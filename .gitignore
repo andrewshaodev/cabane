@@ -9,6 +9,7 @@ coverage/
 playwright-report/
 test-results/
 screenshots/
+/docs/evidence/
 .codex/config.toml
 .superpowers/
 .worktrees/

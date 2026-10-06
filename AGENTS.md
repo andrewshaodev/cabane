@@ -192,3 +192,11 @@ read [the test guidelines](docs/test-guidelines.md).
   applicable verification without asking for separate authorization. Never
   force-push. Do not configure or change a remote, or deploy, unless the user
   explicitly requests it.
+
+## Pull request creation
+
+- Keep verification screenshots local in the ignored `screenshots/` directory or
+  outside the repository. Do not commit or push screenshots, including under
+  `docs/evidence/`.
+- Before committing or opening a PR, inspect the staged file list and remove
+  screenshot artifacts from staging. Summarize visual checks in the PR description.
