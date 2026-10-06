@@ -13,7 +13,7 @@ await withModules(async (load) => {
   const { deriveDemoSessionDefinition } = await load(
     "/packages/engine/src/onboarding/demo/demo-session-definition.ts",
   );
-  const { resolveOpeningPositions, passableOpeningIds } = await load(
+  const { advanceRollUpDoorPositions, resolveOpeningPositions, passableOpeningIds } = await load(
     "/packages/engine/src/opening-pose.ts",
   );
   const { projectFromEditorState, workspaceSnapshotFromEditorState } = await load(
@@ -226,6 +226,20 @@ await withModules(async (load) => {
       passableOpeningIds([floor], { [garage.id]: threshold + 0.001 }, 0.2).has(garage.id),
       false,
     );
+  });
+
+  test("garage motion follows new targets in both directions and Walk uses its intermediate clearance", () => {
+    const id = garage.id;
+    const opening = advanceRollUpDoorPositions({ [id]: 0 }, { [id]: 1 }, [id], 0.05);
+    assert.ok(opening.positions[id] > 0 && opening.positions[id] < 1);
+    assert.equal(opening.moving, true);
+    assert.equal(passableOpeningIds([floor], opening.positions).has(id), false);
+    const closing = advanceRollUpDoorPositions(opening.positions, { [id]: 0 }, [id], 0.05);
+    assert.equal(closing.positions[id], 0);
+    assert.equal(closing.moving, false);
+    assert.equal(passableOpeningIds([floor], closing.positions).has(id), false);
+    const reported = advanceRollUpDoorPositions({ [id]: 0.8 }, { [id]: 0.4 }, [id], 0.05);
+    assert.ok(reported.positions[id] < 0.8 && reported.positions[id] > 0.4);
   });
 
   test("preset replacement reconciles cover mappings atomically and undo restores them", () => {

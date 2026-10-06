@@ -3,7 +3,8 @@ import { resolvedRoomDisplayNames } from "./home-assistant-mapping/room-display-
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useCabaneDom } from "./CabaneDom";
 import { deriveFloorLevels, useFloorNavigation } from "./building";
-import { resolveOpeningPositions, type RetainedOpeningPositions } from "./opening-pose";
+import type { RetainedOpeningPositions } from "./opening-pose";
+import { useAnimatedRollUpDoorPositions } from "./useAnimatedRollUpDoorPositions";
 import { useAdaptiveSceneQuality } from "./useAdaptiveSceneQuality";
 import { useDashboardDeviceInteraction } from "./useDashboardDeviceInteraction";
 import { useDashboardWalk } from "./useDashboardWalk";
@@ -192,14 +193,12 @@ export function useDashboardController({
       ),
     [resolvedBindings.openings],
   );
-  const openingPositions = useMemo(
-    () =>
-      resolveOpeningPositions(
-        automaticOpeningIds,
-        resolvedBindings.openings,
-        lastBoundOpenRef.current,
-      ),
-    [automaticOpeningIds, resolvedBindings.openings],
+  const openingPositions = useAnimatedRollUpDoorPositions(
+    manifest.floors,
+    automaticOpeningIds,
+    resolvedBindings.openings,
+    lastBoundOpenRef.current,
+    reducedMotion,
   );
   const sunState = runtime.entityStates["sun.sun"];
   const solarLighting = resolveSolarLighting(lightingMode, sunState, localTime);
