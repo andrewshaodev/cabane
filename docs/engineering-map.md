@@ -54,7 +54,7 @@ Contract: [Project schema and persistence](../docs/product/workspace.md).
 
 Contract: [Editor coordination](../docs/product/workspace.md).
 
-- Owners: [`apps/web/src/editor-workspace/useHomeEditorController.ts`](../apps/web/src/editor-workspace/useHomeEditorController.ts), [`apps/web/src/editor-workspace/EditorWorkspace.tsx`](../apps/web/src/editor-workspace/EditorWorkspace.tsx), [`apps/web/src/editor-workspace/useEditorProjectHistory.ts`](../apps/web/src/editor-workspace/useEditorProjectHistory.ts), [`apps/web/src/editor-workspace/useEditorSession.ts`](../apps/web/src/editor-workspace/useEditorSession.ts), [`apps/web/src/editor-workspace/useEditorSceneProjection.ts`](../apps/web/src/editor-workspace/useEditorSceneProjection.ts), [`apps/web/src/editor-preview/useEditorWorkspace.ts`](../apps/web/src/editor-preview/useEditorWorkspace.ts).
+- Owners: [`apps/web/src/editor-workspace/useHomeEditorController.ts`](../apps/web/src/editor-workspace/useHomeEditorController.ts), [`apps/web/src/editor-workspace/EditorWorkspace.tsx`](../apps/web/src/editor-workspace/EditorWorkspace.tsx), [`apps/web/src/editor-workspace/useEditorProjectHistory.ts`](../apps/web/src/editor-workspace/useEditorProjectHistory.ts), [`apps/web/src/editor-workspace/useEditorSession.ts`](../apps/web/src/editor-workspace/useEditorSession.ts), [`apps/web/src/editor-workspace/useEditorSceneProjection.ts`](../apps/web/src/editor-workspace/useEditorSceneProjection.ts), [`apps/web/src/editor-preview/useEditorWorkspace.ts`](../apps/web/src/editor-preview/useEditorWorkspace.ts), [`apps/web/src/editor-workspace/useNorthOrientation.ts`](../apps/web/src/editor-workspace/useNorthOrientation.ts).
 - Interface: `ConnectWorkspaceProps`, `HomeEditorExitReason` via [`apps/web/src/editor-workspace/editor-workspace-contract.ts`](../apps/web/src/editor-workspace/editor-workspace-contract.ts).
 - Review invariant: Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary.
 - Checks: `test:unit`, `test:browser`.
@@ -63,9 +63,9 @@ Contract: [Editor coordination](../docs/product/workspace.md).
 
 Contract: [Construct and floor topology](../docs/product/construct.md).
 
-- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors), [`apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx`](../apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx), [`apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx`](../apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx).
+- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors), [`apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx`](../apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx), [`apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx`](../apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx), [`apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx`](../apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx).
 - Interface: `FloorSpec` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.
+- Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. North orientation previews around the plan; only confirmation commits the shared building angle.
 - Checks: `verify:construct`, `fixture:verify:layout`.
 
 ### Arrange and placement
@@ -81,7 +81,7 @@ Contract: [Arrange and placement](../docs/product/arrange.md).
 
 Contract: [Connect and binding profiles](../docs/product/connect.md).
 
-- Owners: [`apps/web/src/editor-connect/useConnectEditor.ts`](../apps/web/src/editor-connect/useConnectEditor.ts), [`packages/engine/src/home-assistant-mapping`](../packages/engine/src/home-assistant-mapping), [`packages/engine/src/runtime-binding-profile.ts`](../packages/engine/src/runtime-binding-profile.ts).
+- Owners: [`apps/web/src/editor-connect/useConnectEditor.ts`](../apps/web/src/editor-connect/useConnectEditor.ts), [`packages/engine/src/home-assistant-mapping`](../packages/engine/src/home-assistant-mapping), [`packages/engine/src/runtime-binding-profile.ts`](../packages/engine/src/runtime-binding-profile.ts), [`apps/web/src/editor-workspace/EditorConnectionMap.tsx`](../apps/web/src/editor-workspace/EditorConnectionMap.tsx).
 - Interface: `RuntimeBindingProfile`, `HomeAssistantMappingScreen` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.
 - Checks: `verify:runtime`, `fixture:verify:scale`.

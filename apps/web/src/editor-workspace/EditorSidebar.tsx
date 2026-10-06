@@ -25,6 +25,7 @@ const PLAN_IMPORT_ENABLED = false;
 
 type Props = Pick<
   ReturnType<typeof useHomeEditorController>,
+  | "northOrientation"
   | "floorNavigation"
   | "activeFloorId"
   | "stairPlacement"
@@ -76,6 +77,7 @@ type Props = Pick<
   onHomeAssistantSettings: Parameters<typeof useHomeEditorController>[0]["onHomeAssistantSettings"];
 };
 export function EditorSidebar({
+  northOrientation,
   floorNavigation,
   activeFloorId,
   stairPlacement,
@@ -129,7 +131,7 @@ export function EditorSidebar({
       <aside
         ref={sidebar}
         className="direction-rail"
-        inert={editingLocked || publishOpen || previewOpen}
+        inert={editingLocked || publishOpen || previewOpen || northOrientation.active}
       >
         <div className="direction-rail__brand">
           <img src={iconUrl} alt="" width="43" height="51" />
@@ -285,15 +287,8 @@ export function EditorSidebar({
             northControls={
               <NorthSettingsEditor
                 value={snapshot.project.home.northAngleDegrees ?? 0}
-                onChange={(northAngleDegrees) =>
-                  commit({
-                    ...snapshot,
-                    project: {
-                      ...snapshot.project,
-                      home: { ...snapshot.project.home, northAngleDegrees },
-                    },
-                  })
-                }
+                disabled={editingLocked || unsettled || reference.adjusting}
+                onEdit={northOrientation.start}
               />
             }
             roof={snapshot.project.home.roof}

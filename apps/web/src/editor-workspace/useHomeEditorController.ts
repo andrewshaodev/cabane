@@ -1,3 +1,4 @@
+import { useNorthOrientation } from "./useNorthOrientation";
 import { isEmptyPublishedHome, useFloorNavigation } from "@cabane/engine";
 import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorReferences";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
@@ -220,7 +221,19 @@ export function useHomeEditorController({
       publishOpen ||
       previewOpen,
   );
-  const unsettled = constructionUnsettled || reference.adjusting;
+  const northOrientation = useNorthOrientation({
+    scope: `${mode}:${activeFloorId}`,
+    enabled:
+      mode === "construct" &&
+      !editingLocked &&
+      !constructionUnsettled &&
+      !reference.adjusting &&
+      !publishOpen &&
+      !previewOpen,
+    snapshot,
+    commit,
+  });
+  const unsettled = constructionUnsettled || reference.adjusting || northOrientation.active;
   const closeAddedItemDetails = useCallback(() => setDetailsItemId(null), [setDetailsItemId]);
   const {
     catalogBrowsing,
@@ -304,7 +317,7 @@ export function useHomeEditorController({
     dragging,
     duplicateArrangeItem,
     duplicateConstructionOpening,
-    editingLocked: editingLocked || reference.adjusting,
+    editingLocked: editingLocked || reference.adjusting || northOrientation.active,
     floorZoneDrawing,
     furnishingEditor,
     marqueeSelecting,
@@ -408,6 +421,7 @@ export function useHomeEditorController({
     await applyDraft(bindingIssues);
   }, [publishErrors.length, editingLocked, unsettled, applyDraft, bindingIssues]);
   return {
+    northOrientation,
     ...constructionTools,
     editorProject,
     setActionBarItems,

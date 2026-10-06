@@ -11,7 +11,7 @@ const existingFileLineLimits = {
   "apps/web/src/editor-preview/construct/ConstructionInspector.tsx": 594,
   "apps/web/src/editor-preview/construct/useConstructEditor.ts": 598,
   "apps/web/src/editor-preview/construct/useConstructionPointerController.ts": 701,
-  "apps/web/src/editor-workspace/HomeEditorScene.tsx": 734,
+  "apps/web/src/editor-workspace/HomeEditorScene.tsx": 720,
   "packages/catalog/src/device/registry.ts": 1210,
   "packages/catalog/src/furnishing/registry.tsx": 1396,
   "packages/engine/src/HomeAssistantRuntime.tsx": 584,

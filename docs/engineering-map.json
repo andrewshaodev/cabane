@@ -44,7 +44,8 @@
       "apps/web/src/editor-workspace/useEditorProjectHistory.ts",
       "apps/web/src/editor-workspace/useEditorSession.ts",
       "apps/web/src/editor-workspace/useEditorSceneProjection.ts",
-      "apps/web/src/editor-preview/useEditorWorkspace.ts"
+      "apps/web/src/editor-preview/useEditorWorkspace.ts",
+      "apps/web/src/editor-workspace/useNorthOrientation.ts"
     ],
     "interfaces": [
       {
@@ -63,7 +64,8 @@
       "packages/engine/src/home-editor/construct",
       "apps/web/src/editor-floors",
       "apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx",
-      "apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx"
+      "apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx",
+      "apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx"
     ],
     "interfaces": [
       {
@@ -71,7 +73,7 @@
         "symbols": ["FloorSpec"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. North orientation previews around the plan; only confirmation commits the shared building angle.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {
@@ -97,7 +99,8 @@
     "owners": [
       "apps/web/src/editor-connect/useConnectEditor.ts",
       "packages/engine/src/home-assistant-mapping",
-      "packages/engine/src/runtime-binding-profile.ts"
+      "packages/engine/src/runtime-binding-profile.ts",
+      "apps/web/src/editor-workspace/EditorConnectionMap.tsx"
     ],
     "interfaces": [
       {

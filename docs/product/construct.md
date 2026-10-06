@@ -275,8 +275,11 @@ These edits use ordinary workspace history, autosave, export/import and Save.
 Basements, split-level decks, supports, pergolas and converting rooms to platforms
 remain outside this tool.
 
-The North disclosure sets a building-wide geographic north angle with a compass,
-direct click/drag rotation and a numeric field. Pointer release commits one
-undoable change; cancelled gestures retain the accepted angle. Arrow keys rotate
-15 degrees, or one degree with Shift. Zero points up the plan; positive angles turn
-clockwise. Changes use ordinary undo/redo, autosave, import/export and Save.
+The North disclosure opens a compass dial around the active floor plan, with four
+cardinal directions, five-degree ticks and longer fifteen-degree marks. Dragging
+rotates the whole dial while architecture remains fixed. Arrow keys rotate five
+degrees (one with Shift); Home resets the preview to zero. Confirm direction makes
+one undoable home-wide edit; Cancel or Escape discards the preview. Other editor
+controls and shortcuts are suspended during the session. The plan temporarily
+fits inside the dial and restores its previous camera pose on exit. The setting
+uses ordinary autosave, import/export and Save; only Save publishes it to Home.
