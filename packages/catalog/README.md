@@ -756,3 +756,18 @@ independent width (track length), height (drop), depth, and elevation controls.
 Fit to window aligns one window; adding another prefers an unoccupied window.
 The inferred default envelope is 120 × 240 × 12 cm; the panel drops 232 cm
 below its track. Existing paired and motorized curtains remain unchanged.
+
+## Rattan bell pendant
+
+`rattan-bell-pendant` is available in Arrange → Dining room → Lighting and All
+items. Public exports are `RattanBellPendant` and `RATTAN_BELL_PENDANT_SIZE`.
+Based on the supplied lamp photo, it has an open woven natural-rattan bell,
+a narrow bottle neck, white suspension cord, ceiling rose and recessed opal bulb.
+The woven shell uses actual curved cane strands and binding hoops, batched into
+three closely related warm tones; there is no opaque cone behind the weave.
+
+Dimensions are inferred, not manufacturer specifications: 50 cm diameter,
+48 cm shade height and 120 cm overall drop. Proportional resizing is supported.
+The centered X/Z origin is at the shade's lower rim, with the ceiling contact at
+Y=1.2 m. This is a static furnishing with no invented smart capability or light
+binding. No home placement is added, and the source photo is not stored in Git.

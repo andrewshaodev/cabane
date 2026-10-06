@@ -1,9 +1,9 @@
 {
-  "revision": 3,
-  "fingerprint": "d71e3fef03bba310057c70fd7532822558b39e190dcedfc5694a589cdcbf57fa",
-  "summary": "Animate garage door opening and closing smoothly",
+  "revision": 4,
+  "fingerprint": "60e1bdf8ffdae9b1d0a9c01f66a12800d05a9e4a8639451ea1977c7f90566170",
+  "summary": "Add the woven rattan bell pendant catalog preset",
   "breakingChanges": [
-    "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
+    "Existing homes remain compatible. Homes using rattan-bell-pendant require the matching panel release; older panels must update before loading this new model."
   ],
   "history": [
     {
@@ -18,6 +18,13 @@
       "summary": "Ship the expanded rug catalog with workspace upgrade guidance",
       "breakingChanges": [
         "Existing rug model and variant IDs remain supported. Workspaces using the new rug styles require this matching integration release; older panels must update through HACS before opening them."
+      ]
+    },
+    {
+      "revision": 3,
+      "summary": "Animate garage door opening and closing smoothly",
+      "breakingChanges": [
+        "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
       ]
     }
   ]

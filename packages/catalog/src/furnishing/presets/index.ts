@@ -12,3 +12,4 @@ export * from "./hallway";
 export * from "./outdoor";
 export * from "./laundry";
 export * from "./curtains";
+export * from "./rattan-bell-pendant";

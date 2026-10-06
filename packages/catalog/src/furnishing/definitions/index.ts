@@ -1,3 +1,4 @@
+import { rattanBellPendantDefinition } from "./rattan-bell-pendant";
 import { whiteDisplayColumnDefinition } from "./white-display-column";
 import { trailingShelfPlantDefinition } from "./trailing-shelf-plant";
 import { decorativeGlobeDefinition } from "./decorative-globe";
@@ -47,6 +48,7 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  "rattan-bell-pendant": rattanBellPendantDefinition,
   "white-display-column": whiteDisplayColumnDefinition,
   "trailing-shelf-plant": trailingShelfPlantDefinition,
   "decorative-globe": decorativeGlobeDefinition,
