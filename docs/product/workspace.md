@@ -173,3 +173,8 @@ backups, and use the same workspace sync path. No separate browser store is used
 Optional `home.northAngleDegrees` is finite and in [0, 360), measured clockwise
 from plan up. Omission means zero for existing V1/V2 projects; no migration or
 architecture rotation is needed. All floors share it.
+
+Walls may persist an optional `edgeColor` CSS color for caps and opening reveals.
+An absent value is Auto; returning to Auto removes the override from exported
+JSON. Existing projects need no migration. Draft conversion, topology edits,
+undo/redo and import/export preserve explicit overrides.

@@ -1,6 +1,6 @@
 import { wallStructuralHeight } from "./architecture-geometry/wall-structural-height";
 import { wallSolidBands } from "./architecture-geometry/wall-solid-bands";
-import { wallFaceFinish } from "./architecture-geometry/wall-face-finish";
+import { wallFaceFinish, wallEdgeFinish } from "./architecture-geometry/wall-face-finish";
 import { wallLevelContact } from "./architecture-geometry/wall-level-contact";
 import { type MultiPolygon } from "polygon-clipping";
 
@@ -152,8 +152,15 @@ export function buildArchitecturalWallGeometries(
         // instead of fading every cap whenever any exterior wall faces camera.
         const buffers = buffersFor(fadeNormalAt(center, activeWalls));
         const [a, b, c] = points.map((point) => [point.x, elevation, point.y] as const);
-        if (upward) addTriangle(buffers, a, c, b, insideColor);
-        else addTriangle(buffers, a, b, c, insideColor);
+        const finishes = activeWalls
+          .filter((wall) => wallData.get(wall)!.contains(center))
+          .map((wall) => wallEdgeFinish(wall, interiorColor));
+        const color =
+          finishes.length && finishes.every((value) => value === finishes[0])
+            ? customColor(finishes[0])
+            : insideColor;
+        if (upward) addTriangle(buffers, a, c, b, color);
+        else addTriangle(buffers, a, b, c, color);
       });
     });
   };
@@ -174,10 +181,12 @@ export function buildArchitecturalWallGeometries(
       const alignment = Math.abs(
         edgeDirection[0] * frame.direction[0] + edgeDirection[1] * frame.direction[1],
       );
-      if (alignment < 0.999 || (owner && alignment <= owner.alignment)) continue;
+      if (owner && alignment <= owner.alignment) continue;
       owner = { wall, alignment };
     }
     if (!owner) return fallback;
+    if (owner.alignment < 0.999)
+      return customColor(wallEdgeFinish(owner.wall, outside ? exteriorColor : interiorColor));
     const normal = wallData.get(owner.wall)!.frame.normal;
     const side =
       visibleNormal[0] * normal[0] + visibleNormal[1] * normal[1] >= 0 ? "left" : "right";

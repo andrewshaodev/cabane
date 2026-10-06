@@ -865,6 +865,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
       [
         "apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
         "apps/web/src/editor-preview/construct/DebouncedColorInput.tsx",
+        "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
       ].map((path) => readFile(path, "utf8")),
     )
   ).join("\n");

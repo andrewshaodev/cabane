@@ -144,7 +144,10 @@ export type FloorEditorAction =
       type: "update-wall-metadata";
       wallId: string;
       changes: Partial<
-        Pick<EditorWall, "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">
+        Pick<
+          EditorWall,
+          "thicknessMeters" | "heightMeters" | "exteriorColor" | "edgeColor" | "faceColors"
+        >
       >;
     }
   | { type: "delete-selection" }

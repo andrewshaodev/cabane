@@ -50,6 +50,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
     thicknessMeters: wall.thicknessMeters,
     ...(wall.heightMeters ? { heightMeters: wall.heightMeters } : {}),
     ...(wall.exteriorColor ? { exteriorColor: wall.exteriorColor } : {}),
+    ...(wall.edgeColor ? { edgeColor: wall.edgeColor } : {}),
     ...(wall.faceColors ? { faceColors: { ...wall.faceColors } } : {}),
   })),
   openings: floor.openings.map((opening) => {

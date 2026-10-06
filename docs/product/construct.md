@@ -283,3 +283,10 @@ one undoable home-wide edit; Cancel or Escape discards the preview. Other editor
 controls and shortcuts are suspended during the session. The plan temporarily
 fits inside the dial and restores its previous camera pose on exit. The setting
 uses ordinary autosave, import/export and Save; only Save publishes it to Home.
+
+Wall Finish includes Edge color: Auto (the default, omitted in JSON) or Custom.
+Custom persists `WallSpec.edgeColor` and applies to end caps, top/bottom caps
+and opening reveals. Auto inherits the two authored face colors when they match;
+otherwise it retains the general wall finish. Different face colors remain unchanged.
+Shared horizontal junction caps retain the general finish when owner edge finishes
+disagree. The setting participates in undo/redo, autosave and workspace import/export.

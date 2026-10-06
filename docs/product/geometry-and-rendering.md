@@ -219,3 +219,10 @@ unusable; preferences identify the active Auto source. Forced day/night remain
 exterior-lighting previews, independent of lamp state. Solar shadow framing encloses
 the building's floor scene bounds, walls, storey elevations and roof allowance,
 including translated and scaled plans. Luminaires remain unshadowed.
+
+Wall caps and opening reveals use the optional `WallSpec.edgeColor` override.
+When absent, matching authored left/right colors extend onto these surfaces;
+otherwise the existing general wall finish remains. Standalone and batched wall
+rendering share this rule. Shared horizontal junction surfaces use the general
+finish when their participating walls disagree, without changing geometry,
+collision, shadows or fade ownership.

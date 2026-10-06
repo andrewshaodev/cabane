@@ -8,7 +8,7 @@ import globals from "globals";
 // ceiling when refactoring; split by responsibility rather than padding exceptions.
 const existingFileLineLimits = {
   "apps/web/src/editor-action-bar/ActionBarEditor.tsx": 512,
-  "apps/web/src/editor-preview/construct/ConstructionInspector.tsx": 594,
+  "apps/web/src/editor-preview/construct/ConstructionInspector.tsx": 584,
   "apps/web/src/editor-preview/construct/useConstructEditor.ts": 598,
   "apps/web/src/editor-preview/construct/useConstructionPointerController.ts": 701,
   "apps/web/src/editor-workspace/HomeEditorScene.tsx": 720,
