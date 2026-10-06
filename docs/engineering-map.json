@@ -284,9 +284,17 @@
   {
     "title": "Verification and delivery",
     "spec": "docs/product/verification-and-delivery.md",
-    "owners": ["scripts", "tests", "eslint.config.mjs", "knip.config.mjs"],
+    "owners": [
+      "scripts",
+      "tests",
+      "package.json",
+      "package-lock.json",
+      "vercel.json",
+      "eslint.config.mjs",
+      "knip.config.mjs"
+    ],
     "interfaces": [],
-    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
+    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
     "checks": ["verify:help", "verify:fast", "verify", "browser:install"]
   },
   {

@@ -23,6 +23,12 @@ use modern headless Chromium rather than an independently updated system browser
 Linux environments without browser libraries can use
 `npm run browser:install -- --with-deps`. Reinstall the browser after Playwright upgrades.
 
+Dependency changes also require a clean `npm ci` with the managed host's npm version.
+Keep required peer dependencies of optional platform packages in the portable
+lockfile, even when the local platform does not install those packages. The
+lockfile regression check covers these references; a successful build against
+existing `node_modules` does not establish clean-install compatibility.
+
 The application checker uses native TypeScript 7 (`typescript-native` alias).
 Typed ESLint uses the TypeScript 6 compiler API, which typescript-eslint currently
 supports. Both versions are locked; remove the alias when the lint ecosystem

@@ -153,9 +153,9 @@ Contract: [Bundled home and agent generation](../docs/product/generation.md).
 
 Contract: [Verification and delivery](../docs/product/verification-and-delivery.md).
 
-- Owners: [`scripts`](../scripts), [`tests`](../tests), [`eslint.config.mjs`](../eslint.config.mjs), [`knip.config.mjs`](../knip.config.mjs).
+- Owners: [`scripts`](../scripts), [`tests`](../tests), [`package.json`](../package.json), [`package-lock.json`](../package-lock.json), [`vercel.json`](../vercel.json), [`eslint.config.mjs`](../eslint.config.mjs), [`knip.config.mjs`](../knip.config.mjs).
 - Interface: repository commands below.
-- Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.
+- Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance.
 - Checks: `verify:help`, `verify:fast`, `verify`, `browser:install`.
 
 ### Shortcuts and private HA actions
