@@ -74,7 +74,10 @@ await withModules(async (load) => {
       assert.ok(shack);
       assert.equal(editor.drawStart, null);
       assert.equal(editor.tool, "select", "closing a room returns to Select");
-      assert.equal(allIssues.length, 1, "real topology and project validators produce one naming issue");
+      assert.match(shack.name, /^Unnamed room \d+$/);
+      assert.equal(allIssues.length, 0, "new rooms receive valid default names");
+      await act(async () => editor.updateRoom(shack.id, { name: "" }));
+      assert.equal(allIssues.length, 1, "real topology and project validators produce one naming issue for an explicitly blank name");
       assert.equal(allIssues[0].code, "room.name");
       assert.ok(document.querySelector('[aria-label="Construction validation"]'), "the naming prompt appears after automatic return to Select");
       const namingButtons = document.querySelectorAll('.construction-inspector__validation button');

@@ -46,7 +46,7 @@ await withModules(async (load) => {
   });
 
   test("exports a pure-JSON owner-home project seed", () => {
-    assert.equal(ownerHomeProject.seedRevision, "south-garden-villa-architectural-garage-v3");
+    assert.equal(ownerHomeProject.seedRevision, "south-garden-villa-wraparound-balcony-v4");
     assert.deepEqual(JSON.parse(JSON.stringify(ownerHomeProject)), ownerHomeProject);
     assert.deepEqual(parseHomeProjectSchema(ownerHomeProject), {
       valid: true,
