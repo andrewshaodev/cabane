@@ -1,3 +1,33 @@
+import { clipReadingLampDefinition } from "./clip-reading-lamp";
+import { wallLiftingDryingRackDefinition } from "./wall-lifting-drying-rack";
+
+import { laundryCleaningDefinitions } from "./laundry-cleaning";
+
+import { balconyFurnishingDefinitions } from "./balcony";
+import { squareCubeStorageDefinition } from "./square-cube-storage";
+import { childrenWallPosterDefinition } from "./children-wall-poster";
+import { pianoBenchDefinition } from "./piano-bench";
+import { slattedSingleBedDefinition } from "./slatted-single-bed";
+import { woodBunkBedDefinition } from "./wood-bunk-bed";
+import { studentStorageDeskDefinition } from "./student-storage-desk";
+import { childSwivelChairDefinition } from "./child-swivel-chair";
+import { portableDigitalPianoDefinition } from "./portable-digital-piano";
+import { splitDoorWardrobeDefinition } from "./split-door-wardrobe";
+import { openCubeBookcaseDefinition } from "./open-cube-bookcase";
+
+import { roundBandedRugDefinition } from "./round-banded-rug";
+import { astroParallelWallLightDefinition } from "./astro-parallel-wall-light";
+import { entrywayFurnishingDefinitions } from "./entryway";
+import { wallArtFurnishingDefinitions } from "./wall-art";
+
+import { countertopApplianceDefinitions } from "./countertop-appliances";
+import { pottedPlantDefinition } from "./potted-plant";
+import { inductionCooktopDefinition } from "./induction-cooktop";
+import { whiteShellDiningChairDefinition } from "./white-shell-dining-chair";
+
+import { bathroomFixtureDefinitions } from "./bathroom-fixtures";
+import { bathroomStorageDefinitions } from "./bathroom-storage";
+import { bathroomLightingDefinitions } from "./bathroom-lighting";
 import { rattanBellPendantDefinition } from "./rattan-bell-pendant";
 import { whiteDisplayColumnDefinition } from "./white-display-column";
 import { trailingShelfPlantDefinition } from "./trailing-shelf-plant";
@@ -48,6 +78,32 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  ...laundryCleaningDefinitions,
+  "wall-lifting-drying-rack": wallLiftingDryingRackDefinition,
+  "clip-reading-lamp": clipReadingLampDefinition,
+  ...balconyFurnishingDefinitions,
+  "children-wall-poster": childrenWallPosterDefinition,
+  "square-cube-storage": squareCubeStorageDefinition,
+  "piano-bench": pianoBenchDefinition,
+  "slatted-single-bed": slattedSingleBedDefinition,
+  "wood-bunk-bed": woodBunkBedDefinition,
+  "student-storage-desk": studentStorageDeskDefinition,
+  "child-swivel-chair": childSwivelChairDefinition,
+  "portable-digital-piano": portableDigitalPianoDefinition,
+  "split-door-wardrobe": splitDoorWardrobeDefinition,
+  "open-cube-bookcase": openCubeBookcaseDefinition,
+  "round-banded-rug": roundBandedRugDefinition,
+  "astro-parallel-wall-light": astroParallelWallLightDefinition,
+  ...entrywayFurnishingDefinitions,
+  ...wallArtFurnishingDefinitions,
+
+  ...countertopApplianceDefinitions,
+  "potted-plant": pottedPlantDefinition,
+  "induction-cooktop": inductionCooktopDefinition,
+  "white-shell-dining-chair": whiteShellDiningChairDefinition,
+  ...bathroomFixtureDefinitions,
+  ...bathroomStorageDefinitions,
+  ...bathroomLightingDefinitions,
   "rattan-bell-pendant": rattanBellPendantDefinition,
   "white-display-column": whiteDisplayColumnDefinition,
   "trailing-shelf-plant": trailingShelfPlantDefinition,

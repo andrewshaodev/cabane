@@ -78,6 +78,27 @@ await withModules(async (load) => {
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const cabaneFloor = JSON.parse(await readFile("tests/fixtures/cabane-floor.json", "utf8"));
 
+  test("outline smoothing preserves the source mesh normals for non-indexed geometry", async () => {
+    const source = new BoxGeometry(1, 1, 1).toNonIndexed();
+    const before = geometrySnapshot(source);
+    const renderer = await create(
+      createElement(
+        "mesh",
+        { geometry: source },
+        createElement(rendering.ToonMaterial, { color: "white" }),
+        createElement(outline.SceneOutlines, { thickness: 0.0015 }),
+      ),
+    );
+    assert.deepEqual(geometrySnapshot(source), before);
+    const children = [];
+    renderer.scene.instance.traverse((object) => {
+      if (object.userData.sceneOutline) children.push(object);
+    });
+    assert.equal(children.length, 1);
+    assert.notEqual(children[0].geometry, source);
+    await renderer.unmount();
+  });
+
   test("renders physical lights only for the active floor", async () => {
     const manifest = structuredClone(neutralDemoManifest);
     const ground = manifest.floors[0];

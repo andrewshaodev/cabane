@@ -268,7 +268,7 @@
         ]
       }
     ],
-    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner.",
+    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner. Outline smoothing owns its derived geometry and preserves authored source normals.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -293,7 +293,10 @@
       "packages/catalog/src/device/presets/media/television-picture.tsx",
       "packages/catalog/src/device/presets/media/television-superman.tsx",
       "packages/catalog/src/device/presets/media/television-comic-patch.tsx",
-      "packages/catalog/src/device/presets/lighting/rattan-bell-pendant"
+      "packages/catalog/src/device/presets/lighting/rattan-bell-pendant",
+      "packages/catalog/src/furnishing/definitions/bathroom-fixtures.ts",
+      "packages/catalog/src/furnishing/definitions/bathroom-storage.ts",
+      "packages/catalog/src/furnishing/presets/children-bedroom/square-cube-storage.tsx"
     ],
     "interfaces": [
       {
@@ -301,7 +304,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry. Mandatory surface verification covers all furnishing and device variants, including all four device connection states; flat artwork uses the engine LayeredSurface contract.",
+    "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry. Mandatory surface verification covers all furnishing and device variants, including all four device connection states; flat artwork uses the engine LayeredSurface contract. Reusable additions exclude tiny standalone props and fitted apartment parts; square storage variants share one frame, and wall-mounted awnings retain wall support. Ordinary preset coverage uses shared catalog/surface checks and UI review.",
     "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {

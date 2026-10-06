@@ -12,6 +12,7 @@ export function RoundedFurniturePanel({
   outline = true,
   outlineColor = "#716657",
   name,
+  creaseAngle = 0.4,
 }: {
   size: [number, number, number];
   position?: [number, number, number];
@@ -21,6 +22,7 @@ export function RoundedFurniturePanel({
   outline?: boolean;
   outlineColor?: string;
   name?: string;
+  creaseAngle?: number;
 }) {
   return (
     <RoundedBox
@@ -31,6 +33,7 @@ export function RoundedFurniturePanel({
       radius={Math.min(radius, ...size.map((dimension) => dimension / 2 - 0.0001))}
       smoothness={2}
       bevelSegments={2}
+      creaseAngle={creaseAngle}
       castShadow
       receiveShadow
     >

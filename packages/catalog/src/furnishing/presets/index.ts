@@ -12,4 +12,6 @@ export * from "./hallway";
 export * from "./outdoor";
 export * from "./laundry";
 export * from "./curtains";
+export * from "./countertop-appliances";
+export * from "./compact-sanitary";
 export * from "./rattan-bell-pendant";

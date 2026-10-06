@@ -11,3 +11,4 @@ export { CoffeeMakerModel } from "./coffee-maker";
 export { ElectricKettleModel } from "./electric-kettle";
 export { FreezerModel } from "./freezer";
 export { PetFeederModel } from "./pet-feeder";
+export { BuiltInMicrowaveModel } from "./built-in-microwave";

@@ -4,3 +4,5 @@ export { LouveredCloset } from "./louvered-closet";
 export { ShoeCabinet, SHOE_CABINET_SIZE } from "./shoe-cabinet";
 export { UmbrellaStand, UMBRELLA_STAND_SIZE } from "./umbrella-stand";
 export { FreestandingCoatStand, FREESTANDING_COAT_STAND_SIZE } from "./freestanding-coat-stand";
+
+export { OakSlabBench, OAK_SLAB_BENCH_SIZE } from "./oak-slab-bench";

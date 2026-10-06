@@ -778,3 +778,29 @@ reach, and bulb emission tops out at 0.18. Inactive, unavailable and disconnecte
 bulbs do not glow. The former furnishing is hidden from Arrange but retained for
 saved-project compatibility. No home placement is added, and the source photo is
 not stored in Git.
+
+## Reusable catalog additions
+
+Reusable bedroom, dining, balcony, bathroom and kitchen models extend the shared
+catalog without importing apartment placements or private assets. Square cube
+storage offers two- and four-compartment variants behind one frame and descriptor.
+The existing potted plant gains a white-pot variant without changing its default.
+
+Bathroom definitions are grouped by fixtures, storage and lighting. They retain
+substantial fixtures such as baths, shower screens, basins, vanities, mirrors,
+cabinets and a wall-hung toilet. Standalone toiletries, tiny fittings, packaging,
+fitted laundry platforms and duplicate appliance poses are excluded. Wall-mounted
+awnings use ordinary wall support; outdoor ground-placement restrictions apply to
+the folding table and chair. The cleaning-tool rack also uses wall support.
+
+Connected additions include the built-in microwave, white dome pendant and
+under-cabinet LED strip. Heated towel rails offer dense white and black variants;
+all variants retain the shared activity indication. The built-in microwave uses
+the same active-only warm window treatment as the countertop model.
+
+Fitted kitchen joinery, exact entryway cabinetry, and apartment-specific rounded
+furniture stay in the active home's personal model collection.
+
+Ordinary model geometry is reviewed visually and through shared catalog and
+surface checks. This split adds no item-specific test files. The shared outline
+regression protects non-indexed source normals from outline smoothing.

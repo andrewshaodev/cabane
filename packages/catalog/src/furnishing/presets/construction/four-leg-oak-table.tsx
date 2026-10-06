@@ -8,12 +8,14 @@ export function FourLegOakTable({
   depth,
   topThickness,
   legWidth,
+  topColor = "#d9b987",
 }: {
   width: number;
   height: number;
   depth: number;
   topThickness: number;
   legWidth: number;
+  topColor?: string;
 }) {
   const legHeight = height - topThickness;
   const x = width / 2 - legWidth / 2 - 0.065;
@@ -24,7 +26,7 @@ export function FourLegOakTable({
         name="oak-table-top"
         size={[width, topThickness, depth]}
         position={[0, height - topThickness / 2, 0]}
-        color="#d9b987"
+        color={topColor}
         radius={0.008}
       />
       {[-x, x].flatMap((legX) =>

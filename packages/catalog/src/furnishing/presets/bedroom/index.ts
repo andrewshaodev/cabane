@@ -14,3 +14,4 @@ export {
 export { RoundGlobeWallLamp, ROUND_GLOBE_WALL_LAMP_SIZE } from "./round-globe-wall-lamp";
 export { WallReadingSpot, WALL_READING_SPOT_SIZE } from "./wall-reading-spot";
 export { OakWallUplight, OAK_WALL_UPLIGHT_SIZE } from "./oak-wall-uplight";
+export { ClipReadingLamp, CLIP_READING_LAMP_SIZE } from "./clip-reading-lamp";
