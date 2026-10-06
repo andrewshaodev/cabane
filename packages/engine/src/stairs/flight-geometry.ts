@@ -2,6 +2,7 @@ import { deriveFloorLevels } from "../building/floor-levels";
 import { planPointToWorld, worldPointToPlan } from "../geometry";
 import type { Polygon } from "../types";
 import type { BuildingGeometry, StairSpec, StairShapeGeometry } from "./types";
+import { uShapedGeometry } from "./u-shaped-geometry";
 import { lShapedGeometry } from "./l-shaped-geometry";
 import { spiralGeometry, SPIRAL_CORE_RADIUS_METERS } from "./spiral-geometry";
 
@@ -11,11 +12,11 @@ export const deriveStairFlight = (building: BuildingGeometry, stair: StairSpec) 
   if (index < 0 || building.floors[index + 1]?.id !== stair.upperFloorId) return null;
   if (![...stair.at, stair.rotationYRadians].every(Number.isFinite)) return null;
   const dimensions = stair.shape === "spiral" ? [stair.diameterMeters,stair.totalTurnDegrees]
-    : stair.shape === "l-shaped" ? [stair.widthMeters,stair.lowerRunMeters,stair.upperRunMeters] : [stair.widthMeters,stair.runMeters];
+    : (stair.shape === "l-shaped" || stair.shape === "u-shaped") ? [stair.widthMeters,stair.lowerRunMeters,stair.upperRunMeters] : [stair.widthMeters,stair.runMeters];
   if (!dimensions.every(n=>Number.isFinite(n)&&n>0)) return null;
   if (stair.shape === "spiral" && (stair.diameterMeters<=2*SPIRAL_CORE_RADIUS_METERS || stair.totalTurnDegrees>360
     || !["clockwise","counterclockwise"].includes(stair.direction))) return null;
-  if (stair.shape === "l-shaped" && !["left","right"].includes(stair.turn)) return null;
+  if ((stair.shape === "l-shaped" || stair.shape === "u-shaped") && !["left","right"].includes(stair.turn)) return null;
   const baseElevationMeters = deriveFloorLevels(building.floors)[index].elevationMeters;
   const riseMeters = building.floors[index].floorToFloorHeightMeters;
   if (!Number.isFinite(riseMeters) || riseMeters <= 0) return null;
@@ -24,7 +25,8 @@ export const deriveStairFlight = (building: BuildingGeometry, stair: StairSpec) 
   const forward = [Math.sin(stair.rotationYRadians),Math.cos(stair.rotationYRadians)] as const;
   const side = [forward[1],-forward[0]] as const;
   let geometry: StairShapeGeometry;
-  if (stair.shape === "l-shaped") geometry=lShapedGeometry(stair,riseMeters,stepCount);
+  if (stair.shape === "u-shaped") geometry=uShapedGeometry(stair,riseMeters,stepCount);
+  else if (stair.shape === "l-shaped") geometry=lShapedGeometry(stair,riseMeters,stepCount);
   else if (stair.shape === "spiral") geometry=spiralGeometry(stair,riseMeters,stepCount);
   else {
     const w=stair.widthMeters, r=stair.runMeters;

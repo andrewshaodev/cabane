@@ -54,7 +54,7 @@ export function StairPlacement({ stair, coordinates, building, registries, onIss
     const preview = (point: StairPlacementPoint) => {
       if (!anchor) return null;
       const source=latest.current.stair;
-      const next = corner && source.shape === "l-shaped"
+      const next = corner && (source.shape === "l-shaped" || source.shape === "u-shaped")
         ? stairFromCorner(source,latest.current.coordinates,anchor,corner,point)
         : stairFromEndpoints(source,latest.current.coordinates,anchor,point);
       setCandidate(next); return next;
@@ -94,7 +94,7 @@ export function StairPlacement({ stair, coordinates, building, registries, onIss
       if (anchorOnly) { setCandidate(null); return; }
       const next = point && preview(point);
       if (!next) return;
-      if(latest.current.stair.shape === "l-shaped" && !corner) {
+      if((latest.current.stair.shape === "l-shaped" || latest.current.stair.shape === "u-shaped") && !corner) {
         corner=point;setSnap(null);return;
       }
       latest.current.validation.flush(next);

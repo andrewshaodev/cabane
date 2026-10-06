@@ -9,7 +9,7 @@ export function StairFeedback({ flight }: {
     Math.max(...flight.footprintWorld.map(p=>p[1]))+.65]} center
     style={{ pointerEvents: "none", width: 250, textAlign: "center" }}>
     <ConstructionDistanceLabel label={flight.spec.shape === "spiral" ? `Ø ${flight.spec.diameterMeters.toFixed(2)} m · ${flight.spec.totalTurnDegrees}°`
-      : flight.spec.shape === "l-shaped" ? `${flight.spec.lowerRunMeters.toFixed(2)} + ${flight.spec.upperRunMeters.toFixed(2)} m × ${flight.widthMeters.toFixed(2)} m`
+      : (flight.spec.shape === "l-shaped" || flight.spec.shape === "u-shaped") ? `${flight.spec.lowerRunMeters.toFixed(2)} + ${flight.spec.upperRunMeters.toFixed(2)} m × ${flight.widthMeters.toFixed(2)} m`
       : `${flight.runMeters.toFixed(2)} m × ${flight.widthMeters.toFixed(2)} m`} ariaLabel="Stair length and width" />
   </Html>;
 }

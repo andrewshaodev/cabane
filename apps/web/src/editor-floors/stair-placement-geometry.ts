@@ -1,5 +1,5 @@
 import { deriveStairFlight, planPointToWorld, worldPointToPlan, type FloorCoordinates, type StairSpec,
-  type LShapedStairSpec, type StairShape, type HomeProject, type StairFlight } from "@cabane/engine";
+  type LShapedStairSpec, type UShapedStairSpec, type StairShape, type HomeProject, type StairFlight } from "@cabane/engine";
 
 export interface StairPlacementPoint { x: number; z: number }
 const rounded=(n:number)=>Number(n.toFixed(2));
@@ -10,16 +10,17 @@ export function stairFromEndpoints(stair: StairSpec, coordinates: FloorCoordinat
   if(!Number.isFinite(run)||run<.1)return null;
   const at=worldPointToPlan(start,coordinates);
   if(stair.shape==='spiral')return {...stair,at,diameterMeters:rounded(2*run),rotationYRadians:-Math.atan2(dz,dx)};
-  if(stair.shape==='l-shaped')return run-stair.widthMeters/2>=.1
+  if(stair.shape === "l-shaped" || stair.shape === "u-shaped")return run-stair.widthMeters/2>=.1
     ?{...stair,at,lowerRunMeters:rounded(run-stair.widthMeters/2),rotationYRadians:Math.atan2(dx,dz)}:null;
   return {...stair,at,runMeters:rounded(run),rotationYRadians:Math.atan2(dx,dz)};
 }
-export function stairFromCorner(stair:LShapedStairSpec,coordinates:FloorCoordinates,
-  start:StairPlacementPoint,corner:StairPlacementPoint,end:StairPlacementPoint):LShapedStairSpec|null {
+export function stairFromCorner(stair:LShapedStairSpec | UShapedStairSpec,coordinates:FloorCoordinates,
+  start:StairPlacementPoint,corner:StairPlacementPoint,end:StairPlacementPoint):LShapedStairSpec | UShapedStairSpec | null {
   const first=stairFromEndpoints(stair,coordinates,start,corner);
-  if(!first||first.shape!=='l-shaped')return null;
+  if(!first || (first.shape !== "l-shaped" && first.shape !== "u-shaped"))return null;
   const across=(end.x-corner.x)*Math.cos(first.rotationYRadians)-(end.z-corner.z)*Math.sin(first.rotationYRadians);
-  const run=Math.abs(across)-stair.widthMeters/2;
+  const along=(end.x-corner.x)*Math.sin(first.rotationYRadians)+(end.z-corner.z)*Math.cos(first.rotationYRadians);
+  const run=first.shape === "u-shaped" ? -along-stair.widthMeters/2 : Math.abs(across)-stair.widthMeters/2;
   return run>=.1?{...first,upperRunMeters:rounded(run),turn:across>=0?'right':'left'}:null;
 }
 export type StairEditHandle = "body" | "bottom" | "top" | "left" | "right" | "corner" | "diameter" | "rotation";
@@ -33,7 +34,7 @@ export function editStairFromPoint(stair:StairSpec,coordinates:FloorCoordinates,
     return handle==='rotation'?{...stair,rotationYRadians:-Math.atan2(point.z-start.z,point.x-start.x)}
       :{...stair,diameterMeters:rounded(radius*2)};
   }
-  if(stair.shape==='l-shaped') {
+  if(stair.shape === "l-shaped" || stair.shape === "u-shaped") {
     const corner={x:start.x+forward.x*(stair.lowerRunMeters+stair.widthMeters/2),z:start.z+forward.z*(stair.lowerRunMeters+stair.widthMeters/2)};
     if(handle==='bottom')return stairFromEndpoints(stair,coordinates,point,corner);
     if(handle==='corner')return stairFromEndpoints(stair,coordinates,start,point);
@@ -56,7 +57,7 @@ export function convertStairShape(building:HomeProject,stair:StairSpec,shape:Sta
   const rise=building.floors.find(f=>f.id===stair.lowerFloorId)!.floorToFloorHeightMeters;
   if(shape==='spiral')return {...base,shape,at:worldPointToPlan({x:entrance[0]-.55*Math.cos(base.rotationYRadians),
     z:entrance[1]+.55*Math.sin(base.rotationYRadians)},building.coordinates),diameterMeters:2,totalTurnDegrees:360,direction:'clockwise'};
-  if(shape==='l-shaped')return {...base,shape,widthMeters:1,lowerRunMeters:rounded(rise*.75),upperRunMeters:rounded(rise*.75),turn:'right'};
+  if(shape === "l-shaped" || shape === "u-shaped")return {...base,shape,widthMeters:1,lowerRunMeters:rounded(rise*.75),upperRunMeters:rounded(rise*.75),turn:'right'};
   return {...base,shape,widthMeters:1,runMeters:rounded(rise*1.5)};
 }
 export function stairEditHandles(flight:StairFlight):{handle:StairEditHandle;at:[number,number,number]}[] {
@@ -67,9 +68,9 @@ export function stairEditHandles(flight:StairFlight):{handle:StairEditHandle;at:
     return [{handle:'diameter',at:p(x-flight.side[0]*r,z-flight.side[1]*r)},
       {handle:'rotation',at:p(x+flight.side[0]*r,z+flight.side[1]*r)}];
   }
-  const run=flight.spec.shape==='l-shaped'?flight.spec.lowerRunMeters:flight.runMeters;
+  const run=(flight.spec.shape === "l-shaped" || flight.spec.shape === "u-shaped")?flight.spec.lowerRunMeters:flight.runMeters;
   return [{handle:'bottom',at:p(start.x,start.z)},{handle:'top',at:p(end.x,end.z)},
     ...([-1,1] as const).map(sign=>({handle:(sign===-1?'left':'right') as StairEditHandle,
       at:p(start.x+flight.forward[0]*run/2+flight.side[0]*sign*flight.widthMeters/2,start.z+flight.forward[1]*run/2+flight.side[1]*sign*flight.widthMeters/2)})),
-    ...(flight.spec.shape==='l-shaped'?[{handle:'corner' as const,at:p(flight.path[2].x,flight.path[2].z)}]:[])];
+    ...((flight.spec.shape === "l-shaped" || flight.spec.shape === "u-shaped")?[{handle:'corner' as const,at:p(flight.path[2].x,flight.path[2].z)}]:[])];
 }

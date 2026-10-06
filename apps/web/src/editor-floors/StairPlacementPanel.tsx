@@ -24,7 +24,7 @@ export function StairPlacementPanel({ shape, issues = [], onChange, onCancel }: 
     </ModelThumbnailRenderer>
     <p className="construction-inspector__tool-hint" role="status">{shape === "spiral"
       ? "Click the center, then the outer edge to set diameter and rotation. Escape cancels."
-      : shape === "l-shaped" ? "Click the bottom, landing center, then the upper endpoint. Escape cancels."
+      : (shape === "l-shaped" || shape === "u-shaped") ? "Click the bottom, landing center, then the upper endpoint. Escape cancels."
         : "Drag from bottom to top, or click each endpoint. Escape cancels."}</p>
     <StairWarnings issues={issues} compact />
     <EditorButton variant="text" onClick={onCancel}>Cancel stairs</EditorButton>

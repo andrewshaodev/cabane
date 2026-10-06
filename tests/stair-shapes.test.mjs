@@ -20,6 +20,21 @@ await withModules(async load => {
       assert.equal(end.elevation,2.6);
     }
   });
+  const { deriveStairGuardSegments } = await load('/packages/engine/src/stairs/guard-geometry.ts');
+  test('U-shaped flights return parallel with a level landing and guard rails', () => {
+    for (const turn of ['left','right']) {
+      const stair={...base,shape:'u-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:3,turn};
+      const project={...makeStairProject(),stairs:[stair]};
+      const f=api.deriveStairFlight(project,stair);
+      assert.ok(f);
+      assert.equal(f.path.at(-1).x,turn==='right'?4:2);
+      assert.equal(f.path.at(-1).z,1);
+      assert.deepEqual(f.exitForward,[0,-1]);
+      assert.equal(f.path[1].elevation,f.path[4].elevation);
+      assert.ok(deriveStairGuardSegments(f,project.coordinates).length>0);
+      assert.equal(api.deriveStairFlight(project,{...stair,upperRunMeters:0}),null);
+    }
+  });
   test('spiral diameter controls its circular aperture and total turn controls its exit', () => {
     const stair = {...base,shape:'spiral',diameterMeters:2,totalTurnDegrees:270,direction:'clockwise'};
     const project={...makeStairProject(),stairs:[stair]};
@@ -36,7 +51,7 @@ await withModules(async load => {
   });
   test('schema round-trips new shapes and still accepts undiscriminated straight stairs', () => {
     const project=makeStairProject();
-    for (const stair of [project.stairs[0], {...base,shape:'l-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'left'},
+    for (const stair of [project.stairs[0], {...base,shape:'u-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:3,turn:'right'}, {...base,shape:'l-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'left'},
       {...base,shape:'spiral',diameterMeters:2,totalTurnDegrees:360,direction:'counterclockwise'}]) {
       const candidate={...project,stairs:[stair]};
       const parsed=parseHomeProjectSchema(JSON.parse(JSON.stringify(candidate)));
@@ -52,6 +67,7 @@ await withModules(async load => {
   const base={id:'shaped',lowerFloorId:'ground',upperFloorId:'first',at:[3,2],rotationYRadians:0};
   test('walks both shaped routes up and down without shortcutting the corner or spiral seam',()=>{
     for(const stair of [
+      ...['left','right'].map(turn=>({...base,shape:'u-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:3,turn})),
       {...base,shape:'l-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'right'},
       ...['clockwise','counterclockwise'].flatMap(direction=>[270,360].map(totalTurnDegrees=>({...base,at:[4,4],shape:'spiral',diameterMeters:2,totalTurnDegrees,direction})))
     ]) {

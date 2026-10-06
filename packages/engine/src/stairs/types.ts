@@ -23,13 +23,16 @@ export interface LShapedStairSpec extends StairConnection {
   upperRunMeters: number;
   turn: "left" | "right";
 }
+export interface UShapedStairSpec extends Omit<LShapedStairSpec, "shape"> {
+  shape: "u-shaped";
+}
 export interface SpiralStairSpec extends StairConnection {
   shape: "spiral";
   diameterMeters: number;
   totalTurnDegrees: number;
   direction: "clockwise" | "counterclockwise";
 }
-export type StairSpec = StraightStairSpec | LShapedStairSpec | SpiralStairSpec;
+export type StairSpec = StraightStairSpec | LShapedStairSpec | UShapedStairSpec | SpiralStairSpec;
 export type StairShape = NonNullable<StairSpec["shape"]>;
 export interface StairPathPoint { x: number; z: number; elevation: number }
 export interface StairTread { polygon: readonly (readonly [number, number])[]; elevation: number }

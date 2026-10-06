@@ -33,7 +33,7 @@ export function StairDetails({ project, stair, registries, liveIssues, onSave, o
       </select></label>
     </> : <>
       {number("Width (m)",draft.widthMeters,widthMeters=>update({...draft,widthMeters}),0)}
-      {draft.shape === "l-shaped" ? <>
+      {(draft.shape === "l-shaped" || draft.shape === "u-shaped") ? <>
         {number("Lower flight length (m)",draft.lowerRunMeters,lowerRunMeters=>update({...draft,lowerRunMeters}),0)}
         {number("Upper flight length (m)",draft.upperRunMeters,upperRunMeters=>update({...draft,upperRunMeters}),0)}
         <label className="construction-inspector__single-control">Turn<select aria-label="Stair turn" value={draft.turn}

@@ -160,3 +160,8 @@ renderer. Legacy straight-stair geometry and stored records remain supported.
 An active Walk traversal owns its stair ID even through overlapping footprints;
 entry ties use stable IDs. Unsupported or obstructed exits stop movement, and stairs
 narrower than the walker remain modelable without allowing traversal.
+
+U-shaped stairs use two adjacent parallel flights and a flat 180° landing. They share
+the L-shaped stair controls: lower/upper flight lengths, width, and left/right turn.
+Place the bottom, lower-flight landing center, then the returning upper endpoint.
+The landing depth equals the flight width; curved half-turn stairs remain unsupported.

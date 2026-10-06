@@ -240,3 +240,8 @@ becomes a home texture or appears in Arrange, Explore, or Home. Visibility and
 opacity are independent of the floor-below guide. Reference adjustments use the
 same session Undo/Redo timeline as architecture, without changing published home
 data. Storage errors appear in the section with Retry.
+
+U-shaped stairs use two adjacent parallel flights and a flat 180° landing. They share
+the L-shaped stair controls: lower/upper flight lengths, width, and left/right turn.
+Place the bottom, lower-flight landing center, then the returning upper endpoint.
+The landing depth equals the flight width; curved half-turn stairs remain unsupported.

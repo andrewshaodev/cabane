@@ -20,6 +20,26 @@ export function deriveStairGuardSegments(flight:StairFlight,coordinates:FloorCoo
       flight.originWorld[1]+r*(flight.side[1]*Math.cos(sign*turn*t)+flight.forward[1]*Math.sin(sign*turn*t)),
     ];
     for(let i=0;i<count;i++)rail(point(i/count),point((i+1)/count),flight.riseMeters*i/count,flight.riseMeters*(i+1)/count,i%3===0);
+  } else if(spec.shape==='u-shaped'&&!upper) {
+    const w=spec.widthMeters,a=spec.lowerRunMeters,b=spec.upperRunMeters;
+    const sign=spec.turn==='right'?1:-1, h=flight.path[1].elevation;
+    const point=(x:number,z:number):[number,number]=>[
+      flight.originWorld[0]+sign*x*flight.side[0]+z*flight.forward[0],
+      flight.originWorld[1]+sign*x*flight.side[1]+z*flight.forward[1],
+    ];
+    const segment=(x1:number,z1:number,x2:number,z2:number,h1:number,h2:number)=>{
+      const count=Math.max(1,Math.min(512,Math.ceil(Math.hypot(x2-x1,z2-z1)/.7)));
+      for(let i=0;i<count;i++)rail(point(x1+(x2-x1)*i/count,z1+(z2-z1)*i/count),
+        point(x1+(x2-x1)*(i+1)/count,z1+(z2-z1)*(i+1)/count),h1+(h2-h1)*i/count,h1+(h2-h1)*(i+1)/count);
+    };
+    segment(-w/2,0,-w/2,a,0,h);
+    segment(-w/2,a,-w/2,a+w,h,h);
+    segment(-w/2,a+w,1.5*w,a+w,h,h);
+    segment(1.5*w,a+w,1.5*w,a,h,h);
+    segment(1.5*w,a,1.5*w,a-b,h,flight.riseMeters);
+    // Separate rails protect both sides of the change in height between flights.
+    segment(w/2,0,w/2,a,0,h);
+    segment(w/2,a,w/2,a-b,h,flight.riseMeters);
   } else {
     const local=(p:readonly [number,number])=>{
       const dx=p[0]-flight.originWorld[0],dz=p[1]-flight.originWorld[1];

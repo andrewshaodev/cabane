@@ -29,11 +29,24 @@ await withModules(async load=>{
    assert.equal(changed.upperRunMeters,3);
    assert.equal(changed.lowerRunMeters,2);
  });
+ test('U-shaped placement and top handle keep parallel returning flights',()=>{
+   const coordinates={origin:[0,0],metersPerPlanUnit:1};
+   const stair={...base,shape:'u-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'right'};
+   for(const sign of [-1,1]) {
+     const placed=edit.stairFromCorner(stair,coordinates,{x:3,z:2},{x:3,z:4.5},{x:3+sign,z:2});
+     assert.equal(placed.lowerRunMeters,2);
+     assert.equal(placed.upperRunMeters,2);
+     assert.equal(placed.turn,sign===1?'right':'left');
+     const changed=edit.editStairFromPoint(placed,coordinates,{x:3,z:2},{x:3+sign,z:2},{x:3+sign,z:1},'top');
+     assert.equal(changed.upperRunMeters,3);
+     assert.equal(changed.lowerRunMeters,2);
+   }
+ });
  test('changing shapes keeps identity, connected floors, and lower entrance',()=>{
    assert.equal(typeof edit.convertStairShape,'function');
    const project=makeStairProject();
    let stair=project.stairs[0];
-   for(const shape of ['spiral','l-shaped','straight']) {
+   for(const shape of ['spiral','l-shaped','u-shaped','straight']) {
      stair=edit.convertStairShape(project,stair,shape);
      const f=deriveStairFlight(project,stair);
      assert.equal(stair.id,'ground-stairs');
@@ -49,7 +62,7 @@ await withModules(async load=>{
  const {validateHomeProject}=await load('/packages/engine/src/home-project/validation.ts');
  test('shaped staircase drafts survive storage and publish with all dimensions intact',async()=>{
    const base={id:'shape',lowerFloorId:'ground',upperFloorId:'first',at:[3,2],rotationYRadians:0};
-   for(const stair of [{...base,shape:'l-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'right'},
+   for(const stair of [{...base,shape:'u-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'left'}, {...base,shape:'l-shaped',widthMeters:1,lowerRunMeters:2,upperRunMeters:2,turn:'right'},
      {...base,at:[4,4],shape:'spiral',diameterMeters:2,totalTurnDegrees:300,direction:'counterclockwise'}]) {
      const record=createSeedProjectRecord(makeStairProject());
      record.draft={...record.draft,stairs:[stair]};
