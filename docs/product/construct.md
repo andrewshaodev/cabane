@@ -34,7 +34,7 @@ and still require review in Construct/Explore and ordinary Apply. Editor keyboar
 shortcuts do not operate behind an open dialog.
 
 The Roof disclosure controls the building-wide gable ridge direction (left–right
-or front–back in plan), roof color, and trim color. Gable and slab infill inherit
+or front–back in plan, or Flat for no gable rise), roof color, and trim color. Gable and slab infill inherit
 the adjoining exterior wall finishes; trim color applies only to the thin roof
 edge and underside. It uses the normal workspace
 history, autosave, export/import, and Apply flow. After Apply, Home's Show roof

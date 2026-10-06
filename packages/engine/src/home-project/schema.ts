@@ -436,8 +436,8 @@ export const validateHomeProjectSchemaShape = (
       const roof = record(home.roof, "home.roof", issues);
       if (roof) {
         keys(roof, ["direction", "color", "edgeColor"], "home.roof", issues);
-        if (roof.direction !== "left-right" && roof.direction !== "front-back")
-          addProjectIssue(issues, "project.roof-direction", "home.roof.direction", "Choose a left–right or front–back roof ridge.");
+        if (roof.direction !== "left-right" && roof.direction !== "front-back" && roof.direction !== "flat")
+          addProjectIssue(issues, "project.roof-direction", "home.roof.direction", "Choose a left–right or front–back roof ridge, or a flat roof.");
         for (const field of ["color", "edgeColor"]) {
           if (typeof roof[field] !== "string" || !/^#[0-9a-f]{6}$/i.test(roof[field] as string))
             addProjectIssue(issues, "project.roof-color", `home.roof.${field}`, "Choose a six-digit hex roof color, such as #aa6250.");

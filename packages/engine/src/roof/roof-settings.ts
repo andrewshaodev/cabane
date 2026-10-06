@@ -1,6 +1,6 @@
 export interface RoofSettings {
-  /** Ridge axis in the building plan. */
-  direction: "left-right" | "front-back";
+  /** Ridge axis in the building plan, or no gable rise for flat roofs. */
+  direction: "left-right" | "front-back" | "flat";
   color: string;
   /** Thin roof trim and underside only; wall infill inherits exterior finishes. */
   edgeColor: string;

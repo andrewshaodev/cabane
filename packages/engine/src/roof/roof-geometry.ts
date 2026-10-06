@@ -38,7 +38,7 @@ function appendRegion(region: RoofRegion, floor: FloorSpec, settings: RoofSettin
   const hi = Math.max(...points.map(point => point[axis]));
   const ridge = (lo + hi) / 2;
   const halfSpan = (hi - lo) / 2;
-  const rise = Math.min(region.maxRise, halfSpan * Math.tan(ROOF_PITCH_RADIANS));
+  const rise = settings.direction === "flat" ? 0 : Math.min(region.maxRise, halfSpan * Math.tan(ROOF_PITCH_RADIANS));
   const heightAt = region.heightAt ?? ((point: Point) => region.baseHeight +
     (halfSpan > 1e-8 ? rise * Math.max(0, 1 - Math.abs(point[axis] - ridge) / halfSpan) : 0));
   const topHeight = (point: Point) => heightAt(point) + ROOF_THICKNESS_METERS;
@@ -47,7 +47,7 @@ function appendRegion(region: RoofRegion, floor: FloorSpec, settings: RoofSettin
   const halves: ClipPolygon[] = axis === 1
     ? [[[[minX, minZ], [maxX, minZ], [maxX, ridge], [minX, ridge]]], [[[minX, ridge], [maxX, ridge], [maxX, maxZ], [minX, maxZ]]]]
     : [[[[minX, minZ], [ridge, minZ], [ridge, maxZ], [minX, maxZ]]], [[[ridge, minZ], [maxX, minZ], [maxX, maxZ], [ridge, maxZ]]]];
-  const surfaces = region.heightAt ? [region.polygon] : halves.flatMap(half => polygonClipping.intersection(region.polygon, half));
+  const surfaces = region.heightAt || settings.direction === "flat" ? [region.polygon] : halves.flatMap(half => polygonClipping.intersection(region.polygon, half));
   for (const polygon of surfaces) appendSurface(top, polygon, topHeight);
   // The ceiling remains an interior surface. Exterior infill closes the full
   // slab/gable depth down to it; only the roof skin uses the trim material.
@@ -58,7 +58,7 @@ function appendRegion(region: RoofRegion, floor: FloorSpec, settings: RoofSettin
     for (let i = 0; i < ring.length; i++) {
       const a = ring[i], b = ring[(i + 1) % ring.length];
       const breaks = [0, ...roofWallBreaks(floor, a, b), 1];
-      if (!region.heightAt && (a[axis] - ridge) * (b[axis] - ridge) < -1e-10) {
+      if (!region.heightAt && settings.direction !== "flat" && (a[axis] - ridge) * (b[axis] - ridge) < -1e-10) {
         const t = (ridge - a[axis]) / (b[axis] - a[axis]);
         breaks.push(t);
       }

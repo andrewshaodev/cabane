@@ -22,7 +22,8 @@ The exterior roof is separate procedural geometry, visible in Home's roof view.
 Connected ceiling areas merge at equal height, with higher floor coverage removed
 from lower sections. Concave outlines, detached sections, and courtyard holes are
 retained. Enclosed construction seams narrower than wall thickness plus 1 cm are
-bridged. Each exposed flat section gets one gable using the shared ridge axis;
+bridged. Each exposed flat section gets one gable using the shared ridge axis,
+or a level roof with no gable rise when Flat is selected;
 authored sloped ceiling planes retain their slope. Roof faces split at the ridge
 before triangulation. The default pitch is 25 degrees, limited to a 2 m rise and
 lowered where needed below taller neighboring ceiling tiers. Edges are flush with

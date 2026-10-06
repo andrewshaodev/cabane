@@ -33,19 +33,21 @@ await withModules(async load => {
   };
   const near = (actual, expected) => assert.ok(Math.abs(actual-expected)<0.001, `${actual} ≠ ${expected}`);
 
-  test("merges adjacent rooms into one gable and splits every triangle at the ridge", () => {
+  test("merges adjacent rooms into one roof with gable directions or a level flat surface", () => {
     const floor = makeFloor([rectangle(0,0,5,6), rectangle(5,0,5,6)]);
     const regions = deriveRoofRegions([floor]);
     assert.equal(regions.length, 1);
     near(coverageArea(regions), 60);
-    for (const direction of ["left-right", "front-back"]) {
+    for (const direction of ["left-right", "front-back", "flat"]) {
       const geometry = buildRoofGeometries([floor], { ...DEFAULT_ROOF_SETTINGS, direction });
       near(projectedArea(geometry.top), 60);
       const axis = direction === "left-right" ? 2 : 0, ridge = direction === "left-right" ? 3 : 5;
       const positions = geometry.top.attributes.position.array;
       for (let i=0; i<positions.length; i+=9) {
         const values = [positions[i+axis], positions[i+3+axis], positions[i+6+axis]];
-        assert.ok(Math.max(...values) <= ridge + 1e-5 || Math.min(...values) >= ridge - 1e-5);
+        if (direction === "flat") {
+          for (const offset of [1, 4, 7]) near(positions[i + offset], regions[0].baseHeight + 0.08);
+        } else assert.ok(Math.max(...values) <= ridge + 1e-5 || Math.min(...values) >= ridge - 1e-5);
       }
       assert.ok([...positions].every(Number.isFinite));
       assert.ok([...geometry.edges.attributes.position.array].every(Number.isFinite));
@@ -203,19 +205,21 @@ await withModules(async load => {
     const project = makeThreeFloorProject();
     assert.equal(project.home.roof,undefined);
     assert.equal(parseHomeProject(serializeHomeProject(project)).valid,true);
-    const roof = {...DEFAULT_ROOF_SETTINGS,direction:"front-back",color:"#445566"};
-    const next = {...project,home:{...project.home,roof}};
-    const roundTrip = parseHomeProject(serializeHomeProject(next));
-    assert.equal(roundTrip.valid,true);
-    assert.deepEqual(roundTrip.project.home.roof,roof);
-    assert.deepEqual(composeHomeManifest(roundTrip.project,emptyExtensions).home.roof,roof);
-    const changed = commitWorkspaceSnapshot(createWorkspaceHistory({project,bindings:{}}),{project:next,bindings:{}});
-    assert.equal(undoWorkspaceHistory(changed).present.project.home.roof,undefined);
-    assert.deepEqual(redoWorkspaceHistory(undoWorkspaceHistory(changed)).present.project.home.roof,roof);
-    for (const patch of [{direction:"diagonal"},{color:"red"},{edgeColor:null},{pitch:25}]) {
-      const invalid = parseHomeProject(serializeHomeProject({...next,home:{...next.home,roof:{...roof,...patch}}}));
-      assert.equal(invalid.valid,false);
-      assert.ok(invalid.issues.some(issue=>issue.path.startsWith("home.roof")));
+    for (const direction of ["front-back", "flat"]) {
+      const roof = {...DEFAULT_ROOF_SETTINGS,direction,color:"#445566"};
+      const next = {...project,home:{...project.home,roof}};
+      const roundTrip = parseHomeProject(serializeHomeProject(next));
+      assert.equal(roundTrip.valid,true);
+      assert.deepEqual(roundTrip.project.home.roof,roof);
+      assert.deepEqual(composeHomeManifest(roundTrip.project,emptyExtensions).home.roof,roof);
+      const changed = commitWorkspaceSnapshot(createWorkspaceHistory({project,bindings:{}}),{project:next,bindings:{}});
+      assert.equal(undoWorkspaceHistory(changed).present.project.home.roof,undefined);
+      assert.deepEqual(redoWorkspaceHistory(undoWorkspaceHistory(changed)).present.project.home.roof,roof);
+      for (const patch of [{direction:"diagonal"},{color:"red"},{edgeColor:null},{pitch:25}]) {
+        const invalid = parseHomeProject(serializeHomeProject({...next,home:{...next.home,roof:{...roof,...patch}}}));
+        assert.equal(invalid.valid,false);
+        assert.ok(invalid.issues.some(issue=>issue.path.startsWith("home.roof")));
+      }
     }
   });
 });

@@ -11,6 +11,7 @@ export function RoofSettingsEditor({ value = DEFAULT_ROOF_SETTINGS, onChange }: 
         onChange={event => onChange({ ...value, direction: event.target.value as RoofSettings["direction"] })}>
         <option value="left-right">Left–right ↔</option>
         <option value="front-back">Front–back ↕</option>
+        <option value="flat">Flat</option>
       </select></label>
       <label>Roof color<DebouncedColorInput label="Roof color" value={value.color}
         onCommit={color => onChange({ ...value, color })} /></label>
