@@ -83,6 +83,11 @@ are sent. OAuth routes and URLs containing authentication parameters are exclude
 both before loading analytics and before sending a page view. Automatic SDK route
 tracking is disabled; React Router owns page navigation. The site uses a
 no-referrer policy to avoid forwarding private URLs.
+The actual `/welcome`, `/demo`, and `/build` routes distinguish introduction,
+demo exploration, and build entry in these ordinary page views. Counts include
+direct visits, revisits, and visitors who explore and then build; they do not
+represent mutually exclusive first choices or a sequenced conversion funnel.
+Closing Welcome also opens Demo. No synthetic page views are emitted.
 Vercel provides aggregate counts using a request-derived visitor hash with a
 24-hour lifetime; this measures site usage, not unique active households.
 Analytics requires a production build with `VITE_PUBLIC_ANALYTICS_ORIGIN` exactly

@@ -14,7 +14,7 @@ await withModules(async load => {
     ]) assert.equal(publicSiteAnalyticsEnabled(production, configured, url), false);
   });
   test("all application paths count without workspace IDs, queries, fragments, or properties", () => {
-    for (const path of ["/", "/workspaces", "/about", "/workspaces/personal", "/workspaces/personal/connect/devices", "/workspaces/personal/construct", "/workspaces/personal/arrange"]) {
+    for (const path of ["/", "/welcome", "/demo", "/build", "/workspaces", "/about", "/workspaces/personal", "/workspaces/personal/connect/devices", "/workspaces/personal/construct", "/workspaces/personal/arrange"]) {
       const url = origin + path + "?name=private#room";
       assert.deepEqual(publicPageView({ type: "pageview", url, properties: { secret: "private" } }, url),
         { type: "pageview", url: origin + path.replace("/personal", "/:workspaceId") });

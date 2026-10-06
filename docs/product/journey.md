@@ -10,7 +10,10 @@ Home renders published data; the editor reads the draft. Routes are:
 
 | Route | Surface |
 | --- | --- |
-| `/` | Opens the last successfully opened workspace on this browser; falls back to the sole workspace or library |
+| `/` | Opens the last successfully opened workspace; the demo resolves to Welcome or Demo according to saved welcome dismissal; falls back to the sole workspace or library |
+| `/welcome` | Introduction over the browser's existing demo, with Explore and Build choices |
+| `/demo` | Published demo with simulated controls and the introduction closed |
+| `/build` | Construct for the browser's Build destination; creates that destination on a first direct visit, or shows mobile editor guidance on phones |
 | `/workspaces` | Library: New, Import, Open, Rename, Duplicate, Export, Delete |
 | `/workspaces/:workspaceId` | Published Home; unapplied homes open Construct |
 | `/workspaces/:workspaceId/home-assistant` | HA connection, cross-device storage, full workspace backups |
@@ -34,9 +37,14 @@ OAuth return state includes the workspace ID, mapping target, selected item, and
 Arrange camera. Callback identity is validated before a home's runtime opens.
 The library does not mount Home Assistant connections.
 
-A genuinely fresh installation opens the default furnished villa with a compact
-welcome and two immediate choices. Explore keeps the simulated demo.
-Build creates a blank workspace and opens Construct without authentication.
+A genuinely fresh installation opens `/welcome` over the default furnished villa
+with two immediate choices. Explore (or closing the introduction) navigates to
+`/demo`. Build creates a blank workspace and opens Construct at `/build` without
+authentication. These URLs render real surfaces, not tracking-only redirects.
+Refresh resumes the same local Build destination; editor mode changes continue
+on its existing workspace-scoped URLs. Direct Welcome/Demo visits never recreate
+a deleted demo, and missing Build workspaces retain the usual recovery link.
+Browser Back to Welcome reopens the introduction even after it was dismissed.
 The scene remains visible; portrait layouts omit previews to keep actions clear.
 
 The demo is identified by installation metadata, not its editable name or a
@@ -50,8 +58,9 @@ it is never silently reseeded.
 The first successful simulated interaction offers a dismissible invitation to
 build a personal home. Welcome and nudge dismissal are installation-wide. Existing
 and migrated installations remain returning users even without older progress.
-The root resumes the last opened workspace; the library remains directly accessible. Manual Getting started remains on
-the demo; personal onboarding homes offer Continue setup.
+The root resumes the last opened workspace; the library remains directly accessible.
+Manual Getting started opens `/welcome` over the demo; personal onboarding homes
+offer Continue setup.
 
 Creation and the per-path destination reference are committed in the same
 IndexedDB transaction. Repeated actions, refresh, and concurrent tabs resume the

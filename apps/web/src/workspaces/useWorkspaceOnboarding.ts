@@ -1,7 +1,7 @@
 import { enrollBuildTutorial } from "../editor-onboarding/build-tutorial-storage";
 import { onboardingDemoRoomId } from "../onboarding-config";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { DeletedOnboardingWorkspaceError, createSetupRecord, loadSetupRecord, saveSetupRecord, type OnboardingPath, type WorkspaceOnboardingState, type WorkspaceRepository } from "@cabane/engine";
 import { editorPath, workspaceHomePath } from "../editor-routes";
 import { composeOwnerProjectManifest } from "../project-runtime";
@@ -9,6 +9,7 @@ import { firstOnboardingLight } from "./first-onboarding-light";
 
 export function useWorkspaceOnboarding(repository: WorkspaceRepository | null) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [state, setState] = useState<WorkspaceOnboardingState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,7 +52,10 @@ export function useWorkspaceOnboarding(repository: WorkspaceRepository | null) {
       if (!saved) setError("Setup progress could not be saved. Your new home is safe in Workspaces.");
       if (path === "build" && previous?.destinations.build !== entry.metadata.id) enrollBuildTutorial(entry.metadata.id);
       await refresh();
-      if (path === "build") { await navigate(editorPath({ mode: "construct" }, entry.metadata.id)); return; }
+      if (path === "build") {
+        if (location.pathname !== "/build") await navigate("/build");
+        return;
+      }
       const mapped = target && Boolean(entry.metadata.homeAssistantUrl && entry.record.bindings[entry.metadata.homeAssistantUrl]?.published.entityIdsBySlotId[target.slotId]);
       if (mapped) await navigate(workspaceHomePath(entry.metadata.id));
       else await navigate(editorPath({ mode: "connect", view: "devices", roomId: target?.roomId, relationshipId: target?.deviceId }, entry.metadata.id),
@@ -60,6 +64,6 @@ export function useWorkspaceOnboarding(repository: WorkspaceRepository | null) {
       setError(cause instanceof Error ? cause.message : "Could not open your home. Please try again.");
       if (cause instanceof DeletedOnboardingWorkspaceError) setDeleted({ path, id: cause.workspaceId });
     } finally { pending.current = false; setBusy(false); }
-  }, [repository, navigate, refresh]);
+  }, [repository, navigate, refresh, location.pathname]);
   return { state, loaded, busy, error, deleted, dismiss, start, clearError: () => { setError(null); setDeleted(null); } };
 }

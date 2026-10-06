@@ -2,10 +2,11 @@ import { enrollBuildTutorial, forgetBuildTutorial } from "../editor-onboarding/b
 import { lastOpenedWorkspace, forgetWorkspacePresentation } from "./workspace-presentation";
 import { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
 import { useCallback, useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { serializeCanonicalJson, setupStorageKey, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
+import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
 import { WorkspaceHaLibrary } from "./WorkspaceHaStorage";
 import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
@@ -55,11 +56,23 @@ export function WorkspaceApplication() {
     }
   }
   if (location.pathname === "/") {
+    if (!onboarding.loaded) return <main className="direction-project-loading">Loading your home…</main>;
     const latest = entries.find(entry => entry.metadata.id === lastOpenedWorkspace());
     const destination = latest ?? (entries.length === 1 ? entries[0] : undefined);
+    if (destination && onboarding.state && destination.metadata.id === onboarding.state.demoWorkspaceId) {
+      return <Navigate to={onboarding.state.welcomeDismissed ? "/demo" : "/welcome"} replace />;
+    }
     return <Navigate to={destination ? workspaceHomePath(destination.metadata.id) : "/workspaces"} replace />;
   }
-  const id = workspaceIdForPath(location.pathname);
+  const isDemoRoute = location.pathname === "/welcome" || location.pathname === "/demo";
+  const isBuildRoute = location.pathname === "/build";
+  if ((isDemoRoute || isBuildRoute) && !onboarding.loaded) return <main className="direction-project-loading">Loading your home…</main>;
+  if (isDemoRoute && !entries.some(entry => entry.metadata.id === onboarding.state?.demoWorkspaceId)) {
+    return <main className="direction-project-loading is-error"><strong>The demo home is no longer in this browser.</strong><Link to="/workspaces">Workspaces</Link></main>;
+  }
+  if (isBuildRoute && !onboarding.state?.destinations.build) return <BuildWorkspaceEntry onboarding={onboarding} />;
+  const id = isDemoRoute ? onboarding.state?.demoWorkspaceId
+    : isBuildRoute ? onboarding.state?.destinations.build : workspaceIdForPath(location.pathname);
   if (id) return <>
     {onboarding.error && <div className="workspace-connection-error" role="alert">{onboarding.error}
       {onboarding.deleted && <button disabled={onboarding.busy} onClick={() => void onboarding.start(onboarding.deleted!.path, onboarding.deleted!.id)}>Create a new home</button>}

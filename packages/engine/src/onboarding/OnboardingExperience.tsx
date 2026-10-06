@@ -20,6 +20,7 @@ export interface OnboardingOptions {
   links?: OnboardingLinks;
   start: (path: "connect" | "build") => Promise<void>;
   dismiss: (kind: "welcome" | "nudge") => Promise<void>;
+  openWelcome?: () => void;
 }
 
 export function CabaneAppExperience({ manifest, architectureModels, deviceModels, homeAssistantUrl, onHomeAssistantUrlChange,
@@ -50,7 +51,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   const [interacted, setInteracted] = useState(false);
   const [success, setSuccess] = useState(false);
   const [hintDismissed, setHintDismissed] = useState(false);
-  useEffect(() => { if (isDemo && !onboarding?.welcome) setSurface(null); }, [isDemo, onboarding?.welcome]);
+  useEffect(() => { if (isDemo) setSurface(onboarding?.welcome ? "intro" : null); }, [isDemo, onboarding?.welcome]);
   const confirmed = useCallback(() => {
     updateSetupRecord(record => ({ ...record, activated: true,
       launch: { ...(record.launch ?? createLaunchOnboardingState()), firstControlConfirmed: true } }));
@@ -76,7 +77,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
     manifest={dashboardManifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
     renderActionBarDeviceIcon={renderActionBarDeviceIcon}
     sessionPresentation={isDemo ? { mode: "demo", label: "Demo", detail: "Simulated devices", menuDescription: "Explore freely. These controls only change simulated devices in this browser." } : undefined}
-    setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => setSurface("intro") }
+    setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => onboarding?.openWelcome ? onboarding.openWelcome() : setSurface("intro") }
       : personalSetup && !setupState.record.activated ? { label: "Continue setup", detail: "Connect a device in this home", attention: false, onOpen: connect } : undefined}
     setupOpen={surface !== null} onWorkspaces={onWorkspaces} onHomeAssistantSettings={onHomeAssistantSettings}
     focusRoomId={personalSetup && targetEntityId && !setupState.record.activated ? target?.roomId : undefined}

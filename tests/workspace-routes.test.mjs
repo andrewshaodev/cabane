@@ -6,6 +6,8 @@ await withModules(async (load) => {
   const { editorPath, editorRequestForPath, workspaceHomePath, workspaceIdForPath, shouldFlushEditorExit } = await load("/apps/web/src/editor-routes.ts");
   const { parseEditorReturn } = await load("/apps/web/src/editor-connect/connect-navigation.ts");
   test("workspace editor routes preserve identity across every editor mode", () => {
+    assert.deepEqual(editorRequestForPath("/build"), { mode: "construct" });
+    assert.equal(workspaceIdForPath("/build"), null);
     for (const request of [{ mode: "construct" }, { mode: "furnish" }, { mode: "connect" }, { mode: "connect", view: "rooms" }, { mode: "connect", view: "devices" }]) {
       const path = editorPath(request, "home-a");
       assert.deepEqual(editorRequestForPath(path), request);

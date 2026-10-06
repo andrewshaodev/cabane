@@ -2,13 +2,15 @@ import { rememberWorkspace, saveWorkspacePreview } from "./workspace-presentatio
 import type { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
 import { onboardingLinks } from "../onboarding-config";
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { ScenePreviewContext, HomeAssistantRuntimeProvider, type HomeProjectRecord, type WorkspaceRepository, type WorkspaceMetadata } from "@cabane/engine";
 import { ConnectedProduct } from "../ConnectedProduct";
 import { createBrowserHomeProjectLifecycle } from "../project-runtime";
 import { WorkspaceHaStorageProvider } from "./WorkspaceHaStorage";
 
 export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: { id: string; repository: WorkspaceRepository; onboarding: ReturnType<typeof useWorkspaceOnboarding>; demoWorkspaceId: string | null }) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const capturePreview = useCallback((canvas: HTMLCanvasElement) => saveWorkspacePreview(id, canvas), [id]);
   const isDemo = onboarding.state?.demoWorkspaceId === id;
   const [lifecycle] = useState(() => createBrowserHomeProjectLifecycle(window.indexedDB, id));
@@ -41,9 +43,12 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
   if (!loaded) return <main className="direction-project-loading">Loading your home…</main>;
   return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
     <WorkspaceHaStorageProvider id={id} origin={loaded.metadata.homeAssistantUrl} repository={repository} hidden={isDemo}>
-    <ConnectedProduct demoWorkspaceId={demoWorkspaceId} onboarding={{ isDemo, welcome: Boolean(isDemo && !onboarding.state?.welcomeDismissed),
+    <ConnectedProduct demoWorkspaceId={demoWorkspaceId} onboarding={{ isDemo, welcome: isDemo && location.pathname === "/welcome",
       nudgeDismissed: onboarding.state?.nudgeDismissed ?? true, busy: onboarding.busy,
-      start: onboarding.start, dismiss: onboarding.dismiss, links: onboardingLinks }} record={loaded.record} lifecycle={lifecycle}
+      start: onboarding.start, dismiss: async kind => {
+        if (kind === "welcome") void navigate("/demo");
+        await onboarding.dismiss(kind);
+      }, openWelcome: () => void navigate("/welcome"), links: onboardingLinks }} record={loaded.record} lifecycle={lifecycle}
       recoveryMessage={loaded.recoveryMessage} recoveryRaw={loaded.recoveryRaw}
       homeAssistantUrl={loaded.metadata.homeAssistantUrl}
       onHomeAssistantUrlChange={async (url, current) => {

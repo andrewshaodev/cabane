@@ -2,6 +2,7 @@ import { matchRoutes } from "react-router";
 import type { EditorOpenRequest } from "./editor-connect/connect-navigation";
 
 export const editorRoutes = [
+  { path: "/build", handle: { mode: "construct" } },
   { path: "/workspaces/:workspaceId/shortcuts", handle: { mode: "construct", panel: "action-bar" } },
   { path: "/workspaces/:workspaceId/action-bar", handle: { mode: "construct", panel: "action-bar" } },
   { path: "/workspaces/:workspaceId/construct", handle: { mode: "construct" } },

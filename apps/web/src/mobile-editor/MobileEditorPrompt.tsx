@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { editorPath, workspaceHomePath } from "../editor-routes";
+import { editorPath } from "../editor-routes";
 import "./mobile-editor-prompt.css";
 
 const dismissedKey = "cabane:mobile-editor-prompt-dismissed";
@@ -57,7 +57,7 @@ export function MobileEditorPrompt({ workspaceId, demoWorkspaceId }: { workspace
         <p id="mobile-editor-description">Construct and Arrange work best on a desktop, where there’s space to shape every detail of your home.</p>
         <div className="mobile-editor-prompt__actions">
           <button type="button" className="mobile-editor-prompt__demo" disabled={!demoWorkspaceId}
-            onClick={() => { if (demoWorkspaceId) void navigate(workspaceHomePath(demoWorkspaceId)); }}>
+            onClick={() => { if (demoWorkspaceId) void navigate("/demo"); }}>
             <span>Explore the demo</span><small>See what Cabane can look like. Try turning your phone sideways!</small>
           </button>
           <button type="button" className="mobile-editor-prompt__share" onClick={() => void share()}>Share to my other device</button>

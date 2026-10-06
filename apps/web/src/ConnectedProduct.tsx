@@ -77,6 +77,8 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   return <FloorNavigationProvider key={record.homeId}>
     {connectionError && <div className="workspace-connection-error" role="alert">{connectionError}<button type="button" onClick={() => setConnectionError(null)}>Dismiss</button></div>}
     <Routes>
+    <Route path="/welcome" element={home} />
+    <Route path="/demo" element={home} />
     <Route path="/workspaces/:workspaceId" element={home} />
     <Route path="/workspaces/:workspaceId/home-assistant" element={<HomeAssistantPage record={record} lifecycle={lifecycle}
       origin={homeAssistantUrl} onChangeOrigin={async url => {
@@ -85,7 +87,8 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
     <Route path="/workspaces/:workspaceId/mobile-editor" element={<MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />} />
     {editorRoutes.map(({ path, handle }) => <Route key={path} path={path} element={
       (handle.mode === "construct" || handle.mode === "furnish") && !handle.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
-        ? <Navigate to={mobileEditorPath(record.homeId, handle.mode)} replace /> : editor} />)}
+        ? path === "/build" ? <MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />
+          : <Navigate to={mobileEditorPath(record.homeId, handle.mode)} replace /> : editor} />)}
     <Route path="*" element={<Navigate to={workspaceHomePath(record.homeId)} replace />} />
   </Routes></FloorNavigationProvider>;
 }

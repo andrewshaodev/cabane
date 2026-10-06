@@ -14,16 +14,30 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     const base = server.resolvedUrls.local[0];
     await page.goto(base);
     await page.getByRole("heading", { name: "Your home. In 3D. Under your control.", exact: true }).waitFor();
-    const demoUrl = page.url();
+    assert.equal(new URL(page.url()).pathname, "/welcome");
+    const demoId = await page.evaluate(async root => {
+      const { createWorkspaceRepository } = await import(`/@fs${root}/packages/engine/src/home-project/index.ts`);
+      const { ownerProjectRegistries } = await import("/src/project-runtime.ts");
+      return (await createWorkspaceRepository(indexedDB, ownerProjectRegistries).readOnboarding()).demoWorkspaceId;
+    }, process.cwd());
+    const demoUrl = `${base}workspaces/${demoId}`;
     assert.equal(await page.getByRole("button", { name: /^Connect my Home Assistant/ }).count(), 0);
     await page.getByRole("button", { name: /^Explore the demo/ }).click();
+    await page.waitForURL("**/demo");
+    await page.goBack();
+    await page.getByRole("heading", { name: "Your home. In 3D. Under your control.", exact: true }).waitFor();
+    await page.goForward();
+    await page.waitForURL("**/demo");
+    await page.reload();
     await page.getByLabel("More options", { exact: true }).click();
     await page.getByRole("button", { name: /^Getting started/ }).click();
     await page.getByRole("button", { name: /^Build my home/ }).click();
-    await page.waitForURL("**/construct");
+    await page.waitForURL("**/build");
     const personalUrl = page.url();
-    assert.notEqual(personalUrl.split("/")[4], demoUrl.split("/")[4]);
     await page.getByRole("navigation", { name: "Editor mode" }).waitFor();
+    await page.reload();
+    await page.getByRole("navigation", { name: "Editor mode" }).waitFor();
+    assert.equal(page.url(), personalUrl);
     await page.getByRole("button", { name: "Connect", exact: true }).click();
     await page.getByRole("heading", { name: "Connect your home", exact: true }).waitFor();
     await page.goto(`${demoUrl}/connect/devices`);
@@ -111,5 +125,46 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     }, { root: process.cwd(), id: second });
     await page.getByText("This workspace was deleted in another tab.", { exact: true }).waitFor();
     assert.equal(await page.getByRole("navigation", { name: "Editor mode" }).count(), 0);
+
+    // A shared /build link is a real entry point even without a prior welcome visit.
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 } });
+    await mobile.goto(`${base}build`);
+    await mobile.getByRole("heading", { name: "Make room for the bigger picture." }).waitFor();
+    assert.equal(new URL(mobile.url()).pathname, "/build");
+    await mobile.reload();
+    await mobile.getByRole("heading", { name: "Make room for the bigger picture." }).waitFor();
+    assert.equal(new URL(mobile.url()).pathname, "/build");
+    await mobile.getByRole("button", { name: /^Explore the demo/ }).click();
+    await mobile.waitForURL("**/demo");
+    await mobile.goto(`${base}welcome`);
+    await mobile.getByRole("button", { name: /^Build my home/ }).click();
+    await mobile.waitForURL("**/build");
+    await mobile.getByRole("button", { name: "Build on mobile anyway" }).click();
+    await mobile.waitForURL("**/construct");
+    await mobile.getByRole("navigation", { name: "Editor mode" }).waitFor();
+    const localHomes = await mobile.evaluate(async root => {
+      const { createWorkspaceRepository } = await import(`/@fs${root}/packages/engine/src/home-project/index.ts`);
+      const { ownerProjectRegistries } = await import("/src/project-runtime.ts");
+      const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
+      return { count: (await repository.list()).length, build: (await repository.readOnboarding()).destinations.build };
+    }, process.cwd());
+    assert.equal(localHomes.count, 2);
+    assert.equal(new URL(mobile.url()).pathname, `/workspaces/${localHomes.build}/construct`);
+    await mobile.setViewportSize({ width: 1280, height: 900 });
+    await mobile.goto(`${base}build`);
+    await mobile.getByRole("navigation", { name: "Editor mode" }).waitFor();
+    assert.equal(new URL(mobile.url()).pathname, "/build");
+    await mobile.goto(`${base}workspaces`);
+    await mobile.evaluate(async root => {
+      const { createWorkspaceRepository } = await import(`/@fs${root}/packages/engine/src/home-project/index.ts`);
+      const { ownerProjectRegistries } = await import("/src/project-runtime.ts");
+      const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
+      for (const entry of await repository.list()) await repository.delete(entry.metadata.id, await repository.readRaw(entry.metadata.id));
+    }, process.cwd());
+    await mobile.goto(`${base}demo`);
+    await mobile.getByText("The demo home is no longer in this browser.", { exact: true }).waitFor();
+    await mobile.goto(`${base}build`);
+    await mobile.getByText("Could not open this workspace.", { exact: true }).waitFor();
+    await mobile.close();
   } finally { await browser?.close(); await server.close(); }
 });
