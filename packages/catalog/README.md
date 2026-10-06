@@ -101,7 +101,9 @@ Its Details variants are Natural woven (`default`), Terracotta (`terracotta`),
 Sage (`sage`), Ocean blue (`ocean`), and Playful colors (`playful`), plus Jute rug (`jute`), Sisal (`sisal`),
 Persian (`persian`), Kilim (`kilim`), Moroccan (`moroccan`), Shag (`shag`),
 Braided (`braided`), Striped (`striped`), Checkered (`checkered`), and
-Scandinavian (`scandinavian`). The original
+Scandinavian (`scandinavian`), and Fluffy white (`fluffy`).
+Fluffy white has a plain white field with fine procedural raised pile and no
+contrasting border or motif, within the same envelope. The original
 neutral appearance remains the default. Colored variants use a 13 mm field
 and 2 mm thick non-overlapping motifs: field top = 13 mm, motif tops = 15 mm.
 Their visible faces are separated by 2 mm at every supported planar size.

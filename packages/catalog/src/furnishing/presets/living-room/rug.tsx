@@ -1,4 +1,5 @@
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
+import { FluffyRugLayers } from "./fluffy-rug-layers";
 import { RoundedFurniturePanel } from "../construction";
 
 export const NEUTRAL_AREA_RUG_SIZE = [2, 0.015, 3] as const;
@@ -86,7 +87,9 @@ export function NeutralAreaRug({
 }) {
   return (
     <group name="neutral-area-rug" scale={[size[0] / 2, size[1] / 0.015, size[2] / 3]}>
-      {isColorfulRugVariant(variant) ? (
+      {variant === "fluffy" ? (
+        <FluffyRugLayers />
+      ) : isColorfulRugVariant(variant) ? (
         <ColorfulRugLayers variant={variant} />
       ) : (
         <NeutralRugLayers />
