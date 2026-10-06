@@ -440,7 +440,7 @@ await withModules(async (load) => {
     );
   });
 
-  test("uses four readable nearest-filtered toon bands", () => {
+  test("uses four readable toon band levels", () => {
     assert.deepEqual([...rendering.TOON_GRADIENT_DATA], [55, 115, 185, 255]);
   });
 

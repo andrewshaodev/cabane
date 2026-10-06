@@ -22,7 +22,7 @@ floats by 2.5 cm, remains depth-tested, and never becomes a picking or collision
 surface. Small controls use a smaller version. The water heater's old pulsing
 bolt is replaced; its physical display retains the four-state status beacon.
 
-TVs display a slow abstract composition; live camera surfaces take precedence.
+TVs display a comic-book Superman flight with a fluttering red cape and drifting clouds; live camera surfaces take precedence.
 Washer and dryer doors show tumbling fabric. Coffee makers and kettles emit stylized
 steam. Oven and microwave windows turn warm while active; their interior lamps
 stay steady rather than flickering. Existing lighting, covers, fans, sprinklers

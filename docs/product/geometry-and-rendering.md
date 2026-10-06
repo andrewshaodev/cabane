@@ -82,8 +82,11 @@ transitions never recreate another storey’s light at the active floor’s elev
 opaque wall emit into their room through an unshadowed spotlight; sources at
 openings and sources farther from walls retain point lighting. This avoids
 lighting through the wall without allocating point-light shadow maps.
-Explore and Arrange use four nearest-filtered toon bands, warm key light and
-cool sky fill. A single multisampled HDR scene render supplies color and depth
+Explore and Arrange use four flat toon bands, warm key light and cool sky fill.
+The shared in-memory gradient repeats each band across 64 texels and linearly
+filters only the narrow boundaries. This keeps stationary surfaces from flashing
+between brightness bands when camera rotation perturbs a view-space light dot
+product at a threshold; broad band interiors retain their original levels. A single multisampled HDR scene render supplies color and depth
 for camera-dependent, approximately one-CSS-pixel occlusion contours. The pass
 subtracts the opposite depth slope to suppress lines on continuous slanted
 surfaces; it does not detect normal, material or triangle edges. Transparent

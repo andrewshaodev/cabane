@@ -1,9 +1,9 @@
 {
   "revision": 7,
-  "fingerprint": "ceddc65f7865f1fe5024275d6361e4e06e3a79dd4346dd99a97c1e476b66b72e",
-  "summary": "Publish reusable furnishing and device presets for the catalog split",
+  "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
+  "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
   "breakingChanges": [
-    "Homes using the new catalog device model IDs require the matching Home Assistant integration release; existing model IDs remain compatible."
+    "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
   ],
   "history": [
     {
