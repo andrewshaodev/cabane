@@ -160,6 +160,39 @@ await withModules(async (load) => {
     await renderer.unmount();
   });
 
+  test("stair floor changes never relocate another floor's light sources", async () => {
+    const sceneItems = homeManifest.sceneItems.map((item) => item.kind === "device"
+      ? { ...item, lightState: "always-on" } : item);
+    const rooms = Object.fromEntries(homeManifest.floors.flatMap((floor) => floor.rooms).map((room) => [room.id, {
+      room, sections: {}, devices: room.devices.map((slot) => ({ slot, entities: slot.entitySlots
+        .filter((entitySlot) => entitySlot.compatibleDomains.includes("light"))
+        .map((entitySlot) => ({ slotId: entitySlot.id, domain: "light", state: {
+          state: "on", attributes: {}, available: true, stale: false,
+        } })), issues: [] })),
+    }]));
+    const props = { resolvedBindings: { rooms, openings: {}, issues: [] },
+      deviceModels: stableDeviceRegistry, extensionDeviceModels: homeExtensions.deviceModels };
+    const forFloor = (floor) => ({ ...props, floor,
+      sceneItems: sceneItems.filter((item) => item.floorId === floor.id) });
+    const renderer = await create(createElement(engine.HomeAssistantSceneLighting, {
+      ...forFloor(homeManifest.floors[0]),
+    }));
+    try {
+      for (const floor of [...homeManifest.floors, homeManifest.floors[0]]) {
+        await renderer.update(createElement(engine.HomeAssistantSceneLighting, forFloor(floor)));
+        const lights = renderer.scene.instance.children[0].children.filter((child) =>
+          child.isPointLight || child.isSpotLight);
+        assert.ok(lights.length > 0);
+        for (const light of lights) {
+          const item = sceneItems.find((item) => light.name === `ha-device-light-${item.id}`);
+          assert.equal(item.floorId, floor.id, `${item.id} must not illuminate ${floor.id}`);
+        }
+      }
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("keeps the two-floor demo within the existing unshadowed light path", async () => {
     for (const floor of homeManifest.floors) {
       const sceneItems = homeManifest.sceneItems

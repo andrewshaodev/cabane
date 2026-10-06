@@ -134,7 +134,9 @@ export function HomeAssistantSceneLighting({
 }) {
   const nightLighting = useContext(SceneNightContext);
   if (!enabled) return <group name="home-assistant-scene-lighting" />;
-  const resolvedDevices = Object.values(resolvedBindings.rooms).flatMap((room) => room.devices);
+  // Bindings cover the whole building; fallback emitters belong only to this floor.
+  const resolvedDevices = floor.rooms.flatMap((room) =>
+    resolvedBindings.rooms[room.id]?.devices ?? []);
   const resolvedById = new Map(resolvedDevices.map((device) => [device.slot.id, device]));
   // Scene items exist independently of room assignment and HA connectivity.
   const deviceItems = sceneItems.filter((item) => item.kind === "device");
