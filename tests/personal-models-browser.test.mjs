@@ -627,6 +627,10 @@ test(
       assert.equal(await replacement.count(), 1);
       assert.match(await replacement.innerText(), new RegExp(source.modelId));
       await replacement.selectOption(`furnishing:${source.modelId}`);
+      await mkdir("test-results/personal-models", { recursive: true });
+      await dialog.screenshot({
+        path: "test-results/personal-models/missing-model-replacement.png",
+      });
       await dialog.getByRole("button", { name: "Add to My models", exact: true }).click();
       await dialog.waitFor({ state: "hidden" });
       const replaced = await waitForModel(
