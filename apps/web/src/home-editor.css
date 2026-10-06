@@ -508,8 +508,6 @@
   .direction-status { left: calc(var(--editor-rail-width) + 10px); bottom: 10px; }
 }
 
-.stair-placement-error { padding: 10px 12px; border: 1px solid #d5bba7; border-radius: 8px; background: #fff4e9; color: #845a46; font: var(--editor-text-control, .875rem)/1.4 Roboto, sans-serif; }
-
 .selected-room-controls .selected-item-actions { position: relative; white-space: nowrap; }
 .selected-room-controls .editor-action-button { width: auto; gap: 6px; padding-inline: 12px; }
 

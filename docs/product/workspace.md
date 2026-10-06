@@ -138,3 +138,8 @@ reports verified Synced with HA, Changes pending, Sync interrupted, or Sync need
 attention. Manual save/load and remote deletion remain under Manage saved copy.
 Opening remote copies checks both the requested home ID and authenticated HA
 origin; corrupt or divergent browser records cannot be silently overwritten.
+
+Stair intersections and unsupported landings are warning-only project diagnostics.
+Warnings retain their severity through validation, draft reload, import/export, and
+Save review; only errors make a project invalid. Existing stair JSON and IDs are
+unchanged, and no data migration is required.

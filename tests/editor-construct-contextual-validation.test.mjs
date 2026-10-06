@@ -110,6 +110,22 @@ await withModules(async (load) => {
     assert.match(result[2].suggestion, /ceiling support/i);
   });
 
+  test("stair advisories permit saving while malformed stairs keep blocking guidance", () => {
+    const issues = collectConstructContextualIssues({ floor, projectIssues: [
+      ...["stair.obstruction", "stair.overlap", "stair.item-obstruction", "stair.landing"].map(code => ({
+        code, severity: "warning", path: "stairs[0]", message: code,
+      })),
+      { code: "stair.geometry", severity: "fatal", path: "stairs[1]", message: "Invalid stair dimensions." },
+      { code: "other.check", severity: "warning", path: "walls", message: "Another warning." },
+    ] });
+    for (const issue of issues.filter(issue => issue.code.startsWith("stair.") && issue.severity === "warning")) {
+      assert.match(issue.suggestion, /keep this layout and save with warnings/i);
+      assert.equal(constructIssueShortLabel(issue), "Stairs");
+    }
+    assert.match(issues.find(issue => issue.code === "stair.geometry").suggestion, /correct this issue before publishing/i);
+    assert.match(issues.find(issue => issue.code === "other.check").suggestion, /correct this issue before publishing/i);
+  });
+
   test("accepts enriched navigation diagnostics without importing navigation", () => {
     const navigationIssue = {
       code: "navigation.spawn-blocked",

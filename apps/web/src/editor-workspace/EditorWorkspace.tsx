@@ -8,7 +8,7 @@ import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
 import { BuildTutorial } from "../editor-onboarding/BuildTutorial";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
-import type { BuildTutorialStep } from "@cabane/engine";
+import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import { createBrowserUuid, normalizeWorkspaceBindingOrigin, resolveHomeAssistantBindings, resolveHomeAssistantPictureUrl } from "@cabane/engine";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorModeIntroduction } from "../editor-chrome/EditorModeIntroduction";
@@ -75,6 +75,12 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     pendingRoomPaintId, confirmRoomPaint, setPendingRoomPaintId, autosaveStatus, editedManifest,
     closeWalk, publishErrors, publishWarnings, publishIssues, publishMessage, publishing, publishProject
   } = useHomeEditorController(props);
+  const [stairLiveIssues, setStairLiveIssues] = useState<readonly ManifestIssue[] | null>(null);
+  const stairRegistries = useMemo(() => ({ furnishingModels, deviceModels }), [furnishingModels, deviceModels]);
+  useEffect(() => { setStairLiveIssues(null); }, [mode, activeFloorId, stairDialog?.id, stairPlacement?.shape]);
+  const selectedStairPath = stairDialog ? `stairs[${snapshot.project.stairs.findIndex(stair => stair.id === stairDialog.id)}]` : null;
+  const sidebarIssues = selectedStairPath ? displayedContextualIssues.filter(issue =>
+    issue.path !== selectedStairPath && !issue.path.startsWith(`${selectedStairPath}.`)) : displayedContextualIssues;
   const tutorial = useBuildTutorial(editorProject, mode, Object.keys(workspace.snapshot.references ?? {}).length > 0);
   const requestedActionBar = props.navigation?.request.panel === "action-bar" || props.initialRequest?.panel === "action-bar";
   const [actionBarPanelOpen, setActionBarPanelOpen] = useState(requestedActionBar);
@@ -160,7 +166,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   };
   return ((
     <main className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`} data-editor-mode={shortcutsMode ? "shortcuts" : mode}>
-      {!shortcutsMode && <HomeEditorScene reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
+      {!shortcutsMode && <HomeEditorScene onStairIssuesChange={setStairLiveIssues} reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
         mode, editingLocked, publishOpen, previewOpen, connectManifest, connect,
         clearConstructionSelection, clearFurnishingSelection, cameraView, cameraResetKey,
         constructEditor, dragging, cameraFocusPoint, handleCameraTargetChange, savedCamera,
@@ -183,7 +189,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         {mode === "construct" && lowerFloor && <label><input type="checkbox" checked={showFloorBelow}
           onChange={(event) => setShowFloorBelow(event.target.checked)} />Show floor below</label>}
       </div>
-      {stairDialog && <StairDetails key={stairDialog.id} project={snapshot.project} stair={snapshot.project.stairs.find(stair => stair.id === stairDialog.id) ?? stairDialog} onCancel={() => setStairDialog(null)}
+      {mode === "construct" && stairDialog && <StairDetails key={`${activeFloorId}:${stairDialog.id}`} registries={stairRegistries} liveIssues={stairLiveIssues} project={snapshot.project} stair={snapshot.project.stairs.find(stair => stair.id === stairDialog.id) ?? stairDialog} onCancel={() => setStairDialog(null)}
         onSave={stair => {
           commit({ ...snapshot, project: { ...snapshot.project, stairs: [...snapshot.project.stairs.filter(s => s.id !== stair.id), stair] } });
         }} />}
@@ -242,7 +248,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         {!shortcutsMode && mode === "construct" && tutorial.state?.status !== "active" && isPristineConstructionFloor(constructEditor.previewFloor) &&
           <p className="construction-empty-hint">Your plan starts here. Choose Wall, then click each corner to draw your first room.</p>}
         {!shortcutsMode && mode === "construct" && stairPlacement && <StairPlacementPanel
-          shape={stairPlacement.shape ?? "straight"}
+          shape={stairPlacement.shape ?? "straight"} issues={stairLiveIssues ?? []}
           onChange={shape => setStairPlacement(convertStairShape(snapshot.project, stairPlacement, shape))}
           onCancel={() => setStairPlacement(null)} />}
         {!shortcutsMode && mode === "construct" && !stairPlacement && (
@@ -273,7 +279,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
               home: { ...snapshot.project.home, roof },
             } })}
             editor={constructEditor}
-            contextualIssues={displayedContextualIssues}
+            contextualIssues={sidebarIssues}
             onIssueFocus={focusIssue}
             floorPainting={{
               finish: floorFinish,

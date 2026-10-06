@@ -93,8 +93,8 @@ await withModules(async load=>{
  test('upper-floor furniture blocks a full spiral exit even where the lower route lies underneath',()=>{
    const stair={id:'spiral',lowerFloorId:'ground',upperFloorId:'first',at:[4,4],rotationYRadians:0,shape:'spiral',diameterMeters:2,totalTurnDegrees:360,direction:'clockwise'};
    for(const z of [4,4.2,4.8]) {
-     const project={...makeStairProject(),stairs:[stair],sceneItems:[{id:'obstacle',floorId:'first',size:[.3,1,.3],placement:{kind:'absolute',at:[4.55,z],elevationMeters:0,rotationYRadians:0}}]};
-     assert.ok(validateStairs(project).some(i=>i.code==='stair.item-obstruction'),`upper exit z=${z}`);
+     const project={...makeStairProject(),stairs:[stair],sceneItems:[{id:'obstacle',kind:'furnishing',modelId:'obstacle',floorId:'first',size:[.3,1,.3],placement:{kind:'absolute',at:[4.55,z],elevationMeters:0,rotationYRadians:0}}]};
+     assert.ok(validateStairs(project,{furnishingModels:{obstacle:{label:'Obstacle',defaultSize:[.3,1,.3],bounds:{min:[-.15,0,-.15],max:[.15,1,.15]}}}}).some(i=>i.code==='stair.item-obstruction'),`upper exit z=${z}`);
    }
  });
 });

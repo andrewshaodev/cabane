@@ -2,6 +2,7 @@ import { passableOpeningIds, type OpeningPositions } from "./opening-pose";
 import { prepareWalkColliders } from "./navigation/prepared-walk-colliders";
 import { moveBuildingWalker, prepareBuildingWalk, type BuildingWalkPoint } from "./stairs/stair-navigation";
 import type { BuildingGeometry } from "./stairs/types";
+import type { StairModelRegistries } from "./stairs/stair-obstacles";
 import {
   PerspectiveCamera
 } from "@react-three/drei";
@@ -43,7 +44,7 @@ const JUMP_LAUNCH_SPEED = 2.8; // 0.4 m peak, approximately 0.57 s airborne.
 
 export function WalkCameraController({
   floor,
-  building, elevation = 0, onFloorChange,
+  building, registries, elevation = 0, onFloorChange,
   poseRef,
   movementInputRef,
   sprintInputRef,
@@ -59,6 +60,7 @@ export function WalkCameraController({
 }: {
   floor: FloorSpec;
   building?: BuildingGeometry;
+  registries?: StairModelRegistries;
   elevation?: number;
   onFloorChange?: (id: string) => void;
 
@@ -195,7 +197,7 @@ export function WalkCameraController({
     previousFloorId.current = floor.id;
     const start = current && (!floorSelectionChanged || current.floorId === floor.id) && current.x === pose.x && current.z === pose.z
       ? current : { ...pose, floorId: floor.id, elevation };
-    const next = building ? moveBuildingWalker(building, start, movement, passable, furniture.current, navigation.building)
+    const next = building ? moveBuildingWalker(building, start, movement, passable, furniture.current, navigation.building, registries)
       : { ...resolveCircleMovement(pose, movement, navigation.floor!(passable, furniture.current)), floorId: floor.id, elevation };
     walker.current = next;
     if (next.floorId !== start.floorId) onFloorChange?.(next.floorId);

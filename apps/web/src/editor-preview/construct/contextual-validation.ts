@@ -195,6 +195,8 @@ const contextualize = (
     source,
     target,
     suggestion: issue.suggestion
+      ?? (issue.code.startsWith("stair.") && issue.severity === "warning"
+        ? "You can keep this layout and save with warnings." : undefined)
       ?? defaultCorrections[issue.code]
       ?? "Review the highlighted context and correct this issue before publishing.",
   };

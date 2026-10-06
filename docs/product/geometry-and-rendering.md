@@ -147,7 +147,16 @@ L-shaped stair elevation rises along each flight and remains constant across its
 square landing; the risers are split proportionally between the two runs. Spiral
 stairs use wedge treads around a fixed central support, an outer rail, a circular
 aperture, and a guarded upper bridge to the surrounding floor. The shared derived
-route drives slope/obstruction validation and continuous Walk elevation. Full-turn
+route drives continuous Walk elevation. Stair advice intersects tread and landing
+clearance volumes with physical wall slices and registered, scaled, rotated model
+bounds. Walls share their height slices and opening cuts with the renderer; closed
+door state does not fill these structural apertures. Bounds retain model-origin
+offsets and vertical clearance, including the spiral bridge. Unknown model bounds
+are not guessed; missing-model validation remains authoritative. Whole landing
+polygons are checked against floor regions. Width and slope are unrestricted. Full-turn
 spirals retain the current route elevation at their coincident entrance and exit.
 Shaped plan strokes and guard rails are instanced; each model family has its own
 renderer. Legacy straight-stair geometry and stored records remain supported.
+An active Walk traversal owns its stair ID even through overlapping footprints;
+entry ties use stable IDs. Unsupported or obstructed exits stop movement, and stairs
+narrower than the walker remain modelable without allowing traversal.

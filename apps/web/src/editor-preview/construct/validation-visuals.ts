@@ -175,6 +175,7 @@ export const constructTargetPlanPoint = (
 };
 
 export const constructIssueShortLabel = (issue: ConstructContextualIssue) => {
+  if (issue.code.startsWith("stair.")) return "Stairs";
   if (issue.code === "floor-zone.polygon") return "Floor area crosses itself";
   if (issue.code === "floor-zone.outside-room") return "Floor area leaves its room";
   if (issue.code === "ground-zone.inside-footprint") return "Outdoor area crosses the building";

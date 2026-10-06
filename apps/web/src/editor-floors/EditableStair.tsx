@@ -3,13 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
 import { deriveStairFlight, planPointToWorld, worldPointToPlan, StairPlan,
-  type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
+  type ManifestIssue, type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
 import { beginSelectDrag, resolveSelectDrag, type SelectDragActivation } from "../editor-preview/construct/select-drag-activation";
 import { worldDragToConstructPlan, worldDragToSnappedConstructPlan } from "../editor-preview/construct/drag-geometry";
 import { constructPixelsPerMeter } from "../editor-preview/construct/plan-screen-scale";
 import { ConstructionOutlineHandle } from "../editor-preview/construct/ConstructionOutlineHandle";
 import { ConstructionAlignmentGuide } from "../editor-preview/construct/ConstructionAlignmentGuide";
 import { stairEditHandles, editStairFromPoint, type StairEditHandle, type StairPlacementPoint } from "./stair-placement-geometry";
+import type { StairValidationRegistries } from "./stair-candidate-validation";
 import { useStairValidation } from "./useStairValidation";
 import { StairFeedback } from "./StairFeedback";
 import { ConnectedFloorGuide } from "./ConnectedFloorGuide";
@@ -20,9 +21,10 @@ type Target = { setPointerCapture(id: number): void; releasePointerCapture(id: n
 type Drag = SelectDragActivation & { original: StairSpec; candidate: StairSpec;
   start: StairPlacementPoint; grab: StairPlacementPoint; handle: StairEditHandle; target: Target };
 
-export function EditableStair({ building, stair, activeFloorId, selected, enabled, onSelect, onCommit,
+export function EditableStair({ building, stair, activeFloorId, selected, enabled, registries, onIssuesChange, onSelect, onCommit,
   onDraggingChange, onGoToFloor, onDelete }: {
   building: HomeProject; stair: StairSpec; activeFloorId: string; selected: boolean; enabled: boolean;
+  registries?: StairValidationRegistries; onIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
   onSelect: () => void; onCommit: (stair: StairSpec) => void; onDraggingChange: (value: boolean) => void;
   onGoToFloor: () => void; onDelete: () => void;
 }) {
@@ -32,7 +34,11 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
   const [snap, setSnap] = useState<SnapTarget | null>(null);
   const active = useRef<Drag | null>(null);
   const candidate = draft ?? stair;
-  const validation = useStairValidation(building, candidate);
+  const validation = useStairValidation(building, selected && enabled ? candidate : null, registries);
+  useEffect(() => {
+    onIssuesChange?.(selected && draft ? validation.issues : null);
+    return () => onIssuesChange?.(null);
+  }, [onIssuesChange, selected, Boolean(draft), validation.issues]);
   const flight = deriveStairFlight(building, candidate);
   const latest = useRef({ onDraggingChange, validation });
   latest.current = { onDraggingChange, validation };
@@ -124,12 +130,12 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
   return <group name={`editable-stair-${stair.id}`}>
     {draft && <ConnectedFloorGuide floor={other} />}
     <StairPlan flight={flight} upper={activeFloorId === stair.upperFloorId} selected={selected}
-      invalid={validation.issues.length > 0} handlers={enabled ? handlers("body") : undefined} />
+      invalid={validation.issues.some(issue => issue.severity !== "warning")} handlers={enabled ? handlers("body") : undefined} />
     <ConstructionAlignmentGuide snap={snap} coordinates={building.coordinates} />
     {selected && <>
       {stairEditHandles(flight).map(({handle,at})=><ConstructionOutlineHandle key={handle}
         name={`stair-${handle}-${stair.id}`} handlers={handlers(handle)} at={at} />)}
-      {draft && <StairFeedback flight={flight} issues={validation.issues} />}
+      {draft && <StairFeedback flight={flight} />}
       {!draft && <SelectedStairControls flight={flight} destinationName={other.name} onGoToFloor={onGoToFloor} onDelete={onDelete} />}
     </>}
   </group>;

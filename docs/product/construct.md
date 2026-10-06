@@ -146,7 +146,7 @@ Existing stairs without an explicit shape remain straight.
 
 Multiple staircases may connect the same adjacent floors. The Stairs tool always
 starts a new placement; select an existing staircase to edit it. Each connection
-has its own shape and dimensions, and stairs sharing a floor must not overlap.
+has its own shape and dimensions. Overlaps are advisory and do not block Save.
 
 L-shaped stairs use two perpendicular flights and a square level landing. Click the
 bottom, landing center, and upper endpoint; the final point chooses the left/right
@@ -164,9 +164,17 @@ runs of 0.75 times the floor height, and a right turn.
 During stair drawing, movement, and resizing, a labeled, noninteractive guide shows the
 other connected floor’s footprint, walls, openings, and pools. The active floor and saved
 Show floor below preference remain unchanged. Diagnostics update during gestures at most
-every 100 ms, with immediate validation of the release point. Invalid but nondegenerate
-stairs remain editable in the autosaved draft and block Apply. Numeric edits follow the
-same policy. The maximum slope is 50 degrees and minimum width is 0.6 metres.
+every 100 ms, with immediate validation of the release point. Nondegenerate stairs remain editable in the autosaved draft. Width and slope are
+not modeling restrictions. Physical intersections and unsupported landings produce
+nonblocking warnings; malformed dimensions and invalid floor connections still block
+Apply. Spiral diameter must exceed its 0.2 m core diameter and turn remains in (0, 360].
+Numeric fields show local correction messages while retaining the last renderable geometry.
+
+The canvas shows measurements, never paragraphs of stair errors. Placement warnings
+are collapsed behind a count in the sidebar; selected-stair warnings appear in its
+properties rather than duplicated in the general diagnostics. Warning-only stairs
+remain publishable through the existing Save review. This tool models a home; its
+warnings are not construction-code certification.
 
 Resizing a wall deletes doors and windows whose full width or height no longer
 fits the wall. Undo restores the wall and its removed openings together.

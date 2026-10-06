@@ -1,13 +1,14 @@
 import { useRef } from "react";
-import type { StairShape } from "@cabane/engine";
+import type { ManifestIssue, StairShape } from "@cabane/engine";
+import { StairWarnings } from "./StairWarnings";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { ModelThumbnail, ModelThumbnailRenderer } from "../editor-preview/furnish/catalog/ModelThumbnailRenderer";
 import { stairPreviewEntries } from "./stair-preview-entries";
 import "../editor-preview/furnish/catalog/arrange-catalog.css";
 import "../editor-preview/construct/door-preset-palette.css";
 
-export function StairPlacementPanel({ shape, onChange, onCancel }: {
-  shape: StairShape; onChange: (shape: StairShape) => void; onCancel: () => void;
+export function StairPlacementPanel({ shape, issues = [], onChange, onCancel }: {
+  shape: StairShape; issues?: readonly ManifestIssue[]; onChange: (shape: StairShape) => void; onCancel: () => void;
 }) {
   const scrollRoot = useRef<HTMLDivElement>(null);
   return <section className="construction-inspector__selection" aria-label="Staircase">
@@ -25,6 +26,7 @@ export function StairPlacementPanel({ shape, onChange, onCancel }: {
       ? "Click the center, then the outer edge to set diameter and rotation. Escape cancels."
       : shape === "l-shaped" ? "Click the bottom, landing center, then the upper endpoint. Escape cancels."
         : "Drag from bottom to top, or click each endpoint. Escape cancels."}</p>
+    <StairWarnings issues={issues} compact />
     <EditorButton variant="text" onClick={onCancel}>Cancel stairs</EditorButton>
   </section>;
 }

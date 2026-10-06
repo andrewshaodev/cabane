@@ -15,13 +15,13 @@ await withModules(async (load) => {
     project.stairs = [];
     assert.deepEqual(api.deriveStairApertures(project), []);
   });
-  test("rejects excessive slopes and unsupported landings", () => {
+  test("allows steep stairs and advises on unsupported landings", () => {
     const project = makeStairProject();
     project.stairs[0].runMeters = 1;
-    assert.ok(api.validateStairs(project).some(x => x.code === "stair.slope"));
+    assert.equal(api.validateStairs(project).some(x => x.code === "stair.slope"), false);
     project.stairs[0].runMeters = 4;
     project.stairs[0].at = [4,7];
-    assert.ok(api.validateStairs(project).some(x => x.code === "stair.landing"));
+    assert.equal(api.validateStairs(project).find(x => x.code === "stair.landing").severity, "warning");
     project.stairs[0].upperFloorId = "second";
     assert.equal(api.deriveStairFlight(project, project.stairs[0]), null);
   });

@@ -3,25 +3,28 @@ import { useEffect, useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Plane, Raycaster, Vector2, Vector3 } from "three";
 import { planPointToWorld, worldPointToPlan, deriveStairFlight, StairPlan,
-  type FloorCoordinates, type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
+  type ManifestIssue, type FloorCoordinates, type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
 import { worldDragToSnappedConstructPlan } from "../editor-preview/construct/drag-geometry";
 import { constructPixelsPerMeter } from "../editor-preview/construct/plan-screen-scale";
 import { beginSegmentPress, segmentPressAnchors, type SegmentPress } from "../editor-preview/construct/segment-gesture";
 import { ConstructionAlignmentGuide } from "../editor-preview/construct/ConstructionAlignmentGuide";
 import { stairFromCorner, stairFromEndpoints, type StairPlacementPoint } from "./stair-placement-geometry";
+import type { StairValidationRegistries } from "./stair-candidate-validation";
 import { useStairValidation } from "./useStairValidation";
 import { StairFeedback } from "./StairFeedback";
 import { ConnectedFloorGuide } from "./ConnectedFloorGuide";
 
-export function StairPlacement({ stair, coordinates, building, onComplete, onCancel, onDraggingChange }: {
-  stair: StairSpec; coordinates: FloorCoordinates; building: HomeProject;
+export function StairPlacement({ stair, coordinates, building, registries, onIssuesChange, onComplete, onCancel, onDraggingChange }: {
+  stair: StairSpec; coordinates: FloorCoordinates; building: HomeProject; registries?: StairValidationRegistries;
+  onIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
   onComplete: (stair: StairSpec) => void; onCancel: () => void;
   onDraggingChange: (dragging: boolean) => void;
 }) {
   const { gl, camera } = useThree();
   const [candidate, setCandidate] = useState<StairSpec | null>(null);
   const [snap, setSnap] = useState<SnapTarget | null>(null);
-  const validation = useStairValidation(building, candidate);
+  const validation = useStairValidation(building, candidate, registries);
+  useEffect(() => { onIssuesChange?.(validation.issues); return () => onIssuesChange?.(null); }, [onIssuesChange, validation.issues]);
   const latest = useRef({ stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation });
   latest.current = { stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation };
   const flight = candidate ? deriveStairFlight(building, candidate) : null;
@@ -122,8 +125,8 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
     {other && <ConnectedFloorGuide floor={other} />}
     <ConstructionAlignmentGuide snap={snap} coordinates={coordinates} />
     {flight && <>
-      <StairPlan flight={flight} invalid={validation.issues.length > 0} />
-      <StairFeedback flight={flight} issues={validation.issues} />
+      <StairPlan flight={flight} invalid={validation.issues.some(issue => issue.severity !== "warning")} />
+      <StairFeedback flight={flight} />
     </>}
   </group>;
 }

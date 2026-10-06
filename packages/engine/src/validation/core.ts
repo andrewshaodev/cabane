@@ -4,6 +4,7 @@ import type {
   DeviceModelDefinition,
   DeviceModelRegistry,
   FurnishingModelDefinition,
+  FurnishingModelRegistry,
   ManifestIssue,
   PlanPoint,
 } from "../types";
@@ -12,6 +13,7 @@ export type RawObject = Record<string, unknown>;
 
 export interface HomeManifestValidationOptions {
   deviceModels?: DeviceModelRegistry;
+  furnishingModels?: FurnishingModelRegistry;
 }
 
 export interface ValidationContext {

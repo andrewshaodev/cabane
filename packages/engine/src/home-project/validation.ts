@@ -56,13 +56,13 @@ export const validateHomeProject = (
       candidate.message,
     ));
   });
-  validateStairs(project).forEach(issue => addProjectIssue(issues, issue.code, issue.path, issue.message));
+  validateStairs(project, registries).forEach(issue => issues.push({ ...issue, severity: issue.severity === "warning" ? "warning" : "error" }));
   validateProfileReferencesAndSlots(project, issues);
   validateGlobalProjectIds(project, issues);
   validateActionBarTargets(project, issues);
   validateSceneItemsAndSupports(project, registries, issues);
   const ordered = sortProjectIssues(issues);
-  return ordered.length === 0
+  return !ordered.some(issue => issue.severity === "error")
     ? { valid: true, project, issues: ordered }
     : { valid: false, issues: ordered };
 };

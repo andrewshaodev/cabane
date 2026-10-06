@@ -7,7 +7,6 @@ await withModules(async load => {
   const { editStairFromPoint } = await load("/apps/web/src/editor-floors/stair-placement-geometry.ts");
   const { beginSegmentPress, segmentPressAnchors } = await load("/apps/web/src/editor-preview/construct/segment-gesture.ts");
   const { validateStairCandidate, canDraftStair, stairCandidateProject } = await load("/apps/web/src/editor-floors/stair-candidate-validation.ts");
-  const { minimumStairRun } = await load("/packages/engine/src/stairs/stair-validation.ts");
   const { deriveStairFlight } = await load("/packages/engine/src/stairs/flight-geometry.ts");
   const { createSeedProjectRecord, serializeHomeProjectRecord, parseHomeProjectRecord } = await load("/packages/engine/src/home-project/project-record-codec.ts");
   const { publishHomeProject } = await load("/packages/engine/src/home-project/lifecycle.ts");
@@ -51,28 +50,26 @@ await withModules(async load => {
     }
     assert.equal(editStairFromPoint(stair,coordinates,start,grab,start,"top"),null);
   });
-  test("50 degree limit and 0.6 metre width apply to every candidate", () => {
+  test("narrow and steep candidates are editable, but degenerate geometry is not", () => {
     const project=makeStairProject(), stair=project.stairs[0];
-    const run=minimumStairRun(2.6);
-    assert.equal(validateStairCandidate(project,{...stair,runMeters:run}).some(i=>i.code==="stair.slope"),false);
-    assert.equal(validateStairCandidate(project,{...stair,runMeters:run-.001}).some(i=>i.code==="stair.slope"),true);
-    assert.equal(validateStairCandidate(project,{...stair,widthMeters:.6}).some(i=>i.code==="stair.width"),false);
-    assert.equal(validateStairCandidate(project,{...stair,widthMeters:.59}).some(i=>i.code==="stair.width"),true);
+    assert.deepEqual(validateStairCandidate(project,{...stair,runMeters:1,widthMeters:.3}),[]);
     assert.equal(canDraftStair(project,{...stair,widthMeters:NaN}),false);
     assert.equal(canDraftStair(project,{...stair,runMeters:0}),false);
   });
-  test("invalid stair edits survive record reload and remain blocking project issues", async () => {
-    const project=makeStairProject();
-    const record=createSeedProjectRecord(project);
-    record.draft=stairCandidateProject(project,{...project.stairs[0],runMeters:1,widthMeters:.4});
+  test("warning-only stair edits survive record reload and publish with existing review", async () => {
+    const project=makeStairProject(), record=createSeedProjectRecord(project);
+    record.draft=stairCandidateProject(project,{...project.stairs[0],at:[4,7]});
     const parsed=parseHomeProjectRecord(serializeHomeProjectRecord(record),emptyRegistries);
     assert.ok(parsed.valid,JSON.stringify(parsed.issues));
-    assert.equal(parsed.record.draft.stairs[0].runMeters,1);
+    assert.deepEqual(parsed.record.draft.stairs[0].at,[4,7]);
     assert.deepEqual(parsed.record.published,project);
-    assert.equal(validateHomeProject(parsed.record.draft,emptyRegistries).valid,false);
-    const result = await publishHomeProject({validate: draft=>validateHomeProject(draft,emptyRegistries),
-      replace: ()=>{throw new Error("invalid stairs must never publish");}},parsed.record);
-    assert.equal(result.status,"blocked");
+    assert.equal(validateHomeProject(parsed.record.draft,emptyRegistries).valid,true);
+    const repository={validate: draft=>validateHomeProject(draft,emptyRegistries),replace: async record=>record};
+    assert.equal((await publishHomeProject(repository,parsed.record)).status,"confirmation-required");
+    const result=await publishHomeProject(repository,parsed.record,{confirmWarnings:true});
+    assert.equal(result.status,"published");
+    assert.deepEqual(result.record.published.stairs,parsed.record.draft.stairs);
+    assert.ok(parseHomeProjectRecord(serializeHomeProjectRecord(result.record),emptyRegistries).valid);
   });
   test("candidate diagnostics include overlaps regardless of original order and both floor obstructions", () => {
     const project=makeStairProject(), stair=project.stairs[0];
@@ -81,7 +78,7 @@ await withModules(async load => {
     for (const floorIndex of [0,1]) {
       const building=makeStairProject();
       building.floors=building.floors.map((floor,index)=> index!==floorIndex?floor:{...floor,walls:[...floor.walls,
-        {...floor.walls[0],id:"blocking",from:[3,3],to:[5,3]}]});
+        {...floor.walls[0],id:"blocking",from:[3,floorIndex===0?3:5.4],to:[5,floorIndex===0?3:5.4]}]});
       assert.ok(validateStairCandidate(building,stair).some(i=>i.code==="stair.obstruction"));
     }
   });

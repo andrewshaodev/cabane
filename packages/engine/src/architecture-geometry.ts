@@ -1,3 +1,4 @@
+import { wallSolidBands } from "./architecture-geometry/wall-solid-bands";
 import { wallFaceFinish } from "./architecture-geometry/wall-face-finish";
 import { wallLevelContact } from "./architecture-geometry/wall-level-contact";
 import { type MultiPolygon } from "polygon-clipping";
@@ -8,11 +9,11 @@ import { GROUND_ELEVATION_METERS } from "./ground-elevation";
 
 import { worldPointToPlan } from "./geometry";
 
-import { differenceClippingGeometry, unionClippingPolygons } from "./architecture-geometry/architecture-clipping";
+import { differenceClippingGeometry } from "./architecture-geometry/architecture-clipping";
 import { EPSILON, Horizontal } from "./architecture-geometry/architecture-geometry-contract";
 import { uniqueSorted } from "./architecture-geometry/architecture-mesh-buckets";
 import { normalize, pointInsideFloorFootprint, wallExteriorNormal, wallFrame } from "./architecture-geometry/wall-coordinate-frame";
-import { ArchitecturalWallGeometryGroup, openingCutPolygon, createWallAssemblyPointTest, wallSolidFootprintPolygons } from "./architecture-geometry/wall-solid-footprints";
+import { ArchitecturalWallGeometryGroup, createWallAssemblyPointTest } from "./architecture-geometry/wall-solid-footprints";
 import type { FloorSpec, WallSpec } from "./types";
 
 /** Generalized version of the original house-wide occupied-grid wall union. */
@@ -39,33 +40,7 @@ export function buildArchitecturalWallGeometries(
     colors: number[];
     indices: number[];
   };
-  const heights = uniqueSorted([
-    0,
-    ...floor.walls.map((wall) => wall.heightMeters ?? floor.defaultWallHeightMeters),
-    ...floor.openings.flatMap((opening) => [
-      opening.sillHeightMeters,
-      opening.sillHeightMeters + opening.openingHeightMeters,
-    ]),
-  ]);
-  const bands = heights.slice(0, -1).map((bottom, index) => {
-    const top = heights[index + 1];
-    const middle = (bottom + top) / 2;
-    const activeWalls = floor.walls.filter((wall) =>
-      (wall.heightMeters ?? floor.defaultWallHeightMeters) > middle
-    );
-    const solids = wallSolidFootprintPolygons(floor, activeWalls);
-    let footprint = unionClippingPolygons(solids);
-    const cuts = floor.openings.flatMap((opening) => {
-      const openingBottom = opening.sillHeightMeters;
-      const openingTop = opening.sillHeightMeters + opening.openingHeightMeters;
-      const wall = activeWalls.find((candidate) => candidate.id === opening.wallId);
-      return wall && middle > openingBottom - EPSILON && middle < openingTop + EPSILON
-        ? [openingCutPolygon(wall, opening, floor)]
-        : [];
-    });
-    if (footprint[0] && cuts.length) footprint = differenceClippingGeometry(footprint, ...cuts);
-    return { bottom, top, activeWalls, footprint };
-  });
+  const bands = wallSolidBands(floor);
 
   const buffersByDirection = new Map<string, Buffers>();
   const buffersFor = (

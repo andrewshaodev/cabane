@@ -14,7 +14,7 @@ await withModules(async load => {
     const previous=Object.fromEntries(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
     for(const name of names) Object.defineProperty(globalThis,name,{configurable:true,writable:true,value:name==="IS_REACT_ACT_ENVIRONMENT"?true:dom.window[name]});
     const root=createRoot(document.getElementById("root"));
-    const building=makeStairProject(), valid=building.stairs[0], invalid={...valid,runMeters:1};
+    const building=makeStairProject(), valid=building.stairs[0], invalid={...valid,runMeters:0};
     let result;
     function Harness({stair}) { result=useStairValidation(building,stair); return null; }
     try {
@@ -22,17 +22,24 @@ await withModules(async load => {
       assert.deepEqual(result.issues,[]);
       await act(async()=>root.render(React.createElement(Harness,{stair:invalid})));
       assert.deepEqual(result.issues,[],"movement does not synchronously validate");
-      await act(async()=>root.render(React.createElement(Harness,{stair:{...invalid,widthMeters:.4}})));
+      await act(async()=>root.render(React.createElement(Harness,{stair:{...valid,shape:"spiral",diameterMeters:1,totalTurnDegrees:361,direction:"clockwise"}})));
       await act(async()=>new Promise(resolve=>setTimeout(resolve,115)));
-      assert.ok(result.issues.some(i=>i.code==="stair.width"),"trailing result uses latest candidate");
+      assert.ok(result.issues.some(i=>i.code==="stair.turn"),"trailing result uses latest candidate");
       let final;
       await act(async()=>{ final=result.flush(valid); });
       assert.deepEqual(final,[],"release validation uses exact supplied candidate");
       assert.deepEqual(result.issues,[]);
+      await act(async()=>{ result.flush(invalid); });
+      assert.ok(result.issues.length > 0);
       await act(async()=>root.render(React.createElement(Harness,{stair:invalid})));
       await act(async()=>result.cancel());
       await act(async()=>new Promise(resolve=>setTimeout(resolve,115)));
-      assert.deepEqual(result.issues,[],"cancel removes pending validation");
+      assert.deepEqual(result.issues,[],"cancel clears existing and pending validation");
+      await act(async()=>{ result.flush(invalid); });
+      await act(async()=>root.render(React.createElement(Harness,{stair:null})));
+      assert.deepEqual(result.issues,[],"deselection clears existing diagnostics immediately");
+      await act(async()=>new Promise(resolve=>setTimeout(resolve,115)));
+      assert.deepEqual(result.issues,[],"deselection prevents stale trailing diagnostics");
     } finally {
       await act(async()=>root.unmount()); dom.window.close();
       for(const name of names) { if(previous[name]) Object.defineProperty(globalThis,name,previous[name]); else delete globalThis[name]; }

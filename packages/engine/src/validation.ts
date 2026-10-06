@@ -30,7 +30,7 @@ export const validateHomeManifest = (
     left.path.localeCompare(right.path) || left.code.localeCompare(right.code)
   );
   if (input.schemaVersion === 2 && !issues.some(candidate => candidate.severity === "fatal")) {
-    try { issues.push(...validateStairs(input as unknown as HomeManifest)); }
+    try { issues.push(...validateStairs(input as unknown as HomeManifest, options)); }
     catch { issues.push(issue("building.stairs", "stairs", "Stairs must define valid adjacent floors, a start point, width, run, and rotation.")); }
   }
   issues.sort((left, right) => left.path.localeCompare(right.path) || left.code.localeCompare(right.code));

@@ -159,7 +159,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                   />
                   {walkMode ? (
                     <WalkCameraController
-                building={manifest} elevation={elevation}
+                building={manifest} registries={manifest.extensions} elevation={elevation}
                 onFloorChange={(id) => floorNavigation.selectFloor(id, "walk")}
 
                       floor={floor}
