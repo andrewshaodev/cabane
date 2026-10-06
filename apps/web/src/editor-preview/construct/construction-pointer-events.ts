@@ -8,7 +8,7 @@ import { type SelectDragActivation } from "./select-drag-activation";
 
 export type PointerEvent3D = ThreeEvent<PointerEvent>;
 
-export type OpeningTool = Extract<FloorEditorTool, "door" | "window" | "passage">;
+export type OpeningTool = Extract<FloorEditorTool, "door" | "window" | "passage" | "niche">;
 
 export type PointerCaptureTarget = {
   setPointerCapture?: (pointerId: number) => void;

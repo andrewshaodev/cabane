@@ -1,6 +1,8 @@
-import { DEFAULT_WALL_COLORS, type FloorEditorTool } from "@cabane/engine";
+import { DEFAULT_WALL_COLORS } from "@cabane/engine";
+import { useWallOpeningPlacement } from "./useWallOpeningPlacement";
 import { incompleteFloorPreview } from "./incomplete-floor-preview";
 import {
+  editorWallAttachments,
   DEFAULT_DOOR_CONFIGURATION,
   type DoorConfiguration,
   availableOpeningOffsetRanges,
@@ -14,6 +16,7 @@ import {
   roomAnchorForPolygon,
   type FloorEditorHistory,
   type FloorEditorSelection,
+  type FloorEditorTool,
   type FloorFinishSpec,
   type FloorSpec,
   type PlanPoint,
@@ -39,7 +42,7 @@ export const useConstructEditor = (
   initialFloor: FloorSpec,
   acceptedFloor = initialFloor,
   defaultExteriorWallColor: string = DEFAULT_WALL_COLORS.exterior,
-  initialTool: FloorEditorTool = "select",
+  initialTool: import("@cabane/engine").FloorEditorTool = "select",
   otherFloorRoomNames: readonly string[] = [],
 ): ConstructEditorController => {
   const reservedNamesKey = JSON.stringify(otherFloorRoomNames);
@@ -244,72 +247,11 @@ export const useConstructEditor = (
     setDrawPreview(null);
     setDrawAngleReferenceRadians(null);
   }, []);
-  const addOpening = useCallback(
-    (kind: "door" | "window" | "passage") => {
-      const selection = history.present.selection;
-      if (selection?.kind !== "wall") return;
-      const wall = history.present.walls.find((candidate) => candidate.id === selection.id);
-      if (!wall) return;
-      const width =
-        (kind === "door" ? doorConfiguration.widthMeters : kind === "window" ? 1.2 : 0.9) /
-        history.present.coordinates.metersPerPlanUnit;
-      const length = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
-      const offsetPlanUnits = nearestAvailableOpeningOffset(
-        Math.max(0, (length - width) / 2),
-        availableOpeningOffsetRanges({
-          draft: history.present,
-          wallId: wall.id,
-          widthPlanUnits: width,
-          sillHeightMeters: kind === "window" ? 0.9 : 0,
-        }),
-      );
-      if (
-        offsetPlanUnits === undefined ||
-        (kind === "door" &&
-          doorConfiguration.heightMeters >
-            (wall.heightMeters ?? history.present.defaultWallHeightMeters))
-      ) {
-        setOpeningError("The door does not fit on this wall.");
-        return;
-      }
-      dispatch({
-        type: "add-opening",
-        wallId: wall.id,
-        kind,
-        doorConfiguration,
-        offsetPlanUnits,
-      });
-    },
-    [history.present, doorConfiguration],
-  );
-  const placeOpening = useCallback(
-    (kind: "door" | "window" | "passage", wallId: string, offsetPlanUnits: number) => {
-      const widthPlanUnits =
-        (kind === "door" ? doorConfiguration.widthMeters : kind === "window" ? 1.2 : 0.9) /
-        history.present.coordinates.metersPerPlanUnit;
-      const valid = availableOpeningOffsetRanges({
-        draft: history.present,
-        wallId,
-        widthPlanUnits,
-        sillHeightMeters: kind === "window" ? 0.9 : 0,
-      }).some((range) => offsetPlanUnits >= range.min && offsetPlanUnits <= range.max);
-      const wall = history.present.walls.find((wall) => wall.id === wallId);
-      if (
-        !valid ||
-        (kind === "door" &&
-          doorConfiguration.heightMeters >
-            (wall?.heightMeters ?? history.present.defaultWallHeightMeters))
-      ) {
-        setOpeningError("The door does not fit on this wall.");
-        return;
-      }
-      setOpeningError(null);
-      // Placement is single-shot: return to Select while preserving the new
-      // opening selection created by the semantic add action.
-      dispatch({ type: "set-tool", tool: "select" });
-      dispatch({ type: "add-opening", wallId, kind, offsetPlanUnits, doorConfiguration });
-    },
-    [history.present, doorConfiguration],
+  const { addOpening, placeOpening } = useWallOpeningPlacement(
+    draft,
+    doorConfiguration,
+    dispatch,
+    setOpeningError,
   );
   const updateRoom = useCallback(
     (
@@ -501,7 +443,7 @@ export const useConstructEditor = (
       const selection = draft.selection;
       const opening =
         selection?.kind === "opening"
-          ? draft.openings.find((candidate) => candidate.id === selection.id)
+          ? editorWallAttachments(draft).find((candidate) => candidate.id === selection.id)
           : undefined;
       if (!opening) return;
       const updated = { ...opening, ...patch };
@@ -518,7 +460,8 @@ export const useConstructEditor = (
         !fits ||
         !wall ||
         updated.openingHeightMeters + updated.sillHeightMeters >
-          (wall.heightMeters ?? draft.defaultWallHeightMeters)
+          (wall.heightMeters ?? draft.defaultWallHeightMeters) -
+            (updated.kind === "niche" ? 0.002 : 0)
       ) {
         setOpeningError(
           "This opening does not fit here. Choose a smaller size or another wall position.",
@@ -541,10 +484,11 @@ export const useConstructEditor = (
         !fits ||
         !wall ||
         opening.openingHeightMeters + opening.sillHeightMeters >
-          (wall.heightMeters ?? draft.defaultWallHeightMeters)
+          (wall.heightMeters ?? draft.defaultWallHeightMeters) -
+            (opening.kind === "niche" ? 0.002 : 0)
       ) {
         setOpeningError(
-          "This door does not fit here. Choose a smaller size or another wall position.",
+          "This opening does not fit here. Choose a smaller size or another wall position.",
         );
         return;
       }
@@ -556,7 +500,9 @@ export const useConstructEditor = (
       dispatch({ type: "update-selected-opening", patch: { offsetPlanUnits, widthPlanUnits } });
     },
     moveOpening: (openingId, wallId, offsetPlanUnits) => {
-      const opening = history.present.openings.find((candidate) => candidate.id === openingId);
+      const opening = editorWallAttachments(history.present).find(
+        (candidate) => candidate.id === openingId,
+      );
       if (!opening) return;
       const constrainedOffset = nearestAvailableOpeningOffset(
         offsetPlanUnits,

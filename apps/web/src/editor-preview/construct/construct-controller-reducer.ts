@@ -1,6 +1,7 @@
 import { omitUndefinedProperties } from "@cabane/engine";
 import { incompleteFloorPreview } from "./incomplete-floor-preview";
 import {
+  editorWallAttachments,
   availableOpeningOffsetRanges,
   createFloorEditorDraft,
   createFloorEditorHistory,
@@ -73,7 +74,7 @@ const engineActionFor = (
     const selection = history.present.selection;
     const opening =
       selection?.kind === "opening"
-        ? history.present.openings.find((candidate) => candidate.id === selection.id)
+        ? editorWallAttachments(history.present).find((candidate) => candidate.id === selection.id)
         : undefined;
     if (!opening) return null;
     const updated =

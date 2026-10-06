@@ -16,6 +16,79 @@ await withModules(async (load) => {
   );
   const { createFloorEditorDraft } = await load("/packages/engine/src/index.ts");
   const { ownerProjectManifest } = await load("/tests/fixtures/bundled-home.ts");
+  const { useConstructEditor } = await load(
+    "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
+  );
+  const { editorWallAttachments } = await load("/packages/engine/src/index.ts");
+  const { interactionFloor } = await load("/tests/fixtures/interaction-floor.ts");
+  test("niches place, drag and resize through the same opening targets and handles", async () => {
+    let editor;
+    function Harness() {
+      editor = useConstructEditor(interactionFloor);
+      return createElement(ConstructionEditLayer, {
+        planMode: true,
+        draft: editor.draft,
+        coordinates: editor.draft.coordinates,
+        rooms: [],
+        selection: editor.selection,
+        tool: editor.tool,
+        onSelectWall: editor.selectWall,
+        onSelectOpening: editor.selectOpening,
+        onSelectRoom: editor.selectRoom,
+        onMoveEndpoint: editor.updateWallEndpoint,
+        onTranslateWall: editor.translateWall,
+        onMoveOpening: editor.moveOpening,
+        onResizeOpening: editor.resizeSelectedOpening,
+        onPlaceOpening: editor.placeOpening,
+        onBeginWall: editor.beginWall,
+        onPreviewWall: editor.previewWall,
+        onAddWall: editor.addWall,
+        onCancelWall: editor.cancelWall,
+      });
+    }
+    const renderer = await create(createElement(Harness));
+    const pointer = (x, z) => ({
+      pointerId: 1,
+      button: 0,
+      stopPropagation() {},
+      target: {
+        setPointerCapture() {},
+        releasePointerCapture() {},
+        hasPointerCapture() {
+          return true;
+        },
+      },
+      nativeEvent: { clientX: x * 100, clientY: z * 100, pointerType: "mouse" },
+      ray: rayAt(x, z).ray,
+    });
+    try {
+      await act(async () => editor.setTool("niche"));
+      await renderer.fireEvent(
+        renderer.scene.findByProps({ name: "construction-wall-target-fixture-north" }),
+        "pointerDown",
+        pointer(2, 0.2),
+      );
+      assert.equal(editor.tool, "select");
+      const id = editor.selection.id;
+      const current = () => editorWallAttachments(editor.draft).find((item) => item.id === id);
+      assert.equal(current().kind, "niche");
+      assert.equal(current().side, "left");
+      const target = renderer.scene.findByProps({ name: `construction-opening-target-${id}` });
+      await renderer.fireEvent(target, "pointerDown", pointer(2, 0.2));
+      await renderer.fireEvent(target, "pointerMove", pointer(3, 0.2));
+      await renderer.fireEvent(target, "pointerUp", pointer(3, 0.2));
+      assert.ok(Math.abs(current().offsetPlanUnits - 2.7) < 1e-6);
+      const handle = renderer.scene.findByProps({ name: `construction-opening-resize-${id}-end` });
+      await renderer.fireEvent(handle, "pointerDown", pointer(3.3, 0.2));
+      await renderer.fireEvent(handle, "pointerMove", pointer(3.5, 0.2));
+      await renderer.fireEvent(handle, "pointerUp", pointer(3.5, 0.2));
+      assert.ok(Math.abs(current().widthPlanUnits - 1) < 1e-6);
+      await act(async () => editor.undo());
+      assert.ok(Math.abs(current().widthPlanUnits - 0.6) < 1e-6);
+    } finally {
+      await renderer.unmount();
+    }
+  });
   const base = {
     ...createFloorEditorDraft(ownerProjectManifest.floors[0]),
     coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },

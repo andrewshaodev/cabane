@@ -1,11 +1,13 @@
 import { omitUndefinedProperties } from "@cabane/engine";
 import {
   snapPlanPoint,
+  editorWallAttachments,
   availableOpeningOffsetRanges,
   type FloorEditorDraft,
   wallOpeningOffsetAtPoint,
   type SnapTarget,
   type EditorWall,
+  type EditorWallAttachment,
   type FloorCoordinates,
   type PlanPoint,
 } from "@cabane/engine";
@@ -16,6 +18,34 @@ export interface WorldPlanPoint {
 }
 
 const round = (value: number) => Number(value.toFixed(6));
+
+export function resizeWallAttachmentAtPoint(
+  draft: FloorEditorDraft,
+  resize: {
+    openingId: string;
+    wallId: string;
+    edge: "start" | "end";
+    originalOffsetPlanUnits: number;
+    originalWidthPlanUnits: number;
+  },
+  point: PlanPoint,
+  anchorOpposite: boolean,
+  coordinates: FloorCoordinates = draft.coordinates,
+) {
+  const wall = draft.walls.find((candidate) => candidate.id === resize.wallId);
+  if (!wall) return null;
+  const attachment = editorWallAttachments(draft).find((item) => item.id === resize.openingId);
+  return resizeOpeningSpan({
+    offsetPlanUnits: resize.originalOffsetPlanUnits,
+    widthPlanUnits: resize.originalWidthPlanUnits,
+    edge: resize.edge,
+    cursorOffsetPlanUnits: wallOffsetForPlanPoint(point, wall),
+    wallLengthPlanUnits: Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]),
+    anchorOpposite,
+    minimumWidthPlanUnits:
+      (attachment?.kind === "niche" ? 0.05 : 0.3) / coordinates.metersPerPlanUnit,
+  });
+}
 
 export const worldToConstructPlan = (
   point: WorldPlanPoint,
@@ -229,6 +259,7 @@ export const openingPlacementIsValid = ({
   widthPlanUnits,
   sillHeightMeters = 0,
   excludeOpeningId,
+  kind,
 }: {
   draft: FloorEditorDraft;
   wallId: string;
@@ -236,6 +267,7 @@ export const openingPlacementIsValid = ({
   widthPlanUnits: number;
   sillHeightMeters?: number;
   excludeOpeningId?: string;
+  kind?: EditorWallAttachment["kind"];
 }) =>
   availableOpeningOffsetRanges({
     draft,
@@ -243,6 +275,7 @@ export const openingPlacementIsValid = ({
     widthPlanUnits,
     sillHeightMeters,
     ...(excludeOpeningId === undefined ? {} : { excludeOpeningId: excludeOpeningId }),
+    ...(kind === undefined ? {} : { kind }),
   }).some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max);
 
 export const resizeOpeningSpan = ({

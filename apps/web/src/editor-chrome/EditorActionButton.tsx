@@ -13,6 +13,9 @@ interface EditorActionButtonProps {
   disabled?: boolean | undefined;
   disabledReason?: string | undefined;
   warning?: string | undefined;
+  tooltip?: boolean;
+  expanded?: boolean;
+  controls?: string | undefined;
   onClick: () => void;
 }
 
@@ -28,12 +31,15 @@ export function EditorActionButton({
   disabledReason,
   warning,
   onClick,
+  tooltip = true,
+  expanded,
+  controls,
 }: EditorActionButtonProps) {
   const dom = useCabaneDom();
   const tooltipId = useId();
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const showTooltip = (event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>) => {
-    if (disabled) return;
+    if (disabled || !tooltip) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const portalBounds = dom.root === document ? null : dom.portalContainer.getBoundingClientRect();
     const width = portalBounds?.width ?? window.innerWidth;
@@ -71,6 +77,8 @@ export function EditorActionButton({
         title={disabled ? disabledReason : undefined}
         aria-description={disabled ? disabledReason : warning}
         aria-pressed={pressed}
+        aria-expanded={expanded}
+        aria-controls={controls}
         aria-keyshortcuts={keyShortcuts}
         disabled={disabled}
         aria-describedby={position && !disabled ? tooltipId : undefined}

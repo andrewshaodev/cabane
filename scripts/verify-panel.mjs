@@ -7,6 +7,11 @@ import { chromium } from "playwright-core";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const bundle = resolve(root, process.env.CABANE_PANEL_BUNDLE ?? "apps/web/dist-panel");
+// The documented weather texture is pinned; its CDN redirects to the same GitHub asset.
+const hostedAssets = new Set([
+  "https://rawcdn.githack.com/pmndrs/drei-assets/9225a9f1fbd449d9411125c2f419b843d0308c9f/cloud.png",
+  "https://raw.githubusercontent.com/pmndrs/drei-assets/9225a9f1fbd449d9411125c2f419b843d0308c9f/cloud.png",
+]);
 const mime = {
   ".js": "text/javascript",
   ".css": "text/css",
@@ -194,11 +199,10 @@ try {
   assert.equal(await page.evaluate(() => window.__hostFixture.stats.popup), 0);
   assert.equal(await page.evaluate(() => window.__hostFixture.stats.authAccess), 0);
   assert.equal(await page.evaluate(() => getComputedStyle(document.body).position), "static");
-  assert.equal(
-    requests.some((url) => !url.startsWith(origin)),
-    false,
-    `unexpected external requests: ${requests.filter((url) => !url.startsWith(origin))}`,
+  const unexpectedRequests = requests.filter(
+    (url) => new URL(url).origin !== origin && !hostedAssets.has(url),
   );
+  assert.deepEqual(unexpectedRequests, [], `unexpected external requests: ${unexpectedRequests}`);
   assert.equal(
     requests.some((url) => url.includes("/_vercel/")),
     false,

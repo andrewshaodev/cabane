@@ -1,5 +1,6 @@
 import { validateActionBarSchema } from "./schema-action-bar";
 import { entitySlot } from "./schema-entity-slot";
+import { wallSchema } from "./schema-wall";
 import { projectSchemaVersionMessage } from "./project-format-errors";
 import { sceneItem } from "./schema-scene-item";
 import { validateCustomModels } from "../imported-models/model-schema";
@@ -98,52 +99,6 @@ const room = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
       `${path}.devices`,
       "Layout rooms require an empty devices array.",
     );
-};
-
-const wall = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  keys(
-    candidate,
-    [
-      "id",
-      "from",
-      "to",
-      "classification",
-      "thicknessMeters",
-      "heightMeters",
-      "exteriorColor",
-      "edgeColor",
-      "faceColors",
-    ],
-    path,
-    issues,
-  );
-  string(candidate.id, `${path}.id`, issues);
-  point(candidate.from, `${path}.from`, issues);
-  point(candidate.to, `${path}.to`, issues);
-  if (!["interior", "exterior"].includes(String(candidate.classification))) {
-    addProjectIssue(
-      issues,
-      "project.wall-classification",
-      `${path}.classification`,
-      "Wall classification is invalid.",
-    );
-  }
-  finite(candidate.thicknessMeters, `${path}.thicknessMeters`, issues);
-  if (candidate.heightMeters !== undefined)
-    finite(candidate.heightMeters, `${path}.heightMeters`, issues);
-  if (candidate.exteriorColor !== undefined)
-    string(candidate.exteriorColor, `${path}.exteriorColor`, issues);
-  if (candidate.edgeColor !== undefined) string(candidate.edgeColor, `${path}.edgeColor`, issues);
-  if (candidate.faceColors !== undefined) {
-    const colors = record(candidate.faceColors, `${path}.faceColors`, issues);
-    if (colors) {
-      keys(colors, ["left", "right"], `${path}.faceColors`, issues);
-      if (colors.left !== undefined) string(colors.left, `${path}.faceColors.left`, issues);
-      if (colors.right !== undefined) string(colors.right, `${path}.faceColors.right`, issues);
-    }
-  }
 };
 
 const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
@@ -441,7 +396,7 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
     room(entry, `${path}.rooms[${index}]`, issues),
   );
   array(candidate.walls, `${path}.walls`, issues)?.forEach((entry, index) =>
-    wall(entry, `${path}.walls[${index}]`, issues),
+    wallSchema(entry, `${path}.walls[${index}]`, issues),
   );
   array(candidate.wallJunctions, `${path}.wallJunctions`, issues)?.forEach((entry, index) => {
     const junctionPath = `${path}.wallJunctions[${index}]`;

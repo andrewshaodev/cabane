@@ -9,6 +9,7 @@ export function deleteWallSpans(
   const occupied = new Set(
     [
       ...draft.walls,
+      ...draft.walls.flatMap((wall) => wall.niches ?? []),
       ...draft.openings,
       ...draft.rooms,
       ...draft.junctions,
@@ -43,11 +44,26 @@ export function deleteWallSpans(
         wall.from[0] + (wall.to[0] - wall.from[0]) * t,
         wall.from[1] + (wall.to[1] - wall.from[1]) * t,
       ];
+      const length = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
+      const niches = wall.niches
+        ?.filter(
+          (niche) =>
+            !targets.some((t) => t.kind === "opening" && t.id === niche.id) &&
+            niche.offsetFromWallStartPlanUnits >= start * length - 1e-7 &&
+            niche.offsetFromWallStartPlanUnits + niche.widthPlanUnits <= end * length + 1e-7,
+        )
+        .map((niche) => ({
+          ...niche,
+          offsetFromWallStartPlanUnits: niche.offsetFromWallStartPlanUnits - start * length,
+        }));
       return {
         source: wall,
         start,
         end,
-        wall: start === 0 && end === 1 ? wall : { ...wall, id, from: at(start), to: at(end) },
+        wall:
+          start === 0 && end === 1 && niches?.length === wall.niches?.length
+            ? wall
+            : { ...wall, ...(niches ? { niches } : {}), id, from: at(start), to: at(end) },
       };
     });
   });

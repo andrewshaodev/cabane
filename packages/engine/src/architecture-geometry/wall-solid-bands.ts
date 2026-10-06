@@ -1,3 +1,4 @@
+import { wallNicheCutPolygon } from "./wall-niche-cut";
 import { differenceClippingGeometry, unionClippingPolygons } from "./architecture-clipping";
 import { EPSILON } from "./architecture-geometry-contract";
 import { uniqueSorted } from "./architecture-mesh-buckets";
@@ -9,6 +10,16 @@ export function wallSolidBands(floor: FloorSpec) {
   const heights = uniqueSorted([
     0,
     ...floor.walls.map((wall) => wall.heightMeters ?? floor.defaultWallHeightMeters),
+    ...floor.walls.flatMap((wall) =>
+      (wall.niches ?? []).flatMap((niche) => [
+        niche.bottomMeters,
+        niche.bottomMeters + niche.heightMeters,
+        ...(niche.shelfHeightsMeters ?? []).flatMap((level) => [
+          niche.bottomMeters + level,
+          niche.bottomMeters + level + (niche.shelfThicknessMeters ?? 0.025),
+        ]),
+      ]),
+    ),
     ...floor.openings.flatMap((opening) => [
       opening.sillHeightMeters,
       opening.sillHeightMeters + opening.openingHeightMeters,
@@ -30,6 +41,21 @@ export function wallSolidBands(floor: FloorSpec) {
         ? [openingCutPolygon(wall, opening, floor)]
         : [];
     });
+    cuts.push(
+      ...activeWalls.flatMap((wall) =>
+        (wall.niches ?? []).flatMap((niche) =>
+          middle > niche.bottomMeters - EPSILON &&
+          middle < niche.bottomMeters + niche.heightMeters + EPSILON &&
+          !(niche.shelfHeightsMeters ?? []).some(
+            (level) =>
+              middle > niche.bottomMeters + level - EPSILON &&
+              middle < niche.bottomMeters + level + (niche.shelfThicknessMeters ?? 0.025) + EPSILON,
+          )
+            ? [wallNicheCutPolygon(wall, niche, floor)]
+            : [],
+        ),
+      ),
+    );
     if (footprint[0] && cuts.length) footprint = differenceClippingGeometry(footprint, ...cuts);
     return { bottom, top, activeWalls, footprint };
   });

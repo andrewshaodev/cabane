@@ -1,6 +1,17 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  niche: (
+    <>
+      <path d="M3 21V3h18v18M6 18V6h12v12Z" />
+      <path d="M6 12h12" />
+    </>
+  ),
+  decorations: (
+    <>
+      <path d="M3 21h18M5 21V9h14v12M8 9V5h8v4M8 15h8" />
+    </>
+  ),
   check: <path d="m5 12 4 4L19 6" />,
   roof: <path d="m2 12 10-8 10 8M5 10v10h14V10M2 12h20" />,
   spawn: (

@@ -36,6 +36,17 @@ Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
 passages rectangular/arched variants.
+Walls may also own optional rectangular blind `niches[]`, with a stable ID,
+left/right directed face, plan offset/width, bottom/height and depth in metres.
+A niche cuts only the selected face and retains at least 20 mm of solid backing;
+it must clear openings, other niches and wall junctions. Optional integral shelf
+bottom heights are relative to the recess bottom, with 25 mm default thickness.
+Shelves use the wall finish and are real connected slabs. Both standalone and
+batched geometry derive the cavity from the same wall data; fades and shadows
+remain wall-owned. Walk navigation retains the full wall barrier for these
+shallow recesses, so they cannot create passage connections. Old walls omit
+`niches` and retain their previous geometry and storage behavior.
+
 Paired hinged and sliding door leaves meet at the center in the same depth plane when closed.
 
 The engine constructs continuous walls and junction assemblies with interior and

@@ -1,4 +1,4 @@
-import { floorEditorSelectionIncludes } from "@cabane/engine";
+import { editorWallAttachments, floorEditorSelectionIncludes } from "@cabane/engine";
 
 import { constructPlanToWorld } from "./drag-geometry";
 
@@ -31,9 +31,10 @@ type Props = Pick<
   | "resizedOpeningForEvent"
   | "finishOpeningResize"
   | "cancelOpeningResize"
->;
+> & { attachments?: ReturnType<typeof editorWallAttachments> };
 export function ConstructionOpeningTargets({
   draft,
+  attachments = editorWallAttachments(draft),
   draggingOpening,
   resizingOpening,
   previewPoint,
@@ -58,7 +59,7 @@ export function ConstructionOpeningTargets({
 }: Props) {
   return (
     <>
-      {draft.openings.map((opening) => {
+      {attachments.map((opening) => {
         const activeDrag = draggingOpening?.openingId === opening.id ? draggingOpening : null;
         const activeResize = resizingOpening?.openingId === opening.id ? resizingOpening : null;
         const displayedWallId = activeDrag?.wallId ?? opening.wallId;
@@ -81,7 +82,7 @@ export function ConstructionOpeningTargets({
         const progress = (displayedOffset + displayedWidth / 2) / planLength;
         const displayedCenterOffset = displayedOffset + displayedWidth / 2;
         const clearancePlanUnits = 0.08 / coordinates.metersPerPlanUnit;
-        const neighboringOpenings = draft.openings.filter(
+        const neighboringOpenings = attachments.filter(
           (candidate) => candidate.id !== opening.id && candidate.wallId === displayedWallId,
         );
         const invalidSpan =

@@ -1,3 +1,4 @@
+import { validateWallNiches } from "./wall-niche-rules";
 import { wallLengthPlanUnits } from "../geometry";
 
 import type { ManifestIssue } from "../types";
@@ -63,6 +64,8 @@ export const validateWalls = (
         ),
       );
     }
+    if (isPlanPoint(rawWall.from) && isPlanPoint(rawWall.to))
+      issues.push(...validateWallNiches(rawWall, rawFloor, wallPath, context));
     if (rawWall.exteriorColor !== undefined && !isNonEmptyString(rawWall.exteriorColor)) {
       issues.push(
         issue(

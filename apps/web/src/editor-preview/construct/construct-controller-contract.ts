@@ -1,7 +1,7 @@
 import {
   deriveFloorTopology,
   type DerivedWallRun,
-  type EditorOpening,
+  type EditorWallAttachment as EditorOpening,
   type EditorWall,
   type FloorEditorAction,
   type FloorEditorFloorSettings,
@@ -103,7 +103,7 @@ export interface ConstructEditorController extends ConstructEditorState {
     changes: Partial<
       Pick<
         EditorWall,
-        "thicknessMeters" | "heightMeters" | "exteriorColor" | "edgeColor" | "faceColors"
+        "thicknessMeters" | "heightMeters" | "exteriorColor" | "edgeColor" | "faceColors" | "niches"
       >
     >,
   ) => void;
@@ -131,11 +131,12 @@ export interface ConstructEditorController extends ConstructEditorState {
   previewWall: (to: PlanPoint) => void;
   addWall: (to: PlanPoint) => void;
   cancelWall: () => void;
-  addOpening: (kind: "door" | "window" | "passage") => void;
+  addOpening: (kind: "door" | "window" | "passage" | "niche") => void;
   placeOpening: (
-    kind: "door" | "window" | "passage",
+    kind: "door" | "window" | "passage" | "niche",
     wallId: string,
     offsetPlanUnits: number,
+    side?: "left" | "right",
   ) => void;
   updateSelectedOpening: (
     patch: Partial<

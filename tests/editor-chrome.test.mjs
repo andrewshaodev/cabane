@@ -85,7 +85,7 @@ await withModules(async (load) => {
   });
 
   test("construction actions retain labels, ordering, pressed state, and callbacks", async () => {
-    await withDom(async ({ root, document }) => {
+    await withDom(async ({ root, document, window }) => {
       const selected = [];
       let undo = 0;
       await act(async () =>
@@ -109,26 +109,18 @@ await withModules(async (load) => {
           "Window",
           "Passage",
           "Floor",
-          "Boundary",
-          "Pool",
           "Measure",
+          "Decorations",
           "Undo",
           "Redo",
         ],
-      );
-      assert.deepEqual(
-        buttons.slice(0, 9).map((button) => button.textContent),
-        ["Select", "Wall", "Door", "Window", "Passage", "Floor", "Boundary", "Pool", "Measure"],
       );
       assert.equal(
         document.querySelector('[aria-label="Wall"]').getAttribute("aria-pressed"),
         "true",
       );
       assert.equal(document.querySelector('[aria-label="Redo"]').disabled, true);
-      assert.equal(document.querySelectorAll('svg[aria-hidden="true"]').length, 11);
-      assert.ok(document.querySelector('[role="group"][aria-label="Construction actions"]'));
-      assert.equal(document.querySelector('[role="toolbar"]'), null);
-      await act(async () => buttons.slice(0, 10).forEach((button) => button.click()));
+      await act(async () => buttons.slice(0, 7).forEach((button) => button.click()));
       assert.deepEqual(selected, [
         "select",
         "wall",
@@ -136,19 +128,43 @@ await withModules(async (load) => {
         "window",
         "passage",
         "floor",
-        "hedge",
-        "pool",
         "measure",
       ]);
-      assert.equal(undo, 1);
-      assert.equal(buttons[0].getAttribute("aria-keyshortcuts"), "V");
-      assert.equal(buttons[5].getAttribute("aria-keyshortcuts"), "F");
-      assert.equal(buttons[7].getAttribute("aria-keyshortcuts"), "P");
-      assert.equal(buttons[9].getAttribute("aria-keyshortcuts"), "Control+Z Meta+Z");
-      assert.equal(
-        buttons[10].getAttribute("aria-keyshortcuts"),
-        "Control+Shift+Z Meta+Shift+Z Control+Y",
+      const decorations = document.querySelector('[aria-label="Decorations"]');
+      await act(async () => decorations.click());
+      assert.equal(decorations.getAttribute("aria-expanded"), "true");
+      const menu = document.querySelector('[aria-label="Decoration tools"]');
+      assert.equal(menu.parentElement, document.body, "menu escapes the scrolling toolbar");
+      assert.deepEqual(
+        [...menu.querySelectorAll("button")].map((button) => button.textContent),
+        ["Niche", "Boundary", "Pool"],
       );
+      await act(async () => menu.querySelector('[aria-label="Niche"]').click());
+      assert.equal(selected.at(-1), "niche");
+      assert.equal(document.querySelector('[aria-label="Decoration tools"]'), null);
+      await act(async () => {
+        decorations.dispatchEvent(
+          new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+        );
+      });
+      assert.equal(document.activeElement.getAttribute("aria-label"), "Niche");
+      await act(async () => {
+        document.activeElement.dispatchEvent(
+          new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+        );
+      });
+      assert.equal(document.activeElement.getAttribute("aria-label"), "Boundary");
+      await act(async () => {
+        document.activeElement.dispatchEvent(
+          new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+      });
+      assert.equal(decorations.getAttribute("aria-expanded"), "false");
+      assert.equal(document.activeElement, decorations);
+      await act(async () => document.querySelector('[aria-label="Undo"]').click());
+      assert.equal(undo, 1);
+      assert.equal(buttons[5].getAttribute("aria-keyshortcuts"), "F");
+      assert.equal(buttons[8].getAttribute("aria-keyshortcuts"), "Control+Z Meta+Z");
     });
   });
 

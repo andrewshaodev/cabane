@@ -1,6 +1,6 @@
 import {
   resolveOpeningOrientation,
-  type EditorOpening,
+  type EditorWallAttachment as EditorOpening,
   type OpeningSpec,
   type PlanPoint,
 } from "@cabane/engine";
@@ -24,6 +24,15 @@ export function openingPlanSymbol(
   };
   line([0, -thickness / 2], [0, thickness / 2], "#596057");
   line([width, -thickness / 2], [width, thickness / 2], "#596057");
+  if (opening.kind === "niche") {
+    const face = opening.side === "left" ? thickness / 2 : -thickness / 2;
+    const back = face - Math.sign(face) * opening.depthMeters;
+    line([0, face], [0, back], "#94765e");
+    line([0, back], [width, back], "#94765e");
+    line([width, back], [width, face], "#94765e");
+    line([0, -face], [width, -face], "#596057");
+    return strokes;
+  }
   if (opening.kind === "passage") return strokes;
   if (opening.kind === "door" && opening.operation === "roll-up") {
     for (const z of [-0.035, 0.035]) line([0, z], [width, z], "#7d8581", 0.025);

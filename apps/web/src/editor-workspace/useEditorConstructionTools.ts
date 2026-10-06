@@ -1,4 +1,4 @@
-import { createBrowserUuid, type StairSpec } from "@cabane/engine";
+import { editorWallAttachments, createBrowserUuid, type StairSpec } from "@cabane/engine";
 
 import { type FloorFinishSpec } from "@cabane/engine";
 
@@ -50,7 +50,9 @@ export function useEditorConstructionTools(
   const selectedOpeningId =
     constructEditorSelection?.kind === "opening" ? constructEditorSelection.id : null;
   const selectedOpening = selectedOpeningId
-    ? constructEditorDraft.openings.find((opening) => opening.id === selectedOpeningId)
+    ? editorWallAttachments(constructEditorDraft).find(
+        (opening) => opening.id === selectedOpeningId,
+      )
     : undefined;
   useEffect(() => {
     setDetailsOpeningId(null);

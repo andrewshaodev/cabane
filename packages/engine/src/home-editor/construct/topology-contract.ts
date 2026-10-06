@@ -31,6 +31,7 @@ export interface EditorWall {
   exteriorColor?: string | undefined;
   edgeColor?: string | undefined;
   faceColors?: WallSpec["faceColors"];
+  niches?: WallSpec["niches"];
 }
 
 type EditableOpening<T extends OpeningSpec> = T extends OpeningSpec

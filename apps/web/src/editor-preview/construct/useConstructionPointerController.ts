@@ -1,8 +1,12 @@
-import { DEFAULT_WALL_COLORS, useCabaneDom } from "@cabane/engine";
+import { DEFAULT_WALL_COLORS } from "@cabane/engine";
+import { previewWallAttachments } from "./wall-attachment-preview";
+import { openingPlacementPreview, openingToolDimensions } from "./opening-placement-preview";
 import { omitUndefinedProperties } from "@cabane/engine";
+import { useCabaneDom } from "@cabane/engine";
 import { useThree } from "@react-three/fiber";
 
 import {
+  editorWallAttachments,
   DEFAULT_DOOR_CONFIGURATION,
   createFloorEditorSelection,
   floorEditorSelectionTargets,
@@ -19,9 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   constructPlanToWorld,
   openingPlacementForPlanPoint,
-  openingPlacementIsValid,
-  resizeOpeningSpan,
-  wallOffsetForPlanPoint,
+  resizeWallAttachmentAtPoint,
   wallOverlayTransform,
   worldDragToConstructPlan,
   worldDragToSnappedConstructPlan,
@@ -96,6 +98,7 @@ export function useConstructionPointerController({
   onDraggingChange,
   onMarqueeChange,
 }: ConstructionEditLayerProps) {
+  const attachments = useMemo(() => editorWallAttachments(draft), [draft]);
   const dom = useCabaneDom();
   const ToonMaterial = planMode ? PlanOverlayMaterial : LitMaterial;
   const getCanvasState = useThree((state) => state.get);
@@ -197,7 +200,7 @@ export function useConstructionPointerController({
     [],
   );
   const openingTool: OpeningTool | null =
-    tool === "door" || tool === "window" || tool === "passage" ? tool : null;
+    tool === "door" || tool === "window" || tool === "passage" || tool === "niche" ? tool : null;
   useEffect(() => setOpeningPreview(null), [tool]);
   const drawingFloorZone = tool === "floor" && floorPaintTarget === "custom-area";
   const drawing =
@@ -412,28 +415,18 @@ export function useConstructionPointerController({
   };
 
   const placementPreviewFromEvent = (event: PointerEvent3D, kind: OpeningTool) => {
-    const widthPlanUnits =
-      (kind === "door" ? doorConfiguration.widthMeters : kind === "window" ? 1.2 : 0.9) /
-      coordinates.metersPerPlanUnit;
-    const placement = openingPlacementFromEvent(event, widthPlanUnits);
-    return placement
-      ? {
-          wallId: placement.wallId,
-          offsetPlanUnits: placement.offsetPlanUnits,
-          valid:
-            (kind !== "door" ||
-              doorConfiguration.heightMeters <=
-                (draft.walls.find((wall) => wall.id === placement.wallId)?.heightMeters ??
-                  draft.defaultWallHeightMeters)) &&
-            openingPlacementIsValid({
-              draft,
-              sillHeightMeters: kind === "window" ? 0.9 : 0,
-              wallId: placement.wallId,
-              offsetPlanUnits: placement.offsetPlanUnits,
-              widthPlanUnits,
-            }),
-        }
-      : null;
+    const dimensions = openingToolDimensions(
+      kind,
+      doorConfiguration,
+      coordinates.metersPerPlanUnit,
+    );
+    return openingPlacementPreview(
+      draft,
+      kind,
+      rawPlanPointForEvent(event),
+      openingPlacementFromEvent(event, dimensions.widthPlanUnits),
+      dimensions,
+    );
   };
 
   const placeOpeningFromEvent = (event: PointerEvent3D) => {
@@ -442,7 +435,7 @@ export function useConstructionPointerController({
     const placement = placementPreviewFromEvent(event, openingTool);
     setOpeningPreview(null);
     if (placement?.valid) {
-      onPlaceOpening(openingTool, placement.wallId, placement.offsetPlanUnits);
+      onPlaceOpening(openingTool, placement.wallId, placement.offsetPlanUnits, placement.side);
     }
   };
 
@@ -450,18 +443,10 @@ export function useConstructionPointerController({
     event: PointerEvent3D,
     resize: NonNullable<typeof resizingOpening>,
   ) => {
-    const wall = draft.walls.find((candidate) => candidate.id === resize.wallId);
     const point = translationPointForEvent(event);
-    if (!wall || !point) return null;
-    return resizeOpeningSpan({
-      offsetPlanUnits: resize.originalOffsetPlanUnits,
-      widthPlanUnits: resize.originalWidthPlanUnits,
-      edge: resize.edge,
-      cursorOffsetPlanUnits: wallOffsetForPlanPoint(point, wall),
-      wallLengthPlanUnits: Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]),
-      anchorOpposite: event.nativeEvent.altKey,
-      minimumWidthPlanUnits: 0.3 / coordinates.metersPerPlanUnit,
-    });
+    return point
+      ? resizeWallAttachmentAtPoint(draft, resize, point, event.nativeEvent.altKey, coordinates)
+      : null;
   };
 
   const finishEndpointDrag = (event: PointerEvent3D) => {
@@ -477,7 +462,7 @@ export function useConstructionPointerController({
   const finishOpeningDrag = (event: PointerEvent3D) => {
     if (!draggingOpening) return;
     const opening = draggingOpening.dragActive
-      ? draft.openings.find((candidate) => candidate.id === draggingOpening.openingId)
+      ? attachments.find((candidate) => candidate.id === draggingOpening.openingId)
       : null;
     const placement = opening
       ? (openingPlacementFromEvent(event, opening.widthPlanUnits) ?? draggingOpening)
@@ -571,19 +556,11 @@ export function useConstructionPointerController({
       ? (() => {
           const wall = draft.walls.find((candidate) => candidate.id === openingPreview.wallId);
           if (!wall) return null;
-          const widthPlanUnits =
-            (openingTool === "door"
-              ? doorConfiguration.widthMeters
-              : openingTool === "window"
-                ? 1.2
-                : 0.9) / coordinates.metersPerPlanUnit;
-          const openingHeightMeters =
-            openingTool === "door"
-              ? doorConfiguration.heightMeters
-              : openingTool === "window"
-                ? 1.2
-                : 2.04;
-          const sillHeightMeters = openingTool === "window" ? 0.9 : 0;
+          const { widthPlanUnits, openingHeightMeters, sillHeightMeters } = openingToolDimensions(
+            openingTool,
+            doorConfiguration,
+            coordinates.metersPerPlanUnit,
+          );
           const [fromX, fromZ] = constructPlanToWorld(wall.from, coordinates);
           const [toX, toZ] = constructPlanToWorld(wall.to, coordinates);
           const wallLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
@@ -631,6 +608,11 @@ export function useConstructionPointerController({
           : draft.openings,
     }),
     [draft, draggingEndpoint, draggingWall, draggingOpening, resizingOpening, previewPoint],
+  );
+  const displayedAttachments = previewWallAttachments(
+    attachments,
+    draggingOpening,
+    resizingOpening,
   );
   const resizedWall = draggingEndpoint
     ? displayedDraft.walls.find((wall) => wall.id === draggingEndpoint.wallId)
@@ -681,6 +663,8 @@ export function useConstructionPointerController({
     coordinates,
     planMode,
     displayedDraft,
+    attachments,
+    displayedAttachments,
     roomTargets,
     onSelectRoom,
     ToonMaterial,

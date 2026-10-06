@@ -34,9 +34,16 @@ const visitProjectIds = (
     floor.rooms.forEach((room, index) =>
       register(room.id, `floors[${floorIndex}].rooms[${index}].id`, "architecture"),
     );
-    floor.walls.forEach((wall, index) =>
-      register(wall.id, `floors[${floorIndex}].walls[${index}].id`, "architecture"),
-    );
+    floor.walls.forEach((wall, index) => {
+      register(wall.id, `floors[${floorIndex}].walls[${index}].id`, "architecture");
+      wall.niches?.forEach((niche, nicheIndex) =>
+        register(
+          niche.id,
+          `floors[${floorIndex}].walls[${index}].niches[${nicheIndex}].id`,
+          "architecture",
+        ),
+      );
+    });
     floor.wallJunctions.forEach((junction, index) =>
       register(junction.id, `floors[${floorIndex}].wallJunctions[${index}].id`, "architecture"),
     );

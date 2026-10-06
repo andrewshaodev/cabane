@@ -1,6 +1,6 @@
 import {
   resolveOpeningOrientation,
-  type EditorOpening,
+  type EditorWallAttachment as EditorOpening,
   type OpeningOrientationAction,
 } from "@cabane/engine";
 import { EditorActionButton } from "../../editor-chrome/EditorActionButton";
@@ -16,7 +16,7 @@ export function OpeningOrientationControls({
   disabled?: boolean;
   showLabel?: boolean;
 }) {
-  if (opening.kind === "passage") return null;
+  if (opening.kind === "passage" || opening.kind === "niche") return null;
   const orientation = resolveOpeningOrientation(opening);
   return (
     <>
