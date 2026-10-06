@@ -1,0 +1,10 @@
+:root {
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  color: #17221f;
+  background: #dce8e1;
+  font-synthesis: none;
+  -webkit-tap-highlight-color: transparent;
+  --font-family-numeric: "Roboto", Noto, sans-serif;
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}

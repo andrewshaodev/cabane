@@ -1,0 +1,136 @@
+.walk-controls {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+.walk-reticle {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 50%;
+  box-shadow: 0 1px 7px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+}
+.walk-reticle::before,
+.walk-reticle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: rgba(255, 255, 255, 0.78);
+  transform: translate(-50%, -50%);
+}
+.walk-reticle::before {
+  width: 5px;
+  height: 1px;
+}
+.walk-reticle::after {
+  width: 1px;
+  height: 5px;
+}
+/* Reserve the slot, bar padding/borders, collapse toggle, and a 13px minimum gap. */
+.walk-device-action {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--scene-action-size) + 56px);
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  max-width: min(360px, calc(100% - 32px));
+  padding: 7px 14px 7px 8px;
+  overflow: hidden;
+  color: #fffaf2;
+  background: rgba(28, 61, 50, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 13px;
+  box-shadow: 0 12px 34px rgba(8, 22, 18, 0.28);
+  backdrop-filter: blur(14px);
+  transform: translateX(-50%);
+  pointer-events: auto;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+.walk-device-action:hover {
+  background: rgba(37, 78, 64, 0.96);
+}
+.walk-device-action:active {
+  transform: translateX(-50%) scale(0.97);
+}
+.walk-device-action:focus-visible {
+  outline: 3px solid #edb28f;
+  outline-offset: 2px;
+}
+.walk-device-action kbd {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  color: #294b3f;
+  background: #fff9ef;
+  border-radius: 8px;
+  box-shadow: inset 0 -2px 0 rgba(32, 61, 51, 0.18);
+  font: inherit;
+  font-size: 0.61rem;
+  font-weight: 850;
+}
+.walk-device-action span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.walk-joystick-zone {
+  position: absolute;
+  z-index: 4;
+  bottom: 0;
+  width: 48%;
+  height: min(68%, 310px);
+  pointer-events: auto;
+  touch-action: none;
+}
+.walk-joystick-zone--left {
+  left: 0;
+}
+.walk-joystick-zone--right {
+  right: 0;
+}
+.walk-joystick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 28px rgba(255, 255, 255, 0.035),
+    0 10px 32px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+  transition: opacity 0.1s ease;
+}
+.walk-joystick.is-active {
+  opacity: 1;
+}
+.walk-joystick__knob {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 50%;
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2);
+}

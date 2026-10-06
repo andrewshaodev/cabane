@@ -1,0 +1,76 @@
+.connection-problem {
+  margin: 12px 16px 0;
+  color: #684536;
+}
+.connection-problem summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0 11px;
+  background: #f6e7d8;
+  border-radius: 11px;
+  font-size: 0.66rem;
+  font-weight: 760;
+  list-style: none;
+  cursor: pointer;
+}
+.connection-problem summary::-webkit-details-marker {
+  display: none;
+}
+.connection-problem__dot {
+  width: 7px;
+  height: 7px;
+  background: #c1744d;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(193, 116, 77, 0.12);
+}
+.connection-problem__detail {
+  padding: 9px 11px 2px;
+  font-size: 0.64rem;
+  line-height: 1.42;
+}
+.connection-problem__detail p {
+  margin: 0 0 8px;
+}
+.connection-problem__detail button {
+  min-height: 40px;
+  padding: 0 12px;
+  color: #fff8f0;
+  background: #784936;
+  border: 0;
+  border-radius: 10px;
+  font-size: 0.66rem;
+  font-weight: 740;
+}
+.room-control-sheet__empty {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: clamp(26px, 6cqw, 44px);
+  background: #edf1e9;
+  border-radius: 18px;
+}
+.room-control-sheet__empty h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 520;
+  letter-spacing: -0.035em;
+}
+.room-control-sheet__empty p {
+  margin: 0;
+  color: #63746c;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+.room-control-sheet__empty button {
+  min-height: 44px;
+  padding: 0 14px;
+  color: #fff9f2;
+  background: #315847;
+  border: 0;
+  border-radius: 11px;
+  font-size: 0.68rem;
+  font-weight: 760;
+}

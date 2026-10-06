@@ -1,0 +1,78 @@
+.room-control-sheet__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-control-sheet__actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  cursor: pointer;
+}
+.room-control-sheet__actions button[aria-pressed="true"] {
+  color: #fff;
+  background: #354a40;
+}
+.room-module-reorder > p {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: #42564b;
+}
+.room-module-reorder ol {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.room-module-reorder li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #e9eee7;
+}
+.room-module-reorder li > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.room-module-reorder button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  color: #354a40;
+  background: transparent;
+  cursor: pointer;
+}
+.room-module-reorder button:hover:not(:disabled) {
+  background: #d5dfd3;
+}
+.room-module-reorder button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.room-module-reorder .room-module-reorder__handle {
+  touch-action: none;
+  cursor: grab;
+}
+.room-module-reorder li[data-dragging="true"] {
+  opacity: 0.6;
+}
+.room-module-reorder li[data-drop-target="true"] {
+  outline: 2px solid #354a40;
+  outline-offset: 2px;
+}
+.room-module-reorder button:focus-visible,
+.room-control-sheet__actions button:focus-visible {
+  outline: 2px solid #354a40;
+  outline-offset: 3px;
+}

@@ -1,0 +1,304 @@
+.room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) {
+  padding: 12px;
+  container: climate-module / inline-size;
+}
+.room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) .room-module__header {
+  margin-bottom: 10px;
+}
+.room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) .room-module__header h2 {
+  font-size: 0.98rem;
+  font-weight: 680;
+}
+.vtherm-control {
+  display: grid;
+  gap: 13px;
+  min-width: 0;
+}
+.vtherm-readings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(28px, 9cqw, 70px);
+  width: min(360px, 100%);
+  margin: 0 auto;
+  padding: 5px 14px 3px;
+}
+.vtherm-readings > span {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  min-width: 0;
+  text-align: center;
+}
+.vtherm-readings > span:only-child {
+  grid-column: 1 / -1;
+}
+.vtherm-readings small {
+  color: #68776f;
+  font-size: 0.61rem;
+  font-weight: 690;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.vtherm-readings output {
+  color: #243930;
+  font-family: var(--font-family-numeric);
+  font-size: clamp(1.05rem, 4cqw, 1.35rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 620;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.vtherm-main {
+  position: relative;
+  width: min(460px, 100%);
+  min-height: 190px;
+  margin: 0 auto;
+}
+.vtherm-dial {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translateX(-50%);
+}
+.vtherm-dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.vtherm-dial__track,
+.vtherm-dial__value {
+  fill: none;
+  stroke-width: 15;
+  stroke-linecap: round;
+  transform: rotate(135deg);
+  transform-origin: 100px 100px;
+}
+.vtherm-dial__track {
+  stroke: #d7ddd8;
+  stroke-dasharray: 75 25;
+}
+.vtherm-dial__value {
+  stroke: color-mix(in srgb, var(--home-accent) 88%, #bc3f32);
+  filter: drop-shadow(0 3px 5px rgba(115, 57, 38, 0.09));
+}
+.vtherm-control[data-mode="cool"] .vtherm-dial__value {
+  stroke: #2a8ed6;
+}
+.vtherm-control[data-mode="dry"] .vtherm-dial__value {
+  stroke: #c49530;
+}
+.vtherm-control[data-mode="fan_only"] .vtherm-dial__value {
+  stroke: #5c8b72;
+}
+.vtherm-control[data-mode="off"] .vtherm-dial__value {
+  stroke: #aab3ad;
+}
+.vtherm-dial__marker {
+  stroke-width: 3;
+}
+.vtherm-dial__marker--target {
+  fill: #fbfaf3;
+  stroke: color-mix(in srgb, var(--home-accent) 88%, #bc3f32);
+}
+.vtherm-dial__marker--current {
+  fill: color-mix(in srgb, var(--home-accent) 88%, #bc3f32);
+  stroke: #fbfaf3;
+  stroke-width: 2;
+}
+.vtherm-control[data-mode="cool"] .vtherm-dial__marker--target {
+  stroke: #2a8ed6;
+}
+.vtherm-control[data-mode="cool"] .vtherm-dial__marker--current {
+  fill: #2a8ed6;
+}
+.vtherm-control[data-mode="dry"] .vtherm-dial__marker--target {
+  stroke: #c49530;
+}
+.vtherm-control[data-mode="dry"] .vtherm-dial__marker--current {
+  fill: #c49530;
+}
+.vtherm-control[data-mode="fan_only"] .vtherm-dial__marker--target {
+  stroke: #5c8b72;
+}
+.vtherm-control[data-mode="fan_only"] .vtherm-dial__marker--current {
+  fill: #5c8b72;
+}
+.vtherm-control[data-mode="off"] .vtherm-dial__marker--target {
+  stroke: #aab3ad;
+}
+.vtherm-control[data-mode="off"] .vtherm-dial__marker--current {
+  fill: #aab3ad;
+}
+.vtherm-action {
+  position: absolute;
+  z-index: 3;
+  top: 52px;
+  left: 50%;
+  color: #596b62;
+  font-size: 0.7rem;
+  font-weight: 720;
+  letter-spacing: 0.01em;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.vtherm-temperature {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  pointer-events: none;
+}
+.vtherm-temperature::after {
+  content: attr(data-unit);
+  position: absolute;
+  top: 95px;
+  left: calc(50% + 42px);
+  color: #42554d;
+  font-size: 0.82rem;
+}
+.vtherm-temperature .temperature-stepper {
+  display: block;
+}
+.vtherm-temperature .temperature-stepper output {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  color: #1e332c;
+  font-family: var(--font-family-numeric);
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transform: translateX(-50%);
+}
+.vtherm-temperature .temperature-stepper button {
+  --room-button-color: #5e6d65;
+  --room-button-background: transparent;
+  --room-button-border-color: #9ea9a2;
+  position: absolute;
+  top: 142px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  pointer-events: auto;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 480;
+}
+.vtherm-temperature .temperature-stepper button:first-of-type {
+  left: calc(50% - 76px);
+}
+.vtherm-temperature .temperature-stepper button:last-of-type {
+  left: calc(50% + 20px);
+}
+.vtherm-temperature .temperature-stepper [role="alert"] {
+  position: absolute;
+  top: 190px;
+  left: 50%;
+  width: 220px;
+  pointer-events: auto;
+  text-align: center;
+  transform: translateX(-50%);
+}
+.vtherm-toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.vtherm-toolbar[data-picker-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.vtherm-toolbar[data-picker-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.vtherm-toolbar[data-picker-count="1"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.vtherm-picker-shell {
+  min-width: 0;
+}
+@media (min-width: 700px) {
+  @container climate-module (min-width: 300px) {
+    .vtherm-control:has(.vtherm-toolbar) {
+      grid-template-columns: minmax(180px, 1fr) minmax(110px, 0.7fr);
+      column-gap: 10px;
+      row-gap: 8px;
+    }
+    .vtherm-control:has(.vtherm-toolbar) .vtherm-readings {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: end;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      padding: 0;
+    }
+    .vtherm-control:has(.vtherm-toolbar) .vtherm-main {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+    .vtherm-control .vtherm-toolbar {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: start;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+    }
+    /* Keep desktop choices inside the card's scrollable content. */
+    .vtherm-control .vtherm-picker__menu {
+      position: static;
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+}
+.vtherm-control[data-direct-off="true"] .vtherm-main {
+  min-height: 190px;
+}
+.vtherm-control .vtherm-main:has([role="alert"]) {
+  min-height: 235px;
+}
+.vtherm-control[data-direct-off="true"] .temperature-stepper button {
+  top: 142px;
+}
+.vtherm-control[data-direct-off="true"] .temperature-stepper [role="alert"] {
+  top: 190px;
+}
+/* Power shares the dial's action row; settings remain a single balanced row. */
+.vtherm-control[data-direct-off="true"] .temperature-stepper button:first-of-type {
+  left: calc(50% - 100px);
+}
+.vtherm-control[data-direct-off="true"] .temperature-stepper button:last-of-type {
+  left: calc(50% + 44px);
+}
+.vtherm-main .vtherm-off {
+  --room-button-color: #5e6d65;
+  --room-button-background: transparent;
+  --room-button-border-color: #9ea9a2;
+  position: absolute;
+  z-index: 4;
+  top: 142px;
+  left: calc(50% - 22px);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+}
+.vtherm-off svg {
+  width: 23px;
+  height: 23px;
+}
+.vtherm-main .vtherm-off[aria-pressed="true"] {
+  --room-button-color: #f5f5ed;
+  --room-button-background: #5e6d65;
+  --room-button-border-color: #5e6d65;
+  opacity: 1;
+}
+.vtherm-off:focus-visible {
+  outline: 3px solid rgba(190, 103, 72, 0.22);
+  outline-offset: 3px;
+}

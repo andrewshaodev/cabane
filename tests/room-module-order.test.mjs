@@ -100,6 +100,10 @@ test(
         const walk = page.getByRole("button", { name: "Walk inside", exact: true });
         const target = await walk.boundingBox();
         assert.ok(target.width >= 44 && target.height >= 44);
+        const close = await page
+          .getByRole("button", { name: "Close room controls", exact: true })
+          .boundingBox();
+        assert.ok(close.x > target.x + target.width, "Close sits to the right of room actions");
         assert.equal(await walk.locator("svg").count(), 1);
         assert.equal(
           await page
@@ -130,6 +134,8 @@ test(
       await page.keyboard.press("Escape");
       assert.equal(await reorder.isVisible(), true);
       assert.equal(await rows.count(), 0);
+      await page.getByRole("button", { name: "Close room controls", exact: true }).click();
+      assert.equal(await page.locator(".room-control-sheet").count(), 0);
     } finally {
       await session.close();
     }

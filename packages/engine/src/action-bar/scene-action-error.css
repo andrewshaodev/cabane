@@ -1,0 +1,28 @@
+.scene-action-error {
+  position: absolute;
+  z-index: 15;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(89px, calc(env(safe-area-inset-bottom) + 83px));
+  left: max(14px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 430px;
+  margin: 0 auto;
+  padding: 11px 12px 11px 14px;
+  color: #fff5ed;
+  background: rgba(115, 48, 35, 0.93);
+  border-radius: 14px;
+  box-shadow: 0 16px 38px rgba(54, 25, 19, 0.23);
+  font-size: 0.66rem;
+}
+.scene-action-error button {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  color: inherit;
+  background: rgba(255, 255, 255, 0.09);
+  border: 0;
+  border-radius: 9px;
+}

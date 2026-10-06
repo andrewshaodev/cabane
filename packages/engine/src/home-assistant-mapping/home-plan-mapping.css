@@ -1,0 +1,195 @@
+.home-mapping__workspace,
+.home-mapping__workspace > [role="tabpanel"] {
+  min-width: 0;
+  min-height: 0;
+}
+.home-mapping__workspace > [role="tabpanel"] {
+  height: 100%;
+}
+
+.rooms-mapping-view {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.home-plan-mapping {
+  --plan-inset-x: clamp(28px, 5vw, 74px);
+  --plan-inset-y: clamp(28px, 5vw, 74px);
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #dfe8e1;
+  background-image:
+    linear-gradient(rgba(29, 62, 49, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(29, 62, 49, 0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.home-plan-mapping:active {
+  cursor: grabbing;
+}
+.home-plan-mapping__instruction {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  left: 20px;
+  margin: 0;
+  padding: 9px 12px;
+  color: #315348;
+  background: rgba(255, 250, 242, 0.88);
+  border: 1px solid rgba(65, 95, 82, 0.18);
+  border-radius: 9px;
+  box-shadow: 0 8px 22px rgba(34, 58, 49, 0.09);
+  font-size: 0.65rem;
+  font-weight: 760;
+  pointer-events: none;
+}
+.home-plan-mapping__controls {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 16px;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  background: rgba(255, 250, 242, 0.9);
+  border: 1px solid rgba(65, 95, 82, 0.18);
+  border-radius: 12px;
+  box-shadow: 0 8px 22px rgba(34, 58, 49, 0.11);
+  touch-action: manipulation;
+}
+.home-plan-mapping__controls button {
+  min-width: 42px;
+  min-height: 42px;
+  padding: 0 11px;
+  color: #315348;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 780;
+}
+.home-plan-mapping__controls button:first-child,
+.home-plan-mapping__controls button:nth-child(2) {
+  padding: 0;
+  font-size: 1.05rem;
+}
+.home-plan-mapping__controls button:hover:not(:disabled) {
+  background: #e6ece5;
+}
+.home-plan-mapping__controls button:disabled {
+  color: #9ba8a1;
+}
+.home-plan-mapping__controls button:focus-visible {
+  outline: 3px solid #d69a79;
+  outline-offset: 0;
+}
+.home-plan-mapping__svg {
+  position: absolute;
+  top: var(--plan-inset-y);
+  left: var(--plan-inset-x);
+  width: calc(100% - var(--plan-inset-x) * 2);
+  height: calc(100% - var(--plan-inset-y) * 2);
+  overflow: visible;
+  filter: drop-shadow(0 18px 24px rgba(34, 58, 49, 0.14));
+  transform-origin: center;
+  transition: transform 0.3s var(--ease-out-quart);
+  will-change: transform;
+}
+.home-plan-mapping.is-interacting .home-plan-mapping__svg {
+  transition: none;
+}
+.home-plan-mapping__room {
+  outline: none;
+  transition: opacity 0.2s var(--ease-out-quart);
+}
+.home-plan-mapping.has-selection .home-plan-mapping__room:not(.is-selected) {
+  opacity: 0.7;
+}
+.home-plan-mapping__room polygon {
+  fill: #c6d8cd;
+  stroke: #365c4e;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition:
+    fill 0.2s var(--ease-out-quart),
+    stroke 0.2s var(--ease-out-quart),
+    transform 0.2s var(--ease-out-quart);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.home-plan-mapping__room.is-unassigned polygon {
+  fill: #d6d8d5;
+  stroke: #747d78;
+}
+.home-plan-mapping__room.is-assigned polygon {
+  fill: #a9c9b7;
+}
+.home-plan-mapping__room.is-selected polygon {
+  fill: #f0c5a9;
+  stroke: #8c492f;
+  stroke-width: 7px;
+  transform: scale(1.012);
+}
+.home-plan-mapping__room:focus-visible polygon {
+  stroke: #c05e3e;
+  stroke-width: 8px;
+}
+.home-plan-mapping__room text {
+  fill: #173129;
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.home-plan-mapping__room-heading {
+  overflow: visible;
+  pointer-events: none;
+}
+.home-plan-mapping__room-heading-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  width: 100%;
+  height: 100%;
+  color: #173129;
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  line-height: 1;
+  white-space: nowrap;
+}
+.home-plan-mapping__room-name {
+  min-width: 0;
+  font-weight: 820;
+}
+.home-plan-mapping__room-icon {
+  flex: 0 0 auto;
+  font-size: 0.92em;
+  line-height: 1;
+}
+.home-plan-mapping__area-name {
+  fill: #4d685e !important;
+  font-weight: 680;
+  letter-spacing: 0.015em;
+}
+.home-plan-mapping__room.is-selected .home-plan-mapping__room-heading-content {
+  color: #713d2c;
+}
+.home-plan-mapping__room.is-selected .home-plan-mapping__area-name {
+  fill: #713d2c !important;
+}
+.home-plan-mapping__empty,
+.devices-mapping-view__empty {
+  margin: 0;
+  padding: 22px;
+  color: #718078;
+  font-size: 0.7rem;
+}

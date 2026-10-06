@@ -1,0 +1,217 @@
+.physical-toggle {
+  display: grid;
+  place-items: center;
+  min-height: 100px;
+}
+.physical-toggle button {
+  --room-button-background: #d6dbd6;
+  --room-button-border-color: transparent;
+  --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
+  --room-button-hover-border-color: transparent;
+  position: relative;
+  width: 64px;
+  height: 100px;
+  min-height: 100px;
+  padding: 8px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 35px;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.42),
+    inset 0 -10px 20px rgba(42, 55, 49, 0.05);
+  transition:
+    background 0.22s ease,
+    box-shadow 0.22s ease;
+}
+.physical-toggle button:hover:not(:disabled),
+.physical-toggle button:active:not(:disabled) {
+  transform: none;
+}
+.physical-toggle button:focus-visible,
+.room-module button.light-dimmer__power:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--home-accent) 54%, #fffaf0);
+  outline-offset: 3px;
+}
+.physical-toggle__paddle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  left: 8px;
+  display: grid;
+  place-items: center;
+  height: 38px;
+  color: #fffaf0;
+  background: #aeb6b0;
+  border-radius: 29px;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.28),
+    0 8px 16px rgba(43, 55, 49, 0.12);
+  transform: translateY(0);
+  transition:
+    transform 0.26s var(--ease-out-quint),
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.physical-toggle[data-active="false"] .physical-toggle__paddle {
+  color: #f3f4ef;
+  background: #9da6a0;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.2),
+    0 4px 10px rgba(43, 55, 49, 0.08);
+  transform: translateY(46px);
+}
+.physical-toggle[data-active="true"][data-tone="light"] button {
+  --room-button-background: #9e7819;
+}
+.physical-toggle[data-active="true"][data-tone="light"] .physical-toggle__paddle {
+  background: #efb82e;
+}
+.physical-toggle[data-active="true"][data-tone="switch"] button {
+  --room-button-background: #496d5c;
+}
+.physical-toggle[data-active="true"][data-tone="switch"] .physical-toggle__paddle {
+  background: #6c927d;
+}
+.physical-toggle__glyph {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.physical-toggle [role="alert"] {
+  margin-top: 8px;
+  text-align: center;
+}
+.light-dimmer {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  min-height: 100px;
+}
+.light-dimmer > [role="alert"] {
+  grid-column: 1 / -1;
+}
+.light-dimmer__reading {
+  grid-column: 2;
+  grid-row: 1;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+}
+.light-dimmer__reading output {
+  color: #253c34;
+  font-family: var(--font-family-numeric);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.light-dimmer__reading small {
+  color: #6a7971;
+  font-size: 0.58rem;
+  font-weight: 760;
+}
+.light-dimmer__well {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  position: relative;
+  width: 64px;
+  height: 100px;
+  overflow: hidden;
+  background: #9e7819;
+  border-radius: 35px;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 -12px 22px rgba(71, 52, 11, 0.12);
+}
+.light-dimmer__well:focus-within {
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.18),
+    inset 0 -12px 22px rgba(71, 52, 11, 0.12),
+    0 0 0 3px rgba(190, 103, 72, 0.22);
+}
+.light-dimmer__fill {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--light-level);
+  background: #efb82e;
+  border-radius: 23px 23px 35px 35px;
+}
+.light-dimmer__thumb {
+  position: absolute;
+  right: 16px;
+  bottom: clamp(3px, calc(var(--light-level) - 2px), 94px);
+  left: 16px;
+  z-index: 2;
+  height: 4px;
+  background: #fffaf0;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(71, 52, 11, 0.18);
+}
+.light-dimmer__well input {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  opacity: 0.001;
+  appearance: none;
+  cursor: ns-resize;
+  touch-action: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+.light-dimmer[data-active="false"] .light-dimmer__well {
+  background: #c8cec9;
+}
+.light-dimmer[data-active="false"] .light-dimmer__fill {
+  background: #9fa8a2;
+}
+.room-module button.light-dimmer__power {
+  --room-button-color: #69766f;
+  --room-button-background: #dfe3de;
+  --room-button-border-color: transparent;
+  position: relative;
+  grid-column: 2;
+  grid-row: 2;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  line-height: 1;
+}
+.light-dimmer__power::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  box-sizing: border-box;
+  width: 17px;
+  height: 17px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  content: "";
+  transform: translate(-50%, -50%);
+}
+.light-dimmer__power::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 10px;
+  background: currentColor;
+  border-radius: 999px;
+  content: "";
+  transform: translate(-50%, -9px);
+}
+.room-module button.light-dimmer__power[aria-pressed="true"] {
+  --room-button-color: #fffaf0;
+  --room-button-background: #59625d;
+  --room-button-hover-color: #fff;
+  --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
+}

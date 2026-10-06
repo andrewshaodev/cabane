@@ -1,0 +1,63 @@
+/* Reserve a separate row above the action dock on narrow scene surfaces. */
+@container (max-width: 1099px) {
+  .building-floor-controls {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--scene-action-size) + 26px);
+  }
+}
+
+@media (max-width: 359px) {
+  .cabane-shell {
+    --scene-action-size: 44px;
+  }
+  .scene-action-bar {
+    gap: 2px;
+    padding: 4px;
+  }
+}
+
+@media (max-width: 699px) {
+  .scene-action-bar {
+    gap: 4px;
+  }
+  .mode-room .scene-hud,
+  .mode-room .scene-action-dock {
+    z-index: 16;
+  }
+  .mode-room .scene-hud {
+    grid-template-columns: 1fr auto 1fr;
+  }
+  .mode-room .scene-hud > :not(.scene-menu) {
+    visibility: hidden;
+  }
+  .mode-room .scene-menu {
+    grid-column: 2;
+    justify-self: center;
+    pointer-events: auto;
+  }
+  .mode-room .scene-menu > div {
+    right: auto;
+    left: 50%;
+    translate: -50% 0;
+    transform-origin: top center;
+  }
+  .mode-room.device-overlay-open .scene-hud,
+  .mode-room.device-overlay-open .scene-action-dock {
+    z-index: 7;
+  }
+  .mode-walk .scene-context .room-status-badges {
+    max-width: 100%;
+  }
+  .layout-recovery-notice {
+    grid-template-columns: 1fr 1fr;
+    bottom: 94px;
+  }
+  .layout-recovery-notice span {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (hover: none) {
+  .scene-action-slot__shortcut {
+    display: none;
+  }
+}
