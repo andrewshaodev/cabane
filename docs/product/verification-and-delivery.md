@@ -5,8 +5,25 @@ TypeScript checking, Node tests, package-boundary and source-policy checks,
 production build, and bundle-size reporting. `verify:bundle` currently reports
 bytes relative to a historical baseline; it does **not** enforce a size budget.
 
-The test command runs four shards with shared harness modules and a compact agent
-reporter. Individual tests remain available through the Node test runner.
+The test command runs four cost-balanced shards with shared harness modules and a
+compact agent reporter. `npm test` always includes both Node and Chrome coverage.
+`npm run test:unit` runs the Node/DOM tests without Chrome or listening HTTP servers;
+`npm run test:browser` runs the browser journeys. Individual files remain available
+through `node --test tests/<name>.test.mjs`. Set `TEST_PROFILE=1` to report slow tests.
+
+Storage, migration, restore, native startup states, and HA settings/sync cases run against the real
+repository and React components in Node, with an isolated `fake-indexeddb` factory
+per scenario. DOM checks wait for state or transaction completion; sync tests drive
+interval callbacks explicitly. Keep Chrome for browser-specific behavior: real
+IndexedDB through the application, route/reload persistence, file upload/download,
+reference-image interaction, responsive editor controls, and rendered scenes.
+
+Browser tests reuse Vite and Chrome within each shard, with fresh browser contexts
+for each test/session and teardown even after failure. Each Vite browser server
+owns a temporary dependency cache; it cannot race another shard or the development
+server over optimized modules. File watchers are disabled in test servers. New
+browser tests should use `tests/browser-test-environment.mjs`; the runner detects
+that import (or a direct Playwright import) when selecting `test:browser`.
 
 Home-specific commands include `home:validate-floor`, `home:verify`, and layout,
 room, and scale fixture verification. Fixtures exercise a representative target

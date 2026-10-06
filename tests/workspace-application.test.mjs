@@ -1,15 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { chromium } from "playwright-core";
+import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 // A disposable browser profile exercises the real host and IndexedDB together.
 test("workspace host routes zero, one, multiple, missing and OAuth target homes", async () => {
-  const server = await createServer({ root: `${process.cwd()}/apps/web`, configFile: `${process.cwd()}/apps/web/vite.config.ts`, server: { host: "127.0.0.1", port: 0, strictPort: false, hmr: false, watch: null } });
+  const { server } = await getBrowserTestServer("app");
   let browser;
   try {
-    await server.listen();
-    browser = await chromium.launch({ channel: "chrome", headless: true });
+    browser = await createBrowserTestSession();
     const page = await browser.newPage();
     const base = server.resolvedUrls.local[0];
     await page.goto(base);
@@ -170,5 +168,5 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     await mobile.goto(`${base}build`);
     await mobile.getByText("Could not open this workspace.", { exact: true }).waitFor();
     await mobile.close();
-  } finally { await browser?.close(); await server.close(); }
+  } finally { await browser?.close(); }
 });

@@ -36,13 +36,16 @@
     "fixture:preview:mapping": "node scripts/mapping-preview.mjs",
     "fixture:evidence": "node scripts/capture-visual-evidence.mjs --fixture all",
     "verify": "npm run typecheck && npm test && npm run verify:boundaries && npm run verify:policy && npm run verify:furnishing-surfaces && npm run build && npm run verify:bundle",
-    "build:panel": "node scripts/build-panel.mjs"
+    "build:panel": "node scripts/build-panel.mjs",
+    "test:unit": "CABANE_TEST_SUITE=unit npm test",
+    "test:browser": "CABANE_TEST_SUITE=browser npm test"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "6.0.5",
+    "fake-indexeddb": "6.2.5",
     "jsdom": "27.4.0",
     "playwright-core": "1.62.1",
     "three": "0.182.0",

@@ -1,26 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { chromium } from "playwright-core";
+import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
+import { withModules } from "./test-server.mjs";
 
-test("workspace repository uses atomic real IndexedDB operations and never reseeds deleted homes", async () => {
-  const server = await createServer({
-    root: process.cwd(), configFile: false, appType: "custom",
-    server: { host: "127.0.0.1", port: 0, hmr: false },
-  });
-  let browser;
-  try {
-    server.middlewares.use((request, response, next) => {
-      if (request.url !== "/") return next();
-      response.setHeader("Content-Type", "text/html");
-      response.end("<!doctype html><title>Workspace storage verification</title>");
-    });
-    await server.listen();
-    browser = await chromium.launch({ channel: "chrome", headless: true });
-    const page = await browser.newPage();
-    await page.goto(server.resolvedUrls.local[0]);
-    const result = await page.evaluate(async () => {
-      const api = await import("/packages/engine/src/home-project/index.ts");
+test("workspace repository uses atomic IndexedDB operations and never reseeds deleted homes", async () => {
+  const indexedDB = new IDBFactory();
+  await withModules(async load => {
+    const result = await (async () => {
+      const api = await load("/packages/engine/src/home-project/index.ts");
       const registries = { furnishingModels: {}, deviceModels: {} };
       const repository = api.createWorkspaceRepository(indexedDB, registries);
       const seed = api.defineHomeProject({
@@ -257,10 +244,7 @@ test("workspace repository uses atomic real IndexedDB operations and never resee
       check(await repository.read("bad-settings") === null, "damaged metadata with no record can be deleted");
       await rejects(() => repository.delete("wrong-identity", null), "missing-record delete cannot remove a newly present record");
       return checks;
-    });
+    })();
     assert.ok(result.length >= 20);
-  } finally {
-    await browser?.close();
-    await server.close();
-  }
+  });
 });

@@ -138,7 +138,8 @@ await withModules(async (load) => {
     });
   });
 
-  test("edits an exterior wall color and keeps the same value in the wall tool", async () => {
+  test("edits an exterior wall color and keeps the same value in the wall tool", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const calls = [];
     const controller = editor({ kind: "wall", id: wall.id }, {
       setExteriorWallColor: (color) => calls.push(["remember", color]),
@@ -154,7 +155,7 @@ await withModules(async (load) => {
         .set.call(selectedColor, "#b86f58");
       await act(async () => {
         selectedColor.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-        await new Promise((resolve) => setTimeout(resolve, 180));
+        context.mock.timers.tick(180);
       });
       assert.deepEqual(calls, [
         ["remember", "#b86f58"],
@@ -173,7 +174,7 @@ await withModules(async (load) => {
         .set.call(drawingColor, "#9b5e4b");
       await act(async () => {
         drawingColor.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-        await new Promise((resolve) => setTimeout(resolve, 180));
+        context.mock.timers.tick(180);
       });
       assert.deepEqual(calls, [
         ["remember", "#9b5e4b"],

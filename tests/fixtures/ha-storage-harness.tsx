@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { WorkspaceOpenContent } from "../../apps/web/src/workspaces/WorkspaceOpenPage";
 import { MemoryRouter } from "react-router";
 import { HomeAssistantPage } from "../../apps/web/src/workspaces/HomeAssistantPage";
 import { createBrowserHomeProjectLifecycle } from "../../apps/web/src/project-runtime";
@@ -42,10 +43,11 @@ export async function mountHaStorageHarness(options: { missing?: boolean; panelM
         onRecordChange={setRecord} onChangeOrigin={async () => {}} isDemo={false} onCreatePersonal={() => {}} />
     </WorkspaceHaStorageProvider>;
   }
-  createRoot(container).render(<MemoryRouter initialEntries={[window.location.pathname + window.location.search]}><HomeAssistantRuntimeValueProvider value={runtime as never}>
+  const root = createRoot(container);
+  root.render(<MemoryRouter initialEntries={[window.location.pathname + window.location.search]}><HomeAssistantRuntimeValueProvider value={runtime as never}>
     {options.fullPage ? <Settings /> : <WorkspaceHaStorage id={entry.metadata.id} origin="https://ha.test" repository={repository} />}
   </HomeAssistantRuntimeValueProvider></MemoryRouter>);
-  return { id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository, setIntegrationInstalled: () => { options.missing = false; options.panelMissing = false; options.panelError = false; } };
+  return { unmount: () => { root.unmount(); container.remove(); }, id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository, setIntegrationInstalled: () => { options.missing = false; options.panelMissing = false; options.panelError = false; } };
 
 }
 
@@ -68,16 +70,16 @@ export async function mountHaStorageBackgroundHarness() {
   };
   const container = document.createElement("div");
   document.body.append(container);
-  createRoot(container).render(<HomeAssistantRuntimeValueProvider value={runtime as never}>
+  const root = createRoot(container);
+  root.render(<HomeAssistantRuntimeValueProvider value={runtime as never}>
     <WorkspaceHaStorageProvider id={entry.metadata.id} origin="https://ha.test" repository={repository}>
       <div>Construct editor, without Connection settings</div>
     </WorkspaceHaStorageProvider>
   </HomeAssistantRuntimeValueProvider>);
-  return { id: entry.metadata.id, repository, getRemoteVersion: () => remote.version };
+  return { unmount: () => { root.unmount(); container.remove(); }, id: entry.metadata.id, repository, getRemoteVersion: () => remote.version };
 }
 
 export async function mountHaOpenHarness(options: { divergent?: boolean; wrongOrigin?: boolean; missing?: boolean } = {}) {
-  const { WorkspaceOpenContent } = await import("../../apps/web/src/workspaces/WorkspaceOpenPage");
   const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
   const blank = await repository.createBlank("Remote cottage");
   const entry = await repository.setConnection(blank.metadata.id, blank.record!.revision, options.wrongOrigin ? "https://other.test" : "https://ha.test");
@@ -98,8 +100,9 @@ export async function mountHaOpenHarness(options: { divergent?: boolean; wrongOr
   };
   const container = window.document.createElement("div"); window.document.body.append(container);
   const onOpened = async (id: string) => { opened = id; };
-  createRoot(container).render(<MemoryRouter><HomeAssistantRuntimeValueProvider value={runtime as never}>
+  const root = createRoot(container);
+  root.render(<MemoryRouter><HomeAssistantRuntimeValueProvider value={runtime as never}>
     <WorkspaceOpenContent repository={repository} target={{ homeId: entry.metadata.id, origin: "https://ha.test", dashboard: true }} onOpened={onOpened} />
   </HomeAssistantRuntimeValueProvider></MemoryRouter>);
-  return { id: entry.metadata.id, repository, getOpened: () => opened, getCalls: () => calls };
+  return { unmount: () => { root.unmount(); container.remove(); }, id: entry.metadata.id, repository, getOpened: () => opened, getCalls: () => calls };
 }
