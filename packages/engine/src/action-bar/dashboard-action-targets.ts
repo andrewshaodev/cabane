@@ -1,16 +1,38 @@
-import type { DeviceModelRegistry, HomeManifest, ResolvedHomeBindings } from "../types";
 import type { ActionBarItem } from "./action-bar-config";
+import type {
+  HomeManifest,
+  RuntimeBindingProfile,
+  HomeAssistantRuntimeSnapshot,
+  ResolvedHomeBindings,
+  DeviceModelRegistry,
+} from "../types";
+import { resolveHaActionShortcut } from "./ha-action-shortcuts";
 import { resolveActionBarDestination } from "./action-bar-navigation";
-
-export function resolveActionBarTargets(
+export interface ResolvedActionBarTarget {
+  label: string;
+  available: boolean;
+  pending?: boolean;
+  reason?: string | undefined;
+  pictureUrl?: string | null | undefined;
+  modelId?: string | undefined;
+}
+export function resolveDashboardActionTargets(
   actionBarItems: readonly ActionBarItem[],
   manifest: HomeManifest,
+  profile: RuntimeBindingProfile,
+  runtime: HomeAssistantRuntimeSnapshot,
   resolvedBindings: ResolvedHomeBindings,
   deviceModels: DeviceModelRegistry,
-) {
+  pendingHaActions: ReadonlySet<string>,
+): Readonly<Record<string, ResolvedActionBarTarget>> {
   return Object.fromEntries(
-    actionBarItems.flatMap((item) => {
+    actionBarItems.flatMap<[string, ResolvedActionBarTarget]>((item) => {
       if (item.target.kind === "built-in" || item.target.kind === "walk-tool") return [];
+      if (item.target.kind === "scene" || item.target.kind === "script") {
+        const target = resolveHaActionShortcut(item, profile, runtime);
+        const pending = pendingHaActions.has(item.id);
+        return [[item.id, { ...target, pending, available: target.available && !pending }]];
+      }
       const destination = resolveActionBarDestination(manifest, item.target);
       if (!destination)
         return [[item.id, { label: `Unavailable ${item.target.kind}`, available: false }]];

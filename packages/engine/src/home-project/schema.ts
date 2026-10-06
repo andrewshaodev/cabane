@@ -1,14 +1,10 @@
+import { keys, record, array, string } from "./schema-json-values";
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
 import { FLOOR_PATTERN_PRESET_IDS, type DeviceDomain } from "../types";
 import type { HomeProject, LegacyHomeProject } from "./types";
-import {
-  addProjectIssue,
-  isPlainRecord,
-  type HomeProjectIssue,
-  type JsonRecord,
-} from "./validation-types";
+import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
 
 const DEVICE_DOMAINS = new Set<DeviceDomain>([
   "light",
@@ -33,42 +29,6 @@ const DEVICE_DOMAINS = new Set<DeviceDomain>([
   "binary_sensor",
 ]);
 const FLOOR_PRESETS = new Set<string>(FLOOR_PATTERN_PRESET_IDS);
-
-const keys = (
-  value: JsonRecord,
-  allowed: readonly string[],
-  path: string,
-  issues: HomeProjectIssue[],
-) => {
-  const accepted = new Set(allowed);
-  for (const key of Object.keys(value)) {
-    if (!accepted.has(key)) {
-      addProjectIssue(
-        issues,
-        "project.unknown-key",
-        path === "$" ? key : `${path}.${key}`,
-        `Property “${key}” is not part of the HomeProject schema.`,
-      );
-    }
-  }
-};
-
-const record = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  if (isPlainRecord(value)) return value;
-  addProjectIssue(issues, "project.object", path, "Expected a plain JSON object.");
-  return null;
-};
-
-const array = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  if (Array.isArray(value)) return value as unknown[];
-  addProjectIssue(issues, "project.array", path, "Expected an array.");
-  return null;
-};
-
-const string = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  if (typeof value === "string" && value.trim().length > 0) return;
-  addProjectIssue(issues, "project.string", path, "Expected a non-empty string.");
-};
 
 const finite = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   if (typeof value === "number" && Number.isFinite(value)) return;
@@ -1114,6 +1074,8 @@ export const validateHomeProjectSchemaShape = (
               "Action bar built-in action is invalid.",
             );
           }
+        } else if (target.kind === "scene" || target.kind === "script") {
+          keys(target, ["kind"], targetPath, issues);
         } else if (target.kind === "walk-tool") {
           keys(target, ["kind", "toolId"], targetPath, issues);
           string(target.toolId, `${targetPath}.toolId`, issues);

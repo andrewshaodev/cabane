@@ -221,7 +221,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  max-width: min(92vw, 720px);
+  max-width: min(92vw, 1000px);
+  overflow-x: auto;
   padding: 6px;
   border-radius: 12px;
   color: white;
@@ -252,6 +253,9 @@
 .shortcuts-workspace__tray-separator {
   height: 26px;
   border-left: 1px solid #718a73;
+}
+.shortcuts-workspace .scene-action-overflow {
+  position: static;
 }
 .shortcuts-workspace .scene-action-overflow__tray {
   bottom: calc(100% + 12px);
@@ -343,4 +347,9 @@
   .direction-preview.is-shortcuts .direction-project-actions {
     grid-row: 2;
   }
+}
+
+.shortcuts-picker__grid small {
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }

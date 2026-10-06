@@ -360,6 +360,9 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           <ActionBarEditor
             walkTools={installedWalkTools}
             project={editorProject}
+            runtime={runtime}
+            profile={connect.profile}
+            actionMappingEnabled={!!bindingOrigin && runtime.origin === bindingOrigin}
             deviceModels={deviceModels}
             roomPictures={roomPictures}
             roomNames={roomNames}

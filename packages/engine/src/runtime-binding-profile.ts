@@ -168,6 +168,23 @@ export const validateRuntimeBindingProfile = (
         }
       }
     }
+  if (input.actionEntityIdsByShortcutId !== undefined) {
+    if (!isObject(input.actionEntityIdsByShortcutId))
+      add("profile.actions", "actionEntityIdsByShortcutId", "Shortcut mappings must be an object.");
+    else
+      for (const [id, entityId] of Object.entries(input.actionEntityIdsByShortcutId)) {
+        const path = `actionEntityIdsByShortcutId.${id}`;
+        const target = manifest.actionBar?.items.find((item) => item.id === id)?.target;
+        if (!target || (target.kind !== "scene" && target.kind !== "script"))
+          add("profile.action-id", path, "Unknown scene or script shortcut.");
+        else if (!isEntityId(entityId) || entityDomain(entityId) !== target.kind)
+          add(
+            "profile.action-domain",
+            path,
+            "The shortcut requires an entity of its configured action kind.",
+          );
+      }
+  }
   const valid = issues.length === 0;
   return omitUndefinedProperties({
     profile: valid
@@ -176,6 +193,13 @@ export const validateRuntimeBindingProfile = (
           homeId: input.homeId as string,
           roomAreaIds: { ...(input.roomAreaIds as Record<string, string>) },
           entityIdsBySlotId: { ...(input.entityIdsBySlotId as Record<string, EntityId>) },
+          ...(input.actionEntityIdsByShortcutId !== undefined
+            ? {
+                actionEntityIdsByShortcutId: {
+                  ...(input.actionEntityIdsByShortcutId as Record<string, EntityId>),
+                },
+              }
+            : {}),
         }
       : undefined,
     issues,
@@ -190,6 +214,7 @@ export const exportRuntimeBindingProfile = (profile: RuntimeBindingProfile) =>
       homeId: profile.homeId,
       roomAreaIds: profile.roomAreaIds,
       entityIdsBySlotId: profile.entityIdsBySlotId,
+      actionEntityIdsByShortcutId: profile.actionEntityIdsByShortcutId,
     },
     null,
     2,

@@ -708,3 +708,38 @@ sit 5 mm beyond the supporting cases; desk grips end at the declared front
 plane, clear of the drawer faces by 10 mm. Monitor glass sits 2 mm ahead of
 the bezel face. Suspended modules and desk accessories use absolute elevation;
 their Y=0 is the supporting surface, not an instruction to place them on the floor.
+
+## Curved living-room and media modules
+
+These generic, independently placeable presets use dimensions inferred from
+reference appearance, rather than manufacturer measurements. They are procedural
+toon geometry and support independent axis resizing. Front is +Z and Y=0 is the
+supporting surface; elevate shelf accessories and suspended modules explicitly.
+
+| ID                          | Width × height × depth (metres) | Construction                                                   |
+| --------------------------- | ------------------------------- | -------------------------------------------------------------- |
+| `curved-three-seat-sofa`    | 2.6 × .88 × 1.1                 | Shallow crescent base, three seat/back cushions, four feet     |
+| `sage-tub-armchair`         | .78 × .86 × .8                  | Rounded sage seat and shell, oak feet                          |
+| `sage-rounded-footstool`    | .48 × .45 × .46                 | Sage padded stool on four oak feet                             |
+| `hexagonal-side-table`      | .6 × .43 × .5196                | White top/oak body; `oak-top` reverses finishes                |
+| `six-door-oak-sideboard`    | 3 × .74 × .42                   | Six flat doors, three knob pairs                               |
+| `double-arched-bookcase`    | 1 × 1.73 × .36                  | Two real arched openings with recessed backing and oak shelves |
+| `media-shelf-surround`      | 2 × 1.73 × .36                  | Open television bay below two oak shelves                      |
+| `white-display-column`      | .6 × 2.4 × .3                   | Freestanding open shelving; not an architectural wall niche    |
+| `white-tapered-wall-sconce` | .18 × .23 × .12                 | Static white tapered shade with open top and wall plate        |
+| `slim-soundbar`             | 1.05 × .065 × .12               | Static dark bar and indicator                                  |
+| `six-globe-ceiling-lamp`    | .9 × .42 × .8062                | Brass connected hub/spokes and six globes; static furnishing   |
+| `tufted-diamond-rug`        | 2.6 × .016 × 2                  | Cream field, raised diamond rings and fringe                   |
+| `book-row`                  | .4 × .28 × .18                  | Ten blank coloured spines                                      |
+| `ring-ceramic-vase`         | .18 × .3 × .06                  | White ceramic ring and dried stems                             |
+| `decorative-globe`          | .278 × .339 × .24               | White sphere on brass support                                  |
+| `trailing-shelf-plant`      | .26 × .57 × .18                 | Pot origin at Y=0; foliage extends down to Y=-.35              |
+
+Suspended assemblies and decor do not create floor colliders. Place the arched
+case and media surround on a supporting cabinet, with its top at their Y=0.
+The rug is 16 mm high; accessories standing on it need the matching elevation.
+The ceiling lamp and soundbar declare no smart capabilities.
+
+`compact-wall-television` is a separate Media device (1.58 × .9 × .07 m), reusing
+the existing wall television's media-player behavior. Its back plane is Z=0,
+width/height resize independently, and household mapping stays in runtime slots.

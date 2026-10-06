@@ -1,3 +1,4 @@
+import { resolveDashboardActionTargets } from "./action-bar/dashboard-action-targets";
 import type { WalkToolNavigation } from "./walk-tools";
 import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate-walk-target";
 import { connectedCanvasEvents } from "./connected-canvas-events";
@@ -39,7 +40,6 @@ import {
 
 import { SceneActionBar } from "./SceneActionBar";
 import { resolvePublishedActionBarItems } from "./action-bar/action-bar-config";
-import { resolveActionBarTargets } from "./action-bar/action-bar-targets";
 import { CustomizeActionBarMenuItem } from "./CustomizeActionBarMenuItem";
 
 import { SceneMenuIcon } from "./SceneMenuIcon";
@@ -139,6 +139,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     runConfiguredAction,
     sceneActionError,
     setSceneActionError,
+    pendingHaActions,
   } = dashboard;
   const equippedTool =
     walkMode && !walkthrough
@@ -155,11 +156,14 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const preferencesMenuItem = walkMode && (
     <WalkPreferencesMenuItem onOpen={() => setPreferencesOpen(true)} />
   );
-  const actionBarTargets = resolveActionBarTargets(
+  const actionBarTargets = resolveDashboardActionTargets(
     actionBarItems,
     manifest,
+    bindingManager.profile,
+    runtime,
     resolvedBindings,
     deviceModels,
+    pendingHaActions,
   );
   const { wholeBuilding, setWholeBuilding } = floorNavigation;
   const floorLevels = deriveFloorLevels(manifest.floors);

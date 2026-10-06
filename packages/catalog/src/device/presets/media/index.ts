@@ -8,3 +8,7 @@ export {
 export { SpeakerModel } from "./speaker";
 export { TelevisionModel } from "./television";
 export { WallTelevisionModel, WALL_TELEVISION_SIZE } from "./wall-television";
+export {
+  CompactWallTelevisionModel,
+  COMPACT_WALL_TELEVISION_SIZE,
+} from "./compact-wall-television";

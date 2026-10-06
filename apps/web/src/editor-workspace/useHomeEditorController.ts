@@ -263,6 +263,8 @@ export function useHomeEditorController({
     redoProject,
     selectSceneItem,
   } = useEditorProjectHistory({
+    runtime,
+    homeAssistantUrl,
     workspace,
     constructEditor,
     furnishingEditor,

@@ -1,3 +1,5 @@
+import { SceneActionTargetSlot } from "./action-bar/SceneActionTargetSlot";
+import type { ResolvedActionBarTarget } from "./action-bar/dashboard-action-targets";
 import { useCabaneDom } from "./CabaneDom";
 import viewIcon from "./assets/scene-actions/view.png";
 import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
@@ -22,7 +24,7 @@ import { type SolarLightingMode } from "./lighting";
 
 import type { BuiltInShortcutId, SceneMode, ShortcutSpec } from "./types";
 import { resolveActionBarItems, type ActionBarItem } from "./action-bar/action-bar-config";
-import { ActionBarBuiltInIcon, RoomShortcutIcon, SceneActionSlotFace } from "./SceneActionSlotFace";
+import { ActionBarBuiltInIcon, SceneActionSlotFace } from "./SceneActionSlotFace";
 
 const sceneActions: readonly ShortcutSpec[] = [
   { id: "construct", action: "construct-mode", context: "both", order: 0 },
@@ -219,12 +221,7 @@ export function SceneActionBar({
   items?: readonly ActionBarItem[];
   walkTools?: readonly import("./walk-tools").WalkToolDefinition[] | undefined;
   activeWalkToolId?: string | null;
-  targets?: Readonly<
-    Record<
-      string,
-      { label: string; available: boolean; pictureUrl?: string | null; modelId?: string }
-    >
-  >;
+  targets?: Readonly<Record<string, ResolvedActionBarTarget>>;
   renderDeviceIcon?: ((modelId: string) => ReactNode) | undefined;
   roofVisible?: boolean;
   onToggleRoof?: (() => void) | undefined;
@@ -504,35 +501,14 @@ export function SceneActionBar({
         available: false,
       };
       return (
-        <button
+        <SceneActionTargetSlot
           key={item.id}
-          type="button"
-          className="scene-action-slot is-filled"
-          aria-label={target.label}
-          title={target.label}
-          disabled={!target.available}
-          onClick={() => {
+          {...{ item, target, renderDeviceIcon }}
+          onAction={(item) => {
             setOverflowOpen(false);
             onAction(item);
           }}
-        >
-          <SceneActionSlotFace
-            label={target.label}
-            icon={
-              item.target.kind === "room" ? (
-                <RoomShortcutIcon name={target.label} pictureUrl={target.pictureUrl} />
-              ) : target.modelId && renderDeviceIcon ? (
-                renderDeviceIcon(target.modelId)
-              ) : (
-                <svg viewBox="0 0 24 24">
-                  <rect x="5" y="3" width="14" height="18" rx="2" />
-                  <circle cx="12" cy="12" r="2.5" />
-                  <path d="M9 6h6" />
-                </svg>
-              )
-            }
-          />
-        </button>
+        />
       );
     }
     switch (item.target.action) {

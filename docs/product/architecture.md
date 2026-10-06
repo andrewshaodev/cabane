@@ -41,6 +41,13 @@ Implementation: [web startup](../../apps/web/src/main.tsx),
 
 [Back to product overview](../../PRODUCT_SPEC.md).
 
+For shortcut work, route editor changes through
+`apps/web/src/editor-action-bar/ActionBarEditor.tsx` and the atomic workspace
+callback in `editor-workspace/useEditorProjectHistory.ts`. The engine's
+`action-bar/` directory owns portable targets, HA action resolution and command
+feedback. `runtime-binding-profile.ts` and `home-project/workspace-bindings.ts`
+own the private scene/script mapping contract; the dashboard composes resolved
+labels and availability into the shared `SceneActionBar`.
 Optional walk tools are installed by the web host through `CabaneDashboard.walkTools`.
 The engine exposes `WalkToolDefinition`, `WalkToolProps`, and `raycastWalkScene` at
 its public root. A definition supplies an ID, label, icon, and scene module; its
@@ -69,3 +76,8 @@ and rendering remain private to `walk-laser/src/portals/`. Live destination view
 use package-private camera transforms, exit clipping, and bounded scene captures
 with the existing renderer and scene supplied by the canvas. No portal rendering
 contract or dependency is added to the engine, catalog, or home.
+
+The first gun equip shows a compact introduction styled like the editor tutorial.
+It explains light toggling and paired portal shortcuts with mouse or touch controls.
+Users dismiss it with Got it (or Enter while the pointer is captured); dismissal
+stays in browser-local storage, with a session fallback if storage is unavailable.

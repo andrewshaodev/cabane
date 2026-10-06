@@ -1,3 +1,5 @@
+import { useHaActionShortcuts } from "./action-bar/useHaActionShortcuts";
+import { resolvedRoomDisplayNames } from "./home-assistant-mapping/room-display-name";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useCabaneDom } from "./CabaneDom";
 import { deriveFloorLevels, useFloorNavigation } from "./building";
@@ -84,13 +86,7 @@ export function useDashboardController({
   );
   const homePresence = useMemo(() => deriveHomePresence(runtime), [runtime]);
   const roomDisplayNames = useMemo(
-    () =>
-      Object.fromEntries(
-        floor.rooms.map((room) => [
-          room.id,
-          resolvedBindings.rooms[room.id]?.displayName ?? room.name,
-        ]),
-      ),
+    () => resolvedRoomDisplayNames(floor.rooms, resolvedBindings.rooms),
     [floor.rooms, resolvedBindings.rooms],
   );
   const initialSession = useRef(
@@ -338,7 +334,13 @@ export function useDashboardController({
         break;
     }
   };
+  const haActions = useHaActionShortcuts(runtime, bindingManager.profile, setSceneActionError);
+  const pendingHaActions = haActions.pending;
   const runConfiguredAction = (item: ActionBarItem) => {
+    if (item.target.kind === "scene" || item.target.kind === "script") {
+      void haActions.run(item);
+      return;
+    }
     if (item.target.kind === "walk-tool") {
       const toolId = item.target.toolId;
       if (walkMode && walkTools.some((tool) => tool.id === toolId)) {
@@ -509,5 +511,6 @@ export function useDashboardController({
     runConfiguredAction,
     sceneActionError,
     setSceneActionError,
+    pendingHaActions,
   };
 }

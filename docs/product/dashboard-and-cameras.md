@@ -181,6 +181,12 @@ The selected shortcut keeps its outlined style and edit controls when the pointe
 moves away or over another shortcut; hover and focus alone do not change selection.
 Native keyboard activation also selects a shortcut.
 
+Shortcuts also offers searchable Scene and Script choices from the connected HA
+runtime, with recognizable names and unavailable choices disabled. Both reuse
+selection, replacement, reordering, removal, history, Save and overflow behavior.
+Their Home buttons show pending requests and expose unavailable reasons; they do
+not indicate an on/off state. Portable imports retain unmapped buttons and can be
+reconnected in Shortcuts.
 The web host offers an optional **Laser** action in Shortcuts → Add action,
 alongside Lights off and View. It is absent from the default bar. Save the shortcut,
 enter Walk, and select Laser to equip or unequip a procedural cartoon laser gun.

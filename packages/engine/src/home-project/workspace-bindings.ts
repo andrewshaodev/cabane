@@ -17,7 +17,13 @@ export interface WorkspaceBindingState {
 /** Browser-private Home Assistant mappings, keyed by their canonical origin. */
 export type WorkspaceBindings = Readonly<Record<string, WorkspaceBindingState>>;
 
-const PROFILE_KEYS = new Set(["schemaVersion", "homeId", "roomAreaIds", "entityIdsBySlotId"]);
+const PROFILE_KEYS = new Set([
+  "schemaVersion",
+  "homeId",
+  "roomAreaIds",
+  "entityIdsBySlotId",
+  "actionEntityIdsByShortcutId",
+]);
 const STATE_KEYS = new Set(["draft", "published", "manualRoomIds", "manualSlotIds"]);
 
 const clone = <T>(value: T): T => structuredClone(value);
@@ -281,6 +287,21 @@ export const reconcileWorkspaceBindings = (
             homeId: state.draft.homeId,
             roomAreaIds: retainedRooms,
             entityIdsBySlotId: retainedSlots,
+            ...(state.draft.actionEntityIdsByShortcutId
+              ? {
+                  actionEntityIdsByShortcutId: Object.fromEntries(
+                    Object.entries(state.draft.actionEntityIdsByShortcutId).filter(
+                      ([id, entityId]) =>
+                        manifest.actionBar?.items.some(
+                          (item) =>
+                            item.id === id &&
+                            (item.target.kind === "scene" || item.target.kind === "script") &&
+                            entityId.startsWith(`${item.target.kind}.`),
+                        ),
+                    ),
+                  ),
+                }
+              : {}),
           },
           published: clone(state.published),
           manualRoomIds: state.manualRoomIds.filter((id) => roomIds.has(id)),

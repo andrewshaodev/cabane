@@ -99,7 +99,7 @@ Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-priv
 
 Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-cameras.md).
 
-- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation), [`packages/engine/src/OrbitCamera.tsx`](../packages/engine/src/OrbitCamera.tsx), [`packages/engine/src/room-navigation`](../packages/engine/src/room-navigation), [`packages/engine/src/action-bar/action-bar-targets.ts`](../packages/engine/src/action-bar/action-bar-targets.ts), [`packages/engine/src/WalkPreferences.tsx`](../packages/engine/src/WalkPreferences.tsx).
+- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation), [`packages/engine/src/OrbitCamera.tsx`](../packages/engine/src/OrbitCamera.tsx), [`packages/engine/src/room-navigation`](../packages/engine/src/room-navigation), [`packages/engine/src/action-bar/dashboard-action-targets.ts`](../packages/engine/src/action-bar/dashboard-action-targets.ts), [`packages/engine/src/WalkPreferences.tsx`](../packages/engine/src/WalkPreferences.tsx).
 - Interface: `CabaneDashboard`, `LiveCameraSurface` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene.
 - Checks: `test:unit`, `test:browser`, `measure:scene`.
@@ -128,7 +128,7 @@ Contract: [Optional walk tools](../docs/product/architecture.md).
 
 - Owners: [`apps/web/src/walk-tools.ts`](../apps/web/src/walk-tools.ts), [`packages/walk-laser/src`](../packages/walk-laser/src), [`packages/engine/src/walk-tools`](../packages/engine/src/walk-tools).
 - Interface: `WalkToolDefinition`, `WalkToolProps`, `WalkToolNavigation`, `WalkToolStorage` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.
+- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.
 - Checks: `test:unit`, `test:browser`, `verify:boundaries`, `build`.
 
 ### Bundled home and agent generation
@@ -148,6 +148,15 @@ Contract: [Verification and delivery](../docs/product/verification-and-delivery.
 - Interface: repository commands below.
 - Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.
 - Checks: `verify:help`, `verify:fast`, `verify`, `browser:install`.
+
+### Shortcuts and private HA actions
+
+Contract: [Shortcuts and private HA actions](../docs/product/workspace.md).
+
+- Owners: [`apps/web/src/editor-action-bar/ActionBarEditor.tsx`](../apps/web/src/editor-action-bar/ActionBarEditor.tsx), [`apps/web/src/editor-action-bar/ShortcutPicker.tsx`](../apps/web/src/editor-action-bar/ShortcutPicker.tsx), [`apps/web/src/editor-workspace/useEditorProjectHistory.ts`](../apps/web/src/editor-workspace/useEditorProjectHistory.ts), [`packages/engine/src/action-bar`](../packages/engine/src/action-bar), [`packages/engine/src/home-project/workspace-bindings.ts`](../packages/engine/src/home-project/workspace-bindings.ts).
+- Interface: `ActionBarItem`, `RuntimeBindingProfile`, `haActionShortcutChoices`, `resolveHaActionShortcut` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Keep shortcut order and kinds portable; scene/script entity IDs belong to origin-scoped draft/published binding profiles. Save publishes both atomically. Activation uses guarded one-shot commands, never toggles.
+- Checks: `verify:runtime`, `verify:workspace`.
 
 ## Package import boundaries
 

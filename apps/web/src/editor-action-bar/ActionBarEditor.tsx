@@ -1,3 +1,4 @@
+import { ShortcutPicker } from "./ShortcutPicker";
 import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
@@ -5,11 +6,13 @@ import {
   RoomShortcutIcon,
   SceneActionSlotFace,
   actionBarBuiltInLabels,
+  resolveHaActionShortcut,
+  type HomeAssistantRuntimeValue,
+  type RuntimeBindingProfile,
+  type EntityId,
   createBrowserUuid,
   isActionBarDeviceNavigable,
   resolveActionBarItems,
-  resolvedRoomIdForItem,
-  type ActionBarBuiltIn,
   type ActionBarItem,
   type DeviceModelRegistry,
   type HomeProject,
@@ -19,12 +22,14 @@ import { ShortcutDeviceIcon } from "./ShortcutDeviceIcon";
 import { moveActionBarItem, removeActionBarItem, replaceActionBarItem } from "./action-bar-edits";
 import "./action-bar-editor.css";
 
-const builtIns: ActionBarBuiltIn[] = ["build", "walk", "night", "view", "all-lights"];
-type Category = "built-in" | "room" | "device";
+type Category = "built-in" | "room" | "device" | "scene" | "script";
 type Picker = { kind: Category; replacingId: string | null } | null;
 
 export function ActionBarEditor({
   project,
+  runtime,
+  profile,
+  actionMappingEnabled = false,
   deviceModels,
   walkTools = [],
   roomPictures,
@@ -37,6 +42,9 @@ export function ActionBarEditor({
   onRedo,
   onChange,
 }: {
+  runtime?: HomeAssistantRuntimeValue;
+  profile?: RuntimeBindingProfile;
+  actionMappingEnabled?: boolean;
   walkTools?: readonly import("@cabane/engine").WalkToolDefinition[];
   project: HomeProject;
   deviceModels: DeviceModelRegistry;
@@ -48,7 +56,7 @@ export function ActionBarEditor({
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  onChange: (items: readonly ActionBarItem[]) => void;
+  onChange: (items: readonly ActionBarItem[], mapping?: { id: string; entityId: EntityId }) => void;
 }) {
   const dom = useCabaneDom();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -64,6 +72,13 @@ export function ActionBarEditor({
     (item) => item.kind === "device" && isActionBarDeviceNavigable(project, item.id),
   );
   const selected = items.find((item) => item.id === selectedId);
+  const actionWarnings =
+    runtime && profile
+      ? items
+          .filter((item) => item.target.kind === "scene" || item.target.kind === "script")
+          .map((item) => resolveHaActionShortcut(item, profile, runtime))
+          .filter((target) => !target.available)
+      : [];
   const missingCount = items.filter((item) => {
     const target = item.target;
     return target.kind === "room"
@@ -117,6 +132,10 @@ export function ActionBarEditor({
         rooms.find((room) => room.id === target.roomId)?.name ??
         "Missing room"
       );
+    if (target.kind === "scene" || target.kind === "script")
+      return runtime && profile
+        ? resolveHaActionShortcut(item, profile, runtime).label
+        : `Unmapped ${target.kind}`;
     const device = devices.find((device) => device.id === target.deviceId);
     return device
       ? (deviceNames[device.id] ??
@@ -133,6 +152,8 @@ export function ActionBarEditor({
     }
     if (target.kind === "room")
       return <RoomShortcutIcon name={label(item)} pictureUrl={roomPictures[target.roomId]} />;
+    if (target.kind === "scene" || target.kind === "script")
+      return <EditorIcon name={target.kind === "scene" ? "grid" : "chevron"} />;
     const device = devices.find((device) => device.id === target.deviceId);
     return device ? (
       <ShortcutDeviceIcon modelId={device.modelId} models={deviceModels} />
@@ -183,9 +204,11 @@ export function ActionBarEditor({
       />
     </button>
   );
-  const choose = (target: ActionBarItem["target"]) => {
+  const choose = (target: ActionBarItem["target"], entityId?: EntityId) => {
     if (!picker) return;
-    onChange(replaceActionBarItem(items, picker.replacingId, target, createBrowserUuid));
+    const id = picker.replacingId ?? createBrowserUuid();
+    const next = replaceActionBarItem(items, picker.replacingId, target, () => id);
+    onChange(next, entityId ? { id, entityId } : undefined);
     setSelectedId(null);
     setPicker(null);
     setQuery("");
@@ -240,155 +263,36 @@ export function ActionBarEditor({
           remove before Save.
         </p>
       )}
+      {actionWarnings.length > 0 && (
+        <p className="shortcuts-workspace__warning" role="status">
+          {actionWarnings.map((target) => `${target.label}: ${target.reason}`).join(" ")}
+        </p>
+      )}
       <div className="shortcuts-workspace__canvas">
         {picker ? (
-          <div className="shortcuts-picker">
-            <div className="shortcuts-picker__heading">
-              <div>
-                <h2>
-                  {picker.kind === "built-in"
-                    ? "Choose an action"
-                    : picker.kind === "room"
-                      ? "Choose a room"
-                      : "Choose a device"}
-                </h2>
-                <p>
-                  {picker.replacingId
-                    ? "Replace the selected shortcut"
-                    : "Add a shortcut to the bar"}
-                </p>
-              </div>
-              <button type="button" onClick={() => setPicker(null)} aria-label="Close choices">
-                <EditorIcon name="close" />
-              </button>
-            </div>
-            <label className="shortcuts-picker__search">
-              <EditorIcon name="search" />
-              <input
-                type="search"
-                value={query}
-                placeholder="Search…"
-                aria-label="Search shortcut choices"
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            </label>
-            <div className="shortcuts-picker__grid">
-              {picker.kind === "built-in" &&
-                builtIns
-                  .filter((action) => matching(actionBarBuiltInLabels[action]))
-                  .map((action) => {
-                    const target = { kind: "built-in" as const, action };
-                    return (
-                      <button
-                        key={action}
-                        type="button"
-                        aria-label={actionBarBuiltInLabels[action]}
-                        disabled={disabled || duplicate(target)}
-                        onClick={() => choose(target)}
-                      >
-                        <span className="shortcuts-picker__icon">
-                          <ActionBarBuiltInIcon action={action} />
-                        </span>
-                        <strong>{actionBarBuiltInLabels[action]}</strong>
-                      </button>
-                    );
-                  })}
-              {picker.kind === "built-in" &&
-                walkTools
-                  .filter((tool) => matching(tool.label))
-                  .map((tool) => {
-                    const target = { kind: "walk-tool" as const, toolId: tool.id };
-                    return (
-                      <button
-                        key={tool.id}
-                        type="button"
-                        aria-label={tool.label}
-                        disabled={disabled || duplicate(target)}
-                        onClick={() => choose(target)}
-                      >
-                        <span className="shortcuts-picker__icon">
-                          <tool.Icon />
-                        </span>
-                        <strong>{tool.label}</strong>
-                        <small>Walk mode</small>
-                      </button>
-                    );
-                  })}
-              {picker.kind === "room" &&
-                rooms
-                  .filter((room) => matching(roomNames[room.id] ?? room.name))
-                  .map((room) => {
-                    const target = { kind: "room" as const, roomId: room.id };
-                    return (
-                      <button
-                        key={room.id}
-                        type="button"
-                        aria-label={roomNames[room.id] ?? room.name}
-                        disabled={disabled || duplicate(target)}
-                        onClick={() => choose(target)}
-                      >
-                        <span className="shortcuts-picker__icon">
-                          <RoomShortcutIcon
-                            name={roomNames[room.id] ?? room.name}
-                            pictureUrl={roomPictures[room.id]}
-                          />
-                        </span>
-                        <strong>{roomNames[room.id] ?? room.name}</strong>
-                      </button>
-                    );
-                  })}
-              {picker.kind === "device" &&
-                rooms.map((room) => {
-                  const roomName = roomNames[room.id] ?? room.name;
-                  const choices = devices
-                    .filter((device) => resolvedRoomIdForItem(device, project) === room.id)
-                    .filter(
-                      (device) =>
-                        matching(roomName) ||
-                        matching(
-                          deviceNames[device.id] ??
-                            deviceModels[device.modelId]?.label ??
-                            device.modelId,
-                        ),
-                    );
-                  if (!choices.length) return null;
-                  return (
-                    <section className="shortcuts-picker__room" key={room.id} aria-label={roomName}>
-                      <h3>{roomName}</h3>
-                      <div className="shortcuts-picker__room-grid">
-                        {choices.map((device) => {
-                          const target = { kind: "device" as const, deviceId: device.id };
-                          const name =
-                            deviceNames[device.id] ??
-                            deviceModels[device.modelId]?.label ??
-                            device.modelId.replaceAll("-", " ");
-                          return (
-                            <button
-                              key={device.id}
-                              type="button"
-                              aria-label={`${name} · ${roomName}`}
-                              disabled={disabled || duplicate(target)}
-                              onClick={() => choose(target)}
-                            >
-                              <span className="shortcuts-picker__icon">
-                                <ShortcutDeviceIcon
-                                  modelId={device.modelId}
-                                  models={deviceModels}
-                                />
-                              </span>
-                              <strong>{name}</strong>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  );
-                })}
-              {picker.kind === "device" && devices.length === 0 && (
-                <p>No room devices are available. Add one in Arrange first.</p>
-              )}
-            </div>
-          </div>
+          <ShortcutPicker
+            {...{
+              picker,
+              project,
+              runtime,
+              profile,
+              actionMappingEnabled,
+              deviceModels,
+              walkTools,
+              roomPictures,
+              roomNames,
+              deviceNames,
+              disabled,
+              rooms,
+              devices,
+              query,
+              setQuery,
+              matching,
+              duplicate,
+              choose,
+            }}
+            onClose={() => setPicker(null)}
+          />
         ) : (
           <div className="shortcuts-workspace__prompt">
             <h2>Choose a shortcut</h2>
@@ -474,6 +378,12 @@ export function ActionBarEditor({
               <EditorIcon name="devices" />
               {selected ? "Replace with device" : "Add device"}
             </button>
+            {(["scene", "script"] as const).map((kind) => (
+              <button key={kind} type="button" disabled={disabled} onClick={() => openPicker(kind)}>
+                <EditorIcon name={kind === "scene" ? "grid" : "chevron"} />
+                {selected ? `Replace with ${kind}` : `Add ${kind}`}
+              </button>
+            ))}
             {selected && (
               <>
                 <span className="shortcuts-workspace__tray-separator" />

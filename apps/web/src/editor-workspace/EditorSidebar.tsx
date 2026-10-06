@@ -163,7 +163,10 @@ export function EditorSidebar({
         {shortcutsMode && (
           <div className="shortcuts-guide">
             <h3>Add a shortcut</h3>
-            <p>Select the empty slot in the bar, then choose an action, room or device.</p>
+            <p>
+              Select the empty slot in the bar, then choose an action, room, device, scene or
+              script.
+            </p>
             <h3>Edit your bar</h3>
             <p>Select a shortcut to replace, move or remove it.</p>
             <h3>Update Home</h3>

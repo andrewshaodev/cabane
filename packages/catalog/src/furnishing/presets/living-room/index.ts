@@ -17,3 +17,20 @@ export { VinylRecordCabinet, VINYL_RECORD_CABINET_SIZE } from "./vinyl-record-ca
 export { OpenDisplayBookcase, OPEN_DISPLAY_BOOKCASE_SIZE } from "./open-display-bookcase";
 export { TwoTierBarCart, TWO_TIER_BAR_CART_SIZE } from "./two-tier-bar-cart";
 export { SlattedRoomDivider, SLATTED_ROOM_DIVIDER_SIZE } from "./slatted-room-divider";
+export { CurvedThreeSeatSofa, CURVED_THREE_SEAT_SOFA_SIZE } from "./curved-three-seat-sofa";
+export { SageTubArmchair, SAGE_TUB_ARMCHAIR_SIZE } from "./sage-tub-armchair";
+export { SageRoundedFootstool, SAGE_ROUNDED_FOOTSTOOL_SIZE } from "./sage-rounded-footstool";
+export { HexagonalSideTable, HEXAGONAL_SIDE_TABLE_SIZE } from "./hexagonal-side-table";
+export { SixDoorOakSideboard, SIX_DOOR_OAK_SIDEBOARD_SIZE } from "./six-door-oak-sideboard";
+export { DoubleArchedBookcase, DOUBLE_ARCHED_BOOKCASE_SIZE } from "./double-arched-bookcase";
+export { MediaShelfSurround, MEDIA_SHELF_SURROUND_SIZE } from "./media-shelf-surround";
+export { SlimSoundbar, SLIM_SOUNDBAR_SIZE } from "./slim-soundbar";
+export { SixGlobeCeilingLamp, SIX_GLOBE_CEILING_LAMP_SIZE } from "./six-globe-ceiling-lamp";
+export { BookRow, BOOK_ROW_SIZE } from "./book-row";
+export {
+  WhiteTaperedWallSconce,
+  WHITE_TAPERED_WALL_SCONCE_SIZE,
+} from "./white-tapered-wall-sconce";
+export { TuftedDiamondRug, TUFTED_DIAMOND_RUG_SIZE } from "./tufted-diamond-rug";
+
+export { WhiteDisplayColumn, WHITE_DISPLAY_COLUMN_SIZE } from "./white-display-column";
