@@ -38,7 +38,7 @@ test("personal workspace offers HA storage while demo does not", async () => {
     assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
     assert.equal(await page.getByRole("heading", { name: "Restore from Home Assistant" }).count(), 0);
-    await page.getByRole("button", { name: "Import", exact: true }).click();
+    await page.getByRole("button", { name: "Import workspace", exact: true }).click();
     await page.getByRole("button", { name: "From Home Assistant", exact: true }).click();
     await page.getByLabel("Home Assistant address").fill("https://ha.example");
     await page.reload();

@@ -17,6 +17,7 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   onChangeOrigin: (origin: string | null) => Promise<void>; onRecordChange: (record: HomeProjectRecord) => void;
   isDemo: boolean; onCreatePersonal: () => void;
 }) {
+  const setup = workspaceDestination(window.location.search) === "dashboard";
   const runtime = useHomeAssistantRuntime();
   const storage = useWorkspaceStorage();
   const [address, setAddress] = useState(origin ?? "");
@@ -44,6 +45,8 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
     window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant", destination: workspaceDestination(window.location.search) }));
     setEditing(false);
   });
+  const ConnectionContainer = setup && connected ? "details" : "div";
+  const BackupContainer = setup ? "details" : "div";
   const latest = async () => (await storage?.repository.read(record.homeId))?.record ?? record;
   const exportBackup = async () => {
     const current = await latest();
@@ -61,15 +64,17 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
     onRecordChange(result.record);
     setNotice("Backup imported into the draft. Open the editor to review and save it.");
   };
-  return <main className="ha-page">
+  return <main className={`ha-page${setup ? " ha-page--setup" : ""}`}>
     <div className="ha-page__content">
       <nav className="ha-page__nav" aria-label="Workspace navigation">
         <Link to="/workspaces"><EditorIcon name="back" />Workspaces</Link>
         <Link to={workspaceHomePath(record.homeId)}>Open home<EditorIcon name="chevron" /></Link>
       </nav>
-      <header className="ha-page__header"><h1>Home Assistant</h1><p>{record.draft.home.name}</p></header>
+      <header className="ha-page__header"><h1>{setup ? "Cabane in Home Assistant" : "Home Assistant"}</h1><p>{record.draft.home.name}</p></header>
       {isDemo ? <section className="ha-section"><h2>Make this home yours</h2><p>The demo uses simulated devices. Create your own workspace to connect Home Assistant and save across devices.</p>
         <button className="ha-primary" onClick={onCreatePersonal}>Create my workspace<EditorIcon name="chevron" /></button></section> : <>
+      <ConnectionContainer className={setup && connected ? "ha-connection-details" : undefined}>
+      {setup && connected && <summary><EditorIcon name="check" />Connected to {origin ? new URL(origin).host : "Home Assistant"}</summary>}
       <section className="ha-section" aria-labelledby="ha-connection-title">
         <div className="ha-section__heading"><h2 id="ha-connection-title">Connection</h2><span className={`ha-status${connected ? " is-connected" : ""}`}><i />{connected ? "Connected" : connecting ? "Connecting…" : origin ? "Disconnected" : "Not connected"}</span></div>
         {editing ? <form onSubmit={event => { event.preventDefault(); const result = validateHomeAssistantUrlInput(address); if (result.error) setError(result.error); else if (result.normalized) void run(() => signIn(result.normalized!)); }}>
@@ -85,14 +90,18 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
         </div></div>}
         {runtime.error && <p role="alert" className="ha-error">{runtime.error}</p>}
       </section>
+      </ConnectionContainer>
       <WorkspaceHaStorageInConnect />
       </>}
+      <BackupContainer className={setup ? "ha-setup-disclosure" : undefined}>
+      {setup && <summary>File backups</summary>}
       <section className="ha-section" aria-labelledby="ha-backups-title"><h2 id="ha-backups-title">Backups</h2>
         <p>Keep a file with your full workspace: design, drafts, and device mappings. Sign-in credentials are never included.</p>
         <div className="ha-actions"><button disabled={busy} onClick={() => void run(exportBackup)}><EditorIcon name="export" />Export backup</button>
           <label className={`ha-file-button${busy ? " is-disabled" : ""}`}><EditorIcon name="import" />Import backup<input type="file" accept=".json,application/json" disabled={busy} onChange={event => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void run(() => importBackup(file)); }} /></label>
         </div><p className="ha-help">Import replaces this home’s draft. Review it in the editor before saving.</p>
       </section>
+      </BackupContainer>
       {error && <p role="alert" className="ha-error">{error}</p>}
       {notice && <p role="status" className="ha-notice">{notice}</p>}
       <footer className="ha-page__footer"><img src="/cabane-icon.png" alt="" width="18" height="22" />Cabane<span>Your home, on your terms.</span></footer>

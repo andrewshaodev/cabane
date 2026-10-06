@@ -120,17 +120,34 @@ in the dashboard menu, and from Connection settings in the Connect footer. Leavi
 the editor for this page uses the same guarded draft flush as other exits.
 
 
-The library exposes Open from Home Assistant beside Import and New workspace.
-The existing three-dot menu includes Home Assistant settings, Sync with Home
-Assistant, Add to HA dashboard, and Open on another device. These destinations
-open the same per-home settings page with a preserved action intent, including
-across OAuth. Demo settings continue to offer creation of a personal home.
+The library groups primary New workspace and secondary Import workspace beside
+the title. Import workspace offers From file and From Home Assistant; legacy
+HA import links open the same dialog with that source selected. A quieter
+Add Cabane to Home Assistant action sits separately above the homes. Setup targets the sole
+eligible home directly or asks which home to use; demo and damaged homes are
+excluded. An empty eligible library offers creation. The existing three-dot
+menu includes Home Assistant settings, Sync with Home Assistant, Add to Home
+Assistant, and Open on another device. These destinations open the same per-home
+settings page with preserved intent, including across OAuth.
 
-Workspace storage checks integration availability after sign-in without uploading.
+Setup uses three states: Install, Sync your home, and Open Cabane. After sign-in,
+Cabane checks storage and the read-only HA panel registry independently, without
+uploading. Only the integration-owned custom cabane-panel at /cabane counts as
+installed; storage-only installations and failed checks do not imply readiness.
+Install guidance links to the configured instance's HACS and integration settings,
+explains custom repository installation, restart, and activation, and offers a
+manual-install guide. Opening a link never marks installation complete.
+
 Enable sync performs the first save and enables ongoing sync in one explicit
-action. Missing integrations show installation and Check again. Dashboard setup
-provides a selectable URL for an HA Webpage card; other-device setup provides an
-opening link. Both require successful synchronization before copying. Receiving
+action. After successful sync and verified panel discovery, Open in Home
+Assistant opens that instance's /cabane sidebar panel. Mobile-app directions are
+optional disclosure content; no app installation is required. A missing-home
+fallback explains opening the saved home from the panel's HA library, including
+older releases' Import flow. This web change does not update the integration's
+bundled frontend or implement its session adapter.
+
+Manual Webpage cards and other-device links remain under Other ways to open this
+home. Both require successful synchronization before copying. Receiving standalone
 sessions authenticate normally (popup OAuth inside iframes), restore the exact
 home, enable sync, and navigate to it. Conflicts offer Review copies and Open
 browser copy; invalid links offer the HA library. No public account or public

@@ -63,7 +63,7 @@ for (const file of files) {
     }
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/workspaces/ha-integration-links.ts") {
       // User-activated installation guide, never fetched as a scene asset.
-      inspectedSource = inspectedSource.replace("https://github.com/cabane-app/cabane-home-assistant#installation", "integration-setup-navigation");
+      inspectedSource = inspectedSource.replace("https://github.com/cabane-app/cabane-home-assistant", "integration-setup-navigation");
     }
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/workspaces/HomeAssistantPage.tsx") {
       inspectedSource = inspectedSource.replace("https://home.example.com", "example-address-placeholder");

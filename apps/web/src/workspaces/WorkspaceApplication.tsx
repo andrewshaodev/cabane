@@ -98,7 +98,7 @@ export function WorkspaceApplication() {
   };
   const open = async (id: string) => { await navigate(workspaceHomePath(id)); };
   return <>{migrationError && <p role="alert" className="workspace-error">{migrationError} Your saved source data has been retained.</p>}
-    <WorkspaceLibrary onSettings={async (id, intent) => { await navigate(`${workspaceHomePath(id)}/home-assistant${intent ? `?action=${intent}` : ""}`); }} entries={entries} onOpen={open} onRecover={open}
+    <WorkspaceLibrary demoWorkspaceId={onboarding.state?.demoWorkspaceId} onSettings={async (id, intent) => { await navigate(`${workspaceHomePath(id)}/home-assistant${intent ? `?action=${intent}` : ""}`); }} entries={entries} onOpen={open} onRecover={open}
       onCreate={async name => { const entry = await repository.createBlank(name); enrollBuildTutorial(entry.metadata.id); await refresh(); await open(entry.metadata.id); }}
       onRename={async (id, name) => { await repository.rename(id, record(id).revision, name); await refresh(); }}
       onDuplicate={async (id, name) => { await repository.duplicate(id, record(id).revision, name); await refresh(); }}

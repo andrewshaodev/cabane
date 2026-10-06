@@ -9,7 +9,7 @@ import { WorkspaceHaStorage, WorkspaceHaStorageProvider } from "../../apps/web/s
 import { exportWorkspaceBackup } from "../../apps/web/src/workspaces/workspace-transfer";
 import { fingerprintWorkspace, writeSyncCursor } from "../../apps/web/src/workspaces/workspace-sync-state";
 
-export async function mountHaStorageHarness(options: { missing?: boolean; fullPage?: boolean } = {}) {
+export async function mountHaStorageHarness(options: { missing?: boolean; panelMissing?: boolean; panelError?: boolean; fullPage?: boolean } = {}) {
   const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
   const blank = await repository.createBlank("Lake house");
   const entry = await repository.setConnection(blank.metadata.id, blank.record!.revision, "https://ha.test");
@@ -17,6 +17,10 @@ export async function mountHaStorageHarness(options: { missing?: boolean; fullPa
   const runtime = {
     status: "connected", origin: "https://ha.test", configured: true, connect() {}, disconnect: async () => {},
     sendStorageMessage: async (message: Record<string, unknown>) => {
+      if (message.type === "get_panels") {
+        if (options.panelError) throw new Error("Panel discovery unavailable");
+        return options.missing || options.panelMissing ? {} : { cabane: { component_name: "custom", config: { _panel_custom: { name: "cabane-panel" } } } };
+      }
       if (options.missing) throw { code: "unknown_command" };
       if (message.type === "cabane/workspaces/get") return remote;
       if (message.type === "cabane/workspaces/put") {
@@ -41,7 +45,7 @@ export async function mountHaStorageHarness(options: { missing?: boolean; fullPa
   createRoot(container).render(<HomeAssistantRuntimeValueProvider value={runtime as never}>
     {options.fullPage ? <Settings /> : <WorkspaceHaStorage id={entry.metadata.id} origin="https://ha.test" repository={repository} />}
   </HomeAssistantRuntimeValueProvider>);
-  return { id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository };
+  return { id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository, setIntegrationInstalled: () => { options.missing = false; options.panelMissing = false; options.panelError = false; } };
 }
 
 export async function mountHaStorageBackgroundHarness() {

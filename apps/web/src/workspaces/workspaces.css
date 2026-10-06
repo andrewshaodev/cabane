@@ -70,5 +70,20 @@
 .workspace-library ::selection { background: #d4ddca; }
 @media (max-width: 600px) {
   .workspace-library-actions { display: grid; grid-template-columns: 1fr 1fr; }
-  .workspace-library-actions .workspace-open-ha { grid-column: 1 / -1; }
 }
+
+.workspace-ha-entry { display: flex; justify-content: flex-end; margin: -12px 0 24px; }
+.workspace-ha-entry button { display: inline-flex; align-items: center; gap: 16px; padding: 10px 0; min-height: 44px; border: 0; background: transparent; color: #46593c; font: inherit; cursor: pointer; }
+.workspace-ha-entry button:hover { text-decoration: underline; text-underline-offset: 4px; }
+.workspace-ha-entry button:focus-visible { outline: 2px solid #54684a; outline-offset: 4px; }
+.workspace-setup-homes { display: grid; gap: 8px; margin-bottom: 20px; }
+.workspace-setup-homes button { width: 100%; text-align: left; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .workspace-ha-entry { justify-content: flex-start; margin-top: 0; } }
+
+.workspace-ha-entry .editor-icon { width: 18px; height: 18px; }
+
+.workspace-library-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.workspace-library-actions .editor-icon { width: 18px; height: 18px; flex-shrink: 0; }
+.workspace-library-actions button:hover:not(:disabled) { background: #e9e3d6; }
+.workspace-library-actions .workspace-primary:hover:not(:disabled) { background: #44583b; }
+@media (max-width: 380px) { .workspace-library-actions { grid-template-columns: 1fr; } }

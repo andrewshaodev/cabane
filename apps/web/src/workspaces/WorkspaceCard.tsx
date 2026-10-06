@@ -29,7 +29,7 @@ export function WorkspaceCard({ entry, busy, onOpen, onAction, onRecover, onExpo
     return () => { active = false; window.removeEventListener("focus", refresh); };
   }, [metadata.id, metadata.homeAssistantUrl, record]);
   const storage = workspaceStorageStatus(sync, changed);
-  const actionLabels: Record<WorkspaceCardAction, string> = { settings: "Home Assistant settings", sync: "Sync with Home Assistant", dashboard: "Add to HA dashboard", device: "Open on another device", rename: "Rename", duplicate: "Duplicate", export: "Export", delete: "Delete" };
+  const actionLabels: Record<WorkspaceCardAction, string> = { settings: "Home Assistant settings", sync: "Sync with Home Assistant", dashboard: "Add to Home Assistant", device: "Open on another device", rename: "Rename", duplicate: "Duplicate", export: "Export", delete: "Delete" };
   const preview = readWorkspacePreview(metadata.id);
   const dirty = record && JSON.stringify(record.draft) !== JSON.stringify(record.published);
   return <article className={`workspace-card${error ? " workspace-card--recovery" : ""}`}>

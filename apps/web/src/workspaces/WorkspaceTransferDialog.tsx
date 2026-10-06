@@ -8,9 +8,9 @@ export function WorkspaceTransferDialog({ mode, busy, error, onImport, onExport,
   const [source, setSource] = useState<"file" | "ha">(() => new URLSearchParams(window.location.search).get("import") === "home-assistant" ? "ha" : "file");
   const [json, setJson] = useState("");
   const [fileError, setFileError] = useState<string | null>(null);
-  return <WorkspaceDialog title={mode === "import" ? "Import a workspace" : "Export workspace"} busy={busy} error={fileError ?? error} onCancel={onCancel}>
+  return <WorkspaceDialog title={mode === "import" ? "Import workspace" : "Export workspace"} busy={busy} error={fileError ?? error} onCancel={onCancel}>
     {mode === "import" && remoteImport && <div className="workspace-import-sources" aria-label="Import source">
-      <button aria-pressed={source === "file"} onClick={() => { window.history.replaceState(window.history.state, "", "/workspaces"); setSource("file"); }}>From a file</button>
+      <button aria-pressed={source === "file"} onClick={() => { window.history.replaceState(window.history.state, "", "/workspaces"); setSource("file"); }}>From file</button>
       <button aria-pressed={source === "ha"} onClick={() => { window.history.replaceState(window.history.state, "", "/workspaces?import=home-assistant"); setSource("ha"); }}>From Home Assistant</button>
     </div>}
     {mode === "import" && source === "ha" ? remoteImport : mode === "import" ? <form onSubmit={event => { event.preventDefault(); onImport(json); }}>
