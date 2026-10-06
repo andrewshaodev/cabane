@@ -79,6 +79,9 @@ and [agent rules](./AGENTS.md).
 
 ## Documentation
 
+- [Engineering map](./docs/engineering-map.md) — owning modules, supported interfaces,
+  invariant review points, and checks by product area.
+
 - [Product specification](./PRODUCT_SPEC.md) — current behavior and links to
   focused product documentation.
 - [Architecture](./docs/product/architecture.md) — package responsibilities

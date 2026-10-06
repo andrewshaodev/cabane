@@ -1,3 +1,4 @@
+import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
@@ -13,7 +14,7 @@ const file = (name = "ground-floor.svg", content = svg) => ({
 test(
   "reference plans trace through the normal Construct UI and remain browser-local",
   { timeout: 120_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -234,7 +235,7 @@ test(
       await page.keyboard.up("Control");
       await page.setViewportSize({ width: 1100, height: 760 });
       await page.screenshot({ path: "/tmp/cabane-reference-plan-desktop.png" });
-      await page.waitForTimeout(400);
+      await page.locator(".direction-status").waitFor({ state: "detached" });
       await page.reload();
       await page.locator(".reference-image").waitFor();
       assert.match(await panel.innerText(), /ground-floor.svg/);
@@ -326,5 +327,5 @@ test(
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );

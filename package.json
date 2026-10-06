@@ -17,7 +17,7 @@
     "dev": "npm run dev --workspace=@cabane/web",
     "build": "npm run build --workspace=@cabane/web",
     "typecheck": "node node_modules/typescript-native/bin/tsc --noEmit -p tsconfig.json",
-    "test": "CABANE_TEST_SHARED_MODULES=1 node --test --test-concurrency=4 --test-reporter=./scripts/agent-test-reporter.mjs tests/shards/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "verify:scene-contours": "node scripts/verify-scene-contours.mjs",
     "measure:scene": "node scripts/measure-scene-performance.mjs",
     "verify:furnishing-surfaces": "node scripts/verify-furnishing-surfaces.mjs",
@@ -45,7 +45,9 @@
     "lint:fix": "eslint . --fix --max-warnings 0",
     "knip": "knip --config knip.config.mjs",
     "browser:install": "playwright-core install chromium --no-shell",
-    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run knip && npm run verify:boundaries && npm run verify:policy"
+    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run knip && npm run verify:boundaries && npm run verify:policy && npm run verify:map",
+    "map:generate": "node scripts/engineering-map.mjs --write",
+    "verify:map": "node scripts/engineering-map.mjs"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",

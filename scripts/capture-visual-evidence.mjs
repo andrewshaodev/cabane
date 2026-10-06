@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright-core";
+import { waitForSceneCamera } from "./browser-scene-settle.mjs";
 import { startFixtureServer, serverOrigin } from "./fixture-server.mjs";
 
 const argument = (flag) => {
@@ -121,7 +122,7 @@ const capture = async ({
       await page.mouse.up();
     }
   }
-  await page.waitForTimeout(300);
+  await waitForSceneCamera(page, mode === "walk" ? "PerspectiveCamera" : "OrthographicCamera");
   if (errors.length > 0) throw new Error(`${name}: ${errors.join("\n")}`);
   const file = resolve(outputDirectory, `${name}.png`);
   await page.screenshot({ path: file, fullPage: true });

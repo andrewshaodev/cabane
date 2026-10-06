@@ -13,12 +13,13 @@ await withModules(async (load) => {
   const { ConstructionEditLayer } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionEditLayer.tsx",
   );
-  const { CONSTRUCT_ARCHITECTURE_SETTLE_MS, useConstructEditor } = await load(
+  const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
   );
   const { interactionFloor: floor } = await load("/tests/fixtures/interaction-floor.ts");
 
-  test("publishes committed topology immediately without waiting for 3D mesh construction", async () => {
+  test("publishes committed topology immediately without waiting for 3D mesh construction", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const dom = new JSDOM("<!doctype html><div id='root'></div>");
     const previousWindow = globalThis.window;
     const previousDocument = globalThis.document;
@@ -60,7 +61,7 @@ await withModules(async (load) => {
       assert.equal(editor.history.past.length, 1, "one release creates one undo step");
 
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -77,7 +78,7 @@ await withModules(async (load) => {
       act(() => editor.selectWall("fixture-north"));
       act(() => editor.updateSelectedWallMetadata({ thicknessMeters: 0.26 }));
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.topologyIssues.length,
@@ -94,7 +95,8 @@ await withModules(async (load) => {
     }
   });
 
-  test("republishes the original architecture after undoing back to the initial draft", async () => {
+  test("republishes the original architecture after undoing back to the initial draft", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const dom = new JSDOM("<!doctype html><div id='root'></div>");
     const previousWindow = globalThis.window;
     const previousDocument = globalThis.document;
@@ -122,7 +124,7 @@ await withModules(async (load) => {
         }),
       );
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -134,7 +136,7 @@ await withModules(async (load) => {
       assert.equal(editor.draft.openings[0].offsetPlanUnits, initialOffset);
       assert.equal(editor.isSettling, false);
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -154,7 +156,7 @@ await withModules(async (load) => {
       act(() => editor.replaceFloor(floor));
       assert.equal(editor.isSettling, false);
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)

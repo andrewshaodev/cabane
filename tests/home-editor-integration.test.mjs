@@ -875,8 +875,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
   assert.match(inspector, /label="Wall thickness"/);
   assert.match(inspector, /DebouncedColorInput/);
   assert.match(inspector, /label="Wall exterior color"/);
-  assert.match(inspector, /setTimeout\(\(\) => \{/);
-  assert.match(inspector, /\}, 160\)/);
+  // Debounce timing is verified by the inspector behavior test with a controlled clock.
   assert.doesNotMatch(inspector, /construction-inspector__tools|construction-inspector__history/);
   const openingProperties = await readFile(
     "apps/web/src/editor-preview/construct/OpeningProperties.tsx",

@@ -1,11 +1,13 @@
+import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
+import { waitForSceneCamera } from "../scripts/browser-scene-settle.mjs";
 import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 test(
   "basements use existing floor controls on desktop and mobile, with persistence and undo",
   { timeout: 120_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -67,7 +69,7 @@ test(
       ])
         await page.mouse.click(x, y);
       await page.keyboard.press("Escape");
-      await page.waitForTimeout(600);
+      await page.locator(".direction-status").waitFor({ state: "detached" });
       await page.reload();
       await current.waitFor();
       await page.waitForFunction(
@@ -138,13 +140,13 @@ test(
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );
 
 test(
   "imported basements render in the normal dashboard and Walk",
   { timeout: 60_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -188,18 +190,18 @@ test(
       if (await daylight.count()) await daylight.click();
       await page.getByRole("button", { name: "View", exact: true }).click();
       await page.getByRole("button", { name: "Show roof", exact: true }).click();
-      await page.waitForTimeout(500);
+      await waitForSceneCamera(page, "OrthographicCamera");
       await page.screenshot({ path: "/tmp/cabane-basement-whole.png" });
       await page.locator(".floor-picker").hover();
       await page.getByRole("button", { name: "Floor −1", exact: true }).click();
-      await page.waitForTimeout(500);
+      await waitForSceneCamera(page, "OrthographicCamera");
       await page.screenshot({ path: "/tmp/cabane-basement-cutaway.png" });
       await page.getByRole("button", { name: "Walk mode", exact: true }).click();
-      await page.waitForTimeout(500);
+      await waitForSceneCamera(page, "PerspectiveCamera");
       await page.screenshot({ path: "/tmp/cabane-basement-walk.png" });
       assert.deepEqual(errors, []);
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );
