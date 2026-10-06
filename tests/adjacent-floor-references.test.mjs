@@ -57,4 +57,16 @@ await withModules(async load => {
       assert.deepEqual(references.references,[]);
     }finally{await renderer.unmount();}
   });
+  test('outdoor-only adjacent floors render platform outlines in both directions',async()=>{
+    const polygon=[[0,0],[3,0],[3,2],[0,2]];
+    const floor={...source,walls:[],rooms:[],outdoorPlatforms:[{id:'terrace',polygon}]};
+    for(const direction of ['above','below']) {
+      const renderer=await create(createElement(AdjacentFloorGuide,{floor,direction}));
+      try {
+        const meshes=renderer.scene.findAllByType('Mesh');
+        assert.equal(meshes.length,4,'every platform edge must appear in the guide');
+        assert.ok(meshes.every(mesh=>mesh.instance.raycast()===undefined),'guides must not intercept selection');
+      }finally{await renderer.unmount();}
+    }
+  });
 });

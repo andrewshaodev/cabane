@@ -2,6 +2,8 @@ import type { FloorCoordinates, FloorSpec, PlanPoint } from "../types";
 import type { SceneItemSpec } from "../home-project/types";
 
 interface StairConnection {
+  /** Sides when ascending; omitted means both. */
+  railings?: "both" | "left" | "right" | "none";
   id: string;
   lowerFloorId: string;
   upperFloorId: string;

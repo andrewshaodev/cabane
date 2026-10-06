@@ -23,6 +23,9 @@ export const validateStairs = (building: BuildingGeometry, registries: StairMode
     if (stair.shape === "spiral" && (!Number.isFinite(stair.totalTurnDegrees) || stair.totalTurnDegrees <= 0 || stair.totalTurnDegrees > 360)) {
       add("stair.turn", "Set the spiral turn above 0 and at most 360 degrees.", "fatal"); return;
     }
+    if (stair.railings !== undefined && !["both", "left", "right", "none"].includes(stair.railings)) {
+      add("stair.railings", "Choose Both, Left, Right, or None.", "fatal"); return;
+    }
     const flight = flights[index];
     if (!flight) { add("stair.geometry", "Stairs require positive dimensions and adjacent floors.", "fatal"); return; }
     const clearance = stairClearanceVolumes(flight,building.coordinates);

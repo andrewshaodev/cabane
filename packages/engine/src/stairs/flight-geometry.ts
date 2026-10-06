@@ -1,3 +1,4 @@
+import { floorSupportPolygons } from "../outdoor-platforms/platform-geometry";
 import { deriveFloorLevels } from "../building/floor-levels";
 import { planPointToWorld, worldPointToPlan } from "../geometry";
 import type { Polygon } from "../types";
@@ -56,9 +57,10 @@ export const deriveStairFlight = (building: BuildingGeometry, stair: StairSpec) 
       [p.x+f[0]*d+f[1]*w,p.z+f[1]*d-f[0]*w],[p.x+f[0]*d-f[1]*w,p.z+f[1]*d+f[0]*w]].map(p=>plan(p as [number,number])) as unknown as Polygon;
   };
   const footprintWorld=geometry.footprint.map(world);
-  return {...stair,shape:stair.shape??"straight",spec:stair,baseElevationMeters,riseMeters,forward,side,stepCount,
+  return {...stair,coordinates:building.coordinates,shape:stair.shape??"straight",spec:stair,baseElevationMeters,riseMeters,forward,side,stepCount,
     widthMeters:geometry.widthMeters,runMeters:geometry.runMeters,
     originWorld:[x,z] as const,startWorld:[path[0].x,path[0].z] as const,path,entranceForward,exitForward,
+    upperSupportWorld: floorSupportPolygons(building.floors[index + 1]).map(polygon => polygon.map(p => planPointToWorld(p, building.coordinates))),
     footprintWorld,footprint:footprintWorld.map(plan) as unknown as Polygon,
     treads:geometry.treads.map(t=>({...t,polygon:t.polygon.map(world)})),
     lowerLanding:landing(false),upperLanding:landing(true)};

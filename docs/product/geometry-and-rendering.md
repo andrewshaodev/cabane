@@ -61,7 +61,9 @@ compose finishes; implementation belongs to the engine finish modules.
 Visible home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable
 product. Shared lighting, fading, and outline behavior stay engine-owned.
-Physical lights render only on the active floor. Indoor sources close to an
+Physical lights render only on the active floor. Device emitters, including
+fallbacks from resolved bindings, are scoped to their owning floor so stair
+transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
 opaque wall emit into their room through an unshadowed spotlight; sources at
 openings and sources farther from walls retain point lighting. This avoids
 lighting through the wall without allocating point-light shadow maps.
@@ -194,3 +196,5 @@ lower ceiling slab coverage; remaining slab regions use 0.16 m thickness. Higher
 floors cover their actual indoor and outdoor support footprints. Explicit low
 exterior walls retain their height when another floor exists, while full-height
 facades continue across the real inter-floor slab.
+
+Stair `railings` optionally selects `both`, `left`, `right`, or `none`, relative to ascent; omission preserves both sides. Spiral stairs retain their central support and apply side selection to the outer rail and exit bridge. Upper-opening guards are clipped to actual floor/platform support outside the opening, including partial and disconnected floor regions; exterior flights never acquire floating opening guards. All stair shapes share this guard geometry.

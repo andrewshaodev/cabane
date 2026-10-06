@@ -24,6 +24,17 @@ await withModules(async load => {
       for (const key of Object.keys(globals)) { if (previous[key]) Object.defineProperty(globalThis, key, previous[key]); else delete globalThis[key]; }
     }
   }
+  test("railing selection saves immediately with an explicit ascending-side description", async () => withDom(async ({root,dom}) => {
+    const project=makeStairProject(), saved=[];
+    await act(async()=>root.render(React.createElement(StairDetails,{project,stair:project.stairs[0],onSave:value=>saved.push(value),onCancel(){}})));
+    const select=document.querySelector('select[aria-label="Stair railings"]');
+    assert.equal(select.value,'both');
+    assert.match(select.parentElement.textContent,/walking upstairs/);
+    for(const value of ['left','right','none','both']) {
+      await act(async()=>{select.value=value;select.dispatchEvent(new dom.window.Event('change',{bubbles:true}));});
+      assert.equal(saved.at(-1).railings,value);
+    }
+  }));
   test("stair fields identify blocking values accessibly and preserve the last saved geometry", async () => withDom(async ({ root, dom }) => {
     const project = makeStairProject(), saved = [];
     await act(async () => root.render(React.createElement(StairDetails, { project, stair: project.stairs[0], onSave: stair => saved.push(stair), onCancel() {} })));

@@ -513,9 +513,10 @@ export const validateHomeProjectSchemaShape = (
       const stair = record(entry, path, issues);
       if (!stair) return;
       const shape = stair.shape ?? "straight";
+      if (stair.railings !== undefined && !["both", "left", "right", "none"].includes(String(stair.railings))) addProjectIssue(issues, "stair.railings", `${path}.railings`, "Choose Both, Left, Right, or None.");
       const dimensions = shape === "spiral" ? ["diameterMeters", "totalTurnDegrees"]
         : (shape === "l-shaped" || shape === "u-shaped") ? ["widthMeters", "lowerRunMeters", "upperRunMeters"] : ["widthMeters", "runMeters"];
-      keys(stair, ["id", "lowerFloorId", "upperFloorId", "at", "rotationYRadians", "shape", ...dimensions,
+      keys(stair, ["id", "lowerFloorId", "upperFloorId", "at", "rotationYRadians", "shape", "railings", ...dimensions,
         ...(shape === "spiral" ? ["direction"] : (shape === "l-shaped" || shape === "u-shaped") ? ["turn"] : [])], path, issues);
       if (!["straight", "l-shaped", "u-shaped", "spiral"].includes(String(shape))) addProjectIssue(issues,"stair.shape",`${path}.shape`,"Unknown stair shape.");
       if (shape === "spiral" && !["clockwise","counterclockwise"].includes(String(stair.direction))) addProjectIssue(issues,"stair.direction",`${path}.direction`,"Choose clockwise or counterclockwise.");
