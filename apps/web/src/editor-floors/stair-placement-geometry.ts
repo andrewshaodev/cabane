@@ -52,7 +52,7 @@ export function convertStairShape(building:HomeProject,stair:StairSpec,shape:Sta
   if((stair.shape??'straight')===shape)return stair;
   const flight=deriveStairFlight(building,stair);
   const entrance=flight?.startWorld??planPointToWorld(stair.at,building.coordinates);
-  const base={id:stair.id,lowerFloorId:stair.lowerFloorId,upperFloorId:stair.upperFloorId,
+  const base={id:stair.id,railings:stair.railings,lowerFloorId:stair.lowerFloorId,upperFloorId:stair.upperFloorId,
     at:worldPointToPlan({x:entrance[0],z:entrance[1]},building.coordinates),rotationYRadians:stair.rotationYRadians};
   const rise=building.floors.find(f=>f.id===stair.lowerFloorId)!.floorToFloorHeightMeters;
   if(shape==='spiral')return {...base,shape,at:worldPointToPlan({x:entrance[0]-.55*Math.cos(base.rotationYRadians),

@@ -42,6 +42,11 @@ export function StairDetails({ project, stair, registries, liveIssues, onSave, o
         </select></label>
       </> : number("Length (m)",draft.runMeters,runMeters=>update({...draft,runMeters}),0)}
     </>}
+    <label className="construction-inspector__single-control">Railings<select aria-label="Stair railings"
+      value={draft.railings ?? "both"} onChange={event => update({ ...draft, railings: event.target.value as StairSpec["railings"] })}>
+      <option value="both">Both sides</option><option value="left">Left side</option>
+      <option value="right">Right side</option><option value="none">None</option>
+    </select><span>Left and right when walking upstairs.</span></label>
     <details className="selection-details-advanced"><summary>Advanced</summary>
       {number("Rotation (degrees)", draft.rotationYRadians * 180 / Math.PI, value => update({ ...draft, rotationYRadians: value * Math.PI / 180 }))}
       {number(draft.shape === "spiral" ? "Center X (plan units)" : "Start X (plan units)", draft.at[0], value => update({ ...draft, at: [value, draft.at[1]] }))}
