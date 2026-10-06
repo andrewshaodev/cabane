@@ -27,7 +27,11 @@ Pills, room surfaces, status labels and room shortcuts share selection behavior.
 The selected pill is exposed to assistive technology and stays visible after
 selection or resize. The strip is absent in Walk, roof view and device overlays,
 which retain their contextual heading. Room details stay on the right on desktop;
-narrow portrait layouts use a bottom panel. Compact landscape keeps a side panel.
+narrow portrait layouts use a bottom sheet with a visible border and shadow.
+The hero fills the sheet edge-to-edge and retains its sticky photo parallax.
+Back, Reorder and the labeled Walk inside icon overlay the hero, with reserved
+space above wrapping room titles and status badges. The mobile room sheet occupies 54% of the
+viewport, leaving the scene visible above it. Compact landscape keeps a side panel.
 Dedicated device controls retain their existing modal layout.
 
 Interactive Orbit floors and wall faces use gently subdued base colors. Selecting
