@@ -1,3 +1,5 @@
+import type { WalkToolDefinition } from "../walk-tools/types";
+
 export type ActionBarBuiltIn = "build" | "walk" | "night" | "view" | "all-lights";
 
 export type ActionBarTarget =
@@ -22,15 +24,21 @@ export const defaultActionBarItems: readonly ActionBarItem[] = [
   { id: "default-view", target: { kind: "built-in", action: "view" } },
 ];
 
-export function resolveActionBarItems(config?: ActionBarConfiguration): readonly ActionBarItem[] {
-  return config?.items ?? defaultActionBarItems;
+type DefaultTool = Pick<WalkToolDefinition, "id" | "defaultShortcut">;
+
+export function resolveActionBarItems(config?: ActionBarConfiguration, tools: readonly DefaultTool[] = []): readonly ActionBarItem[] {
+  if (config) return config.items;
+  const defaults = tools.filter(tool => tool.defaultShortcut);
+  return defaults.length ? [...defaultActionBarItems, ...defaults.map(tool => ({
+    id: `default-tool-${tool.id}`, target: { kind: "walk-tool" as const, toolId: tool.id },
+  }))] : defaultActionBarItems;
 }
 
 const builtInActions = new Set<ActionBarBuiltIn>(["build", "walk", "night", "view", "all-lights"]);
 
 /** Published records can be corrupt even when normal project imports are validated. */
-export function resolvePublishedActionBarItems(config: unknown): readonly ActionBarItem[] {
-  if (config === undefined) return defaultActionBarItems;
+export function resolvePublishedActionBarItems(config: unknown, tools: readonly DefaultTool[] = []): readonly ActionBarItem[] {
+  if (config === undefined) return resolveActionBarItems(undefined, tools);
   const rawItems = config !== null && typeof config === "object" && !Array.isArray(config)
     ? (config as { items?: unknown }).items : undefined;
   if (!Array.isArray(rawItems)) return [{ id: "unavailable-action-bar", target: { kind: "room", roomId: "unavailable-action-bar" } }];

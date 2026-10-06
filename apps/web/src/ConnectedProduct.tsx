@@ -1,10 +1,11 @@
+import { useWorkspaceToolStorage } from "./workspaces/useWorkspaceToolStorage";
 import { installedWalkTools } from "./walk-tools";
 import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 import {
-  useHomeAssistantHostSession, FloorNavigationProvider, CabaneAppExperience, createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin,
+  WalkToolStorageProvider, useHomeAssistantHostSession, FloorNavigationProvider, CabaneAppExperience, createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin,
   type HomeProjectLifecycle, type HomeProjectRecord, type OnboardingOptions,
 } from "@cabane/engine";
 import { composeOwnerProjectManifest, ownerDeviceModels } from "./project-runtime";
@@ -29,6 +30,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   const publishedManifest = useMemo(() => record.publishedAt === 0 ? null : composeOwnerProjectManifest(record.published), [record.published, record.publishedAt]);
   const [recovery, setRecovery] = useState({ message: recoveryMessage, raw: recoveryRaw });
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const toolStorage = useWorkspaceToolStorage(record, setRecord, setConnectionError);
   const [constructionApplied, setConstructionApplied] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +45,8 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
     }
   }, []);
-  const openEditor = (request: EditorOpenRequest) => {
+  const openEditor = async (request: EditorOpenRequest) => {
+    await toolStorage.flush();
     const path = (request.mode === "construct" || request.mode === "furnish") && !request.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
       ? mobileEditorPath(record.homeId, request.mode) : editorPath(request, record.homeId);
     void navigate(path, { state: { editorRequest: request } });
@@ -65,7 +68,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
       onClose={(next, reason) => { setRecovery({ message: undefined, raw: undefined }); setRecord(next); setConstructionApplied(reason === "applied"); window.sessionStorage.removeItem(CONNECT_RETURN_KEY); }} />;
   const home = record.publishedAt === 0
     ? <Navigate to={editorPath({ mode: "construct" }, record.homeId)} replace />
-    : <ShortcutThumbnailSurface><CabaneAppExperience manifest={publishedManifest!} architectureModels={stableArchitectureModelRegistry}
+    : <WalkToolStorageProvider storage={toolStorage.storage}><ShortcutThumbnailSurface><CabaneAppExperience manifest={publishedManifest!} architectureModels={stableArchitectureModelRegistry}
     onboarding={onboarding} walkTools={installedWalkTools}
     deviceModels={ownerDeviceModels} homeAssistantUrl={homeAssistantUrl} onHomeAssistantUrlChange={(url) => {
       setConnectionError(null);
@@ -78,7 +81,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
     bindingManager={manager} constructionApplied={constructionApplied} onEditHome={(mode = "construct") => openEditor({ mode })}
     onCustomizeActionBar={() => openEditor({ mode: "construct", panel: "action-bar" })}
     onOpenConnect={(view, roomId) => openEditor({ mode: "connect", view, roomId })}
-    onExportBrowserData={() => downloadConnectData(exportWorkspaceBackup({ name: record.draft.home.name, homeAssistantUrl, hasPublished: record.publishedAt !== 0 }, record), `${record.homeId}-private-workspace.json`)} /></ShortcutThumbnailSurface>;
+    onExportBrowserData={() => downloadConnectData(exportWorkspaceBackup({ name: record.draft.home.name, homeAssistantUrl, hasPublished: record.publishedAt !== 0 }, record), `${record.homeId}-private-workspace.json`)} /></ShortcutThumbnailSurface></WalkToolStorageProvider>;
   return <FloorNavigationProvider key={record.homeId}>
     {connectionError && <div className="workspace-connection-error" role="alert">{connectionError}<button type="button" onClick={() => setConnectionError(null)}>Dismiss</button></div>}
     <Routes>

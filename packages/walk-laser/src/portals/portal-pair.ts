@@ -2,9 +2,9 @@ import { otherPortal, type PortalAnchor, type PortalColor, type PortalPair } fro
 import { portalsOverlap } from "./portal-placement";
 
 /** Only successful, non-overlapping placements advance the alternating color. */
-export function createPortalPair() {
-  let pair: PortalPair = {};
-  let next: PortalColor = "blue";
+export function createPortalPair(initial: PortalPair = {}, nextColor: PortalColor = "blue") {
+  let pair: PortalPair = initial;
+  let next: PortalColor = nextColor;
   return {
     get current() { return pair; },
     get nextColor() { return next; },

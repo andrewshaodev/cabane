@@ -229,3 +229,89 @@ test('Chrome portal placement on indoor floors, outdoor ground and exterior wall
     await page.screenshot({path:'/tmp/cabane-portals-outdoor-failure.png'});throw error;
   } finally {await browser.close();}
 });
+
+// The real host adapter and IndexedDB repository; scene actions remain normal UI input.
+const persistedFixture = fixture.replace("import React from 'react';", `import React from 'react';
+import { WalkToolStorageProvider, createHomeProjectRepository, createIndexedDbProjectRecordStore, createEmptyHomeProject } from '@cabane/engine';
+import { useWorkspaceToolStorage } from '/@fs/${process.cwd()}/apps/web/src/workspaces/useWorkspaceToolStorage.ts';
+const repository = createHomeProjectRepository(createIndexedDbProjectRecordStore(indexedDB), {furnishingModels:{},deviceModels:{}});
+window.readSavedPortals = async () => (await repository.load('portal-test')).published.toolState?.['cabane.laser'];
+const initial = (await repository.loadOrCreate(createEmptyHomeProject('portal-test','Portal test'),0)).record;
+function PersistentHome({children}) {
+ const [record,setRecord] = React.useState(initial);
+ const {storage}=useWorkspaceToolStorage(record,setRecord,message=>{window.storageError=message;});
+ return React.createElement(WalkToolStorageProvider,{storage},children);
+}
+`).replace("React.createElement(HomeAssistantRuntimeProvider,null,", "React.createElement(PersistentHome,null,React.createElement(HomeAssistantRuntimeProvider,null,")
+.replace("Scene:ObservedGun}]})));", "Scene:ObservedGun}]}))));");
+
+for (const reducedMotion of ['no-preference','reduce']) test(`Chrome saved portals reload and either shot closes them (${reducedMotion})`, async () => {
+ const {server}=await getBrowserTestServer('app');
+ const browser=await createBrowserTestSession();
+ const page=await browser.newPage({viewport:{width:1280,height:800},reducedMotion});
+ page.setDefaultTimeout(12000);
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ const equip=async()=>{
+  await page.locator('canvas').first().waitFor();
+  const walk=page.getByRole('button',{name:'Walk mode',exact:true});
+  if(await walk.count()) await walk.click();
+  else await page.locator('canvas').first().click();
+  await page.keyboard.press('g');
+  await page.waitForFunction(()=>window.portalObservation && document.pointerLockElement);
+ };
+ const turn=async yaw=>{
+  await page.evaluate(yaw=>window.dispatchEvent(new MouseEvent('mousemove',{movementX:(window.portalObservation.yaw-yaw)/.0024})),yaw);
+  await page.waitForFunction(yaw=>Math.abs(window.portalObservation.yaw-yaw)<.01,yaw);
+ };
+ const shoot=async button=>{await page.mouse.down({button});await page.mouse.up({button});};
+ const saved=()=>page.evaluate(()=>window.readSavedPortals());
+ try {
+  await page.route('**/portal-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-fixture',persistedFixture)}));
+  await page.goto(server.resolvedUrls.local[0]+'portal-fixture');await equip();
+  await turn(Math.PI);await shoot('right');
+  await page.waitForFunction(()=>window.portalObservation.portals.length===1);
+  await page.locator('[data-action=portal][data-next-portal=gold]').waitFor();
+  // Let the revision-checked home write settle before another action or reload.
+  await page.waitForTimeout(150);
+  await turn(0);await shoot('right');
+  await page.waitForFunction(()=>window.portalObservation.portals.length===2 && window.portalObservation.portals.every(p=>p.scale===1));
+  const before=await saved();assert.ok(before.pair.blue && before.pair.gold);
+  await page.keyboard.press('g');
+  await page.waitForFunction(()=>!document.querySelector('.walk-laser'));
+  await page.keyboard.press('g');
+  await page.waitForFunction(()=>window.portalObservation.portals.length===2);
+  await page.reload();await equip();
+  await page.waitForFunction(()=>window.portalObservation.portals.length===2 && window.portalObservation.portals.every(p=>p.scale===1));
+  assert.deepEqual(await saved(),before);
+  await turn(0);await shoot('left');
+  if(reducedMotion==='no-preference') {
+   await page.waitForFunction(()=>window.portalObservation.portals.some(p=>p.name==='gun-portal-closing-gold' && p.scale>0 && p.scale<.9));
+   await page.screenshot({path:'/tmp/cabane-portal-closing.png'});
+  }
+  await page.waitForFunction(()=>window.portalObservation.portals.length===1 && window.portalObservation.portals[0].name==='gun-portal-blue');
+  assert.equal((await saved()).pair.gold,undefined);
+  await turn(Math.PI);await shoot('right');
+  await page.waitForFunction(()=>window.portalObservation.portals.length===0);
+  assert.deepEqual((await saved()).pair,{});
+  await page.reload();await equip();await page.waitForTimeout(250);
+  assert.equal(await page.evaluate(()=>window.portalObservation.portals.length),0);
+  assert.equal(await page.evaluate(()=>window.storageError),undefined);
+  assert.deepEqual(errors,[]);
+ } catch(error) {console.error(errors,await page.locator('body').innerText());throw error;} finally {await browser.close();}
+});
+
+
+test('Chrome default shortcuts include the installed Laser without configuration', async () => {
+ const {server}=await getBrowserTestServer('app');
+ const browser=await createBrowserTestSession();
+ const page=await browser.newPage({viewport:{width:1280,height:800}});
+ try {
+  const defaults=fixture.replace(/manifest.actionBar = .*?;\n/, 'delete manifest.actionBar;\n');
+  await page.route('**/portal-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-fixture',defaults)}));
+  await page.goto(server.resolvedUrls.local[0]+'portal-fixture');
+  await page.getByRole('button',{name:'Walk mode',exact:true}).click();
+  await page.keyboard.press('g');
+  await page.waitForFunction(()=>window.portalObservation && document.querySelector('.walk-laser'));
+  assert.equal(await page.getByRole('button',{name:'Unequip Laser',exact:true}).count(),1);
+ } finally {await browser.close();}
+});

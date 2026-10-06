@@ -437,8 +437,9 @@ export const validateHomeProjectSchemaShape = (
   const project = record(input, "$", issues);
   if (!project) return null;
   const legacy = project.schemaVersion === 1;
-  keys(project, ["schemaVersion", "seedRevision", "home", ...(legacy ? ["floor"] : ["floors", "coordinates", "stairs"]), "sceneItems", "roomProfiles", "openingProfiles", "shortcuts", "actionBar", "assumptions"], "$", issues);
+  keys(project, ["schemaVersion", "seedRevision", "home", ...(legacy ? ["floor"] : ["floors", "coordinates", "stairs"]), "sceneItems", "roomProfiles", "openingProfiles", "shortcuts", "actionBar", "toolState", "assumptions"], "$", issues);
   if (!legacy && project.schemaVersion !== 2) addProjectIssue(issues, "project.schema-version", "schemaVersion", "Supported project versions are 1 and 2.");
+  if (project.toolState !== undefined) record(project.toolState, "toolState", issues);
   string(project.seedRevision, "seedRevision", issues);
   const home = record(project.home, "home", issues);
   if (home) {

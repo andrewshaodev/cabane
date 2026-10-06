@@ -35,6 +35,8 @@ export interface WalkToolProps {
 export interface WalkToolDefinition {
   id: string;
   label: string;
+  /** Include this installed tool in uncustomized and restored default action bars. */
+  defaultShortcut?: boolean;
   /** Optional non-movement key, active only when this shortcut is on the bar. */
   shortcutKey?: string;
   Icon: ComponentType;

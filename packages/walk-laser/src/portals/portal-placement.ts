@@ -6,7 +6,8 @@ const surfaceNormal = (hit: Intersection) => hit.face?.normal.clone()
   .applyMatrix3(new Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize();
 
 /** Fit the whole oval on a flat surface and reserve a supported exit before accepting it. */
-export function placePortal(hit: Intersection, scene: Object3D, navigation: WalkToolNavigation): PortalAnchor | null {
+export function placePortal(hit: Intersection, scene: Object3D, navigation: WalkToolNavigation,
+  surfaceQuery: (ray: Raycaster, scene: Object3D) => { hit: Intersection | null } = raycastWalkScene): PortalAnchor | null {
   const normal = surfaceNormal(hit);
   if (!normal || (Math.abs(normal.y) > .05 && normal.y < .98)) return null;
   for (let object: Object3D | null = hit.object; object; object = object.parent) {
@@ -29,7 +30,7 @@ export function placePortal(hit: Intersection, scene: Object3D, navigation: Walk
     const sample = offset.applyQuaternion(rotation).add(center);
     probe.set(sample.clone().addScaledVector(normal, .08), normal.clone().negate());
     probe.far = .16;
-    const surface = raycastWalkScene(probe, scene).hit;
+    const surface = surfaceQuery(probe, scene).hit;
     if (!surface || Math.abs(surface.point.clone().sub(sample).dot(normal)) > .025
       || (surfaceNormal(surface)?.dot(normal) ?? 0) < .98) return null;
   }
