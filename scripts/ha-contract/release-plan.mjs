@@ -1,5 +1,17 @@
+export function contractRequiresRelease(previous, release) {
+  if (previous?.fingerprint === release.fingerprint) return false;
+  const baseline = release.baseline;
+  return !(
+    baseline &&
+    release.fingerprint === baseline.compatibilityFingerprint &&
+    release.revision === baseline.revision &&
+    previous?.revision === baseline.revision &&
+    previous?.fingerprint === baseline.fingerprint
+  );
+}
+
 export function integrationReleasePlan(version, previous, release) {
-  if (previous?.fingerprint === release.fingerprint) return null;
+  if (!contractRequiresRelease(previous, release)) return null;
   if (previous && previous.revision >= release.revision)
     throw new Error("Refusing to replace a newer integration contract with an older one.");
   if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error("Expected a stable integration version.");
