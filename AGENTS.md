@@ -1,5 +1,9 @@
 # Cabane Agent Instructions
 
+Before locating product code, changing module boundaries, or choosing checks, read
+[the engineering map](docs/engineering-map.md). Update its routing data and regenerate
+it in the same change when ownership, interfaces, invariants, or checks change.
+
 ## Scope and authority
 
 These instructions apply to the entire repository. `PRODUCT_SPEC.md` and its linked files under `docs/product/` form the
