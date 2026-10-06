@@ -112,8 +112,12 @@ After building, `node scripts/verify-panel.mjs` serves the production artifact
 under a nested local asset path and opens a synthetic Home Assistant host in
 Chromium (`CHROME_PATH` can override the executable). It exercises the real
 workspace/editor UI, host-session selection, HA import/storage, reconnect and
-detach behavior, and local asset loading while retaining the host URL. Unit and
-browser regressions additionally cover origin mismatch, demo isolation, stale
+detach behavior, and local asset loading while retaining the host URL. The browser
+fixture uses HA's auto-height wrapper with safe-area padding and verifies
+content bounds beside the sidebar at desktop, portrait and landscape sizes.
+Set `CABANE_PANEL_BUNDLE` to verify an extracted release's frontend directory
+instead of the local build. Unit and browser regressions additionally cover
+origin mismatch, demo isolation, stale
 connection work, token-storage traps, and standalone migration compatibility.
 These fixtures use fake HA data and do not establish live household acceptance
 or deploy the artifact to Home Assistant.
