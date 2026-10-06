@@ -93,6 +93,88 @@ await withModules(async (load) => {
     await load("/packages/engine/src/index.ts");
   const registries = { furnishingModels: {}, deviceModels: {} };
   const project = () => createEmptyHomeProject("synthetic-home", "Test home");
+  const { interactionFloor } = await load("/tests/fixtures/interaction-floor.ts");
+  const { stableFurnishingRegistry } = await load("/packages/catalog/src/furnishing/index.ts");
+  const missingModelFixture = () => {
+    const home = project();
+    home.floors = [{ ...home.floors[0], ...structuredClone(interactionFloor), openings: [] }];
+    const item = {
+      id: "shelf",
+      kind: "furnishing",
+      floorId: home.floors[0].id,
+      modelId: "oak-floating-shelf",
+      size: [1.1, 0.035, 0.24],
+      placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
+    };
+    home.sceneItems = [item];
+    return { home, item, models: registries };
+  };
+  test("missing catalog models import through portable and private formats as placeholders", () => {
+    const { home, item, models } = missingModelFixture();
+    const record = createSeedProjectRecord(home);
+    for (const json of [
+      JSON.stringify(home),
+      JSON.stringify(record),
+      exportWorkspaceBackup(
+        { name: home.home.name, hasPublished: true, homeAssistantUrl: null },
+        record,
+      ),
+    ]) {
+      const imported = parseWorkspaceImport(json, models);
+      assert.deepEqual(
+        imported.record.draft.sceneItems.find((candidate) => candidate.id === item.id),
+        item,
+      );
+    }
+  });
+  test("a missing-model warning cannot mask the error that blocks a private import", () => {
+    const { home, item, models } = missingModelFixture();
+    item.placement = {
+      kind: "wall",
+      wallId: "missing-wall",
+      face: "left",
+      offsetFromWallStartPlanUnits: 1,
+      elevationMeters: 1,
+      depthOffsetMeters: 0,
+      rotationOffsetRadians: 0,
+    };
+    const record = createSeedProjectRecord(home);
+    for (const json of [
+      JSON.stringify(record),
+      exportWorkspaceBackup(
+        { name: home.home.name, hasPublished: true, homeAssistantUrl: null },
+        record,
+      ),
+    ]) {
+      assert.throws(() => parseWorkspaceImport(json, models), /Wall “missing-wall” does not exist/);
+    }
+  });
+  test("older catalogs import a missing shelf and newer bed variant without losing either ID", () => {
+    const { home } = missingModelFixture();
+    const { variants: _variants, ...legacyBed } = stableFurnishingRegistry["double-bed"];
+    const models = { ...registries, furnishingModels: { "double-bed": legacyBed } };
+    const bed = {
+      id: "bed",
+      kind: "furnishing",
+      floorId: home.floors[0].id,
+      modelId: "double-bed",
+      variant: "cozy-white-blue",
+      size: legacyBed.defaultSize,
+      placement: { kind: "absolute", at: [4, 4], elevationMeters: 0, rotationYRadians: 0 },
+    };
+    home.sceneItems.push(bed);
+    const record = createSeedProjectRecord(home);
+    for (const json of [
+      JSON.stringify(home),
+      exportWorkspaceBackup(
+        { name: home.home.name, hasPublished: true, homeAssistantUrl: null },
+        record,
+      ),
+    ]) {
+      const imported = parseWorkspaceImport(json, models);
+      assert.deepEqual(imported.record.draft.sceneItems, home.sceneItems);
+    }
+  });
   test("portable blank designs import as an unapplied home without private configuration", () => {
     const imported = parseWorkspaceImport(JSON.stringify(project()), registries);
     assert.equal(imported.hasPublished, false);

@@ -724,7 +724,7 @@ await withModules(async (load) => {
     }
   });
 
-  test("validates furniture and device variants while accepting omitted defaults", () => {
+  test("unavailable furniture and device variants warn and render defaults without changing saved IDs", () => {
     const project = fixtureHomeProject();
     const registries = fixtureHomeExtensions();
     assert.equal(validateHomeProject(project, registries).valid, true);
@@ -742,7 +742,16 @@ await withModules(async (load) => {
       assert.equal(validateHomeProject(project, registries).valid, true);
       item.variant = "missing";
       const result = validateHomeProject(project, registries);
-      assert.ok(result.issues.some((issue) => issue.code === "project.variant-missing"));
+      assert.equal(result.valid, true, JSON.stringify(result.issues));
+      assert.equal(
+        result.issues.find((issue) => issue.code === "project.variant-missing")?.severity,
+        "warning",
+      );
+      assert.equal(item.variant, "missing");
+      assert.equal(
+        engineApi.resolveModelVariant(registry[item.modelId], item.variant).id,
+        "default",
+      );
       item.variant = "default";
     }
   });

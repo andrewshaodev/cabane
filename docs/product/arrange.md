@@ -20,7 +20,10 @@ and depth controls, including previously fixed-size presets. Resizing scales the
 procedural model, so extreme dimensions can stretch its details. Device and
 home-local extension controls follow their declared resize policies. Variant is a standard saved attribute for both
 furniture and devices. Details shows a Variant selector only when the model has
-multiple choices; the first choice is the default for older items. Variant changes
+multiple choices; the first choice is the default for older items.
+An unavailable saved variant renders using that default with a warning while
+retaining the original variant ID for a later catalog update. It does not block Save.
+Variant changes
 keep identity, size, placement and bindings, participate in undo/redo and duplication,
 and are published on Apply. Lights also expose a State selector: Always off,
 Always on, Night only, or Connected (the default). Night only follows the sun's

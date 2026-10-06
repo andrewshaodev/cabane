@@ -4,6 +4,8 @@ Unsupported fields and newer schema versions remain blocked to protect saved
 data from older editors. Errors explain the possible newer-client mismatch and
 the HACS update, HA restart and browser/Companion reload steps; raw diagnostics
 remain available. Failed parsing leaves existing local and HA copies unchanged.
+Rejected workspace records list blocking errors before warnings, so an unavailable
+model warning cannot hide the actual reason an import or restore failed.
 
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
 palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
@@ -16,8 +18,11 @@ absolute, wall-relative, or ceiling-relative placement. Device items declare
 typed entity slots with exactly one primary role. No React components or HA
 credentials belong in this serialized project. Runtime manifest composition
 resolves registered implementations separately. Omitted variants resolve to the model's
-first choice (or `default` for models without explicit choices); unknown variant
-IDs produce actionable validation errors. An unknown furnishing or device model
+first choice (or `default` for models without explicit choices). Unknown furnishing
+and device variant IDs remain saved and produce warnings; rendering uses the
+model's default choice until the requested variant becomes available. Import,
+reload and Save remain available when only catalog models or variants are missing.
+An unknown furnishing or device model
 ID is retained as a warning and renders as an editable generic placeholder with
 the saved size and placement, so a JSON project can be imported before its
 personal model pack is available.

@@ -228,7 +228,10 @@ export const parseHomeProjectRecord = (
       valid: false,
       raw,
       issues: issues.sort(
-        (left, right) => left.path.localeCompare(right.path) || left.code.localeCompare(right.code),
+        (left, right) =>
+          Number(left.severity === "warning") - Number(right.severity === "warning") ||
+          left.path.localeCompare(right.path) ||
+          left.code.localeCompare(right.code),
       ),
     };
   }

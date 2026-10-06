@@ -140,11 +140,11 @@ export const validateSceneItemsAndSupports = (
         item.variant !== undefined &&
         !modelVariants(definition).some((variant) => variant.id === item.variant)
       ) {
-        addProjectIssue(
+        addProjectWarning(
           issues,
           "project.variant-missing",
           `${itemPath}.variant`,
-          `Variant “${item.variant}” is not available for this model.`,
+          `Variant “${item.variant}” is not available for model “${item.modelId}”; its default variant will be shown until it is available.`,
         );
       }
       if (
