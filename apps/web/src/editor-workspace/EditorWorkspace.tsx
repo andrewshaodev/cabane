@@ -1,3 +1,5 @@
+import { EditorButton } from "../editor-chrome/EditorButton";
+import { SidebarSectionSummary } from "../editor-chrome/SidebarSectionSummary";
 import { ReferencePlanPanel } from "../editor-reference-plan/ReferencePlanPanel";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
@@ -232,23 +234,21 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             planImportControls={PLAN_IMPORT_ENABLED && <PlanImportActions homeId={snapshot.project.home.id}
               disabled={tutorialBusy} onImport={importWorkspace} />}
             tutorialControls={tutorial.state?.status !== "active" && <details className="construction-inspector__floor-disclosure">
-              <summary>Build tutorial<EditorIcon name="chevron" /></summary>
-              <p className="construction-inspector__tool-hint">A guided introduction to drawing and furnishing your first room.</p>
-              <button type="button" className="editor-tutorial-restart" disabled={tutorialBusy} onClick={tutorial.restart}>Restart tutorial</button>
+              <SidebarSectionSummary icon="tutorial" title="Tutorial" description="Learn to draw and furnish your first room." />
+              <div className="sidebar-section-content"><EditorButton disabled={tutorialBusy} onClick={tutorial.restart}>Restart tutorial</EditorButton></div>
             </details>}
             walkStartControls={<details className="construction-inspector__floor-disclosure">
-              <summary>Walkthrough<EditorIcon name="chevron" /></summary>
-              <div className="construction-walk-start" role="group" aria-label="Walk starting point">
-                <p>Choose where you enter your home when you select Explore.</p>
-                <button type="button" aria-pressed={placingWalkStart} disabled={unsettled && !placingWalkStart}
+              <SidebarSectionSummary icon="spawn" title="Spawn area" description="Choose where you start in Explore." />
+              <div className="construction-walk-start sidebar-section-content" role="group" aria-label="Walk starting point">
+                <EditorButton aria-pressed={placingWalkStart} disabled={unsettled && !placingWalkStart}
                   onClick={() => { clearConstructionSelection(); constructEditor.setTool("select"); setWalkStartFloor(placingWalkStart ? null : activeFloorId); }}>
                   {placingWalkStart ? "Cancel" : snapshot.project.home.walkStart ? "Move starting point" : "Set starting point"}
-                </button>
+                </EditorButton>
                 {placingWalkStart && <p role="status">Click inside the floor to set your starting point. Escape cancels.</p>}
-                {snapshot.project.home.walkStart && <button type="button" onClick={() => {
+                {snapshot.project.home.walkStart && <EditorButton variant="text" onClick={() => {
                   const { walkStart, ...home } = snapshot.project.home;
                   commit({ ...snapshot, project: { ...snapshot.project, home } }); setWalkStartFloor(null);
-                }}>Use automatic start</button>}
+                }}>Use automatic start</EditorButton>}
               </div>
             </details>}
             roof={snapshot.project.home.roof}

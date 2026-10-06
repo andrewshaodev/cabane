@@ -148,7 +148,7 @@ control for unnamed rooms. Enter or blur commits a nonempty trimmed name; Escape
 cancels. Naming uses ordinary undo/redo and autosave and is disabled during active
 gestures. Unnamed rooms are valid saved drafts; they still require names to Apply.
 
-The Walkthrough disclosure in the Construct sidebar groups the Explore starting-point controls with an explanation of their purpose. Floor settings, Roof, and Build tutorial remain separate disclosures.
+The Spawn area disclosure in the Construct sidebar groups the Explore starting-point controls. The sidebar sections appear in this order: Reference plan, Roof, Spawn area, Scale & heights, and Tutorial. Each has an outline icon and a short description visible while collapsed. Scale & heights contains the former Floor settings controls. The Advanced structure-data section is no longer shown.
 
 Door offers six catalog presets: Panel wood, Panel white, French, Full glass,
 Sliding wood, and Garage door. Its sidebar follows the Floor palette hierarchy,
@@ -165,8 +165,7 @@ side but no hinge, slide direction, or leaf count.
 
 Construct offers a persistent Reference plan disclosure below the Edit the plan
 introduction or active tool/selection properties, and above diagnostics.
-Its expanded contents include a Show reference plan checkbox and opacity slider. Floor settings, Roof,
-Walkthrough, Build tutorial, and Advanced remain below those properties. The
+Its expanded contents include a Show reference plan checkbox and opacity slider. Roof, Spawn area, Scale & heights, and Tutorial remain below those properties. The
 active tutorial retains its floating desktop placement. New or restarted
 tutorials begin with an optional Add a reference plan step; Skip proceeds to
 walls, which remains step 1 of 6. Accepting a reference, or beginning wall

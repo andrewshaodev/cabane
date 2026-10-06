@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { SidebarSectionSummary } from "../editor-chrome/SidebarSectionSummary";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import type { ReferencePlanController } from "./useReferencePlan";
 import "./reference-plan.css";
@@ -14,8 +14,8 @@ export function ReferencePlanPanel({ reference: r, floorName }: { reference: Ref
     }} />
     <details className="construction-inspector__floor-disclosure" open={r.expanded || r.adjusting}
       onToggle={event => { if (!r.adjusting) r.setExpanded(event.currentTarget.open); else if (!event.currentTarget.open) event.currentTarget.open = true; }}>
-      <summary>Reference plan<EditorIcon name="chevron" /></summary>
-      {!plan ? <div className="reference-plan__content"><p>Trace an image of this floor.</p><EditorButton disabled={r.disabled} onClick={r.openPicker}>Add image</EditorButton></div> : <div className="reference-plan__content">
+      <SidebarSectionSummary icon="plan" title="Reference plan" description="Add a floor plan image to trace." />
+      {!plan ? <div className="reference-plan__content sidebar-section-content"><EditorButton disabled={r.disabled} onClick={r.openPicker}>Add image</EditorButton></div> : <div className="reference-plan__content sidebar-section-content">
       <p className="reference-plan__filename" title={plan.name}>{plan.name}</p>
       <p className="reference-plan__storage">{floorName} · Saved in this browser only</p>
       <label className="reference-plan__visible"><input type="checkbox" checked={r.preference.visible} disabled={r.adjusting}

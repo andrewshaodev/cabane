@@ -302,33 +302,24 @@ await withModules(async (load) => {
     });
   });
 
-  test("reveals technical coordinates with Advanced and keeps floor settings independent", async () => {
+  test("keeps scale and heights available without the removed Advanced controls", async () => {
     await withDom(async ({ dom, root }) => {
       await act(async () => root.render(React.createElement(ConstructionInspector, {
         editor: editor({ kind: "wall", id: wall.id }),
+        onRoofChange: () => {},
       })));
       const document = dom.window.document;
-      const toggle = document.querySelector(".construction-inspector__expert-toggle");
-      assert.equal(toggle.getAttribute("aria-expanded"), "false");
-      assert.ok(toggle.getAttribute("aria-controls"));
-      assert.match(toggle.textContent, /Advanced/);
-      const floorSettings = document.querySelector('details.construction-inspector__floor-disclosure');
+      assert.equal(document.querySelector(".construction-inspector__expert-toggle"), null);
+      assert.equal(document.querySelector('[aria-label="Expert construction data"]'), null);
+      assert.equal(document.querySelector('[aria-label="from X coordinate"]'), null);
+      const sections = [...document.querySelectorAll('details.construction-inspector__floor-disclosure')];
+      assert.deepEqual(sections.map(section => section.querySelector('.sidebar-section-summary__copy > span').textContent), ['Roof', 'Scale & heights']);
+      const floorSettings = sections[1];
       assert.equal(floorSettings.open, false);
-      assert.equal(floorSettings.querySelector('summary').textContent, 'Floor settings');
       assert.ok(floorSettings.querySelector('[aria-label="Meters per plan unit"]'));
-
-      await act(async () => toggle.click());
-      assert.equal(toggle.getAttribute("aria-expanded"), "true");
-      assert.match(document.body.textContent, /Structure data/);
-      assert.match(document.body.textContent, /Scale & defaults/);
-      assert.equal(document.querySelectorAll('[aria-label="Wall thickness"]').length, 1);
-      assert.match(document.body.textContent, /0, 0 → 4\.25, 0/);
-      assert.match(document.body.textContent, /living-east · offset 1\.2 · width 1\.4/);
-      assert.ok(document.querySelector("[aria-label='from X coordinate']"));
-      assert.equal(
-        document.querySelector("[aria-label='Expert construction data']").id,
-        toggle.getAttribute("aria-controls"),
-      );
+      assert.ok(floorSettings.querySelector('[aria-label="Default wall height"]'));
+      assert.ok(floorSettings.querySelector('summary small').textContent);
+      assert.equal(floorSettings.querySelectorAll('summary svg').length, 2);
     });
   });
 
