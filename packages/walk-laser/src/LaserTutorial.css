@@ -1,22 +1,38 @@
 /* Match the editor's build tutorial without depending on web-host styles. */
 .walk-laser-tutorial {
   position: absolute;
-  top: max(76px, env(safe-area-inset-top));
-  left: max(16px, env(safe-area-inset-left));
+  top: 50%;
+  right: max(20px, env(safe-area-inset-right));
+  transform: translateY(-50%);
   box-sizing: border-box;
   width: min(320px, calc(100vw - 32px));
   max-height: calc(100dvh - 180px);
   overflow-y: auto;
-  padding: 13px;
+  padding: 18px;
   border: 1px solid rgba(70, 70, 58, 0.14);
   border-radius: 12px;
   background: #eaece1;
   color: #2e3835;
   pointer-events: auto;
 }
+.walk-laser-tutorial__heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.walk-laser-tutorial__heading img {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.walk-laser-tutorial .walk-laser-tutorial__heading p {
+  margin: 0;
+}
 .walk-laser-tutorial h2 {
-  margin: 5px 0 8px;
-  font-size: 1rem;
+  margin: 0 0 4px;
+  font-size: 1.375rem;
   font-weight: 650;
 }
 .walk-laser-tutorial p {
@@ -29,14 +45,14 @@
   padding: 8px 12px;
   border: 1px solid rgba(70, 70, 58, 0.14);
   border-radius: 7px;
-  background: transparent;
-  color: inherit;
+  background: #2e3835;
+  color: #fffdf3;
   font: inherit;
   font-size: 0.8125rem;
   cursor: pointer;
 }
 .walk-laser-tutorial button:hover {
-  background: #dce1d3;
+  background: #43534a;
 }
 .walk-laser-tutorial button:focus-visible {
   outline: 2px solid #2e3835;
@@ -44,8 +60,9 @@
 }
 @media (max-width: 760px) {
   .walk-laser-tutorial {
-    padding: 8px 12px;
-    max-height: 42dvh;
+    right: max(16px, env(safe-area-inset-right));
+    padding: 14px;
+    max-height: calc(100dvh - 180px);
   }
   .walk-laser-tutorial p {
     margin-bottom: 6px;

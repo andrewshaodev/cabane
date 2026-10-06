@@ -1,5 +1,6 @@
 import { useCabaneDom } from "@cabane/engine";
 import { useCallback, useEffect, useState } from "react";
+import { LaserIcon } from "./LaserIcon";
 import "./LaserTutorial.css";
 
 const STORAGE_KEY = "cabane.walk-laser.tutorial.v1";
@@ -55,7 +56,13 @@ export function LaserTutorial({ coarsePointer }: { coarsePointer: boolean }) {
       onPointerDown={(event) => event.stopPropagation()}
       onClick={(event) => event.stopPropagation()}
     >
-      <h2>A little magic around the house</h2>
+      <div className="walk-laser-tutorial__heading">
+        <LaserIcon />
+        <div>
+          <h2>Pew pew!</h2>
+          <p>Your home, a little more playful.</p>
+        </div>
+      </div>
       <p>
         <strong>Toggle lights.</strong> Aim at a connected light, then{" "}
         {coarsePointer ? "tap the lightning button" : "left-click or press F"} to turn it on or off.
