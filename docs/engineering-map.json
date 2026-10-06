@@ -179,7 +179,7 @@
         ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.",
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -195,7 +195,9 @@
       "packages/catalog/src/architecture",
       "packages/catalog/src/furnishing",
       "packages/catalog/src/device",
-      "home/src/extensions"
+      "home/src/extensions",
+      "packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts",
+      "packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx"
     ],
     "interfaces": [
       {
@@ -203,7 +205,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry.",
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls.",
     "checks": ["verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {

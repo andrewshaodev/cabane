@@ -100,6 +100,10 @@ export function DoorDesignFields({
                 <option value="panel">Panel</option>
                 <option value="french">French</option>
                 <option value="full-glass">Full glass</option>
+                <option value="concealed">Concealed · no frame</option>
+                <option value="flush-knob">Flush · black knob</option>
+                <option value="flush">Flush</option>
+                <option value="steel-arched">Arched steel glass</option>
                 <option value="plank">Plank</option>
               </select>
             </label>

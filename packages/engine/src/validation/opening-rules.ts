@@ -152,12 +152,12 @@ export const validateOpenings = (
           ),
         );
       }
-      if (!["plain", "muntined"].includes(String(rawOpening.variant))) {
+      if (!["plain", "muntined", "steel-arched"].includes(String(rawOpening.variant))) {
         issues.push(
           issue(
             "opening.window-variant",
             `${openingPath}.variant`,
-            "Window variant must be plain or muntined.",
+            "Window variant must be plain, muntined or steel-arched.",
           ),
         );
       }

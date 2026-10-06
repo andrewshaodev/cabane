@@ -10,7 +10,14 @@ import {
   type Group,
   type Mesh,
 } from "three";
-import { createContext, useContext, useEffect, useRef, type ComponentProps } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  type ComponentProps,
+} from "react";
 import { cameraFacingWallOpacityForNormals } from "./wall-fade";
 import { SceneContourContext } from "./StylizedScene";
 import { SceneOutlines } from "./SceneOutlines";
@@ -66,11 +73,12 @@ export function Outlines({
   return <SceneOutlines color={color} thickness={thickness} screenspace={screenspace} {...props} />;
 }
 
-export const applyCameraFadeToMesh = (mesh: Mesh, opacity: number) => {
+export const applyCameraFadeToMesh = (mesh: Mesh, opacity: number, retainShadows = false) => {
   if (mesh.userData.cameraFadeBaseCastShadow === undefined) {
     mesh.userData.cameraFadeBaseCastShadow = mesh.castShadow;
   }
-  mesh.castShadow = Boolean(mesh.userData.cameraFadeBaseCastShadow) && opacity >= 0.995;
+  mesh.castShadow =
+    Boolean(mesh.userData.cameraFadeBaseCastShadow) && (retainShadows || opacity >= 0.995);
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   for (const material of materials) {
     if (material.userData.cameraFadeBaseOpacity === undefined) {
@@ -96,6 +104,7 @@ export function CameraFacingFade({
   normal,
   normals,
   reducedMotion = false,
+  retainShadows = false,
   children,
 }: {
   enabled: boolean;
@@ -103,26 +112,30 @@ export function CameraFacingFade({
   normals?: readonly (readonly [number, number])[];
   center?: readonly [number, number];
   reducedMotion?: boolean;
+  retainShadows?: boolean;
   children: React.ReactNode;
 }) {
   const groupRef = useRef<Group>(null);
   const opacityRef = useRef(1);
   const { invalidate } = useThree();
   const fadeNormals = normals ?? (normal ? [normal] : []);
-  const applyOpacity = (opacity: number) => {
-    groupRef.current?.traverse((object) => {
-      const mesh = object as Mesh;
-      if (!mesh.isMesh) return;
-      applyCameraFadeToMesh(mesh, opacity);
-    });
-  };
+  const applyOpacity = useCallback(
+    (opacity: number) => {
+      groupRef.current?.traverse((object) => {
+        const mesh = object as Mesh;
+        if (!mesh.isMesh) return;
+        applyCameraFadeToMesh(mesh, opacity, retainShadows);
+      });
+    },
+    [retainShadows],
+  );
   useEffect(() => {
     if (!enabled) {
       opacityRef.current = 1;
       applyOpacity(1);
     }
     invalidate();
-  }, [enabled, invalidate, normal, normals, reducedMotion]);
+  }, [enabled, invalidate, normal, normals, reducedMotion, applyOpacity]);
   useFrame(({ camera }, delta) => {
     const target = cameraFacingWallOpacityForNormals(
       enabled,
