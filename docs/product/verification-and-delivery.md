@@ -13,7 +13,11 @@ focused checks never replace `npm run verify` before product delivery. When addi
 or renaming tests, maintain `tests/verification-groups.json`: unclassified tests
 conservatively trigger the full suite, and stale entries fail visibly.
 
-Node 24.11.1 and npm 11.6.2 are pinned. Install with `npm ci`, then
+Node 24.11.1 and npm 11.6.2 are the pinned local baseline. The `engines` and
+`devEngines` checks accept Node `>=24.11.1 <25` and npm `>=11.6.2 <12`, so managed
+hosts can install security updates within those major versions. Do not enforce an
+exact patch version through `devEngines`: Vercel selects the Node major and updates
+its minor/patch version independently of the local pins. Install with `npm ci`, then
 `npm run browser:install` to install Playwright's matching Chromium build; tests
 use modern headless Chromium rather than an independently updated system browser.
 Linux environments without browser libraries can use

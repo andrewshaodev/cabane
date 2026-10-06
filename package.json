@@ -84,12 +84,12 @@
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "24.11.1",
+      "version": ">=24.11.1 <25",
       "onFail": "error"
     },
     "packageManager": {
       "name": "npm",
-      "version": "11.6.2",
+      "version": ">=11.6.2 <12",
       "onFail": "error"
     }
   },

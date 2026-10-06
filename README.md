@@ -38,7 +38,7 @@ change the Cabane product itself.
 
 ## Run locally
 
-Use Node.js **24.11.1** and npm **11.6.2**, pinned in `.nvmrc`, `.node-version`, and `package.json`. With nvm, run `nvm install && nvm use` first.
+Use Node.js **24.11.1** and npm **11.6.2** for the reproducible local baseline, pinned in `.nvmrc`, `.node-version`, and `packageManager`. With nvm, run `nvm install && nvm use` first. The `engines` and `devEngines` compatibility checks also accept newer Node 24 and npm 11 releases because managed hosts such as Vercel update their runtimes within a major version.
 
 ```sh
 npm ci
