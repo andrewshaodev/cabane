@@ -29,7 +29,7 @@ export interface ConstructionEditLayerProps {
   drawAngleReferenceRadians?: number | null;
   wallExteriorColor?: string;
   poolPoints?: readonly PlanPoint[];
-  floorPaintTarget?: import("./FloorFinishPalette").FloorPaintTarget;
+  floorPaintTarget?: import("./floor-painting-contract").FloorPaintTarget;
   floorZonePoints?: readonly PlanPoint[];
   floorZonePreview?: PlanPoint | null;
   onCancelFloorZone?: () => void;

@@ -19,7 +19,7 @@ import {
 } from "@cabane/engine";
 
 import { usePoolDrawing } from "./usePoolDrawing";
-import type { FloorPaintTarget } from "./FloorFinishPalette";
+import type { FloorPaintTarget } from "./floor-painting-contract";
 
 export interface ConstructEditorState {
   history: FloorEditorHistory;

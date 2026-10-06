@@ -7,8 +7,23 @@ globalThis.IS_REACT_ACT_ENVIRONMENT=true;
 await withModules(async load=>{
   const e=await load('/packages/engine/src/index.ts');
   const {useConstructEditor}=await load('/apps/web/src/editor-preview/construct/useConstructEditor.ts');
-  const {PlatformDrawingProperties}=await load('/apps/web/src/editor-preview/construct/PlatformProperties.tsx');
+  const {FloorToolProperties}=await load('/apps/web/src/editor-preview/construct/FloorToolProperties.tsx');
   const floor=e.neutralDemoManifest.floors[0];
+  test('Floor choices retain their order and heading hierarchy across every target', () => {
+    const labels=['Whole room','Custom area','Outdoor platform'];
+    for (const target of ['room','custom-area','outdoor-platform']) {
+      const editor={tool:target==='outdoor-platform'?'platform':'floor',platformSettings:{finish:{kind:'solid',color:'#ffffff'},defaultEdge:{kind:'railing',heightMeters:1}},poolDrawing:{error:null}};
+      const panel=FloorToolProperties({editor,painting:{target,finish:editor.platformSettings.finish}});
+      const [header,choices,hint,finish,edges]=panel.props.children;
+      assert.equal(header.type,'header');
+      assert.equal(choices.props['aria-label'],'Paint target');
+      assert.deepEqual(choices.props.children.map(button=>button.props['aria-label']),labels);
+      assert.equal(choices.props.children.filter(button=>button.props['aria-pressed']).length,1);
+      assert.equal(hint.type,'p');
+      assert.equal(finish.props.children[0].props.children,'Floor finish');
+      assert.equal(Boolean(edges),target==='outdoor-platform');
+    }
+  });
   test('Floor platform drawing commits the creation style, selects the platform and retains it through wall edits',async()=>{
     let editor; const renderer=await create(createElement(()=>{editor=useConstructEditor(floor);return null;}));
     try{
@@ -32,8 +47,8 @@ await withModules(async load=>{
     try {
       act(()=>editor.setFloorPaintTarget('outdoor-platform'));
       act(()=>editor.poolDrawing.place([10,0]));
-      const panel=PlatformDrawingProperties({editor});
-      const cancel=panel.props.children.find(child=>child?.type==='button');
+      const panel=FloorToolProperties({editor,painting:{target:"outdoor-platform",finish:editor.platformSettings.finish}});
+      const cancel=panel.props.children.find(child=>child?.props?.children==='Cancel platform');
       act(()=>cancel.props.onClick());
       assert.equal(editor.tool,'select');
       assert.equal(editor.poolDrawing.active,false);

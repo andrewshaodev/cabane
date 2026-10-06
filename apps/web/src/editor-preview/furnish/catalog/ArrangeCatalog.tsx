@@ -1,3 +1,4 @@
+import { EditorButton } from "../../../editor-chrome/EditorButton";
 import { ROOM_TYPES, type DeviceModelRegistry, type FurnishingModelRegistry } from "@cabane/engine";
 import { useMemo, useRef } from "react";
 import { EditorIcon, type EditorIconName } from "../../../editor-chrome/EditorIcon";
@@ -68,9 +69,9 @@ export function ArrangeCatalog({ furnishingModels, deviceModels, browsing, onBro
             </button>)}
             {results.length === 0 && <div className="catalog-empty" role="status">
               <p>{browsing.query.trim() ? "No matching items" : "No items for this room type yet"}</p>
-              <button type="button" onClick={() => browsing.query.trim() ? onBrowse({ ...browsing, query: "" }) : chooseFilter("all")}>
+              <EditorButton onClick={() => browsing.query.trim() ? onBrowse({ ...browsing, query: "" }) : chooseFilter("all")}>
                 {browsing.query.trim() ? "Clear search" : "Browse all items"}
-              </button>
+              </EditorButton>
             </div>}
           </div>
         </ModelThumbnailRenderer>

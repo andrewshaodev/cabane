@@ -15,3 +15,4 @@ export * from "./selection-geometry";
 export * from "./scene-item-dependencies";
 export * from "./useConstructEditor";
 export * from "./useConstructMeasure";
+export type { FloorPaintTarget, FloorPaintingInspector } from "./floor-painting-contract";

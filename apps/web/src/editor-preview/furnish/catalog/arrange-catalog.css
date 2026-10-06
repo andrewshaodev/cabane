@@ -31,7 +31,6 @@
 .catalog-card__fallback { position: absolute; inset: 0; display: grid; place-content: center; padding: 10px; background: #ebe9df; color: #7a8272; font-size: var(--editor-text-caption, .75rem); text-align: center; }
 .catalog-thumbnail-renderer { position: fixed; left: -10000px; top: 0; pointer-events: none; }
 .catalog-empty { grid-column: 1 / -1; padding: 16px 2px; color: #74806d; font-size: var(--editor-text-control, .875rem); line-height: 1.5; }
-.catalog-empty button { border: 0; border-bottom: 1px solid #9dab90; padding: 4px 0; color: #476347; background: transparent; font: inherit; cursor: pointer; }
 .catalog-add-error { color: #945a3a; font-size: var(--editor-text-control, .875rem); line-height: 1.5; }
 .arrange-inspector-close { display: grid; flex: none; place-items: center; width: 28px; height: 28px; padding: 4px; border: 0; border-radius: 5px; background: transparent; color: #78816d; cursor: pointer; }
 .arrange-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }

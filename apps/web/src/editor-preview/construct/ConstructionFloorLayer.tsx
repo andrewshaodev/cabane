@@ -121,7 +121,7 @@ export interface ConstructionFloorLayerProps {
   selection: FloorEditorSelection;
   deletionTargets?: readonly FloorEditorSelectionTarget[];
   tool: FloorEditorTool;
-  paintTarget: import("./FloorFinishPalette").FloorPaintTarget;
+  paintTarget: import("./floor-painting-contract").FloorPaintTarget;
   drawingPoints: readonly PlanPoint[];
   drawingPreview: PlanPoint | null;
   drawingRoomId: string | null;

@@ -1,3 +1,4 @@
+import { EditorButton } from "../../editor-chrome/EditorButton";
 import { mapPoolOutline, polygonSignedArea, type PoolSpec } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 import type { ConstructEditorController } from "./useConstructEditor";
@@ -22,6 +23,6 @@ export function PoolProperties({ pool, editor }: { pool: PoolSpec; editor: Const
         onCommit={(value) => editor.updatePool(pool.id, mapPoolOutline(pool.polygon, (p, i) => i === index
           ? axis === 0 ? [value, p[1]] : [p[0], value] : p))} /></label>)}
     </fieldset>)}
-    <button type="button" onClick={editor.deleteSelected}>Delete pool</button>
+    <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>Delete pool</EditorButton>
   </div>;
 }

@@ -1,3 +1,4 @@
+import { EditorButton } from "../../editor-chrome/EditorButton";
 import { HedgeStyleGrid } from "./HedgeStyleGrid";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 import type { ConstructEditorController } from "./construct-controller-contract";
@@ -18,6 +19,6 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
       : { style: style.id, heightMeters: style.heightMeters, widthMeters: style.widthMeters })} />
     <label>Height (m)<CommittedNumberInput label="Hedge height" value={settings.heightMeters} min={.2} step={.1} onCommit={(heightMeters) => update({ heightMeters: Math.min(5, Math.max(.2, heightMeters)) })} /></label>
     <label>Width (m)<CommittedNumberInput label="Hedge width" value={settings.widthMeters} min={.2} step={.1} onCommit={(widthMeters) => update({ widthMeters: Math.min(3, Math.max(.2, widthMeters)) })} /></label>
-    {hedge && <button type="button" onClick={editor.deleteSelected}>Delete hedge</button>}
+    {hedge && <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>Delete hedge</EditorButton>}
   </div>;
 }

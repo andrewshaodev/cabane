@@ -1,4 +1,6 @@
-import { PlatformDrawingProperties, PlatformProperties } from "./PlatformProperties";
+import { EditorButton } from "../../editor-chrome/EditorButton";
+import { PlatformProperties } from "./PlatformProperties";
+import { FloorToolProperties } from "./FloorToolProperties";
 import { DoorPresetPalette } from "./DoorPresetPalette";
 import { DoorDesignFields } from "./DoorDesignFields";
 import { HedgeProperties } from "./HedgeProperties";
@@ -31,10 +33,8 @@ import { constructIssueShortLabel } from "./validation-visuals";
 
 import { CommittedTextInput } from "./CommittedTextInput";
 import { DebouncedColorInput } from "./DebouncedColorInput";
-import {
-  FloorFinishPalette,
-  type FloorPaintingInspector,
-} from "./FloorFinishPalette";
+import { FloorFinishPalette } from "./FloorFinishPalette";
+import type { FloorPaintingInspector } from "./floor-painting-contract";
 import { FloorSettingsEditor } from "./FloorSettingsEditor";
 
 export interface ConstructionInspectorProps {
@@ -118,6 +118,10 @@ export function ConstructionInspector({
   const wallThickness = selectedWall?.thicknessMeters
     ?? resolvedWall?.thicknessMeters
     ?? editor.draft.exteriorWallThicknessMeters;
+  const platformId = editor.selection?.kind === "outdoor-platform" ? editor.selection.id : undefined;
+  const selectedPlatform = editor.tool === "select" && platformId
+    ? editor.draft.outdoorPlatforms?.find(platform => platform.id === platformId)
+    : undefined;
   const multipleSelection = editor.selection?.kind === "multiple";
   const deletionCounts = useMemo(() => {
     const counts = { "outdoor-platform": 0, hedge: 0, wall: 0, opening: 0, room: 0, pool: 0, "floor-zone": 0 };
@@ -153,17 +157,10 @@ export function ConstructionInspector({
     <section className="construction-inspector" aria-label="Construction inspector">
       <div className="construction-inspector__context" inert={inert}>
       <HedgeProperties editor={editor} />
-      {editor.tool === "platform" && floorPainting && <>
-        <div className="floor-finish-palette__targets" role="group" aria-label="Paint target">
-          {(["room", "custom-area", "outdoor-platform"] as const).map(target=><button type="button" key={target}
-            aria-label={target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
-            aria-pressed={target === "outdoor-platform"} onClick={()=>floorPainting.onTargetChange(target)}>
-            {target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
-          </button>)}
-        </div>
-        <PlatformDrawingProperties editor={editor} />
-      </>}
-      {editor.tool === "select" && editor.selection?.kind === "outdoor-platform" && editor.draft.outdoorPlatforms?.filter(p=>p.id===(editor.selection as {id:string}).id).map(platform=><PlatformProperties key={platform.id} platform={platform} editor={editor} />)}
+      {(editor.tool === "floor" || editor.tool === "platform") && floorPainting && (
+        <FloorToolProperties editor={editor} painting={floorPainting} />
+      )}
+      {selectedPlatform && <PlatformProperties platform={selectedPlatform} editor={editor} />}
       {editor.tool === "wall" && (
         <div className="construction-inspector__selection">
           <header>
@@ -192,37 +189,11 @@ export function ConstructionInspector({
         <DoorDesignFields value={editor.doorConfiguration} onChange={editor.setDoorConfiguration} />
         {editor.openingError && <p role="alert">{editor.openingError}</p>}
       </div>}
-      {editor.tool === "floor" && floorPainting && (
-        <div className="construction-inspector__selection">
-          <header>
-            <div><small>Floor tool</small><strong>Paint a floor</strong></div>
-          </header>
-          <p className="construction-inspector__tool-hint">Choose a finish, then click a room or close an area inside or outside the building.</p>
-          <FloorFinishPalette
-            value={floorPainting.finish}
-            onChange={floorPainting.onFinishChange}
-            target={floorPainting.target}
-            onTargetChange={target=>{floorPainting.onTargetChange(target);if(target === "outdoor-platform") editor.setPlatformSettings({...editor.platformSettings,finish:floorPainting.finish});}}
-          />
-          {floorPainting.target === "custom-area" && <p role="status">
-            Start inside a room for an inset, or outside the building for a path or ground patch. Return to the first point to close it.
-            Escape cancels.
-          </p>}
-          {floorPainting.drawingError && (
-            <p role="alert">{floorPainting.drawingError}</p>
-          )}
-          {floorPainting.drawingActive && (
-            <button type="button" onClick={floorPainting.onCancelDrawing}>
-              Cancel area
-            </button>
-          )}
-        </div>
-      )}
       {editor.tool === "pool" && <div className="construction-inspector__selection" role="status">
         <header><div><small>Outdoor pool</small><strong>Close the outline</strong></div></header>
         <p className="construction-inspector__tool-hint">Click to add corners, then return to the first corner to close the pool. Undo removes the last corner. Escape cancels.</p>
         {editor.poolDrawing?.error && <p role="alert">{editor.poolDrawing.error}</p>}
-        {editor.poolDrawing?.active && <button type="button" onClick={editor.poolDrawing.cancel}>Cancel pool</button>}
+        {editor.poolDrawing?.active && <EditorButton variant="secondary" type="button" onClick={editor.poolDrawing.cancel}>Cancel pool</EditorButton>}
       </div>}
       {editor.tool === "select" && !editor.selection && (
         <div className="construction-inspector__selection construction-inspector__selection-hint" role="status">
@@ -247,7 +218,7 @@ export function ConstructionInspector({
             {deletionCounts.pool > 0 && <div><dt>Pools</dt><dd>{deletionCounts.pool}</dd></div>}
             {deletionCounts["floor-zone"] > 0 && <div><dt>Floor areas</dt><dd>{deletionCounts["floor-zone"]}</dd></div>}
           </dl>
-          <button type="button" onClick={editor.deleteSelected}>Delete selection</button>
+          <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>Delete selection</EditorButton>
         </div>
       )}
       {selectedPool && <PoolProperties pool={selectedPool} editor={editor} />}
@@ -262,13 +233,10 @@ export function ConstructionInspector({
               selectedFloorZone.id,
               { finish },
             )}
-            target="room"
-            onTargetChange={() => undefined}
-            showTarget={false}
           />
-          <button type="button" onClick={editor.deleteSelected}>
+          <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
             Delete floor area
-          </button>
+          </EditorButton>
         </div>
       )}
       {selectedWall && (
@@ -302,7 +270,7 @@ export function ConstructionInspector({
               /></label>
             </fieldset>
           )}
-          <button type="button" onClick={editor.deleteSelected}>Delete wall</button>
+          <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>Delete wall</EditorButton>
         </div>
       )}
       {selectedRoom && (
@@ -320,9 +288,9 @@ export function ConstructionInspector({
               <p>This wall change joined existing rooms. Keep one identity before continuing.</p>
               <div>
                 {mergedRoomIdentities.map((identity) => (
-                  <button key={identity.id} type="button" onClick={() => editor.resolveRoomMerge(identity.id)}>
+                  <EditorButton variant="secondary" key={identity.id} type="button" onClick={() => editor.resolveRoomMerge(identity.id)}>
                     Keep {identity.name || identity.id}
-                  </button>
+                  </EditorButton>
                 ))}
               </div>
             </div>
@@ -343,13 +311,13 @@ export function ConstructionInspector({
                   : floorFinishPreset(finish.preset).label;
               })()}</strong>
             </div>
-            <button type="button" onClick={() => floorPainting ? floorPainting.onTargetChange("room") : editor.setFloorPaintTarget("room")}>
+            <EditorButton variant="secondary" type="button" onClick={() => floorPainting ? floorPainting.onTargetChange("room") : editor.setFloorPaintTarget("room")}>
               Paint floor
-            </button>
+            </EditorButton>
             <label>Ceiling<CommittedNumberInput label="Room ceiling height" min={.3} step={.05} value={roomCeilingHeight} onCommit={(ceilingHeightMeters) => editor.updateSelectedRoom({ ceilingHeightMeters })} /></label>
           </fieldset>
           {editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false && <p role="status">All enclosing walls are shared. Edit the walls to remove this room.</p>}
-          <button type="button" disabled={editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false} onClick={editor.deleteSelected}>Delete room</button>
+          <EditorButton variant="text" type="button" disabled={editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false} onClick={editor.deleteSelected}>Delete room</EditorButton>
         </div>
       )}
       {validationIssues.length > 0 && (

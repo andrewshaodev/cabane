@@ -192,11 +192,7 @@
 .construction-inspector label.construction-inspector__check { display: flex; align-items: center; gap: 8px; }
 .construction-inspector__check input[type="checkbox"] { width: 16px; min-height: 16px; height: 16px; accent-color: var(--preview-accent); }
 .construction-inspector__single-control { margin: 15px 0; }
-.construction-inspector__selection > button, .furnishing-editor-inspector__actions button {
-  min-height: 36px; padding: 8px 0; border: 0; color: #a35746; background: transparent; font-size: var(--editor-text-control, .875rem); text-align: left; cursor: pointer;
-}
 .construction-inspector__selection > button { margin: 3px 0 10px; }
-.construction-inspector__selection > button:hover, .furnishing-editor-inspector__actions button:hover { text-decoration: underline; }
 .construction-inspector__tool-hint { margin: 0 0 18px; color: var(--preview-muted); font-size: var(--editor-text-control, .875rem); line-height: 1.55; }
 .construction-inspector__selection-hint { padding-bottom: 4px; }
 .construction-inspector__selection-hint > header { margin-bottom: 12px; }
@@ -207,19 +203,14 @@
 .construction-inspector__bulk-facts dt { color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); }
 .construction-inspector__bulk-facts dd { margin: 0; color: #8f4936; font: 400 var(--editor-text-subheading, 1.25rem) Georgia, serif; font-variant-numeric: tabular-nums; }
 .furnishing-editor-inspector__actions { display: flex; gap: 20px; }
-.furnishing-editor-inspector__actions button:first-child { color: var(--preview-ink); }
 .construction-inspector__merge { margin: 12px 0; padding: 12px; border-radius: 8px; color: #7f3e2d; background: #f2dfd1; }
 .construction-inspector__merge > strong { font: var(--editor-text-body, 1rem) Georgia, serif; }
 .construction-inspector__merge p { margin: 6px 0 10px; font-size: var(--editor-text-control, .875rem); line-height: 1.5; }
 .construction-inspector__merge > div { display: grid; gap: 6px; }
-.construction-inspector__merge button { min-height: 36px; padding: 8px; border: 1px solid #c8aa96; border-radius: 6px; color: var(--preview-ink); background: #fff4e9; font-size: var(--editor-text-control, .875rem); text-align: left; cursor: pointer; }
 
 /* Disclosures retain exact controls without competing with the active selection. */
 .construction-inspector__floor-disclosure { margin: 0; }
 .construction-walk-start { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; margin: 10px 0; }
-.construction-walk-start button { min-height: 36px; padding: 5px 0; border: 0; background: transparent; color: #a35746; font-size: var(--editor-text-control, .875rem); line-height: 1.4; text-align: left; cursor: pointer; }
-.construction-walk-start button:hover:not(:disabled) { text-decoration: underline; }
-.construction-walk-start button:disabled { opacity: .5; cursor: default; }
 .construction-walk-start p { flex-basis: 100%; margin: 0 0 8px; color: var(--preview-muted); font-size: var(--editor-text-control, .875rem); line-height: 1.55; }
 .construction-inspector__floor-disclosure > summary, .construction-inspector__expert-toggle {
   display: flex; width: 100%; min-height: 46px; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0;
@@ -501,11 +492,13 @@
 .direction-status { left: calc(var(--editor-rail-width) + 16px); right: auto; }
 @media (max-width: 760px) {
   .editor-floor-controls { bottom: calc(40dvh + 12px); right: max(12px, env(safe-area-inset-right)); }
-  .direction-status { left: 12px; bottom: calc(40dvh + 70px); }
+  .editor-floor-controls [role="status"] > button:hover { color: #7f3e2d; text-decoration: underline; text-underline-offset: 2px; }
+.direction-status { left: 12px; bottom: calc(40dvh + 70px); }
 }
 @media (max-height: 500px) and (orientation: landscape) {
   .editor-floor-controls { bottom: max(10px, env(safe-area-inset-bottom)); }
-  .direction-status { left: calc(var(--editor-rail-width) + 10px); bottom: 10px; }
+  .editor-floor-controls [role="status"] > button:hover { color: #7f3e2d; text-decoration: underline; text-underline-offset: 2px; }
+.direction-status { left: calc(var(--editor-rail-width) + 10px); bottom: 10px; }
 }
 
 .selected-room-controls .selected-item-actions { position: relative; white-space: nowrap; }
