@@ -25,24 +25,44 @@ import {
 // small finish overlap so near-corner openings do not fail on harmless trim.
 const OPENING_JUNCTION_FINISH_TOLERANCE_METERS = .02;
 
-const junctionArmPlanUnitsForWall = (
+const junctionOccupiedIntervalsForWall = (
   wall: ValidWall,
+  junction: ValidJunction,
   incidentWalls: readonly ValidWall[],
   metersPerPlanUnit: number,
 ) => {
   const wallLength = wallLengthPlanUnits(wall as never);
   const wallDx = (wall.to[0] - wall.from[0]) / wallLength;
   const wallDy = (wall.to[1] - wall.from[1]) / wallLength;
-  return Math.max(0, ...incidentWalls
+  return incidentWalls
     .filter((candidate) => candidate.id !== wall.id)
-    .map((candidate) => {
+    .flatMap((candidate) => {
       const candidateLength = wallLengthPlanUnits(candidate as never);
       const candidateDx = (candidate.to[0] - candidate.from[0]) / candidateLength;
       const candidateDy = (candidate.to[1] - candidate.from[1]) / candidateLength;
       const sine = Math.abs(wallDx * candidateDy - wallDy * candidateDx);
-      if (sine <= JUNCTION_EPSILON) return 0;
-      return candidate.thicknessMeters / (2 * metersPerPlanUnit * sine);
-    }));
+      if (sine <= JUNCTION_EPSILON) return [];
+      const halfSpan = candidate.thicknessMeters / (2 * metersPerPlanUnit * sine);
+      let start = -halfSpan;
+      let end = halfSpan;
+      // Intersect the wall centerline with the finite adjoining wall, not its
+      // infinite supporting strip. A nearly straight continuation points away
+      // from this wall and must not reserve metres of space towards its doors.
+      const cosine = wallDx * candidateDx + wallDy * candidateDy;
+      if (Math.abs(cosine) > JUNCTION_EPSILON) {
+        const junctionAlongCandidate =
+          (junction.at[0] - candidate.from[0]) * candidateDx +
+          (junction.at[1] - candidate.from[1]) * candidateDy;
+        const from = -junctionAlongCandidate / cosine;
+        const to = (candidateLength - junctionAlongCandidate) / cosine;
+        start = Math.max(start, Math.min(from, to));
+        end = Math.min(end, Math.max(from, to));
+      }
+      const tolerance = OPENING_JUNCTION_FINISH_TOLERANCE_METERS / metersPerPlanUnit;
+      start += tolerance;
+      end -= tolerance;
+      return end > start ? [{ start, end }] : [];
+    });
 };
 
 export const validateOpenings = (
@@ -316,20 +336,19 @@ export const validateOpenings = (
         const dy = (wall.to[1] - wall.from[1]) / wallLength;
         const distance = (junction.at[0] - wall.from[0]) * dx +
           (junction.at[1] - wall.from[1]) * dy;
-        const armPlanUnits = junctionArmPlanUnitsForWall(
+        const occupiedIntervals = junctionOccupiedIntervalsForWall(
           wall,
+          junction,
           incidentWalls,
           metersPerPlanUnit,
-        );
-        const protectedArmPlanUnits = Math.max(
-          0,
-          armPlanUnits - OPENING_JUNCTION_FINISH_TOLERANCE_METERS / metersPerPlanUnit,
         );
         for (const candidate of openingsByWall.get(wall.id) ?? []) {
           const openingStart = candidate.opening.offsetFromWallStartPlanUnits;
           const openingEnd = openingStart + candidate.opening.widthPlanUnits;
-          if (distance + protectedArmPlanUnits > openingStart + JUNCTION_EPSILON &&
-            distance - protectedArmPlanUnits < openingEnd - JUNCTION_EPSILON) {
+          if (occupiedIntervals.some(({ start, end }) =>
+            distance + end > openingStart + JUNCTION_EPSILON &&
+            distance + start < openingEnd - JUNCTION_EPSILON
+          )) {
             issues.push(issue(
               "wall-junction.opening-overlap",
               junction.path,
