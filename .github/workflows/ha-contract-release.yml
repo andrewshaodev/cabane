@@ -45,6 +45,8 @@ jobs:
     needs: contract
     if: github.event_name != 'pull_request' && needs.contract.outputs.changed == 'true'
     runs-on: ubuntu-latest
+    env:
+      CABANE_TEST_CONCURRENCY: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
