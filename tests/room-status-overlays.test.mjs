@@ -17,6 +17,9 @@ await withModules(async (load) => {
     selectRoomStatusOverlayIds,
     shouldShowRoomStatusOverlays,
   } = await load("/packages/engine/src/room-status/RoomStatusOverlays.tsx");
+  const { loadOverlayPreferences, saveOverlayPreferences, filterOverlayStatuses } = await load(
+    "/packages/engine/src/room-status/overlay-preferences.ts",
+  );
   const summary = {
     roomId: "demo-room",
     temperature: { value: "21", unit: "°C" },
@@ -27,6 +30,36 @@ await withModules(async (load) => {
     presence: "present",
     doorOpen: false,
   };
+
+  test("persists overlay choices, defaults humidity on, and leaves room details intact", () => {
+    const previousWindow = globalThis.window;
+    const dom = new JSDOM("", { url: "https://cabane.test" });
+    globalThis.window = dom.window;
+    try {
+      const defaults = loadOverlayPreferences();
+      assert.equal(defaults.humidity, true);
+      saveOverlayPreferences({ ...defaults, humidity: false, cooling: false });
+      const preferences = loadOverlayPreferences();
+      assert.equal(preferences.humidity, false);
+      const filtered = filterOverlayStatuses({ "demo-room": summary }, preferences)["demo-room"];
+      const html = renderToStaticMarkup(
+        React.createElement(RoomStatusOverlayButton, {
+          roomName: "Demo room",
+          summary: filtered,
+          onSelect: () => undefined,
+        }),
+      );
+      assert.equal(html.includes("Humidity"), false);
+      assert.equal(html.includes("Cooling"), false);
+      assert.match(html, /Temperature 21/);
+      assert.equal(summary.humidity.value, "48");
+      dom.window.localStorage.setItem("cabane.room-overlays.preferences.v1", "broken");
+      assert.equal(loadOverlayPreferences().humidity, true);
+    } finally {
+      globalThis.window = previousWindow;
+      dom.window.close();
+    }
+  });
 
   test("anchors an overlay above the room polygon centroid", () => {
     const floor = neutralDemoManifest.floors[0];
@@ -52,12 +85,12 @@ await withModules(async (load) => {
     assert.match(html, /<button/);
     assert.match(
       html,
-      /aria-label="Open Demo room\. Temperature 21 °C, Cooling, Lights on, Presence"/,
+      /aria-label="Open Demo room\. Temperature 21 °C, Humidity 48 %, Cooling, Lights on, Presence"/,
     );
     assert.match(html, /data-visible="true"/);
     assert.match(html, /Demo room/);
-    assert.equal(html.includes("Humidity"), false);
-    assert.equal(html.includes("48 %"), false);
+    assert.equal(html.includes("Humidity"), true);
+    assert.equal(html.includes("48 %"), true);
   });
 
   test("uses a compact cap and prioritizes useful status before center distance", () => {
@@ -72,7 +105,7 @@ await withModules(async (load) => {
         cooling: false,
         doorOpen: false,
       }),
-      0,
+      1,
     );
 
     const candidates = Array.from({ length: 7 }, (_, index) => ({

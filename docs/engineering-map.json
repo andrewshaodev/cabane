@@ -183,7 +183,8 @@
       "packages/engine/src/action-bar/dashboard-action-targets.ts",
       "packages/engine/src/WalkPreferences.tsx",
       "packages/engine/src/home-assistant-dashboard",
-      "packages/engine/src/styles.css"
+      "packages/engine/src/styles.css",
+      "packages/engine/src/room-status"
     ],
     "interfaces": [
       {
@@ -191,7 +192,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets. Overlay preferences persist locally and filter only overview summaries. Area temperature/humidity readings take precedence over usable mapped room sensor fallbacks.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {

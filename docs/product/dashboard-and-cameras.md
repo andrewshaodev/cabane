@@ -275,3 +275,14 @@ Orbit controls retain their pointer listeners across dashboard updates, includin
 updates during a gesture. One-finger panning, two-finger rotation/pinch zoom, and
 desktop drags must continue through re-renders and release cleanly for the next
 gesture. Manual input still interrupts a room-camera transition.
+
+Room overlay preferences are available from More options in overview, room view,
+Walk, and draft Explore. Temperature, humidity, heating, cooling, lights, presence,
+and open-door indicators each default to enabled. Choices persist in browser-local
+preferences and affect overview labels, accessibility text, and decluttering, while
+room detail sheets retain all available information. The dialog scrolls on short screens.
+Temperature and humidity prefer a usable sensor explicitly selected on the mapped
+HA area, then fall back to the first usable mapped room sensor of that device class
+in resolved order (primary, secondary, diagnostic, then modeled devices).
+Unknown, unavailable, and stale readings are skipped; unbound area sensors are not
+fallback candidates. This does not create bindings or change HA configuration.

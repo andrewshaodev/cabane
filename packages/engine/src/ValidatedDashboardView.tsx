@@ -1,3 +1,8 @@
+import {
+  filterOverlayStatuses,
+  loadOverlayPreferences,
+  saveOverlayPreferences,
+} from "./room-status/overlay-preferences";
 import { resolveDashboardActionTargets } from "./action-bar/dashboard-action-targets";
 import type { WalkToolNavigation } from "./walk-tools";
 import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate-walk-target";
@@ -14,7 +19,15 @@ import { PerformanceMonitor } from "@react-three/drei";
 
 import { Canvas } from "@react-three/fiber";
 
-import { Suspense, useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import {
+  Suspense,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
 import { ArchitectureScene } from "./ArchitectureScene";
 
@@ -56,6 +69,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const toolNavigationRef = useRef<WalkToolNavigation | null>(null);
   const orbitControls = useRef<OrbitControlsImpl | null>(null);
   const roomFocus = useRoomFocusFrame();
+  const [overlayPreferences, setOverlayPreferences] = useState(loadOverlayPreferences);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
   const closePreferences = useCallback(() => setPreferencesOpen(false), []);
@@ -154,9 +168,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     !selectedCamera &&
     !preferencesOpen;
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar, props.walkTools);
-  const preferencesMenuItem = walkMode && (
-    <WalkPreferencesMenuItem onOpen={() => setPreferencesOpen(true)} />
+  const overlayStatuses = useMemo(
+    () => filterOverlayStatuses(roomStatuses, overlayPreferences),
+    [roomStatuses, overlayPreferences],
   );
+  const preferencesMenuItem = <WalkPreferencesMenuItem onOpen={() => setPreferencesOpen(true)} />;
   const actionBarTargets = resolveDashboardActionTargets(
     actionBarItems,
     manifest,
@@ -349,7 +365,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                       <group position={[0, elevation, 0]}>
                         <RoomStatusOverlays
                           floor={floor}
-                          summaries={roomStatuses}
+                          summaries={overlayStatuses}
                           roomNames={roomDisplayNames}
                           onSelectRoom={selectRoom}
                         />
@@ -504,6 +520,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           </header>
           {preferencesOpen && (
             <WalkPreferences
+              overlayPreferences={overlayPreferences}
+              onOverlayPreferencesChange={(value) => {
+                setOverlayPreferences(value);
+                saveOverlayPreferences(value);
+              }}
               inverted={invertYAxis}
               lightingSource={solarLighting.source}
               lightingMode={lightingMode}

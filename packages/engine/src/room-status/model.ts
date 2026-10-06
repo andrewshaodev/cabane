@@ -62,6 +62,23 @@ const areaReading = (
   };
 };
 
+const roomReading = (
+  entityId: EntityId | null | undefined,
+  deviceClass: "temperature" | "humidity",
+  entities: readonly ResolvedEntityBinding[],
+  runtime: HomeAssistantRuntimeSnapshot,
+): RoomStatusReading | undefined => {
+  const preferred = areaReading(entityId, runtime);
+  if (preferred) return preferred;
+  for (const binding of entities) {
+    if (binding.domain !== "sensor" || binding.state?.attributes.device_class !== deviceClass)
+      continue;
+    const reading = areaReading(binding.entityId, runtime);
+    if (reading) return reading;
+  }
+  return undefined;
+};
+
 const climateMode = (state: EntityStateSnapshot): "heating" | "cooling" | null => {
   const action = state.attributes.hvac_action;
   if (action === "heating" || action === "cooling") return action;
@@ -129,8 +146,13 @@ export const deriveRoomStatusMap = (
         const summary: RoomStatusSummary = omitUndefinedProperties({
           roomId: room.id,
           connected: Boolean(area),
-          temperature: areaReading(area?.temperature_entity_id, runtime),
-          humidity: areaReading(area?.humidity_entity_id, runtime),
+          temperature: roomReading(
+            area?.temperature_entity_id,
+            "temperature",
+            reliableEntities,
+            runtime,
+          ),
+          humidity: roomReading(area?.humidity_entity_id, "humidity", reliableEntities, runtime),
           heating: climateModes.includes("heating"),
           cooling: climateModes.includes("cooling"),
           lighting:

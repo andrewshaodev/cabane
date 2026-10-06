@@ -37,7 +37,7 @@ await withModules(async (load) => {
     assert.deepEqual(summary.humidity, { value: "48", unit: "%" });
   });
 
-  test("hides missing, unknown, unavailable, and stale area readings without fallback", () => {
+  test("falls back for missing area readings and hides unknown, unavailable, and stale sensors", () => {
     const missing = derive(({ runtime }) => {
       runtime.areas[0].temperature_entity_id = "sensor.missing";
     });
@@ -60,10 +60,45 @@ await withModules(async (load) => {
       };
     });
 
-    assert.equal(missing.temperature, undefined);
+    assert.deepEqual(missing.temperature, { value: "19.7", unit: "°C" });
     assert.equal(unknown.temperature, undefined);
     assert.equal(unavailable.humidity, undefined);
     assert.equal(stale.humidity, undefined);
+  });
+
+  test("falls back to mapped room sensors when area readings are not configured", () => {
+    const summary = derive(({ manifest, profile, runtime }) => {
+      delete runtime.areas[0].temperature_entity_id;
+      delete runtime.areas[0].humidity_entity_id;
+      manifest.floors[0].rooms[0].dashboardSlots.push({
+        id: "humidity-slot",
+        compatibleDomains: ["sensor"],
+        compatibleDeviceClasses: ["humidity"],
+        required: false,
+        autoMap: "unique-compatible",
+        presentation: { label: "Humidity", dashboardRole: "diagnostic" },
+      });
+      profile.entityIdsBySlotId["humidity-slot"] = "sensor.demo_humidity";
+    });
+    assert.deepEqual(summary.temperature, { value: "19.7", unit: "°C" });
+    assert.deepEqual(summary.humidity, { value: "48", unit: "%" });
+    const unbound = derive(({ profile, runtime }) => {
+      delete runtime.areas[0].temperature_entity_id;
+      delete profile.entityIdsBySlotId["demo-temperature-slot"];
+    });
+    assert.equal(unbound.temperature, undefined);
+  });
+
+  test("prefers the configured area sensor over a mapped sensor", () => {
+    const summary = derive(({ runtime }) => {
+      runtime.entityStates["sensor.preferred"] = {
+        ...runtime.entityStates["sensor.demo_temperature"],
+        entityId: "sensor.preferred",
+        state: "23",
+      };
+      runtime.areas[0].temperature_entity_id = "sensor.preferred";
+    });
+    assert.equal(summary.temperature.value, "23");
   });
 
   test("aggregates only exact reliable climate, light, presence, and adjacent door bindings", () => {

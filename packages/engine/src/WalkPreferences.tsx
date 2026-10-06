@@ -1,3 +1,4 @@
+import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
 import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
@@ -59,6 +60,8 @@ export function saveLightingMode(mode: SolarLightingMode): void {
 }
 
 export function WalkPreferences({
+  overlayPreferences,
+  onOverlayPreferencesChange,
   inverted,
   onChange,
   lightingMode,
@@ -66,6 +69,8 @@ export function WalkPreferences({
   onLightingModeChange,
   onClose,
 }: {
+  overlayPreferences: OverlayPreferences;
+  onOverlayPreferencesChange: (value: OverlayPreferences) => void;
   inverted: boolean;
   onChange: (value: boolean) => void;
   lightingMode: SolarLightingMode;
@@ -136,6 +141,27 @@ export function WalkPreferences({
             ×
           </button>
         </header>
+        <div className="walk-preferences__group">
+          <h3>Room overlays</h3>
+          <p className="walk-preferences__hint">
+            Choose what appears below room names in overview. Available readings only.
+          </p>
+          {overlayOptions.map(([key, label]) => (
+            <label className="walk-preferences__row walk-preferences__row--compact" key={key}>
+              <span>
+                <strong>{label}</strong>
+              </span>
+              <input
+                type="checkbox"
+                checked={overlayPreferences[key]}
+                onChange={(event) =>
+                  onOverlayPreferencesChange({ ...overlayPreferences, [key]: event.target.checked })
+                }
+              />
+              <span className="walk-preferences__switch" aria-hidden="true" />
+            </label>
+          ))}
+        </div>
         <div className="walk-preferences__group">
           <h3>Look controls</h3>
           <label className="walk-preferences__row">
