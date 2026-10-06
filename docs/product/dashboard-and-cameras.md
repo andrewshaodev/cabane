@@ -16,6 +16,8 @@ groups wall fading and roof visibility. Room and device links select the correct
 room view or device sheet, including when leaving Walk. The bar shows the items that fit at usable
 size and puts the rest under More actions. An intentionally empty layout hides the bar; Customize
 action bar remains in Home's More options menu.
+On mobile, device control sheets fill the viewport in portrait and compact landscape,
+including when opened from an action-bar shortcut. Desktop device sheets remain centered.
 Desktop hover opens trays above the dock; touch toggles them with a tap. Keyboard
 users can open Build with B and View with V, use Arrow Up to enter a tray, and
 dismiss with Escape. R toggles the roof; C, A, Shift+C, W, N, S, and L retain
