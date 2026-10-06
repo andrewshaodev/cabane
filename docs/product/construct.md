@@ -6,7 +6,12 @@ Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, 
 Window, Passage, Floor, Pool, Hedge, Measure, and Pan. Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
-also controls default wall/ceiling settings.
+also controls default wall/ceiling settings. Select a door, window, or passage and
+open its on-canvas Details action to edit width and height. Passage Details also
+controls rectangular/arched shape and arch rise. Valid width and height edits update
+the scene immediately. Sizes that do not fit report an error; leaving the field
+restores the accepted value. These edits use the ordinary
+preview, undo/redo, autosave, and Apply flow.
 
 The “Have a floor plan?” sidebar block is temporarily disabled by
 `PLAN_IMPORT_ENABLED` in `EditorWorkspace.tsx`. Its implementation is retained for

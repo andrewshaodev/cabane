@@ -20,8 +20,8 @@ export const SelectedOpeningActionBar = forwardRef<HTMLDivElement, {
   onDelete: () => void;
 }>(function SelectedOpeningActionBar({ opening, detailsOpen, disabled, canDuplicate, onDetails, onChange, onDuplicate, onDelete }, ref) {
   return <SelectionActionBar ref={ref} mode="construct" label="Selected opening actions">
-    {opening.kind !== "passage" && <EditorActionButton icon="details" label="Details" pressed={detailsOpen}
-      disabled={disabled} onClick={onDetails} />}
+    <EditorActionButton icon="details" label="Details" pressed={detailsOpen}
+      disabled={disabled} onClick={onDetails} />
     <EditorActionButton icon="duplicate" label="Duplicate" disabled={disabled || !canDuplicate}
       disabledReason={!canDuplicate ? "No free space on this wall." : undefined} onClick={onDuplicate} />
     <OpeningOrientationControls opening={opening} onChange={onChange} disabled={disabled} />

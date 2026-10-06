@@ -129,6 +129,7 @@ export const useConstructEditor = (
     dispatch({ type: "set-tool", tool });
   }, [poolDrawing.cancel]);
   const select = useCallback((selection: FloorEditorSelection) => {
+    setOpeningError(null);
     dispatch({ type: "select", selection });
   }, []);
   const beginWall = useCallback((from: PlanPoint) => {
@@ -361,7 +362,20 @@ export const useConstructEditor = (
     cancelWall,
     addOpening,
     placeOpening,
-    updateSelectedOpening: (patch) => dispatch({ type: "update-selected-opening", patch }),
+    updateSelectedOpening: (patch) => {
+      const selection = draft.selection;
+      const opening = selection?.kind === "opening" ? draft.openings.find(candidate => candidate.id === selection.id) : undefined;
+      if (!opening) return;
+      const updated = { ...opening, ...patch };
+      const wall = draft.walls.find(candidate => candidate.id === updated.wallId);
+      const fits = availableOpeningOffsetRanges({ draft, wallId: updated.wallId, widthPlanUnits: updated.widthPlanUnits, excludeOpeningId: updated.id }).length > 0;
+      if (!fits || !wall || updated.openingHeightMeters + updated.sillHeightMeters > (wall.heightMeters ?? draft.defaultWallHeightMeters)) {
+        setOpeningError("This opening does not fit here. Choose a smaller size or another wall position.");
+        return;
+      }
+      setOpeningError(null);
+      dispatch({ type: "update-selected-opening", patch });
+    },
     replaceSelectedOpening: (opening) => {
       const wall = draft.walls.find((wall) => wall.id === opening.wallId);
       const fits = availableOpeningOffsetRanges({ draft, wallId: opening.wallId, widthPlanUnits: opening.widthPlanUnits, excludeOpeningId: opening.id })
@@ -373,10 +387,10 @@ export const useConstructEditor = (
       setOpeningError(null);
       dispatch({ type: "replace-selected-opening", opening });
     },
-    resizeSelectedOpening: (offsetPlanUnits, widthPlanUnits) => dispatch({
-      type: "update-selected-opening",
-      patch: { offsetPlanUnits, widthPlanUnits },
-    }),
+    resizeSelectedOpening: (offsetPlanUnits, widthPlanUnits) => {
+      setOpeningError(null);
+      dispatch({ type: "update-selected-opening", patch: { offsetPlanUnits, widthPlanUnits } });
+    },
     moveOpening: (openingId, wallId, offsetPlanUnits) => {
       const opening = history.present.openings.find((candidate) => candidate.id === openingId);
       if (!opening) return;

@@ -5,7 +5,6 @@ import { RoofSettingsEditor } from "./RoofSettingsEditor";
 import type { RoofSettings } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
-import { OpeningProperties } from "./OpeningProperties";
 
 import { PoolProperties } from "./PoolProperties";
 
@@ -72,7 +71,6 @@ export function ConstructionInspector({
 }: ConstructionInspectorProps) {
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
   const selectedPoolId = editor.selection?.kind === "pool" ? editor.selection.id : null;
-  const selectedOpeningId = editor.selection?.kind === "opening" ? editor.selection.id : null;
   const selectedRoomId = editor.selection?.kind === "room" ? editor.selection.id : null;
   const selectedFloorZoneId = editor.selection?.kind === "floor-zone"
     ? editor.selection.id
@@ -82,9 +80,6 @@ export function ConstructionInspector({
     : undefined;
   const selectedPool = selectedPoolId
     ? editor.draft.pools?.find((pool) => pool.id === selectedPoolId) : undefined;
-  const selectedOpening = selectedOpeningId
-    ? editor.draft.openings.find((opening) => opening.id === selectedOpeningId)
-    : undefined;
   const selectedRoom = selectedRoomId
     ? editor.previewFloor.rooms.find((room) => room.id === selectedRoomId)
     : undefined;
@@ -342,13 +337,6 @@ export function ConstructionInspector({
           </fieldset>
           {editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false && <p role="status">All enclosing walls are shared. Edit the walls to remove this room.</p>}
           <button type="button" disabled={editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false} onClick={editor.deleteSelected}>Delete room</button>
-        </div>
-      )}
-      {selectedOpening?.kind === "passage" && (
-        <div className="construction-inspector__selection">
-          <header><div><small>Selected opening</small><strong>Passage properties</strong></div></header>
-          <OpeningProperties opening={selectedOpening} editor={editor} advanced={false} />
-          <button type="button" onClick={editor.deleteSelected}>Delete opening</button>
         </div>
       )}
       {validationIssues.length > 0 && (

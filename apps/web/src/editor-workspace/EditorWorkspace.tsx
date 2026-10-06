@@ -295,7 +295,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           onPlacementChange={furnishingEditor.updatePlacement} onSizeChange={furnishingEditor.updateSize} onLightStateChange={furnishingEditor.updateLightState} onVariantChange={furnishingEditor.updateVariant}
           onClose={() => setDetailsItemId(null)} />
       </div>}
-      {mode === "construct" && !marqueeSelecting && selectedOpening && selectedOpening.kind !== "passage" && detailsOpeningId === selectedOpening.id && (
+      {mode === "construct" && !marqueeSelecting && selectedOpening && detailsOpeningId === selectedOpening.id && (
         <div inert={editingLocked || publishOpen || previewOpen}>
           <OpeningDetails key={selectedOpening.id} opening={selectedOpening} editor={constructEditor}
             disabled={dragging || editingLocked} onClose={() => setDetailsOpeningId(null)} />

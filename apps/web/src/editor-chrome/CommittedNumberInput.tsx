@@ -6,12 +6,14 @@ export function CommittedNumberInput({
   min,
   step = .1,
   onCommit,
+  commitOnChange = false,
 }: {
   label: string;
   value: number;
   min?: number;
   step?: number;
   onCommit: (value: number) => void;
+  commitOnChange?: boolean;
 }) {
   const [draft, setDraft] = useState(String(value));
   const cancelled = useRef(false);
@@ -19,6 +21,10 @@ export function CommittedNumberInput({
   const commit = () => {
     if (cancelled.current) {
       cancelled.current = false;
+      return;
+    }
+    if (commitOnChange) {
+      setDraft(String(value));
       return;
     }
     const next = Number(draft);
@@ -40,7 +46,12 @@ export function CommittedNumberInput({
       min={min}
       step={step}
       value={draft}
-      onChange={(event) => setDraft(event.target.value)}
+      onChange={(event) => {
+        const text = event.target.value;
+        setDraft(text);
+        const next = event.target.valueAsNumber;
+        if (commitOnChange && Number.isFinite(next) && (min === undefined || next >= min) && next !== value) onCommit(next);
+      }}
       onBlur={commit}
       onKeyDown={onKeyDown}
     />
