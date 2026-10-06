@@ -118,3 +118,17 @@ Home and preserves draft edits; it is disabled until the first successful Save.
 Reset asks for confirmation, restores the published project and connection
 bindings, and clears draft undo history. Before the first Save it restores the
 initial unpublished baseline. Reset is disabled when the draft matches that baseline.
+
+Reference plans are browser-only editor assets in the separate
+`cabane-reference-plans-v1` IndexedDB database. Image blobs are keyed by home and
+asset ID; per-floor records contain placement and image dimensions, with separate
+visibility/opacity preferences. Session history retains only metadata and asset
+IDs, never blob copies. Reference-only edits do not dirty or autosave the home
+project, trigger HA sync, or enter portable exports/private backups.
+
+Removing a floor hides its reference while session undo can restore it. Reset
+retains references for surviving floors; clearing history or leaving the editor
+cleans unused assets. Deleting a workspace removes its reference records and
+blobs. Duplicated and imported homes begin without references. Failed local writes
+retain in-memory changes and allow Retry; a rejected image replacement leaves the
+previous reference intact.

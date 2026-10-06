@@ -1,3 +1,4 @@
+import { deleteReferenceHome } from "../editor-reference-plan/reference-storage";
 import { enrollBuildTutorial, forgetBuildTutorial } from "../editor-onboarding/build-tutorial-storage";
 import { lastOpenedWorkspace, forgetWorkspacePresentation } from "./workspace-presentation";
 import { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
@@ -106,6 +107,7 @@ export function WorkspaceApplication() {
           if (fresh?.record?.revision !== entry.record.revision) throw new Error("This workspace changed. Refresh before deleting it.");
         }
         await repository.delete(id, raw);
+        await deleteReferenceHome(id);
         forgetWorkspacePresentation(id);
         forgetBuildTutorial(id);
         try { window.localStorage.removeItem(setupStorageKey(id)); } catch { /* Non-authoritative onboarding only. */ }

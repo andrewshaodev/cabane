@@ -3,10 +3,10 @@ import { createBuildTutorialState, type HomeProject, type BuildTutorialState } f
 import { reconcileBuildTutorial } from "./build-tutorial-progress";
 import { readBuildTutorial, writeBuildTutorial } from "./build-tutorial-storage";
 
-export function useBuildTutorial(project: HomeProject, mode: string) {
+export function useBuildTutorial(project: HomeProject, mode: string, hasReference = false) {
   const homeId = project.home.id;
   const [stored, setStored] = useState(() => readBuildTutorial(homeId));
-  const state = stored.state ? reconcileBuildTutorial(stored.state, project, mode) : undefined;
+  const state = stored.state ? reconcileBuildTutorial(stored.state, project, mode, hasReference) : undefined;
   const update = (next: BuildTutorialState) => {
     const durable = writeBuildTutorial(homeId, next);
     setStored({ state: next, durable });

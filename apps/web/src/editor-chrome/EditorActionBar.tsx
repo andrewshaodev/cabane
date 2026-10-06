@@ -15,6 +15,7 @@ const constructionTools = [
 ] as const;
 
 export interface EditorActionBarProps {
+  inert?: boolean;
   mode: EditorMode;
   tool: FloorEditorTool;
   onToolChange: (tool: FloorEditorTool) => void;
@@ -28,11 +29,11 @@ export interface EditorActionBarProps {
 }
 
 export function EditorActionBar({
-  mode, tool, onToolChange, canUndo, canRedo, onUndo, onRedo, onStairs, stairsActive, stairsDisabledReason,
+  inert, mode, tool, onToolChange, canUndo, canRedo, onUndo, onRedo, onStairs, stairsActive, stairsDisabledReason,
 }: EditorActionBarProps) {
   const constructing = mode === "construct";
   return (
-    <div className="editor-action-bar" role="group" data-mode={mode}
+    <div inert={inert} className="editor-action-bar" role="group" data-mode={mode}
       aria-label={constructing ? "Construction actions" : "Edit history"}>
       {constructing && <>
         {constructionTools.flatMap((action) => [<EditorActionButton key={action.tool}

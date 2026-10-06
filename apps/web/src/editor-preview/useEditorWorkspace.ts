@@ -1,12 +1,10 @@
+import { architectureChanged, commitWorkspaceSnapshot, createWorkspaceHistory, redoWorkspaceHistory, undoWorkspaceHistory, type ReferenceWorkspaceHistory as EditorWorkspaceHistory } from "../editor-reference-plan/reference-history";
+import { useReferencePersistence } from "../editor-reference-plan/useReferencePersistence";
+import type { ReferencePlans } from "../editor-reference-plan/reference-plan";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  commitWorkspaceSnapshot,
-  createWorkspaceHistory,
-  redoWorkspaceHistory,
-  undoWorkspaceHistory,
   WorkspaceConflictError,
   type AutosaveResult,
-  type EditorWorkspaceHistory,
   type EditorWorkspaceSnapshot,
   type HomeProjectLifecycle,
   type HomeProjectRecord,
@@ -32,6 +30,24 @@ export function useEditorWorkspace({
 }) {
   const [history, setHistory] = useState(() => createWorkspaceHistory(snapshotFromRecord(initialRecord)));
   const historyRef = useRef(history);
+  const initializeReferences = useCallback((stored: ReferencePlans) => {
+    const previous = historyRef.current;
+    const references = Object.fromEntries(Object.entries(stored).filter(([id]) => previous.present.project.floors.some(floor => floor.id === id)));
+    const withReferences = (entry: typeof previous.present) => ({ ...entry, references });
+    const next = { present: withReferences(previous.present), past: previous.past.map(withReferences), future: previous.future.map(withReferences) };
+    historyRef.current = next;
+    setHistory(next);
+    return references;
+  }, []);
+  const referenceStorage = useReferencePersistence(initialRecord.homeId, history.present.references, initializeReferences);
+  const cleanupState = useRef(history);
+  cleanupState.current = history;
+  useEffect(() => () => {
+    const present = cleanupState.current.present;
+    if (!present.references) return;
+    const floors = new Set(present.project.floors.map(floor => floor.id));
+    referenceStorage.cleanup(Object.fromEntries(Object.entries(present.references).filter(([id]) => floors.has(id))));
+  }, [referenceStorage.cleanup]);
   const [record, setRecord] = useState(initialRecord);
   const recordRef = useRef(record);
   const [saving, setSaving] = useState(false);
@@ -120,9 +136,11 @@ export function useEditorWorkspace({
 
   const changeHistory = useCallback((next: EditorWorkspaceHistory): EditorWorkspaceSnapshot | null => {
     if (locked.current || next === historyRef.current) return null;
+    const changed = architectureChanged(historyRef.current.present, next.present);
     historyRef.current = next;
-    revision.current += 1;
     setHistory(next);
+    if (!changed) return next.present;
+    revision.current += 1;
     cancelTimer();
     if (!failure.current) {
       setSaving(true);
@@ -131,7 +149,10 @@ export function useEditorWorkspace({
     return next.present;
   }, [autosaveDelayMs, cancelTimer, queueSnapshot]);
   const commit = useCallback((snapshot: EditorWorkspaceSnapshot): boolean =>
-    !locked.current && changeHistory(commitWorkspaceSnapshot(historyRef.current, snapshot)) !== null,
+    !locked.current && changeHistory(commitWorkspaceSnapshot(historyRef.current, { ...snapshot, references: historyRef.current.present.references })) !== null,
+  [changeHistory]);
+  const commitReferences = useCallback((references: ReferencePlans): boolean =>
+    !locked.current && changeHistory(commitWorkspaceSnapshot(historyRef.current, { ...historyRef.current.present, references })) !== null,
   [changeHistory]);
   const undo = useCallback(() => changeHistory(undoWorkspaceHistory(historyRef.current)), [changeHistory]);
   const redo = useCallback(() => changeHistory(redoWorkspaceHistory(historyRef.current)), [changeHistory]);
@@ -167,13 +188,15 @@ export function useEditorWorkspace({
   }, [acceptRecord, cancelTimer, enqueue, lifecycle, saveSnapshot, showFailure]);
 
   const establishBaseline = useCallback((next: HomeProjectRecord) => {
-    const nextHistory = createWorkspaceHistory(snapshotFromRecord(next));
+    const references = Object.fromEntries(Object.entries(historyRef.current.present.references ?? {}).filter(([id]) => next.draft.floors.some(floor => floor.id === id)));
+    const nextHistory = createWorkspaceHistory({ ...snapshotFromRecord(next), ...(historyRef.current.present.references ? { references } : {}) });
     historyRef.current = nextHistory;
+    if (nextHistory.present.references) referenceStorage.cleanup(references);
     savedRevision.current = ++revision.current;
     failure.current = null;
     acceptRecord(next);
     if (mounted.current) { setHistory(nextHistory); setSaving(false); setError(null); }
-  }, [acceptRecord]);
+  }, [acceptRecord, referenceStorage.cleanup]);
   const reset = useCallback(async (kind: "resetDraftToPublished" | "resetToSeed"): Promise<AutosaveResult> => {
     if (locked.current) return { status: "storage-error", record: recordRef.current, error: new Error("The workspace is busy.") };
     locked.current = true;
@@ -205,7 +228,7 @@ export function useEditorWorkspace({
   }, [establishBaseline]);
 
   return {
-    record, snapshot: history.present, commit, undo, redo,
+    record, snapshot: history.present, commit, undo, redo, commitReferences, referenceStorage,
     canUndo: history.past.length > 0, canRedo: history.future.length > 0,
     flush, publish, saving, error, busy,
     resetDraftToPublished, resetToSeed, getRecord, adoptRecord,

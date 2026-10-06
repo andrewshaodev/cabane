@@ -1,0 +1,28 @@
+.reference-plan { flex-shrink: 0; margin: 0; font-size: var(--editor-text-control); }
+.reference-plan__content { padding: 0 0 16px; }
+.reference-plan p { margin: 0 0 12px; color: #59645d; line-height: 1.5; }
+.reference-plan .reference-plan__filename { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; color: var(--preview-ink); font-weight: 500; }
+.reference-plan .reference-plan__storage { font-size: var(--editor-text-caption, .75rem); }
+.reference-plan label { display: grid; grid-template-columns: minmax(0, 1fr) 100px; align-items: center; gap: 8px; margin-bottom: 12px; }
+.reference-plan label.reference-plan__visible { display: flex; gap: 8px; color: var(--preview-ink); }
+.reference-plan label.reference-plan__opacity { grid-template-columns: auto minmax(0, 1fr) 36px; }
+.reference-plan input { min-width: 0; accent-color: #985637; }
+.reference-plan input[type="range"] { width: 100%; }
+.reference-plan input[type="checkbox"] { width: 16px; height: 16px; min-height: 16px; flex: none; margin: 0; }
+.reference-plan input[type="number"] { width: 100%; padding: 6px; border: 1px solid #b9b9aa; border-radius: 4px; color: var(--preview-ink); background: #faf6ef; font: inherit; text-align: right; }
+.reference-plan__actions, .reference-plan__secondary { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.reference-plan__secondary { margin-left: -12px; }
+.reference-plan .reference-plan__error, .reference-plan__error p { color: #993c29; }
+.reference-canvas-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.reference-image { position: absolute; left: 0; top: 0; transform-origin: 0 0; max-width: none; user-select: none; pointer-events: none; }
+.reference-adjustment { position: absolute; inset: 0; touch-action: none; outline: none; }
+.reference-adjustment svg { width: 100%; height: 100%; overflow: visible; }
+.reference-adjustment polygon, .reference-adjustment line { fill: none; stroke: #985637; stroke-width: 2; }
+.reference-adjustment circle { fill: #fff8ee; stroke: #985637; stroke-width: 2; }
+.reference-adjustment [data-handle] { cursor: nwse-resize; }
+.reference-adjustment [data-handle="rotate"] { cursor: grab; }
+.reference-adjustment text { fill: #713c27; font: 600 14px "Roboto", sans-serif; paint-order: stroke; stroke: #fff8ee; stroke-width: 4px; }
+.reference-asset-error { position: absolute; bottom: 24px; left: 24px; right: 24px; padding: 12px; background: #fff4e9; color: #993c29; }
+.direction-preview[data-editor-mode="construct"] .direction-rail:has(.reference-plan) { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #b9b9aa transparent; }
+.direction-preview[data-editor-mode="construct"] .direction-rail:has(.reference-plan) .construction-inspector { flex: none; overflow: visible; }
+.editor-action-bar[inert] { opacity: .55; }

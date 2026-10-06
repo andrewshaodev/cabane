@@ -23,11 +23,12 @@ export function roomHasOpening(floor: FloorSpec, room: FloorSpec["rooms"][number
   });
 }
 
-export function reconcileBuildTutorial(state: BuildTutorialState, project: HomeProject, mode: string): BuildTutorialState {
+export function reconcileBuildTutorial(state: BuildTutorialState, project: HomeProject, mode: string, hasReference = false): BuildTutorialState {
   if (state.status !== "active") return state;
   const rooms = project.floors.flatMap(floor => floor.rooms.map(room => ({ floor, room })));
   const target = rooms.find(({ floor, room }) => floor.id === state.target?.floorId && room.id === state.target.roomId) ?? rooms[0];
   const complete = {
+    reference: hasReference || state.step !== "reference" || project.floors.some(floor => floor.walls.length > 0),
     walls: Boolean(target),
     door: Boolean(target && roomHasOpening(target.floor, target.room, "door")),
     window: Boolean(target && roomHasOpening(target.floor, target.room, "window")),

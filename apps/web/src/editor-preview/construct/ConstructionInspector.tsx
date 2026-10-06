@@ -43,6 +43,8 @@ import { FloorSettingsEditor } from "./FloorSettingsEditor";
 import { formatPlanValue } from "./inspector-number-format";
 
 export interface ConstructionInspectorProps {
+  inert?: boolean;
+  referencePlanControls?: import("react").ReactNode;
   planImportControls?: import("react").ReactNode;
   tutorialControls?: import("react").ReactNode;
   walkStartControls?: import("react").ReactNode;
@@ -60,6 +62,8 @@ type InspectorValidationIssue = ManifestIssue & Pick<ConstructContextualIssue, "
 };
 
 export function ConstructionInspector({
+  inert,
+  referencePlanControls,
   planImportControls,
   tutorialControls,
   walkStartControls,
@@ -157,6 +161,7 @@ export function ConstructionInspector({
   };
   return (
     <section className="construction-inspector" aria-label="Construction inspector">
+      <div className="construction-inspector__context" inert={inert}>
       <HedgeProperties editor={editor} />
       {editor.tool === "wall" && (
         <div className="construction-inspector__selection">
@@ -376,6 +381,9 @@ export function ConstructionInspector({
           <button type="button" onClick={editor.deleteSelected}>Delete opening</button>
         </div>
       )}
+      </div>
+      {referencePlanControls}
+      <div className="construction-inspector__context" inert={inert}>
       {validationIssues.length > 0 && (
         <section
           className="construction-inspector__validation"
@@ -496,6 +504,7 @@ export function ConstructionInspector({
           </div>}
         </section>
       )}
+      </div>
     </section>
   );
 }

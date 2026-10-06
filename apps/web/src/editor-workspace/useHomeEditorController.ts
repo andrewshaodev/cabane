@@ -1,3 +1,4 @@
+import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
 import { createBrowserUuid } from "@cabane/engine";
@@ -189,10 +190,12 @@ export function useHomeEditorController({
         ? constructEditor.addFloorZone(roomId, polygon, floorFinish)
         : constructEditor.addGroundZone(polygon, floorFinish),
   );
-  const unsettled = Boolean(stairPlacement) || dragging || constructEditor.isSettling
+  const constructionUnsettled = Boolean(stairPlacement) || dragging || constructEditor.isSettling
     || !!furnishingEditor.transaction || poolDrawing.active
     || floorZoneDrawing.active || pendingRoomPaintId !== null;
   const editingLocked = workspace.busy || closing || connectionBusy;
+  const reference = useReferencePlan(workspace, activeFloorId, mode === "construct", editingLocked || constructionUnsettled || Boolean(constructEditor.drawStart) || publishOpen || previewOpen);
+  const unsettled = constructionUnsettled || reference.adjusting;
   const editorSyncTarget = useRef<{
     draft: typeof constructEditor.draft;
     items: typeof furnishingEditor.items;
@@ -363,7 +366,7 @@ export function useHomeEditorController({
 
   useHomeEditorShortcuts({
     clearConstructionSelection, clearFurnishingSelection, constructEditor, constructMeasure, dragging,
-    duplicateArrangeItem, duplicateConstructionOpening, editingLocked,
+    duplicateArrangeItem, duplicateConstructionOpening, editingLocked: editingLocked || reference.adjusting,
     floorZoneDrawing, furnishingEditor, marqueeSelecting, mode, pendingRoomPaintId, previewOpen,
     publishOpen, redoProject, selectedOpening, undoProject, setPendingRoomPaintId, setDragging
   });
@@ -595,7 +598,7 @@ export function useHomeEditorController({
     visualSceneItems, furnishingEditor, selectedItem, selectedDefinition, detailsItemId,
     setDetailsItemId, unsettled, selectMode, duplicateArrangeItem, deleteSceneItem, setCameraView,
     walkButton, setPreviewOpen, closeEditor, onWorkspaces, closing, setPublishMessage, setPublishOpen, runtime,
-    workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
+    reference, workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
     homeAssistantUrl, signIn, snapshot, flush, lifecycle, commit, replaceEditorsFromProject,
     catalogBrowsing, setCatalogBrowsing, catalogError, addCatalogItem, arrangeAnnouncement,
     pendingRoomPaintId, confirmRoomPaint, setPendingRoomPaintId, autosaveStatus, editedManifest,
