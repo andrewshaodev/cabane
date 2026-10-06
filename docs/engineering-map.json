@@ -97,7 +97,8 @@
       "packages/engine/src/home-project/placements.ts",
       "apps/web/src/editor-preview/furnish/FurnishingProperties.tsx",
       "apps/web/src/editor-preview/furnish/NumericField.tsx",
-      "apps/web/src/editor-preview/furnish/SelectedItemControls.tsx"
+      "apps/web/src/editor-preview/furnish/SelectedItemControls.tsx",
+      "apps/web/src/editor-preview/furnish/SelectedItemResizeButton.tsx"
     ],
     "interfaces": [
       {
@@ -105,7 +106,7 @@
         "symbols": ["useFurnishingEditor"]
       }
     ],
-    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Optional fabric colors follow item history and persistence; model defaultColor enables the picker. 3D elevation dragging preserves support and horizontal placement, commits one history step on release, and restores the initial placement on cancellation.",
+    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Optional fabric colors follow item history and persistence; model defaultColor enables the picker. 3D elevation dragging preserves support and horizontal placement, commits one history step on release, and restores the initial placement on cancellation. Proportional resize dragging preserves placement, respects model resize policies, and shares the single-transaction commit/cancel behavior.",
     "checks": ["test:unit", "test:browser", "verify:furnishing-surfaces", "fixture:verify:room"]
   },
   {

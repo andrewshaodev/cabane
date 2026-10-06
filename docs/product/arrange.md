@@ -11,7 +11,11 @@ dimensions and placement. In 3D, a matching elevation button beside the rotation
 controls raises or lowers the selected item while dragged vertically. Release
 commits one undo step; Escape, pointer cancellation, or focus loss restores its
 initial placement. Elevation preserves horizontal position, rotation, and wall or
-ceiling support. All built-in furnishings expose independent width, height,
+ceiling support. A matching resize button scales the current dimensions proportionally:
+upward dragging enlarges the item, downward dragging shrinks it. It preserves
+placement and uses the same commit/cancel history behavior. Fixed-size models
+hide this control; other model resize policies still constrain allowed dimensions.
+All built-in furnishings expose independent width, height,
 and depth controls, including previously fixed-size presets. Resizing scales the
 procedural model, so extreme dimensions can stretch its details. Device and
 home-local extension controls follow their declared resize policies. Variant is a standard saved attribute for both

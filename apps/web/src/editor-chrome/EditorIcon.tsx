@@ -112,6 +112,7 @@ const paths = {
   ),
   reverseSlide: <path d="M3 7h18m-4-4 4 4-4 4M21 17H3m4-4-4 4 4 4" />,
   switchSide: <path d="M3 10h18M3 14h18M12 2v6m-3-3 3-3 3 3M12 16v6m-3-3 3 3 3-3" />,
+  resize: <path d="M4 10V4h6M14 20h6v-6M4 4l16 16" />,
   elevation: <path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4" />,
   move: <path d="M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3" />,
   select: <path d="m5 3 14 10-7 1-3 7z" />,

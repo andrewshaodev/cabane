@@ -1869,6 +1869,8 @@
   flex-shrink: 0;
 }
 
+.selected-item-resize-button,
+.selected-item-resize-button .editor-action-button,
 .selected-item-elevation-button,
 .selected-item-elevation-button .editor-action-button {
   touch-action: none;
