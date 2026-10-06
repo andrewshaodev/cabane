@@ -13,7 +13,7 @@ await withModules(async (load) => {
   const { deriveDemoSessionDefinition } = await load(
     "/packages/engine/src/onboarding/demo/demo-session-definition.ts",
   );
-  const { advanceRollUpDoorPositions, resolveOpeningPositions, passableOpeningIds } = await load(
+  const { resolveOpeningPositions, passableOpeningIds } = await load(
     "/packages/engine/src/opening-pose.ts",
   );
   const { projectFromEditorState, workspaceSnapshotFromEditorState } = await load(
@@ -191,7 +191,10 @@ await withModules(async (load) => {
         });
       const renderer = await create(render(0));
       const frame = () => renderer.scene.findByProps({ name: "roll-up-door-frame" });
-      const slats = () => renderer.scene.findByProps({ name: "roll-up-door-slats" }).children;
+      const slats = () =>
+        renderer.scene
+          .findByProps({ name: "roll-up-door-slats" })
+          .children.filter((node) => node.instance.visible);
       const bounds = new Box3().setFromObject(frame().instance);
       assert.ok(slats().length > 4);
       await renderer.update(render(0.5));
@@ -203,6 +206,50 @@ await withModules(async (load) => {
       assert.ok(new Box3().setFromObject(frame().instance).equals(bounds));
       for (const mesh of renderer.scene.findAll((node) => node.type === "Mesh"))
         assert.equal(mesh.instance.material.type, "MeshToonMaterial");
+      await renderer.unmount();
+    }
+  });
+
+  test("garage slats animate both ways, reverse continuously, and settle at partial positions", async () => {
+    const render = (position, reducedMotion = false) =>
+      createElement(DoorModel, { wall, floor, opening: garage, position, reducedMotion });
+    const renderer = await create(render(0));
+    try {
+      const group = renderer.scene.findByProps({ name: "roll-up-door-slats" }).instance;
+      const panel = group.children[0];
+      const geometry = panel.geometry;
+      const bottom = () => panel.position.y - (geometry.parameters.height * panel.scale.y) / 2;
+      const clearHeight = engine.rollUpDoorGeometry(
+        garage.widthPlanUnits,
+        garage.openingHeightMeters,
+        1,
+      ).clearHeight;
+      assert.equal(bottom(), 0);
+      await renderer.update(render(1));
+      assert.equal(bottom(), 0, "a new target must not jump the panels");
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.ok(bottom() > 0 && bottom() < clearHeight / 5);
+      await renderer.advanceFrames(12, 1 / 60);
+      const midOpening = bottom();
+      await renderer.update(render(0));
+      assert.equal(bottom(), midOpening, "reversing preserves the current pose");
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.ok(bottom() > 0 && bottom() < midOpening);
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.equal(bottom(), 0);
+      await renderer.update(render(0.5));
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.equal(bottom(), clearHeight / 2);
+      await renderer.update(render(1));
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.ok(group.children.every((part) => !part.visible));
+      await renderer.update(render(0));
+      await renderer.advanceFrames(1, 5);
+      assert.ok(panel.visible && bottom() > clearHeight * 0.5, "idle frames must not snap shut");
+      await renderer.update(render(0.25, true));
+      assert.equal(bottom(), clearHeight / 4, "reduced motion settles immediately");
+      assert.equal(panel.geometry, geometry, "frames reuse the existing geometry");
+    } finally {
       await renderer.unmount();
     }
   });
@@ -226,20 +273,6 @@ await withModules(async (load) => {
       passableOpeningIds([floor], { [garage.id]: threshold + 0.001 }, 0.2).has(garage.id),
       false,
     );
-  });
-
-  test("garage motion follows new targets in both directions and Walk uses its intermediate clearance", () => {
-    const id = garage.id;
-    const opening = advanceRollUpDoorPositions({ [id]: 0 }, { [id]: 1 }, [id], 0.05);
-    assert.ok(opening.positions[id] > 0 && opening.positions[id] < 1);
-    assert.equal(opening.moving, true);
-    assert.equal(passableOpeningIds([floor], opening.positions).has(id), false);
-    const closing = advanceRollUpDoorPositions(opening.positions, { [id]: 0 }, [id], 0.05);
-    assert.equal(closing.positions[id], 0);
-    assert.equal(closing.moving, false);
-    assert.equal(passableOpeningIds([floor], closing.positions).has(id), false);
-    const reported = advanceRollUpDoorPositions({ [id]: 0.8 }, { [id]: 0.4 }, [id], 0.05);
-    assert.ok(reported.positions[id] < 0.8 && reported.positions[id] > 0.4);
   });
 
   test("preset replacement reconciles cover mappings atomically and undo restores them", () => {

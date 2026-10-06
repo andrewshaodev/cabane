@@ -5,26 +5,6 @@ export const WALK_HEAD_MARGIN = 0.18;
 export type OpeningPositions = Readonly<Record<string, number>>;
 export type RetainedOpeningPositions = Map<string, { bindingKey: string; position: number }>;
 
-/** Move roll-up doors toward the latest reported position at a steady normalized speed. */
-export function advanceRollUpDoorPositions(
-  current: OpeningPositions,
-  target: OpeningPositions,
-  doorIds: readonly string[],
-  deltaSeconds: number,
-): { positions: OpeningPositions; moving: boolean } {
-  const positions: Record<string, number> = {};
-  let moving = false;
-  const step = Math.max(0, Math.min(0.05, deltaSeconds)) * 0.7;
-  for (const id of doorIds) {
-    const from = current[id] ?? target[id] ?? 0;
-    const to = target[id] ?? 0;
-    const next = from + Math.max(-step, Math.min(step, to - from));
-    positions[id] = next;
-    if (Math.abs(next - to) > 0.000001) moving = true;
-  }
-  return { positions, moving };
-}
-
 /** Bound state wins over local proximity; retained poses belong to one binding identity. */
 export function resolveOpeningPositions(
   automatic: ReadonlySet<string>,

@@ -1,9 +1,9 @@
 {
-  "revision": 2,
-  "fingerprint": "0df7817498ca086f75022168c9255c97332c885c1ac579115744ae0c1a3e0f50",
-  "summary": "Ship the expanded rug catalog with workspace upgrade guidance",
+  "revision": 3,
+  "fingerprint": "d71e3fef03bba310057c70fd7532822558b39e190dcedfc5694a589cdcbf57fa",
+  "summary": "Animate garage door opening and closing smoothly",
   "breakingChanges": [
-    "Existing rug model and variant IDs remain supported. Workspaces using the new rug styles require this matching integration release; older panels must update through HACS before opening them."
+    "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
   ],
   "history": [
     {
@@ -11,6 +11,13 @@
       "summary": "Explain newer workspace formats and automate matching HA releases",
       "breakingChanges": [
         "Unknown fields remain blocked. Older panels must update in HACS before opening newer homes; the message now explains update, restart and reload steps."
+      ]
+    },
+    {
+      "revision": 2,
+      "summary": "Ship the expanded rug catalog with workspace upgrade guidance",
+      "breakingChanges": [
+        "Existing rug model and variant IDs remain supported. Workspaces using the new rug styles require this matching integration release; older panels must update through HACS before opening them."
       ]
     }
   ]
