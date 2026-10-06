@@ -191,7 +191,7 @@ export function CameraScreenModel({ liveMedia, visualState, reducedMotion }: Hom
             />
           </mesh>
 
-          <mesh position={[0.425, PANEL_CENTER_Y - 0.247, HUD_Z + 0.001]} renderOrder={13}>
+          <mesh position={[0.425, PANEL_CENTER_Y - 0.247, HUD_Z + 0.003]} renderOrder={13}>
             <ringGeometry args={[0.012, 0.014, 32]} />
             <ToonMaterial
               color={statusColor}

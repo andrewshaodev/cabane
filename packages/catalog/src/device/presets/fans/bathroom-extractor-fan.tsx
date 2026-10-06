@@ -18,11 +18,11 @@ export function BathroomExtractorFanModel({ visualState, reducedMotion }: HomeDe
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.003} />
       </RoundedBox>
-      <mesh position={[0, 0.09, 0.065]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.07, 0.07, 0.05, 20]} />
+      <mesh position={[0, 0.09, 0.062]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.07, 0.07, 0.044, 20]} />
         <ToonMaterial color={active ? "#849c95" : "#9ba29e"} />
       </mesh>
-      <mesh position={[0, 0.09, 0.089]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.09, 0.087]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.014, 0.014, 0.002, 16]} />
         <ToonMaterial color="#596460" />
       </mesh>

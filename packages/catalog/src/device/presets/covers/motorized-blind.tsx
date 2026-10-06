@@ -11,7 +11,7 @@ export function MotorizedBlindModel({ state, visualState, reducedMotion }: HomeD
   return (
     <group name="catalog-motorized-blind">
       <mesh name="blind-headbox" position={[0, 1.54, 0.09]} castShadow receiveShadow>
-        <boxGeometry args={[1.2, 0.12, 0.06]} />
+        <boxGeometry args={[1.156, 0.12, 0.06]} />
         <ToonMaterial color="#e7e5dc" />
         <Outlines color="#59605a" thickness={0.0015} screenspace={false} />
       </mesh>

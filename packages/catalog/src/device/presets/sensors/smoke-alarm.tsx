@@ -11,8 +11,8 @@ export function SmokeAlarmModel({ visualState }: HomeDeviceModelProps) {
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </mesh>
-      <mesh position={[0, 0.04, 0]}>
-        <cylinderGeometry args={[0.052, 0.056, 0.01, 24]} />
+      <mesh position={[0, 0.039, 0]}>
+        <cylinderGeometry args={[0.052, 0.056, 0.008, 24]} />
         <ToonMaterial color="#d5d5cf" />
       </mesh>
       {[-0.03, -0.01, 0.01, 0.03].map((x) => (

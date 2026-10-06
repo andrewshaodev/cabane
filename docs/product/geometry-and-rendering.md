@@ -298,3 +298,25 @@ clear/off weather returns to demand rendering and hidden pages suspend animation
 Reduced motion retains static clouds and lighting without precipitation or pulses.
 Real mobile performance and complete cross-browser weather acceptance require
 measurements on those devices; fixture success does not establish them.
+
+## Layered flat surfaces
+
+Use the public engine `LayeredSurface` for opaque, planar artwork such as screen
+illustrations and labels. Supply XY geometry as its child and a `layer` integer
+from 0 through 64; higher layers cover lower layers. Transform the complete stack
+using parent groups. Disjoint patches can reuse a layer; overlapping patches
+must use different layers. The component owns depth testing, depth writing,
+opaque toon material, and bounded polygon bias. A small local Z separation matches
+the paint order; callers do not supply material depth overrides. Colours and
+emissive colour/intensity remain configurable. This is not a transparent-glass or
+volumetric-overlay primitive, and depth bias does not replace physical clearance
+between separate objects.
+
+The geometry audit validates local planarity and actual material state before
+accepting declared layers. It rejects duplicate triangles within a mesh, duplicate
+meshes, competing exposed coplanar finishes, and overlapping patches sharing a
+layer. Shared edges, hidden support faces, and identically shaded opaque structural
+joins are not conflicts. Detection uses transformed triangle geometry, material
+groups, and draw ranges. It is a model-space diagnostic, not a guarantee against
+all camera precision, transparency-sorting, animated intersections, or shader
+instability; the toon camera-motion regression covers the separate lighting case.

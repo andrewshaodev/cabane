@@ -18,6 +18,7 @@ export * from "./HomeAssistantSceneLighting";
 export * from "./navigation";
 export * from "./performance";
 export * from "./rendering";
+export * from "./layered-surfaces";
 export * from "./LiveCameraSurface";
 export * from "./camera-stream";
 export * from "./validation";

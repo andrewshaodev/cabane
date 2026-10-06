@@ -11,7 +11,7 @@ export function MotorizedCurtainModel({ state, visualState, color }: HomeDeviceM
   return (
     <group name="catalog-motorized-curtain">
       <mesh position={[0, 2.36, 0.1]} castShadow>
-        <boxGeometry args={[2, 0.08, 0.12]} />
+        <boxGeometry args={[2, 0.08, 0.112]} />
         <ToonMaterial color="#dedbd3" />
         <Outlines color="#666c68" thickness={0.004} />
       </mesh>
@@ -23,7 +23,7 @@ export function MotorizedCurtainModel({ state, visualState, color }: HomeDeviceM
       ))}
       {[-1, 1].map((side) => (
         <mesh key={side} position={[side * panelOffset, 1.14, 0.125]} castShadow receiveShadow>
-          <boxGeometry args={[panelWidth, 2.28, 0.07]} />
+          <boxGeometry args={[panelWidth, 2.28, 0.064]} />
           <ToonMaterial color={color ?? (side < 0 ? "#d8c8ad" : "#dfcfb6")} />
           <Outlines color="#81745f" thickness={0.004} />
         </mesh>
@@ -34,8 +34,8 @@ export function MotorizedCurtainModel({ state, visualState, color }: HomeDeviceM
           <ToonMaterial color={color ?? "#b6a78f"} />
         </mesh>
       ))}
-      <mesh position={[0.91, 2.29, 0.125]}>
-        <boxGeometry args={[0.12, 0.14, 0.07]} />
+      <mesh position={[0.91, 2.29, 0.123]}>
+        <boxGeometry args={[0.12, 0.14, 0.074]} />
         <ToonMaterial color="#707873" />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.91, 2.3, 0.153]} scale={0.28} />

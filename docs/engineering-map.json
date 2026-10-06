@@ -232,7 +232,8 @@
       "packages/engine/src/wall-colors.ts",
       "packages/engine/src/floor-finishes/wood-planks.ts",
       "packages/engine/src/weather",
-      "packages/engine/src/roof/roof-region-surface.ts"
+      "packages/engine/src/roof/roof-region-surface.ts",
+      "packages/engine/src/layered-surfaces"
     ],
     "interfaces": [
       {
@@ -242,7 +243,8 @@
           "StylizedScene",
           "deriveSolarLighting",
           "resolveSolarLighting",
-          "DEFAULT_WALL_COLORS"
+          "DEFAULT_WALL_COLORS",
+          "LayeredSurface"
         ]
       }
     ],
@@ -279,7 +281,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry.",
+    "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry. Mandatory surface verification covers all furnishing and device variants, including all four device connection states; flat artwork uses the engine LayeredSurface contract.",
     "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {
@@ -342,7 +344,9 @@
       "scripts/test-profile-report.mjs",
       "tests/test-costs.json",
       ".githooks",
-      "CODING_STANDARDS.md"
+      "CODING_STANDARDS.md",
+      "scripts/surface-overlaps.mjs",
+      "scripts/layered-surface-contract.mjs"
     ],
     "interfaces": [],
     "invariant": "The delivery contract defines local verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery requires the full gate.",

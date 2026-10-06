@@ -243,3 +243,25 @@ or archive transfer. Existing Node/DOM suites retain schema, repository, model-p
 archive, reference-plan, weather and startup behavior; they do not establish equivalent
 end-to-end UI coverage. No replacement browser journeys or duplicate unit matrices
 are added. Basement editing and the representative-scale GLB scene remain.
+
+### Coplanar surface checks
+
+`verify:furnishing-surfaces` runs during `verify` and therefore the mandatory
+pre-push hook. It checks every furnishing variant (including retired entries)
+and every device variant in active, inactive, unavailable, and disconnected
+states. Devices without layered artwork are included automatically. The checker
+also validates declared layers even when their material settings are invalid.
+Geometry inspection runs offline and adds no production frame work.
+
+Pass model IDs to audit specific devices/furnishings; `--all-devices` remains a
+compatibility alias for the default full scan. Diagnostics name the model, state,
+surface, plane, and overlapping area. Shared-edge fixtures and known bad
+synthetic meshes protect the detector from false positives and missed duplicate
+faces. The gate samples static reduced-motion poses; it does not prove all
+animation poses, near-coplanar depth precision, or shader stability. The separate
+orbit-rendering test guards the toon-gradient camera regression.
+
+Legacy device displays, grilles, controls, and cover hardware use physically
+separated front faces. Backing shells are recessed within their existing placement
+envelopes; the camera HUD status ring sits ahead of its reticle. Do not restore
+flush overlapping faces to recover nominal casing thickness.

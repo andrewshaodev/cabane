@@ -18,11 +18,11 @@ export function RefrigeratorModel({ visualState }: HomeDeviceModelProps) {
         <Outlines color={palette.charcoal} thickness={0.006} />
       </RoundedBox>
       <mesh position={[0, 1.305, 0.345]} castShadow>
-        <boxGeometry args={[0.67, 1.04, 0.03]} />
+        <boxGeometry args={[0.67, 1.04, 0.024]} />
         <ToonMaterial color="#e9ece8" />
       </mesh>
       <mesh position={[0, 0.39, 0.345]} castShadow>
-        <boxGeometry args={[0.67, 0.72, 0.03]} />
+        <boxGeometry args={[0.67, 0.72, 0.024]} />
         <ToonMaterial color="#d8ddda" />
       </mesh>
       {[0.39, 1.305].map((y) => (

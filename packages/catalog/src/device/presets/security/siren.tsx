@@ -11,8 +11,8 @@ export function SirenModel({ visualState }: HomeDeviceModelProps) {
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.003} />
       </mesh>
-      <mesh position={[0, 0.08, 0.055]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.055, 0.075, 0.03, 24]} />
+      <mesh position={[0, 0.08, 0.053]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.055, 0.075, 0.026, 24]} />
         <ToonMaterial color={sounding ? "#d95f4b" : "#bdc5bf"} />
       </mesh>
       <mesh position={[0, 0.08, 0.0675]} rotation={[Math.PI / 2, 0, 0]}>

@@ -10,10 +10,10 @@ export function HumidifierDehumidifierModel({ visualState, reducedMotion }: Home
   return (
     <group name="catalog-humidifier-dehumidifier" userData={{ walkCollider: true }}>
       <RoundedBox
-        args={[0.32, 0.6, 0.28]}
+        args={[0.32, 0.6, 0.274]}
         radius={0.035}
         smoothness={2}
-        position={[0, 0.3, 0]}
+        position={[0, 0.3, -0.003]}
         castShadow
         receiveShadow
       >
