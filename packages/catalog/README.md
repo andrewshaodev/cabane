@@ -685,3 +685,40 @@ countertop objects. No binding slots or household placements are added.
 metre-based default dimensions. `DoorModel` dispatches hinged/sliding leaves or
 a roll-up assembly from the canonical door operation. Architecture models receive
 normalized `position` (0 closed, 1 open), rather than a boolean `open` prop.
+
+## Compact bedroom and desk modules
+
+Eleven independently placeable generic presets appear in Arrange → Bedroom.
+They use inferred proportions, warm white fronts, black round knobs and natural
+wood; no manufacturer measurements are claimed. Dimensions are width × height
+× depth in metres. Each accepts independent axis resizing and has a centered
+footprint with Y=0 at its support and the front facing +Z.
+
+| ID | Dimensions | Construction |
+| --- | --- | --- |
+| `knob-door-wardrobe` | 1 × 2.4 × .6 | Two plain doors by default; single-door variants with left/right black knob |
+| `overbed-bridge-cabinet` | 2 × .65 × .4 | Three doors and round pulls; elevate above a bed, no floor collider |
+| `shelf-headboard` | 2 × 1.15 × .22 | Wood backing, top shelf, white inset panel, two small bedside ledges |
+| `headboard-free-double-bed` | 1.64 × .66 × 2.04 | 160 × 200 cm mattress, white frame, neutral duvet and two pillows |
+| `drawer-pedestal-desk` | 1.8 × .75 × .6 | Wood worktop, two white five-drawer supports, recessed dark grips |
+| `white-folding-chair` | .46 × .8 × .52 | White seat and three back slats, crossed metal supports and floor pads |
+| `desktop-monitor` | .54 × .42 × .18 | Dark screen bezel, muted flat display, stem and base; elevate onto a desk |
+| `open-laptop` | .34 × .24 × .24 | Dark open notebook, flat screen, keyboard and touchpad |
+| `round-globe-wall-lamp` | .24 × .24 × .16 | Static white globe on a round backplate; no light slot or floor collider |
+
+`knob-door-wardrobe` offers Two doors (`default`), One door · left knob
+(`single-left`), and One door · right knob (`single-right`). These keep the same
+cabinet bounds; door count is explicit rather than inferred from instance width.
+
+Two further static lighting visuals are available in Bedroom: `wall-reading-spot`
+(9 × 12 × 13 cm) has a round white plate and a downward tilted cylindrical barrel;
+`oak-wall-uplight` (12 × 25 × 9 cm) has a narrow oak backing and two white light
+bands. Both support independent axis resizing and use the supporting wall/surface at the back of
+the centered depth envelope. They do not create floor colliders or HA slots.
+
+These are static furnishings and carry no invented smart-device capabilities.
+The existing `pedestal-fan` device remains available separately. Cabinet fronts
+sit 5 mm beyond the supporting cases; desk grips end at the declared front
+plane, clear of the drawer faces by 10 mm. Monitor glass sits 2 mm ahead of
+the bezel face. Suspended modules and desk accessories use absolute elevation;
+their Y=0 is the supporting surface, not an instruction to place them on the floor.
