@@ -270,3 +270,8 @@ Laser opts into the default shortcuts through installed-tool metadata. All homes
 using the default bar receive it, and Shortcuts → Restore defaults includes it.
 Explicitly customized bars remain exactly as saved. The engine does not hardcode
 a gun ID or import the optional gun package.
+
+Orbit controls retain their pointer listeners across dashboard updates, including
+updates during a gesture. One-finger panning, two-finger rotation/pinch zoom, and
+desktop drags must continue through re-renders and release cleanly for the next
+gesture. Manual input still interrupts a room-camera transition.
