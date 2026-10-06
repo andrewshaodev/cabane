@@ -128,7 +128,7 @@ Contract: [Optional walk tools](../docs/product/architecture.md).
 
 - Owners: [`apps/web/src/walk-tools.ts`](../apps/web/src/walk-tools.ts), [`packages/walk-laser/src`](../packages/walk-laser/src), [`packages/engine/src/walk-tools`](../packages/engine/src/walk-tools).
 - Interface: `WalkToolDefinition`, `WalkToolProps`, `WalkToolNavigation`, `WalkToolStorage` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.
+- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.
 - Checks: `test:unit`, `test:browser`, `verify:boundaries`, `build`.
 
 ### Bundled home and agent generation
