@@ -7,6 +7,13 @@ export interface FloorFinishTextureSet {
   dispose: () => void;
 }
 
+const textureSize = (id: FloorPatternPresetId, variant: FloorPatternVariant) =>
+  id === "dark-walnut" || id === "light-oak" || id === "light-oak-horizontal"
+    ? 512
+    : variant === "plan"
+      ? 96
+      : 128;
+
 type CanvasDocument = Pick<Document, "createElement">;
 
 export const createFloorFinishTextureSet = (
@@ -18,7 +25,7 @@ export const createFloorFinishTextureSet = (
     for (const preset of FLOOR_FINISH_PRESETS) {
       try {
         const canvas = canvasDocument.createElement("canvas");
-        canvas.width = variant === "plan" ? 96 : 128;
+        canvas.width = textureSize(preset.id, variant);
         canvas.height = canvas.width;
         const context = canvas.getContext("2d");
         if (!context) continue;
@@ -28,6 +35,7 @@ export const createFloorFinishTextureSet = (
         texture.wrapS = RepeatWrapping;
         texture.wrapT = RepeatWrapping;
         texture.minFilter = LinearMipmapLinearFilter;
+        texture.anisotropy = 8;
         texture.generateMipmaps = true;
         texture.needsUpdate = true;
         textures.set(preset.id, texture);
@@ -44,7 +52,7 @@ export const createFloorFinishTextureSet = (
       if (!textures.has(key)) {
         try {
           const canvas = canvasDocument.createElement("canvas");
-          canvas.width = variant === "plan" ? 96 : 128;
+          canvas.width = textureSize(id, variant);
           canvas.height = canvas.width;
           const context = canvas.getContext("2d");
           if (!context) return null;

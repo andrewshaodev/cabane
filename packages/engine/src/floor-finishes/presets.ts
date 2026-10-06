@@ -1,3 +1,4 @@
+import { paintWoodPlanks } from "./wood-planks";
 import { paintCeramicTile } from "./ceramic-tile";
 import { paintBlueQuatrefoilTile } from "./blue-quatrefoil-tile";
 import { paintBlackWhitePatchwork } from "./black-white-patchwork";
@@ -23,12 +24,12 @@ export interface FloorFinishPreset {
 }
 
 export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
-  { id: "light-oak", label: "Light oak", representativeColor: "#c99e66", repeatMeters: 1.2 },
+  { id: "light-oak", label: "Light oak", representativeColor: "#c9a97e", repeatMeters: 3.6 },
   {
     id: "light-oak-horizontal",
     label: "Light oak 2",
-    representativeColor: "#c99e66",
-    repeatMeters: 1.2,
+    representativeColor: "#c9a97e",
+    repeatMeters: 3.6,
   },
   {
     id: "oak-herringbone",
@@ -39,7 +40,7 @@ export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
   { id: "travertine", label: "Travertine", representativeColor: "#e0d2b9", repeatMeters: 1.2 },
   { id: "terracotta-tile", label: "Terracotta", representativeColor: "#bd7756", repeatMeters: 0.8 },
   { id: "terrazzo", label: "Terrazzo", representativeColor: "#cabfa9", repeatMeters: 0.7 },
-  { id: "dark-walnut", label: "Dark walnut", representativeColor: "#765139", repeatMeters: 1.2 },
+  { id: "dark-walnut", label: "Dark walnut", representativeColor: "#77583f", repeatMeters: 3.6 },
   { id: "limestone", label: "Limestone", representativeColor: "#cbc3ad", repeatMeters: 1.2 },
   {
     id: "square-tile",
@@ -119,31 +120,6 @@ const line = (
   context.moveTo(fromX, fromY);
   context.lineTo(toX, toY);
   context.stroke();
-};
-
-const planks = (
-  context: CanvasRenderingContext2D,
-  colors: readonly [string, string, string],
-  seams: string,
-  orientation: "vertical" | "horizontal" = "vertical",
-) => {
-  const size = context.canvas.width;
-  const width = size / 6;
-  context.fillStyle = colors[0];
-  context.fillRect(0, 0, size, size);
-  for (let plank = 0; plank < 6; plank += 1) {
-    context.fillStyle = colors[plank % colors.length];
-    const joint = plank % 2 === 0 ? size * 0.42 : size * 0.68;
-    if (orientation === "horizontal") {
-      context.fillRect(0, plank * width, size, width);
-      line(context, seams, 1, 0, plank * width, size, plank * width);
-      line(context, seams, 1, joint, plank * width, joint, (plank + 1) * width);
-    } else {
-      context.fillRect(plank * width, 0, width, size);
-      line(context, seams, 1, plank * width, 0, plank * width, size);
-      line(context, seams, 1, plank * width, joint, (plank + 1) * width, joint);
-    }
-  }
 };
 
 const travertine = (context: CanvasRenderingContext2D, quiet: boolean) => {
@@ -324,26 +300,11 @@ export const paintFloorPattern = (
       paintStones(context, id === "stepping-stones", quiet);
       break;
     case "light-oak":
-      planks(
-        context,
-        quiet ? ["#d1b184", "#d5b98f", "#cbaa7d"] : ["#c99e66", "#d5ad77", "#b98952"],
-        quiet ? "#ad9473" : "#765437",
-      );
-      break;
     case "light-oak-horizontal":
-      planks(
-        context,
-        quiet ? ["#d1b184", "#d5b98f", "#cbaa7d"] : ["#c99e66", "#d5ad77", "#b98952"],
-        quiet ? "#ad9473" : "#765437",
-        "horizontal",
-      );
+      paintWoodPlanks(context, quiet, "oak", id === "light-oak-horizontal");
       break;
     case "dark-walnut":
-      planks(
-        context,
-        quiet ? ["#80634f", "#876b55", "#755845"] : ["#765139", "#8a6247", "#5f402f"],
-        quiet ? "#6d5849" : "#4d3428",
-      );
+      paintWoodPlanks(context, quiet, "walnut");
       break;
     case "oak-herringbone":
       herringbone(context, quiet ? "#cfb084" : "#c7a06d", quiet ? "#ad8d67" : "#8e6843");

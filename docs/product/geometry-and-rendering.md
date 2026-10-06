@@ -254,3 +254,7 @@ reuse it; renderers honor the project palette and authored wall finishes.
 Interior walls ignore any stale exteriorColor metadata when resolving Auto edges;
 matching face colors still extend onto caps, while differing colors use the
 home interior palette. Explicit edgeColor continues to take precedence.
+
+Dark walnut and both light-oak directions use a 3.6 m repeating procedural pattern with 22.5 cm boards,
+staggered end joints, restrained species-specific tone variation and fine lengthwise grain.
+Each 512 px in-memory canvas retains the existing toon lighting and shadow behavior.
