@@ -103,8 +103,10 @@ Garden lanterns use a short, warm inverse-square falloff to softly illuminate
 nearby ground in night mode.
 
 Walk collision derives from walls, openings, junctions, and pools. Navigation
-checks clear spawn points and room connectivity; it does not maintain a second
-hand-authored collision plan. Walk controls support keyboard/mouse and touch
+derives optional clear spawn points and checks room connectivity; rooms without
+a safe spawn (such as small cupboards) do not produce a validation diagnostic.
+Walk entry still requires a safe spawn and skips rooms without one. Navigation
+does not maintain a second hand-authored collision plan. Walk controls support keyboard/mouse and touch
 input, pitch limits, collision resolution, and automatic unbound door opening.
 Mobile fullscreen/orientation requests are capability-dependent. Reduced-motion
 and document-visibility state affect behavior.

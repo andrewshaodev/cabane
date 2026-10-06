@@ -70,9 +70,7 @@ export interface WalkRoomNavigation {
 }
 
 export interface WalkNavigationDiagnostic {
-  code:
-  | "navigation.room-no-safe-spawn"
-  | "navigation.room-no-walkable-connection";
+  code: "navigation.room-no-walkable-connection";
   severity: "error" | "warning";
   path: string;
   message: string;
