@@ -17,6 +17,7 @@
       "editor-validation-recovery.test.mjs",
       "first-control-confirmation.test.mjs",
       "ha-action-shortcuts.test.mjs",
+      "ha-contract.test.mjs",
       "ha-model-assets.test.mjs",
       "ha-workspace-client.test.mjs",
       "home-assistant-auth-lifecycle.test.mjs",

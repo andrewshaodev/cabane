@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/ha-contract.mjs\" --hook",
+            "timeout": 10,
+            "statusMessage": "Checking the Home Assistant contract release"
+          }
+        ]
+      }
+    ]
+  }
+}

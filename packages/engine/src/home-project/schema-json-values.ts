@@ -4,6 +4,7 @@ import {
   type HomeProjectIssue,
   type JsonRecord,
 } from "./validation-types";
+import { unsupportedProjectFormatMessage } from "./project-format-errors";
 
 export const keys = (
   value: JsonRecord,
@@ -18,7 +19,7 @@ export const keys = (
         issues,
         "project.unknown-key",
         path === "$" ? key : `${path}.${key}`,
-        `Property “${key}” is not part of the HomeProject schema.`,
+        unsupportedProjectFormatMessage(`Property “${key}” is not part of the HomeProject schema.`),
       );
     }
   }

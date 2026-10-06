@@ -1,0 +1,9 @@
+{
+  "revision": 1,
+  "fingerprint": "d7317927630feb4a7c3d07b76be5025f34d563b07be954414f79b39c8a016a33",
+  "summary": "Explain newer workspace formats and automate matching HA releases",
+  "breakingChanges": [
+    "Unknown fields remain blocked. Older panels must update in HACS before opening newer homes; the message now explains update, restart and reload steps."
+  ],
+  "history": []
+}

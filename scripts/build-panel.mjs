@@ -5,10 +5,13 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { scopePanelCss } from "./panel-build-tools.mjs";
+import { contractFingerprint, validateContractRelease } from "./ha-contract/source-contract.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const web = join(root, "apps/web");
 const outDir = join(web, "dist-panel");
+const contract = JSON.parse(await readFile(join(root, "docs/ha-contract.json"), "utf8"));
+validateContractRelease(contract, contractFingerprint(root).fingerprint);
 const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], {
   cwd: root,
   encoding: "utf8",
@@ -109,6 +112,7 @@ await writeFile(
       element: "cabane-panel",
       entrypoint: "cabane-panel.js",
       source_commit: sourceCommit,
+      workspace_contract: { revision: contract.revision, fingerprint: contract.fingerprint },
       ...(dirty ? { development: true } : {}),
       files,
     },
