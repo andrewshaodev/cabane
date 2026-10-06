@@ -235,7 +235,7 @@ test(
       await page.keyboard.up("Control");
       await page.setViewportSize({ width: 1100, height: 760 });
       await page.screenshot({ path: "/tmp/cabane-reference-plan-desktop.png" });
-      await page.waitForTimeout(400);
+      await page.locator(".direction-status").waitFor({ state: "detached" });
       await page.reload();
       await page.locator(".reference-image").waitFor();
       assert.match(await panel.innerText(), /ground-floor.svg/);

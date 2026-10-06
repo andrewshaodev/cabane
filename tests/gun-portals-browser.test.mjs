@@ -303,7 +303,7 @@ for (const viewport of [
         await touch("touchMove", viewport.width * 0.75 + 32, viewport.height - 60);
         await page.waitForFunction(() => window.portalObservation.yaw < 0.1);
         await touch("touchEnd");
-        await page.waitForTimeout(200);
+        // touchEnd has released look input; the shot can run immediately.
         await page.getByRole("button", { name: "Create gold portal" }).tap();
         await page.waitForFunction(() => window.portalObservation.portals.length === 2);
         await page.getByRole("button", { name: "Create blue portal" }).waitFor();
@@ -586,7 +586,8 @@ for (const reducedMotion of ["no-preference", "reduce"])
         assert.deepEqual((await saved()).pair, {});
         await page.reload();
         await equip();
-        await page.waitForTimeout(250);
+        // Portal state is synchronously hydrated before ObservedGun renders.
+        await page.waitForFunction(() => window.portalObservation.portals.length === 0);
         assert.equal(await page.evaluate(() => window.portalObservation.portals.length), 0);
         assert.equal(await page.evaluate(() => window.storageError), undefined);
         assert.deepEqual(errors, []);

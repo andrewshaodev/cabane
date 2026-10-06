@@ -275,7 +275,7 @@ await withModules(async (load) => {
           .querySelector(`[data-relationship-id="${device.id}"] button`)
           .click(),
       );
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 25)));
+      await act(async () => new Promise((resolve) => requestAnimationFrame(resolve)));
       assert.match(
         harness.dom.window.document.activeElement.getAttribute("aria-label"),
         /^Back to devices/,
@@ -328,7 +328,7 @@ await withModules(async (load) => {
       await act(async () =>
         harness.dom.window.document.querySelector('[aria-label^="Back to devices"]').click(),
       );
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 25)));
+      await act(async () => new Promise((resolve) => requestAnimationFrame(resolve)));
       assert.equal(
         harness.dom.window.document.activeElement.closest("[data-relationship-id]").dataset
           .relationshipId,
@@ -448,14 +448,14 @@ await withModules(async (load) => {
       );
       assert.ok(row);
       await act(async () => row.click());
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
+      await act(async () => new Promise((resolve) => requestAnimationFrame(resolve)));
       assert.ok(harness.dom.window.document.querySelector(".device-mapping-inspector.is-inline"));
       assert.equal(harness.dom.window.document.querySelector('[role="dialog"]'), null);
       assert.equal(harness.dom.window.document.querySelector('input[value=""]').disabled, false);
       assert.doesNotMatch(harness.dom.window.document.body.textContent, /Save rooms|Save devices/);
       const back = harness.dom.window.document.querySelector('[aria-label^="Back to devices"]');
       await act(async () => back.click());
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 30)));
+      await act(async () => new Promise((resolve) => requestAnimationFrame(resolve)));
       assert.ok(harness.dom.window.document.activeElement.textContent.includes("New draft target"));
     } finally {
       await harness.close();

@@ -190,12 +190,13 @@ await withModules(async (load) => {
     return { promise, resolve };
   };
 
-  test("StrictMode effect replay preserves the first editor autosave timer", async () => {
+  test("StrictMode effect replay preserves the first editor autosave timer", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const { lifecycle, record, repository } = await fixture();
     const harness = await mount(record, lifecycle, true);
     try {
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        context.mock.timers.tick(5);
       });
       assert.equal(harness.current.saving, false);
       assert.equal((await repository.load(record.homeId)).draft.home.name, "Initialized draft");
@@ -284,7 +285,8 @@ await withModules(async (load) => {
     }
   });
 
-  test("the debounced autosave persists both slices, and a corrected invalid draft can save", async () => {
+  test("the debounced autosave persists both slices, and a corrected invalid draft can save", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const { lifecycle, record, repository } = await fixture();
     const harness = await mount(record, lifecycle);
     try {
@@ -292,7 +294,7 @@ await withModules(async (load) => {
       await act(async () => harness.current.commit(edited));
       assert.equal(harness.current.saving, true);
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        context.mock.timers.tick(5);
       });
       const stored = await repository.load(record.homeId);
       assert.deepEqual(stored.draft, edited.project);
@@ -388,7 +390,8 @@ await withModules(async (load) => {
     }
   });
 
-  test("transient storage failure pauses autosave but explicit flush safely saves retained edits after storage recovers", async () => {
+  test("transient storage failure pauses autosave but explicit flush safely saves retained edits after storage recovers", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const { lifecycle, record, repository } = await fixture();
     let unavailable = true;
     let attempts = 0;
@@ -411,7 +414,7 @@ await withModules(async (load) => {
       );
       unavailable = false;
       await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        context.mock.timers.tick(5);
       });
       assert.equal(attempts, 1, "autosave stays paused after a failure");
       await act(async () => assert.equal((await harness.current.flush()).status, "saved"));

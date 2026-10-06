@@ -185,7 +185,9 @@ await withModules(async (load) => {
       );
       await act(async () => {
         selectedColor.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-        context.mock.timers.tick(180);
+        context.mock.timers.tick(159);
+        assert.deepEqual(calls, [], "color changes remain pending before the debounce deadline");
+        context.mock.timers.tick(1);
       });
       assert.deepEqual(calls, [
         ["remember", "#b86f58"],
@@ -212,7 +214,9 @@ await withModules(async (load) => {
       );
       await act(async () => {
         drawingColor.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
-        context.mock.timers.tick(180);
+        context.mock.timers.tick(159);
+        assert.deepEqual(calls, [], "color changes remain pending before the debounce deadline");
+        context.mock.timers.tick(1);
       });
       assert.deepEqual(calls, [
         ["remember", "#9b5e4b"],
