@@ -1,3 +1,19 @@
+import { whiteDisplayColumnDefinition } from "./white-display-column";
+import { trailingShelfPlantDefinition } from "./trailing-shelf-plant";
+import { decorativeGlobeDefinition } from "./decorative-globe";
+import { ringCeramicVaseDefinition } from "./ring-ceramic-vase";
+import { tuftedDiamondRugDefinition } from "./tufted-diamond-rug";
+import { whiteTaperedWallSconceDefinition } from "./white-tapered-wall-sconce";
+import { bookRowDefinition } from "./book-row";
+import { sixGlobeCeilingLampDefinition } from "./six-globe-ceiling-lamp";
+import { slimSoundbarDefinition } from "./slim-soundbar";
+import { mediaShelfSurroundDefinition } from "./media-shelf-surround";
+import { doubleArchedBookcaseDefinition } from "./double-arched-bookcase";
+import { sixDoorOakSideboardDefinition } from "./six-door-oak-sideboard";
+import { hexagonalSideTableDefinition } from "./hexagonal-side-table";
+import { sageRoundedFootstoolDefinition } from "./sage-rounded-footstool";
+import { sageTubArmchairDefinition } from "./sage-tub-armchair";
+import { curvedThreeSeatSofaDefinition } from "./curved-three-seat-sofa";
 import { oakWallUplightDefinition } from "./oak-wall-uplight";
 import { wallReadingSpotDefinition } from "./wall-reading-spot";
 import { openLaptopDefinition } from "./open-laptop";
@@ -31,6 +47,22 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  "white-display-column": whiteDisplayColumnDefinition,
+  "trailing-shelf-plant": trailingShelfPlantDefinition,
+  "decorative-globe": decorativeGlobeDefinition,
+  "ring-ceramic-vase": ringCeramicVaseDefinition,
+  "tufted-diamond-rug": tuftedDiamondRugDefinition,
+  "white-tapered-wall-sconce": whiteTaperedWallSconceDefinition,
+  "book-row": bookRowDefinition,
+  "six-globe-ceiling-lamp": sixGlobeCeilingLampDefinition,
+  "slim-soundbar": slimSoundbarDefinition,
+  "media-shelf-surround": mediaShelfSurroundDefinition,
+  "double-arched-bookcase": doubleArchedBookcaseDefinition,
+  "six-door-oak-sideboard": sixDoorOakSideboardDefinition,
+  "hexagonal-side-table": hexagonalSideTableDefinition,
+  "sage-rounded-footstool": sageRoundedFootstoolDefinition,
+  "sage-tub-armchair": sageTubArmchairDefinition,
+  "curved-three-seat-sofa": curvedThreeSeatSofaDefinition,
   "oak-wall-uplight": oakWallUplightDefinition,
   "wall-reading-spot": wallReadingSpotDefinition,
   "open-laptop": openLaptopDefinition,
