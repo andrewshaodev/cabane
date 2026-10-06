@@ -11,6 +11,7 @@ import {
   constructIssueKey,
   constructIssuePlanPoint,
   constructIssueVisualTargets,
+  constructTargetPlanPoint,
   useConstructEditor,
   type ConstructContextualIssue,
 } from "../editor-preview/construct";
@@ -36,6 +37,8 @@ export function useEditorCamera({
     previewFloor: constructEditorPreviewFloor,
     selectOpening: constructEditorSelectOpening,
     selectPool: constructEditorSelectPool,
+    selectPlatform: constructEditorSelectPlatform,
+    selectFloorZone: constructEditorSelectFloorZone,
     selectRoom: constructEditorSelectRoom,
     selectWall: constructEditorSelectWall,
     setTool: constructEditorSetTool,
@@ -60,30 +63,45 @@ export function useEditorCamera({
         constructEditorPreviewFloor,
         previewSceneItems,
       );
-      const itemTarget = targets.find((target) => target.kind === "scene-item");
+      const target =
+        issue.target && issue.target.kind !== "junction"
+          ? issue.target
+          : (targets.find(
+              (target) =>
+                target.kind === "scene-item" ||
+                target.kind === "opening" ||
+                target.kind === "niche",
+            ) ?? targets[0]);
+      const itemTarget = target?.kind === "scene-item" ? target : undefined;
       if (itemTarget) {
         selectMode("furnish");
         furnishingEditorSelect(itemTarget.id);
       } else {
         selectMode("construct");
         constructEditorSetTool("select");
-        const openingTarget = targets.find((target) => target.kind === "opening");
-        const roomTarget = targets.find((target) => target.kind === "room");
-        const wallTarget = targets.find((target) => target.kind === "wall");
-        const poolTarget = targets.find((target) => target.kind === "pool");
-        if (openingTarget) constructEditorSelectOpening(openingTarget.id);
-        else if (poolTarget) constructEditorSelectPool(poolTarget.id);
-        else if (roomTarget) constructEditorSelectRoom(roomTarget.id);
-        else if (wallTarget)
+        if (target?.kind === "opening" || target?.kind === "niche")
+          constructEditorSelectOpening(target.id);
+        else if (target?.kind === "pool") constructEditorSelectPool(target.id);
+        else if (target?.kind === "outdoor-platform") constructEditorSelectPlatform(target.id);
+        else if (target?.kind === "floor-zone") constructEditorSelectFloorZone(target.id);
+        else if (target?.kind === "room") constructEditorSelectRoom(target.id);
+        else if (target?.kind === "ceiling") {
+          const roomId = constructEditorPreviewFloor.ceilings?.find(
+            (ceiling) => ceiling.id === target.id,
+          )?.roomIds[0];
+          if (roomId) constructEditorSelectRoom(roomId);
+        } else if (target?.kind === "wall")
           constructEditorSelectWall(
-            constructEditorWallRuns.find((run) => run.wallId === wallTarget.id)?.sourceWallId ??
-              wallTarget.id,
+            constructEditorWallRuns.find((run) => run.wallId === target.id)?.sourceWallId ??
+              target.id,
           );
       }
       setActiveIssueKey(constructIssueKey(issue));
       setIssueFocusVersion((version) => version + 1);
       setCameraFocusPoint(
-        constructIssuePlanPoint(issue, constructEditorPreviewFloor, previewSceneItems),
+        target
+          ? constructTargetPlanPoint(target, constructEditorPreviewFloor, previewSceneItems)
+          : constructIssuePlanPoint(issue, constructEditorPreviewFloor, previewSceneItems),
       );
       setCameraResetKey((key) => key + 1);
     },
@@ -91,6 +109,8 @@ export function useEditorCamera({
       constructEditorPreviewFloor,
       constructEditorSelectOpening,
       constructEditorSelectPool,
+      constructEditorSelectPlatform,
+      constructEditorSelectFloorZone,
       constructEditorSelectRoom,
       constructEditorSelectWall,
       constructEditorSetTool,

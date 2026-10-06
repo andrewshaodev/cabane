@@ -32,6 +32,9 @@ export const constructIssueVisualTargets = (
 
   floor.walls.forEach((wall) => {
     if (quoted(issue.message, wall.id)) add({ kind: "wall", id: wall.id });
+    wall.niches?.forEach((niche) => {
+      if (quoted(issue.message, niche.id)) add({ kind: "niche", id: niche.id });
+    });
   });
   floor.openings.forEach((opening) => {
     if (quoted(issue.message, opening.id)) add({ kind: "opening", id: opening.id });
@@ -65,6 +68,10 @@ export const constructIssueVisualTargets = (
     if (target.kind === "opening") {
       const opening = floor.openings.find((candidate) => candidate.id === target.id);
       if (opening) add({ kind: "wall", id: opening.wallId });
+    }
+    if (target.kind === "niche") {
+      const wall = floor.walls.find((wall) => wall.niches?.some((niche) => niche.id === target.id));
+      if (wall) add({ kind: "wall", id: wall.id });
     }
     if (target.kind === "scene-item") {
       const item = sceneItems.find((candidate) => candidate.id === target.id);
@@ -145,9 +152,19 @@ export const constructTargetPlanPoint = (
   if (target.kind === "junction") {
     return floor.wallJunctions.find((candidate) => candidate.id === target.id)?.at ?? null;
   }
-  if (target.kind === "opening") {
-    const opening = floor.openings.find((candidate) => candidate.id === target.id);
-    const wall = opening && floor.walls.find((candidate) => candidate.id === opening.wallId);
+  if (target.kind === "opening" || target.kind === "niche") {
+    const nicheWall =
+      target.kind === "niche"
+        ? floor.walls.find((wall) => wall.niches?.some((niche) => niche.id === target.id))
+        : undefined;
+    const opening =
+      target.kind === "niche"
+        ? nicheWall?.niches?.find((niche) => niche.id === target.id)
+        : floor.openings.find((candidate) => candidate.id === target.id);
+    const wall =
+      nicheWall ??
+      (opening &&
+        floor.walls.find((candidate) => "wallId" in opening && candidate.id === opening.wallId));
     if (!opening || !wall) return null;
     const length = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
     if (length <= 1e-9) return wall.from;
@@ -211,6 +228,7 @@ export const constructIssueShortLabel = (issue: ConstructContextualIssue) => {
   if (issue.code === "wall-junction.opening-overlap") return "Opening is too close to this corner";
   if (issue.code === "project.outdoor-placement") return "Outdoor item is inside the house";
   if (issue.target?.kind === "opening") return "Check this opening";
+  if (issue.target?.kind === "niche") return "Check this niche";
   if (issue.target?.kind === "wall") return "Check this wall";
   if (issue.target?.kind === "room") return "Check this room";
   if (issue.target?.kind === "scene-item") return "Check this object";

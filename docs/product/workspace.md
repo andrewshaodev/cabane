@@ -53,7 +53,11 @@ Arrange → My models can exchange a model-only ZIP pack (`manifest.json` plus
 `assets/<sha256>.glb`) independently of a workspace JSON or `.cabane` backup.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
-can remain visible while editing. Workspace history spans construction,
+can remain visible while editing. The shared validation panel stays available in
+Construct, Arrange, Connect, and Shortcuts whenever the draft has visible issues.
+Locate selects and focuses the affected editable object, switching floor and mode
+when needed; attachment errors select the attachment rather than its supporting
+wall or diagnostic marker. Workspace history spans construction,
 arrangement, and connections; pending gestures are settled before committing.
 Shortcuts is an editor tab beside Construct, Arrange, and Connect. It keeps the workspace sidebar with guidance for adding, editing, and applying shortcuts, and displays
 the draft action bar with the same slot visuals and overflow as Home. Hovering, focusing,

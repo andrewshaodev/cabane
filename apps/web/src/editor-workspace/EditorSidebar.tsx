@@ -1,3 +1,4 @@
+import { EditorValidationPanel } from "./EditorValidationPanel";
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
 import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
@@ -136,227 +137,228 @@ export function EditorSidebar({
         className="direction-rail"
         inert={editingLocked || publishOpen || previewOpen || northOrientation.active}
       >
-        <div className="direction-rail__brand">
-          <img src={iconUrl} alt="" width="43" height="51" />
-          <div className="direction-rail__identity">
-            <h1>Cabane</h1>
-            {onWorkspaces && (
-              <button
-                type="button"
-                className="editor-workspace-link"
-                title={`Switch workspace · ${snapshot.project.home.name}`}
-                aria-label={`Workspaces: ${snapshot.project.home.name}`}
-                disabled={editingLocked || unsettled}
-                onClick={onWorkspaces}
-              >
-                <span>{snapshot.project.home.name}</span>
-                <EditorIcon name="chevron" />
-              </button>
-            )}
+        <div className="editor-sidebar-content">
+          <div className="direction-rail__brand">
+            <img src={iconUrl} alt="" width="43" height="51" />
+            <div className="direction-rail__identity">
+              <h1>Cabane</h1>
+              {onWorkspaces && (
+                <button
+                  type="button"
+                  className="editor-workspace-link"
+                  title={`Switch workspace · ${snapshot.project.home.name}`}
+                  aria-label={`Workspaces: ${snapshot.project.home.name}`}
+                  disabled={editingLocked || unsettled}
+                  onClick={onWorkspaces}
+                >
+                  <span>{snapshot.project.home.name}</span>
+                  <EditorIcon name="chevron" />
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-        {!shortcutsMode && mode === "construct" && (
-          <ConstructFloorControls
-            floors={snapshot.project.floors}
-            selectedId={activeFloorId}
-            disabled={floorControlsDisabled}
-            onSelect={(id) => floorNavigation.selectFloor(id)}
-            onAdd={addFloorAbove}
-            onAddBelow={addFloorBelow}
-            onSettings={() => setFloorDialog("rename")}
-          />
-        )}
-        <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
-        {shortcutsMode && (
-          <div className="shortcuts-guide">
-            <h3>Add a shortcut</h3>
-            <p>
-              Select the empty slot in the bar, then choose an action, room, device, scene or
-              script.
-            </p>
-            <h3>Edit your bar</h3>
-            <p>Select a shortcut to replace, move or remove it.</p>
-            <h3>Update Home</h3>
-            <p>Your changes save as a draft. Choose Save when your bar is ready.</p>
-          </div>
-        )}
-        {!shortcutsMode && tutorial.state?.status === "active" && (
-          <BuildTutorial
-            state={tutorial.state}
-            mode={mode}
-            disabled={tutorialBusy}
-            warning={tutorial.warning}
-            onAction={activateTutorial}
-            onSkip={tutorial.skip}
-            onDismiss={tutorial.dismiss}
-          />
-        )}
-        {!shortcutsMode &&
-          mode === "construct" &&
-          tutorial.state?.status !== "active" &&
-          isPristineConstructionFloor(constructEditor.previewFloor) && (
-            <p className="construction-empty-hint">
-              Your plan starts here. Choose Wall, then click each corner to draw your first room.
-            </p>
+          {!shortcutsMode && mode === "construct" && (
+            <ConstructFloorControls
+              floors={snapshot.project.floors}
+              selectedId={activeFloorId}
+              disabled={floorControlsDisabled}
+              onSelect={(id) => floorNavigation.selectFloor(id)}
+              onAdd={addFloorAbove}
+              onAddBelow={addFloorBelow}
+              onSettings={() => setFloorDialog("rename")}
+            />
           )}
-        {!shortcutsMode && mode === "construct" && stairPlacement && (
-          <StairPlacementPanel
-            shape={stairPlacement.shape ?? "straight"}
-            issues={stairLiveIssues ?? []}
-            onChange={(shape) =>
-              setStairPlacement(convertStairShape(snapshot.project, stairPlacement, shape))
-            }
-            onCancel={() => setStairPlacement(null)}
-          />
-        )}
-        {!shortcutsMode && mode === "construct" && !stairPlacement && (
-          <ConstructionInspector
-            inert={reference.adjusting}
-            referencePlanControls={
-              <ReferencePlanPanel
-                reference={reference}
-                floorName={constructEditor.previewFloor.name}
-              />
-            }
-            planImportControls={
-              PLAN_IMPORT_ENABLED && (
-                <PlanImportActions
-                  homeId={snapshot.project.home.id}
-                  disabled={tutorialBusy}
-                  onImport={importWorkspace}
+          <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
+          {shortcutsMode && (
+            <div className="shortcuts-guide">
+              <h3>Add a shortcut</h3>
+              <p>
+                Select the empty slot in the bar, then choose an action, room, device, scene or
+                script.
+              </p>
+              <h3>Edit your bar</h3>
+              <p>Select a shortcut to replace, move or remove it.</p>
+              <h3>Update Home</h3>
+              <p>Your changes save as a draft. Choose Save when your bar is ready.</p>
+            </div>
+          )}
+          {!shortcutsMode && tutorial.state?.status === "active" && (
+            <BuildTutorial
+              state={tutorial.state}
+              mode={mode}
+              disabled={tutorialBusy}
+              warning={tutorial.warning}
+              onAction={activateTutorial}
+              onSkip={tutorial.skip}
+              onDismiss={tutorial.dismiss}
+            />
+          )}
+          {!shortcutsMode &&
+            mode === "construct" &&
+            tutorial.state?.status !== "active" &&
+            isPristineConstructionFloor(constructEditor.previewFloor) && (
+              <p className="construction-empty-hint">
+                Your plan starts here. Choose Wall, then click each corner to draw your first room.
+              </p>
+            )}
+          {!shortcutsMode && mode === "construct" && stairPlacement && (
+            <StairPlacementPanel
+              shape={stairPlacement.shape ?? "straight"}
+              issues={stairLiveIssues ?? []}
+              onChange={(shape) =>
+                setStairPlacement(convertStairShape(snapshot.project, stairPlacement, shape))
+              }
+              onCancel={() => setStairPlacement(null)}
+            />
+          )}
+          {!shortcutsMode && mode === "construct" && !stairPlacement && (
+            <ConstructionInspector
+              inert={reference.adjusting}
+              referencePlanControls={
+                <ReferencePlanPanel
+                  reference={reference}
+                  floorName={constructEditor.previewFloor.name}
                 />
-              )
-            }
-            tutorialControls={
-              tutorial.state?.status !== "active" && (
+              }
+              planImportControls={
+                PLAN_IMPORT_ENABLED && (
+                  <PlanImportActions
+                    homeId={snapshot.project.home.id}
+                    disabled={tutorialBusy}
+                    onImport={importWorkspace}
+                  />
+                )
+              }
+              tutorialControls={
+                tutorial.state?.status !== "active" && (
+                  <details className="construction-inspector__floor-disclosure">
+                    <SidebarSectionSummary
+                      icon="tutorial"
+                      title="Tutorial"
+                      description="Learn to draw and furnish your first room."
+                    />
+                    <div className="sidebar-section-content">
+                      <EditorButton disabled={tutorialBusy} onClick={tutorial.restart}>
+                        Restart tutorial
+                      </EditorButton>
+                    </div>
+                  </details>
+                )
+              }
+              walkStartControls={
                 <details className="construction-inspector__floor-disclosure">
                   <SidebarSectionSummary
-                    icon="tutorial"
-                    title="Tutorial"
-                    description="Learn to draw and furnish your first room."
+                    icon="spawn"
+                    title="Spawn area"
+                    description="Choose where you start in Explore."
                   />
-                  <div className="sidebar-section-content">
-                    <EditorButton disabled={tutorialBusy} onClick={tutorial.restart}>
-                      Restart tutorial
-                    </EditorButton>
-                  </div>
-                </details>
-              )
-            }
-            walkStartControls={
-              <details className="construction-inspector__floor-disclosure">
-                <SidebarSectionSummary
-                  icon="spawn"
-                  title="Spawn area"
-                  description="Choose where you start in Explore."
-                />
-                <div
-                  className="construction-walk-start sidebar-section-content"
-                  role="group"
-                  aria-label="Walk starting point"
-                >
-                  <EditorButton
-                    aria-pressed={placingWalkStart}
-                    disabled={unsettled && !placingWalkStart}
-                    onClick={() => {
-                      clearConstructionSelection();
-                      constructEditor.setTool("select");
-                      setWalkStartFloor(placingWalkStart ? null : activeFloorId);
-                    }}
+                  <div
+                    className="construction-walk-start sidebar-section-content"
+                    role="group"
+                    aria-label="Walk starting point"
                   >
-                    {placingWalkStart
-                      ? "Cancel"
-                      : snapshot.project.home.walkStart
-                        ? "Move starting point"
-                        : "Set starting point"}
-                  </EditorButton>
-                  {placingWalkStart && (
-                    <p role="status">
-                      Click inside the floor to set your starting point. Escape cancels.
-                    </p>
-                  )}
-                  {snapshot.project.home.walkStart && (
                     <EditorButton
-                      variant="text"
+                      aria-pressed={placingWalkStart}
+                      disabled={unsettled && !placingWalkStart}
                       onClick={() => {
-                        const { walkStart, ...home } = snapshot.project.home;
-                        commit({ ...snapshot, project: { ...snapshot.project, home } });
-                        setWalkStartFloor(null);
+                        clearConstructionSelection();
+                        constructEditor.setTool("select");
+                        setWalkStartFloor(placingWalkStart ? null : activeFloorId);
                       }}
                     >
-                      Use automatic start
+                      {placingWalkStart
+                        ? "Cancel"
+                        : snapshot.project.home.walkStart
+                          ? "Move starting point"
+                          : "Set starting point"}
                     </EditorButton>
-                  )}
-                </div>
-              </details>
-            }
-            northControls={
-              <NorthSettingsEditor
-                value={snapshot.project.home.northAngleDegrees ?? 0}
-                disabled={editingLocked || unsettled || reference.adjusting}
-                onEdit={northOrientation.start}
-              />
-            }
-            roof={snapshot.project.home.roof}
-            onRoofChange={(roof) =>
-              commit({
-                ...snapshot,
-                project: { ...snapshot.project, home: { ...snapshot.project.home, roof } },
-              })
-            }
-            editor={constructEditor}
-            contextualIssues={sidebarIssues}
-            onIssueFocus={focusIssue}
-            floorPainting={{
-              finish: floorFinish,
-              target: floorPaintTarget,
-              drawingActive: floorZoneDrawing.active,
-              drawingError: floorZoneDrawing.error,
-              onFinishChange: setFloorFinish,
-              onTargetChange: (target) => {
-                floorZoneDrawing.cancel();
-                setFloorPaintTarget(target);
-              },
-              onCancelDrawing: floorZoneDrawing.cancel,
-            }}
-          />
-        )}
-        {!shortcutsMode && mode === "connect" && (
-          <ConnectInspector
-            editor={connect}
-            manifest={connectManifest}
-            runtime={runtime}
-            deviceModels={deviceModels}
-            homeAssistantUrl={homeAssistantUrl}
-            onSettings={onHomeAssistantSettings}
-          />
-        )}
-        <div className="arrange-catalog-mount" hidden={shortcutsMode || mode !== "furnish"}>
-          <ArrangeCatalog
-            enabled={!shortcutsMode && mode === "furnish"}
-            furnishingModels={furnishingModels}
-            deviceModels={deviceModels}
-            browsing={catalogBrowsing}
-            onBrowse={setCatalogBrowsing}
-            error={catalogError}
-            onChoose={addCatalogItem}
-            customModels={
-              <CustomModelLibrary
-                workspace={workspace}
-                disabled={editingLocked || unsettled}
-                onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
-              />
-            }
-            renderCustomModel={(entry) => (
-              <CustomModelCard
-                workspace={workspace}
-                entry={entry}
-                disabled={editingLocked || unsettled}
-                onChoose={() => addCatalogItem(entry)}
-              />
-            )}
-          />
+                    {placingWalkStart && (
+                      <p role="status">
+                        Click inside the floor to set your starting point. Escape cancels.
+                      </p>
+                    )}
+                    {snapshot.project.home.walkStart && (
+                      <EditorButton
+                        variant="text"
+                        onClick={() => {
+                          const { walkStart, ...home } = snapshot.project.home;
+                          commit({ ...snapshot, project: { ...snapshot.project, home } });
+                          setWalkStartFloor(null);
+                        }}
+                      >
+                        Use automatic start
+                      </EditorButton>
+                    )}
+                  </div>
+                </details>
+              }
+              northControls={
+                <NorthSettingsEditor
+                  value={snapshot.project.home.northAngleDegrees ?? 0}
+                  disabled={editingLocked || unsettled || reference.adjusting}
+                  onEdit={northOrientation.start}
+                />
+              }
+              roof={snapshot.project.home.roof}
+              onRoofChange={(roof) =>
+                commit({
+                  ...snapshot,
+                  project: { ...snapshot.project, home: { ...snapshot.project.home, roof } },
+                })
+              }
+              editor={constructEditor}
+              floorPainting={{
+                finish: floorFinish,
+                target: floorPaintTarget,
+                drawingActive: floorZoneDrawing.active,
+                drawingError: floorZoneDrawing.error,
+                onFinishChange: setFloorFinish,
+                onTargetChange: (target) => {
+                  floorZoneDrawing.cancel();
+                  setFloorPaintTarget(target);
+                },
+                onCancelDrawing: floorZoneDrawing.cancel,
+              }}
+            />
+          )}
+          {!shortcutsMode && mode === "connect" && (
+            <ConnectInspector
+              editor={connect}
+              manifest={connectManifest}
+              runtime={runtime}
+              deviceModels={deviceModels}
+              homeAssistantUrl={homeAssistantUrl}
+              onSettings={onHomeAssistantSettings}
+            />
+          )}
+          <div className="arrange-catalog-mount" hidden={shortcutsMode || mode !== "furnish"}>
+            <ArrangeCatalog
+              enabled={!shortcutsMode && mode === "furnish"}
+              furnishingModels={furnishingModels}
+              deviceModels={deviceModels}
+              browsing={catalogBrowsing}
+              onBrowse={setCatalogBrowsing}
+              error={catalogError}
+              onChoose={addCatalogItem}
+              customModels={
+                <CustomModelLibrary
+                  workspace={workspace}
+                  disabled={editingLocked || unsettled}
+                  onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
+                />
+              }
+              renderCustomModel={(entry) => (
+                <CustomModelCard
+                  workspace={workspace}
+                  entry={entry}
+                  disabled={editingLocked || unsettled}
+                  onChoose={() => addCatalogItem(entry)}
+                />
+              )}
+            />
+          </div>
         </div>
+        <EditorValidationPanel issues={sidebarIssues} onSelect={focusIssue} />
       </aside>
     </>
   );

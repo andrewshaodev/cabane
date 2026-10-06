@@ -18,8 +18,15 @@ await withModules(async (load) => {
   const { constructIssueKey } = await load(
     "/apps/web/src/editor-preview/construct/validation-visuals.ts",
   );
-  const { ConstructionInspector } = await load(
-    "/apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
+  const { useEditorCamera } = await load("/apps/web/src/editor-workspace/useEditorCamera.ts");
+  const { useEditorIssueNavigation } = await load(
+    "/apps/web/src/editor-workspace/useEditorIssueNavigation.ts",
+  );
+  const { ConstructionValidationMarker } = await load(
+    "/apps/web/src/editor-preview/construct/ConstructionValidationMarker.tsx",
+  );
+  const { EditorValidationPanel } = await load(
+    "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
   );
   const { interactionFloor: acceptedFloor } = await load("/tests/fixtures/interaction-floor.ts");
   const { createEmptyHomeProject } = await load("/packages/engine/src/index.ts");
@@ -57,6 +64,235 @@ await withModules(async (load) => {
     }
   }
 
+  test("hover and keyboard focus expose every full error and correction outside the canvas", async () => {
+    await withDom(async (root, document) => {
+      const issues = [
+        {
+          message: "A wall attachment is too high to fit between the floor and the wall top.",
+          suggestion: "Lower the attachment or reduce its height.",
+        },
+        {
+          message: "The attachment extends past the end of its supporting wall.",
+          suggestion: "Move it inward.",
+        },
+      ];
+      let activated = 0;
+      let hidden = 0;
+      await act(async () =>
+        root.render(
+          React.createElement(ConstructionValidationMarker, {
+            issues,
+            number: 12,
+            active: false,
+            onActivate() {
+              activated++;
+            },
+            onDismiss() {
+              hidden++;
+            },
+          }),
+        ),
+      );
+      const button = document.querySelector(".construction-validation-marker__details");
+      assert.equal(button.textContent, "12");
+      assert.ok(button.querySelector("svg"));
+      await act(async () =>
+        button.dispatchEvent(new window.MouseEvent("mouseover", { bubbles: true })),
+      );
+      const tooltip = document.querySelector('[role="tooltip"]');
+      assert.equal(tooltip.parentElement, document.body);
+      for (const issue of issues) {
+        assert.ok(tooltip.textContent.includes(issue.message));
+        assert.ok(tooltip.textContent.includes(issue.suggestion));
+      }
+      assert.equal(button.getAttribute("aria-describedby"), tooltip.id);
+      await act(async () =>
+        document.dispatchEvent(
+          new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        ),
+      );
+      assert.equal(document.querySelector('[role="tooltip"]'), null);
+      await act(async () => button.focus());
+      assert.ok(document.querySelector('[role="tooltip"]'));
+      await act(async () => button.click());
+      assert.equal(activated, 1);
+      await act(async () =>
+        document.querySelector(".construction-validation-marker__dismiss").click(),
+      );
+      assert.equal(hidden, 1);
+    });
+  });
+
+  test("project diagnostics resolve global item indices and nested attachments on their actual floors", () => {
+    const upper = {
+      ...acceptedFloor,
+      id: "upper",
+      walls: [{ ...acceptedFloor.walls[0], niches: [{ id: "high-niche" }] }],
+    };
+    const items = [
+      { id: "ground-item", floorId: acceptedFloor.id },
+      { id: "upper-item", floorId: "upper" },
+    ];
+    const result = collectConstructContextualIssues({
+      floor: acceptedFloor,
+      sceneItems: [items[0]],
+      project: { floors: [acceptedFloor, upper], sceneItems: items },
+      projectIssues: [
+        {
+          code: "project.wall-support-height",
+          path: "sceneItems[1].placement.elevationMeters",
+          severity: "error",
+          message: "Wall attachment must fit below the wall top.",
+        },
+        {
+          code: "niche.height",
+          path: "floors[1].walls[0].niches[0]",
+          severity: "error",
+          message: "Niche must fit below the wall top.",
+        },
+      ],
+    });
+    assert.deepEqual(
+      result.map((issue) => [issue.floorId, issue.target]),
+      [
+        ["upper", { kind: "niche", id: "high-niche" }],
+        ["upper", { kind: "scene-item", id: "upper-item" }],
+      ],
+    );
+  });
+
+  test("Locate selects and frames the affected object rather than a related wall or error point", async () => {
+    await withDom(async (root) => {
+      const calls = [];
+      let camera;
+      const area = {
+        polygon: [
+          [0, 0],
+          [4, 0],
+          [4, 4],
+          [0, 4],
+        ],
+      };
+      const floor = {
+        ...acceptedFloor,
+        rooms: [{ ...area, id: "room" }],
+        ceilings: [{ id: "ceiling", roomIds: ["room"] }],
+        groundZones: [{ ...area, id: "zone" }],
+        pools: [{ ...area, id: "pool" }],
+        outdoorPlatforms: [{ ...area, id: "platform" }],
+        walls: [
+          {
+            ...acceptedFloor.walls[0],
+            from: [0, 0],
+            to: [10, 0],
+            niches: [{ id: "niche", offsetFromWallStartPlanUnits: 1, widthPlanUnits: 2 }],
+          },
+        ],
+        openings: [
+          {
+            id: "opening",
+            wallId: acceptedFloor.walls[0].id,
+            offsetFromWallStartPlanUnits: 6,
+            widthPlanUnits: 2,
+          },
+        ],
+      };
+      const items = [
+        {
+          id: "lamp",
+          placement: { kind: "wall", wallId: floor.walls[0].id, offsetFromWallStartPlanUnits: 2 },
+        },
+      ];
+      function Harness() {
+        camera = useEditorCamera({
+          constructEditor: {
+            previewFloor: floor,
+            wallRuns: [],
+            setTool: (tool) => calls.push(tool),
+            selectOpening: (id) => calls.push(id),
+            selectWall: (id) => calls.push(id),
+            selectRoom: (id) => calls.push(id),
+            selectPool: (id) => calls.push(id),
+            selectPlatform: (id) => calls.push(id),
+            selectFloorZone: (id) => calls.push(id),
+          },
+          furnishingEditor: { select: (id) => calls.push(id) },
+          previewSceneItems: items,
+        });
+        return null;
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      for (const [kind, id, point, mode] of [
+        ["scene-item", "lamp", [2, 0], "furnish"],
+        ["niche", "niche", [2, 0], "construct"],
+        ["opening", "opening", [7, 0], "construct"],
+        ["floor-zone", "zone", [2, 2], "construct"],
+        ["outdoor-platform", "platform", [2, 2], "construct"],
+        ["pool", "pool", [2, 2], "construct"],
+        ["room", "room", [2, 2], "construct"],
+        ["ceiling", "ceiling", [2, 2], "construct"],
+      ]) {
+        calls.length = 0;
+        await act(async () =>
+          camera.focusIssue(
+            {
+              code: "height",
+              path: id,
+              message: `Issue on wall “${floor.walls[0].id}”.`,
+              target: { kind, id },
+            },
+            (mode) => calls.push(mode),
+          ),
+        );
+        assert.equal(calls[0], mode);
+        assert.equal(calls.at(-1), kind === "ceiling" ? "room" : id);
+        assert.deepEqual(camera.cameraFocusPoint, point);
+      }
+    });
+  });
+
+  test("Locate waits for the requested floor to restore before selecting the attachment", async () => {
+    await withDom(async (root) => {
+      let locate;
+      const requestedFloors = [],
+        focused = [];
+      const issue = { floorId: "upper", target: { kind: "scene-item", id: "upper-lamp" } };
+      const selectFloor = (id) => requestedFloors.push(id);
+      const focusCameraIssue = (value) => focused.push(value);
+      const selectMode = () => {};
+      function Harness({ activeFloorId, previewFloorId }) {
+        locate = useEditorIssueNavigation({
+          activeFloorId,
+          previewFloorId,
+          selectFloor,
+          focusCameraIssue,
+          selectMode,
+        });
+        return null;
+      }
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, { activeFloorId: "ground", previewFloorId: "ground" }),
+        ),
+      );
+      await act(async () => locate(issue));
+      assert.deepEqual(requestedFloors, ["upper"]);
+      assert.deepEqual(focused, []);
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, { activeFloorId: "upper", previewFloorId: "ground" }),
+        ),
+      );
+      assert.deepEqual(focused, []);
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, { activeFloorId: "upper", previewFloorId: "upper" }),
+        ),
+      );
+      assert.deepEqual(focused, [issue]);
+    });
+  });
+
   test("separator walls survive draft recovery without errors and can later close a room", async () => {
     await withDom(async (root, document) => {
       let editor;
@@ -74,10 +310,9 @@ await withModules(async (load) => {
           topologyIssues: editor.topologyIssues,
           projectIssues: validateHomeProject(project, ownerProjectRegistries).issues,
         });
-        return React.createElement(ConstructionInspector, {
-          editor,
-          contextualIssues: visibleConstructIssues(allIssues, editor.tool),
-          onIssueFocus: (issue) => focused.push(issue),
+        return React.createElement(EditorValidationPanel, {
+          issues: visibleConstructIssues(allIssues, editor.tool),
+          onSelect: (issue) => focused.push(issue),
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
@@ -92,7 +327,7 @@ await withModules(async (load) => {
       await act(async () => editor.beginWall(corners[0]));
       for (const corner of corners.slice(1)) await act(async () => editor.addWall(corner));
       assert.equal(
-        document.querySelector('[aria-label="Construction validation"]'),
+        document.querySelector('[aria-label="Editor validation"]'),
         null,
         "do not interrupt wall drawing with closure issues",
       );
@@ -100,7 +335,7 @@ await withModules(async (load) => {
       await act(async () => editor.cancelWall());
       assert.equal(editor.tool, "wall");
       assert.equal(
-        document.querySelector('[aria-label="Construction validation"]'),
+        document.querySelector('[aria-label="Editor validation"]'),
         null,
         "ending a chain does not leave Wall mode",
       );
@@ -125,7 +360,7 @@ await withModules(async (load) => {
       );
       await act(async () => editor.setTool("wall"));
       assert.equal(
-        document.querySelector('[aria-label="Construction validation"]'),
+        document.querySelector('[aria-label="Editor validation"]'),
         null,
         "resuming Wall defers the existing completion issues again",
       );
@@ -155,12 +390,12 @@ await withModules(async (load) => {
       );
       assert.equal(allIssues[0].code, "room.name");
       assert.ok(
-        document.querySelector('[aria-label="Construction validation"]'),
+        document.querySelector('[aria-label="Editor validation"]'),
         "the naming prompt appears after automatic return to Select",
       );
       const namingButtons = document.querySelectorAll(".construction-inspector__validation button");
       assert.equal(namingButtons.length, 1);
-      assert.match(namingButtons[0].textContent, /Name this room/);
+      assert.match(namingButtons[0].textContent, /This room needs a name/);
       assert.doesNotMatch(namingButtons[0].textContent, /Expected a non-empty string/);
       await act(async () => editor.selectRoom(shack.id));
       await act(async () => editor.updateSelectedRoom({ name: "Wooden shack" }));

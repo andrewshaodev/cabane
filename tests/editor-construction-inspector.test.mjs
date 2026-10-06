@@ -19,6 +19,9 @@ await withModules(async (load) => {
   const { ConstructionInspector } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
   );
+  const { EditorValidationPanel } = await load(
+    "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
+  );
   const { FloorPaintConfirmation } = await load(
     "/apps/web/src/editor-preview/construct/FloorPaintConfirmation.tsx",
   );
@@ -852,214 +855,94 @@ await withModules(async (load) => {
     });
   });
 
-  test("shows every contextual issue with a compact error and warning summary", async () => {
+  test("lists complete errors, warnings and recovery text in the shared validation panel", async () => {
     await withDom(async ({ dom, root }) => {
-      await act(async () =>
-        root.render(
-          React.createElement(ConstructionInspector, {
-            editor: editor(null),
-            planImportControls: React.createElement(
-              "section",
-              { "aria-label": "Build from a floor plan" },
-              "Have a floor plan?",
-            ),
-            contextualIssues: [
-              {
-                code: "construct.opening-outside-wall",
-                severity: "error",
-                message: "The window extends beyond its wall.",
-                suggestion: "Move it inward or reduce its width.",
-                target: { kind: "opening", id: opening.id },
-              },
-              {
-                code: "construct.room-no-exit",
-                severity: "warning",
-                message: "The bedroom has no walkable exit.",
-                target: { kind: "room", id: "bedroom" },
-              },
-              {
-                code: "construct.spawn-blocked",
-                severity: "fatal",
-                message: "No safe walk position was found.",
-              },
-            ],
-          }),
-        ),
-      );
-
-      const document = dom.window.document;
-      const card = document.querySelector("[aria-label='Construction validation']");
-      assert.ok(card);
-      assert.ok(
-        card.compareDocumentPosition(
-          document.querySelector("[aria-label='Build from a floor plan']"),
-        ) & dom.window.Node.DOCUMENT_POSITION_FOLLOWING,
-      );
-      assert.match(card.textContent, /3 issues/);
-      assert.match(card.textContent, /2 errors · 1 warning/);
-      assert.match(card.textContent, /The window extends beyond its wall/);
-      assert.match(card.textContent, /Move it inward or reduce its width/);
-      assert.match(card.textContent, /The bedroom has no walkable exit/);
-      assert.match(card.textContent, /No safe walk position was found/);
-      assert.equal(card.querySelectorAll("li").length, 3);
-      assert.doesNotMatch(document.body.textContent, /Structure data/);
-    });
-  });
-
-  test("lists all legacy topology and dependency issues until the aggregate is connected", async () => {
-    await withDom(async ({ dom, root }) => {
-      await act(async () =>
-        root.render(
-          React.createElement(ConstructionInspector, {
-            editor: editor(null, {
-              topologyIssues: [
-                {
-                  code: "topology.first",
-                  severity: "fatal",
-                  path: "walls[0]",
-                  message: "First topology issue",
-                },
-                {
-                  code: "topology.second",
-                  severity: "warning",
-                  path: "walls[1]",
-                  message: "Second topology issue",
-                },
-              ],
-            }),
-            dependencyIssues: [
-              {
-                code: "dependency.ceiling",
-                severity: "error",
-                path: "sceneItems[0]",
-                message: "Ceiling dependency issue",
-              },
-            ],
-          }),
-        ),
-      );
-
-      const card = dom.window.document.querySelector("[aria-label='Construction validation']");
-      assert.ok(card);
-      assert.match(card.textContent, /3 issues/);
-      assert.match(card.textContent, /First topology issue/);
-      assert.match(card.textContent, /Second topology issue/);
-      assert.match(card.textContent, /Ceiling dependency issue/);
-    });
-  });
-
-  test("selects targeted walls, openings, and rooms from validation rows", async () => {
-    const selections = [];
-    await withDom(async ({ dom, root }) => {
-      await act(async () =>
-        root.render(
-          React.createElement(ConstructionInspector, {
-            editor: editor(null, {
-              selectWall: (id) => selections.push(["wall", id]),
-              selectOpening: (id) => selections.push(["opening", id]),
-              selectRoom: (id) => selections.push(["room", id]),
-            }),
-            contextualIssues: [
-              {
-                code: "wall",
-                severity: "error",
-                message: "Wall problem",
-                target: { kind: "wall", id: wall.id },
-              },
-              {
-                code: "opening",
-                severity: "warning",
-                message: "Opening problem",
-                target: { kind: "opening", id: opening.id },
-              },
-              {
-                code: "room",
-                severity: "error",
-                message: "Room problem",
-                target: { kind: "room", id: "bedroom" },
-              },
-              { code: "floor", severity: "warning", message: "Floor-wide note" },
-            ],
-          }),
-        ),
-      );
-
-      const document = dom.window.document;
-      const targetButtons = [
-        ...document.querySelectorAll(".construction-inspector__validation button"),
+      const focused = [];
+      const issues = [
+        {
+          code: "opening",
+          severity: "error",
+          message: "The window extends beyond its wall.",
+          suggestion: "Move it inward or reduce its width.",
+          target: { kind: "opening", id: opening.id },
+        },
+        {
+          code: "room",
+          severity: "warning",
+          message: "The bedroom has no walkable exit.",
+          target: { kind: "room", id: "bedroom" },
+        },
+        { code: "spawn", severity: "fatal", message: "No safe walk position was found." },
       ];
-      assert.equal(targetButtons.length, 3);
-      for (const button of targetButtons) await act(async () => button.click());
-      assert.deepEqual(selections, [
-        ["wall", wall.id],
-        ["opening", opening.id],
-        ["room", "bedroom"],
-      ]);
-      assert.equal(
-        document.querySelectorAll(".construction-inspector__validation li > div").length,
-        1,
+      await act(async () =>
+        root.render(
+          React.createElement(EditorValidationPanel, {
+            issues,
+            onSelect: (issue) => focused.push(issue),
+          }),
+        ),
       );
+      const panel = dom.window.document.querySelector('[aria-label="Editor validation"]');
+      assert.match(panel.textContent, /3 issues/);
+      assert.match(panel.textContent, /2 errors · 1 warning/);
+      for (const issue of issues) assert.ok(panel.textContent.includes(issue.message));
+      assert.ok(panel.textContent.includes(issues[0].suggestion));
+      assert.equal(panel.querySelectorAll("li").length, 3);
+      assert.equal(panel.querySelectorAll("li > div").length, 1);
+      for (const button of panel.querySelectorAll("button")) await act(async () => button.click());
+      assert.deepEqual(focused, issues.slice(0, 2));
     });
   });
 
-  test("offers a locate action for junction and item diagnostics", async () => {
-    const focused = [];
+  test("offers Locate for every editable diagnostic target and preserves the full issue", async () => {
     await withDom(async ({ dom, root }) => {
-      const junctionIssue = {
-        code: "wall-junction.opening-overlap",
+      const focused = [];
+      const issues = [
+        "wall",
+        "opening",
+        "niche",
+        "room",
+        "scene-item",
+        "junction",
+        "outdoor-platform",
+        "floor-zone",
+        "pool",
+        "ceiling",
+      ].map((kind) => ({
+        code: `invalid.${kind}`,
+        path: kind,
         severity: "error",
         source: "project",
-        path: "floor.wallJunctions[0]",
-        message: 'Junction overlaps opening "living-window" on wall "living-east".',
-        suggestion: "Move the opening away from this corner.",
-        target: { kind: "junction", id: "living-corner" },
-      };
-      const itemIssue = {
-        code: "project.wall-support-missing",
-        severity: "error",
-        source: "dependency",
-        path: "sceneItems[0].placement",
-        message: "The supporting wall no longer exists.",
-        suggestion: "Choose an existing wall.",
-        target: { kind: "scene-item", id: "armchair" },
-      };
+        message: `Full ${kind} error`,
+        suggestion: "Correct its dimensions.",
+        target: { kind, id: `${kind}-id` },
+      }));
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
-            editor: editor(null),
-            contextualIssues: [junctionIssue, itemIssue],
-            onIssueFocus: (issue) => focused.push(issue),
+          React.createElement(EditorValidationPanel, {
+            issues,
+            onSelect: (issue) => focused.push(issue),
           }),
         ),
       );
-
-      const card = dom.window.document.querySelector("[aria-label='Construction validation']");
-      assert.match(card.textContent, /Opening is too close to this corner/);
-      assert.match(card.textContent, /The supporting wall no longer exists/);
-      assert.equal(card.querySelectorAll("button").length, 2);
-      assert.equal(
-        card.querySelectorAll(".construction-inspector__validation-arrow")[0].textContent,
-        "Locate →",
+      const buttons = dom.window.document.querySelectorAll(
+        ".construction-inspector__validation button",
       );
-      for (const button of card.querySelectorAll("button")) await act(async () => button.click());
-      assert.deepEqual(focused, [junctionIssue, itemIssue]);
+      assert.equal(buttons.length, issues.length);
+      for (const button of buttons) {
+        assert.match(button.textContent, /Locate →/);
+        await act(async () => button.click());
+      }
+      assert.deepEqual(focused, issues);
     });
   });
 
-  test("hides validation when the canonical issue list is empty", async () => {
+  test("hides the shared validation panel when there are no diagnostics", async () => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
-        root.render(
-          React.createElement(ConstructionInspector, {
-            editor: editor(null),
-            contextualIssues: [],
-          }),
-        ),
+        root.render(React.createElement(EditorValidationPanel, { issues: [], onSelect() {} })),
       );
-      assert.equal(
-        dom.window.document.querySelector("[aria-label='Construction validation']"),
-        null,
-      );
+      assert.equal(dom.window.document.querySelector('[aria-label="Editor validation"]'), null);
     });
   });
 });

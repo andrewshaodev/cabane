@@ -4,6 +4,7 @@ import {
   type FloorSpec,
   type ManifestIssue,
   type SceneItemSpec,
+  type HomeProject,
 } from "@cabane/engine";
 
 export type ConstructValidationIssueSource = "topology" | "project" | "dependency" | "navigation";
@@ -11,6 +12,7 @@ export type ConstructValidationIssueSource = "topology" | "project" | "dependenc
 export type ConstructValidationTargetKind =
   | "wall"
   | "opening"
+  | "niche"
   | "room"
   | "floor-zone"
   | "pool"
@@ -36,11 +38,13 @@ export interface ConstructValidationDiagnostic extends ManifestIssue {
 
 export interface ConstructContextualIssue extends ManifestIssue {
   source: ConstructValidationIssueSource;
+  floorId?: string;
   target?: ConstructValidationTarget;
   suggestion: string;
 }
 
 export interface ConstructContextualValidationInput {
+  project?: Pick<HomeProject, "floors" | "sceneItems">;
   floor: Pick<
     FloorSpec,
     | "footprint"
@@ -152,6 +156,11 @@ export const constructValidationTargetForPath = (
   path: string,
   input: Pick<ConstructContextualValidationInput, "floor" | "sceneItems">,
 ): ConstructValidationTarget | undefined => {
+  const nicheReference = path.match(/(?:^|\.)walls\[(\d+)\]\.niches\[(\d+)\]/);
+  if (nicheReference) {
+    const niche = input.floor.walls[Number(nicheReference[1])]?.niches?.[Number(nicheReference[2])];
+    if (niche) return { kind: "niche", id: niche.id };
+  }
   const zoneReference = path.match(/(?:^|\.)rooms\[(\d+)\]\.floorZones\[(\d+)\]/);
   if (zoneReference) {
     const room = input.floor.rooms[Number(zoneReference[1])];
@@ -200,7 +209,22 @@ const contextualize = (
   source: ConstructValidationIssueSource,
   input: ConstructContextualValidationInput,
 ): ConstructContextualIssue => {
-  const target = issue.target ?? constructValidationTargetForPath(issue.path, input);
+  const projectItemIndex = source === "project" ? issue.path.match(/^sceneItems\[(\d+)\]/) : null;
+  const projectFloorIndex = source === "project" ? issue.path.match(/^floors\[(\d+)\]/) : null;
+  const item = projectItemIndex && input.project?.sceneItems[Number(projectItemIndex[1])];
+  const floor = item
+    ? input.project?.floors.find((floor) => floor.id === item.floorId)
+    : projectFloorIndex
+      ? input.project?.floors[Number(projectFloorIndex[1])]
+      : undefined;
+  const target =
+    issue.target ??
+    constructValidationTargetForPath(issue.path, {
+      floor: floor ?? input.floor,
+      sceneItems:
+        (projectItemIndex && input.project ? input.project.sceneItems : input.sceneItems) ?? [],
+    });
+  const floorContext = floor ? { floorId: floor.id } : {};
   // Topology uses stable room IDs; schema validation uses array indices and a
   // generic string error. Normalize that one condition before deduplicating.
   if (
@@ -215,6 +239,7 @@ const contextualize = (
       path: `rooms[${JSON.stringify(target.id)}].name`,
       message: "This room needs a name.",
       source,
+      ...floorContext,
       target,
       suggestion:
         "Click “Name room” on the plan, or enter a name in the room panel before applying.",
@@ -223,6 +248,7 @@ const contextualize = (
   return omitUndefinedProperties({
     ...issue,
     source,
+    ...floorContext,
     target,
     suggestion:
       issue.suggestion ??

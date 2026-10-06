@@ -93,8 +93,11 @@ zones. Repainting a room with existing zones asks whether to keep or replace
 those zones. Polygon drawing has local undo/redo and cancel behavior. Pools are
 outdoor polygon basins with validation, collision, and rendered cutouts.
 
-Diagnostics are contextual to the current tool and can focus the offending
-object in the scene. Apply uses the full issue set, including project,
+Diagnostics are contextual to the current tool and share the editor-wide issue
+panel. Canvas errors use compact error-icon and number badges. Hover or keyboard
+focus opens a readable, wrapping popover with every grouped error and its recovery
+suggestion; Escape dismisses it. Locate selects and focuses the offending editable
+object, including individual openings and niches, rather than the error marker. Apply uses the full issue set, including project,
 topology, dependent placement, and walk-navigation errors, regardless of which
 issues are currently displayed. Explore opens an eye-level draft preview with
 non-operative HA controls. Editor changes remain browser-local until exported;

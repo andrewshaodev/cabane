@@ -1,3 +1,4 @@
+import { ConstructionValidationMarker } from "./ConstructionValidationMarker";
 import { Html } from "@react-three/drei";
 import {
   resolveItemTransform,
@@ -12,7 +13,6 @@ import { useValidationLabels } from "./useValidationLabels";
 import { constructPlanToWorld, wallOverlayTransform } from "./drag-geometry";
 import type { ConstructContextualIssue } from "./contextual-validation";
 import {
-  constructIssueShortLabel,
   constructIssueKey,
   constructIssuePlanPoint,
   constructIssueVisualTargets,
@@ -47,8 +47,11 @@ export function ConstructionValidationOverlay({
     focusVersion,
   );
   const errorIssues = useMemo(
-    () => issues.filter((issue) => issue.severity !== "warning"),
-    [issues],
+    () =>
+      issues.filter(
+        (issue) => issue.severity !== "warning" && (!issue.floorId || issue.floorId === floor.id),
+      ),
+    [issues, floor.id],
   );
   const visuals = useMemo(
     () =>
@@ -137,8 +140,20 @@ export function ConstructionValidationOverlay({
             </mesh>
           );
         }
-        if (target.kind === "opening") {
-          const opening = floor.openings.find((candidate) => candidate.id === target.id);
+        if (target.kind === "opening" || target.kind === "niche") {
+          const nicheWall =
+            target.kind === "niche"
+              ? floor.walls.find((wall) => wall.niches?.some((niche) => niche.id === target.id))
+              : undefined;
+          const niche = nicheWall?.niches?.find((niche) => niche.id === target.id);
+          const opening = niche
+            ? {
+                ...niche,
+                openingHeightMeters: niche.heightMeters,
+                sillHeightMeters: niche.bottomMeters,
+                wallId: nicheWall!.id,
+              }
+            : floor.openings.find((candidate) => candidate.id === target.id);
           const wall = opening && floor.walls.find((candidate) => candidate.id === opening.wallId);
           const point = constructTargetPlanPoint(target, floor, sceneItems);
           if (!opening || !wall || !point) return null;
@@ -259,10 +274,6 @@ export function ConstructionValidationOverlay({
           const active = markerIssues.some(
             (candidate) => constructIssueKey(candidate) === activeIssueKey,
           );
-          const label =
-            markerIssues.length === 1
-              ? constructIssueShortLabel(issue)
-              : `${markerIssues.length} issues here`;
           return (
             <Html
               key={`${x}:${z}`}
@@ -272,39 +283,13 @@ export function ConstructionValidationOverlay({
               wrapperClass="construction-validation-overlay-label"
               style={{ pointerEvents: "none" }}
             >
-              <div
-                className={`construction-validation-marker ${active ? "is-active" : ""}`}
-                role="group"
-                aria-label={label}
-                onPointerDown={(event) => event.stopPropagation()}
-                onPointerUp={(event) => event.stopPropagation()}
-              >
-                <button
-                  type="button"
-                  className="construction-validation-marker__details"
-                  aria-label={`${label}. ${markerIssues.map((candidate) => candidate.message).join(" ")}`}
-                  title={markerIssues.map((candidate) => candidate.message).join("\n")}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onActivate(issue);
-                  }}
-                >
-                  <span>{index + 1}</span>
-                  <strong>{label}</strong>
-                </button>
-                <button
-                  type="button"
-                  className="construction-validation-marker__dismiss"
-                  aria-label={`Hide error label: ${label}`}
-                  title="Hide this label. Use Locate in the issue list to show it again."
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    hide(markerIssues.map(constructIssueKey));
-                  }}
-                >
-                  <span aria-hidden="true">×</span>
-                </button>
-              </div>
+              <ConstructionValidationMarker
+                issues={markerIssues}
+                number={index + 1}
+                active={active}
+                onActivate={() => onActivate(issue)}
+                onDismiss={() => hide(markerIssues.map(constructIssueKey))}
+              />
             </Html>
           );
         })}

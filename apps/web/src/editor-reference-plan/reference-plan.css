@@ -136,11 +136,6 @@
   background: #fff4e9;
   color: #993c29;
 }
-.direction-preview[data-editor-mode="construct"] .direction-rail:has(.reference-plan) {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #b9b9aa transparent;
-}
 .direction-preview[data-editor-mode="construct"]
   .direction-rail:has(.reference-plan)
   .construction-inspector {

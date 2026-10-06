@@ -1,6 +1,5 @@
-import type { RoofSettings, ManifestIssue } from "@cabane/engine";
+import type { RoofSettings } from "@cabane/engine";
 import type { ConstructEditorController } from "./construct-controller-contract";
-import type { ConstructContextualIssue } from "./contextual-validation";
 import type { FloorPaintingInspector } from "./floor-painting-contract";
 export interface ConstructionInspectorProps {
   inert?: boolean;
@@ -12,8 +11,5 @@ export interface ConstructionInspectorProps {
   roof?: RoofSettings | undefined;
   onRoofChange?: (settings: RoofSettings) => void;
   editor: ConstructEditorController;
-  dependencyIssues?: readonly ManifestIssue[];
-  contextualIssues?: readonly ConstructContextualIssue[];
-  onIssueFocus?: (issue: ConstructContextualIssue) => void;
   floorPainting?: FloorPaintingInspector;
 }

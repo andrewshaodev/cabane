@@ -108,7 +108,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const shortcutsMode = props.navigation ? requestedActionBar : actionBarPanelOpen;
   const sidebar = useRef<HTMLElement>(null);
   useEffect(() => {
-    if (sidebar.current) sidebar.current.scrollTop = 0;
+    const content = sidebar.current?.querySelector<HTMLElement>(".editor-sidebar-content");
+    if (content) content.scrollTop = 0;
   }, [mode, shortcutsMode]);
   const onModeTabChange = (next: EditorMode | "shortcuts") => {
     reference.cancel();
@@ -393,6 +394,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
         <EditorSidebar
           {...controller}
+          focusIssue={(issue) => {
+            setActionBarPanelOpen(false);
+            controller.focusIssue(issue);
+          }}
           sidebar={sidebar}
           iconUrl={iconUrl}
           shortcutsMode={shortcutsMode}

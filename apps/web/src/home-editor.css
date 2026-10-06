@@ -21,7 +21,8 @@
   line-height: 1.5;
 }
 .direction-preview *,
-.editor-action-tooltip {
+.editor-action-tooltip,
+.construction-validation-tooltip {
   box-sizing: border-box;
 }
 .direction-preview.is-plan {
@@ -239,6 +240,18 @@
   align-items: center;
   gap: 11px;
   margin-bottom: 24px;
+}
+.editor-sidebar-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.editor-sidebar-content
+  > :not(.construction-inspector, .connect-inspector, .arrange-catalog-mount, .shortcuts-guide) {
+  flex-shrink: 0;
 }
 .direction-rail__brand img {
   width: 43px;
@@ -1032,6 +1045,7 @@
 }
 
 .construction-inspector__validation {
+  flex: none;
   margin-top: 10px;
   overflow: hidden;
   border: 1px solid rgba(140, 80, 55, 0.2);
@@ -1064,7 +1078,7 @@
   font-weight: 500;
 }
 .construction-inspector__validation > header > span {
-  color: #94664f;
+  color: #77503d;
   font-size: var(--editor-text-caption, 0.75rem);
   font-weight: 750;
   white-space: nowrap;
@@ -1086,7 +1100,7 @@
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: 18px 1fr auto;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
   align-items: start;
   gap: 7px;
   box-sizing: border-box;
@@ -1127,12 +1141,14 @@
   gap: 3px;
 }
 .construction-inspector__validation li strong {
+  overflow-wrap: anywhere;
   font-size: var(--editor-text-caption, 0.75rem);
   font-weight: 750;
   line-height: 1.35;
 }
 .construction-inspector__validation li small {
-  color: #8b7768;
+  overflow-wrap: anywhere;
+  color: #705d4f;
   font-size: var(--editor-text-caption, 0.75rem);
   line-height: 1.35;
 }
@@ -1151,7 +1167,7 @@
 }
 .construction-validation-marker {
   display: flex;
-  min-width: 132px;
+  width: max-content;
   align-items: center;
   gap: 2px;
   padding: 3px;
@@ -1190,34 +1206,19 @@
   outline-offset: 1px;
 }
 .construction-validation-marker__details {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  grid-template-columns: 22px 1fr;
+  display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-height: 28px;
-  padding: 3px;
-  text-align: left;
+  padding: 3px 7px;
 }
-.construction-validation-marker__details > span {
-  display: grid;
-  width: 22px;
-  height: 22px;
-  place-items: center;
-  border-radius: 50%;
-  color: #873128;
-  background: #fff4e9;
-  font-size: var(--editor-text-caption, 0.75rem);
-  font-weight: 900;
+.construction-validation-marker .editor-icon {
+  width: 18px;
+  height: 18px;
 }
 .construction-validation-marker__details > strong {
-  max-width: 170px;
-  overflow: hidden;
-  font-size: var(--editor-text-caption, 0.75rem);
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: var(--editor-text-control, 0.875rem);
+  font-variant-numeric: tabular-nums;
 }
 .construction-validation-marker .construction-validation-marker__dismiss {
   display: grid;
@@ -1231,6 +1232,47 @@
 }
 .construction-validation-marker__dismiss:hover {
   background: rgba(255, 244, 233, 0.18);
+}
+
+.construction-validation-tooltip {
+  position: fixed;
+  z-index: 160;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: #fff8f1;
+  background: #672d27;
+  box-shadow: 0 8px 24px #321d2940;
+  font:
+    0.875rem/1.5 "Roboto",
+    sans-serif;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+}
+.construction-validation-tooltip > strong {
+  font-variant-numeric: tabular-nums;
+}
+.construction-validation-tooltip ul {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.construction-validation-tooltip li + li {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #fff8f133;
+}
+.construction-validation-tooltip p {
+  margin: 0;
+}
+.construction-validation-tooltip p + p {
+  margin-top: 5px;
+  color: #f1d5c6;
+}
+.construction-inspector__validation-marker .editor-icon {
+  width: 13px;
+  height: 13px;
 }
 
 .floor-finish-palette {
@@ -1577,15 +1619,18 @@
   .editor-mode-introduction {
     margin-bottom: 18px;
   }
-  .direction-rail > .construction-inspector,
-  .direction-rail > .connect-inspector,
-  .direction-rail > .shortcuts-guide {
+  .editor-sidebar-content > .construction-inspector,
+  .editor-sidebar-content > .connect-inspector,
+  .editor-sidebar-content > .shortcuts-guide {
     flex: none;
     overflow: visible;
   }
-  .direction-rail > .arrange-catalog-mount {
+  .editor-sidebar-content > .arrange-catalog-mount {
     flex: none;
     min-height: 300px;
+  }
+  .construction-inspector__validation ul {
+    max-height: min(120px, 16dvh);
   }
   .construction-inspector__floor-disclosure {
     margin-top: 0;

@@ -20,14 +20,7 @@ import {
 
 import { useMemo } from "react";
 
-import type {
-  ConstructContextualIssue,
-  ConstructValidationDiagnostic as InspectorValidationIssue,
-} from "./contextual-validation";
-
 import { wallMeasurement } from "./drag-geometry";
-
-import { constructIssueShortLabel } from "./validation-visuals";
 
 import { CommittedTextInput } from "./CommittedTextInput";
 import { WallFinishFields } from "./WallFinishFields";
@@ -44,9 +37,6 @@ export function ConstructionInspector({
   roof,
   onRoofChange,
   editor,
-  dependencyIssues = [],
-  contextualIssues,
-  onIssueFocus,
   floorPainting,
 }: ConstructionInspectorProps) {
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
@@ -123,25 +113,6 @@ export function ConstructionInspector({
     return counts;
   }, [editor.deletionTargets]);
   const deletionCount = Object.values(deletionCounts).reduce((sum, count) => sum + count, 0);
-  const validationIssues: readonly InspectorValidationIssue[] = contextualIssues ?? [
-    ...dependencyIssues,
-    ...(editor.canUndo ? editor.topologyIssues : []),
-  ];
-  const errorCount = validationIssues.filter((issue) => issue.severity !== "warning").length;
-  const warningCount = validationIssues.length - errorCount;
-  const selectIssueTarget = (issue: InspectorValidationIssue) => {
-    if (onIssueFocus && "source" in issue) {
-      onIssueFocus(issue as ConstructContextualIssue);
-      return;
-    }
-    if (!issue.target) return;
-    if (issue.target.kind === "wall") editor.selectWall(issue.target.id);
-    if (issue.target.kind === "opening") editor.selectOpening(issue.target.id);
-    if (issue.target.kind === "room") editor.selectRoom(issue.target.id);
-    if (issue.target.kind === "outdoor-platform") editor.selectPlatform(issue.target.id);
-    if (issue.target.kind === "pool") editor.selectPool(issue.target.id);
-    if (issue.target.kind === "floor-zone") editor.selectFloorZone(issue.target.id);
-  };
   return (
     <section className="construction-inspector" aria-label="Construction inspector">
       <div className="construction-inspector__context" inert={inert}>
@@ -492,83 +463,6 @@ export function ConstructionInspector({
               Delete room
             </EditorButton>
           </div>
-        )}
-        {validationIssues.length > 0 && (
-          <section
-            className="construction-inspector__validation"
-            aria-label="Construction validation"
-            aria-live="polite"
-          >
-            <header>
-              <div>
-                <small>Needs attention</small>
-                <strong>
-                  {validationIssues.length} {validationIssues.length === 1 ? "issue" : "issues"}
-                </strong>
-              </div>
-              <span>
-                {errorCount > 0 && `${errorCount} ${errorCount === 1 ? "error" : "errors"}`}
-                {errorCount > 0 && warningCount > 0 && " · "}
-                {warningCount > 0 &&
-                  `${warningCount} ${warningCount === 1 ? "warning" : "warnings"}`}
-              </span>
-            </header>
-            <ul>
-              {validationIssues.map((issue, index) => {
-                const selectableTarget =
-                  issue.target &&
-                  (onIssueFocus ||
-                    issue.target.kind === "wall" ||
-                    issue.target.kind === "opening" ||
-                    issue.target.kind === "room" ||
-                    issue.target.kind === "pool" ||
-                    issue.target.kind === "floor-zone")
-                    ? issue.target
-                    : undefined;
-                const content = (
-                  <>
-                    <span className="construction-inspector__validation-marker" aria-hidden="true">
-                      {issue.severity === "warning" ? "!" : "×"}
-                    </span>
-                    <span>
-                      <strong>
-                        {"source" in issue
-                          ? constructIssueShortLabel(issue as ConstructContextualIssue)
-                          : issue.message}
-                      </strong>
-                      <small>
-                        {"source" in issue && `${issue.message} `}
-                        {issue.suggestion}
-                      </small>
-                    </span>
-                    {selectableTarget && (
-                      <span className="construction-inspector__validation-arrow" aria-hidden="true">
-                        Locate →
-                      </span>
-                    )}
-                  </>
-                );
-                return (
-                  <li
-                    key={`${issue.code}:${issue.path ?? ""}:${issue.target?.kind ?? ""}:${issue.target?.id ?? ""}:${index}`}
-                    data-severity={issue.severity}
-                  >
-                    {selectableTarget ? (
-                      <button
-                        type="button"
-                        aria-label={`Select ${selectableTarget.kind} ${selectableTarget.id}: ${issue.message}`}
-                        onClick={() => selectIssueTarget(issue)}
-                      >
-                        {content}
-                      </button>
-                    ) : (
-                      <div>{content}</div>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
         )}
       </div>
       {referencePlanControls}

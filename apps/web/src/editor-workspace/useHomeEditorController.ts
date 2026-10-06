@@ -4,6 +4,7 @@ import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorRef
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
+import { useEditorIssueNavigation } from "./useEditorIssueNavigation";
 import { useEditorCamera } from "./useEditorCamera";
 import { useEditorCatalog } from "./useEditorCatalog";
 import { useEditorConnection } from "./useEditorConnection";
@@ -32,7 +33,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { type EditorMode } from "../editor-chrome/EditorModeNav";
 
-import { useConstructEditor, type ConstructContextualIssue } from "../editor-preview/construct";
+import { useConstructEditor } from "../editor-preview/construct";
 
 import { useFurnishingEditor } from "../editor-preview/furnish";
 
@@ -402,10 +403,13 @@ export function useHomeEditorController({
     walkNavigation,
     mode,
   });
-  const focusIssue = useCallback(
-    (issue: ConstructContextualIssue) => focusCameraIssue(issue, selectMode),
-    [focusCameraIssue, selectMode],
-  );
+  const focusIssue = useEditorIssueNavigation({
+    activeFloorId,
+    previewFloorId: constructEditorPreviewFloor.id,
+    selectFloor: floorNavigationSelectFloor,
+    focusCameraIssue,
+    selectMode,
+  });
   const { publishIssues, publishErrors, publishWarnings } = useEditorPublicationIssues(
     contextualIssues,
     bindingIssues,

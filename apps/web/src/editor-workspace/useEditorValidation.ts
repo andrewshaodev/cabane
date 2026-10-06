@@ -53,6 +53,7 @@ export function useEditorValidation({
   const contextualIssues = useMemo(
     () =>
       collectConstructContextualIssues({
+        project: editorProject,
         floor: constructEditor.previewFloor,
         sceneItems: previewSceneItems,
         topologyIssues: constructEditor.topologyIssues,
@@ -66,6 +67,7 @@ export function useEditorValidation({
       constructEditor.topologyIssues,
       previewSceneItems,
       semanticValidation.issues,
+      editorProject,
       walkNavigation.diagnostics,
     ],
   );

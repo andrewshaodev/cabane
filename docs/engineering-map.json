@@ -50,6 +50,10 @@
     "owners": [
       "apps/web/src/editor-workspace/useHomeEditorController.ts",
       "apps/web/src/editor-workspace/EditorWorkspace.tsx",
+      "apps/web/src/editor-workspace/EditorSidebar.tsx",
+      "apps/web/src/editor-workspace/EditorValidationPanel.tsx",
+      "apps/web/src/editor-workspace/useEditorCamera.ts",
+      "apps/web/src/editor-workspace/useEditorIssueNavigation.ts",
       "apps/web/src/editor-workspace/useEditorProjectHistory.ts",
       "apps/web/src/editor-workspace/useEditorSession.ts",
       "apps/web/src/editor-workspace/useEditorSceneProjection.ts",
@@ -62,7 +66,7 @@
         "symbols": ["ConnectWorkspaceProps", "HomeEditorExitReason"]
       }
     ],
-    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary.",
+    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments.",
     "checks": ["test:unit", "test:browser"]
   },
   {
