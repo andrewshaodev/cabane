@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { AdditiveBlending, BufferAttribute, BufferGeometry, Mesh, Vector3 } from "three";
 
 /** Camera-facing jagged ribbons: no solid tube to read as a stick during movement. */
-export function ElectricArc({ start, end, duration }: { start: Vector3; end: Vector3; duration: number }) {
+export function ElectricArc({ start, end, duration, color }: { start: Vector3; end: Vector3; duration: number; color?: string }) {
   const mesh = useRef<Mesh>(null);
   const age = useRef(0);
   const geometry = useMemo(() => {
@@ -48,7 +48,7 @@ export function ElectricArc({ start, end, duration }: { start: Vector3; end: Vec
     positions.needsUpdate = true;
     geometry.computeVertexNormals();
   });
-  return <mesh ref={mesh} geometry={geometry} frustumCulled={false} raycast={() => undefined}>
-    <ToonMaterial color="#9beaff" emissive="#219bff" emissiveIntensity={5} toneMapped={false} transparent opacity={.9} blending={AdditiveBlending} depthWrite={false} side={2} />
+  return <mesh name="laser-electric-arc" ref={mesh} geometry={geometry} frustumCulled={false} raycast={() => undefined}>
+    <ToonMaterial color={color ?? "#9beaff"} emissive={color ?? "#219bff"} emissiveIntensity={5} toneMapped={false} transparent opacity={.9} blending={AdditiveBlending} depthWrite={false} side={2} />
   </mesh>;
 }

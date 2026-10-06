@@ -38,3 +38,43 @@ heel preserve its distinctive shapes. These models remain procedural and toon-sh
 The blaster includes a matching padded glove. Idle breathing and speed-driven walk/sprint sway move the hand and weapon together; reduced motion disables these offsets. A text-free four-tick crosshair becomes cyan corner brackets only over an eligible light, using the same host-owned authorization guards as firing.
 
 Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.
+
+Desktop secondary fire places a blue portal, then a gold portal, alternating only
+on successful placement. Aim at a broad flat wall or floor, right-click with the
+mouse captured, and walk into either linked oval to emerge from its partner.
+Walls align the oval to standing height. The whole oval must fit; ceilings, devices,
+furniture, overlapping portals and unsupported/blocked exits are rejected. The
+surfaces are opaque toon energy membranes, with no mirrors or remote scene renders.
+Stowing the gun or leaving Walk removes the pair; nothing is persisted.
+
+`src/portals/` owns the feature: placement geometry, alternating pair state,
+traversal, desktop input, the coordinating hook, and the procedural surface each
+have a dedicated file. Its only movement dependency is the injected generic
+`WalkToolNavigation`: `resolveLanding` checks supported feet positions;
+`teleport` rechecks the exit and atomically commits position, facing and floor.
+The engine owns collision and resets jump/velocity state; it knows nothing about
+portal colors, triggers or pairing. Traversal pauses when controls are unavailable,
+requires entry from the front, and blocks the arrival portal until the player moves
+clear. This version uses grounded travel, without momentum/flinging or ceiling portals.
+
+Successful portal shots reuse the primary electric arc/pulse/impact through
+`useLaserShots`, tinted with the same blue or gold as the new portal. They do not
+leave a scorch on its membrane. `usePortalAppearance` owns a 550 ms bloom from zero,
+a brief overshoot and settling rim, plus an 800 ms expanding energy ripple.
+Replacing a portal replays the arrival. Reduced motion suppresses the zap and
+arrival movement while preserving the fully formed portal and travel.
+
+Portal travel uses a package-local transition coordinator: a 95 ms energy veil
+covers one rendered frame before relocation, then reveals the exit over 320 ms.
+A bounded 3° field-of-view easing adds a slight sense of passage; no camera path
+crosses intervening geometry. Cancellation restores the original lens and discards
+pending travel. The controller revalidates the exit at the covered cut; a rejected
+exit reveals the original view. Reduced motion relocates immediately with a gentle
+120 ms tint and no lens/ring movement. Transition timing, the React hook and the
+screen-space veil each live in a dedicated portal file; the engine is unchanged.
+
+The desktop crosshair shows a zap glyph on the left and a portal glyph on the
+right, each with its corresponding mouse button highlighted. The portal glyph
+uses the next placement's blue/gold color; successful placement updates it from
+the pair's own alternating state. These cues contain no visible text, preserve
+the central light-target highlight, and are omitted on touch devices.

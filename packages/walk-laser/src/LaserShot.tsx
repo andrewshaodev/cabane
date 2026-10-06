@@ -6,7 +6,7 @@ import { ElectricArc } from "./ElectricArc";
 import { ElectricScorch } from "./ElectricScorch";
 import { sampleLaserPulse } from "./laser-pulse";
 
-export interface ShotVisual { id: number; start: Vector3; end: Vector3; hit: boolean; normal?: Vector3; createdAt?: number; }
+export interface ShotVisual { id: number; start: Vector3; end: Vector3; hit: boolean; normal?: Vector3; createdAt?: number; color?: string; scorch?: boolean; }
 const noRaycast = () => undefined;
 
 export function LaserShot({ shot }: { shot: ShotVisual }) {
@@ -41,24 +41,24 @@ export function LaserShot({ shot }: { shot: ShotVisual }) {
   const surfaceRotation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), shot.normal ?? path.direction.clone().negate());
   const surfacePoint = shot.end.clone().addScaledVector(shot.normal ?? path.direction.clone().negate(), .004);
   return <group userData={{ walkToolVisual: true }}>
-    <ElectricArc start={shot.start} end={shot.end} duration={.3} />
-    {shot.hit && <group position={surfacePoint.toArray()} quaternion={surfaceRotation.toArray()}><ElectricScorch delay={0} lifetime={3.2} /></group>}
+    <ElectricArc start={shot.start} end={shot.end} duration={.3} color={shot.color} />
+    {shot.hit && shot.scorch !== false && <group position={surfacePoint.toArray()} quaternion={surfaceRotation.toArray()}><ElectricScorch delay={0} lifetime={3.2} /></group>}
     <group name="laser-pulse" ref={pulse} quaternion={path.rotation.toArray()} visible={false}>
       <mesh raycast={noRaycast} scale={[0.02, 0.02, 0.5]}>
-        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color="#f5ffff" emissive="#caffff" emissiveIntensity={4} toneMapped={false} transparent blending={AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color="#f5ffff" emissive={shot.color ?? "#caffff"} emissiveIntensity={4} toneMapped={false} transparent blending={AdditiveBlending} depthWrite={false} />
       </mesh>
       <mesh raycast={noRaycast} scale={[0.06, 0.06, 0.55]}>
-        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color="#41dfff" emissive="#41dfff" emissiveIntensity={2} toneMapped={false} transparent opacity={0.22} blending={AdditiveBlending} depthWrite={false} />
+        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color={shot.color ?? "#41dfff"} emissive={shot.color ?? "#41dfff"} emissiveIntensity={2} toneMapped={false} transparent opacity={0.22} blending={AdditiveBlending} depthWrite={false} />
       </mesh>
     </group>
     <group name="laser-impact" ref={impact} position={surfacePoint.toArray()} quaternion={surfaceRotation.toArray()} visible={false}>
-      <mesh raycast={noRaycast}><icosahedronGeometry args={[0.045, 1]} /><ToonMaterial color="#d5f6ff" emissive="#168fff" emissiveIntensity={3} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
-      <mesh ref={ring} raycast={noRaycast}><torusGeometry args={[0.052, 0.006, 5, 20]} /><ToonMaterial color="#6dcaff" emissive="#6dcaff" emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
-      <mesh userData={{ glowOpacity: 0.24 }} raycast={noRaycast}><sphereGeometry args={[0.09, 8, 6]} /><ToonMaterial color="#47eaff" emissive="#47eaff" emissiveIntensity={2} toneMapped={false} transparent opacity={0.24} depthWrite={false} blending={AdditiveBlending} /></mesh>
+      <mesh raycast={noRaycast}><icosahedronGeometry args={[0.045, 1]} /><ToonMaterial color={shot.color ?? "#d5f6ff"} emissive={shot.color ?? "#168fff"} emissiveIntensity={3} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
+      <mesh ref={ring} raycast={noRaycast}><torusGeometry args={[0.052, 0.006, 5, 20]} /><ToonMaterial color={shot.color ?? "#6dcaff"} emissive={shot.color ?? "#6dcaff"} emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
+      <mesh userData={{ glowOpacity: 0.24 }} raycast={noRaycast}><sphereGeometry args={[0.09, 8, 6]} /><ToonMaterial color={shot.color ?? "#47eaff"} emissive={shot.color ?? "#47eaff"} emissiveIntensity={2} toneMapped={false} transparent opacity={0.24} depthWrite={false} blending={AdditiveBlending} /></mesh>
       {Array.from({ length: 7 }, (_, index) => {
         const angle = index * Math.PI * 2 / 7;
         return <mesh key={index} position={[Math.cos(angle) * 0.07, Math.sin(angle) * 0.07, -0.008]} rotation={[0, 0, angle - Math.PI / 2]} raycast={noRaycast}>
-          <coneGeometry args={[0.009, 0.06, 4]} /><ToonMaterial color="#d5f6ff" emissive="#218fff" emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} />
+          <coneGeometry args={[0.009, 0.06, 4]} /><ToonMaterial color={shot.color ?? "#d5f6ff"} emissive={shot.color ?? "#218fff"} emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} />
         </mesh>;
       })}
     </group>

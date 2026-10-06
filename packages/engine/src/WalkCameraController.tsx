@@ -1,3 +1,5 @@
+import { useWalkToolNavigation } from "./walk-tools/useWalkToolNavigation";
+import type { WalkToolNavigation } from "./walk-tools";
 import { passableOpeningIds, type OpeningPositions } from "./opening-pose";
 import { prepareWalkColliders } from "./navigation/prepared-walk-colliders";
 import { moveBuildingWalker, prepareBuildingWalk, type BuildingWalkPoint } from "./stairs/stair-navigation";
@@ -46,6 +48,7 @@ export function WalkCameraController({
   floor,
   building, registries, elevation = 0, onFloorChange,
   poseRef,
+  toolNavigationRef,
   movementInputRef,
   sprintInputRef,
   jumpRequestRef,
@@ -65,6 +68,7 @@ export function WalkCameraController({
   onFloorChange?: (id: string) => void;
 
   poseRef: MutableRefObject<WalkPose>;
+  toolNavigationRef?: MutableRefObject<WalkToolNavigation | null>;
   movementInputRef: MutableRefObject<StickVector>;
   sprintInputRef?: MutableRefObject<boolean>;
   jumpRequestRef?: MutableRefObject<boolean>;
@@ -117,6 +121,10 @@ export function WalkCameraController({
     });
     furniture.current = next;
   }, [box, scene, floor.id, elevation]);
+
+  useWalkToolNavigation({ building, floor, scene, box, toolNavigationRef, poseRef, cameraRef,
+    walker, velocity, lookVelocity, lookDeltaRef, jumpHeight, jumpVelocity, bobWeight, jumpRequestRef,
+    lastRoomId, onFloorChange, onRoomChange, invalidate });
 
   useEffect(() => {
     if (!cameraRef.current) return;

@@ -1,0 +1,27 @@
+.walk-portal-transit {
+  --portal-color: #42cfff;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at center,
+    color-mix(in srgb, var(--portal-color) 24%, #111925) 0%,
+    color-mix(in srgb, var(--portal-color) 48%, #111925) 65%,
+    #111925 100%);
+}
+.walk-portal-transit__iris {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(58vh, 65vw);
+  height: min(88vh, 90vw);
+  border: 3px solid var(--portal-color);
+  border-radius: 50%;
+  opacity: .5;
+  transform: translate(-50%, -50%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .walk-portal-transit__iris { display: none !important; }
+}

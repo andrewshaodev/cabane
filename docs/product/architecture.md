@@ -54,3 +54,11 @@ first equipped. The engine, catalog, and home never import it. Removing that
 registration and dependency removes the feature; stored `walk-tool` shortcuts
 remain readable and render as unavailable. The generic shortcut schema retains
 unknown tool IDs to preserve portable projects between hosts with different tools.
+
+Walk tools also receive `WalkToolNavigation`, a generic injected relocation
+interface. `resolveLanding` finds a clear supported floor near a world-space feet
+position; `teleport` revalidates that landing and updates the authoritative walker,
+camera, selected floor and room, resetting velocity and jump state. The controller's
+adapter lives in `walk-tools/useWalkToolNavigation.ts`; support/collision resolution
+lives in `navigation/walk-landing.ts`. Portal placement, pairing, traversal, input,
+and rendering remain private to `walk-laser/src/portals/`.

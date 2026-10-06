@@ -1,3 +1,4 @@
+import type { WalkToolNavigation } from "./walk-tools";
 import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate-walk-target";
 import { connectedCanvasEvents } from "./connected-canvas-events";
 import { useCabaneDom } from "./CabaneDom";
@@ -64,6 +65,7 @@ import { useDashboardController } from './useDashboardController';
 
 export function ValidatedDashboardView(props: Parameters<typeof useDashboardController>[0]) {
   const dom = useCabaneDom();
+  const toolNavigationRef = useRef<WalkToolNavigation | null>(null);
   const orbitControls = useRef<OrbitControlsImpl | null>(null);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
@@ -171,6 +173,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
 
                       floor={floor}
                       poseRef={poseRef}
+                      toolNavigationRef={toolNavigationRef}
                       movementInputRef={movementInputRef}
                       sprintInputRef={sprintInputRef}
                       jumpRequestRef={jumpRequestRef}
@@ -216,6 +219,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                   /></SceneNightContext.Provider>
                   {equippedTool && <Suspense fallback={null}><equippedTool.Scene enabled={toolInputEnabled} pointerLocked={walkPointerLocked}
                     coarsePointer={coarsePointer} reducedMotion={reducedMotion}
+                    navigation={{
+                      resolveLanding: position => toolNavigationRef.current?.resolveLanding(position) ?? null,
+                      teleport: (landing, facing) => toolInputEnabled && walkPointerLocked
+                        && (toolNavigationRef.current?.teleport(landing, facing) ?? false),
+                    }}
                     canActivateTarget={target => toolInputEnabled && canActivateWalkTarget(target, resolvedBindings, runtime.canMutate)}
                     activateTarget={target => toolInputEnabled
                       ? activateWalkTarget(target, resolvedBindings, runtime)

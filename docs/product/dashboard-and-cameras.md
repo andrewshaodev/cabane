@@ -171,3 +171,25 @@ the blaster and the existing sculpted action icons; it is never a scene texture.
 The blaster includes a matching padded glove. Idle breathing and speed-driven walk/sprint sway move the hand and weapon together; reduced motion disables these offsets. A text-free four-tick crosshair becomes cyan corner brackets only over an eligible light, using the same host-owned authorization guards as firing.
 
 Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.
+
+With Laser equipped and mouse capture active on desktop, right-click alternates
+between a blue and gold portal. A linked pair transports the walker from either
+entrance to the other exit, including between floors when both landings are clear.
+Portals fit on broad flat walls or supported floors; wall portals align to standing
+height. Invalid or overlapping placements leave the pair and next color unchanged.
+The opaque energy surfaces do not render the destination. Arrival protection avoids
+immediate return trips, and controls/overlays pause traversal. Stowing Laser or
+leaving Walk clears the pair. This first version is grounded travel: no ceiling
+portals, retained launch momentum or flinging. Touch keeps its existing Fire action.
+Successful portal placement fires the same electrical zap as primary fire, tinted
+blue or gold to match its destination. Each portal blooms from zero with a brief
+overshoot, settling rim and dissipating energy ripple; replacement replays it.
+Reduced motion shows the completed portal immediately without the zap or bloom.
+Travel between portals briefly covers the view in energy before the position change,
+then eases open in the exit portal's color, with a small bounded lens effect.
+Pausing or stowing cancels pending travel and restores the camera. Reduced motion
+keeps only a short gentle tint and skips the lens/ring animation.
+The desktop gun crosshair includes text-free primary/secondary fire cues: a left
+zap glyph and right portal glyph, with matching highlighted mouse buttons. The
+portal cue shows the next blue/gold placement color. Touch retains its central
+reticle and Fire control.

@@ -1,9 +1,4 @@
 .walk-laser { position: absolute; inset: 0; pointer-events: none; color: #fffdf3; font-family: Roboto, sans-serif; }
-.walk-laser__sight { position: absolute; top: 50%; left: 50%; width: 32px; height: 32px; transform: translate(-50%, -50%); color: #fffdf3; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; filter: drop-shadow(0 1px 1px #15242c); }
-.walk-laser__sight[data-target="true"] { color: #51e8f3; }
-.walk-laser__lock { opacity: 0; }
-.walk-laser__sight[data-target="true"] .walk-laser__lock { opacity: 1; }
-.walk-laser__sight[data-target="true"] .walk-laser__ticks { opacity: 0; }
 .walk-laser__fire { position: absolute; right: 32px; bottom: 190px; width: 68px; height: 68px; border: 2px solid #203d39; border-radius: 50%; color: #203d39; background: #efba65; font: 700 15px Roboto, sans-serif; pointer-events: auto; touch-action: manipulation; }
 .walk-laser__fire:hover { background: #ffcf87; }
 .walk-laser__fire:active { background: #dda551; }

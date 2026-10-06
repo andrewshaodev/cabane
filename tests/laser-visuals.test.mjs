@@ -50,6 +50,22 @@ await withModules(async load => {
       assert.equal(scorch.visible, false, 'scorch fades completely');
     } finally { await renderer.unmount(); }
   });
+  test('portal zaps reuse the electrical arc and impact with the selected color, without burning the portal', async () => {
+    for (const color of ['#42cfff','#efa632']) {
+      const renderer = await create(React.createElement(LaserShot, {shot:{id:1,start:new Vector3(),end:new Vector3(0,0,-2),hit:true,color,scorch:false}}));
+      try {
+        const arc=renderer.scene.findByProps({name:'laser-electric-arc'}).instance;
+        assert.equal('#'+arc.material.emissive.getHexString(),color);
+        assert.equal(renderer.scene.findAllByProps({name:'electric-scorch'}).length,0);
+        await renderer.advanceFrames(1,1/60);assert.equal(arc.visible,true);
+        await renderer.advanceFrames(11,1/60);
+        const impact=renderer.scene.findByProps({name:'laser-impact'}).instance;
+        assert.equal(impact.visible,true);
+        assert.equal('#'+impact.children[0].material.emissive.getHexString(),color);
+        await renderer.advanceFrames(40,1/60);assert.equal(arc.visible,false);assert.equal(impact.visible,false);
+      } finally {await renderer.unmount();}
+    }
+  });
   test('a miss has no impact burst', async () => {
     const renderer = await create(React.createElement(LaserShot, {shot:{id:1,start:new Vector3(),end:new Vector3(0,0,-2),hit:false}}));
     try {

@@ -3,23 +3,26 @@ import { Html } from "@react-three/drei";
 import { createPortal, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Group, Matrix3, Raycaster, Scene, Vector2, Vector3, type PerspectiveCamera } from "three";
+import { GunPortals } from "./portals";
+import { LaserCrosshair } from "./LaserCrosshair";
+import type { PortalColor } from "./portals/portal-contract";
 import { LaserGun } from "./LaserGun";
-import { LaserShot, type ShotVisual } from "./LaserShot";
+import { useLaserShots } from "./useLaserShots";
+import { LaserShot } from "./LaserShot";
 import { createShotGate } from "./shot-gate";
 import "./laser.css";
 
-export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMotion, canActivateTarget, activateTarget }: WalkToolProps) {
+export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMotion, navigation, canActivateTarget, activateTarget }: WalkToolProps) {
   const { camera, scene } = useThree();
   const dom = useCabaneDom();
   const gun = useRef<Group>(null);
   const muzzle = useRef<Group>(null);
-  const shotSequence = useRef(0);
   const weaponScene = useMemo(() => new Scene(), []);
-  const [shots, setShots] = useState<ShotVisual[]>([]);
+  const { shots, recoil, emitShot } = useLaserShots(muzzle, camera, reducedMotion);
   const shot = shots.at(-1);
+  const [nextPortal, setNextPortal] = useState<PortalColor>("blue");
   const [aim, setAim] = useState<string | null>(null);
   const lastAim = useRef<string | null>(null);
-  const recoil = useRef(0);
   const motion = useRef({ previous: camera.position.clone(), speed: 0, phase: 0, time: 0 });
   const gate = useMemo(() => createShotGate(), []);
   const raycaster = useMemo(() => new Raycaster(), []);
@@ -27,11 +30,6 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
   const ready = enabled && (coarsePointer || pointerLocked);
   const readyRef = useRef(ready);
   readyRef.current = ready;
-  useEffect(() => {
-    if (!shots.length) return;
-    const timer = window.setTimeout(() => setShots(previous => previous.filter(item => performance.now() - (item.createdAt ?? 0) < 3400)), 250);
-    return () => window.clearTimeout(timer);
-  }, [shots]);
 
   useFrame((_, delta) => {
     const pose = motion.current;
@@ -79,14 +77,12 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
       raycaster.setFromCamera(center, camera);
       const { hit, target } = raycastWalkScene(raycaster, scene);
       const end = hit?.point.clone() ?? raycaster.ray.at(30, new Vector3());
-      muzzle.current?.updateWorldMatrix(true, false);
-      const start = muzzle.current?.getWorldPosition(new Vector3()) ?? camera.position.clone();
-      if (!reducedMotion) { const normal = hit?.face?.normal.clone().applyMatrix3(new Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize();
-        if (normal && normal.dot(raycaster.ray.direction) > 0) normal.negate();
-        setShots(previous => [...previous.slice(-11), { id: ++shotSequence.current, start, end, hit: Boolean(hit), normal, createdAt: performance.now() }]); recoil.current = 0.055; }
+      const normal = hit?.face?.normal.clone().applyMatrix3(new Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize();
+      if (normal && normal.dot(raycaster.ray.direction) > 0) normal.negate();
+      emitShot({ end, hit: Boolean(hit), normal });
       if (target) await activateTarget(target);
     });
-  }, [activateTarget, camera, center, gate, raycaster, reducedMotion, scene]);
+  }, [activateTarget, camera, center, gate, raycaster, emitShot, scene]);
 
   useEffect(() => {
     const pointer = (event: PointerEvent) => {
@@ -103,18 +99,20 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
     return () => { dom.events.removeEventListener("pointerdown", pointer); dom.events.removeEventListener("keydown", keyboard); };
   }, [coarsePointer, dom.events, dom.root, fire]);
 
+  const portalShot = useCallback((end: Vector3, normal: Vector3, color: string, nextColor: PortalColor) => {
+    setNextPortal(nextColor);
+    emitShot({ end, normal, color, hit: true, scorch: false });
+  }, [emitShot]);
+
   return <>
+    <GunPortals active={ready && !coarsePointer} navigation={navigation} reducedMotion={reducedMotion} onPlaced={portalShot} />
     {createPortal(<><ambientLight intensity={1.1} /><directionalLight position={[-2, 4, 3]} intensity={2.2} />
       <group ref={gun}><LaserGun muzzleRef={muzzle} shotId={shot?.id ?? 0} /></group></>, weaponScene)}
     {shots.map(item => <LaserShot key={item.id} shot={item} />)}
     {/* Screen-space HUD remains visible regardless of the world origin behind the camera. */}
     <Html onOcclude={() => undefined} fullscreen calculatePosition={(_, __, size) => [size.width / 2, size.height / 2]} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
       {enabled && <div className="walk-laser" data-ready={ready}>
-        <svg className="walk-laser__sight" data-target={Boolean(aim)} aria-hidden="true" viewBox="0 0 32 32">
-          <path className="walk-laser__ticks" d="M16 3v6 M16 23v6 M3 16h6 M23 16h6" />
-          <path className="walk-laser__lock" d="M7 11V7h4 M21 7h4v4 M25 21v4h-4 M11 25H7v-4" />
-          <circle cx="16" cy="16" r="1.3" fill="currentColor" stroke="none" />
-        </svg>
+        <LaserCrosshair target={Boolean(aim)} desktop={!coarsePointer} ready={ready} nextPortal={nextPortal} />
         {coarsePointer && <button type="button" className="walk-laser__fire" disabled={!ready} onClick={fire} aria-label="Fire laser">Fire</button>}
       </div>}
     </Html>
