@@ -67,6 +67,8 @@ export type ItemPlacement =
     };
 
 interface SceneItemBase {
+  /** Optional six-digit hex fabric override; omitted preserves the model palette. */
+  color?: string;
   /** Omitted values use the model's first variant. */
   variant?: string;
   id: string;

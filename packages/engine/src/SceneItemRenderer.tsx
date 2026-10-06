@@ -207,6 +207,7 @@ function DeviceSceneItem({
       <DeviceHoverContext.Provider value={hovered}>
         <Component
           variant={resolveModelVariant(definition, item.variant).id}
+          {...omitUndefinedProperties({ color: item.color })}
           slot={binding}
           {...omitUndefinedProperties({ state: state })}
           {...omitUndefinedProperties({
@@ -297,6 +298,7 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
           <FurnishingContent
             component={definition.component}
             variant={resolveModelVariant(definition, item.variant).id}
+            {...omitUndefinedProperties({ color: item.color })}
             size={item.size}
             entityStatesBySlotId={entityStatesBySlotId}
             reducedMotion={reducedMotion}

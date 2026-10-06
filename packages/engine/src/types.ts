@@ -583,6 +583,7 @@ export interface RoomFurnishingsProps {
 }
 
 export interface HomeDeviceModelProps {
+  color?: string;
   variant?: string;
   slot: DeviceSlotSpec;
   state?: EntityStateSnapshot;
@@ -617,6 +618,7 @@ export type HomeDeviceModelComponent = ComponentType<HomeDeviceModelProps>;
 export type HomeOpeningModelComponent = ArchitectureModelComponent;
 
 export interface SceneModelProps {
+  color?: string;
   variant?: string;
   size: readonly [number, number, number];
   entityStatesBySlotId: Readonly<Record<string, EntityStateSnapshot>>;
@@ -661,6 +663,8 @@ export interface SceneModelVariant {
 }
 
 export interface SceneModelEditorDescriptor {
+  /** Enables the fabric color picker; omission keeps a model's original palette. */
+  defaultColor?: string;
   /** Ordered choices sharing size, placement, and bindings. First is the default. */
   variants?: readonly SceneModelVariant[];
   defaultRoomType: RoomType;

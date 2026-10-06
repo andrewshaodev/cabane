@@ -5,6 +5,7 @@ export const singleWindowCurtainDefinition = defineFurnishingModel({
   defaultRoomType: "living-room",
   component: SingleWindowCurtain,
   label: "Single window curtain",
+  defaultColor: "#d8c8ad",
   category: "Decor",
   variants: [
     { id: "left", label: "Gathered left" },

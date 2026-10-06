@@ -43,6 +43,11 @@ export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
     beginTransaction: useCallback(() => dispatch({ type: "begin-transaction" }), []),
     commitTransaction: useCallback(() => dispatch({ type: "commit-transaction" }), []),
     cancelTransaction: useCallback(() => dispatch({ type: "cancel-transaction" }), []),
+    updateColor: useCallback(
+      (id: string, color: string | null, definition: SceneModelEditorDescriptor) =>
+        dispatch({ type: "update-color", id, color, definition }),
+      [],
+    ),
     updateVariant: useCallback(
       (id: string, variant: string, definition: SceneModelEditorDescriptor) =>
         dispatch({ type: "update-variant", id, variant, definition }),

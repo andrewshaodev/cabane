@@ -672,6 +672,7 @@ const stableFurnishingDefinitions = {
   "three-seat-sofa": defineFurnishingModel({
     component: ThreeSeatSofa,
     label: "3-seat sofa",
+    defaultColor: "#e2d5bf",
     category: "Seating",
     defaultRoomType: "living-room",
     defaultSize: THREE_SEAT_SOFA_SIZE,

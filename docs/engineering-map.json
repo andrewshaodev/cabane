@@ -22,6 +22,7 @@
     "spec": "docs/product/workspace.md",
     "owners": [
       "packages/engine/src/home-project/schema.ts",
+      "packages/engine/src/home-project/schema-scene-item.ts",
       "packages/engine/src/home-project/workspace-repository.ts",
       "apps/web/src/workspaces/workspace-sync-coordinator.ts",
       "packages/engine/src/home-project/schema-json-values.ts",
@@ -96,7 +97,7 @@
         "symbols": ["useFurnishingEditor"]
       }
     ],
-    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history.",
+    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Optional fabric colors follow item history and persistence; model defaultColor enables the picker.",
     "checks": ["test:unit", "test:browser", "verify:furnishing-surfaces", "fixture:verify:room"]
   },
   {

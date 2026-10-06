@@ -86,3 +86,11 @@ Implementation: [catalog UI](../../apps/web/src/editor-preview/furnish/catalog/A
 [item renderer](../../packages/engine/src/SceneItemRenderer.tsx).
 
 [Back to product overview](../../PRODUCT_SPEC.md).
+
+Curtain presets (single-window, children's paired, and motorized), the 3-seat
+sofa, and the sectional sofa offer a Fabric color picker and Reset color in
+Arrange Details. A six-digit hex `color` override is optional item data and
+survives undo/redo, duplication, Apply, and project import/export. Omission
+preserves each model's original multi-tone palette. Overrides recolor fabric;
+tracks, wood, motor housings, and decorative throw cushions retain their finishes.
+Only descriptors declaring `defaultColor` offer this control.

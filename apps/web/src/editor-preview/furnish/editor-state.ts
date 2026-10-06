@@ -153,6 +153,12 @@ export interface FurnishingEditorState extends EditorSnapshot {
 }
 
 export type FurnishingEditorAction =
+  | {
+      type: "update-color";
+      id: string;
+      color: string | null;
+      definition: SceneModelEditorDescriptor;
+    }
   | { type: "add-item"; item: SceneItemSpec }
   | { type: "select"; id: string | null }
   | { type: "begin-transaction" }
@@ -279,6 +285,18 @@ export const furnishingEditorReducer = (
       };
     case "cancel-transaction":
       return state.transaction ? { ...state, ...state.transaction, transaction: null } : state;
+    case "update-color":
+      if (
+        !action.definition.defaultColor ||
+        (action.color !== null && !/^#[0-9a-f]{6}$/i.test(action.color))
+      )
+        return state;
+      return updateItem(state, action.id, (item) => {
+        const next = { ...item };
+        if (action.color === null) delete next.color;
+        else next.color = action.color;
+        return next;
+      });
     case "update-variant":
       if (!modelVariants(action.definition).some((variant) => variant.id === action.variant))
         return state;
