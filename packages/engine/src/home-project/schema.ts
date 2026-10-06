@@ -4,40 +4,9 @@ import { keys, record, array, string, finite, point, polygon } from "./schema-js
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
-import { FLOOR_PATTERN_PRESET_IDS } from "../types";
+import { floorFinish } from "./schema-floor-finish";
 import type { HomeProject, LegacyHomeProject } from "./types";
 import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
-
-const FLOOR_PRESETS = new Set<string>(FLOOR_PATTERN_PRESET_IDS);
-
-const floorFinish = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  if (candidate.kind === "solid") {
-    keys(candidate, ["kind", "color"], path, issues);
-    string(candidate.color, `${path}.color`, issues);
-    return;
-  }
-  if (candidate.kind === "preset") {
-    keys(candidate, ["kind", "preset"], path, issues);
-    if (!FLOOR_PRESETS.has(String(candidate.preset))) {
-      addProjectIssue(
-        issues,
-        "project.floor-preset",
-        `${path}.preset`,
-        "Floor preset is not supported.",
-      );
-    }
-    return;
-  }
-  keys(candidate, ["kind"], path, issues);
-  addProjectIssue(
-    issues,
-    "project.floor-finish-kind",
-    `${path}.kind`,
-    "Floor finish kind must be solid or preset.",
-  );
-};
 
 const floorZone = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   const candidate = record(value, path, issues);

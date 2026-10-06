@@ -283,3 +283,10 @@ one undoable home-wide edit; Cancel or Escape discards the preview. Other editor
 controls and shortcuts are suspended during the session. The plan temporarily
 fits inside the dial and restores its previous camera pose on exit. The setting
 uses ordinary autosave, import/export and Save; only Save publishes it to Home.
+
+Construct’s floor palette includes Square tile, Rectangular tile (staggered), and
+Checkerboard tile. Their Tile color picker changes the ceramic color while keeping
+neutral grout (and the checkerboard’s cream alternate tiles). Reset color restores
+the preset default. Optional six-digit hex `color` on these preset finishes survives
+history, draft reload, Save, duplication, and import/export; omitted color preserves
+existing projects. Patterns are generated in memory and rendered with toon materials.

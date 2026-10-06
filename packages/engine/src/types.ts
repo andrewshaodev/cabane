@@ -105,6 +105,9 @@ export const FLOOR_PATTERN_PRESET_IDS = [
   "terrazzo",
   "dark-walnut",
   "limestone",
+  "square-tile",
+  "subway-tile",
+  "checkerboard-tile",
   "encaustic-tile",
   "black-white-patchwork",
   "blue-quatrefoil-tile",
@@ -121,7 +124,8 @@ export const FLOOR_PATTERN_PRESET_IDS = [
 export type FloorPatternPresetId = (typeof FLOOR_PATTERN_PRESET_IDS)[number];
 
 export type FloorFinishSpec =
-  { kind: "solid"; color: string } | { kind: "preset"; preset: FloorPatternPresetId };
+  | { kind: "solid"; color: string }
+  | { kind: "preset"; preset: FloorPatternPresetId; color?: string };
 
 export interface FloorFinishZoneSpec {
   id: string;

@@ -1,3 +1,4 @@
+import { paintCeramicTile } from "./ceramic-tile";
 import { paintBlueQuatrefoilTile } from "./blue-quatrefoil-tile";
 import { paintBlackWhitePatchwork } from "./black-white-patchwork";
 import { paintDirt } from "./dirt";
@@ -18,6 +19,7 @@ export interface FloorFinishPreset {
   label: string;
   representativeColor: string;
   repeatMeters: number;
+  configurableColor?: boolean;
 }
 
 export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
@@ -39,6 +41,27 @@ export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
   { id: "terrazzo", label: "Terrazzo", representativeColor: "#cabfa9", repeatMeters: 0.7 },
   { id: "dark-walnut", label: "Dark walnut", representativeColor: "#765139", repeatMeters: 1.2 },
   { id: "limestone", label: "Limestone", representativeColor: "#cbc3ad", repeatMeters: 1.2 },
+  {
+    id: "square-tile",
+    label: "Square tile",
+    representativeColor: "#dedbd2",
+    repeatMeters: 1.2,
+    configurableColor: true,
+  },
+  {
+    id: "subway-tile",
+    label: "Rectangular tile",
+    representativeColor: "#c5d4cd",
+    repeatMeters: 1.2,
+    configurableColor: true,
+  },
+  {
+    id: "checkerboard-tile",
+    label: "Checkerboard tile",
+    representativeColor: "#545e68",
+    repeatMeters: 1.2,
+    configurableColor: true,
+  },
   {
     id: "encaustic-tile",
     label: "Encaustic tile",
@@ -266,9 +289,15 @@ export const paintFloorPattern = (
   context: CanvasRenderingContext2D,
   id: FloorPatternPresetId,
   variant: FloorPatternVariant,
+  color?: string,
 ) => {
   const quiet = variant === "plan";
   switch (id) {
+    case "square-tile":
+    case "subway-tile":
+    case "checkerboard-tile":
+      paintCeramicTile(context, id, color ?? floorFinishPreset(id).representativeColor);
+      break;
     case "light-dirt":
     case "dark-dirt":
       paintDirt(context, id === "dark-dirt", quiet);
@@ -382,7 +411,9 @@ export const resolveRoomFloorFinish = (room: Pick<RoomSpec, "floorFinish">): Flo
   room.floorFinish ?? DEFAULT_ROOM_FLOOR_FINISH;
 
 export const floorFinishRepresentativeColor = (finish: FloorFinishSpec) =>
-  finish.kind === "solid" ? finish.color : floorFinishPreset(finish.preset).representativeColor;
+  finish.kind === "solid"
+    ? finish.color
+    : (finish.color ?? floorFinishPreset(finish.preset).representativeColor);
 
 if (FLOOR_FINISH_PRESETS.length !== FLOOR_PATTERN_PRESET_IDS.length) {
   throw new Error("Floor finish preset registry is incomplete.");

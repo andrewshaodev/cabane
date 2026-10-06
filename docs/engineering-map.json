@@ -28,7 +28,8 @@
       "packages/engine/src/home-project/schema-entity-slot.ts",
       "packages/engine/src/home-project/project-record-stores.ts",
       "packages/engine/src/imported-models/asset-storage.ts",
-      "packages/engine/src/sha256-digest.ts"
+      "packages/engine/src/sha256-digest.ts",
+      "packages/engine/src/home-project/schema-floor-finish.ts"
     ],
     "interfaces": [
       {
@@ -206,7 +207,8 @@
       "packages/engine/src/lighting.ts",
       "packages/engine/src/solar-shadow-frame.ts",
       "packages/engine/src/hedges",
-      "packages/engine/src/boundaries"
+      "packages/engine/src/boundaries",
+      "packages/engine/src/floor-finishes"
     ],
     "interfaces": [
       {
@@ -219,7 +221,7 @@
         ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences.",
+    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout.",
     "checks": [
       "test:unit",
       "verify:policy",

@@ -69,7 +69,7 @@ function FinishSurface({
     [cutPools, floor, polygon, repeatMeters, apertures],
   );
   useEffect(() => () => geometry.dispose(), [geometry]);
-  const texture = finish.kind === "preset" ? textureSet.get(finish.preset) : null;
+  const texture = finish.kind === "preset" ? textureSet.get(finish.preset, finish.color) : null;
   const color = floorFinishRepresentativeColor(finish);
   const press = useRef<{
     pointerId: number;
