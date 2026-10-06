@@ -58,6 +58,15 @@ import their internal files.
   multiple models reuse an implementation, extract it into a narrowly named
   component or module that states the concrete responsibility it owns.
 
+## Source size and responsibility
+
+- Production TypeScript files have an ESLint limit of 500 nonblank, noncomment
+  lines. Existing oversized files have fixed ceilings in `eslint.config.mjs`;
+  lower or remove their ceilings when refactoring them.
+- Keep each module focused on one responsibility behind a small interface.
+  Extract cohesive behavior rather than splitting code solely to meet the count.
+  Fix a size failure by improving the module, not by raising its ceiling.
+
 ## Task routing
 
 `$bootstrap-cabane`, `$build-floor-layout`, and `$equip-room` are skills we
