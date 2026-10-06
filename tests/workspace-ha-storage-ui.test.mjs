@@ -30,5 +30,8 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.getByText("Set a Home Assistant address in Connect before saving this workspace.").waitFor();
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
     await page.getByRole("heading", { name: "Restore from Home Assistant" }).waitFor();
+    await page.getByLabel("Home Assistant address").fill("https://ha.example");
+    await page.reload();
+    assert.equal(await page.getByLabel("Home Assistant address").inputValue(), "https://ha.example");
   } finally { await browser?.close(); await server.close(); }
 });

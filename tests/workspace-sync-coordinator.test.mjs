@@ -62,3 +62,16 @@ test("clean remote change loads; dual change and deletion conflict", async () =>
   f.deleteRemote();
   assert.equal((await f.coordinator.reconcile("home", "https://ha")).kind, "conflict");
 });
+
+test("manual restore requires explicit conflict resolution for edited local copy", async () => {
+  const f = fixture();
+  await f.coordinator.manualSave("home", "https://ha");
+  f.setLocal("unsaved edit");
+  f.setRemote("HA edit");
+  assert.equal((await f.coordinator.manualRestore("home", "https://ha")).kind, "conflict");
+  assert.equal(f.local.record.value, "unsaved edit");
+  assert.equal((await f.coordinator.resolveConflict("home", "https://ha", "local", f.remote.version - 1)).kind, "conflict");
+  assert.equal(f.remote.version, 2);
+  await f.coordinator.resolveConflict("home", "https://ha", "remote");
+  assert.equal(f.local.record.value, "HA edit");
+});

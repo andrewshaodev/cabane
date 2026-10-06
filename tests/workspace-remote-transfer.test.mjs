@@ -28,6 +28,8 @@ test("sync cursor is origin scoped and restore rejects invalid data", async () =
       const original = await repository.createBlank("Remote home");
       const id = original.metadata.id;
       const backup = exportWorkspaceBackup(original.metadata, original.record);
+      const other = await repository.createBlank("Other home");
+      const otherBackup = exportWorkspaceBackup(other.metadata, other.record);
       await repository.delete(id, await repository.readRaw(id));
       const entry = await restoreRemoteWorkspace(repository, backup);
       let invalidRejected = false;
@@ -36,8 +38,13 @@ test("sync cursor is origin scoped and restore rejects invalid data", async () =
       let bareRejected = false;
       try { await restoreRemoteWorkspace(repository, JSON.stringify(entry.record.draft), entry.record.revision); }
       catch { bareRejected = true; }
-      return { sameId: entry.metadata.id === id, invalidRejected, bareRejected, unchanged: (await repository.read(id)).record.homeId === id };
+      let wrongTargetRejected = false;
+      try { await restoreRemoteWorkspace(repository, otherBackup, entry.record.revision, id); }
+      catch { wrongTargetRejected = true; }
+      return { sameId: entry.metadata.id === id, invalidRejected, bareRejected, wrongTargetRejected,
+        unchanged: (await repository.read(id)).record.homeId === id,
+        otherUnchanged: (await repository.read(other.metadata.id)).record.revision === other.record.revision };
     });
-    assert.deepEqual(restored, { sameId: true, invalidRejected: true, bareRejected: true, unchanged: true });
+    assert.deepEqual(restored, { sameId: true, invalidRejected: true, bareRejected: true, wrongTargetRejected: true, unchanged: true, otherUnchanged: true });
   } finally { await browser?.close(); await server.close(); }
 });

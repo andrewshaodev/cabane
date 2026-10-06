@@ -7,6 +7,7 @@ export function restoreRemoteWorkspace(
   repository: WorkspaceRepository,
   document: string,
   expectedLocalRevision?: number,
+  expectedHomeId?: string,
 ): Promise<WorkspaceEntry> {
   let envelope: unknown;
   try { envelope = JSON.parse(document); } catch { throw new Error("The HA workspace copy is not valid JSON."); }
@@ -14,6 +15,9 @@ export function restoreRemoteWorkspace(
     throw new Error("The HA workspace copy is not a private Cabane backup.");
   }
   const imported = parseWorkspaceImport(document, ownerProjectRegistries);
+  if (expectedHomeId && imported.record.homeId !== expectedHomeId) {
+    throw new Error("The HA workspace copy belongs to a different workspace.");
+  }
   const metadata = {
     id: imported.record.homeId,
     name: imported.name,

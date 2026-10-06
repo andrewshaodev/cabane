@@ -16,15 +16,35 @@ function useCoordinator(repository: WorkspaceRepository) {
       remove: (origin, homeId) => deleteSyncCursor(window.indexedDB, origin, homeId) },
     fingerprint: entry => fingerprintWorkspace(entry.metadata, entry.record!),
     serialize: entry => exportWorkspaceBackup(entry.metadata, entry.record!),
-    restore: (document, revision) => restoreRemoteWorkspace(repository, document, revision),
+    restore: (document, revision, homeId) => restoreRemoteWorkspace(repository, document, revision, homeId),
   }), [client, repository]);
   return { runtime, client, coordinator };
 }
 
 type StorageContext = { id: string; origin: string | null; repository: WorkspaceRepository };
-const workspaceStorageContext = createContext<StorageContext | null>(null);
+type ActiveStorageContext = StorageContext & { coordinator: ReturnType<typeof createWorkspaceSyncCoordinator>; backgroundStatus: SyncStatus; refreshBackground: () => Promise<void> };
+const workspaceStorageContext = createContext<ActiveStorageContext | null>(null);
 export function WorkspaceHaStorageProvider({ id, origin, repository, hidden = false, children }: StorageContext & { hidden?: boolean; children: ReactNode }) {
-  return <workspaceStorageContext.Provider value={hidden ? null : { id, origin, repository }}>{children}</workspaceStorageContext.Provider>;
+  const { runtime, coordinator } = useCoordinator(repository);
+  const [backgroundStatus, setBackgroundStatus] = useState<SyncStatus>({ kind: "off" });
+  const refreshBackground = useCallback(async () => {
+    if (hidden || !origin) return;
+    const cursor = await readSyncCursor(window.indexedDB, origin, id);
+    if (!cursor?.enabled || runtime.status !== "connected") return;
+    try {
+      const next = await coordinator.reconcile(id, origin);
+      setBackgroundStatus(next);
+      if (next.detail === "restored") window.location.reload();
+    } catch (cause) {
+      setBackgroundStatus({ kind: "disconnected", detail: cause instanceof Error ? cause.message : "Home Assistant is unavailable." });
+    }
+  }, [hidden, origin, id, runtime.status, coordinator]);
+  useEffect(() => {
+    void refreshBackground();
+    const timer = window.setInterval(() => { void refreshBackground(); }, 3000);
+    return () => window.clearInterval(timer);
+  }, [refreshBackground]);
+  return <workspaceStorageContext.Provider value={hidden ? null : { id, origin, repository, coordinator, backgroundStatus, refreshBackground }}>{children}</workspaceStorageContext.Provider>;
 }
 export function WorkspaceHaStorageInConnect() {
   const storage = useContext(workspaceStorageContext);
@@ -32,7 +52,11 @@ export function WorkspaceHaStorageInConnect() {
 }
 
 export function WorkspaceHaStorage({ id, origin, repository }: { id: string; origin: string | null; repository: WorkspaceRepository }) {
-  const { runtime, coordinator } = useCoordinator(repository);
+  const own = useCoordinator(repository);
+  const active = useContext(workspaceStorageContext);
+  const hasBackground = Boolean(active);
+  const { runtime } = own;
+  const coordinator = active?.coordinator ?? own.coordinator;
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => { if (open) panel.current?.scrollIntoView({ block: "nearest" }); }, [open]);
@@ -57,12 +81,13 @@ export function WorkspaceHaStorage({ id, origin, repository }: { id: string; ori
   useEffect(() => {
     if (!origin) return;
     void refresh().catch(cause => setError(String(cause)));
-    const timer = window.setInterval(() => { void refresh().catch(cause => setError(String(cause))); }, 3000);
+    const timer = hasBackground ? undefined : window.setInterval(() => { void refresh().catch(cause => setError(String(cause))); }, 3000);
     return () => window.clearInterval(timer);
-  }, [origin, refresh]);
+  }, [origin, refresh, hasBackground]);
+  useEffect(() => { if (active) setStatus(active.backgroundStatus); }, [active?.backgroundStatus]);
   const run = async (operation: () => Promise<SyncStatus>, reload = false) => {
     setBusy(true); setError(null);
-    try { const next = await operation(); setStatus(next); if (next.kind !== "conflict") await refresh(); if (reload) window.location.reload(); }
+    try { const next = await operation(); setStatus(next); if (next.kind !== "conflict") await refresh(); if (reload && next.kind !== "conflict") window.location.reload(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : "Home Assistant storage is unavailable."); void refresh(); }
     finally { setBusy(false); }
   };
@@ -71,8 +96,10 @@ export function WorkspaceHaStorage({ id, origin, repository }: { id: string; ori
     if (entry?.record) downloadConnectData(exportWorkspaceBackup(entry.metadata, entry.record), `${id}-before-ha-replace.json`);
   };
   const resolve = (choice: "local" | "remote") => run(async () => {
-    await backupLocal();
-    return coordinator.resolveConflict(id, origin!, choice);
+    if (choice === "remote") { await backupLocal(); return coordinator.resolveConflict(id, origin!, choice); }
+    const copy = await own.client.get(id);
+    if (copy?.document) downloadConnectData(copy.document, `${id}-before-browser-replace.json`);
+    return coordinator.resolveConflict(id, origin!, choice, copy?.version);
   }, choice === "remote");
   const downloadHaRaw = async () => {
     if (!origin) return;
@@ -122,7 +149,7 @@ function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: Wor
       const downloaded = await client.get(summary.home_id);
       if (!downloaded?.document) throw new Error("This HA copy was removed. Refresh the list.");
       if (downloaded.corrupt) throw new Error("This HA copy is damaged. Download its raw data for recovery.");
-      await restoreRemoteWorkspace(repository, downloaded.document);
+      await restoreRemoteWorkspace(repository, downloaded.document, undefined, summary.home_id);
       await writeSyncCursor(window.indexedDB, { origin: runtime.origin!, homeId: summary.home_id, enabled: false,
         remoteVersion: downloaded.version, acknowledgedFingerprint: await fingerprintWorkspace((await repository.read(summary.home_id))!.metadata, (await repository.read(summary.home_id))!.record!) });
       await onRestored();
@@ -147,8 +174,9 @@ function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: Wor
 }
 
 export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin }: { repository: WorkspaceRepository; onRestored: () => Promise<void>; initialOrigin: string | null }) {
-  const [originInput, setOriginInput] = useState(initialOrigin ?? "");
+  const [originInput, setOriginInput] = useState(() => window.sessionStorage.getItem("cabane:ha-library-origin") ?? initialOrigin ?? "");
   const origin = normalizeHomeAssistantUrl(originInput);
+  useEffect(() => { if (origin) window.sessionStorage.setItem("cabane:ha-library-origin", origin); }, [origin]);
   return <section className="workspace-ha-library"><h2>Restore from Home Assistant</h2>
     <p>Workspaces on this HA instance are shared with every signed-in HA user.</p>
     <label>Home Assistant address<input value={originInput} onChange={event => setOriginInput(event.target.value)} placeholder="Enter HTTPS address" /></label>

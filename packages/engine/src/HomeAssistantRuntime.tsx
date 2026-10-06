@@ -436,6 +436,17 @@ function HomeAssistantRuntimeProviderImpl({
     };
   }, [status]);
 
+  const sendStorageMessage = useCallback(async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
+    const lifecycle = lifecycleRef.current;
+    const connection = connectionRef.current;
+    if (!connection || statusRef.current !== "connected") throw new Error("Home Assistant is not connected.");
+    const result = await connection.sendMessagePromise<T>(message);
+    if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
+      throw new Error("This Home Assistant session is no longer active.");
+    }
+    return result;
+  }, []);
+
   const value = useMemo<HomeAssistantRuntimeValue>(() => {
     const lifecycle = lifecycleRef.current;
     return {
@@ -458,17 +469,7 @@ function HomeAssistantRuntimeProviderImpl({
         ? Promise.reject(new Error("This Home Assistant session is no longer active."))
         : schedulerRef.current.schedule(call),
       cameraClient,
-      sendStorageMessage: async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
-        const connection = connectionRef.current;
-        if (lifecycle !== lifecycleRef.current || !connection || statusRef.current !== "connected") {
-          throw new Error("Home Assistant is not connected.");
-        }
-        const result = await connection.sendMessagePromise<T>(message);
-        if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
-          throw new Error("This Home Assistant session is no longer active.");
-        }
-        return result;
-      },
+      sendStorageMessage,
     };
   }, [
     areas,
@@ -483,6 +484,7 @@ function HomeAssistantRuntimeProviderImpl({
     refreshError,
     refreshing,
     startSession,
+    sendStorageMessage,
     status,
   ]);
 

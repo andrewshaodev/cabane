@@ -6,7 +6,7 @@ export type SyncStatus = { kind: "off" | "synced" | "pending" | "disconnected" |
 export interface WorkspaceSyncDependencies {
   repository: { read(homeId: string): Promise<WorkspaceEntry | null> };
   client: {
-    get(homeId: string): Promise<{ version: number; document: string | null } | null>;
+    get(homeId: string): Promise<{ version: number; document: string | null; corrupt?: boolean } | null>;
     put(homeId: string, document: string, expectedVersion: number | null): Promise<number>;
     delete(homeId: string, expectedVersion: number): Promise<unknown>;
   };
@@ -17,7 +17,7 @@ export interface WorkspaceSyncDependencies {
   };
   fingerprint(entry: WorkspaceEntry): Promise<string>;
   serialize(entry: WorkspaceEntry): string;
-  restore(document: string, expectedLocalRevision?: number): Promise<WorkspaceEntry>;
+  restore(document: string, expectedLocalRevision?: number, expectedHomeId?: string): Promise<WorkspaceEntry>;
 }
 
 export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) {
@@ -50,12 +50,13 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
     let remote;
     try { remote = await deps.client.get(homeId); } catch (error) { return classify(error); }
     if (!remote?.document) return { kind: "conflict", detail: "The HA copy was removed." };
+    if (remote.corrupt) return { kind: "conflict", detail: "The HA copy is damaged. Download its raw data for recovery." };
     const localChanged = fingerprint !== cursor.acknowledgedFingerprint;
     const remoteChanged = remote.version !== cursor.remoteVersion;
     if (localChanged && remoteChanged) return { kind: "conflict" };
     if (remoteChanged) {
       try {
-        const restored = await deps.restore(remote.document, entry.record!.revision);
+        const restored = await deps.restore(remote.document, entry.record!.revision, homeId);
         await acknowledge(origin, restored, remote.version, true);
         return { kind: "synced", detail: "restored" };
       } catch (error) { return { kind: "conflict", detail: error instanceof Error ? error.message : undefined }; }
@@ -75,6 +76,7 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
     const entry = await local(homeId);
     const cursor = await deps.cursors.read(origin, homeId);
     const remote = await deps.client.get(homeId);
+    if (remote?.corrupt) return { kind: "conflict", detail: "The HA copy is damaged." };
     if (remote?.document && (!cursor || remote.version !== cursor.remoteVersion)) return { kind: "conflict" };
     const version = await deps.client.put(homeId, deps.serialize(entry), remote?.version ?? null);
     await acknowledge(origin, entry, version, cursor?.enabled ?? false);
@@ -83,9 +85,11 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
   const manualRestore = (homeId: string, origin: string) => run(homeId, async (): Promise<SyncStatus> => {
     const remote = await deps.client.get(homeId);
     if (!remote?.document) throw new Error("No HA copy of this workspace exists.");
+    if (remote.corrupt) throw new Error("The HA copy is damaged. Download its raw data for recovery.");
     const existing = await deps.repository.read(homeId);
-    const restored = await deps.restore(remote.document, existing?.record?.revision);
     const cursor = await deps.cursors.read(origin, homeId);
+    if (existing?.record && (!cursor || await deps.fingerprint(existing) !== cursor.acknowledgedFingerprint)) return { kind: "conflict", detail: "This browser's copy has changes. Choose which copy to keep." };
+    const restored = await deps.restore(remote.document, existing?.record?.revision, homeId);
     await acknowledge(origin, restored, remote.version, cursor?.enabled ?? false);
     return { kind: cursor?.enabled ? "synced" : "off" };
   });
@@ -95,13 +99,15 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
     await deps.cursors.write({ ...cursor, enabled });
     return { kind: enabled ? "pending" : "off" } as SyncStatus;
   });
-  const resolveConflict = (homeId: string, origin: string, choice: "local" | "remote") => run(homeId, async (): Promise<SyncStatus> => {
+  const resolveConflict = (homeId: string, origin: string, choice: "local" | "remote", observedVersion?: number) => run(homeId, async (): Promise<SyncStatus> => {
     const remote = await deps.client.get(homeId);
+    if (observedVersion !== undefined && remote?.version !== observedVersion) return { kind: "conflict", detail: "The HA copy changed again. Review it before replacing." };
     const cursor = await deps.cursors.read(origin, homeId);
     if (choice === "remote") {
       if (!remote?.document) throw new Error("The HA copy was removed.");
+      if (remote.corrupt) throw new Error("The HA copy is damaged. Download its raw data for recovery.");
       const entry = await local(homeId);
-      const restored = await deps.restore(remote.document, entry.record!.revision);
+      const restored = await deps.restore(remote.document, entry.record!.revision, homeId);
       await acknowledge(origin, restored, remote.version, cursor?.enabled ?? false);
     } else {
       const entry = await local(homeId);
