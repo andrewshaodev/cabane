@@ -1,7 +1,7 @@
 # Workspaces, persistence, and Apply
 
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
-palette, shared coordinates, ordered floors, straight stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
+palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
 assumptions. Layout rooms carry empty device/dashboard arrays; runtime bindings
 are composed from profiles and scene items. The layout project accepts flat
 ceilings; the broader runtime manifest also supports sloped ceilings.

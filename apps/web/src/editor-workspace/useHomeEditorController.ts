@@ -1,7 +1,7 @@
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
 import { createBrowserUuid } from "@cabane/engine";
-import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StraightStairSpec } from "@cabane/engine";
+import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
 import { useHomeEditorShortcuts } from "./useHomeEditorShortcuts";
@@ -107,8 +107,8 @@ export function useHomeEditorController({
       ?? snapshot.project.floors.find(floor => floor.rooms.some(room => room.id === request.roomId))?.id;
     if (target && snapshot.project.floors.some(floor => floor.id === target)) floorNavigation.selectFloor(target, "target");
   }, [initialRequest]);
-  const [stairPlacement, setStairPlacement] = useState<StraightStairSpec | null>(null);
-  const [stairDialog, setStairDialog] = useState<StraightStairSpec | null>(null);
+  const [stairPlacement, setStairPlacement] = useState<StairSpec | null>(null);
+  const [stairDialog, setStairDialog] = useState<StairSpec | null>(null);
   useEffect(() => {
     setStairDialog(current => current && !snapshot.project.stairs.some(stair => stair.id === current.id) ? null : current);
   }, [snapshot.project.stairs]);

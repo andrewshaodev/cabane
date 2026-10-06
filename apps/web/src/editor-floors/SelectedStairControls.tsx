@@ -14,19 +14,21 @@ export function SelectedStairControls({ flight, destinationName, onGoToFloor, on
   const toolbar = useRef<HTMLDivElement>(null);
   const overlay = useRef<HTMLDivElement>(null);
   const scratch = useMemo(() => new Vector3(), []);
+  const footprintCenter = useMemo(() => [
+    (Math.min(...flight.footprintWorld.map(p=>p[0]))+Math.max(...flight.footprintWorld.map(p=>p[0])))/2,
+    (Math.min(...flight.footprintWorld.map(p=>p[1]))+Math.max(...flight.footprintWorld.map(p=>p[1])))/2,
+  ] as const, [flight]);
   useLayoutEffect(() => { invalidate(); }, [invalidate, flight, size]);
   useFrame(() => {
     if (!toolbar.current || !overlay.current) return;
-    const project = (along: number, across: number) => {
-      scratch.set(flight.startWorld[0] + flight.forward[0] * along + flight.side[0] * across, .13,
-        flight.startWorld[1] + flight.forward[1] * along + flight.side[1] * across).project(camera);
-      return { x: (scratch.x + 1) * size.width / 2, y: (1 - scratch.y) * size.height / 2, z: scratch.z };
+    const project = (x:number,z:number) => {
+      scratch.set(x,.13,z).project(camera);
+      return {x:(scratch.x+1)*size.width/2,y:(1-scratch.y)*size.height/2,z:scratch.z};
     };
-    const center = project(flight.runMeters / 2, 0);
+    const points=flight.footprintWorld.map(([x,z])=>project(x,z));
+    const center=project(...footprintCenter);
     overlay.current.style.visibility = "hidden";
     if (center.z < -1 || center.z > 1 || center.x < 0 || center.x > size.width || center.y < 0 || center.y > size.height) return;
-    const points = [project(0, -flight.widthMeters / 2), project(0, flight.widthMeters / 2),
-      project(flight.runMeters, -flight.widthMeters / 2), project(flight.runMeters, flight.widthMeters / 2)];
     const header = gl.domElement.closest(".direction-preview")?.querySelector(".editor-header")?.getBoundingClientRect();
     const at = selectionToolbarPosition({ centerX: center.x, itemTop: Math.min(...points.map(p => p.y)), itemBottom: Math.max(...points.map(p => p.y)),
       width: size.width, height: size.height, toolbarWidth: toolbar.current.offsetWidth, toolbarHeight: toolbar.current.offsetHeight,

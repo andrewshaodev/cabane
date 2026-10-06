@@ -308,7 +308,7 @@ export function HomeEditorScene({
             }} />
         )}
         </StylizedScene>
-            {stairPlacement && <StairPlacement building={snapshot.project} stair={stairPlacement} coordinates={snapshot.project.coordinates}
+            {stairPlacement && <StairPlacement key={stairPlacement.shape??"straight"} building={snapshot.project} stair={stairPlacement} coordinates={snapshot.project.coordinates}
               onDraggingChange={setDragging}
               onCancel={() => setStairPlacement(null)}
               onComplete={stair => {

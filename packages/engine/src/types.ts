@@ -745,7 +745,7 @@ export interface HomeManifest {
   schemaVersion: 2;
   home: HomeProject["home"];
   coordinates: FloorCoordinates;
-  stairs: readonly import("./stairs/types").StraightStairSpec[];
+  stairs: readonly import("./stairs/types").StairSpec[];
   floors: readonly RenderableFloorSpec[];
   sceneItems: readonly SceneItemSpec[];
   shortcuts: readonly ShortcutSpec[];

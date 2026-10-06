@@ -1,3 +1,5 @@
+import { StairShapeSelect } from "../editor-floors/StairShapeSelect";
+import { convertStairShape } from "../editor-floors/stair-placement-geometry";
 import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
@@ -171,7 +173,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
           onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
             ? () => setFloorDialog("remove") : undefined} />
-        {stairPlacement && <div role="status">Drag from bottom to top, or click each endpoint. Escape cancels.
+        {stairPlacement && <div role="status" className="stair-placement-instructions">
+          <StairShapeSelect value={stairPlacement.shape??"straight"} onChange={shape=>setStairPlacement(convertStairShape(snapshot.project,stairPlacement,shape))} />
+          {stairPlacement.shape === "spiral" ? "Click the center, then the outer edge to set diameter and rotation. Escape cancels."
+            : stairPlacement.shape === "l-shaped" ? "Click the bottom, landing center, then the upper endpoint. Escape cancels."
+            : "Drag from bottom to top, or click each endpoint. Escape cancels."}
           <button type="button" onClick={() => setStairPlacement(null)}>Cancel stairs</button></div>}
         {mode === "construct" && lowerFloor && <label><input type="checkbox" checked={showFloorBelow}
           onChange={(event) => setShowFloorBelow(event.target.checked)} />Show floor below</label>}

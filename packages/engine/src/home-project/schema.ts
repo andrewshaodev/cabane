@@ -486,10 +486,17 @@ export const validateHomeProjectSchemaShape = (
       const path = `stairs[${index}]`;
       const stair = record(entry, path, issues);
       if (!stair) return;
-      keys(stair, ["id", "lowerFloorId", "upperFloorId", "at", "rotationYRadians", "widthMeters", "runMeters"], path, issues);
+      const shape = stair.shape ?? "straight";
+      const dimensions = shape === "spiral" ? ["diameterMeters", "totalTurnDegrees"]
+        : shape === "l-shaped" ? ["widthMeters", "lowerRunMeters", "upperRunMeters"] : ["widthMeters", "runMeters"];
+      keys(stair, ["id", "lowerFloorId", "upperFloorId", "at", "rotationYRadians", "shape", ...dimensions,
+        ...(shape === "spiral" ? ["direction"] : shape === "l-shaped" ? ["turn"] : [])], path, issues);
+      if (!["straight", "l-shaped", "spiral"].includes(String(shape))) addProjectIssue(issues,"stair.shape",`${path}.shape`,"Unknown stair shape.");
+      if (shape === "spiral" && !["clockwise","counterclockwise"].includes(String(stair.direction))) addProjectIssue(issues,"stair.direction",`${path}.direction`,"Choose clockwise or counterclockwise.");
+      if (shape === "l-shaped" && !["left","right"].includes(String(stair.turn))) addProjectIssue(issues,"stair.turn",`${path}.turn`,"Choose left or right.");
       for (const key of ["id", "lowerFloorId", "upperFloorId"]) string(stair[key], `${path}.${key}`, issues);
       point(stair.at, `${path}.at`, issues);
-      for (const key of ["rotationYRadians", "widthMeters", "runMeters"]) finite(stair[key], `${path}.${key}`, issues);
+      for (const key of ["rotationYRadians", ...dimensions]) finite(stair[key], `${path}.${key}`, issues);
     });
   }
   array(project.sceneItems, "sceneItems", issues)?.forEach((entry, index) => sceneItem(entry, `sceneItems[${index}]`, issues, legacy));

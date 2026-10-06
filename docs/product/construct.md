@@ -106,7 +106,7 @@ also offers Show roof for an exterior view of the complete building. Connect ret
 
 Construct supports adding above, renaming, changing floor height, and removing
 only the top floor with confirmation and undo. Ground cannot be removed.
-Reordering, duplication, basements, and non-straight stairs remain excluded.
+Reordering, duplication, and basements remain excluded.
 
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 
@@ -118,6 +118,24 @@ Completion selects the staircase. On either connected floor, drag its body to mo
 either endpoint to change length/direction, or either side handle to resize width
 symmetrically. Measurements update throughout the gesture. Escape and interrupted
 gestures cancel; each completed gesture is one undoable edit.
+
+Stairs also support L-shaped and spiral connections between adjacent floors. Choose
+Straight, L-shaped, or Spiral before drawing or in the selected stair's properties.
+Changing shape retains its ID, connected floors, and lower entrance position.
+Existing stairs without an explicit shape remain straight.
+
+L-shaped stairs use two perpendicular flights and a square level landing. Click the
+bottom, landing center, and upper endpoint; the final point chooses the left/right
+turn. Width, lower and upper flight lengths, and turn are editable. Endpoint,
+landing, and width handles adjust the shape; dragging the body moves it.
+
+Spiral stairs use a center point and an outer-edge point for placement. Diameter,
+rotation, clockwise/counterclockwise direction, and total turn (greater than zero,
+at most 360 degrees) are editable. Diameter handles resize around the fixed center;
+the orientation handle rotates the entrance. A fixed 0.1 m radius central support
+sets the inner edge of the usable width. New spirals default to 2 m diameter and a
+360-degree clockwise turn. New L-shaped stairs default to 1 m width, equal flight
+runs of 0.75 times the floor height, and a right turn.
 
 During stair drawing, movement, and resizing, a labeled, noninteractive guide shows the
 other connected floor’s footprint, walls, openings, and pools. The active floor and saved

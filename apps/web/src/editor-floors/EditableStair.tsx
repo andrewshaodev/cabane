@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
 import { deriveStairFlight, planPointToWorld, worldPointToPlan, StairPlan,
-  type HomeProject, type StraightStairSpec, type SnapTarget } from "@cabane/engine";
+  type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
 import { beginSelectDrag, resolveSelectDrag, type SelectDragActivation } from "../editor-preview/construct/select-drag-activation";
 import { worldDragToConstructPlan, worldDragToSnappedConstructPlan } from "../editor-preview/construct/drag-geometry";
 import { constructPixelsPerMeter } from "../editor-preview/construct/plan-screen-scale";
 import { ConstructionOutlineHandle } from "../editor-preview/construct/ConstructionOutlineHandle";
 import { ConstructionAlignmentGuide } from "../editor-preview/construct/ConstructionAlignmentGuide";
-import { editStairFromPoint, type StairEditHandle, type StairPlacementPoint } from "./stair-placement-geometry";
+import { stairEditHandles, editStairFromPoint, type StairEditHandle, type StairPlacementPoint } from "./stair-placement-geometry";
 import { useStairValidation } from "./useStairValidation";
 import { StairFeedback } from "./StairFeedback";
 import { ConnectedFloorGuide } from "./ConnectedFloorGuide";
@@ -17,18 +17,18 @@ import { SelectedStairControls } from "./SelectedStairControls";
 
 type Pointer = ThreeEvent<PointerEvent>;
 type Target = { setPointerCapture(id: number): void; releasePointerCapture(id: number): void; hasPointerCapture(id: number): boolean };
-type Drag = SelectDragActivation & { original: StraightStairSpec; candidate: StraightStairSpec;
+type Drag = SelectDragActivation & { original: StairSpec; candidate: StairSpec;
   start: StairPlacementPoint; grab: StairPlacementPoint; handle: StairEditHandle; target: Target };
 
 export function EditableStair({ building, stair, activeFloorId, selected, enabled, onSelect, onCommit,
   onDraggingChange, onGoToFloor, onDelete }: {
-  building: HomeProject; stair: StraightStairSpec; activeFloorId: string; selected: boolean; enabled: boolean;
-  onSelect: () => void; onCommit: (stair: StraightStairSpec) => void; onDraggingChange: (value: boolean) => void;
+  building: HomeProject; stair: StairSpec; activeFloorId: string; selected: boolean; enabled: boolean;
+  onSelect: () => void; onCommit: (stair: StairSpec) => void; onDraggingChange: (value: boolean) => void;
   onGoToFloor: () => void; onDelete: () => void;
 }) {
   const { camera, size, gl, get } = useThree();
   const lockedControls = useRef<{ enabled: boolean } | null>(null);
-  const [draft, setDraft] = useState<StraightStairSpec | null>(null);
+  const [draft, setDraft] = useState<StairSpec | null>(null);
   const [snap, setSnap] = useState<SnapTarget | null>(null);
   const active = useRef<Drag | null>(null);
   const candidate = draft ?? stair;
@@ -71,9 +71,7 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
     const endpoint = current && (current.handle === "bottom" || current.handle === "top");
     const originalFlight = current && deriveStairFlight(building, current.original);
     const fixed = originalFlight && (current?.handle === "bottom"
-      ? { x: originalFlight.startWorld[0] + originalFlight.forward[0] * originalFlight.runMeters,
-          z: originalFlight.startWorld[1] + originalFlight.forward[1] * originalFlight.runMeters }
-      : { x: originalFlight.startWorld[0], z: originalFlight.startWorld[1] });
+      ? originalFlight.path[originalFlight.path.length-1] : originalFlight.path[0]);
     const point = endpoint ? worldDragToSnappedConstructPlan({ point: hit, coordinates,
       walls: building.floors.filter(f => f.id === stair.lowerFloorId || f.id === stair.upperFloorId).flatMap(f => f.walls),
       onSnap: setSnap, pixelsPerMeter: constructPixelsPerMeter(camera, size.height),
@@ -98,7 +96,7 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
       const target = event.target as unknown as Target;
       target.setPointerCapture(event.pointerId);
       active.current = { ...beginSelectDrag(event.pointerId, [event.nativeEvent.clientX, event.nativeEvent.clientY]),
-        original: stair, candidate: stair, start: { x: flight.startWorld[0], z: flight.startWorld[1] }, grab, handle, target };
+        original: stair, candidate: stair, start: { x: flight.originWorld[0], z: flight.originWorld[1] }, grab, handle, target };
     },
     onPointerMove: (event: Pointer) => {
       const current = active.current; if (!current || current.pointerId !== event.pointerId) return;
@@ -123,19 +121,15 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
   });
   if (!flight) return null;
   const other = building.floors.find(f => f.id === (activeFloorId === stair.lowerFloorId ? stair.upperFloorId : stair.lowerFloorId))!;
-  const at = (along: number, across: number): [number, number, number] => [
-    flight.startWorld[0] + flight.forward[0] * along + flight.side[0] * across, .25,
-    flight.startWorld[1] + flight.forward[1] * along + flight.side[1] * across];
   return <group name={`editable-stair-${stair.id}`}>
     {draft && <ConnectedFloorGuide floor={other} />}
     <StairPlan flight={flight} upper={activeFloorId === stair.upperFloorId} selected={selected}
       invalid={validation.issues.length > 0} handlers={enabled ? handlers("body") : undefined} />
     <ConstructionAlignmentGuide snap={snap} coordinates={building.coordinates} />
     {selected && <>
-      {(["bottom", "top", "left", "right"] as const).map(handle => <ConstructionOutlineHandle key={handle}
-        name={`stair-${handle}-${stair.id}`} handlers={handlers(handle)}
-        at={handle === "bottom" ? at(0, 0) : handle === "top" ? at(flight.runMeters, 0) : at(flight.runMeters / 2, (handle === "left" ? -1 : 1) * flight.widthMeters / 2)} />)}
-      <StairFeedback flight={flight} issues={validation.issues} />
+      {stairEditHandles(flight).map(({handle,at})=><ConstructionOutlineHandle key={handle}
+        name={`stair-${handle}-${stair.id}`} handlers={handlers(handle)} at={at} />)}
+      {draft && <StairFeedback flight={flight} issues={validation.issues} />}
       {!draft && <SelectedStairControls flight={flight} destinationName={other.name} onGoToFloor={onGoToFloor} onDelete={onDelete} />}
     </>}
   </group>;
