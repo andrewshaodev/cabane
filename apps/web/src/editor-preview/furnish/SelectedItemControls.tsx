@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { Html } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type PointerEvent } from "react";
@@ -73,6 +74,7 @@ export function SelectedItemControls({
     if (active.target.hasPointerCapture?.(active.pointerId)) active.target.releasePointerCapture(active.pointerId);
   };
 
+  const dom = useCabaneDom();
   useEffect(() => {
     const cancel = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || !session.current) return;
@@ -81,10 +83,10 @@ export function SelectedItemControls({
       finish(true);
     };
     const blur = () => finish(true);
-    window.addEventListener("keydown", cancel, true);
+    dom.events.addEventListener("keydown", cancel, true);
     window.addEventListener("blur", blur);
     return () => {
-      window.removeEventListener("keydown", cancel, true);
+      dom.events.removeEventListener("keydown", cancel, true);
       window.removeEventListener("blur", blur);
       if (session.current) {
         session.current = null;

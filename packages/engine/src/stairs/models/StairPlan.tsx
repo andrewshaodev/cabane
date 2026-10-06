@@ -1,3 +1,4 @@
+import { ShapedStairPlan } from "./ShapedStairPlan";
 import type { ThreeElements } from "@react-three/fiber";
 import type { StairFlight } from "../flight-geometry";
 import { ToonMaterial } from "../../rendering";
@@ -8,6 +9,7 @@ export function StairPlan({ flight, upper = false, selected = false, invalid = f
   handlers?: Pick<ThreeElements["mesh"], "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel">; invalid?: boolean;
   flight: StairFlight; upper?: boolean; selected?: boolean; onSelect?: () => void;
 }) {
+  if (flight.shape !== "straight") return <ShapedStairPlan {...{flight,upper,selected,invalid,handlers,onSelect}} />;
   const width = flight.widthMeters;
   const run = flight.runMeters;
   const ink = invalid ? "#bc433a" : selected ? "#ff754d" : upper ? "#6b7881" : "#35434c";

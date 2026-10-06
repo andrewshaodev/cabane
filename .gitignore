@@ -14,3 +14,5 @@ screenshots/
 .worktrees/
 __pycache__/
 *.pyc
+
+dist-panel/

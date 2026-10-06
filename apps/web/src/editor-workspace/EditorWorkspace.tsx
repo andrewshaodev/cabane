@@ -1,3 +1,6 @@
+import { StairPlacementPanel } from "../editor-floors";
+import { convertStairShape } from "../editor-floors/stair-placement-geometry";
+import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { SidebarSectionSummary } from "../editor-chrome/SidebarSectionSummary";
 import { ReferencePlanPanel } from "../editor-reference-plan/ReferencePlanPanel";
@@ -12,7 +15,7 @@ import { EditorModeIntroduction } from "../editor-chrome/EditorModeIntroduction"
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { FloorPicker, addTopFloor, renameFloor, removeTopFloor, setFloorHeight } from "@cabane/engine";
 import { StairDetails } from "../editor-floors/StairDetails";
-import { FloorManagementDialog } from "../editor-floors";
+import { FloorManagementDialog, ConstructFloorControls } from "../editor-floors";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
 
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -75,6 +78,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const tutorial = useBuildTutorial(editorProject, mode, Object.keys(workspace.snapshot.references ?? {}).length > 0);
   const requestedActionBar = props.navigation?.request.panel === "action-bar" || props.initialRequest?.panel === "action-bar";
   const [actionBarPanelOpen, setActionBarPanelOpen] = useState(requestedActionBar);
+  const dom = useCabaneDom();
+  const iconUrl = useCabaneAssetUrl("cabane-icon.png");
   useEffect(() => { setActionBarPanelOpen(requestedActionBar); }, [requestedActionBar]);
   const shortcutsMode = props.navigation ? requestedActionBar : actionBarPanelOpen;
   const sidebar = useRef<HTMLElement>(null);
@@ -140,11 +145,19 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   useEffect(() => { setWalkStartFloor(null); }, [mode, activeFloorId, reference.adjusting]);
   useEffect(() => {
     const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") setWalkStartFloor(null); };
-    window.addEventListener("keydown", cancel);
-    return () => window.removeEventListener("keydown", cancel);
+    dom.events.addEventListener("keydown", cancel);
+    return () => dom.events.removeEventListener("keydown", cancel);
   }, []);
   useEffect(() => { if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null); }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
+  const floorControlsDisabled = editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+  const addFloorAbove = () => {
+    const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
+    commit(next);
+    floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
+    constructEditor.replaceFloor(next.project.floors.at(-1)!);
+    furnishingEditor.replaceItems([]);
+  };
   return ((
     <main className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`} data-editor-mode={shortcutsMode ? "shortcuts" : mode}>
       {!shortcutsMode && <HomeEditorScene reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
@@ -162,19 +175,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       <div className="editor-floor-controls" inert={publishOpen || previewOpen}>
         <FloorPicker floors={snapshot.project.floors} selectedId={activeFloorId}
-          disabled={editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog)} onSelect={(id) => floorNavigation.selectFloor(id)}
-          onAdd={mode === "construct" ? () => {
-            const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
-            commit(next);
-            floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
-            constructEditor.replaceFloor(next.project.floors.at(-1)!);
-            furnishingEditor.replaceItems([]);
-          } : undefined}
+          disabled={floorControlsDisabled} onSelect={(id) => floorNavigation.selectFloor(id)}
+          onAdd={mode === "construct" ? addFloorAbove : undefined}
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
           onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
             ? () => setFloorDialog("remove") : undefined} />
-        {stairPlacement && <div role="status">Drag from bottom to top, or click each endpoint. Escape cancels.
-          <button type="button" onClick={() => setStairPlacement(null)}>Cancel stairs</button></div>}
         {mode === "construct" && lowerFloor && <label><input type="checkbox" checked={showFloorBelow}
           onChange={(event) => setShowFloorBelow(event.target.checked)} />Show floor below</label>}
       </div>
@@ -183,6 +188,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           commit({ ...snapshot, project: { ...snapshot.project, stairs: [...snapshot.project.stairs.filter(s => s.id !== stair.id), stair] } });
         }} />}
       {floorDialog && <FloorManagementDialog action={floorDialog}
+        onRemove={snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
+          ? () => setFloorDialog("remove") : undefined}
+        removeDisabledReason={activeFloorId === snapshot.project.floors[0]?.id ? "The ground floor cannot be deleted."
+          : activeFloorId !== snapshot.project.floors.at(-1)?.id ? "Only the top floor can be deleted. Delete the floors above first." : undefined}
         name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
         height={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.floorToFloorHeightMeters}
         itemCount={snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length}
@@ -205,7 +214,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       <aside ref={sidebar} className="direction-rail" inert={editingLocked || publishOpen || previewOpen}>
         <div className="direction-rail__brand">
-          <img src="/cabane-icon.png" alt="" width="43" height="51" />
+          <img src={iconUrl} alt="" width="43" height="51" />
           <div className="direction-rail__identity">
             <h1>Cabane</h1>
             {onWorkspaces && <button type="button" className="editor-workspace-link"
@@ -215,6 +224,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             </button>}
           </div>
         </div>
+        {!shortcutsMode && mode === "construct" && <ConstructFloorControls
+          floors={snapshot.project.floors} selectedId={activeFloorId} disabled={floorControlsDisabled}
+          onSelect={id => floorNavigation.selectFloor(id)} onAdd={addFloorAbove}
+          onSettings={() => setFloorDialog("rename")} />}
         <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
         {shortcutsMode && <div className="shortcuts-guide">
           <h3>Add a shortcut</h3>
@@ -228,7 +241,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           disabled={tutorialBusy} warning={tutorial.warning} onAction={activateTutorial} onSkip={tutorial.skip} onDismiss={tutorial.dismiss} />}
         {!shortcutsMode && mode === "construct" && tutorial.state?.status !== "active" && isPristineConstructionFloor(constructEditor.previewFloor) &&
           <p className="construction-empty-hint">Your plan starts here. Choose Wall, then click each corner to draw your first room.</p>}
-        {!shortcutsMode && mode === "construct" && (
+        {!shortcutsMode && mode === "construct" && stairPlacement && <StairPlacementPanel
+          shape={stairPlacement.shape ?? "straight"}
+          onChange={shape => setStairPlacement(convertStairShape(snapshot.project, stairPlacement, shape))}
+          onCancel={() => setStairPlacement(null)} />}
+        {!shortcutsMode && mode === "construct" && !stairPlacement && (
           <ConstructionInspector inert={reference.adjusting}
             referencePlanControls={<ReferencePlanPanel reference={reference} floorName={constructEditor.previewFloor.name} />}
             planImportControls={PLAN_IMPORT_ENABLED && <PlanImportActions homeId={snapshot.project.home.id}
@@ -295,7 +312,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           onPlacementChange={furnishingEditor.updatePlacement} onSizeChange={furnishingEditor.updateSize} onLightStateChange={furnishingEditor.updateLightState} onVariantChange={furnishingEditor.updateVariant}
           onClose={() => setDetailsItemId(null)} />
       </div>}
-      {mode === "construct" && !marqueeSelecting && selectedOpening && selectedOpening.kind !== "passage" && detailsOpeningId === selectedOpening.id && (
+      {mode === "construct" && !marqueeSelecting && selectedOpening && detailsOpeningId === selectedOpening.id && (
         <div inert={editingLocked || publishOpen || previewOpen}>
           <OpeningDetails key={selectedOpening.id} opening={selectedOpening} editor={constructEditor}
             disabled={dragging || editingLocked} onClose={() => setDetailsOpeningId(null)} />

@@ -6,7 +6,6 @@ export {
   planPointForWorldDrag,
   selectionBoxGeometry,
   snapToGrid,
-  uniqueItemId,
 } from "./editor-state";
 export type {
   FurnishingEditorAction,

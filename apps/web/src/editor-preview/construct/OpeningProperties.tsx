@@ -19,8 +19,8 @@ export function OpeningProperties({ opening: selectedOpening, editor, advanced }
   return <>
           <fieldset>
             <legend>Size</legend>
-            <label>Width<CommittedNumberInput label="Opening width" min={.3} value={selectedOpening.widthPlanUnits * editor.previewFloor.coordinates.metersPerPlanUnit} onCommit={(value) => editor.updateSelectedOpening({ widthPlanUnits: value / editor.previewFloor.coordinates.metersPerPlanUnit })} /></label>
-            <label>Height<CommittedNumberInput label="Opening height" min={.3} value={selectedOpening.openingHeightMeters} onCommit={(value) => editor.updateSelectedOpening({ openingHeightMeters: value })} /></label>
+            <label>Width<CommittedNumberInput label="Opening width" commitOnChange min={.3} value={selectedOpening.widthPlanUnits * editor.previewFloor.coordinates.metersPerPlanUnit} onCommit={(value) => editor.updateSelectedOpening({ widthPlanUnits: value / editor.previewFloor.coordinates.metersPerPlanUnit })} /></label>
+            <label>Height<CommittedNumberInput label="Opening height" commitOnChange min={.3} value={selectedOpening.openingHeightMeters} onCommit={(value) => editor.updateSelectedOpening({ openingHeightMeters: value })} /></label>
           </fieldset>
           {selectedOpening.kind === "window" && (
             <label className="construction-inspector__single-control">Height from floor<CommittedNumberInput label="Window height from floor" min={0} value={selectedOpening.sillHeightMeters} onCommit={(value) => editor.updateSelectedOpening({ sillHeightMeters: value })} /></label>
@@ -32,8 +32,7 @@ export function OpeningProperties({ opening: selectedOpening, editor, advanced }
               const { offsetFromWallStartPlanUnits, ...door } = doorFromConfiguration(configuration, scale, { id: selectedOpening.id, wallId: selectedOpening.wallId, offsetFromWallStartPlanUnits: selectedOpening.offsetPlanUnits });
               editor.replaceSelectedOpening({ ...door, offsetPlanUnits: offsetFromWallStartPlanUnits });
             };
-            return <><DoorPresetPalette value={value} onChange={apply} /><DoorDesignFields value={value} onChange={apply} showSize={false} />
-              {editor.openingError && <p role="alert">{editor.openingError}</p>}</>;
+            return <><DoorPresetPalette value={value} onChange={apply} /><DoorDesignFields value={value} onChange={apply} showSize={false} /></>;
           })()}
           {selectedOpening.kind === "window" && (
             <fieldset className="construction-inspector__variants">
@@ -76,6 +75,7 @@ export function OpeningProperties({ opening: selectedOpening, editor, advanced }
             </fieldset>
           )}
 
+    {editor.openingError && <p role="alert">{editor.openingError}</p>}
     {advanced === undefined ? <details className="opening-properties__advanced"><summary>Advanced</summary>{wallPosition}</details> : advanced && wallPosition}
   </>;
 }

@@ -14,6 +14,7 @@ import { Canvas } from "@react-three/fiber";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 
 import {
+  connectedCanvasEvents,
   deriveFloorLevels,
   StylizedScene,
   ArchitectureScene,
@@ -76,7 +77,7 @@ export function HomeEditorScene({
     />}
     {referenceCanvas.background}
     <div hidden={mode === "connect"} style={{ width: "100%", height: "100%", position: "relative" }}>
-    <Canvas
+    <Canvas events={connectedCanvasEvents}
       tabIndex={0}
       aria-label="Home editor canvas"
       onPointerDownCapture={(event) => {
@@ -315,7 +316,7 @@ export function HomeEditorScene({
             }} />
         )}
         </StylizedScene>
-            {stairPlacement && <StairPlacement building={snapshot.project} stair={stairPlacement} coordinates={snapshot.project.coordinates}
+            {stairPlacement && <StairPlacement key={stairPlacement.shape??"straight"} building={snapshot.project} stair={stairPlacement} coordinates={snapshot.project.coordinates}
               onDraggingChange={setDragging}
               onCancel={() => setStairPlacement(null)}
               onComplete={stair => {

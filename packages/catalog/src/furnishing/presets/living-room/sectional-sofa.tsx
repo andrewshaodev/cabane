@@ -4,7 +4,9 @@ import { CozySofaCushions, TailoredCushion } from "./sofa-upholstery";
 
 /** Existing sectional envelope and offset origin retained for saved placements. */
 export function CustomSectionalSofa({ variant = "default" }: { variant?: string } = {}) {
-  return <group name="canape-salon-custom" userData={{ walkCollider: true }}>
+  const mirrored = variant === "right" || variant === "cozy-right";
+  const cozy = variant === "cozy" || variant === "cozy-right";
+  return <group name="canape-salon-custom" scale={[mirrored ? -1 : 1, 1, 1]} userData={{ walkCollider: true }}>
     <RoundedFurniturePanel size={[2.72, .32, .72]} position={[0, .31, .02]} color="#d2ccbd" radius={.055} />
     <RoundedFurniturePanel size={[.88, .32, 1.56]} position={[-.91, .31, .43]} color="#d2ccbd" radius={.055} />
     <RoundedFurniturePanel name="upholstered-back-frame" size={[2.55, .65, .16]} position={[0, .675, -.33]} color="#d2ccbd" radius={.045} />
@@ -17,7 +19,7 @@ export function CustomSectionalSofa({ variant = "default" }: { variant?: string 
       <RoundedFurniturePanel name="sectional-arm" size={[.19, .59, .86]} position={[x, .455, .01]} color="#ded9ca" radius={.065} />
       <TailoredCushion name="sectional-arm-pad" size={[.18, .13, .84]} position={[x, .765, .01]} color="#eee7d8" />
     </group>)}
-    {variant === "cozy" && <CozySofaCushions />}
+    {cozy && <CozySofaCushions />}
     {[[-1.23,-.25],[-.55,-.25],[.48,-.25],[1.23,-.25],[-1.23,1.04],[-.58,1.04],[.48,.27],[1.23,.27]].map(([x,z]) =>
       <mesh key={`${x}-${z}`} position={[x,.085,z]} castShadow>
         <cylinderGeometry args={[.05,.035,.17,10]} /><ToonMaterial color="#b38d59" />

@@ -41,7 +41,7 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
   }, [id, repository, loaded?.metadata.homeAssistantUrl]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not open this workspace.</strong><p>{error}</p><Link to="/workspaces?import=home-assistant">Open from Home Assistant</Link><Link to="/workspaces">Workspaces</Link></main>;
   if (!loaded) return <main className="direction-project-loading">Loading your home…</main>;
-  return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
+  return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider hostSession={isDemo ? null : undefined} homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
     <WorkspaceHaStorageProvider id={id} origin={loaded.metadata.homeAssistantUrl} repository={repository} hidden={isDemo}>
     <ConnectedProduct demoWorkspaceId={demoWorkspaceId} onboarding={{ isDemo, welcome: isDemo && location.pathname === "/welcome",
       nudgeDismissed: onboarding.state?.nudgeDismissed ?? true, busy: onboarding.busy,

@@ -1,10 +1,12 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, type ReactNode } from "react";
 export function WorkspaceDialog({ title, busy, error, onCancel, children }: {
   title: string; busy: boolean; error: string | null; onCancel: () => void; children: ReactNode;
 }) {
+  const dom = useCabaneDom();
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = dom.root.activeElement as HTMLElement | null;
     ref.current?.showModal?.();
     return () => previous?.focus();
   }, []);

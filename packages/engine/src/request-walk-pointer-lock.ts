@@ -1,6 +1,7 @@
 /** Call during the entry click so browsers retain transient user activation. */
 export function requestWalkPointerLock(target: HTMLElement): Promise<void> {
-  if (document.pointerLockElement === target) return Promise.resolve();
+  const root = target.getRootNode() as Document | ShadowRoot;
+  if (root.pointerLockElement === target) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const cleanup = () => {
       clearTimeout(timeout);
@@ -9,7 +10,7 @@ export function requestWalkPointerLock(target: HTMLElement): Promise<void> {
     };
     const failed = () => { cleanup(); reject(new Error("Pointer lock was not granted.")); };
     const changed = () => {
-      if (document.pointerLockElement !== target) return;
+      if (root.pointerLockElement !== target) return;
       cleanup(); resolve();
     };
     const timeout = setTimeout(failed, 5000);

@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Component, createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { OrthographicCamera, Vector3 } from "three";
-import { ToonMaterial } from "@cabane/engine";
+import { connectedCanvasEvents, ToonMaterial } from "@cabane/engine";
 import type { ModelPreviewEntry } from "./model-preview-entry";
 import { ModelVisual } from "./ModelVisual";
 import { paintThumbnail, readThumbnail, saveThumbnail } from "./thumbnailCache";
@@ -187,7 +187,7 @@ export function ModelThumbnailRenderer({ children, scrollRoot, enabled }: { chil
     {children}
     {enabled && !unavailable && serial > 0 && <div aria-hidden="true" className="catalog-thumbnail-renderer" style={{ width: 160 * ratio, height: 160 }}>
       <PreviewBoundary onError={failRenderer}>
-        <Canvas orthographic frameloop="demand" dpr={Math.min(globalThis.devicePixelRatio || 1, 1.5)}
+        <Canvas events={connectedCanvasEvents} orthographic frameloop="demand" dpr={Math.min(globalThis.devicePixelRatio || 1, 1.5)}
           gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
           fallback={<span>Preview unavailable</span>}>
           <RendererContextMonitor onError={failRenderer} />

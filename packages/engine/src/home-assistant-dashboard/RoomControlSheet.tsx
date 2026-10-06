@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SupportedServiceCall } from "../home-assistant-controls";
 import type { HomeAssistantConnectionStatus, ResolvedRoomBindings } from "../types";
@@ -109,6 +110,7 @@ export function RoomControlSheet({
   deviceOverlay = false,
   onEscape,
 }: RoomControlSheetProps) {
+  const dom = useCabaneDom();
   const modules = useMemo(() => buildRoomModules(resolved), [resolved]);
   const selectedModule = useMemo(
     () => focusedDeviceModule(modules, selectedDeviceId),
@@ -153,16 +155,16 @@ export function RoomControlSheet({
       if (controls.length === 0) return;
       const first = controls[0];
       const last = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && dom.root.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && dom.root.activeElement === last) {
         event.preventDefault();
         first.focus();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    dom.events.addEventListener("keydown", onKeyDown);
+    return () => dom.events.removeEventListener("keydown", onKeyDown);
   }, [deviceOverlay, goBack, onEscape]);
 
   useEffect(() => {

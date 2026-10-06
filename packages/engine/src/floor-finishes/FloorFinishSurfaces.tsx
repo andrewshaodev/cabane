@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { useHoveredRoom, useRoomHoverTarget, useRoomHoverEnabled } from "../room-status/RoomHover";
 import { useStairSurfaceApertures } from "../stairs/surface-apertures";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
@@ -54,6 +55,7 @@ function FinishSurface({
   elevation: requestedElevation,
   cutPools = false,
 }: FinishSurfaceProps) {
+  const dom = useCabaneDom();
   const repeatMeters = finish.kind === "preset"
     ? floorFinishPreset(finish.preset).repeatMeters
     : 1;
@@ -97,9 +99,9 @@ function FinishSurface({
   useEffect(() => invalidate(), [interactionOpacity, invalidate]);
   useEffect(() => {
     if ((roomId && sharedHoverEnabled) || !hovered || !onSelect || typeof document === "undefined") return;
-    const previous = document.body.style.cursor;
-    document.body.style.cursor = "pointer";
-    return () => { document.body.style.cursor = previous; };
+    const previous = dom.container.style.cursor;
+    dom.container.style.cursor = "pointer";
+    return () => { dom.container.style.cursor = previous; };
   }, [hovered, onSelect, roomId, sharedHoverEnabled]);
 
   useFrame((_state, delta) => {

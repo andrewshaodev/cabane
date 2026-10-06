@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import { collectBindingSlots } from "./binding-slot-descriptors";
 import { resolveOpeningPositions, type RetainedOpeningPositions } from "./opening-pose";
 import { pointInsidePolygon, worldPointToPlan } from "./geometry";
@@ -75,6 +76,7 @@ export function useDashboardController({
   onOpenConnect,
   walkthrough,
 }: ValidatedDashboardProps) {
+  const dom = useCabaneDom();
   const onExitWalkthrough = walkthrough?.onExit;
   const walkthroughStarted = useRef(false);
   const floorNavigation = useFloorNavigation(manifest.floors);
@@ -173,7 +175,7 @@ export function useDashboardController({
   const walkMode = mode === "walk";
   const requestWalkPointerLock = useCallback(() => {
     const target = walkthrough?.pointerLockTarget ?? shellRef.current;
-    if (coarsePointer || !target || document.pointerLockElement === target) return;
+    if (coarsePointer || !target || dom.root.pointerLockElement === target) return;
     lookDeltaRef.current = { x: 0, y: 0 };
     walkPointerLockPendingRef.current = true;
     void acquireWalkPointerLock(target).catch(() => {
@@ -210,19 +212,19 @@ export function useDashboardController({
       if (onExitWalkthrough) onExitWalkthrough();
       else setMode(selectedRoomId ? "room" : "overview");
     };
-    window.addEventListener("keydown", exit);
-    return () => window.removeEventListener("keydown", exit);
+    dom.events.addEventListener("keydown", exit);
+    return () => dom.events.removeEventListener("keydown", exit);
   }, [deviceOverlay, onExitWalkthrough, selectedRoomId, walkMode]);
 
   useEffect(() => {
     const shell = walkthrough?.pointerLockTarget ?? shellRef.current;
     if (!walkMode || coarsePointer) {
-      if (!walkMode && !walkthrough && document.pointerLockElement === shell) document.exitPointerLock();
+      if (!walkMode && !walkthrough && dom.root.pointerLockElement === shell) document.exitPointerLock();
       return;
     }
-    let acquired = document.pointerLockElement === shell;
+    let acquired = dom.root.pointerLockElement === shell;
     const syncPointerLock = () => {
-      const locked = document.pointerLockElement === shell;
+      const locked = dom.root.pointerLockElement === shell;
       setWalkPointerLocked(locked);
       if (locked) {
         acquired = true;
@@ -241,7 +243,7 @@ export function useDashboardController({
     return () => {
       document.removeEventListener("pointerlockchange", syncPointerLock);
       queueMicrotask(() => {
-        if (shell && !shell.isConnected && document.pointerLockElement === shell) document.exitPointerLock();
+        if (shell && !shell.isConnected && dom.root.pointerLockElement === shell) document.exitPointerLock();
       });
     };
   }, [coarsePointer, onExitWalkthrough, selectedRoomId, walkMode, walkthrough?.pointerLockTarget]);
@@ -272,7 +274,7 @@ export function useDashboardController({
     setAutomaticOpeningIds(new Set());
     setWalkDeviceTarget(null);
     setWalkPointerLocked(false);
-    if (document.pointerLockElement) document.exitPointerLock();
+    if (dom.root.pointerLockElement) document.exitPointerLock();
     walkPointerLockPendingRef.current = false;
     if (onExitWalkthrough) { onExitWalkthrough(); return; }
     setMode(selectedRoomId ? "room" : "overview");
@@ -302,7 +304,7 @@ export function useDashboardController({
     }
     if (mobileFullscreenRef.current) {
       mobileFullscreenRef.current = false;
-      if (document.fullscreenElement === shellRef.current) {
+      if (dom.root.fullscreenElement === shellRef.current) {
         void document.exitFullscreen().catch(() => undefined);
       }
     }
@@ -314,14 +316,14 @@ export function useDashboardController({
     if (walkthrough || typeof screen.orientation?.lock !== "function") return;
     void (async () => {
       try {
-        if (!document.fullscreenElement && shellRef.current?.requestFullscreen) {
+        if (!dom.root.fullscreenElement && shellRef.current?.requestFullscreen) {
           await shellRef.current.requestFullscreen();
           mobileFullscreenRef.current = true;
         }
         await screen.orientation.lock("landscape");
         mobileOrientationLockRef.current = true;
       } catch {
-        if (mobileFullscreenRef.current && document.fullscreenElement === shellRef.current) {
+        if (mobileFullscreenRef.current && dom.root.fullscreenElement === shellRef.current) {
           mobileFullscreenRef.current = false;
           void document.exitFullscreen().catch(() => undefined);
         }
@@ -503,7 +505,7 @@ export function useDashboardController({
     lookDeltaRef.current = { x: 0, y: 0 };
     walkDevicePanelOpenRef.current = true;
     walkPointerLockPendingRef.current = false;
-    if (document.pointerLockElement === shellRef.current) document.exitPointerLock();
+    if (dom.root.pointerLockElement === shellRef.current) document.exitPointerLock();
   }, [walkMode]);
   const handleExtensionInteraction = useCallback((target: ExtensionInteractionTarget) => {
     if (walkthrough) return;
@@ -540,7 +542,7 @@ export function useDashboardController({
     if (floor.openings.some((opening) => opening.id === walkDeviceTarget.id && opening.coverSlot)) {
       handleExtensionInteraction(walkDeviceTarget);
       setWalkDeviceTarget(null);
-      if (document.pointerLockElement) document.exitPointerLock();
+      if (dom.root.pointerLockElement) document.exitPointerLock();
       return;
     }
     const room = floor.rooms.find((candidate) =>
@@ -559,14 +561,14 @@ export function useDashboardController({
       openWalkDevice();
     };
     const activateWithPointer = (event: PointerEvent) => {
-      if (event.button !== 0 || document.pointerLockElement !== shellRef.current) return;
+      if (event.button !== 0 || dom.root.pointerLockElement !== shellRef.current) return;
       openWalkDevice();
     };
-    window.addEventListener("keydown", activateWithKeyboard);
-    window.addEventListener("pointerdown", activateWithPointer);
+    dom.events.addEventListener("keydown", activateWithKeyboard);
+    dom.events.addEventListener("pointerdown", activateWithPointer);
     return () => {
-      window.removeEventListener("keydown", activateWithKeyboard);
-      window.removeEventListener("pointerdown", activateWithPointer);
+      dom.events.removeEventListener("keydown", activateWithKeyboard);
+      dom.events.removeEventListener("pointerdown", activateWithPointer);
     };
   }, [coarsePointer, openWalkDevice, selectedDeviceId, walkDeviceTarget, walkMode, walkthrough]);
   useEffect(() => {
@@ -582,8 +584,8 @@ export function useDashboardController({
       event.preventDefault();
       runAction(action);
     };
-    window.addEventListener("keydown", activateEditorShortcut);
-    return () => window.removeEventListener("keydown", activateEditorShortcut);
+    dom.events.addEventListener("keydown", activateEditorShortcut);
+    return () => dom.events.removeEventListener("keydown", activateEditorShortcut);
   }, [deviceOverlay, mappingOpen, mode, selectedCamera, setupOpen, walkMode, walkthrough]);
   return {
     floorNavigation, elevation, setCameraResetKey, requestWalkPointerLock,

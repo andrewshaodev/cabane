@@ -3,42 +3,23 @@ import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
 interface RegisteredId {
   path: string;
-  kind: "architecture" | "slot" | "shortcut";
+  kind: "architecture" | "slot" | "shortcut" | "item";
 }
 
-export const validateGlobalProjectIds = (
+const visitProjectIds = (
   project: HomeProject,
-  issues: HomeProjectIssue[],
+  register: (id: string, path: string, kind: RegisteredId["kind"]) => void,
 ) => {
-  const ids = new Map<string, RegisteredId>();
-  const register = (
-    id: string,
-    path: string,
-    kind: RegisteredId["kind"],
-  ) => {
-    const prior = ids.get(id);
-    if (!prior) {
-      ids.set(id, { path, kind });
-      return;
-    }
-    addProjectIssue(
-      issues,
-      "project.id-duplicate",
-      path,
-      `ID “${id}” is already used at ${prior.path}.`,
-    );
-  };
-
   project.floors.forEach((floor, floorIndex) => {
-  register(floor.id, `floors[${floorIndex}].id`, "architecture");
-  floor.hedges?.forEach((hedge, index) => register(hedge.id, `floors[${floorIndex}].hedges[${index}].id`, "architecture"));
-  floor.pools?.forEach((pool, index) => register(pool.id, `floors[${floorIndex}].pools[${index}].id`, "architecture"));
-  floor.groundZones?.forEach((zone, index) => register(zone.id, `floors[${floorIndex}].groundZones[${index}].id`, "architecture"));
-  floor.rooms.forEach((room, index) => register(room.id, `floors[${floorIndex}].rooms[${index}].id`, "architecture"));
-  floor.walls.forEach((wall, index) => register(wall.id, `floors[${floorIndex}].walls[${index}].id`, "architecture"));
-  floor.wallJunctions.forEach((junction, index) => register(junction.id, `floors[${floorIndex}].wallJunctions[${index}].id`, "architecture"));
-  floor.openings.forEach((opening, index) => register(opening.id, `floors[${floorIndex}].openings[${index}].id`, "architecture"));
-  floor.ceilings?.forEach((ceiling, index) => register(ceiling.id, `floors[${floorIndex}].ceilings[${index}].id`, "architecture"));
+    register(floor.id, `floors[${floorIndex}].id`, "architecture");
+    floor.hedges?.forEach((hedge, index) => register(hedge.id, `floors[${floorIndex}].hedges[${index}].id`, "architecture"));
+    floor.pools?.forEach((pool, index) => register(pool.id, `floors[${floorIndex}].pools[${index}].id`, "architecture"));
+    floor.groundZones?.forEach((zone, index) => register(zone.id, `floors[${floorIndex}].groundZones[${index}].id`, "architecture"));
+    floor.rooms.forEach((room, index) => register(room.id, `floors[${floorIndex}].rooms[${index}].id`, "architecture"));
+    floor.walls.forEach((wall, index) => register(wall.id, `floors[${floorIndex}].walls[${index}].id`, "architecture"));
+    floor.wallJunctions.forEach((junction, index) => register(junction.id, `floors[${floorIndex}].wallJunctions[${index}].id`, "architecture"));
+    floor.openings.forEach((opening, index) => register(opening.id, `floors[${floorIndex}].openings[${index}].id`, "architecture"));
+    floor.ceilings?.forEach((ceiling, index) => register(ceiling.id, `floors[${floorIndex}].ceilings[${index}].id`, "architecture"));
   });
   project.stairs.forEach((stair, index) => register(stair.id, `stairs[${index}].id`, "architecture"));
 
@@ -61,17 +42,43 @@ export const validateGlobalProjectIds = (
   }));
   project.shortcuts.forEach((shortcut, index) => register(shortcut.id, `shortcuts[${index}].id`, "shortcut"));
 
-  project.sceneItems.forEach((item, index) => {
-    const prior = ids.get(item.id);
-    if (prior) {
-      addProjectIssue(
-        issues,
-        "project.item-id-duplicate",
-        `sceneItems[${index}].id`,
-        `Scene item id “${item.id}” is already used at ${prior.path}.`,
-      );
-    } else {
-      ids.set(item.id, { path: `sceneItems[${index}].id`, kind: "architecture" });
-    }
+  project.sceneItems.forEach((item, index) => register(item.id, `sceneItems[${index}].id`, "item"));
+};
+
+/** The same identity namespace used by validation, including implicit opening slots. */
+export const collectProjectIds = (project: HomeProject): string[] => {
+  const ids: string[] = [];
+  visitProjectIds(project, id => ids.push(id));
+  return ids;
+};
+
+const identityLabel = (project: HomeProject, path: string): string => {
+  const room = /^floors\[(\d+)\]\.rooms\[(\d+)\]\.id$/.exec(path);
+  if (room) {
+    const floor = project.floors[Number(room[1])];
+    return `Room “${floor.rooms[Number(room[2])].name}” on “${floor.name}”`;
+  }
+  const item = /^sceneItems\[(\d+)\]/.exec(path);
+  if (item) {
+    const value = project.sceneItems[Number(item[1])];
+    const floor = project.floors.find(floor => floor.id === value.floorId);
+    return `${path.includes("entitySlots") ? "Device slot for" : "Scene item"} “${value.modelId}” on “${floor?.name ?? value.floorId}”`;
+  }
+  return path;
+};
+
+export const validateGlobalProjectIds = (project: HomeProject, issues: HomeProjectIssue[]) => {
+  const ids = new Map<string, RegisteredId>();
+  visitProjectIds(project, (id, path, kind) => {
+    const prior = ids.get(id);
+    if (!prior) { ids.set(id, { path, kind }); return; }
+    const roomConflict = /\.rooms\[\d+\]\.id$/.test(path);
+    addProjectIssue(issues, kind === "item" ? "project.item-id-duplicate" : "project.id-duplicate", path,
+      `${identityLabel(project, path)} has internal ID “${id}”, already used by ${identityLabel(project, prior.path)} (${prior.path}). `
+      + (roomConflict
+        ? "Room names may repeat; give these rooms distinct IDs in the project JSON. Renaming a room does not change its ID."
+        : kind === "item" || path.includes("entitySlots")
+          ? "Catalog models may repeat; delete and re-add the conflicting item in Arrange, or assign distinct item and slot IDs in the project JSON."
+          : "Assign distinct IDs to these entries in the project JSON."));
   });
 };

@@ -12,7 +12,7 @@ import type {
   RoomSpec,
   ShortcutSpec,
 } from "../types";
-import type { StraightStairSpec } from "../stairs/types";
+import type { StairSpec } from "../stairs/types";
 import type { RoofSettings } from "../roof/roof-settings";
 import type { ActionBarConfiguration } from "../action-bar/action-bar-config";
 import { migrateLegacyProject } from "./migrations";
@@ -127,7 +127,7 @@ export interface HomeProject {
   };
   coordinates: FloorCoordinates;
   floors: readonly DraftLayoutFloorSpec[];
-  stairs: readonly StraightStairSpec[];
+  stairs: readonly StairSpec[];
   sceneItems: readonly SceneItemSpec[];
   roomProfiles: Readonly<Record<string, RoomProfileSpec>>;
   openingProfiles: Readonly<Record<string, OpeningProfileSpec>>;

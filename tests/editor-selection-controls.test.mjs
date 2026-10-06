@@ -77,8 +77,10 @@ await withModules(async (load) => {
       { id: "light-battery", deviceRole: "battery", compatibleDomains: ["sensor"] },
     ] };
     const copy = duplicateSceneItem(device, [device], floor, ["light-primary-copy"]);
-    assert.equal(copy.id, "chair-copy");
-    assert.deepEqual(copy.entitySlots.map((slot) => slot.id), ["light-primary-copy-2", "light-battery-copy"]);
+    const ids = [copy.id, ...copy.entitySlots.map(slot => slot.id)];
+    assert.equal(new Set(ids).size, 3);
+    for (const id of ids) assert.match(id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    assert.ok(ids.every(id => ![device.id, "light-primary", "light-battery", "light-primary-copy"].includes(id)));
     assert.deepEqual(copy.entitySlots.map((slot) => slot.deviceRole), ["primary", "battery"]);
     assert.notEqual(copy.entitySlots[0].compatibleDomains, device.entitySlots[0].compatibleDomains);
     const assignments = { "light-primary": "light.test_fixture", "light-battery": "sensor.test_fixture" };

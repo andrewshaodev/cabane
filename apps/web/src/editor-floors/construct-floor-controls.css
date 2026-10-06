@@ -1,0 +1,29 @@
+.construct-floor-controls { position: relative; display: flex; align-items: center; gap: 8px; margin: 0 0 18px; }
+.construct-floor-controls__trigger {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  flex: 1; min-width: 0; min-height: 37px; padding: 7px 10px;
+  border: 1px solid var(--editor-line); border-radius: 7px;
+  color: var(--preview-ink); background: #faf6ef;
+  font: 500 var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif;
+  text-align: left; cursor: pointer;
+}
+.construct-floor-controls__trigger > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.construct-floor-controls__trigger > .editor-icon { width: 16px; height: 16px; flex: none; transform: rotate(90deg); }
+.construct-floor-controls__trigger:hover:not(:disabled), .construct-floor-controls__trigger[aria-expanded="true"] { background: #eae5d9; }
+.construct-floor-controls .editor-button { flex: none; padding: 9px; }
+.construct-floor-controls__menu {
+  position: absolute; z-index: 12; top: calc(100% + 6px); left: 0; right: 0;
+  padding: 5px; border-radius: 9px; background: #faf6ef;
+  box-shadow: 0 6px 24px #302c2426; max-height: min(340px, 55dvh); overflow-y: auto;
+}
+.construct-floor-controls__menu button {
+  display: flex; align-items: center; gap: 9px; width: 100%; min-height: 38px; padding: 9px 10px;
+  border: 0; border-radius: 5px; background: transparent; color: var(--preview-ink);
+  text-align: left; font: 400 var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif; cursor: pointer;
+}
+.construct-floor-controls__menu button > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.construct-floor-controls__menu button[aria-checked="true"] { color: #963f27; background: #eee0d4; font-weight: 600; }
+.construct-floor-controls__menu button:hover, .construct-floor-controls__menu button:focus-visible { background: #eae5d9; }
+.construct-floor-controls__menu [role="separator"] { height: 1px; background: var(--editor-line); margin: 5px; }
+.construct-floor-controls__menu .editor-icon { width: 16px; height: 16px; }
+@media (pointer: coarse) { .construct-floor-controls button { min-height: 44px; } }

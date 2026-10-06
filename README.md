@@ -46,7 +46,27 @@ npm run dev
 ```
 
 Open the local URL printed by the development server. Run `npm run verify` for
-the repository's automated checks. The app can be built with `npm run build`.
+the repository's automated checks. Build the standalone app with `npm run build`.
+
+Cabane also runs as the native `cabane-panel` custom element inside Home
+Assistant. It borrows the signed-in host connection; each personal workspace
+explicitly selects that instance, and the demo remains simulated. The panel
+keeps its navigation and UI inside its own memory router and shadow root.
+Standalone browser sign-in remains available in the regular web app.
+
+Build and check the native panel from a clean, committed frontend tree:
+
+```sh
+npm run build:panel
+node scripts/verify-panel.mjs
+```
+
+The artifact in `apps/web/dist-panel` includes local assets, license notices,
+and a manifest with the source commit and file hashes. The verifier runs an
+isolated local host fixture, without accessing a household HA instance. For
+uncommitted development only, use `CABANE_PANEL_ALLOW_DIRTY=1 npm run build:panel`;
+its manifest is marked development-only. See the [delivery contract](./docs/product/verification-and-delivery.md)
+for the scope of these checks.
 
 For guided setup or home authoring, see the [repository skills](./.agents/skills/)
 and [agent rules](./AGENTS.md).

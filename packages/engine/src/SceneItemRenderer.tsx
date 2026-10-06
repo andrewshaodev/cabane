@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import { resolveModelVariant } from "./model-variants";
 import { memo, useContext, useEffect, useRef, useState } from "react";
 import { SceneNightContext, sceneLightState } from "./scene-light-state";
@@ -80,6 +81,7 @@ function DeviceSceneItem({
   liveMediaByEntityId: Readonly<Partial<Record<EntityId, DeviceLiveMedia>>>;
   groupName: string;
 }) {
+  const dom = useCabaneDom();
   const scale = deviceSceneItemScaleForSize(item.size, definition);
   const press = useRef<{ pointerId: number; x: number; y: number } | null>(null);
   const [hovered, setHovered] = useState(false);
@@ -87,9 +89,9 @@ function DeviceSceneItem({
 
   useEffect(() => {
     if (!hovered || typeof document === "undefined") return;
-    const previousCursor = document.body.style.cursor;
-    document.body.style.cursor = "pointer";
-    return () => { document.body.style.cursor = previousCursor; };
+    const previousCursor = dom.container.style.cursor;
+    dom.container.style.cursor = "pointer";
+    return () => { dom.container.style.cursor = previousCursor; };
   }, [hovered]);
 
   const renderable = scale !== null;

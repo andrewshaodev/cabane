@@ -38,6 +38,7 @@ await withModules(async (load) => {
     ...homeExtensions.deviceModels,
   };
   const { SceneItemRenderer, createSeedProjectRecord } = await load("/packages/engine/src/index.ts");
+  const { useHomeEditorController } = await load("/apps/web/src/editor-workspace/useHomeEditorController.ts");
   const { HomeEditor } = await load("/apps/web/src/HomeEditor.tsx");
 
   test("action bar panel keeps slot edits in draft history until Save", async () => {
@@ -206,6 +207,11 @@ await withModules(async (load) => {
       const root = createRoot(dom.window.document.getElementById("root"));
       const record = createSeedProjectRecord(ownerHomeProject, 1);
       let publishedProject = null;
+      let controller;
+      function ConstructHarness(props) {
+        controller = useHomeEditorController(props);
+        return null;
+      }
       const lifecycle = {
         autosave: async (current, draft, _now, bindings) => ({
           status: "saved", record: { ...current, draft, bindings, revision: current.revision + 1 },
@@ -219,10 +225,10 @@ await withModules(async (load) => {
         },
       };
       try {
-        await act(async () => root.render(createElement(HomeEditor, {
+        await act(async () => root.render(createElement(initialRequest.mode === "construct" ? ConstructHarness : HomeEditor, {
           initialRecord: record, lifecycle, initialRequest, onClose() {},
         })));
-        await run({ dom, record, getPublishedProject: () => publishedProject });
+        await run({ dom, record, getPublishedProject: () => publishedProject, getController: () => controller });
       } catch (error) {
         if (error instanceof AggregateError) throw new Error(error.errors.map((entry) => entry.stack).join("\n"));
         throw error;
@@ -239,17 +245,13 @@ await withModules(async (load) => {
       key, bubbles: true, cancelable: true, [modifier]: true,
     }));
 
-    await renderEditor({ mode: "construct" }, async ({ dom, record }) => {
+    await renderEditor({ mode: "construct" }, async ({ dom, record, getController }) => {
       const document = dom.window.document;
-      await act(async () => document.querySelector(".construction-inspector__expert-toggle").click());
       assert.equal(shortcut(dom.window, "c", "ctrlKey"), true);
       assert.equal(shortcut(dom.window, "v", "ctrlKey"), true);
       const source = record.draft.floors[0].openings[0];
-      const sourceButton = [...document.querySelectorAll(".construction-inspector__technical-list button")]
-        .find((button) => button.textContent.includes(source.id));
-      await act(async () => sourceButton.click());
-      const openingCount = () => [...document.querySelectorAll(".construction-inspector__technical-list button")]
-        .filter((button) => /^(door|window|passage) ·/.test(button.textContent)).length;
+      await act(async () => getController().constructEditor.selectOpening(source.id));
+      const openingCount = () => getController().constructEditor.draft.openings.length;
       const before = openingCount();
       await act(async () => { assert.equal(shortcut(dom.window, "c", "ctrlKey"), false); });
       assert.equal(openingCount(), before, "copy alone does not mutate the floor");
@@ -260,13 +262,8 @@ await withModules(async (load) => {
       assert.equal(openingCount(), before, "shortcuts stay inactive in editable fields");
       await act(async () => { assert.equal(shortcut(dom.window, "v", "ctrlKey"), false); });
       assert.equal(openingCount(), before + 1);
-      const copyButton = [...document.querySelectorAll(".construction-inspector__technical-list button")]
-        .find((button) => button.textContent.includes(`${source.id}-copy`));
-      assert.equal(copyButton?.getAttribute("aria-pressed"), "true");
-
-      const originalButton = [...document.querySelectorAll(".construction-inspector__technical-list button")]
-        .find((button) => button.textContent.includes(source.id) && !button.textContent.includes(`${source.id}-copy`));
-      await act(async () => originalButton.click());
+      assert.equal(getController().constructEditor.selection.id, `${source.id}-copy`);
+      await act(async () => getController().constructEditor.selectOpening(source.id));
       await act(async () => { assert.equal(shortcut(dom.window, "c", "ctrlKey"), false); });
       await act(async () => { assert.equal(dom.window.dispatchEvent(new dom.window.KeyboardEvent("keydown", {
         key: "Delete", bubbles: true, cancelable: true,
@@ -274,8 +271,7 @@ await withModules(async (load) => {
       assert.equal(openingCount(), before);
       await act(async () => { assert.equal(shortcut(dom.window, "v", "ctrlKey"), false); });
       assert.equal(openingCount(), before, "a removed copied source cannot be pasted");
-
-      await act(async () => [...document.querySelectorAll("button")].find((button) => button.textContent === "Arrange").click());
+      await act(async () => getController().selectMode("furnish"));
       assert.equal(shortcut(dom.window, "v", "ctrlKey"), true, "a copied opening is inactive in Arrange");
     });
 
@@ -292,8 +288,10 @@ await withModules(async (load) => {
       await act(async () => button("Save").click());
       assert.equal(shortcut(dom.window, "v", "metaKey"), true, "paste stays inactive while Save is open");
       await act(async () => (button("Save anyway") ?? button("Save changes")).click());
-      assert.ok(getPublishedProject().sceneItems.some((item) => item.id === `${furnishing.id}-copy`));
-      assert.equal(getPublishedProject().sceneItems.filter((item) => item.id.startsWith(`${furnishing.id}-copy`)).length, 1);
+      const originalIds = new Set(ownerHomeProject.sceneItems.map(item => item.id));
+      const copies = getPublishedProject().sceneItems.filter(item => !originalIds.has(item.id));
+      assert.equal(copies.length, 1);
+      assert.equal(copies[0].modelId, furnishing.modelId);
     });
   });
 
@@ -454,7 +452,7 @@ test("the product opens the unified editor and exposes its approved chrome", asy
   assert.match(host, /setConstructionApplied\(reason === "applied"\)/);
   assert.match(host, /constructionApplied=\{constructionApplied\}/);
   assert.match(await readFile(new URL("../packages/engine/src/onboarding/OnboardingExperience.tsx", import.meta.url), "utf8"), /useSetupRecord\(manifest\.home\.id, constructionApplied\)/);
-  assert.match(editor, /name="save" \/>Save<\/button>/);
+  assert.match(editor, /name="save" \/>Save<\/EditorButton>/);
   assert.match(editor, /"Saving…"[\s\S]*"Save anyway"[\s\S]*"Save changes"/);
   assert.doesNotMatch(editor, /[">](?:Publish|Publishing|Ready to publish)/);
   assert.doesNotMatch(editor, /<SolarLighting/);
@@ -490,12 +488,12 @@ test("selected walls expose friendly facts before exact expert controls", async 
   assert.match(inspector, /CommittedNumberInput/);
   assert.match(inspector, /label="Wall thickness"/);
   assert.match(inspector, /DebouncedColorInput/);
-  assert.match(inspector, /label="Left wall face color"/);
+  assert.match(inspector, /label="Wall exterior color"/);
   assert.match(inspector, /setTimeout\(\(\) => \{/);
   assert.match(inspector, /\}, 160\)/);
   assert.doesNotMatch(inspector, /construction-inspector__tools|construction-inspector__history/);
   const openingProperties = await readFile("apps/web/src/editor-preview/construct/OpeningProperties.tsx", "utf8");
-  assert.match(inspector, /<OpeningProperties/);
+  assert.match(await readFile("apps/web/src/editor-preview/construct/OpeningDetails.tsx", "utf8"), /<OpeningProperties/);
   assert.match(await readFile("apps/web/src/editor-preview/construct/DoorDesignFields.tsx", "utf8"), /aria-label="Door operation"/);
   assert.match(openingProperties, /aria-label="Window glazing"/);
   assert.match(openingProperties, /aria-label="Passage shape"/);

@@ -407,6 +407,14 @@ await withModules(async (load) => {
       assert.equal(updated.offsetPlanUnits, 1.1);
       assert.equal(updated.widthPlanUnits, 0.8);
       assert.equal(updated.openingHeightMeters, 1.95);
+      const previewOpening = state.previewFloor.openings.find((candidate) => candidate.id === opening.id);
+      assert.equal(previewOpening.widthPlanUnits, 0.8);
+      assert.equal(previewOpening.openingHeightMeters, 1.95);
+      const reopened = createConstructEditorState(JSON.parse(JSON.stringify(state.previewFloor)));
+      const restored = reopened.history.present.openings.find((candidate) => candidate.id === opening.id);
+      assert.equal(restored.widthPlanUnits, 0.8);
+      assert.equal(restored.openingHeightMeters, 1.95);
+
 
       state = reduce(state, { type: "delete-selection" });
       assert.equal(state.history.present.openings.some((candidate) => candidate.id === opening.id), false);

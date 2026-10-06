@@ -86,4 +86,4 @@
 .workspace-library-actions .editor-icon { width: 18px; height: 18px; flex-shrink: 0; }
 .workspace-library-actions button:hover:not(:disabled) { background: #e9e3d6; }
 .workspace-library-actions .workspace-primary:hover:not(:disabled) { background: #44583b; }
-@media (max-width: 380px) { .workspace-library-actions { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .workspace-library-actions { grid-template-columns: 1fr; } }

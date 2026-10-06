@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import type { EditorMode } from "../editor-chrome/EditorModeNav";
 import type { useConstructEditor, useConstructMeasure, useFloorZoneDrawing } from "../editor-preview/construct";
@@ -32,6 +33,7 @@ export function useHomeEditorShortcuts({
   furnishingEditor, marqueeSelecting, mode, pendingRoomPaintId, previewOpen, publishOpen, redoProject,
   selectedOpening, undoProject, setPendingRoomPaintId, setDragging
 }: ShortcutContext) {
+  const dom = useCabaneDom();
   const copiedEditorElement = useRef<{ mode: "construct" | "furnish"; id: string } | null>(null);
   useEffect(() => {
     if (editingLocked || previewOpen || publishOpen) return;
@@ -60,7 +62,7 @@ export function useHomeEditorShortcuts({
         redoProject();
         return;
       }
-      if (document.querySelector(".shortcuts-workspace")) return;
+      if (dom.root.querySelector(".shortcuts-workspace")) return;
       if (mode === "connect") return;
       if (historyModifier && !event.shiftKey && (key === "c" || key === "v")) {
         if (dragging) return;
@@ -130,8 +132,8 @@ export function useHomeEditorShortcuts({
         constructEditor.deleteSelected();
       }
     };
-    globalThis.addEventListener("keydown", handleConstructShortcut, true);
-    return () => globalThis.removeEventListener("keydown", handleConstructShortcut, true);
+    dom.events.addEventListener("keydown", handleConstructShortcut, true);
+    return () => dom.events.removeEventListener("keydown", handleConstructShortcut, true);
   }, [clearConstructionSelection, clearFurnishingSelection, constructEditor, constructMeasure, dragging,
     duplicateArrangeItem, duplicateConstructionOpening, editingLocked, floorZoneDrawing, furnishingEditor, marqueeSelecting, mode,
     pendingRoomPaintId, previewOpen, publishOpen, redoProject, selectedOpening, undoProject]);

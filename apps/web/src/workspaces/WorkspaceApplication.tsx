@@ -1,3 +1,4 @@
+import { NativeWorkspaceWelcome } from "./NativeWorkspaceWelcome";
 import { WorkspaceOpenPage } from "./WorkspaceOpenPage";
 import { deleteReferenceHome } from "../editor-reference-plan/reference-storage";
 import { enrollBuildTutorial, forgetBuildTutorial } from "../editor-onboarding/build-tutorial-storage";
@@ -5,7 +6,7 @@ import { lastOpenedWorkspace, forgetWorkspacePresentation } from "./workspace-pr
 import { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import { serializeCanonicalJson, setupStorageKey, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
+import { serializeCanonicalJson, setupStorageKey, useHomeAssistantHostSession, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
 import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
@@ -19,7 +20,12 @@ import { ownerProjectRegistries } from "../project-runtime";
 
 export function WorkspaceApplication() {
   const location = useLocation();
+  const hostSession = useHomeAssistantHostSession();
   const navigate = useNavigate();
+  // Keep an explicit startup choice authoritative while router transitions and
+  // IndexedDB/onboarding state updates commit at different React priorities.
+  const [startupDestination, setStartupDestination] = useState<string | null>(null);
+  useEffect(() => { if (location.pathname !== "/") setStartupDestination(null); }, [location.pathname]);
   const [repository, setRepository] = useState<WorkspaceRepository | null>(null);
   const onboarding = useWorkspaceOnboarding(repository);
   const [entries, setEntries] = useState<WorkspaceEntry[] | null>(null);
@@ -27,10 +33,10 @@ export function WorkspaceApplication() {
   const [migrationError, setMigrationError] = useState<string | undefined>();
   // Keep the initiating identity while the runtime asynchronously consumes OAuth.
   // ConnectedProduct removes its session return request after restoring navigation.
-  const [callbackRequest] = useState(() => readEditorReturn());
+  const [callbackRequest] = useState(() => hostSession ? null : readEditorReturn());
   useEffect(() => {
     let active = true;
-    void initializeWorkspaces(window.indexedDB, window.localStorage).then(async result => {
+    void initializeWorkspaces(window.indexedDB, window.localStorage, { skipLegacyMigration: Boolean(hostSession) }).then(async result => {
       const all = await result.repository.list();
       if (active) { setRepository(result.repository); setEntries(all); setMigrationError(result.migrationError); }
     }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : "Browser storage is unavailable."); });
@@ -49,7 +55,7 @@ export function WorkspaceApplication() {
   if (error) return <main className="direction-project-loading is-error"><strong>Could not load your workspaces.</strong><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></main>;
   if (!repository || !entries) return <main className="direction-project-loading">Loading your workspaces…</main>;
   if (location.pathname.startsWith("/open/")) return <WorkspaceOpenPage repository={repository} onOpened={openedRemote} />;
-  const isCallback = location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
+  const isCallback = !hostSession && location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
   const callback = isCallback ? callbackRequest : null;
   if (isCallback) {
     if (!callback || !entries.some(entry => entry.metadata.id === callback.workspaceId)) {
@@ -60,7 +66,16 @@ export function WorkspaceApplication() {
     }
   }
   if (location.pathname === "/") {
+    if (startupDestination) return <Navigate to={startupDestination} replace />;
     if (!onboarding.loaded) return <main className="direction-project-loading">Loading your home…</main>;
+    if (hostSession && onboarding.state && !onboarding.state.welcomeDismissed
+      && entries.length === 1 && entries[0].metadata.id === onboarding.state.demoWorkspaceId) {
+      return <NativeWorkspaceWelcome session={hostSession} repository={repository}
+        onRestored={async id => { setStartupDestination(workspaceHomePath(id)); await refresh(); await onboarding.dismiss("welcome"); }}
+        onBuild={async () => { setStartupDestination("/build"); }}
+        onExplore={async () => { setStartupDestination("/demo"); await onboarding.dismiss("welcome"); }}
+        onCancel={async () => { setStartupDestination("/workspaces"); await onboarding.dismiss("welcome"); }} />;
+    }
     const latest = entries.find(entry => entry.metadata.id === lastOpenedWorkspace());
     const destination = latest ?? (entries.length === 1 ? entries[0] : undefined);
     if (destination && onboarding.state && destination.metadata.id === onboarding.state.demoWorkspaceId) {

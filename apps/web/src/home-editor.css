@@ -540,5 +540,6 @@
   .direction-preview.is-shortcuts .editor-close { grid-row: 2; }
 }
 
+/* Stair shape selection shares the inspector's native control treatment. */
 .construction-inspector__context { display: contents; }
 .construction-inspector__context > * { flex-shrink: 0; }

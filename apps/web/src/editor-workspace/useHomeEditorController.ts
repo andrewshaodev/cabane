@@ -1,8 +1,8 @@
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
-import { createBrowserUuid } from "@cabane/engine";
-import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StraightStairSpec } from "@cabane/engine";
+import { collectProjectIds, createBrowserUuid } from "@cabane/engine";
+import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
 import { useHomeEditorShortcuts } from "./useHomeEditorShortcuts";
@@ -11,6 +11,8 @@ import {
   evaluateDerivedWalkNavigation,
   polygonCentroid,
   useHomeAssistantRuntime,
+  useHomeAssistantHostSession,
+  useCabaneDom,
   validateWorkspaceBindings,
   type FloorFinishSpec,
   type ActionBarItem,
@@ -92,6 +94,7 @@ export function useHomeEditorController({
   autosaveDelayMs?: number;
   onClose: (record: HomeProjectRecord, reason: HomeEditorExitReason) => void;
 }) {
+  const dom = useCabaneDom();
   const [localMode, setMode] = useState<EditorMode>(initialRequest?.mode ?? "construct");
   const mode = navigation?.request.mode ?? localMode;
   const workspace = useEditorWorkspace({ initialRecord, lifecycle, autosaveDelayMs });
@@ -105,8 +108,8 @@ export function useHomeEditorController({
       ?? snapshot.project.floors.find(floor => floor.rooms.some(room => room.id === request.roomId))?.id;
     if (target && snapshot.project.floors.some(floor => floor.id === target)) floorNavigation.selectFloor(target, "target");
   }, [initialRequest]);
-  const [stairPlacement, setStairPlacement] = useState<StraightStairSpec | null>(null);
-  const [stairDialog, setStairDialog] = useState<StraightStairSpec | null>(null);
+  const [stairPlacement, setStairPlacement] = useState<StairSpec | null>(null);
+  const [stairDialog, setStairDialog] = useState<StairSpec | null>(null);
   useEffect(() => {
     setStairDialog(current => current && !snapshot.project.stairs.some(stair => stair.id === current.id) ? null : current);
   }, [snapshot.project.stairs]);
@@ -167,7 +170,7 @@ export function useHomeEditorController({
   useEffect(() => { setPreviewOpen(false); }, [mode]);
   const walkButton = useRef<HTMLButtonElement>(null);
   const closeWalk = useCallback(() => {
-    if (document.pointerLockElement) document.exitPointerLock();
+    if (dom.root.pointerLockElement) document.exitPointerLock();
     setPreviewOpen(false);
     requestAnimationFrame(() => walkButton.current?.focus());
   }, []);
@@ -352,13 +355,9 @@ export function useHomeEditorController({
   const duplicateArrangeItem = useCallback((id: string) => {
     if (!furnishingEditor.items.some((item) => item.id === id)) return false;
     setDetailsItemId(null);
-    const slots = [
-      ...Object.values(editorProject.roomProfiles).flatMap((room) => room.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((opening) => [opening.contactSlot?.id, opening.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    furnishingEditor.duplicate(id, constructEditor.previewFloor, slots);
+    furnishingEditor.duplicate(id, constructEditor.previewFloor, collectProjectIds(editorProject));
     return true;
-  }, [constructEditor.previewFloor, editorProject.openingProfiles, editorProject.roomProfiles, furnishingEditor]);
+  }, [constructEditor.previewFloor, editorProject, furnishingEditor]);
   const duplicateConstructionOpening = useCallback((id: string) => {
     setDetailsOpeningId(null);
     return constructEditor.duplicateOpening(id);
@@ -406,13 +405,14 @@ export function useHomeEditorController({
     if (editingLocked || unsettled) return;
     constructEditor.setTool("select");
     clearConstructionSelection();
-            const index = snapshot.project.floors.findIndex(f => f.id === activeFloorId);
-            const floor = snapshot.project.floors[index];
-            const existing = snapshot.project.stairs.find(stair => stair.lowerFloorId === activeFloorId);
-            if (existing) { setStairDialog(existing); return; }
-            setStairPlacement({ id: `stairs-${createBrowserUuid()}`, lowerFloorId: activeFloorId,
-              upperFloorId: snapshot.project.floors[index + 1].id, at: floor.footprint[0] ?? floor.coordinates.origin,
-              widthMeters: 1, runMeters: floor.floorToFloorHeightMeters * 1.5, rotationYRadians: 0 });
+    const index = snapshot.project.floors.findIndex(f => f.id === activeFloorId);
+    const floor = snapshot.project.floors[index];
+    const upperFloor = snapshot.project.floors[index + 1];
+    if (!floor || !upperFloor) return;
+    setStairDialog(null);
+    setStairPlacement({ id: `stairs-${createBrowserUuid()}`, lowerFloorId: activeFloorId,
+      upperFloorId: upperFloor.id, at: floor.footprint[0] ?? floor.coordinates.origin,
+      widthMeters: 1, runMeters: floor.floorToFloorHeightMeters * 1.5, rotationYRadians: 0 });
   };
 
   const closeEditor = useCallback(async () => {
@@ -454,6 +454,7 @@ export function useHomeEditorController({
       navigation.go({ ...navigation.request, view: connect.defaultView }, true);
     }
   }, [navigation, connect.defaultView]);
+  const hostSession = useHomeAssistantHostSession();
   const signIn = useConnectSignIn(runtime, async (origin) => {
     setConnectionBusy(true);
     try {
@@ -464,6 +465,7 @@ export function useHomeEditorController({
         const next = await onPrepareOrigin(workspace.getRecord(), origin);
         if (!workspace.adoptRecord(next)) throw new Error("The workspace changed while connecting. Reopen Connect to retry.");
       }
+      if (hostSession) return;
       const request: EditorOpenRequest = {
         floorId: activeFloorId,
         mode: "connect", view: connect.view, roomId: connect.roomId,
@@ -495,16 +497,8 @@ export function useHomeEditorController({
       { items: visualSceneItems, furnishingModels, deviceModels }, arrangeVisibility.current);
     setCatalogError(candidate.error);
     if (!candidate.placement) return;
-    const occupiedSlots = [
-      ...editorProject.floors.flatMap((floor) => [floor.id,
-        ...floor.rooms.map((room) => room.id), ...floor.walls.map((wall) => wall.id),
-        ...floor.wallJunctions.map((junction) => junction.id), ...floor.openings.map((opening) => opening.id),
-        ...(floor.ceilings ?? []).map((ceiling) => ceiling.id), ...(floor.groundZones ?? []).map(zone => zone.id)]),
-      ...editorProject.shortcuts.map((shortcut) => shortcut.id),
-      ...Object.values(editorProject.roomProfiles).flatMap((profile) => profile.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((profile) => [profile.contactSlot?.id, profile.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items, occupiedSlots, constructEditor.previewFloor.id);
+    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items,
+      collectProjectIds(editorProject), constructEditor.previewFloor.id);
     furnishingEditor.addItem(candidate.size ? { ...item, size: candidate.size } : item);
     setDetailsItemId(null);
     setArrangeAnnouncement(`${entry.definition.label} added. Drag to move it; use Undo to remove it.`);

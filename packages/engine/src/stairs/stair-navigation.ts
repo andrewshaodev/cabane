@@ -3,6 +3,7 @@ import { resolveItemTransform } from "../home-project/placements";
 import { deriveFloorLevels } from "../building/floor-levels";
 import { planPointToWorld, pointInsidePolygon, worldPointToPlan } from "../geometry";
 import { WALK_PLAYER_RADIUS, deriveWalkColliders, isWalkPointClear, resolveCircleMovement, safeSpawnPoseForRoom, type WalkPoint, type BoxWalkCollider } from "../navigation";
+import { projectStairPath, stairEndCoordinates } from "./path-projection";
 import { deriveStairFlight } from "./flight-geometry";
 import type { BuildingGeometry } from "./types";
 
@@ -20,21 +21,32 @@ export const moveBuildingWalker = (building: BuildingGeometry, pose: BuildingWal
     const stair = building.stairs[i];
     const flight = prepared ? prepared.flights[i] : deriveStairFlight(building, stair);
     if (!flight || (pose.floorId !== stair.lowerFloorId && pose.floorId !== stair.upperFloorId)) continue;
-    const dx = next.x - flight.startWorld[0], dz = next.z - flight.startWorld[1];
-    const along = dx * flight.forward[0] + dz * flight.forward[1];
-    const across = dx * flight.side[0] + dz * flight.side[1];
+    const first=flight.path[0],last=flight.path[flight.path.length-1];
+    const bottom=stairEndCoordinates(next,first,flight.entranceForward);
+    const top=stairEndCoordinates(next,last,flight.exitForward);
+    const halfWidth=flight.widthMeters/2-WALK_PLAYER_RADIUS;
+    const localElevation=pose.elevation-flight.baseElevationMeters;
     if (pose.stairId === stair.id) {
-      if (Math.abs(across) > flight.widthMeters / 2 - WALK_PLAYER_RADIUS) return pose;
-      if (along <= 0) return { ...candidate, floorId: stair.lowerFloorId, elevation: flight.baseElevationMeters, stairId: undefined };
-      if (along >= flight.runMeters) return { ...candidate, floorId: stair.upperFloorId, elevation: flight.baseElevationMeters + flight.riseMeters, stairId: undefined };
-      return { ...candidate, elevation: flight.baseElevationMeters + flight.riseMeters * along / flight.runMeters };
+      if(localElevation<.4 && bottom.along<=1e-8 && Math.abs(bottom.across)<=halfWidth)
+        return {...candidate,floorId:stair.lowerFloorId,elevation:flight.baseElevationMeters,stairId:undefined};
+      if(localElevation>flight.riseMeters-.4 && top.along>=-1e-8 && Math.abs(top.across)<=halfWidth)
+        return {...candidate,floorId:stair.upperFloorId,elevation:flight.baseElevationMeters+flight.riseMeters,stairId:undefined};
+      const projected=projectStairPath(flight,next,localElevation);
+      if(!projected || projected.distance>halfWidth+1e-8) return pose;
+      return {...candidate,elevation:flight.baseElevationMeters+projected.elevation};
     }
-    if (along > 0 && along < flight.runMeters && Math.abs(across) < flight.widthMeters / 2) {
-      const previousAlong = (pose.x - flight.startWorld[0]) * flight.forward[0] + (pose.z - flight.startWorld[1]) * flight.forward[1];
-      const entersAtEnd = pose.floorId === stair.lowerFloorId ? previousAlong <= 0 : previousAlong >= flight.runMeters;
-      if (!entersAtEnd || Math.abs(across) > flight.widthMeters / 2 - WALK_PLAYER_RADIUS) return pose;
-      return { ...candidate, stairId: stair.id, elevation: flight.baseElevationMeters + flight.riseMeters * along / flight.runMeters };
+    const fromBelow=pose.floorId===stair.lowerFloorId;
+    const end=fromBelow?first:last,forward=fromBelow?flight.entranceForward:flight.exitForward;
+    const previous=stairEndCoordinates(pose,end,forward),current=fromBelow?bottom:top;
+    const entering=fromBelow?previous.along<=1e-8&&current.along>=-1e-8:previous.along>=-1e-8&&current.along<=1e-8;
+    if(entering && Math.abs(current.across)<=halfWidth) {
+      const projected=projectStairPath(flight,next,fromBelow?0:flight.riseMeters);
+      if(projected && projected.distance<=halfWidth) return {...candidate,stairId:stair.id,elevation:flight.baseElevationMeters+projected.elevation};
     }
+    const plan=worldPointToPlan(next,building.coordinates);
+    // The upper bridge is a walkable surface over a spiral aperture.
+    const onLanding=pointInsidePolygon(plan,fromBelow?flight.lowerLanding:flight.upperLanding);
+    if(pointInsidePolygon(plan,flight.footprint) && !onLanding) return pose;
   }
   if (floor.id !== building.floors[0].id && !pointInsidePolygon(worldPointToPlan(next, building.coordinates), floor.footprint)) return pose;
   return candidate;

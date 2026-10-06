@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type { HomeProject, ManifestIssue, StraightStairSpec } from "@cabane/engine";
+import type { HomeProject, ManifestIssue, StairSpec } from "@cabane/engine";
 import { validateStairCandidate } from "./stair-candidate-validation";
 
 /** Geometry stays immediate; expensive diagnostics trail by at most 100 ms. */
-export function useStairValidation(building: HomeProject, candidate: StraightStairSpec | null) {
+export function useStairValidation(building: HomeProject, candidate: StairSpec | null) {
   const [issues, setIssues] = useState<ManifestIssue[]>([]);
   const latest = useRef({ building, candidate });
   latest.current = { building, candidate };

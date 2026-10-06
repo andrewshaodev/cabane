@@ -1,34 +1,37 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Plane, Raycaster, Vector2, Vector3 } from "three";
 import { planPointToWorld, worldPointToPlan, deriveStairFlight, StairPlan,
-  type FloorCoordinates, type HomeProject, type StraightStairSpec, type SnapTarget } from "@cabane/engine";
+  type FloorCoordinates, type HomeProject, type StairSpec, type SnapTarget } from "@cabane/engine";
 import { worldDragToSnappedConstructPlan } from "../editor-preview/construct/drag-geometry";
 import { constructPixelsPerMeter } from "../editor-preview/construct/plan-screen-scale";
 import { beginSegmentPress, segmentPressAnchors, type SegmentPress } from "../editor-preview/construct/segment-gesture";
 import { ConstructionAlignmentGuide } from "../editor-preview/construct/ConstructionAlignmentGuide";
-import { stairFromEndpoints, type StairPlacementPoint } from "./stair-placement-geometry";
+import { stairFromCorner, stairFromEndpoints, type StairPlacementPoint } from "./stair-placement-geometry";
 import { useStairValidation } from "./useStairValidation";
 import { StairFeedback } from "./StairFeedback";
 import { ConnectedFloorGuide } from "./ConnectedFloorGuide";
 
 export function StairPlacement({ stair, coordinates, building, onComplete, onCancel, onDraggingChange }: {
-  stair: StraightStairSpec; coordinates: FloorCoordinates; building: HomeProject;
-  onComplete: (stair: StraightStairSpec) => void; onCancel: () => void;
+  stair: StairSpec; coordinates: FloorCoordinates; building: HomeProject;
+  onComplete: (stair: StairSpec) => void; onCancel: () => void;
   onDraggingChange: (dragging: boolean) => void;
 }) {
   const { gl, camera } = useThree();
-  const [candidate, setCandidate] = useState<StraightStairSpec | null>(null);
+  const [candidate, setCandidate] = useState<StairSpec | null>(null);
   const [snap, setSnap] = useState<SnapTarget | null>(null);
   const validation = useStairValidation(building, candidate);
   const latest = useRef({ stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation });
   latest.current = { stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation };
   const flight = candidate ? deriveStairFlight(building, candidate) : null;
+  const dom = useCabaneDom();
   useEffect(() => {
     const canvas = gl.domElement;
     const raycaster = new Raycaster();
     const plane = new Plane(new Vector3(0, 1, 0), 0);
     let anchor: StairPlacementPoint | null = null;
+    let corner: StairPlacementPoint | null = null;
     let pointer: number | null = null;
     let press: SegmentPress | null = null;
     const project = (event: PointerEvent) => {
@@ -41,13 +44,16 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
       const walls = building.floors.filter(f => f.id === stair.lowerFloorId || f.id === stair.upperFloorId).flatMap(f => f.walls);
       const point = worldDragToSnappedConstructPlan({ point: hit, coordinates, walls, onSnap: setSnap,
         pixelsPerMeter: constructPixelsPerMeter(camera, rect.height), pointerType: event.pointerType,
-        absolute: event.altKey, angleOrigin: anchor ? worldPointToPlan(anchor, coordinates) : undefined });
+        absolute: event.altKey, angleOrigin: (corner ?? anchor) ? worldPointToPlan((corner ?? anchor)!, coordinates) : undefined });
       const [x, z] = planPointToWorld(point, coordinates);
       return { x, z };
     };
     const preview = (point: StairPlacementPoint) => {
       if (!anchor) return null;
-      const next = stairFromEndpoints(latest.current.stair, latest.current.coordinates, anchor, point);
+      const source=latest.current.stair;
+      const next = corner && source.shape === "l-shaped"
+        ? stairFromCorner(source,latest.current.coordinates,anchor,corner,point)
+        : stairFromEndpoints(source,latest.current.coordinates,anchor,point);
       setCandidate(next); return next;
     };
     const release = () => {
@@ -85,6 +91,9 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
       if (anchorOnly) { setCandidate(null); return; }
       const next = point && preview(point);
       if (!next) return;
+      if(latest.current.stair.shape === "l-shaped" && !corner) {
+        corner=point;setSnap(null);return;
+      }
       latest.current.validation.flush(next);
       latest.current.onComplete(next);
     };
@@ -97,14 +106,14 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
     canvas.addEventListener("pointerup", up, true);
     canvas.addEventListener("pointercancel", interrupted, true);
     canvas.addEventListener("lostpointercapture", interrupted, true);
-    window.addEventListener("keydown", key, true);
+    dom.events.addEventListener("keydown", key, true);
     return () => {
       canvas.removeEventListener("pointerdown", down, true);
       canvas.removeEventListener("pointermove", move, true);
       canvas.removeEventListener("pointerup", up, true);
       canvas.removeEventListener("pointercancel", interrupted, true);
       canvas.removeEventListener("lostpointercapture", interrupted, true);
-      window.removeEventListener("keydown", key, true);
+      dom.events.removeEventListener("keydown", key, true);
       release();
     };
   }, [gl, camera]);

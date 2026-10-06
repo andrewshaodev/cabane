@@ -33,11 +33,36 @@ Cabane links back to the library, using the same guarded save-on-exit flow.
 In the library, the whole home card opens its workspace; its three-dot menu keeps
 management actions separate. Each card has separate, non-clickable Connection and Storage rows. The library reports “HA configured” for a stored URL, never a live connection. Storage distinguishes Local only, Saved to HA · sync off, Sync enabled, and Changes pending; the library does not contact HA. Draft and recovery labels remain independent.
 
-OAuth return state includes the workspace ID, mapping target, selected item, and
-Arrange camera. Callback identity is validated before a home's runtime opens.
-The library does not mount Home Assistant connections.
+In the standalone app, OAuth return state includes the workspace ID, mapping
+target, selected item, and Arrange camera. Callback identity is validated before
+a home's runtime opens. The library mounts a connection only while its Home
+Assistant import source is open.
 
-A genuinely fresh installation opens `/welcome` over the default furnished villa
+The native Home Assistant panel uses the same workspace and editor routes in a
+memory router. Internal navigation, import selection, and dialogs do not change
+Home Assistant's browser URL or interpret its query parameters as OAuth callbacks.
+The panel mounts inside a shadow root, scopes portals, focus, and input handling
+to that root, and resolves bundled UI assets beside its module. The HA menu
+control opens the host navigation; Cabane's workspace navigation stays internal.
+
+Personal workspaces explicitly select “Use this Home Assistant” to borrow the
+current host session. A workspace configured for another origin shows the
+mismatch and requires that same explicit action; existing mappings remain keyed
+to their original instance. Settings identify sign-in as managed by Home Assistant.
+“Disconnect workspace” clears only that workspace's selection and detaches its
+runtime. “Retry connection” retries a failed borrowed session without OAuth.
+Home Assistant import uses the host session directly. The demo never borrows
+that session and continues to use simulated devices.
+
+On the first native-panel launch, a browser with only its untouched demo checks
+for homes saved on the host HA instance. Saved homes open **Import a workspace**
+with the host library and explicit Open choices; nothing is imported automatically.
+Create a new home and Explore the demo remain available. An empty result opens
+the usual welcome screen; errors or a timed-out check offer retry instead of
+claiming there are no saved homes. Existing local homes and dismissed welcome
+flows retain their usual startup, and standalone startup does not query HA.
+
+Otherwise, a genuinely fresh installation opens `/welcome` over the default furnished villa
 with two immediate choices. Explore (or closing the introduction) navigates to
 `/demo`. Build creates a blank workspace and opens Construct at `/build` without
 authentication. These URLs render real surfaces, not tracking-only redirects.
@@ -143,8 +168,9 @@ action. After successful sync and verified panel discovery, Open in Home
 Assistant opens that instance's /cabane sidebar panel. Mobile-app directions are
 optional disclosure content; no app installation is required. A missing-home
 fallback explains opening the saved home from the panel's HA library, including
-older releases' Import flow. This web change does not update the integration's
-bundled frontend or implement its session adapter.
+older releases' Import flow. The native panel retains its borrowed host session and first-launch saved-home
+picker. Its library hides the already-completed Add Cabane action. Releasing an
+updated integration bundle remains a separate delivery step.
 
 Manual Webpage cards and other-device links remain under Other ways to open this
 home. Both require successful synchronization before copying. Receiving standalone

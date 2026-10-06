@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
-import { Box3 } from "three";
+import { Box3, Vector3 } from "three";
 import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -38,11 +38,15 @@ await withModules(async (load) => {
 
   test("cozy sectional renders colored cushions inside its existing envelope", async () => {
     const definition = homeExtensions.furnishingModels["sectional-sofa"];
-    for (const variant of [undefined, "cozy"]) {
+    for (const variant of [undefined, "cozy", "right", "cozy-right"]) {
       const renderer = await create(createElement(definition.component, {
         variant, size: definition.defaultSize, entityStatesBySlotId: {}, reducedMotion: true, walkMode: false, onInteract() {},
       }));
-      assert.equal(renderer.scene.findAllByProps({ name: "cozy-sofa-cushions" }).length, variant === "cozy" ? 1 : 0);
+      assert.equal(renderer.scene.findAllByProps({ name: "cozy-sofa-cushions" }).length, variant === "cozy" || variant === "cozy-right" ? 1 : 0);
+      renderer.scene.instance.updateMatrixWorld(true);
+      const chaise = renderer.scene.findByProps({ name: "chaise-seat-cushion" }).instance;
+      const chaiseX = chaise.getWorldPosition(new Vector3()).x;
+      assert.ok(variant === "right" || variant === "cozy-right" ? chaiseX > 0 : chaiseX < 0);
       const box = new Box3().setFromObject(renderer.scene.instance);
       for (let axis = 0; axis < 3; axis++) {
         assert.ok(Math.abs(box.min.toArray()[axis] - definition.bounds.min[axis]) < .001);

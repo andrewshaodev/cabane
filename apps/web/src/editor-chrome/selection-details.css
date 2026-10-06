@@ -8,6 +8,7 @@
 .selection-details:focus-visible { outline: 2px solid #9c6b53; outline-offset: 3px; }
 .selection-details select { min-width: 0; width: 100%; min-height: 36px; padding: 8px 10px; border: 1px solid var(--editor-line); border-radius: 7px; color: var(--preview-ink); background: #faf7ef; font: inherit; }
 .selection-details .construction-inspector__single-control { display: grid; grid-template-columns: minmax(0, 1fr) 100px; align-items: center; gap: 10px; font-size: var(--editor-text-control, .875rem); color: var(--preview-muted); }
+.selection-details .stair-direction-control { grid-template-columns: minmax(0, 1fr); }
 .opening-properties__advanced summary { padding: 10px 0; color: var(--preview-muted); font: 600 var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif; letter-spacing: .01em; cursor: pointer; }
 .opening-direction__diagram { display: block; width: 100%; height: 108px; background: #ebe9df; border-radius: 7px; }
 .opening-direction .editor-action-button { display: flex; align-items: center; gap: 9px; min-height: 44px; width: 100%; padding: 8px 10px; border: 1px solid #d9c9ba; border-radius: 7px; background: #f8f3eb; color: #845a46; font: var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif; text-align: left; cursor: pointer; }

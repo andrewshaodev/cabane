@@ -1,6 +1,6 @@
 import { SceneRoomSelection } from "./building/RoomSelectionSurfaces";
 import { StairPlan } from "./stairs/models/StairPlan";
-import { StraightStairModel } from "./stairs/models";
+import { StraightStairModel, LShapedStairModel, SpiralStairModel } from "./stairs/models";
 import { deriveStairFlight, deriveStairApertures } from "./stairs/flight-geometry";
 import { StairSurfaceApertures } from "./stairs/surface-apertures";
 import { memo, useMemo } from "react";
@@ -56,6 +56,8 @@ export const ArchitectureScene = memo(function ArchitectureScene({ activeFloorId
       if (view === "plan" ? stair.lowerFloorId !== active && stair.upperFloorId !== active : !visible.has(stair.lowerFloorId)) return null;
       const flight = deriveStairFlight(manifest, stair);
       if (flight && view === "plan") return <StairPlan key={stair.id} flight={flight} upper={stair.upperFloorId === active} />;
+      if (flight?.shape === "spiral") return <SpiralStairModel key={stair.id} flight={flight} coordinates={manifest.coordinates} showUpperGuard={visible.has(stair.upperFloorId)} />;
+      if (flight?.shape === "l-shaped") return <LShapedStairModel key={stair.id} flight={flight} coordinates={manifest.coordinates} showUpperGuard={visible.has(stair.upperFloorId)} />;
       return flight ? <StraightStairModel key={stair.id} flight={flight} plan={view === "plan"} showUpperGuard={visible.has(stair.upperFloorId)} /> : null;
     })}
   </group></SceneRoomSelection.Provider>;

@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { RoomNameControl } from "./RoomNameControl";
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
@@ -17,6 +18,7 @@ type NamingProps = { onNameFocusHandled?: () => void; namingDisabled?: boolean; 
 const PlanRoom = memo(function PlanRoom({ room, coordinates, namingDisabled, nameFocusRequest, onNameFocusHandled, onRoomNameChange }: NamingProps & {
   room: FloorSpec["rooms"][number]; coordinates: FloorSpec["coordinates"];
 }) {
+  const dom = useCabaneDom();
   const label = useRef<HTMLSpanElement>(null);
   const bounds = useMemo(() => worldBoundsForPolygon(room.polygon, coordinates), [room.polygon, coordinates]);
   const areaSquareMeters = useMemo(() => Math.abs(polygonSignedArea(room.polygon))
@@ -27,7 +29,7 @@ const PlanRoom = memo(function PlanRoom({ room, coordinates, namingDisabled, nam
     const height = bounds.depth * Number(camera.zoom);
     // Avoid unreadable overlapping names in a fitted phone overview. Names
     // return as the user zooms; the room inspector always provides the full name.
-    const editing = Boolean(label.current.querySelector("input")) || label.current.contains(document.activeElement);
+    const editing = Boolean(label.current.querySelector("input")) || label.current.contains(dom.root.activeElement);
     label.current.style.visibility = !editing && (width < 56 || height < 28) ? "hidden" : "visible";
     label.current.style.maxWidth = `${Math.min(130, width * .85)}px`;
     label.current.style.fontSize = width < 100 ? "9px" : "11px";

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
+import { MemoryRouter } from "react-router";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -18,7 +19,7 @@ await withModules(async load => {
     const calls = [];
     const props = { entries: [entry], ...Object.fromEntries(["Open", "Create", "Rename", "Duplicate", "Delete", "Import", "Export", "Recover", "ExportRaw"].map(name => [`on${name}`, async (...args) => { calls.push([name, ...args]); }])), ...overrides };
     const root = createRoot(dom.window.document.getElementById("root"));
-    await act(async () => root.render(createElement(WorkspaceLibrary, props)));
+    await act(async () => root.render(createElement(MemoryRouter, null, createElement(WorkspaceLibrary, props))));
     return { dom, calls, async click(text) { const button = [...dom.window.document.querySelectorAll("button")].find(node => node.textContent.trim() === text); assert.ok(button, text); await act(async () => button.click()); },
       async close() { await act(async () => root.unmount()); dom.window.close(); for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; } } };
   }

@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import {
   useEffect,
   type MutableRefObject
@@ -12,16 +13,17 @@ export function DesktopLookSurface({
 }: {
   lookDeltaRef: MutableRefObject<StickVector>;
 }) {
+  const dom = useCabaneDom();
   useEffect(() => {
     const move = (event: MouseEvent) => {
-      if (document.pointerLockElement) {
+      if (dom.root.pointerLockElement) {
         lookDeltaRef.current.x += event.movementX;
         lookDeltaRef.current.y += event.movementY;
       }
     };
-    document.addEventListener("mousemove", move);
+    dom.events.addEventListener("mousemove", move);
     return () => {
-      document.removeEventListener("mousemove", move);
+      dom.events.removeEventListener("mousemove", move);
       lookDeltaRef.current = { x: 0, y: 0 };
     };
   }, [lookDeltaRef]);

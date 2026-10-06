@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useId, useState, type MouseEvent, type FocusEvent } from "react";
 import { createPortal } from "react-dom";
 import { EditorIcon, type EditorIconName } from "./EditorIcon";
@@ -19,14 +20,18 @@ interface EditorActionButtonProps {
 export function EditorActionButton({
   icon, label, shortcut, keyShortcuts, showLabel = false, pressed, disabled, disabledReason, warning, onClick,
 }: EditorActionButtonProps) {
+  const dom = useCabaneDom();
   const tooltipId = useId();
   const [position, setPosition] = useState<{ left: number; top: number } | null>(null);
   const showTooltip = (event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>) => {
     if (disabled) return;
     const rect = event.currentTarget.getBoundingClientRect();
+    const portalBounds = dom.root === document ? null : dom.portalContainer.getBoundingClientRect();
+    const width = portalBounds?.width ?? window.innerWidth;
+    const inset = Math.min(112, width / 2);
     setPosition({
-      left: Math.max(112, Math.min(window.innerWidth - 112, rect.left + rect.width / 2)),
-      top: rect.bottom + 9,
+      left: Math.max(inset, Math.min(width - inset, rect.left + rect.width / 2 - (portalBounds?.left ?? 0))),
+      top: rect.bottom + 9 - (portalBounds?.top ?? 0),
     });
   };
   useEffect(() => {
@@ -35,11 +40,11 @@ export function EditorActionButton({
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") dismiss(); };
     window.addEventListener("resize", dismiss);
     window.addEventListener("scroll", dismiss, true);
-    window.addEventListener("keydown", onKeyDown);
+    dom.events.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("resize", dismiss);
       window.removeEventListener("scroll", dismiss, true);
-      window.removeEventListener("keydown", onKeyDown);
+      dom.events.removeEventListener("keydown", onKeyDown);
     };
   }, [position]);
 
@@ -51,7 +56,7 @@ export function EditorActionButton({
         aria-describedby={position && !disabled ? tooltipId : undefined}
         onClick={onClick} onFocus={showTooltip} onBlur={() => setPosition(null)}
         onMouseEnter={showTooltip} onMouseLeave={(event) => {
-          if (document.activeElement !== event.currentTarget) setPosition(null);
+          if (dom.root.activeElement !== event.currentTarget) setPosition(null);
         }}>
         <EditorIcon name={icon} />
         {showLabel && <span>{label}</span>}
@@ -60,7 +65,7 @@ export function EditorActionButton({
       {position && !disabled && createPortal(
         <div role="tooltip" id={tooltipId} className="editor-action-tooltip" style={position}>
           {warning ?? label}{shortcut && <kbd>{shortcut}</kbd>}
-        </div>, document.body,
+        </div>, dom.portalContainer,
       )}
     </>
   );

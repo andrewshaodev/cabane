@@ -1,3 +1,5 @@
+import { connectedCanvasEvents } from "./connected-canvas-events";
+import { useCabaneDom } from "./CabaneDom";
 import { ScenePreview } from "./ScenePreview";
 import { RoomHoverProvider } from "./room-status/RoomHover";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
@@ -60,6 +62,7 @@ import { connectionLabel } from "./dashboard-contract";
 import { useDashboardController } from './useDashboardController';
 
 export function ValidatedDashboardView(props: Parameters<typeof useDashboardController>[0]) {
+  const dom = useCabaneDom();
   const orbitControls = useRef<OrbitControlsImpl | null>(null);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
@@ -83,7 +86,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar);
   const preferencesMenuItem = walkMode && <button type="button" onClick={event => {
     event.currentTarget.closest("details")?.removeAttribute("open");
-    if (document.pointerLockElement) document.exitPointerLock();
+    if (dom.root.pointerLockElement) document.exitPointerLock();
     setPreferencesOpen(true);
   }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>;
   const actionBarTargets = Object.fromEntries(actionBarItems.flatMap(item => {
@@ -138,7 +141,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                 && event.target instanceof HTMLCanvasElement) requestWalkPointerLock();
             }}>
             <Suspense fallback={<div className="scene-loading">Preparing the house…</div>}>
-              <Canvas
+              <Canvas events={connectedCanvasEvents}
                 shadows="percentage"
                 dpr={canvasDpr}
                 frameloop={!documentVisible ? "never" : walkMode ? "always" : "demand"}

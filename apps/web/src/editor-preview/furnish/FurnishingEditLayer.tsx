@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
   resolveItemTransform,
@@ -81,6 +82,7 @@ export function FurnishingEditLayer({
   onDragCancel,
   onDraggingChange,
 }: FurnishingEditLayerProps) {
+  const dom = useCabaneDom();
   const [rectangle, setRectangle] = useState<{ from: Vector3; to: Vector3 } | null>(null);
   const marquee = useRef<{ from: Vector3; to: Vector3; pointerId: number; target: PointerCaptureTarget | null } | null>(null);
   const drag = useRef<DragSession | null>(null);
@@ -136,10 +138,10 @@ export function FurnishingEditLayer({
       endDrag(true);
     };
     const blur = () => endDrag(true);
-    window.addEventListener("keydown", cancel, true);
+    dom.events.addEventListener("keydown", cancel, true);
     window.addEventListener("blur", blur);
     return () => {
-      window.removeEventListener("keydown", cancel, true);
+      dom.events.removeEventListener("keydown", cancel, true);
       window.removeEventListener("blur", blur);
       endDrag(true);
     };

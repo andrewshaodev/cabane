@@ -1,3 +1,4 @@
+import { useCabaneAssetUrl } from "../CabaneDom";
 import { useEffect, useRef } from "react";
 import { OnboardingPrivacy } from "./OnboardingPrivacy";
 
@@ -6,6 +7,7 @@ export function OnboardingIntroduction({ onExplore, onBuild, onDismiss, busy, er
   onExplore: () => void; onBuild: () => void; onDismiss: () => void;
   busy: boolean; error: string | null; links?: OnboardingLinks;
 }) {
+  const previewBaseUrl = useCabaneAssetUrl("onboarding/");
   const title = useRef<HTMLHeadingElement>(null);
   useEffect(() => { title.current?.focus({ preventScroll: true }); }, []);
   return <aside className="setup-task-surface onboarding-intro" aria-labelledby="onboarding-title" aria-busy={busy}>
@@ -20,7 +22,7 @@ export function OnboardingIntroduction({ onExplore, onBuild, onDismiss, busy, er
           ["connect", "Connect", "Home Assistant connection setup for a modeled device"],
           ["control", "Control", "A light controlled from the 3D home"],
         ].map(([name, label, alt], index) => <figure key={name}>
-          <img src={`/onboarding/${name}.png`} alt={alt} width={320} height={200} />
+          <img src={`${previewBaseUrl}${name}.png`} alt={alt} width={320} height={200} />
           <figcaption><span>{index + 1}</span> {label}</figcaption>
         </figure>)}
       </div>

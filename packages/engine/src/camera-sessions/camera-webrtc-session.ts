@@ -18,6 +18,7 @@ export const openWebRtcSession = async (
   onDisconnected: () => void,
   onVideoCreated: (video: HTMLVideoElement, transport: CameraTransport) => void,
   signal: AbortSignal,
+  videoContainer?: HTMLElement,
 ): Promise<CameraSession> => {
   throwIfAborted(signal);
   const clientConfig = await waitWithSignal(client.sendMessagePromise<WebRtcClientConfiguration>({
@@ -26,7 +27,7 @@ export const openWebRtcSession = async (
   }), signal);
   const peer = new RTCPeerConnection(clientConfig.configuration);
   const remoteStream = new MediaStream();
-  const video = makeVideo();
+  const video = makeVideo(true, videoContainer);
   onVideoCreated(video, "webrtc");
   let closed = false;
   let established = false;

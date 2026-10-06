@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { EntityStateSnapshot } from "../types";
 import type { SupportedServiceCall } from "../home-assistant-controls";
@@ -107,6 +108,7 @@ export function ProtectedCodeDialog({
   onCancel: () => void;
   onSubmit: (code: string) => Promise<unknown>;
 }) {
+  const dom = useCabaneDom();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -114,8 +116,8 @@ export function ProtectedCodeDialog({
   const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    previousFocus.current = document.activeElement instanceof HTMLElement
-      ? document.activeElement
+    previousFocus.current = dom.root.activeElement instanceof HTMLElement
+      ? dom.root.activeElement
       : null;
     inputRef.current?.focus();
     return () => previousFocus.current?.focus();
@@ -153,10 +155,10 @@ export function ProtectedCodeDialog({
           if (controls.length === 0) return;
           const first = controls[0];
           const last = controls.at(-1);
-          if (event.shiftKey && document.activeElement === first) {
+          if (event.shiftKey && dom.root.activeElement === first) {
             event.preventDefault();
             last?.focus();
-          } else if (!event.shiftKey && document.activeElement === last) {
+          } else if (!event.shiftKey && dom.root.activeElement === last) {
             event.preventDefault();
             first.focus();
           }

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
-import { HomeAssistantRuntimeProvider, normalizeHomeAssistantUrl, type WorkspaceRepository } from "@cabane/engine";
+import { HomeAssistantRuntimeProvider, useHomeAssistantHostSession, normalizeHomeAssistantUrl, type WorkspaceRepository } from "@cabane/engine";
 import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import type { HaWorkspaceSummary } from "./ha-workspace-client";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 
-function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void> }) {
+function WorkspaceHaLibraryContent({ repository, onRestored, onBusyChange }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; onBusyChange?: (busy: boolean) => void }) {
+  const hostSession = useHomeAssistantHostSession();
   const { runtime, client, coordinator } = useWorkspaceSyncCoordinator(repository);
   const [remote, setRemote] = useState<HaWorkspaceSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   const load = useCallback(async () => { try { setRemote(await client.list()); setError(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not list HA workspaces."); } }, [client]);
   useEffect(() => { if (runtime.status === "connected") void load(); }, [runtime.status, load]);
   const restore = async (summary: HaWorkspaceSummary) => {
@@ -28,7 +30,7 @@ function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: Wor
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not download HA data."); }
   };
   return <div className="workspace-ha-library-content">
-    {runtime.status !== "connected" ? <button type="button" onClick={runtime.connect}>Sign in to Home Assistant</button> : <>
+    {runtime.status !== "connected" ? hostSession ? <div><p role="status">{runtime.error ?? "Waiting for Home Assistant…"}</p>{["error", "disconnected"].includes(runtime.status) && <button type="button" onClick={runtime.retry}>Retry connection</button>}</div> : <button type="button" onClick={runtime.connect}>Sign in to Home Assistant</button> : <>
       <button type="button" onClick={() => void load()}>Refresh</button>
       {remote.length === 0 && !error && <p>No Cabane workspaces saved on this HA instance.</p>}
       {remote.map(item => <div key={item.home_id}><span>{item.name}</span><button type="button" disabled={busy} onClick={() => void (item.corrupt ? downloadDamaged(item) : restore(item))}>{item.corrupt ? "Download raw data" : "Open"}</button></div>)}
@@ -38,15 +40,16 @@ function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: Wor
   </div>;
 }
 
-export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; initialOrigin: string | null }) {
+export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin, onBusyChange }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; initialOrigin: string | null; onBusyChange?: (busy: boolean) => void }) {
+  const hostSession = useHomeAssistantHostSession();
   const [originInput, setOriginInput] = useState(() => window.sessionStorage.getItem("cabane:ha-library-origin") ?? initialOrigin ?? "");
-  const origin = normalizeHomeAssistantUrl(originInput);
-  useEffect(() => { if (origin) window.sessionStorage.setItem("cabane:ha-library-origin", origin); }, [origin]);
+  const origin = hostSession?.origin ?? normalizeHomeAssistantUrl(originInput);
+  useEffect(() => { if (origin && !hostSession) window.sessionStorage.setItem("cabane:ha-library-origin", origin); }, [origin, hostSession]);
   return <section className="workspace-ha-library">
-    <p>Sign in to choose a saved workspace.</p>
-    <label>Home Assistant address<input value={originInput} onChange={event => setOriginInput(event.target.value)} placeholder="Enter HTTPS address" /></label>
+    {hostSession ? <p>Choose a workspace saved on {hostSession.origin}. Sign-in is managed by Home Assistant.</p> : <p>Sign in to choose a saved workspace.</p>}
+    {!hostSession && <label>Home Assistant address<input value={originInput} onChange={event => setOriginInput(event.target.value)} placeholder="Enter HTTPS address" /></label>}
     {origin && <HomeAssistantRuntimeProvider key={origin} homeAssistantUrl={origin}>
-      <WorkspaceHaLibraryContent repository={repository} onRestored={onRestored} />
+      <WorkspaceHaLibraryContent repository={repository} onRestored={onRestored} onBusyChange={onBusyChange} />
     </HomeAssistantRuntimeProvider>}
   </section>;
 }

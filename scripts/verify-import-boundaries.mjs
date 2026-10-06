@@ -17,7 +17,7 @@ async function filesBelow(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === "dist") continue;
+    if (entry.name === "node_modules" || entry.name === "dist" || entry.name === "dist-panel") continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await filesBelow(path));
     else if (sourceExtensions.has(extname(entry.name))) files.push(path);

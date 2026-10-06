@@ -13,6 +13,8 @@ await withModules(async (load) => {
     "/apps/web/src/editor-preview/construct/FloorPaintConfirmation.tsx",
   );
 
+  const { useConstructEditor } = await load("/apps/web/src/editor-preview/construct/useConstructEditor.ts");
+  const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { OpeningDetails } = await load("/apps/web/src/editor-preview/construct/OpeningDetails.tsx");
   const { OpeningOrientationControls } = await load("/apps/web/src/editor-preview/construct/OpeningOrientationControls.tsx");
   const { SelectedOpeningActionBar } = await load("/apps/web/src/editor-preview/construct/SelectedOpeningControls.tsx");
@@ -348,6 +350,55 @@ await withModules(async (load) => {
     });
   });
 
+  test("passage Details exposes size and shape without door orientation controls", async () => {
+    await withDom(async ({ dom, root }) => {
+      const passage = {
+        id: "passage", kind: "passage", variant: "arched", archRiseMeters: .15,
+        wallId: wall.id, offsetPlanUnits: 1, widthPlanUnits: 1.5,
+        openingHeightMeters: 2.1, sillHeightMeters: 0,
+      };
+      const controller = editor({ kind: "opening", id: passage.id });
+      controller.draft.openings = [passage];
+      await act(async () => root.render(React.createElement(OpeningDetails, {
+        opening: passage, editor: controller, disabled: false, onClose() {},
+      })));
+      const document = dom.window.document;
+      assert.ok(document.querySelector('[aria-label="Passage properties"]'));
+      assert.equal(document.querySelector('[aria-label="Opening width"]').value, "1.5");
+      assert.equal(document.querySelector('[aria-label="Opening height"]').value, "2.1");
+      assert.ok(document.querySelector('[aria-label="Passage shape"]'));
+      assert.ok(document.querySelector('[aria-label="Passage arch rise"]'));
+      assert.equal(document.querySelector('.opening-direction'), null);
+    });
+  });
+
+  test("opening size edits update the preview and reject sizes that cannot fit", async () => {
+    await withDom(async ({ dom, root }) => {
+      let controller;
+      function Harness() {
+        controller = useConstructEditor(neutralDemoManifest.floors[0]);
+        const selected = controller.draft.openings.find(candidate => candidate.id === "demo-window");
+        return React.createElement(OpeningDetails, { opening: selected, editor: controller, disabled: false, onClose() {} });
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      await act(async () => controller.selectOpening("demo-window"));
+      await act(async () => controller.updateSelectedOpening({ widthPlanUnits: .8 }));
+      assert.equal(controller.previewFloor.openings.find(candidate => candidate.id === "demo-window").widthPlanUnits, .8);
+      assert.equal(dom.window.document.querySelector('[aria-label="Opening width"]').value, "0.8");
+      await act(async () => controller.updateSelectedOpening({ widthPlanUnits: 99 }));
+      assert.match(dom.window.document.querySelector('[role="alert"]').textContent, /does not fit/);
+      assert.equal(controller.draft.openings.find(candidate => candidate.id === "demo-window").widthPlanUnits, .8);
+      await act(async () => controller.resizeSelectedOpening(1.45, 1.1));
+      assert.equal(dom.window.document.querySelector('[aria-label="Opening width"]').value, "1.1");
+      assert.equal(dom.window.document.querySelector('[role="alert"]'), null);
+      await act(async () => controller.updateSelectedOpening({ openingHeightMeters: 99 }));
+      assert.ok(dom.window.document.querySelector('[role="alert"]'));
+      await act(async () => controller.updateSelectedOpening({ openingHeightMeters: 1.1 }));
+      assert.equal(dom.window.document.querySelector('[role="alert"]'), null);
+      assert.equal(controller.previewFloor.openings.find(candidate => candidate.id === "demo-window").openingHeightMeters, 1.1);
+    });
+  });
+
   test("orientation actions match the operation and panel count", async () => {
     await withDom(async ({ dom, root }) => {
       const cases = [
@@ -392,10 +443,13 @@ await withModules(async (load) => {
         opening: passage, ...actions, canDuplicate: false,
       })));
       buttons = [...dom.window.document.querySelectorAll("button")];
-      assert.deepEqual(buttons.map((button) => button.getAttribute("aria-label")), ["Duplicate", "Delete"]);
-      assert.equal(buttons[0].disabled, true);
-      assert.equal(buttons[0].title, "No free space on this wall.");
-      assert.equal(buttons[1].disabled, false);
+      assert.deepEqual(buttons.map((button) => button.getAttribute("aria-label")), ["Details", "Duplicate", "Delete"]);
+      assert.equal(buttons[0].disabled, false);
+      assert.equal(buttons[1].disabled, true);
+      assert.equal(buttons[1].title, "No free space on this wall.");
+      assert.equal(buttons[2].disabled, false);
+      await act(async () => buttons[0].click());
+      assert.deepEqual(calls, ["duplicate", "details"]);
     });
   });
 

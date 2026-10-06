@@ -20,6 +20,7 @@ export const openHlsSession = async (
   onDisconnected: () => void,
   onVideoCreated: (video: HTMLVideoElement, transport: CameraTransport) => void,
   signal: AbortSignal,
+  videoContainer?: HTMLElement,
 ): Promise<CameraSession> => {
   throwIfAborted(signal);
   const stream = await waitWithSignal(client.sendMessagePromise<{ url: string }>({
@@ -29,7 +30,7 @@ export const openHlsSession = async (
   }), signal);
   const url = resolveHomeAssistantMediaUrl(stream.url, homeAssistantOrigin);
   if (!url) throw new Error("Home Assistant returned an unsafe camera stream URL.");
-  let video = makeVideo();
+  let video = makeVideo(true, videoContainer);
   onVideoCreated(video, "hls");
   let closed = false;
   let hls: Hls | null = null;
@@ -77,7 +78,7 @@ export const openHlsSession = async (
       // has not CORS-enabled. Keep that DOM playback available in the viewer;
       // the texture-safety probe below will keep it out of WebGL.
       closeVideo(video);
-      video = makeVideo(false);
+      video = makeVideo(false, videoContainer);
       onVideoCreated(video, "hls");
       video.src = url;
       void video.play().catch(() => undefined);

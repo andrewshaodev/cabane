@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import viewIcon from "./assets/scene-actions/view.png";
 import {
   Fragment, useEffect, useRef, useState,
@@ -172,6 +173,7 @@ export function SceneActionBar({
   onAction: (item: ActionBarItem) => void;
   onChildAction?: (action: BuiltInShortcutId) => void;
 }) {
+  const dom = useCabaneDom();
   const [open, setOpen] = useState<"Build" | "View" | null>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [visibleCapacity, setVisibleCapacity] = useState<number | null>(null);
@@ -208,7 +210,7 @@ export function SceneActionBar({
       }
       if (!keyboardEnabled || mode === "walk" || event.defaultPrevented || event.repeat || event.isComposing
         || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey
-        || document.querySelector("dialog[open]")
+        || dom.root.querySelector("dialog[open]")
         || (event.target instanceof HTMLElement && (event.target.closest("input, textarea, select") || event.target.isContentEditable))) return;
       const group = event.key.toLowerCase() === "b" ? "Build" : event.key.toLowerCase() === "v" ? "View" : null;
       if (group && items.some(item => item.target.kind === "built-in" && item.target.action === group.toLowerCase())) {
@@ -217,9 +219,9 @@ export function SceneActionBar({
       }
       if (event.key.toLowerCase() === "r" && onToggleRoof) { event.preventDefault(); onToggleRoof(); }
     };
-    document.addEventListener("pointerdown", outside);
-    window.addEventListener("keydown", keydown);
-    return () => { document.removeEventListener("pointerdown", outside); window.removeEventListener("keydown", keydown); };
+    dom.events.addEventListener("pointerdown", outside);
+    dom.events.addEventListener("keydown", keydown);
+    return () => { dom.events.removeEventListener("pointerdown", outside); dom.events.removeEventListener("keydown", keydown); };
   }, [open, overflowOpen, keyboardEnabled, mode, onToggleRoof, items]);
   useEffect(() => {
     if (!open) return;

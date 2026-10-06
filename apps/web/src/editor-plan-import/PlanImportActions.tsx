@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { buildPlanGenerationPrompt } from "./plan-generation-prompt";
@@ -29,6 +30,7 @@ function PlanImportDialog({ mode, homeId, disabled, onClose, onImport }: {
   mode: "prompt" | "import"; homeId: string; disabled: boolean;
   onClose: () => void; onImport: (json: string) => void;
 }) {
+  const dom = useCabaneDom();
   const dialog = useRef<HTMLDialogElement>(null);
   const promptField = useRef<HTMLTextAreaElement>(null);
   const titleId = useId();
@@ -38,7 +40,7 @@ function PlanImportDialog({ mode, homeId, disabled, onClose, onImport }: {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = dom.root.activeElement as HTMLElement | null;
     dialog.current?.showModal?.();
     return () => previous?.focus();
   }, []);

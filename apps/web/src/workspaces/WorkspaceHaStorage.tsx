@@ -1,10 +1,11 @@
+import { useLocation } from "react-router";
 import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import { WorkspaceDestinations } from "./WorkspaceDestinations";
 import { workspaceDestination } from "./workspace-open-link";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { WorkspaceHaInstall } from "./WorkspaceHaInstall";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { type WorkspaceRepository } from "@cabane/engine";
+import { useHomeAssistantHostSession, type WorkspaceRepository } from "@cabane/engine";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 import { HaWorkspaceUnavailableError } from "./ha-workspace-client";
 import { createWorkspaceSyncCoordinator, type SyncStatus } from "./workspace-sync-coordinator";
@@ -50,6 +51,9 @@ export function WorkspaceHaStorageInConnect() {
 }
 
 export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
+  const location = useLocation();
+  const hostSession = useHomeAssistantHostSession();
+  const nativePanel = Boolean(hostSession && hostSession.origin === origin);
   const own = useWorkspaceSyncCoordinator(repository, origin);
   const active = useContext(workspaceStorageContext);
   const coordinator = active?.coordinator ?? own.coordinator;
@@ -77,10 +81,10 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
     const generation = ++checkGeneration.current;
     setChecking(true); setError(null); setPanel("checking");
     const [storageResult, panelResult] = await Promise.allSettled([
-      client.list(), runtime.sendStorageMessage<Record<string, { component_name?: string; config?: { _panel_custom?: { name?: string } } }>>({ type: "get_panels" }),
+      client.list(), nativePanel ? Promise.resolve(null) : runtime.sendStorageMessage<Record<string, { component_name?: string; config?: { _panel_custom?: { name?: string } } }>>({ type: "get_panels" }),
     ]);
     if (generation !== checkGeneration.current) return;
-    setPanel(panelResult.status === "rejected" ? "error" : panelResult.value?.cabane?.component_name === "custom" && panelResult.value.cabane.config?._panel_custom?.name === "cabane-panel" ? "ready" : "missing");
+    setPanel(nativePanel ? "ready" : panelResult.status === "rejected" ? "error" : panelResult.value?.cabane?.component_name === "custom" && panelResult.value.cabane.config?._panel_custom?.name === "cabane-panel" ? "ready" : "missing");
     try {
       if (storageResult.status === "rejected") throw storageResult.reason;
       await refresh();
@@ -90,7 +94,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
       setAvailable(false);
       if (!(cause instanceof HaWorkspaceUnavailableError)) setError(cause instanceof Error ? cause.message : "Could not reach Home Assistant. Try again.");
     } finally { if (generation === checkGeneration.current) { setChecked(true); setChecking(false); } }
-  }, [client, refresh, runtime.sendStorageMessage]);
+  }, [client, refresh, runtime.sendStorageMessage, nativePanel]);
   useEffect(() => {
     let current = true;
     setHasCopy(false); setEnabled(false);
@@ -123,7 +127,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
     if (copy?.document) downloadConnectData(copy.document, `${id}-before-replace.json`);
     return coordinator.resolveConflict(id, origin!, choice, copy?.version);
   }, "Copy updated.", choice === "remote");
-  const intent = workspaceDestination(window.location.search);
+  const intent = workspaceDestination(location.search);
   const syncLabel = enabled ? runtime.status !== "connected" || status.kind === "disconnected" || status.kind === "unavailable" ? "Sync interrupted" : status.kind === "conflict" ? "Sync needs attention" : status.kind === "synced" ? "Synced with HA" : status.kind === "pending" ? "Changes pending" : "Checking sync…" : hasCopy ? "Saved to HA · sync off" : checking ? "Checking storage…" : "Local only";
   const setupStep = panel !== "ready" || !available ? 1 : !enabled || status.kind !== "synced" ? 2 : 3;
   return <section className="ha-section ha-setup" id="workspace-storage" aria-labelledby="ha-storage-title">
@@ -143,12 +147,13 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
         {status.kind === "conflict" && <div className="ha-storage-state" role="alert"><strong>Choose which copy to keep</strong><p>{status.detail ?? "This browser and Home Assistant both have changes."} The replaced copy will be downloaded first.</p>
           <div className="ha-actions"><button disabled={busy} onClick={() => void resolve("local")}>Keep browser copy</button><button disabled={busy} onClick={() => void resolve("remote")}>Keep Home Assistant copy</button></div></div>}
         {status.kind === "disconnected" && <p role="status">Sync paused. Your changes are saved in this browser.</p>}
-        {hasCopy && enabled && <WorkspaceDestinations id={id} origin={origin!} intent={intent} panelReady={panel === "ready"} ready={status.kind === "synced" && runtime.status === "connected"} />}
+        {origin && hasCopy && enabled && <WorkspaceDestinations id={id} origin={origin!} intent={intent} panelReady={panel === "ready"} ready={status.kind === "synced" && runtime.status === "connected"} />}
         <details className="ha-storage-manage"><summary>Manage saved copy</summary>
           {enabled && <div className="ha-sync-row"><label id="ha-auto-label" htmlFor="ha-auto">Sync automatically</label>
           <button id="ha-auto" className="ha-switch" role="switch" aria-labelledby="ha-auto-label" aria-checked={enabled} disabled={busy} onClick={() => void run(() => coordinator.setEnabled(id, origin!, false))}><span /></button>
         </div>}
           <div className="ha-actions">
+
           <button disabled={busy} onClick={() => void run(() => coordinator.manualSave(id, origin!))}><EditorIcon name="export" />Save a copy now</button>
           <button disabled={busy || !hasCopy} onClick={() => { if (window.confirm("Load the Home Assistant copy? Your browser copy will be downloaded as a backup first.")) void run(async () => { await backupLocal(); return coordinator.manualRestore(id, origin!); }, undefined, true); }}><EditorIcon name="import" />Load saved copy</button>
           <button className="ha-danger" disabled={busy || !hasCopy} onClick={() => { if (window.confirm("Delete the copy on Home Assistant? Your browser's workspace will remain. Automatic sync will turn off.")) void run(() => coordinator.deleteRemote(id, origin!), "Home Assistant copy deleted. Your browser copy is safe."); }}><EditorIcon name="delete" />Delete saved copy</button>

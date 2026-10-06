@@ -37,15 +37,16 @@ export async function mountHaStorageHarness(options: { missing?: boolean; panelM
   document.body.append(container);
   function Settings() {
     const [record, setRecord] = useState(entry.record!);
-    return <MemoryRouter><WorkspaceHaStorageProvider id={entry.metadata.id} origin="https://ha.test" repository={repository}>
+    return <WorkspaceHaStorageProvider id={entry.metadata.id} origin="https://ha.test" repository={repository}>
       <HomeAssistantPage record={record} lifecycle={createBrowserHomeProjectLifecycle(indexedDB, entry.metadata.id)} origin="https://ha.test"
         onRecordChange={setRecord} onChangeOrigin={async () => {}} isDemo={false} onCreatePersonal={() => {}} />
-    </WorkspaceHaStorageProvider></MemoryRouter>;
+    </WorkspaceHaStorageProvider>;
   }
-  createRoot(container).render(<HomeAssistantRuntimeValueProvider value={runtime as never}>
+  createRoot(container).render(<MemoryRouter initialEntries={[window.location.pathname + window.location.search]}><HomeAssistantRuntimeValueProvider value={runtime as never}>
     {options.fullPage ? <Settings /> : <WorkspaceHaStorage id={entry.metadata.id} origin="https://ha.test" repository={repository} />}
-  </HomeAssistantRuntimeValueProvider>);
+  </HomeAssistantRuntimeValueProvider></MemoryRouter>);
   return { id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository, setIntegrationInstalled: () => { options.missing = false; options.panelMissing = false; options.panelError = false; } };
+
 }
 
 export async function mountHaStorageBackgroundHarness() {

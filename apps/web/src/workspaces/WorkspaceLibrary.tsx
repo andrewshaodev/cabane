@@ -1,4 +1,7 @@
 import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { useCabaneAssetUrl, useHomeAssistantHostSession } from "@cabane/engine";
+import { useLocation, useNavigate } from "react-router";
+
 import type { WorkspaceDestination } from "./workspace-open-link";
 import { WorkspaceDialog } from "./WorkspaceDialog";
 import { useState, type ReactNode } from "react";
@@ -25,7 +28,12 @@ export interface WorkspaceLibraryProps {
   onSettings?: (id: string, intent?: WorkspaceDestination) => Promise<void>;
 }
 export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
-  const [dialog, setDialog] = useState<Dialog | null>(() => new URLSearchParams(window.location.search).get("import") === "home-assistant" ? { action: "import" } : null);
+  const hostSession = useHomeAssistantHostSession();
+  const iconUrl = useCabaneAssetUrl("cabane-icon.png");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [dialog, setDialog] = useState<Dialog | null>(() => new URLSearchParams(location.search).get("import") === "home-assistant" ? { action: "import" } : null);
+
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const openDialog = (next: Dialog) => { setError(null); setDialog(next); };
@@ -39,14 +47,15 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
     if (setupEntries.length === 1) void run(() => props.onSettings!(setupEntries[0].metadata.id, "dashboard"));
     else openDialog({ action: "setup-ha" });
   };
-  const cancel = () => { setDialog(null); setError(null); window.history.replaceState(window.history.state, "", "/workspaces"); };
+  const cancel = () => { setDialog(null); setError(null); void navigate("/workspaces", { replace: true }); };
   return <main className="workspace-library">
-    <header className="workspace-library-header"><div><p className="workspace-brand"><img src="/cabane-icon.png" alt="" width="28" height="33" />Cabane</p><h1>Your workspaces</h1></div>
+    <header className="workspace-library-header"><div><p className="workspace-brand"><img src={iconUrl} alt="" width="28" height="33" />Cabane</p><h1>Your workspaces</h1></div>
       <div className="workspace-library-actions">
         <button className="workspace-primary" disabled={busy} onClick={() => openDialog({ action: "create" })}><EditorIcon name="plus" />New workspace</button>
         <button disabled={busy} onClick={() => openDialog({ action: "import" })}><EditorIcon name="import" />Import workspace</button>
       </div></header>
-    {props.onSettings && <div className="workspace-ha-entry"><button disabled={busy} onClick={startSetup}>Add Cabane to Home Assistant<EditorIcon name="chevron" /></button></div>}
+    {props.onSettings && !hostSession && <div className="workspace-ha-entry"><button disabled={busy} onClick={startSetup}>Add Cabane to Home Assistant<EditorIcon name="chevron" /></button></div>}
+
     {!dialog && error && <p role="alert" className="workspace-error">{error}</p>}
     {!props.entries.length ? <section className="workspace-empty"><h2>A place for your next home</h2><p>Create a workspace from scratch, or import a saved Cabane project.</p></section> :
       <section className="workspace-grid" aria-label="Homes">{props.entries.map(entry => <WorkspaceCard key={entry.metadata.id} entry={entry} busy={busy}

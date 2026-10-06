@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from "react-router";
 import { useState, type ReactNode } from "react";
 import { WorkspaceDialog } from "./WorkspaceDialog";
 export function WorkspaceTransferDialog({ mode, busy, error, onImport, onExport, onCancel, remoteImport }: {
@@ -5,13 +6,16 @@ export function WorkspaceTransferDialog({ mode, busy, error, onImport, onExport,
   mode: "import" | "export"; busy: boolean; error: string | null;
   onImport: (json: string) => void; onExport: (privateBackup: boolean) => void; onCancel: () => void;
 }) {
-  const [source, setSource] = useState<"file" | "ha">(() => new URLSearchParams(window.location.search).get("import") === "home-assistant" ? "ha" : "file");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [source, setSource] = useState<"file" | "ha">(() => new URLSearchParams(location.search).get("import") === "home-assistant" ? "ha" : "file");
   const [json, setJson] = useState("");
   const [fileError, setFileError] = useState<string | null>(null);
   return <WorkspaceDialog title={mode === "import" ? "Import workspace" : "Export workspace"} busy={busy} error={fileError ?? error} onCancel={onCancel}>
     {mode === "import" && remoteImport && <div className="workspace-import-sources" aria-label="Import source">
-      <button aria-pressed={source === "file"} onClick={() => { window.history.replaceState(window.history.state, "", "/workspaces"); setSource("file"); }}>From file</button>
-      <button aria-pressed={source === "ha"} onClick={() => { window.history.replaceState(window.history.state, "", "/workspaces?import=home-assistant"); setSource("ha"); }}>From Home Assistant</button>
+      <button aria-pressed={source === "file"} onClick={() => { void navigate("/workspaces", { replace: true }); setSource("file"); }}>From file</button>
+      <button aria-pressed={source === "ha"} onClick={() => { void navigate("/workspaces?import=home-assistant", { replace: true }); setSource("ha"); }}>From Home Assistant</button>
+
     </div>}
     {mode === "import" && source === "ha" ? remoteImport : mode === "import" ? <form onSubmit={event => { event.preventDefault(); onImport(json); }}>
       <p>A project or backup creates a new workspace.</p>

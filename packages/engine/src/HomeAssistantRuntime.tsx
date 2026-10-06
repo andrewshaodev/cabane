@@ -1,3 +1,6 @@
+import { BorrowedHomeAssistantRuntime } from "./BorrowedHomeAssistantRuntime";
+import { useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
+export { HomeAssistantHostSessionProvider, useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
 import {
   getAuth,
   type Auth,
@@ -495,34 +498,25 @@ function HomeAssistantRuntimeProviderImpl({
   );
 }
 
-export function HomeAssistantRuntimeProvider({
-  homeAssistantUrl,
-  children,
-}: {
+export function HomeAssistantRuntimeProvider(props: {
   homeAssistantUrl?: string | null;
+  hostSession?: HomeAssistantHostSession | null;
   children: ReactNode;
 }) {
-  return (
-    <HomeAssistantRuntimeProviderImpl homeAssistantUrl={homeAssistantUrl} client={DEFAULT_CLIENT}>
-      {children}
-    </HomeAssistantRuntimeProviderImpl>
-  );
+  return <HomeAssistantRuntimeTestProvider {...props} client={DEFAULT_CLIENT} />;
 }
 
-export function HomeAssistantRuntimeTestProvider({
-  homeAssistantUrl,
-  client,
-  children,
-}: {
+export function HomeAssistantRuntimeTestProvider({ homeAssistantUrl, hostSession, client, children }: {
   homeAssistantUrl?: string | null;
+  hostSession?: HomeAssistantHostSession | null;
   client: HomeAssistantRuntimeClient;
   children: ReactNode;
 }) {
-  return (
-    <HomeAssistantRuntimeProviderImpl homeAssistantUrl={homeAssistantUrl} client={client}>
-      {children}
-    </HomeAssistantRuntimeProviderImpl>
-  );
+  const inherited = useHomeAssistantHostSession();
+  const session = hostSession === undefined ? inherited : hostSession;
+  return session
+    ? <BorrowedHomeAssistantRuntime session={session} homeAssistantUrl={homeAssistantUrl} client={client}>{children}</BorrowedHomeAssistantRuntime>
+    : <HomeAssistantRuntimeProviderImpl homeAssistantUrl={homeAssistantUrl} client={client}>{children}</HomeAssistantRuntimeProviderImpl>;
 }
 
 export function HomeAssistantRuntimeSnapshotTestProvider({

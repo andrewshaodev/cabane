@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import "./selection-details.css";
 import { useEffect, useRef, type ReactNode } from "react";
 import { EditorActionButton } from "./EditorActionButton";
@@ -10,9 +11,10 @@ export function SelectionDetailsPanel({ children, title, subtitle, label, mode =
   mode?: "construct" | "furnish";
   onClose: () => void;
 }) {
+  const dom = useCabaneDom();
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previous = dom.root.activeElement instanceof HTMLElement ? dom.root.activeElement : null;
     panel.current?.focus();
     return () => { if (previous?.isConnected) previous.focus(); };
   }, []);

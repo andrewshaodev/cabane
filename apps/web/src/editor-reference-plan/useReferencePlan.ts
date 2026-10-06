@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createBrowserUuid } from "@cabane/engine";
+import { createBrowserUuid, useCabaneDom } from "@cabane/engine";
 import type { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
 import { decodeReferenceImage } from "./decode-reference-image";
 import { calibrateReference, defaultReferencePreference, type ReferencePlan, type ReferencePoint, type ReferencePreference } from "./reference-plan";
 export interface ReferenceViewport { center: ReferencePoint; width: number; height: number }
 export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace>, floorId: string, enabled: boolean, busy: boolean) {
+  const { events } = useCabaneDom();
   const storage = workspace.referenceStorage;
   const input = useRef<HTMLInputElement>(null);
   const saved = workspace.snapshot.references?.[floorId];
@@ -96,9 +97,9 @@ export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace
       if (gestureCancel.current) { gestureCancel.current(); gestureCancel.current = null; }
       else cancel();
     };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [adjusting, cancel]);
+    events.addEventListener("keydown", onKey, true);
+    return () => events.removeEventListener("keydown", onKey, true);
+  }, [adjusting, cancel, events]);
   return { input, openPicker: () => { if (!busy && storage.ready) { setExpanded(true); input.current?.click(); } }, plan, preference, adjusting, expanded, setExpanded, loading, error, storage, viewport, gestureCancel, points, calibrating,
     disabled: busy || loading || !storage.ready, begin, update, cancel, done, upload, calibrate, pickPoint,
     remove: () => { workspace.commitReferences(Object.fromEntries(Object.entries(workspace.snapshot.references ?? {}).filter(([id]) => id !== floorId))); cancel(); },

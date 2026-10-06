@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { useCabaneDom } from "./CabaneDom";
 import type { HomeAssistantCameraClient } from "./camera-runtime";
 
 import {
@@ -67,6 +68,7 @@ function CameraStreamSource({
   documentVisible: boolean;
   onChange: (entityId: EntityId, media: DeviceLiveMedia) => void;
 }) {
+  const { container } = useCabaneDom();
   const sessionRef = useRef<CameraSession | null>(null);
   const posterRef = useRef(requirement.posterUrl);
   const [retryKey, setRetryKey] = useState(0);
@@ -154,6 +156,7 @@ function CameraStreamSource({
                 disconnected,
                 presentConnectingVideo,
                 attemptSignal,
+                container,
               )
               : openHlsSession(
                 client,
@@ -162,6 +165,7 @@ function CameraStreamSource({
                 disconnected,
                 presentConnectingVideo,
                 attemptSignal,
+                container,
               ),
             transport === "hls"
               ? CAMERA_HLS_FIRST_FRAME_TIMEOUT_MS
@@ -207,7 +211,7 @@ function CameraStreamSource({
       sessionRef.current?.close();
       sessionRef.current = null;
     };
-  }, [client, documentVisible, origin, requirement.available, requirement.entityId, retryKey]);
+  }, [container, client, documentVisible, origin, requirement.available, requirement.entityId, retryKey]);
 
   useEffect(() => () => sessionRef.current?.close(), []);
   return null;

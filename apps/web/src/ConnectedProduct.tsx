@@ -1,9 +1,9 @@
 import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
 import { useEffect, useMemo, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 import {
-  FloorNavigationProvider, CabaneAppExperience, createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin,
+  useHomeAssistantHostSession, FloorNavigationProvider, CabaneAppExperience, createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin,
   type HomeProjectLifecycle, type HomeProjectRecord, type OnboardingOptions,
 } from "@cabane/engine";
 import { composeOwnerProjectManifest, ownerDeviceModels } from "./project-runtime";
@@ -30,11 +30,13 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [constructionApplied, setConstructionApplied] = useState(false);
   const navigate = useNavigate();
-  const [entryRequest] = useState<EditorOpenRequest | null>(() => initialRequest ?? readEditorReturn(initialRecord.homeId));
+  const location = useLocation();
+  const hostSession = useHomeAssistantHostSession();
+  const [entryRequest] = useState<EditorOpenRequest | null>(() => initialRequest ?? (hostSession ? null : readEditorReturn(initialRecord.homeId)));
   useEffect(() => {
     if (entryRequest) {
       // Preserve OAuth query parameters until the runtime has consumed them.
-      const search = new URLSearchParams(window.location.search);
+      const search = new URLSearchParams(location.search);
       if (entryRequest.destination) search.set("action", entryRequest.destination);
       void navigate(`${editorPath(entryRequest, record.homeId)}${search.size ? `?${search}` : ""}`, { replace: true, state: { editorRequest: entryRequest } });
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);

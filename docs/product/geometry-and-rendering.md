@@ -116,7 +116,7 @@ Implementation: [contracts](../../packages/engine/src/types.ts),
 
 [Back to product overview](../../PRODUCT_SPEC.md).
 
-Straight stairs derive treads, landings, guards, floor/ceiling apertures, and walk
+Straight, L-shaped, and spiral stairs derive treads, landings, guards, floor/ceiling apertures, and walk
 ramps from adjacent levels. Walking updates the selected floor at landings.
 
 Only ground-floor walls extend to the terrain datum. Shared-level wall caps are
@@ -142,3 +142,12 @@ calculation. Walk requires eye height plus a 0.18 m head margin and current jump
 elevation; jambs remain collidable. Reported positions apply directly, without
 an independent animation timeline. Unbound doors open locally on approach;
 bound doors follow reported/retained state, even when closed or unavailable.
+
+L-shaped stair elevation rises along each flight and remains constant across its
+square landing; the risers are split proportionally between the two runs. Spiral
+stairs use wedge treads around a fixed central support, an outer rail, a circular
+aperture, and a guarded upper bridge to the surrounding floor. The shared derived
+route drives slope/obstruction validation and continuous Walk elevation. Full-turn
+spirals retain the current route elevation at their coincident entrance and exit.
+Shaped plan strokes and guard rails are instanced; each model family has its own
+renderer. Legacy straight-stair geometry and stored records remain supported.
