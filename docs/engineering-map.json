@@ -266,7 +266,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue.",
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Roll-up slats own smooth, reversible position tracking with retained geometry and immediate reduced-motion poses. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue.",
     "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {

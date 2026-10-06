@@ -12,6 +12,7 @@ export function RollUpDoorModel({
   opening,
   floor,
   position,
+  reducedMotion,
 }: ArchitectureModelProps<Extract<DoorSpec, { operation: "roll-up" }>>) {
   const placement = openingWorldPlacement(wall, opening, floor.coordinates);
   const width = placement.widthMeters,
@@ -32,6 +33,7 @@ export function RollUpDoorModel({
       />
       <group position={[width / 2, 0, 0]}>
         <RollUpDoorSlats
+          reducedMotion={reducedMotion}
           width={geometry.clearWidth}
           {...geometry}
           finish={opening.finish}
