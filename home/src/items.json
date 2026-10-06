@@ -3184,5 +3184,86 @@
     },
     "size": [0.1, 0.16, 0.1],
     "variant": "default"
+  },
+  {
+    "id": "living-west-ac",
+    "kind": "device",
+    "modelId": "indoor-ac",
+    "floorId": "ground-floor",
+    "size": [0.86, 0.28, 0.206],
+    "placement": {
+      "kind": "wall",
+      "wallId": "ground-west-wall",
+      "face": "right",
+      "offsetFromWallStartPlanUnits": 5.3177,
+      "elevationMeters": 1.8898,
+      "depthOffsetMeters": 0.004,
+      "rotationOffsetRadians": 0
+    },
+    "entitySlots": [
+      {
+        "id": "living-west-ac-entity",
+        "autoMap": "manual",
+        "compatibleDomains": ["climate"],
+        "deviceRole": "primary",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "West living room AC"
+        },
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "dining-pedestal-fan",
+    "kind": "device",
+    "modelId": "pedestal-fan",
+    "floorId": "ground-floor",
+    "size": [0.45, 1.35, 0.4],
+    "placement": {
+      "kind": "absolute",
+      "at": [13.5207, 17.5304],
+      "elevationMeters": 0.001,
+      "rotationYRadians": -2.235508463075441
+    },
+    "entitySlots": [
+      {
+        "id": "dining-pedestal-fan-entity",
+        "autoMap": "manual",
+        "compatibleDomains": ["fan"],
+        "deviceRole": "primary",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "Dining pedestal fan"
+        },
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "living-west-floor-lamp",
+    "kind": "device",
+    "modelId": "floor-lamp",
+    "floorId": "ground-floor",
+    "size": [0.652, 1.796, 0.652],
+    "placement": {
+      "kind": "absolute",
+      "at": [0.5129, 17.5525],
+      "elevationMeters": 0.001,
+      "rotationYRadians": 0
+    },
+    "entitySlots": [
+      {
+        "id": "living-west-floor-lamp-entity",
+        "autoMap": "manual",
+        "compatibleDomains": ["light"],
+        "deviceRole": "primary",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "Living room floor lamp"
+        },
+        "required": true
+      }
+    ]
   }
 ]
