@@ -1,7 +1,16 @@
 # Personal GLB models
 
-Arrange offers **My models**, **Import GLB**, and **Download AI skill**. The
-catalog belongs to the active home. Import asks for Name, Preferred placement
+Arrange exposes personal-model tools only inside **My models**, identified by
+a cube icon. This section offers **Import model (.glb file)** and **Generate a
+custom model**, lists the home's models, and retains rename, download and unused
+model deletion. The generation guide explains use of any AI tool, installation
+of the public skill through the Skills CLI in Codex or Claude Code, and generation from a real
+photo or description, with an illustrative photo-to-model image. A GitHub repository link and a copyable installation command appear in that
+guide, not in the general Arrange catalog. No skill ZIP is bundled in the app. Its bundled
+UI illustration and exact public repository navigation URL are owned by
+`ModelGenerationGuide`; these narrowly scoped source policy exceptions do not
+permit images in native scene geometry or remote model fetches. The catalog
+belongs to the active home. Import asks for Name, Preferred placement
 (Floor, Wall, Ceiling), and Profile (Furniture by default). The preview permits
 orientation corrections and uniform resizing in metres. Floor models contact
 the ground at their bottom, wall models contact the wall at their back, and
@@ -70,16 +79,18 @@ native homes and ask for an update for homes containing GLB references.
 Unreferenced remote files and abandoned transfers expire after 24 hours; cleanup
 preserves assets referenced by any stored draft or published home.
 
-The downloadable `create-cabane-model` skill contains `SKILL.md`, export guidance,
+The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) contains `SKILL.md`, export guidance,
 standalone Blender and Three.js examples, and a local Python validator. It emits
 a standard GLB without Cabane source or an additional manifest. Simplified
 proportions, a restrained palette, and Cabane-like finishes are defaults; explicit
 style preferences take precedence. Final validation also uses the Cabane import
-preview. Reference photos and household HA data are not deliverables.
+preview. Reference photos and household HA data are not deliverables. Install with
+`npx skills add cabane-app/agent-skills --skill create-cabane-model`. This public
+repository is the single source of the skill; Cabane does not keep a second copy.
 
 Implementation: [import owner](../../packages/engine/src/imported-models/index.ts),
 [Arrange library](../../apps/web/src/custom-models/CustomModelLibrary.tsx),
 [HA asset client](../../apps/web/src/workspaces/ha-model-assets.ts),
-[portable skill](../../.agents/skills/create-cabane-model/SKILL.md).
+[portable skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model).
 
 [Back to product overview](../../PRODUCT_SPEC.md).

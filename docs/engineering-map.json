@@ -121,8 +121,7 @@
     "owners": [
       "packages/engine/src/imported-models",
       "apps/web/src/custom-models",
-      "apps/web/src/workspaces/ha-model-assets.ts",
-      ".agents/skills/create-cabane-model"
+      "apps/web/src/workspaces/ha-model-assets.ts"
     ],
     "interfaces": [
       {
@@ -138,7 +137,7 @@
         ]
       }
     ],
-    "invariant": "Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
+    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import, illustrated AI-generation guidance and model management inside Arrange's My models section. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
     "checks": [
       "verify:workspace",
       "verify:runtime",

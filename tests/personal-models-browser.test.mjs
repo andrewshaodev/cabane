@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
-import { promisify } from "node:util";
-import { execFile } from "node:child_process";
 import { unzipSync } from "fflate";
 import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
@@ -42,7 +40,17 @@ test(
         return entry.metadata.id;
       }, rootPath);
       await page.goto(`${url}workspaces/${id}/arrange`);
-      await page.getByRole("button", { name: "Import GLB", exact: true }).waitFor();
+      await page.getByRole("button", { name: "My models", exact: true }).waitFor();
+      assert.equal(
+        await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).count(),
+        0,
+      );
+      assert.equal(
+        await page.getByRole("button", { name: "Generate a custom model", exact: true }).count(),
+        0,
+      );
+      assert.equal(await page.locator(".custom-model-management").count(), 0);
+      await page.getByRole("button", { name: "My models", exact: true }).click();
       const read = () =>
         page.evaluate(
           async ({ rootPath, id }) => {
@@ -69,21 +77,57 @@ test(
         }
         assert.fail(`Expected ${models} models and ${items} persisted items.`);
       };
-      const download = page.waitForEvent("download");
-      await page.getByRole("button", { name: "Download AI skill", exact: true }).click();
-      const skill = await download;
-      assert.equal(skill.suggestedFilename(), "create-cabane-model.zip");
-      const files = unzipSync(new Uint8Array(await readFile(await skill.path())));
-      assert.ok(files["create-cabane-model/SKILL.md"]);
-      assert.ok(files["create-cabane-model/scripts/validate_glb.py"]);
-      await promisify(execFile)(process.execPath, [
-        ".agents/skills/create-cabane-model/examples/three.mjs",
-        "/private/tmp/cabane-browser-skill.glb",
-      ]);
+      await page.getByRole("button", { name: "Generate a custom model", exact: true }).click();
+      const guide = page.getByRole("dialog", { name: "Generate a custom model", exact: true });
+      await guide.waitFor();
+      const command = "npx skills add cabane-app/agent-skills --skill create-cabane-model";
+      assert.equal(await guide.locator("pre code").innerText(), command);
+      const repositoryLink = guide.getByRole("link", { name: "View the skill on GitHub" });
+      assert.equal(
+        await repositoryLink.getAttribute("href"),
+        "https://github.com/cabane-app/agent-skills",
+      );
+      assert.equal(await repositoryLink.getAttribute("target"), "_blank");
+      await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+      await guide.getByRole("button", { name: "Copy command", exact: true }).click();
+      await guide.getByRole("button", { name: "Copied", exact: true }).waitFor();
+      assert.equal(await page.evaluate(() => navigator.clipboard.readText()), command);
+      assert.equal(
+        await guide.getByRole("button", { name: "Download AI skill", exact: true }).count(),
+        0,
+      );
+      assert.match(await guide.innerText(), /photo/);
+      await guide.locator("img").evaluate((image) => image.decode());
+      await mkdir("test-results/personal-models", { recursive: true });
+      await page.screenshot({ path: "test-results/personal-models/generate-desktop.png" });
+      await guide.press("Escape");
+      await guide.waitFor({ state: "hidden" });
+      await page.waitForFunction(
+        () => document.activeElement?.textContent?.trim() === "Generate a custom model",
+      );
+      assert.equal(
+        await page
+          .getByRole("button", { name: "Generate a custom model", exact: true })
+          .evaluate((button) => button === document.activeElement),
+        true,
+      );
+      await page.getByRole("button", { name: "All items", exact: true }).click();
+      assert.equal(
+        await page.getByRole("button", { name: "Download AI skill", exact: true }).count(),
+        0,
+      );
+      assert.equal(
+        await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).count(),
+        0,
+      );
+      await page.getByRole("button", { name: "My models", exact: true }).click();
+      const threeFixture = JSON.parse(
+        await readFile("tests/fixtures/personal-three-model.json", "utf8"),
+      );
       const examples = [
         {
           name: "AI desk",
-          bytes: await readFile("/private/tmp/cabane-browser-skill.glb"),
+          bytes: Buffer.from(threeFixture.base64, "base64"),
           support: "floor",
           profile: "furniture",
         },
@@ -102,7 +146,7 @@ test(
       ];
       for (const [index, example] of examples.entries()) {
         const chooser = page.waitForEvent("filechooser");
-        await page.getByRole("button", { name: "Import GLB", exact: true }).click();
+        await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).click();
         await (
           await chooser
         ).setFiles({
@@ -239,10 +283,28 @@ test(
       await page.getByRole("button", { name: "Reset changes", exact: true }).click();
       await waitCounts(3, 3);
       await page.reload();
-      await page.getByRole("button", { name: "Import GLB", exact: true }).waitFor();
+      await page.getByRole("button", { name: "My models", exact: true }).click();
+      await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).waitFor();
       assert.equal((await read()).draft.customModels.length, 3);
       await page.screenshot({ path: "test-results/personal-models/arrange-desktop.png" });
       await page.setViewportSize({ width: 390, height: 844 });
+      await page.getByRole("button", { name: "Generate a custom model", exact: true }).click();
+      const mobileGuide = page.getByRole("dialog", {
+        name: "Generate a custom model",
+        exact: true,
+      });
+      await mobileGuide.waitFor();
+      await mobileGuide.locator("img").evaluate((image) => image.decode());
+      await page.screenshot({ path: "test-results/personal-models/generate-mobile.png" });
+      const guideRect = await mobileGuide.boundingBox();
+      assert.ok(guideRect.width <= 390 && guideRect.x >= 0 && guideRect.height <= 812);
+      assert.equal(
+        await mobileGuide.evaluate((element) => element.scrollWidth <= element.clientWidth),
+        true,
+      );
+      await mobileGuide
+        .getByRole("button", { name: "Close generation guide", exact: true })
+        .click();
       await page.locator('.custom-model-library input[type="file"]').setInputFiles({
         name: "mobile.glb",
         mimeType: "model/gltf-binary",

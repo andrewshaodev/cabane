@@ -89,6 +89,26 @@ for (const file of files) {
       continue;
     let inspectedSource = source;
     if (
+      rule.reason === "runtime remote URL" &&
+      relativePath === "apps/web/src/custom-models/ModelGenerationGuide.tsx"
+    ) {
+      // A navigation link to the public skill repository; never a runtime asset fetch.
+      inspectedSource = inspectedSource.replace(
+        '"https://github.com/cabane-app/agent-skills"',
+        '"public-skill-repository-link"',
+      );
+    }
+    if (
+      rule.reason === "external visual asset reference" &&
+      relativePath === "apps/web/src/custom-models/ModelGenerationGuide.tsx"
+    ) {
+      // One bundled UI illustration for the generation guide, never a scene texture.
+      inspectedSource = inspectedSource.replace(
+        '"./assets/photo-to-model.png"',
+        '"bundled-generation-guide-illustration"',
+      );
+    }
+    if (
       rule.reason === "external visual asset reference" &&
       (relativePath.startsWith("packages/engine/src/imported-models/") ||
         relativePath === "apps/web/src/custom-models/CustomModelLibrary.tsx")

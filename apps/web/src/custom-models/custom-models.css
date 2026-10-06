@@ -6,8 +6,12 @@
 }
 .custom-model-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
+}
+.custom-model-actions .editor-button {
+  justify-content: flex-start;
+  text-align: left;
 }
 .custom-model-management {
   margin-top: 10px;

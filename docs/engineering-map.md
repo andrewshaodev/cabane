@@ -90,9 +90,9 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 
 Contract: [Personal GLB models and asset transfer](../docs/product/personal-models.md).
 
-- Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts), [`.agents/skills/create-cabane-model`](../.agents/skills/create-cabane-model).
+- Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts).
 - Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
+- Review invariant: Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import, illustrated AI-generation guidance and model management inside Arrange's My models section. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
 - Checks: `verify:workspace`, `verify:runtime`, `verify:policy`, `fixture:verify:scale`, `build:panel`.
 
 ### Home Assistant runtime and controls

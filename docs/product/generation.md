@@ -19,7 +19,7 @@ content remains code-native/procedural and uses the public toon vocabulary.
 Stable catalog models are preferred where they fit; bespoke reusable geometry
 belongs to domain-specific home extensions.
 
-The downloadable `create-cabane-model` skill is a distinct standalone authoring
+The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) is a distinct standalone authoring
 route for users of hosted Cabane. It produces a standard GLB, recommends the
 Cabane aesthetic, and respects an explicitly requested alternative style. It
 requires no repository access or household HA information. Its import exception

@@ -9,7 +9,7 @@ import "./arrange-catalog.css";
 const roomIcons: Record<CatalogRoom, EditorIconName> = {
   all: "grid",
   devices: "devices",
-  "my-models": "furnish",
+  "my-models": "cube",
   "living-room": "furnish",
   kitchen: "kitchen",
   bedroom: "bed",
@@ -73,7 +73,6 @@ export function ArrangeCatalog({
           {error}
         </p>
       )}
-      {customModels}
       <div className="arrange-catalog__body">
         <nav className="catalog-rooms" aria-label="Catalog room types">
           {rooms.map((room) => (
@@ -93,7 +92,7 @@ export function ArrangeCatalog({
               aria-pressed={browsing.room === "my-models"}
               onClick={() => chooseFilter("my-models")}
             >
-              <EditorIcon name="furnish" />
+              <EditorIcon name="cube" />
               <span>My models</span>
             </button>
             <button
@@ -120,6 +119,7 @@ export function ArrangeCatalog({
               ))}
             </select>
           </label>
+          {browsing.room === "my-models" && customModels}
           <div className="catalog-search">
             <EditorIcon name="search" />
             <input
@@ -163,18 +163,20 @@ export function ArrangeCatalog({
                     {browsing.query.trim()
                       ? "No matching items"
                       : browsing.room === "my-models"
-                        ? "Import your first GLB model"
+                        ? "Your models will appear here. Import one or create one with your AI."
                         : "No items for this room type yet"}
                   </p>
-                  <EditorButton
-                    onClick={() =>
-                      browsing.query.trim()
-                        ? onBrowse({ ...browsing, query: "" })
-                        : chooseFilter("all")
-                    }
-                  >
-                    {browsing.query.trim() ? "Clear search" : "Browse all items"}
-                  </EditorButton>
+                  {(browsing.query.trim() || browsing.room !== "my-models") && (
+                    <EditorButton
+                      onClick={() =>
+                        browsing.query.trim()
+                          ? onBrowse({ ...browsing, query: "" })
+                          : chooseFilter("all")
+                      }
+                    >
+                      {browsing.query.trim() ? "Clear search" : "Browse all items"}
+                    </EditorButton>
+                  )}
                 </div>
               )}
             </div>

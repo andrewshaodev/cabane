@@ -10,7 +10,8 @@ import {
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { ModelImportDialog } from "./ModelImportDialog";
 import { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
-import { downloadModelSkill } from "./ai-skill-download";
+import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { ModelGenerationGuide } from "./ModelGenerationGuide";
 import "./custom-models.css";
 
 export function CustomModelLibrary({
@@ -24,6 +25,7 @@ export function CustomModelLibrary({
 }) {
   const picker = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [generationGuide, setGenerationGuide] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rename, setRename] = useState<{ id: string; name: string } | null>(null);
   const models = workspace.snapshot.project.customModels ?? [];
@@ -53,17 +55,12 @@ export function CustomModelLibrary({
     <div className="custom-model-library">
       <div className="custom-model-actions">
         <EditorButton disabled={disabled} onClick={() => picker.current?.click()}>
-          Import GLB
+          <EditorIcon name="import" />
+          Import model (.glb file)
         </EditorButton>
-        <EditorButton
-          disabled={disabled}
-          onClick={() => {
-            void downloadModelSkill().catch(() =>
-              setError("Could not download the skill. Try again."),
-            );
-          }}
-        >
-          Download AI skill
+        <EditorButton disabled={disabled} onClick={() => setGenerationGuide(true)}>
+          <EditorIcon name="cube" />
+          Generate a custom model
         </EditorButton>
       </div>
       <input
@@ -80,93 +77,94 @@ export function CustomModelLibrary({
           else if (next) setFile(next);
         }}
       />
-      <details className="custom-model-management">
-        <summary>Manage My models ({models.length})</summary>
-        {!models.length && <p>Generate a GLB with your own AI, then import it here.</p>}
-        {models.map((model) => (
-          <div className="custom-model-row" key={model.id}>
-            {rename?.id === model.id ? (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (rename.name.trim()) {
-                    setModels(
-                      models.map((m) =>
-                        m.id === model.id ? { ...m, name: rename.name.trim() } : m,
-                      ),
-                    );
-                    setRename(null);
-                  }
-                }}
-              >
-                <input
-                  aria-label="Model name"
-                  required
-                  autoFocus
-                  value={rename.name}
-                  onChange={(e) => setRename({ ...rename, name: e.target.value })}
-                />
-                <EditorButton type="submit">Rename</EditorButton>
-                <EditorButton onClick={() => setRename(null)}>Cancel</EditorButton>
-              </form>
-            ) : (
-              <>
-                <strong>{model.name}</strong>
-                <div>
-                  <EditorButton
-                    variant="text"
-                    disabled={disabled}
-                    onClick={() => setRename({ id: model.id, name: model.name })}
-                  >
-                    Rename
-                  </EditorButton>
-                  <EditorButton
-                    variant="text"
-                    disabled={disabled}
-                    onClick={() => {
-                      void createModelAssetRepository(window.indexedDB)
-                        .verify([model.asset])
-                        .then(([asset]) =>
-                          downloadCabaneBytes(
-                            asset!.bytes,
-                            `${model.name.replace(/[^a-z0-9-]/gi, "_")}.glb`,
-                            "model/gltf-binary",
-                          ),
+      {models.length > 0 && (
+        <details className="custom-model-management">
+          <summary>Manage My models ({models.length})</summary>
+          {models.map((model) => (
+            <div className="custom-model-row" key={model.id}>
+              {rename?.id === model.id ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (rename.name.trim()) {
+                      setModels(
+                        models.map((m) =>
+                          m.id === model.id ? { ...m, name: rename.name.trim() } : m,
+                        ),
+                      );
+                      setRename(null);
+                    }
+                  }}
+                >
+                  <input
+                    aria-label="Model name"
+                    required
+                    autoFocus
+                    value={rename.name}
+                    onChange={(e) => setRename({ ...rename, name: e.target.value })}
+                  />
+                  <EditorButton type="submit">Rename</EditorButton>
+                  <EditorButton onClick={() => setRename(null)}>Cancel</EditorButton>
+                </form>
+              ) : (
+                <>
+                  <strong>{model.name}</strong>
+                  <div>
+                    <EditorButton
+                      variant="text"
+                      disabled={disabled}
+                      onClick={() => setRename({ id: model.id, name: model.name })}
+                    >
+                      Rename
+                    </EditorButton>
+                    <EditorButton
+                      variant="text"
+                      disabled={disabled}
+                      onClick={() => {
+                        void createModelAssetRepository(window.indexedDB)
+                          .verify([model.asset])
+                          .then(([asset]) =>
+                            downloadCabaneBytes(
+                              asset!.bytes,
+                              `${model.name.replace(/[^a-z0-9-]/gi, "_")}.glb`,
+                              "model/gltf-binary",
+                            ),
+                          )
+                          .catch((e: unknown) =>
+                            setError(
+                              e instanceof Error ? e.message : "Could not download this model.",
+                            ),
+                          );
+                      }}
+                    >
+                      Download GLB
+                    </EditorButton>
+                    <EditorButton
+                      variant="text"
+                      disabled={
+                        disabled ||
+                        workspace.snapshot.project.sceneItems.some(
+                          (item) => item.modelId === model.id,
                         )
-                        .catch((e: unknown) =>
-                          setError(
-                            e instanceof Error ? e.message : "Could not download this model.",
-                          ),
-                        );
-                    }}
-                  >
-                    Download GLB
-                  </EditorButton>
-                  <EditorButton
-                    variant="text"
-                    disabled={
-                      disabled ||
-                      workspace.snapshot.project.sceneItems.some(
-                        (item) => item.modelId === model.id,
-                      )
-                    }
-                    title={
-                      workspace.snapshot.project.sceneItems.some(
-                        (item) => item.modelId === model.id,
-                      )
-                        ? "Remove this model's instances first."
-                        : "Remove unused model"
-                    }
-                    onClick={() => setModels(models.filter((m) => m.id !== model.id))}
-                  >
-                    Delete
-                  </EditorButton>
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-      </details>
+                      }
+                      title={
+                        workspace.snapshot.project.sceneItems.some(
+                          (item) => item.modelId === model.id,
+                        )
+                          ? "Remove this model's instances first."
+                          : "Remove unused model"
+                      }
+                      onClick={() => setModels(models.filter((m) => m.id !== model.id))}
+                    >
+                      Delete
+                    </EditorButton>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </details>
+      )}
       {error && (
         <p role="alert" className="catalog-add-error">
           {error}
@@ -174,6 +172,15 @@ export function CustomModelLibrary({
       )}
       {file && (
         <ModelImportDialog file={file} onCancel={() => setFile(null)} onImport={importModel} />
+      )}
+      {generationGuide && (
+        <ModelGenerationGuide
+          onClose={() => setGenerationGuide(false)}
+          onImport={() => {
+            setGenerationGuide(false);
+            picker.current?.click();
+          }}
+        />
       )}
     </div>
   );

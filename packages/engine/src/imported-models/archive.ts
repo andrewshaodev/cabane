@@ -114,10 +114,3 @@ export function downloadCabaneBytes(
   anchor.click();
   globalThis.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-
-export function createModelSkillArchive(files: Readonly<Record<string, string>>) {
-  return zipSync(
-    Object.fromEntries(Object.entries(files).map(([path, source]) => [path, strToU8(source)])),
-    { level: 6 },
-  );
-}

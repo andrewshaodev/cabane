@@ -145,8 +145,10 @@ overrides the destination).
 
 Personal GLB coverage uses `tests/personal-models.test.mjs`,
 `tests/personal-models-browser.test.mjs`, and `tests/ha-model-assets.test.mjs`.
-The normal Arrange UI imports solid/PBR/textured files and an actual downloadable
-skill example, tests supports, history, Save/Reset, and complete archives. Storage
+The normal Arrange UI checks the public skill link and copyable install command,
+imports solid/PBR/textured files and actual Blender/Three.js skill example fixtures,
+and tests supports, history, Save/Reset, and complete archives. Installation and
+generation are verified independently in the public skill repository. Storage
 fixtures exercise missing/corrupt files, transaction failures, deduplication,
 interruptions, origin/session isolation, old integrations, and two-client revision
 conflicts. Companion integration tests cover authenticated blocks, integrity,
