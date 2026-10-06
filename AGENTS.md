@@ -160,9 +160,16 @@ read [the test guidelines](docs/test-guidelines.md).
 
 - Use the pinned Node/npm versions and `npm ci`. Install the pinned Chromium with
   `npm run browser:install` before browser verification.
-- Run `npm run format` after edits and `npm run verify:fast` before handing off code.
-  Run `npm run verify` for shared product changes; use the surface-specific checks
-  below as well. Fix failures instead of weakening lint, compiler, or Knip rules.
+- Run `npm run format` after edits. During iteration, use the smallest relevant
+  check from `npm run verify:help` or an affected test file. Finish shared product
+  changes with one `npm run verify`, which includes `verify:fast`; other code
+  changes require `npm run verify:fast` and applicable surface checks.
+- Run verification sequentially: finish focused checks before starting the full
+  gate, and reuse passing results while the files and relevant inputs are unchanged.
+  Repeat checks only for new changes, failures, or unresolved concerns. If the full
+  gate fails, investigate and rerun the affected checks, then complete any stages
+  skipped by that failure. Report retries explicitly. Fix failures instead of
+  weakening lint, compiler, or Knip rules.
 - Inspect the existing tree and Git status before editing. Preserve unrelated
   user changes and do not overwrite generated home work outside the task.
 - Prefer the repository's public types, helpers, fixtures, and verification
