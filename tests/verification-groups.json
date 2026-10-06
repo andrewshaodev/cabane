@@ -160,8 +160,11 @@
     "tests": [
       "action-bar-editor.test.mjs",
       "action-bar-navigation.test.mjs",
+      "agent-test-reporter.test.mjs",
       "agent-workflow.test.mjs",
       "browser-data-transfer.test.mjs",
+      "browser-diagnostics-lifecycle.test.mjs",
+      "browser-diagnostics.test.mjs",
       "build-tutorial.test.mjs",
       "defined-properties.test.mjs",
       "editor-chrome.test.mjs",
