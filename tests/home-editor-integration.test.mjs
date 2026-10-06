@@ -261,7 +261,7 @@ await withModules(async (load) => {
     }
   });
 
-  test("HomeEditor publishes through the workspace boundary, locks chrome, closes on Save with the published home", async () => {
+  test("HomeEditor reviews errors, saves warnings directly, locks chrome and closes with the published home", async () => {
     const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: "http://cabane.local/" });
     const names = [
       "window",
@@ -296,6 +296,8 @@ await withModules(async (load) => {
     const root = createRoot(dom.window.document.getElementById("root"));
     const record = createSeedProjectRecord(ownerHomeProject, 1);
     record.publishedAt = 0;
+    record.draft.sceneItems.find((item) => item.kind === "furnishing").modelId =
+      "fixture-unavailable-model";
     const profile = {
       schemaVersion: 1,
       homeId: record.homeId,
@@ -340,9 +342,28 @@ await withModules(async (load) => {
         (entry) => entry.textContent === label,
       );
     try {
+      const invalid = structuredClone(record);
+      invalid.draft.floors[0].rooms[0].name = "";
       await act(async () =>
         root.render(
           createElement(HomeEditor, {
+            key: "errors",
+            initialRecord: invalid,
+            lifecycle,
+            onClose: (next) => closed.push(next),
+          }),
+        ),
+      );
+      await act(async () => button("Save").click());
+      assert.match(dom.window.document.getElementById("publish-title").textContent, /to fix/);
+      assert.equal(calls.length, 0, "errors still block publication");
+      assert.equal(closed.length, 0);
+      assert.equal(button("Save anyway").disabled, true);
+      await act(async () => button("Cancel").click());
+      await act(async () =>
+        root.render(
+          createElement(HomeEditor, {
+            key: "warnings",
             initialRecord: record,
             lifecycle,
             onClose: (next) => closed.push(next),
@@ -351,12 +372,10 @@ await withModules(async (load) => {
       );
       assert.equal(button("Back").disabled, true, "Back is unavailable before the first save");
       await act(async () => button("Save").click());
-      const confirm = button("Save anyway") ?? button("Save changes");
-      assert.ok(confirm);
-      await act(async () => confirm.click());
+      assert.equal(dom.window.document.querySelector('[aria-labelledby="publish-title"]'), null);
       assert.equal(calls.length, 1);
       assert.equal(button("Back").disabled, true);
-      assert.equal(button("Cancel").disabled, true);
+      assert.equal(button("Save").disabled, true);
       assert.ok(dom.window.document.querySelector(".direction-rail").hasAttribute("inert"));
       await act(async () => {
         release();
@@ -580,12 +599,7 @@ await withModules(async (load) => {
         const button = (label) =>
           [...document.querySelectorAll("button")].find((entry) => entry.textContent === label);
         await act(async () => button("Save").click());
-        assert.equal(
-          shortcut(dom.window, "v", "metaKey"),
-          true,
-          "paste stays inactive while Save is open",
-        );
-        await act(async () => (button("Save anyway") ?? button("Save changes")).click());
+        assert.equal(document.querySelector('[aria-labelledby="publish-title"]'), null);
         const originalIds = new Set(ownerHomeProject.sceneItems.map((item) => item.id));
         const copies = getPublishedProject().sceneItems.filter((item) => !originalIds.has(item.id));
         assert.equal(copies.length, 1);

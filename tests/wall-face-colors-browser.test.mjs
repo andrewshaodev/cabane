@@ -74,10 +74,6 @@ test(
       await page.screenshot({ path: "/tmp/cabane-wall-face-controls.png" });
       await living.blur();
       await page.getByRole("button", { name: "Save", exact: true }).click();
-      await page.getByRole("button", { name: "Save anyway", exact: true }).click();
-      await page
-        .getByRole("button", { name: "Save anyway", exact: true })
-        .waitFor({ state: "hidden" });
       // Save exits Construct asynchronously. Reopen the saved workspace only after
       // that navigation settles, rather than racing a reload against it.
       await page.waitForURL((url) => /^\/workspaces\/[^/]+$/.test(url.pathname));

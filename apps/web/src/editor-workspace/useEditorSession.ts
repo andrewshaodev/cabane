@@ -51,6 +51,7 @@ export function useEditorSession(
         onClose(result.record, "applied");
         return;
       }
+      setPublishOpen(true);
       if (result.status === "storage-error") {
         setPublishMessage(
           "Could not save changes in browser storage. The previous home is unchanged.",

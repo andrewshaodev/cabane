@@ -32,6 +32,8 @@ type Props = Pick<
   | "closing"
   | "setPublishMessage"
   | "setPublishOpen"
+  | "publishErrors"
+  | "publishProject"
   | "connect"
   | "runtime"
   | "constructEditor"
@@ -67,6 +69,8 @@ export function HomeEditorHeader({
   closing,
   setPublishMessage,
   setPublishOpen,
+  publishErrors,
+  publishProject,
   connect,
   runtime,
   constructEditor,
@@ -200,7 +204,8 @@ export function HomeEditorHeader({
           disabled={editingLocked || unsettled}
           onClick={() => {
             setPublishMessage(null);
-            setPublishOpen(true);
+            if (publishErrors.length > 0) setPublishOpen(true);
+            else void publishProject();
           }}
         >
           <EditorIcon name="save" />

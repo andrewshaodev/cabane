@@ -81,8 +81,8 @@ Offline or missing action targets remain saved, with unavailable controls rather
 than blocking unrelated project publication.
 Undo does not rewind already published content. Leaving the editor flushes the draft;
 it does not implicitly Apply. Apply validates the project and binding slices,
-blocks errors, requires warning confirmation, and writes the new published
-project and mappings together. A failed write leaves the previous Home intact.
+blocks errors, and writes the new published project and mappings together.
+A failed write leaves the previous Home intact.
 
 The library creates blank homes and imports files as new independent identities.
 Duplicate copies draft and published data, mappings, and the configured connection;
@@ -147,7 +147,9 @@ exports, workspace duplication, and undo history.
 
 The editor separates Back navigation on the left from Reset and primary Save
 actions on the right. Save validates and
-atomically publishes the draft, closes the editor, and opens Home. Back returns to
+atomically publishes the draft, closes the editor, and opens Home.
+Save proceeds immediately when validation has only warnings or no issues; the
+review dialog remains available for errors and failed saves. Back returns to
 Home and preserves draft edits; it is disabled until the first successful Save.
 Reset asks for confirmation, restores the published project and connection
 bindings, and clears draft undo history. Before the first Save it restores the
