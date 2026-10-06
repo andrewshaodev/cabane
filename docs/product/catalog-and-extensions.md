@@ -126,3 +126,10 @@ and drifting clouds. The engine LayeredSurface primitive owns ordered polygon de
 overview and oblique camera angles while retaining scene occlusion. Wall TVs
 omit their glass reflection while active. Reduced motion freezes the composition;
 inactive and unavailable states retain their existing appearance.
+
+Shared catalog additions prioritize reusable furniture, substantial fixtures and
+connected devices. Small toiletries, packaging, individual sanitary fittings and
+apartment-specific fitted platforms are excluded. Square cube storage shares one
+frame with two- and four-compartment variants. Wall-mounted awnings and cleaning
+racks use ordinary wall support; folding balcony furniture uses outdoor ground
+support. Existing catalog IDs and default variants remain unchanged.

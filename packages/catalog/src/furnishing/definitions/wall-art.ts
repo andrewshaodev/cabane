@@ -1,6 +1,5 @@
 import { AbstractReliefWallArt, ABSTRACT_RELIEF_WALL_ART_SIZE } from "../presets/decor";
 import { LinePortraitWallArt, LINE_PORTRAIT_WALL_ART_SIZE } from "../presets/decor";
-import { FramedWallArt, FRAMED_WALL_ART_SIZE } from "../presets/decor";
 import { defineFurnishingModel } from "@cabane/engine";
 export const wallArtFurnishingDefinitions = {
   "abstract-relief-wall-art": defineFurnishingModel({
@@ -35,17 +34,5 @@ export const wallArtFurnishingDefinitions = {
       { id: "default", label: "Portrait" },
       { id: "mirrored", label: "Mirrored portrait" },
     ],
-  }),
-  "framed-wall-art": defineFurnishingModel({
-    component: FramedWallArt,
-    label: "Framed wall art",
-    category: "Decor",
-    defaultRoomType: "living-room",
-    defaultSize: FRAMED_WALL_ART_SIZE,
-    bounds: { min: [-0.4, 0, 0], max: [0.4, 0.6, 0.04] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "wall",
-    outlineContact: true,
-    complexity: { visibleMeshes: 5, triangles: 2_500 },
   }),
 };

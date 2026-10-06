@@ -119,7 +119,10 @@ export function SceneOutlines({
     // Non-indexed normal generation mutates its input; keep outline smoothing
     // separate from the source surface's lighting normals.
     mesh.geometry = angle
-      ? optimizedCreasedNormalGeometry(parent.geometry.clone(), angle)
+      ? optimizedCreasedNormalGeometry(
+          parent.geometry.index ? parent.geometry : parent.geometry.clone(),
+          angle,
+        )
       : parent.geometry;
     mesh.raycast = () => null;
     mesh.userData.sceneOutline = true;

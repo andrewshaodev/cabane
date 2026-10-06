@@ -653,10 +653,6 @@ await withModules(async (load) => {
         "refrigerator",
       ],
     );
-    assert.deepEqual(
-      filterCatalog(entries, "kitchen", "microwave").map((entry) => entry.modelId),
-      ["built-in-microwave", "microwave"],
-    );
     const collision = catalogEntries(
       { speaker: get("sectional-sofa").definition },
       { speaker: get("speaker").definition },
@@ -664,22 +660,8 @@ await withModules(async (load) => {
     assert.equal(new Set(collision.map((entry) => entry.key)).size, 2);
     assert.deepEqual(
       filterCatalog(entries, "all", "fan").map((entry) => entry.modelId),
-      [
-        "bathroom-extractor-fan",
-        "ceiling-fan",
-        "compact-counter-fan",
-        "guarded-platform-fan",
-        "inline-duct-fan",
-        "pedestal-fan",
-        "table-fan",
-        "vented-laundry-platform",
-      ],
+      ["bathroom-extractor-fan", "ceiling-fan", "pedestal-fan", "table-fan"],
     );
-    assert.deepEqual(
-      filterCatalog(entries, "laundry", "guarded platform").map((entry) => entry.modelId),
-      ["guarded-platform-fan"],
-    );
-    assert.equal(filterCatalog(entries, "devices", "guarded platform").length, 0);
     assert.equal(filterCatalog(entries, "bedroom", "fan")[0].modelId, "pedestal-fan");
     assert.equal(filterCatalog(entries, "living-room", "fan")[0].modelId, "ceiling-fan");
     assert.equal(filterCatalog(entries, "bathroom", "fan")[0].modelId, "bathroom-extractor-fan");

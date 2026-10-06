@@ -43,7 +43,6 @@ export const balconyFurnishingDefinitions = {
     bounds: { min: [-1.8, 0, -0.5], max: [1.8, 0.45, 0.5] },
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "wall",
-    placementEnvironment: "outdoor",
     outlineContact: true,
     complexity: { visibleMeshes: 11, triangles: 3500 },
   }),

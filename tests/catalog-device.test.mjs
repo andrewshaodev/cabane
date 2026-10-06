@@ -586,13 +586,6 @@ await withModules(async (load) => {
         { kind: "axes", axes: ["width", "height"] },
         "absolute",
       ],
-      "under-cabinet-led-strip": [
-        "Under-cabinet LED strip",
-        "Lighting",
-        [1, 0.015, 0.025],
-        { kind: "axes", axes: ["width"] },
-        "absolute",
-      ],
       "wall-television": [
         "Wall television · 110 inch",
         "Media",

@@ -84,7 +84,7 @@ import {
   WoodenCrib,
   WOODEN_CRIB_SIZE,
 } from "./presets/children-bedroom";
-import { FramedWallArt, FRAMED_WALL_ART_SIZE, PottedPlant } from "./presets/decor";
+import { FramedWallArt, FRAMED_WALL_ART_SIZE } from "./presets/decor";
 import {
   LowMediaConsole,
   LOW_MEDIA_CONSOLE_SIZE,
@@ -1073,22 +1073,6 @@ const stableFurnishingDefinitions = {
     preferredPlacement: "absolute",
     outlineContact: false,
     complexity: { visibleMeshes: 12, triangles: 3_600 },
-  }),
-  "potted-plant": defineFurnishingModel({
-    defaultRoomType: "living-room",
-    component: ({ size }) => (
-      <group scale={[size[0] / 0.615, size[1] / 1.105, size[2] / 0.44]}>
-        <PottedPlant />
-      </group>
-    ),
-    label: "Potted plant",
-    category: "Decor",
-    defaultSize: [0.615, 1.105, 0.44],
-    bounds: { min: [-0.3075, 0, -0.22], max: [0.3075, 1.105, 0.22] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "absolute",
-    outlineContact: false,
-    complexity: { visibleMeshes: 4, triangles: 1_200 },
   }),
   "towel-rail": defineFurnishingModel({
     defaultRoomType: "bathroom",

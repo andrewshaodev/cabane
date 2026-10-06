@@ -8,10 +8,6 @@ import {
   TWO_SLOT_TOASTER_SIZE,
   StandMixer,
   STAND_MIXER_SIZE,
-  RaisedStandMixer,
-  RAISED_STAND_MIXER_SIZE,
-  CompactCounterFan,
-  COMPACT_COUNTER_FAN_SIZE,
 } from "../presets/countertop-appliances";
 export const countertopApplianceDefinitions = {
   multicooker: defineFurnishingModel({
@@ -65,29 +61,5 @@ export const countertopApplianceDefinitions = {
       { id: "default", label: "Red" },
       { id: "black", label: "Black" },
     ],
-  }),
-  "raised-stand-mixer": defineFurnishingModel({
-    component: RaisedStandMixer,
-    label: "Raised stand mixer",
-    category: "Kitchen",
-    defaultRoomType: "kitchen",
-    defaultSize: RAISED_STAND_MIXER_SIZE,
-    bounds: { min: [-0.14, 0, -0.2], max: [0.14, 0.493143318, 0.2] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "absolute",
-    outlineContact: false,
-    complexity: { visibleMeshes: 6, triangles: 2200 },
-  }),
-  "compact-counter-fan": defineFurnishingModel({
-    component: CompactCounterFan,
-    label: "Compact counter fan",
-    category: "Kitchen",
-    defaultRoomType: "kitchen",
-    defaultSize: COMPACT_COUNTER_FAN_SIZE,
-    bounds: { min: [-0.14, 0, -0.08], max: [0.14, 0.3, 0.08] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "absolute",
-    outlineContact: false,
-    complexity: { visibleMeshes: 10, triangles: 2800 },
   }),
 };

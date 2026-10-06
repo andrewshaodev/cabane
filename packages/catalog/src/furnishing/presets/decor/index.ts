@@ -10,5 +10,3 @@ export { TrailingShelfPlant, TRAILING_SHELF_PLANT_SIZE } from "./trailing-shelf-
 export { AbstractReliefWallArt, ABSTRACT_RELIEF_WALL_ART_SIZE } from "./abstract-relief-wall-art";
 
 export { LinePortraitWallArt, LINE_PORTRAIT_WALL_ART_SIZE } from "./line-portrait-wall-art";
-
-export { PottedCactus, POTTED_CACTUS_SIZE } from "./potted-cactus";

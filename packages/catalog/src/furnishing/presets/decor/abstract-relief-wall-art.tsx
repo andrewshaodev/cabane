@@ -1,4 +1,4 @@
-import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
+import { LayeredSurface, ToonMaterial, type SceneItemSize } from "@cabane/engine";
 export const ABSTRACT_RELIEF_WALL_ART_SIZE = [0.45, 0.65, 0.035] as const;
 /** Independently placeable shallow geometric relief in black, ivory or rose. */
 export function AbstractReliefWallArt({
@@ -42,14 +42,16 @@ export function AbstractReliefWallArt({
       {ivory ? (
         <>
           {block("relief-vertical", 0.08, 0.3, -0.025, 0.36)}
-          <mesh position={[0, 0.41, 0.028]} castShadow>
-            <ringGeometry args={[0.065, 0.13, 36, 1, 0, Math.PI]} />
-            <ToonMaterial color={relief} />
-          </mesh>
-          <mesh position={[0.012, 0.25, 0.028]} rotation={[0, 0, Math.PI]} castShadow>
-            <ringGeometry args={[0.065, 0.13, 36, 1, 0, Math.PI]} />
-            <ToonMaterial color={relief} />
-          </mesh>
+          <group position={[0, 0.41, 0.028]}>
+            <LayeredSurface layer={0} color={relief}>
+              <ringGeometry args={[0.065, 0.13, 36, 1, 0, Math.PI]} />
+            </LayeredSurface>
+          </group>
+          <group position={[0.012, 0.25, 0.028]} rotation={[0, 0, Math.PI]}>
+            <LayeredSurface layer={0} color={relief}>
+              <ringGeometry args={[0.065, 0.13, 36, 1, 0, Math.PI]} />
+            </LayeredSurface>
+          </group>
           {block("relief-eye", 0.062, 0.012, 0.045, 0.408)}
         </>
       ) : rose ? (
@@ -57,10 +59,11 @@ export function AbstractReliefWallArt({
           {block("relief-rose-upper", 0.15, 0.19, -0.05, 0.47, 0.04, 0.012)}
           {block("relief-rose-middle", 0.28, 0.17, 0, 0.31, 0.12)}
           {block("relief-rose-lower", 0.17, 0.14, 0.07, 0.14, -0.05)}
-          <mesh position={[-0.073, 0.44, 0.035]}>
-            <ringGeometry args={[0.045, 0.049, 32]} />
-            <ToonMaterial color="#4d363d" />
-          </mesh>
+          <group position={[-0.073, 0.44, 0.035]}>
+            <LayeredSurface layer={1} color="#4d363d">
+              <ringGeometry args={[0.045, 0.049, 32]} />
+            </LayeredSurface>
+          </group>
         </>
       ) : (
         <>

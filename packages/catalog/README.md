@@ -781,24 +781,26 @@ not stored in Git.
 
 ## Reusable catalog additions
 
-This catalog split keeps generic, independently placeable models public. The
-new entries cover:
+Reusable bedroom, dining, balcony, bathroom and kitchen models extend the shared
+catalog without importing apartment placements or private assets. Square cube
+storage offers two- and four-compartment variants behind one frame and descriptor.
+The existing potted plant gains a white-pot variant without changing its default.
 
-- bedroom furniture: `slatted-single-bed`, `wood-bunk-bed`,
-  `split-door-wardrobe`, `student-storage-desk`, `two-cube-bedside`,
-  `open-cube-bookcase`, `four-cube-storage`, `piano-bench`,
-  `portable-digital-piano`, `child-swivel-chair`, `children-wall-poster`,
-  `round-banded-rug`, and `clip-reading-lamp`;
-- bathroom, laundry, and countertop accessories: the `compact-sanitary`,
-  `bathroom-toiletries`, `laundry-cleaning`, `laundry-ventilation`, and
-  `countertop-appliances` families, plus the silver `round-towel-ring`
-  variant;
-- generic furniture and decor: `oak-slab-bench`, `balcony` furnishings,
-  `potted-cactus`, `potted-plant`, wall art, and the Astro Parallel wall light;
-- connected devices: `built-in-microwave`, `white-dome-pendant`,
-  `under-cabinet-led-strip`, and dense white/black heated-towel-rail variants.
+Bathroom definitions are grouped by fixtures, storage and lighting. They retain
+substantial fixtures such as baths, shower screens, basins, vanities, mirrors,
+cabinets and a wall-hung toilet. Standalone toiletries, tiny fittings, packaging,
+fitted laundry platforms and duplicate appliance poses are excluded. Wall-mounted
+awnings use ordinary wall support; outdoor ground-placement restrictions apply to
+the folding table and chair. The cleaning-tool rack also uses wall support.
 
-Fitted kitchen joinery, exact entryway cabinetry, and apartment-specific
-rounded furniture remain outside this shared registry. They belong in the
-active home's personal model collection, where their assets and placements do
-not become a dependency for other Cabane users.
+Connected additions include the built-in microwave, white dome pendant and
+under-cabinet LED strip. Heated towel rails offer dense white and black variants;
+all variants retain the shared activity indication. The built-in microwave uses
+the same active-only warm window treatment as the countertop model.
+
+Fitted kitchen joinery, exact entryway cabinetry, and apartment-specific rounded
+furniture stay in the active home's personal model collection.
+
+Ordinary model geometry is reviewed visually and through shared catalog and
+surface checks. This split adds no item-specific test files. The shared outline
+regression protects non-indexed source normals from outline smoothing.

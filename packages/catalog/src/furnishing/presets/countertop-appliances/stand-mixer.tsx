@@ -2,23 +2,23 @@ import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../construction";
 import { MixingBowl } from "./mixing-bowl";
 export const STAND_MIXER_SIZE = [0.28, 0.4, 0.4] as const;
-export const RAISED_STAND_MIXER_SIZE = [0.28, 0.493143318, 0.4] as const;
-function MixerAssembly({
-  size,
-  raised,
-  variant,
+export function StandMixer({
+  size = STAND_MIXER_SIZE,
+  variant = "default",
 }: {
-  size: SceneItemSize;
-  raised: boolean;
+  size?: SceneItemSize;
   variant?: string;
 }) {
-  const nominal = raised ? RAISED_STAND_MIXER_SIZE : STAND_MIXER_SIZE;
-  const color = raised || variant === "black" ? "#303436" : "#853c48";
+  const color = variant === "black" ? "#303436" : "#853c48";
   return (
     <group
       userData={{ walkCollider: true }}
-      name={raised ? "raised-stand-mixer" : "stand-mixer"}
-      scale={[size[0] / nominal[0], size[1] / nominal[1], size[2] / nominal[2]]}
+      name="stand-mixer"
+      scale={[
+        size[0] / STAND_MIXER_SIZE[0],
+        size[1] / STAND_MIXER_SIZE[1],
+        size[2] / STAND_MIXER_SIZE[2],
+      ]}
     >
       <RoundedFurniturePanel
         name="mixer-base"
@@ -34,7 +34,7 @@ function MixerAssembly({
         color={color}
         radius={0.022}
       />
-      <group name="tilting-head" position={[0, 0.335, -0.14]} rotation={[raised ? -0.3 : 0, 0, 0]}>
+      <group name="tilting-head" position={[0, 0.335, -0.14]}>
         <RoundedFurniturePanel
           name="motor-head"
           size={[0.13, 0.11, 0.36]}
@@ -54,16 +54,4 @@ function MixerAssembly({
       </mesh>
     </group>
   );
-}
-export function StandMixer({
-  size = STAND_MIXER_SIZE,
-  variant = "default",
-}: {
-  size?: SceneItemSize;
-  variant?: string;
-}) {
-  return <MixerAssembly size={size} raised={false} variant={variant} />;
-}
-export function RaisedStandMixer({ size = RAISED_STAND_MIXER_SIZE }: { size?: SceneItemSize }) {
-  return <MixerAssembly size={size} raised />;
 }

@@ -1,8 +1,12 @@
 import { defineFurnishingModel } from "@cabane/engine";
-import { FourCubeStorage } from "../presets/children-bedroom/four-cube-storage";
-export const fourCubeStorageDefinition = defineFurnishingModel({
-  component: FourCubeStorage,
-  label: "Four cube storage",
+import { SquareCubeStorage } from "../presets/children-bedroom/square-cube-storage";
+export const squareCubeStorageDefinition = defineFurnishingModel({
+  component: SquareCubeStorage,
+  label: "Square cube storage",
+  variants: [
+    { id: "default", label: "Four compartments" },
+    { id: "two-compartment", label: "Two compartments" },
+  ],
   category: "Children",
   defaultRoomType: "bedroom",
   defaultSize: [0.77, 0.77, 0.39],

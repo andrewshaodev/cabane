@@ -2,7 +2,7 @@ import { ToonMaterial, type HomeDeviceModelProps } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../../../furnishing/presets/construction";
 import { AppliancePull } from "./appliance-pull";
 /** Fixed built-in microwave, with a projecting face and independent cabinet. */
-export function BuiltInMicrowaveModel(_props: HomeDeviceModelProps) {
+export function BuiltInMicrowaveModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-built-in-microwave" userData={{ walkCollider: true }}>
       <mesh
@@ -34,7 +34,7 @@ export function BuiltInMicrowaveModel(_props: HomeDeviceModelProps) {
         name="microwave-built-in-window"
         size={[0.41, 0.17, 0.003]}
         position={[0, 0.139, 0.1345]}
-        color="#495e60"
+        color={visualState === "connected-active" ? "#e6a359" : "#263434"}
         radius={0.005}
         outline={false}
       />

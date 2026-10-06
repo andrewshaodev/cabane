@@ -11,7 +11,7 @@ export const astroParallelWallLightDefinition = defineFurnishingModel({
   defaultSize: ASTRO_PARALLEL_WALL_LIGHT_SIZE,
   bounds: { min: [-0.16, 0, 0], max: [0.16, 0.13, 0.11] },
   resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-  preferredPlacement: "absolute",
+  preferredPlacement: "wall",
   outlineContact: false,
   complexity: { visibleMeshes: 1, triangles: 450 },
 });

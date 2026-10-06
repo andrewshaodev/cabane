@@ -1,10 +1,10 @@
 import { clipReadingLampDefinition } from "./clip-reading-lamp";
 import { wallLiftingDryingRackDefinition } from "./wall-lifting-drying-rack";
-import { laundryVentilationDefinitions } from "./laundry-ventilation";
+
 import { laundryCleaningDefinitions } from "./laundry-cleaning";
-import { pottedCactusDefinition } from "./potted-cactus";
+
 import { balconyFurnishingDefinitions } from "./balcony";
-import { fourCubeStorageDefinition } from "./four-cube-storage";
+import { squareCubeStorageDefinition } from "./square-cube-storage";
 import { childrenWallPosterDefinition } from "./children-wall-poster";
 import { pianoBenchDefinition } from "./piano-bench";
 import { slattedSingleBedDefinition } from "./slatted-single-bed";
@@ -14,7 +14,7 @@ import { childSwivelChairDefinition } from "./child-swivel-chair";
 import { portableDigitalPianoDefinition } from "./portable-digital-piano";
 import { splitDoorWardrobeDefinition } from "./split-door-wardrobe";
 import { openCubeBookcaseDefinition } from "./open-cube-bookcase";
-import { twoCubeBedsideDefinition } from "./two-cube-bedside";
+
 import { roundBandedRugDefinition } from "./round-banded-rug";
 import { astroParallelWallLightDefinition } from "./astro-parallel-wall-light";
 import { entrywayFurnishingDefinitions } from "./entryway";
@@ -24,8 +24,10 @@ import { countertopApplianceDefinitions } from "./countertop-appliances";
 import { pottedPlantDefinition } from "./potted-plant";
 import { inductionCooktopDefinition } from "./induction-cooktop";
 import { whiteShellDiningChairDefinition } from "./white-shell-dining-chair";
-import { bathroomToiletryDefinitions } from "./bathroom-toiletries";
-import { compactSanitaryDefinitions } from "./compact-sanitary";
+
+import { bathroomFixtureDefinitions } from "./bathroom-fixtures";
+import { bathroomStorageDefinitions } from "./bathroom-storage";
+import { bathroomLightingDefinitions } from "./bathroom-lighting";
 import { rattanBellPendantDefinition } from "./rattan-bell-pendant";
 import { whiteDisplayColumnDefinition } from "./white-display-column";
 import { trailingShelfPlantDefinition } from "./trailing-shelf-plant";
@@ -77,13 +79,11 @@ import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
   ...laundryCleaningDefinitions,
-  ...laundryVentilationDefinitions,
   "wall-lifting-drying-rack": wallLiftingDryingRackDefinition,
   "clip-reading-lamp": clipReadingLampDefinition,
-  "potted-cactus": pottedCactusDefinition,
   ...balconyFurnishingDefinitions,
   "children-wall-poster": childrenWallPosterDefinition,
-  "four-cube-storage": fourCubeStorageDefinition,
+  "square-cube-storage": squareCubeStorageDefinition,
   "piano-bench": pianoBenchDefinition,
   "slatted-single-bed": slattedSingleBedDefinition,
   "wood-bunk-bed": woodBunkBedDefinition,
@@ -92,7 +92,6 @@ export const furnishingPresetDefinitions = {
   "portable-digital-piano": portableDigitalPianoDefinition,
   "split-door-wardrobe": splitDoorWardrobeDefinition,
   "open-cube-bookcase": openCubeBookcaseDefinition,
-  "two-cube-bedside": twoCubeBedsideDefinition,
   "round-banded-rug": roundBandedRugDefinition,
   "astro-parallel-wall-light": astroParallelWallLightDefinition,
   ...entrywayFurnishingDefinitions,
@@ -102,8 +101,9 @@ export const furnishingPresetDefinitions = {
   "potted-plant": pottedPlantDefinition,
   "induction-cooktop": inductionCooktopDefinition,
   "white-shell-dining-chair": whiteShellDiningChairDefinition,
-  ...compactSanitaryDefinitions,
-  ...bathroomToiletryDefinitions,
+  ...bathroomFixtureDefinitions,
+  ...bathroomStorageDefinitions,
+  ...bathroomLightingDefinitions,
   "rattan-bell-pendant": rattanBellPendantDefinition,
   "white-display-column": whiteDisplayColumnDefinition,
   "trailing-shelf-plant": trailingShelfPlantDefinition,

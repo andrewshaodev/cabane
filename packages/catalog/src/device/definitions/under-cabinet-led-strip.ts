@@ -8,7 +8,7 @@ export const underCabinetLedStripDefinition = defineDeviceModel({
   component: UnderCabinetLedStripModel,
   label: "Under-cabinet LED strip",
   category: "Lighting",
-  defaultRoomType: "living-room",
+  defaultRoomType: "kitchen",
   defaultSize: UNDER_CABINET_LED_STRIP_SIZE,
   bounds: { min: [-0.5, 0, -0.0125], max: [0.5, 0.015, 0.0125] },
   resizePolicy: { kind: "axes", axes: ["width"] },
