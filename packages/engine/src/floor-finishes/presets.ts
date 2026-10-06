@@ -1,3 +1,5 @@
+import { paintBlueQuatrefoilTile } from "./blue-quatrefoil-tile";
+import { paintBlackWhitePatchwork } from "./black-white-patchwork";
 import { paintDirt } from "./dirt";
 import { paintPineBark } from "./pine-bark";
 import { paintTomettes } from "./tomettes";
@@ -42,6 +44,18 @@ export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
     label: "Encaustic tile",
     representativeColor: "#c7ad86",
     repeatMeters: 0.6,
+  },
+  {
+    id: "black-white-patchwork",
+    label: "Black & white patchwork",
+    representativeColor: "#b4b3aa",
+    repeatMeters: 0.8,
+  },
+  {
+    id: "blue-quatrefoil-tile",
+    label: "Blue quatrefoil tile",
+    representativeColor: "#b7c1bd",
+    repeatMeters: 0.4,
   },
   { id: "sand", label: "Sand", representativeColor: "#d7c28f", repeatMeters: 1.4 },
   { id: "gravel", label: "Gravel", representativeColor: "#aaa38f", repeatMeters: 0.72 },
@@ -310,6 +324,12 @@ export const paintFloorPattern = (
       break;
     case "limestone":
       tiles(context, quiet ? "#d1cbbb" : "#cbc3ad", quiet ? "#b8b2a2" : "#a9a18c", 4, 5, true);
+      break;
+    case "blue-quatrefoil-tile":
+      paintBlueQuatrefoilTile(context, quiet);
+      break;
+    case "black-white-patchwork":
+      paintBlackWhitePatchwork(context, quiet);
       break;
     case "encaustic-tile":
       encaustic(context, quiet);

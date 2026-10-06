@@ -1,4 +1,5 @@
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
+import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
@@ -346,6 +347,14 @@ export function EditorSidebar({
                 onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
               />
             }
+            renderCustomModel={(entry) => (
+              <CustomModelCard
+                workspace={workspace}
+                entry={entry}
+                disabled={editingLocked || unsettled}
+                onChoose={() => addCatalogItem(entry)}
+              />
+            )}
           />
         </div>
       </aside>

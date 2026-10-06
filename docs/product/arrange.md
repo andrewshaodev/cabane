@@ -64,8 +64,9 @@ normalization and profile preview. **Generate a custom model** opens an
 illustrated guide for describing an object or using a reference photo with the
 user's AI tool. It links to the public skill repository and provides a copyable
 Skills CLI installation command for Codex, Claude Code and other supported agents.
-Models can be renamed, downloaded and deleted when
-unused.
+A single preview grid contains model management: download and unused-model
+removal icons appear on preview hover or keyboard focus, and remain visible on
+touch devices. Click the model name to rename it.
 Personal models preserve file materials and expose uniform resizing. Their
 metadata and instances share history/publication with native items; geometry is
 an immutable asset. See [personal models](personal-models.md).

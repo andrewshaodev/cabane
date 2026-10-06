@@ -216,14 +216,12 @@ test(
       await blender.getByRole("button", { name: "Add to My models", exact: true }).click();
       await blender.waitFor({ state: "hidden" });
       await waitCounts(4, 3);
-      await page.locator(".custom-model-management summary").click();
-      await page
-        .locator(".custom-model-row")
-        .filter({ hasText: "Blender desk" })
-        .getByRole("button", { name: "Delete", exact: true })
-        .click();
+      assert.equal(await page.locator(".custom-model-management").count(), 0);
+      assert.equal(await page.locator(".custom-model-card").count(), 4);
+      const blenderCard = page.getByRole("article", { name: "Blender desk model", exact: true });
+      await blenderCard.locator(".custom-model-preview").hover();
+      await blenderCard.getByRole("button", { name: "Remove Blender desk", exact: true }).click();
       await waitCounts(3, 3);
-      await page.locator(".custom-model-management summary").click();
       // A failed import keeps the scene and existing catalogue usable.
       await page.locator('.custom-model-library input[type="file"]').setInputFiles({
         name: "broken.glb",
@@ -247,23 +245,45 @@ test(
       const separate = (await read()).draft.customModels;
       assert.notEqual(separate[0].id, separate[3].id);
       assert.equal(separate[0].asset.sha256, separate[3].asset.sha256);
-      await page.locator(".custom-model-management summary").click();
-      const used = page.locator(".custom-model-row").filter({ hasText: "AI desk" });
+      const used = page.getByRole("article", { name: "AI desk model", exact: true });
+      await used.getByRole("button", { name: "Add AI desk", exact: true }).focus();
       assert.equal(
-        await used.getByRole("button", { name: "Delete", exact: true }).isDisabled(),
+        await used
+          .locator(".custom-model-preview-actions")
+          .evaluate((element) => getComputedStyle(element).opacity),
+        "1",
+      );
+      assert.equal(
+        await used.getByRole("button", { name: "Remove AI desk", exact: true }).isDisabled(),
         true,
       );
-      const spare = page.locator(".custom-model-row").filter({ hasText: "Independent desk" });
-      await spare.getByRole("button", { name: "Rename", exact: true }).click();
+      const spare = page.getByRole("article", { name: "Independent desk model", exact: true });
+      await page.getByRole("searchbox", { name: "Search my models", exact: true }).hover();
+      assert.equal(
+        await spare
+          .locator(".custom-model-preview-actions")
+          .evaluate((element) => getComputedStyle(element).opacity),
+        "0",
+      );
+      await spare.locator(".custom-model-preview").hover();
+      assert.equal(
+        await spare
+          .locator(".custom-model-preview-actions")
+          .evaluate((element) => getComputedStyle(element).opacity),
+        "1",
+      );
+      await page.screenshot({ path: "test-results/personal-models/models-desktop.png" });
+      await spare.getByRole("button", { name: "Rename Independent desk", exact: true }).click();
       await page.getByLabel("Model name", { exact: true }).fill("Spare desk");
       await page.getByLabel("Model name", { exact: true }).press("Enter");
-      const renamed = page.locator(".custom-model-row").filter({ hasText: "Spare desk" });
+      const renamed = page.getByRole("article", { name: "Spare desk model", exact: true });
+      await renamed.locator(".custom-model-preview").hover();
       const modelDownload = page.waitForEvent("download");
-      await renamed.getByRole("button", { name: "Download GLB", exact: true }).click();
+      await renamed.getByRole("button", { name: "Download Spare desk GLB", exact: true }).click();
       const downloaded = await modelDownload;
       assert.equal(downloaded.suggestedFilename(), "Spare_desk.glb");
       assert.deepEqual(await readFile(await downloaded.path()), examples[0].bytes);
-      await renamed.getByRole("button", { name: "Delete", exact: true }).click();
+      await renamed.getByRole("button", { name: "Remove Spare desk", exact: true }).click();
       await waitCounts(3, 3);
       await page.getByRole("button", { name: "Undo", exact: true }).click();
       await waitCounts(4, 3);
@@ -305,6 +325,15 @@ test(
       await mobileGuide
         .getByRole("button", { name: "Close generation guide", exact: true })
         .click();
+      const mobileCard = page.getByRole("article", { name: "AI desk model", exact: true });
+      await mobileCard.getByRole("button", { name: "Add AI desk", exact: true }).focus();
+      await page.screenshot({ path: "test-results/personal-models/models-mobile.png" });
+      assert.equal(
+        await mobileCard
+          .locator(".custom-model-preview-actions")
+          .evaluate((element) => getComputedStyle(element).opacity),
+        "1",
+      );
       await page.locator('.custom-model-library input[type="file"]').setInputFiles({
         name: "mobile.glb",
         mimeType: "model/gltf-binary",

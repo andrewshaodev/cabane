@@ -1,6 +1,6 @@
 import { EditorButton } from "../../../editor-chrome/EditorButton";
 import { ROOM_TYPES, type DeviceModelRegistry, type FurnishingModelRegistry } from "@cabane/engine";
-import { useMemo, useRef, type ReactNode } from "react";
+import { Fragment, useMemo, useRef, type ReactNode } from "react";
 import { EditorIcon, type EditorIconName } from "../../../editor-chrome/EditorIcon";
 import { catalogEntries, filterCatalog, type CatalogEntry, type CatalogRoom } from "./catalog";
 import { ModelThumbnail, ModelThumbnailRenderer } from "./ModelThumbnailRenderer";
@@ -42,9 +42,11 @@ export function ArrangeCatalog({
   onChoose,
   enabled = true,
   customModels,
+  renderCustomModel,
 }: {
   enabled?: boolean;
   customModels?: ReactNode;
+  renderCustomModel?: (entry: CatalogEntry) => ReactNode;
   furnishingModels: FurnishingModelRegistry;
   deviceModels: DeviceModelRegistry;
   browsing: CatalogBrowsing;
@@ -141,22 +143,26 @@ export function ArrangeCatalog({
           </div>
           <ModelThumbnailRenderer scrollRoot={scrollRoot} enabled={enabled}>
             <div className="catalog-grid" ref={scrollRoot} aria-label={`${filterLabel} catalog`}>
-              {results.map((entry) => (
-                <button
-                  type="button"
-                  className="catalog-card"
-                  key={entry.key}
-                  aria-label={`Add ${entry.definition.label}`}
-                  disabled={
-                    entry.kind === "device" && entry.definition.supportedDomains.length === 0
-                  }
-                  onClick={() => onChoose(entry)}
-                >
-                  <ModelThumbnail entry={entry} />
-                  <strong>{entry.definition.label}</strong>
-                  <small>{entry.kind === "device" ? "Device" : "Furniture"}</small>
-                </button>
-              ))}
+              {results.map((entry) =>
+                browsing.room === "my-models" && renderCustomModel ? (
+                  <Fragment key={entry.key}>{renderCustomModel(entry)}</Fragment>
+                ) : (
+                  <button
+                    type="button"
+                    className="catalog-card"
+                    key={entry.key}
+                    aria-label={`Add ${entry.definition.label}`}
+                    disabled={
+                      entry.kind === "device" && entry.definition.supportedDomains.length === 0
+                    }
+                    onClick={() => onChoose(entry)}
+                  >
+                    <ModelThumbnail entry={entry} />
+                    <strong>{entry.definition.label}</strong>
+                    <small>{entry.kind === "device" ? "Device" : "Furniture"}</small>
+                  </button>
+                ),
+              )}
               {results.length === 0 && (
                 <div className="catalog-empty" role="status">
                   <p>

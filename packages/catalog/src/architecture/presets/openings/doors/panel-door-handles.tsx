@@ -8,6 +8,9 @@ export function PanelDoorHandles({
   width: number;
   side?: -1 | 1;
 }) {
+  const rosetteRadius = Math.min(0.035, width * 0.15);
+  const leverWidth = Math.min(0.16, width * 0.5);
+  const leverOffset = Math.min(0.055, width * 0.18);
   return (
     <group
       name="opening-door-handles"
@@ -21,7 +24,7 @@ export function PanelDoorHandles({
             position={[0, 0, face * 0.034]}
             rotation={[Math.PI / 2, 0, 0]}
           >
-            <cylinderGeometry args={[0.035, 0.035, 0.018, 18]} />
+            <cylinderGeometry args={[rosetteRadius, rosetteRadius, 0.018, 18]} />
             <ToonMaterial color="#aeb4b2" />
             <Outlines thickness={0.004} color="#555b59" screenspace={false} />
           </mesh>
@@ -30,10 +33,10 @@ export function PanelDoorHandles({
             <ToonMaterial color="#c3c7c5" />
           </mesh>
           <RoundedBox
-            args={[0.16, 0.026, 0.028]}
+            args={[leverWidth, 0.026, 0.028]}
             radius={0.011}
             smoothness={3}
-            position={[-0.055 * handleSide, 0, face * 0.076]}
+            position={[-leverOffset * handleSide, 0, face * 0.076]}
             castShadow
           >
             <ToonMaterial color="#b8bdbb" />

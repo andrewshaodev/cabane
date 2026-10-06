@@ -13,35 +13,6 @@
   justify-content: flex-start;
   text-align: left;
 }
-.custom-model-management {
-  margin-top: 10px;
-}
-.custom-model-management summary {
-  cursor: pointer;
-  padding-block: 6px;
-}
-.custom-model-management[open] {
-  max-height: 210px;
-  overflow-y: auto;
-}
-.custom-model-row {
-  padding-block: 8px;
-  border-top: 1px solid var(--editor-line);
-}
-.custom-model-row strong {
-  display: block;
-  overflow-wrap: anywhere;
-}
-.custom-model-row form,
-.custom-model-row > div {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.custom-model-row input {
-  min-width: 0;
-  max-width: 100%;
-}
 .model-import-dialog {
   width: min(620px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
@@ -107,8 +78,7 @@
   min-width: 0;
 }
 .model-import-dialog input,
-.model-import-dialog select,
-.custom-model-row input {
+.model-import-dialog select {
   box-sizing: border-box;
   width: 100%;
   min-height: 36px;
@@ -120,8 +90,7 @@
   font: inherit;
 }
 .model-import-dialog input:focus-visible,
-.model-import-dialog select:focus-visible,
-.custom-model-row input:focus-visible {
+.model-import-dialog select:focus-visible:focus-visible {
   outline: 2px solid #395a3d;
   outline-offset: 2px;
 }

@@ -5,6 +5,7 @@ import { ShapeUtils, Vector2 } from "three";
 import { planPointToWorld, worldPointToPlan } from "../geometry";
 
 import type { FloorSpec, WallJunctionSpec, WallSpec } from "../types";
+import { junctionCornerMiterPolygon } from "./wall-solid-footprints";
 import { unionClippingPolygons } from "./architecture-clipping";
 import { EPSILON, Horizontal, MaterialBucket } from "./architecture-geometry-contract";
 import { geometryFromBuckets, pushTriangle, uniqueSorted } from "./architecture-mesh-buckets";
@@ -99,6 +100,8 @@ export const buildWallJunctionGeometries = (junction: WallJunctionSpec, floor: F
       (wall) => (wall.heightMeters ?? floor.defaultWallHeightMeters) >= top - EPSILON,
     );
     const arms = active.map((wall) => armPolygon(wall, junction, floor));
+    const miter = junctionCornerMiterPolygon(junction, active, floor);
+    if (miter) arms.push(miter);
     if (!arms[0]) return [];
     const merged = unionClippingPolygons(arms);
     return merged.flatMap((polygon, polygonIndex) => ({

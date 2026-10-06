@@ -78,6 +78,7 @@ export class SceneGeometryLod {
         const mesh = object as Mesh;
         if (!mesh.isMesh || toonBatchKey(mesh, true, true) === null) return;
         const source = mesh.geometry;
+        if (source.userData.preservePlanarFaces === true) return;
         if ((source.index?.count ?? source.attributes.position.count) < 300) return;
         used.add(source);
         const revision = geometryRevision(mesh);

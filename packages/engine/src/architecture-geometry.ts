@@ -275,6 +275,7 @@ export function buildArchitecturalWallGeometries(
 
   return [...buffersByDirection.values()].map((buffers) => {
     const geometry = new BufferGeometry();
+    geometry.userData.preservePlanarFaces = true;
     geometry.setAttribute("position", new Float32BufferAttribute(buffers.positions, 3));
     geometry.setAttribute("color", new Float32BufferAttribute(buffers.colors, 3));
     geometry.setIndex(buffers.indices);

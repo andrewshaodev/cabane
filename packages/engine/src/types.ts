@@ -106,6 +106,8 @@ export const FLOOR_PATTERN_PRESET_IDS = [
   "dark-walnut",
   "limestone",
   "encaustic-tile",
+  "black-white-patchwork",
+  "blue-quatrefoil-tile",
   "sand",
   "gravel",
   "light-dirt",
@@ -177,7 +179,16 @@ export interface OpeningBaseSpec {
 }
 
 export type DoorOperation = "hinged" | "sliding" | "roll-up";
-export type DoorVariant = "panel" | "french" | "full-glass" | "plank";
+export type DoorVariant =
+  | "panel"
+  | "panel-white-lever"
+  | "french"
+  | "full-glass"
+  | "steel-arched"
+  | "concealed"
+  | "flush-knob"
+  | "flush"
+  | "plank";
 export type DoorFinish = "wood" | "white";
 
 /** Relative to the owning wall's from → to direction, never the camera. */
@@ -194,6 +205,10 @@ export interface OpeningCoverSlotSpec {
 }
 
 interface DoorBaseSpec extends OpeningBaseSpec {
+  /** Optional flush-front jamb overlap, capped by adjacent structural margins. */
+  frontOverlayMeters?: number;
+  /** Concealed door finish plane; independent of the swing side. */
+  frontSide?: "left" | "right";
   kind: "door";
   finish: DoorFinish;
   openingSide?: "left" | "right";
@@ -239,7 +254,7 @@ export type DoorConfiguration = DoorSpec extends infer D
   : never;
 
 export type WindowOperation = "fixed" | "casement";
-export type WindowVariant = "plain" | "muntined";
+export type WindowVariant = "plain" | "muntined" | "steel-arched";
 
 export interface WindowSpec extends OpeningBaseSpec, OpeningOrientation {
   kind: "window";

@@ -21,6 +21,10 @@ await withModules(async (load) => {
   const { roundedBoxGeometry } = await load(
     "/packages/engine/src/rounded-box/rounded-box-geometry.ts",
   );
+  const { buildArchitecturalWallGeometries, buildWallJunctionGeometries } = await load(
+    "/packages/engine/src/index.ts",
+  );
+  const { interactionFloor } = await load("/tests/fixtures/interaction-floor.ts");
   test("rounded procedural geometry simplifies across seams with bounded attribute error", async () => {
     const source = roundedBoxGeometry(1, 2, 0.1, 0.02, 1, 4, 4, 0.4);
     const levels = await createGeometryLods(source);
@@ -28,6 +32,46 @@ await withModules(async (load) => {
     assert.ok(levels.at(-1).error < 0.08 * 2);
     levels.forEach((level) => level.geometry.dispose());
     source.dispose();
+  });
+  test("architectural wall and junction planes retain original buffers at every camera scale", async () => {
+    const groups = [
+      ...buildArchitecturalWallGeometries(interactionFloor),
+      ...buildWallJunctionGeometries(interactionFloor.wallJunctions[0], interactionFloor),
+    ];
+    const scene = new Scene();
+    let preparations = 0;
+    const lod = new SceneGeometryLod(
+      () => {},
+      async (source) => {
+        preparations++;
+        return createGeometryLods(source);
+      },
+    );
+    const meshes = groups.map(({ geometry }) => {
+      assert.equal(geometry.userData.preservePlanarFaces, true);
+      const mesh = new Mesh(geometry, new MeshToonMaterial());
+      scene.add(mesh);
+      return mesh;
+    });
+    const camera = new OrthographicCamera(-50, 50, 50, -50, 0.1, 100);
+    camera.position.z = 20;
+    try {
+      for (const zoom of [0.01, 1, 10000]) {
+        camera.zoom = zoom;
+        camera.updateProjectionMatrix();
+        lod.render(scene, camera, 100, () =>
+          meshes.forEach((mesh, index) => assert.equal(mesh.geometry, groups[index].geometry)),
+        );
+        await lod.ready;
+      }
+      assert.equal(preparations, 0);
+    } finally {
+      lod.dispose();
+      meshes.forEach((mesh) => {
+        mesh.geometry.dispose();
+        mesh.material.dispose();
+      });
+    }
   });
   test("meshoptimizer reduces dense geometry without modifying authored buffers", async () => {
     const source = new SphereGeometry(1, 48, 32),

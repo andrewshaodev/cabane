@@ -2,8 +2,10 @@
 
 Arrange exposes personal-model tools only inside **My models**, identified by
 a cube icon. This section offers **Import model (.glb file)** and **Generate a
-custom model**, lists the home's models, and retains rename, download and unused
-model deletion. The generation guide explains use of any AI tool, installation
+custom model**. A single preview grid lists the home's models, with download and
+unused-model removal icons on preview hover or keyboard focus, and always visible
+on touch devices. Clicking a model's name renames it; there is no second management
+list. The generation guide explains use of any AI tool, installation
 of the public skill through the Skills CLI in Codex or Claude Code, and generation from a real
 photo or description, with an illustrative photo-to-model image. A GitHub repository link and a copyable installation command appear in that
 guide, not in the general Arrange catalog. No skill ZIP is bundled in the app. Its bundled

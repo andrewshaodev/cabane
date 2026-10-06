@@ -111,7 +111,7 @@ for (const file of files) {
     if (
       rule.reason === "external visual asset reference" &&
       (relativePath.startsWith("packages/engine/src/imported-models/") ||
-        relativePath === "apps/web/src/custom-models/CustomModelLibrary.tsx")
+        relativePath === "apps/web/src/custom-models/CustomModelCard.tsx")
     ) {
       // Local GLB bytes and user downloads only; remote URLs and other assets
       // remain prohibited, including inside the import owner.

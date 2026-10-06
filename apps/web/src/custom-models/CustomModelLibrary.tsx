@@ -1,8 +1,6 @@
 import { useRef, useState } from "react";
 import {
   CUSTOM_MODEL_LIMITS,
-  createModelAssetRepository,
-  downloadCabaneBytes,
   stageModelAssets,
   type CustomModel,
   type ModelAsset,
@@ -27,7 +25,6 @@ export function CustomModelLibrary({
   const [file, setFile] = useState<File | null>(null);
   const [generationGuide, setGenerationGuide] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rename, setRename] = useState<{ id: string; name: string } | null>(null);
   const models = workspace.snapshot.project.customModels ?? [];
   const setModels = (customModels: readonly CustomModel[]) =>
     workspace.commit({
@@ -77,94 +74,6 @@ export function CustomModelLibrary({
           else if (next) setFile(next);
         }}
       />
-      {models.length > 0 && (
-        <details className="custom-model-management">
-          <summary>Manage My models ({models.length})</summary>
-          {models.map((model) => (
-            <div className="custom-model-row" key={model.id}>
-              {rename?.id === model.id ? (
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    if (rename.name.trim()) {
-                      setModels(
-                        models.map((m) =>
-                          m.id === model.id ? { ...m, name: rename.name.trim() } : m,
-                        ),
-                      );
-                      setRename(null);
-                    }
-                  }}
-                >
-                  <input
-                    aria-label="Model name"
-                    required
-                    autoFocus
-                    value={rename.name}
-                    onChange={(e) => setRename({ ...rename, name: e.target.value })}
-                  />
-                  <EditorButton type="submit">Rename</EditorButton>
-                  <EditorButton onClick={() => setRename(null)}>Cancel</EditorButton>
-                </form>
-              ) : (
-                <>
-                  <strong>{model.name}</strong>
-                  <div>
-                    <EditorButton
-                      variant="text"
-                      disabled={disabled}
-                      onClick={() => setRename({ id: model.id, name: model.name })}
-                    >
-                      Rename
-                    </EditorButton>
-                    <EditorButton
-                      variant="text"
-                      disabled={disabled}
-                      onClick={() => {
-                        void createModelAssetRepository(window.indexedDB)
-                          .verify([model.asset])
-                          .then(([asset]) =>
-                            downloadCabaneBytes(
-                              asset!.bytes,
-                              `${model.name.replace(/[^a-z0-9-]/gi, "_")}.glb`,
-                              "model/gltf-binary",
-                            ),
-                          )
-                          .catch((e: unknown) =>
-                            setError(
-                              e instanceof Error ? e.message : "Could not download this model.",
-                            ),
-                          );
-                      }}
-                    >
-                      Download GLB
-                    </EditorButton>
-                    <EditorButton
-                      variant="text"
-                      disabled={
-                        disabled ||
-                        workspace.snapshot.project.sceneItems.some(
-                          (item) => item.modelId === model.id,
-                        )
-                      }
-                      title={
-                        workspace.snapshot.project.sceneItems.some(
-                          (item) => item.modelId === model.id,
-                        )
-                          ? "Remove this model's instances first."
-                          : "Remove unused model"
-                      }
-                      onClick={() => setModels(models.filter((m) => m.id !== model.id))}
-                    >
-                      Delete
-                    </EditorButton>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </details>
-      )}
       {error && (
         <p role="alert" className="catalog-add-error">
           {error}

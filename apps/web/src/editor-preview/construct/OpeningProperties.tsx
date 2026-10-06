@@ -148,6 +148,7 @@ export function OpeningProperties({
               }}
             >
               <option value="plain">Plain</option>
+              <option value="steel-arched">Arched steel glass</option>
               <option value="muntined">Muntined</option>
             </select>
           </label>

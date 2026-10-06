@@ -225,3 +225,5 @@ unusable; preferences identify the active Auto source. Forced day/night remain
 exterior-lighting previews, independent of lamp state. Solar shadow framing encloses
 the building's floor scene bounds, walls, storey elevations and roof allowance,
 including translated and scaled plans. Luminaires remain unshadowed.
+
+Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
