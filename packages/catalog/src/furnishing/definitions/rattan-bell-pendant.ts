@@ -9,7 +9,7 @@ export const rattanBellPendantDefinition = defineFurnishingModel({
   defaultRoomType: "dining-room",
   defaultSize: RATTAN_BELL_PENDANT_SIZE,
   bounds: { min: [-0.25, 0, -0.25], max: [0.25, 1.2, 0.25] },
-  resizePolicy: { kind: "uniform" },
+  resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
   preferredPlacement: "ceiling",
   outlineContact: true,
   complexity: { visibleMeshes: 10, triangles: 40_000 },

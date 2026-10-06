@@ -1,9 +1,9 @@
 {
-  "revision": 6,
-  "fingerprint": "09399316f668236b8e09e48617cbab6ac0770a62b6dd5258381332922aba183d",
-  "summary": "Soften rattan pendant lighting and lower its bulb into the shade chamber",
+  "revision": 7,
+  "fingerprint": "ceddc65f7865f1fe5024275d6361e4e06e3a79dd4346dd99a97c1e476b66b72e",
+  "summary": "Publish reusable furnishing and device presets for the catalog split",
   "breakingChanges": [
-    "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
+    "Homes using the new catalog device model IDs require the matching Home Assistant integration release; existing model IDs remain compatible."
   ],
   "history": [
     {
@@ -39,6 +39,13 @@
       "summary": "Make rattan bell pendants bindable light devices",
       "breakingChanges": [
         "Existing furnishing pendants remain readable as hidden legacy items. New rattan-bell-pendant instances are light devices and require the matching panel release."
+      ]
+    },
+    {
+      "revision": 6,
+      "summary": "Soften rattan pendant lighting and lower its bulb into the shade chamber",
+      "breakingChanges": [
+        "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
       ]
     }
   ]
