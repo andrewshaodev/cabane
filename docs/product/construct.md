@@ -3,7 +3,7 @@
 Construct is an implemented 2D plan editor. Two-finger trackpad scrolling pans
 the plan without clicking or changing tools, including during construction.
 Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, Wall, Door,
-Window, Passage, Floor, Pool, Hedge, Measure, and Pan. Users can edit wall endpoints and
+Window, Passage, Floor, Pool, Boundary, Measure, and Pan. Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
 also controls default wall/ceiling settings. Select a door, window, or passage and
@@ -85,13 +85,13 @@ issues are currently displayed. Explore opens an eye-level draft preview with
 non-operative HA controls. Editor changes remain browser-local until exported;
 Apply changes the browser's Home view.
 
-Hedge (H) draws connected segments with the shared drag and snapping controller.
+Boundary (H) draws connected segments with the shared drag and snapping controller.
 Choose Clipped box, Rounded, Bushy, Tall mixed hedge (oleander and evergreen
 laurel), or Ivy-covered wall from a thumbnail grid using Arrange’s shared preview
 renderer and cache. New styles use suitable default dimensions; restyling an
 existing hedge retains its height and width. Both dimensions remain editable. Select a
 hedge to move it or drag either endpoint; deletion, undo/redo, project export,
-and Apply preserve hedges. Procedural toon hedges participate in walk collision.
+and Apply preserve boundaries. The picker retains all five hedge styles and adds Picket fence, Privacy fence, Post and rail, Metal fence, and Low masonry wall. Existing `hedges` records, IDs, style IDs and dimensions remain unchanged; new styles use the same record and lifecycle. Restyling retains dimensions. All styles are procedural toon geometry and block walking across their continuous segment envelope, including gaps between rails or bars. Leave explicit segment gaps for entrances; garden and driveway gates are deferred.
 
 Wall, hedge, pool, and custom floor outlines share segment drawing gestures, snapping,
 angle references, and edge measurements. Pool and floor outline editing shares

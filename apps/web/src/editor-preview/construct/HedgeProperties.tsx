@@ -20,13 +20,17 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
     <div className="construction-inspector__selection">
       <header>
         <div>
-          <small>{hedge ? "Selected hedge" : "Hedge tool"}</small>
-          <strong>Hedgerow</strong>
+          <small>{hedge ? "Selected boundary" : "Boundary tool"}</small>
+          <strong>Boundary</strong>
         </div>
       </header>
       <p className="construction-inspector__tool-hint">
-        Drag to draw a hedge. Continue from its endpoint for a connected row. Escape finishes
+        Drag to draw a boundary. Continue from its endpoint for a connected row. Escape finishes
         drawing.
+      </p>
+      <p className="construction-inspector__tool-hint">
+        All styles block walking across the full width, including open rails. Leave gaps for
+        entrances.
       </p>
       <HedgeStyleGrid
         value={settings.style}
@@ -45,7 +49,7 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
       <label>
         Height (m)
         <CommittedNumberInput
-          label="Hedge height"
+          label="Boundary height"
           value={settings.heightMeters}
           min={0.2}
           step={0.1}
@@ -57,7 +61,7 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
       <label>
         Width (m)
         <CommittedNumberInput
-          label="Hedge width"
+          label="Boundary width"
           value={settings.widthMeters}
           min={0.2}
           step={0.1}
@@ -68,7 +72,7 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
       </label>
       {hedge && (
         <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
-          Delete hedge
+          Delete boundary
         </EditorButton>
       )}
     </div>

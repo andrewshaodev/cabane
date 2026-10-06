@@ -357,7 +357,7 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
           issues,
           "project.hedge",
           hedgePath,
-          "Hedges need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.",
+          "Boundaries need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.",
         );
     });
   const edgeConfiguration = (value: unknown, edgePath: string) => {

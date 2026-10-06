@@ -291,7 +291,7 @@ export function ConstructionInspector({
               )}
               {deletionCounts.hedge > 0 && (
                 <div>
-                  <dt>Hedges</dt>
+                  <dt>Boundaries</dt>
                   <dd>{deletionCounts.hedge}</dd>
                 </div>
               )}

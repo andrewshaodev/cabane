@@ -308,8 +308,18 @@ export interface SlopedCeilingSpec {
 
 export type CeilingSpec = FlatCeilingSpec | SlopedCeilingSpec;
 
-/** Procedural hedge silhouettes supported by Construct. */
-export type HedgeStyle = "clipped" | "rounded" | "bushy" | "mixed" | "ivy-wall";
+/** Procedural boundary styles. Legacy hedge names remain the portable wire contract. */
+export type HedgeStyle =
+  | "clipped"
+  | "rounded"
+  | "bushy"
+  | "mixed"
+  | "ivy-wall"
+  | "picket"
+  | "privacy"
+  | "post-rail"
+  | "metal-bars"
+  | "masonry";
 
 export interface HedgeSpec {
   id: string;

@@ -9,7 +9,7 @@ const constructionTools = [
   { tool: "window", label: "Window", key: "N" },
   { tool: "passage", label: "Passage", key: "A" },
   { tool: "floor", label: "Floor", key: "F" },
-  { tool: "hedge", label: "Hedge", key: "H" },
+  { tool: "hedge", label: "Boundary", key: "H" },
   { tool: "pool", label: "Pool", key: "P" },
   { tool: "measure", label: "Measure", key: "M" },
 ] as const;
