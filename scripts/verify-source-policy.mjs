@@ -61,12 +61,23 @@ for (const file of files) {
       // User-activated documentation navigation, never a scene asset request.
       inspectedSource = inspectedSource.replace("https://www.home-assistant.io/integrations/http/", "http-settings-documentation");
     }
+    if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/workspaces/ha-integration-links.ts") {
+      // User-activated installation guide, never fetched as a scene asset.
+      inspectedSource = inspectedSource.replace("https://github.com/cabane-app/cabane-home-assistant#installation", "integration-setup-navigation");
+    }
+    if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/workspaces/HomeAssistantPage.tsx") {
+      inspectedSource = inspectedSource.replace("https://home.example.com", "example-address-placeholder");
+    }
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/onboarding-config.ts") {
       inspectedSource = inspectedSource.replace(/https:\/\/github\.com\/cabane-app\/cabane(?:#readme)?/g, "public-source-navigation");
     }
+    if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/mobile-editor/MobileEditorPrompt.tsx") {
+      // This is the user-requested URL passed to the native share sheet, not a runtime asset fetch.
+      inspectedSource = inspectedSource.replace("https://cabane.my", "cabane-share-destination");
+    }
     if (rule.reason === "runtime remote URL" && relativePath === "packages/engine/src/ValidatedDashboardView.tsx") {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
-      inspectedSource = inspectedSource.replace("https://tally.so/r/pbQv8B", "feedback-navigation");
+      inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
     }
     if (rule.reason === "external visual asset reference" && relativePath === "packages/engine/src/onboarding/OnboardingIntroduction.tsx") {
       inspectedSource = inspectedSource.replace('`/onboarding/${name}.png`', '"bundled-onboarding-preview"');
@@ -76,6 +87,7 @@ for (const file of files) {
       "apps/web/src/HomeEditor.tsx",
       "apps/web/src/editor-workspace/EditorWorkspace.tsx",
       "apps/web/src/workspaces/WorkspaceLibrary.tsx",
+      "apps/web/src/workspaces/HomeAssistantPage.tsx",
     ].includes(relativePath)) {
       // The editor and workspace library reuse the checked-in engine UI brand mark.
       inspectedSource = inspectedSource.replace(/(["'`])\/cabane-icon\.png\1/g, '"bundled-cabane-brand"');

@@ -6,6 +6,7 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { serializeCanonicalJson, setupStorageKey, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
+import { WorkspaceHaLibrary } from "./WorkspaceHaStorage";
 import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
@@ -43,7 +44,7 @@ export function WorkspaceApplication() {
   }, [refresh, location.pathname]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not load your workspaces.</strong><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></main>;
   if (!repository || !entries) return <main className="direction-project-loading">Loading your workspaces…</main>;
-  const isCallback = new URLSearchParams(location.search).has("auth_callback");
+  const isCallback = location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
   const callback = isCallback ? callbackRequest : null;
   if (isCallback) {
     if (!callback || !entries.some(entry => entry.metadata.id === callback.workspaceId)) {
@@ -64,7 +65,8 @@ export function WorkspaceApplication() {
       {onboarding.deleted && <button disabled={onboarding.busy} onClick={() => void onboarding.start(onboarding.deleted!.path, onboarding.deleted!.id)}>Create a new home</button>}
       <button onClick={() => void navigate("/workspaces")}>Workspaces</button><button onClick={onboarding.clearError}>Dismiss</button>
     </div>}
-    {onboarding.loaded ? <WorkspaceHost key={id} id={id} repository={repository} onboarding={onboarding} /> : <main className="direction-project-loading">Loading your home…</main>}
+    {onboarding.loaded ? <WorkspaceHost key={id} id={id} repository={repository} onboarding={onboarding}
+      demoWorkspaceId={entries.some(entry => entry.metadata.id === onboarding.state?.demoWorkspaceId) ? onboarding.state?.demoWorkspaceId ?? null : null} /> : <main className="direction-project-loading">Loading your home…</main>}
   </>;
   if (location.pathname !== "/workspaces") return <Navigate to="/" replace />;
   const selected = (id: string) => {
@@ -79,7 +81,7 @@ export function WorkspaceApplication() {
   };
   const open = async (id: string) => { await navigate(workspaceHomePath(id)); };
   return <>{migrationError && <p role="alert" className="workspace-error">{migrationError} Your saved source data has been retained.</p>}
-    <WorkspaceLibrary entries={entries} onOpen={open} onRecover={open}
+    <WorkspaceLibrary onSettings={async id => { await navigate(`${workspaceHomePath(id)}/home-assistant`); }} entries={entries} onOpen={open} onRecover={open}
       onCreate={async name => { const entry = await repository.createBlank(name); enrollBuildTutorial(entry.metadata.id); await refresh(); await open(entry.metadata.id); }}
       onRename={async (id, name) => { await repository.rename(id, record(id).revision, name); await refresh(); }}
       onDuplicate={async (id, name) => { await repository.duplicate(id, record(id).revision, name); await refresh(); }}
@@ -102,6 +104,7 @@ export function WorkspaceApplication() {
         const entry = selected(id); const saved = record(id);
         downloadConnectData(privateBackup ? exportWorkspaceBackup(entry.metadata, saved) : serializeCanonicalJson(saved.draft), `${id}-${privateBackup ? "backup" : "project"}.json`);
       }}
-      onExportRaw={async id => { const raw = await repository.readRaw(id); if (raw === null) throw new Error("No saved record exists."); downloadConnectData(raw, `${id}-recovery.json`); }} />
+      onExportRaw={async id => { const raw = await repository.readRaw(id); if (raw === null) throw new Error("No saved record exists."); downloadConnectData(raw, `${id}-recovery.json`); }}
+      remoteImport={<WorkspaceHaLibrary repository={repository} onRestored={async id => { await refresh(); await open(id); }} initialOrigin={entries.find(entry => entry.metadata.homeAssistantUrl)?.metadata.homeAssistantUrl ?? null} />} />
   </>;
 }

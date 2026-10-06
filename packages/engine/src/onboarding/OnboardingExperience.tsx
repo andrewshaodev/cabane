@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { CabaneDashboard } from "../CabaneDashboard";
-import { DemoHomeAssistantSession } from "../DemoHomeAssistantSession";
+import { DemoHomeAssistantSession, demoLightVisualManifest } from "../DemoHomeAssistantSession";
 import { HomeAssistantConnectionFlow } from "../HomeAssistantConnectionFlow";
 import { HomeAssistantRuntimeValueProvider, useHomeAssistantRuntime } from "../HomeAssistantRuntime";
 import { useRuntimeBindingProfile, type RuntimeBindingProfileManager } from "../RuntimeBindingSetup";
@@ -24,7 +24,7 @@ export interface OnboardingOptions {
 
 export function CabaneAppExperience({ manifest, architectureModels, deviceModels, homeAssistantUrl, onHomeAssistantUrlChange,
   renderActionBarDeviceIcon,
-  onEditHome, onCustomizeActionBar, onWorkspaces, onImportBrowserData, onExportBrowserData = () => undefined, bindingManager, onOpenConnect,
+  onEditHome, onCustomizeActionBar, onHomeAssistantSettings, onWorkspaces, onImportBrowserData, onExportBrowserData = () => undefined, bindingManager, onOpenConnect,
   constructionApplied = false, onboarding,
 }: {
   manifest: HomeManifest; architectureModels: ArchitectureModelRegistry; deviceModels: DeviceModelRegistry;
@@ -32,6 +32,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   homeAssistantUrl: string | null; onHomeAssistantUrlChange: (url: string | null) => void;
   onEditHome?: (mode?: "construct" | "furnish" | "connect") => void;
   onCustomizeActionBar?: () => void;
+  onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onImportBrowserData?: (json: string) => BrowserDataImportResult; onExportBrowserData?: () => void;
   bindingManager?: RuntimeBindingProfileManager;
@@ -44,6 +45,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   const { setupState, updateSetupRecord } = useSetupRecord(manifest.home.id, constructionApplied);
   const launch = setupState.record.launch ?? createLaunchOnboardingState();
   const isDemo = onboarding?.isDemo ?? false;
+  const dashboardManifest = useMemo(() => isDemo ? demoLightVisualManifest(manifest) : manifest, [isDemo, manifest]);
   const [surface, setSurface] = useState<"intro" | "connection" | null>(() => onboarding?.welcome ? "intro" : null);
   const [interacted, setInteracted] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -63,7 +65,6 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   const observedRuntime = useFirstControlConfirmation(runtime,
     personalSetup && !setupState.record.activated && !launch.firstControlConfirmed, confirmed, manifest.home.id, targetEntityId);
   const connect = () => {
-    if (isDemo && onboarding) { void onboarding.start("build"); return; }
     if (onOpenConnect) onOpenConnect("devices", target?.roomId);
     else setSurface("connection");
   };
@@ -72,16 +73,16 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
     requestAnimationFrame(() => shell.current?.querySelector<HTMLElement>('summary[aria-label="Open scene menu"]')?.focus());
   };
   const dashboard = (bindingManager: RuntimeBindingProfileManager) => <CabaneDashboard
-    manifest={manifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
+    manifest={dashboardManifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
     renderActionBarDeviceIcon={renderActionBarDeviceIcon}
     sessionPresentation={isDemo ? { mode: "demo", label: "Demo", detail: "Simulated devices", menuDescription: "Explore freely. These controls only change simulated devices in this browser." } : undefined}
     setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => setSurface("intro") }
       : personalSetup && !setupState.record.activated ? { label: "Continue setup", detail: "Connect a device in this home", attention: false, onOpen: connect } : undefined}
-    setupOpen={surface !== null} onWorkspaces={onWorkspaces}
+    setupOpen={surface !== null} onWorkspaces={onWorkspaces} onHomeAssistantSettings={onHomeAssistantSettings}
     focusRoomId={personalSetup && targetEntityId && !setupState.record.activated ? target?.roomId : undefined}
-    onEditHome={onEditHome ? mode => { if (mode === "connect" && isDemo) connect(); else onEditHome(mode); } : undefined}
+    onEditHome={onEditHome}
     onCustomizeActionBar={onCustomizeActionBar}
-    onOpenConnect={onOpenConnect ? (view, roomId) => { if (isDemo) connect(); else onOpenConnect(view, roomId); } : undefined}
+    onOpenConnect={onOpenConnect}
     onExportBrowserData={onExportBrowserData} />;
   const nudge = isDemo && interacted && !onboarding?.nudgeDismissed;
   const targetState = targetEntityId ? runtime.entityStates[targetEntityId] : undefined;

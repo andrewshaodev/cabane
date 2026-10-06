@@ -36,8 +36,7 @@ import {
 
 import { ConnectInspector } from "../editor-connect/ConnectInspector";
 
-import { exportWorkspaceBackup } from "../workspaces/workspace-transfer";
-import { exportPublishedProfile, stageImportedWorkspace } from "../editor-connect/profile-transfer";
+import { stageImportedWorkspace } from "../editor-connect/profile-transfer";
 
 import { ArrangeCatalog } from "../editor-preview/furnish/catalog/ArrangeCatalog";
 
@@ -271,12 +270,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         )}
         {!shortcutsMode && mode === "connect" && <ConnectInspector editor={connect} manifest={connectManifest} runtime={runtime}
           deviceModels={deviceModels}
-          homeAssistantUrl={homeAssistantUrl} onSignIn={signIn}
-          onExportProfile={() => exportPublishedProfile(workspace.getRecord().bindings, homeAssistantUrl!, snapshot.project.home.id)}
-          onBackup={async () => { const saved = await flush(); if (saved.status !== "saved") throw new Error("Save the draft before exporting a backup."); return exportWorkspaceBackup({ name: saved.record.draft.home.name, homeAssistantUrl: homeAssistantUrl ?? null, hasPublished: saved.record.publishedAt !== 0 }, saved.record); }}
-          onExportProject={() => lifecycle.exportRecord({ ...workspace.getRecord(), draft: snapshot.project })}
-          onImportWorkspace={importWorkspace}
-          onDiscard={async () => { const reset = await workspace.resetDraftToPublished(); if (reset.status !== "saved") throw new Error("Could not discard the draft."); replaceEditorsFromProject(reset.record.draft); }} />}
+          homeAssistantUrl={homeAssistantUrl} onSettings={props.onHomeAssistantSettings} />}
         <div className="arrange-catalog-mount" hidden={shortcutsMode || mode !== "furnish"}>
           <ArrangeCatalog enabled={!shortcutsMode && mode === "furnish"} furnishingModels={furnishingModels} deviceModels={deviceModels}
             browsing={catalogBrowsing} onBrowse={setCatalogBrowsing} error={catalogError}

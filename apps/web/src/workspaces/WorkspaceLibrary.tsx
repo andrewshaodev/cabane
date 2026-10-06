@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { WorkspaceCard, type WorkspaceCardAction, type WorkspaceLibraryEntry } from "./WorkspaceCard";
 import { WorkspaceNameDialog } from "./WorkspaceNameDialog";
 import { WorkspaceDeleteDialog } from "./WorkspaceDeleteDialog";
@@ -17,9 +17,11 @@ export interface WorkspaceLibraryProps {
   onExport: (id: string, privateBackup: boolean) => Promise<void>;
   onRecover: (id: string) => Promise<void>;
   onExportRaw: (id: string) => Promise<void>;
+  remoteImport?: ReactNode;
+  onSettings?: (id: string) => Promise<void>;
 }
 export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
-  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [dialog, setDialog] = useState<Dialog | null>(() => new URLSearchParams(window.location.search).get("import") === "home-assistant" ? { action: "import" } : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const openDialog = (next: Dialog) => { setError(null); setDialog(next); };
@@ -28,7 +30,7 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
     try { await action(); setDialog(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not complete this action. Please try again."); }
     finally { setBusy(false); }
   };
-  const cancel = () => { setDialog(null); setError(null); };
+  const cancel = () => { setDialog(null); setError(null); window.history.replaceState(window.history.state, "", "/workspaces"); };
   return <main className="workspace-library">
     <header className="workspace-library-header"><div><p className="workspace-brand"><img src="/cabane-icon.png" alt="" width="28" height="33" />Cabane</p><h1>Your workspaces</h1></div>
       <div className="workspace-library-actions"><button disabled={busy} onClick={() => openDialog({ action: "import" })}>Import</button>
@@ -36,7 +38,7 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
     {!dialog && error && <p role="alert" className="workspace-error">{error}</p>}
     {!props.entries.length ? <section className="workspace-empty"><h2>A place for your next home</h2><p>Create a workspace from scratch, or import a saved Cabane project.</p></section> :
       <section className="workspace-grid" aria-label="Homes">{props.entries.map(entry => <WorkspaceCard key={entry.metadata.id} entry={entry} busy={busy}
-        onOpen={() => void run(() => props.onOpen(entry.metadata.id))} onAction={action => openDialog({ action, entry })}
+        onOpen={() => void run(() => props.onOpen(entry.metadata.id))} onAction={action => action === "settings" ? void run(() => props.onSettings?.(entry.metadata.id) ?? Promise.resolve()) : openDialog({ action, entry })}
         onRecover={() => void run(() => props.onRecover(entry.metadata.id))} onExportRaw={() => void run(() => props.onExportRaw(entry.metadata.id))} />)}</section>}
     {dialog && (dialog.action === "create" || dialog.action === "rename" || dialog.action === "duplicate") &&
       <WorkspaceNameDialog action={dialog.action} initialName={dialog.action === "create" ? "" : `${dialog.entry!.metadata.name}${dialog.action === "duplicate" ? " copy" : ""}`}
@@ -45,6 +47,6 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
     {dialog?.action === "delete" && <WorkspaceDeleteDialog name={dialog.entry!.metadata.name} busy={busy} error={error} onCancel={cancel}
       onDelete={() => void run(() => props.onDelete(dialog.entry!.metadata.id))} />}
     {(dialog?.action === "import" || dialog?.action === "export") && <WorkspaceTransferDialog mode={dialog.action} busy={busy} error={error} onCancel={cancel}
-      onImport={json => void run(() => props.onImport(json))} onExport={privateBackup => void run(() => props.onExport(dialog.entry!.metadata.id, privateBackup))} />}
+      remoteImport={props.remoteImport} onImport={json => void run(() => props.onImport(json))} onExport={privateBackup => void run(() => props.onExport(dialog.entry!.metadata.id, privateBackup))} />}
   </main>;
 }

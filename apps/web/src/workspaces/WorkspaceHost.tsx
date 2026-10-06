@@ -1,23 +1,16 @@
 import { rememberWorkspace, saveWorkspacePreview } from "./workspace-presentation";
 import type { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
 import { onboardingLinks } from "../onboarding-config";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router";
 import { ScenePreviewContext, HomeAssistantRuntimeProvider, type HomeProjectRecord, type WorkspaceRepository, type WorkspaceMetadata } from "@cabane/engine";
 import { ConnectedProduct } from "../ConnectedProduct";
 import { createBrowserHomeProjectLifecycle } from "../project-runtime";
+import { WorkspaceHaStorageProvider } from "./WorkspaceHaStorage";
 
-export function WorkspaceHost({ id, repository, onboarding }: { id: string; repository: WorkspaceRepository; onboarding: ReturnType<typeof useWorkspaceOnboarding> }) {
+export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: { id: string; repository: WorkspaceRepository; onboarding: ReturnType<typeof useWorkspaceOnboarding>; demoWorkspaceId: string | null }) {
   const capturePreview = useCallback((canvas: HTMLCanvasElement) => saveWorkspacePreview(id, canvas), [id]);
-  const location = useLocation();
-  const navigate = useNavigate();
   const isDemo = onboarding.state?.demoWorkspaceId === id;
-  const demoConnect = isDemo && /\/connect(?:\/|$)/.test(location.pathname);
-  const redirected = useRef(false);
-  useEffect(() => {
-    if (demoConnect && !redirected.current) { redirected.current = true; void onboarding.start("build"); }
-    if (!demoConnect) redirected.current = false;
-  }, [demoConnect, onboarding.start]);
   const [lifecycle] = useState(() => createBrowserHomeProjectLifecycle(window.indexedDB, id));
   const [loaded, setLoaded] = useState<{ record: HomeProjectRecord; metadata: WorkspaceMetadata; recoveryMessage?: string; recoveryRaw?: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -46,12 +39,9 @@ export function WorkspaceHost({ id, repository, onboarding }: { id: string; repo
   }, [id, repository, loaded?.metadata.homeAssistantUrl]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not open this workspace.</strong><p>{error}</p><Link to="/workspaces">Workspaces</Link></main>;
   if (!loaded) return <main className="direction-project-loading">Loading your home…</main>;
-  if (demoConnect) return <main className="direction-project-loading"><strong>Build your own home</strong>
-    <p>Start with an empty home, then connect your own devices.</p>
-    <button disabled={onboarding.busy} onClick={() => void onboarding.start("build")}>{onboarding.busy ? "Opening…" : "Build my home"}</button>
-    <button disabled={onboarding.busy} onClick={() => void navigate(`/workspaces/${id}`)}>Back to demo</button></main>;
   return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
-    <ConnectedProduct onboarding={{ isDemo, welcome: Boolean(isDemo && !onboarding.state?.welcomeDismissed),
+    <WorkspaceHaStorageProvider id={id} origin={loaded.metadata.homeAssistantUrl} repository={repository} hidden={isDemo}>
+    <ConnectedProduct demoWorkspaceId={demoWorkspaceId} onboarding={{ isDemo, welcome: Boolean(isDemo && !onboarding.state?.welcomeDismissed),
       nudgeDismissed: onboarding.state?.nudgeDismissed ?? true, busy: onboarding.busy,
       start: onboarding.start, dismiss: onboarding.dismiss, links: onboardingLinks }} record={loaded.record} lifecycle={lifecycle}
       recoveryMessage={loaded.recoveryMessage} recoveryRaw={loaded.recoveryRaw}
@@ -62,5 +52,6 @@ export function WorkspaceHost({ id, repository, onboarding }: { id: string; repo
         setLoaded(previous => previous ? { ...previous, metadata: entry.metadata, record: entry.record! } : previous);
         return entry.record;
       }} />
+    </WorkspaceHaStorageProvider>
   </HomeAssistantRuntimeProvider></ScenePreviewContext.Provider>;
 }

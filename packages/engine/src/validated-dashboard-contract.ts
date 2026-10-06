@@ -28,6 +28,7 @@ export interface ValidatedDashboardProps {
   onEditHome?: (mode?: EditorMode) => void;
   onCustomizeActionBar?: () => void;
   onExportBrowserData?: () => void;
+  onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onOpenConnect?: (view: "rooms" | "devices", roomId?: string | null) => void;
   walkthrough?: CabaneDashboardProps["walkthrough"];

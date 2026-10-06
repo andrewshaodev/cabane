@@ -60,6 +60,7 @@ and [agent rules](./AGENTS.md).
 - [Verification and delivery](./docs/product/verification-and-delivery.md) —
   checks, deployment status, and known limits.
 - [Catalog](./packages/catalog/README.md) — available reusable models.
+- [Home Assistant workspace storage setup](./docs/ha-workspace-storage-setup.md) — install the optional HA integration and save or restore workspaces.
 
 ## License
 

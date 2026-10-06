@@ -30,7 +30,7 @@ export function OnboardingIntroduction({ onExplore, onBuild, onDismiss, busy, er
       </div>
       {error && <p className="onboarding-error" role="alert">{error}</p>}
       <footer><p>Your home is saved in this browser.</p><OnboardingPrivacy />
-        {links && (links.available === false ? <p>Source &amp; self-hosting will be available at launch.</p> : <nav aria-label="Source and self-hosting"><a href={links.source} target="_blank" rel="noreferrer">Source code ↗</a><a href={links.selfHost} target="_blank" rel="noreferrer">Self-hosting ↗</a></nav>)}
+        {links && links.available !== false && <nav aria-label="Source and self-hosting"><a href={links.source} target="_blank" rel="noreferrer">Source code ↗</a><a href={links.selfHost} target="_blank" rel="noreferrer">Self-hosting ↗</a></nav>}
       </footer>
     </div>
   </aside>;

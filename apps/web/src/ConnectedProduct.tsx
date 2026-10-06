@@ -1,3 +1,4 @@
+import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -10,17 +11,18 @@ import type { EditorOpenRequest } from "./editor-connect/useConnectEditor";
 import { downloadConnectData } from "./editor-connect/profile-transfer";
 import { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-navigation";
 export { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-navigation";
-import { editorPath, editorRoutes, workspaceHomePath } from "./editor-routes";
+import { editorPath, editorRoutes, mobileEditorPath, workspaceHomePath } from "./editor-routes";
 import { exportWorkspaceBackup } from "./workspaces/workspace-transfer";
 import { RoutedHomeEditor } from "./RoutedHomeEditor";
 import { ShortcutDeviceIcon, ShortcutThumbnailSurface } from "./editor-action-bar/ShortcutDeviceIcon";
+import { MobileEditorPrompt, mobileEditorPromptDismissed, mobileEditorViewport } from "./mobile-editor/MobileEditorPrompt";
 
 export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssistantUrl, onHomeAssistantUrlChange, recoveryMessage, recoveryRaw,
-  initialRequest, onboarding,
+  initialRequest, onboarding, demoWorkspaceId,
 }: {
   record: HomeProjectRecord; lifecycle: HomeProjectLifecycle; homeAssistantUrl: string | null;
   onHomeAssistantUrlChange: (url: string | null, current?: HomeProjectRecord) => void | Promise<HomeProjectRecord | void>; recoveryMessage?: string; recoveryRaw?: string;
-  initialRequest?: EditorOpenRequest; onboarding?: OnboardingOptions;
+  initialRequest?: EditorOpenRequest; onboarding?: OnboardingOptions; demoWorkspaceId: string | null;
 }) {
   const [record, setRecord] = useState(initialRecord);
   const publishedManifest = useMemo(() => record.publishedAt === 0 ? null : composeOwnerProjectManifest(record.published), [record.published, record.publishedAt]);
@@ -36,7 +38,11 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
     }
   }, []);
-  const openEditor = (request: EditorOpenRequest) => { void navigate(editorPath(request, record.homeId), { state: { editorRequest: request } }); };
+  const openEditor = (request: EditorOpenRequest) => {
+    const path = (request.mode === "construct" || request.mode === "furnish") && !request.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
+      ? mobileEditorPath(record.homeId, request.mode) : editorPath(request, record.homeId);
+    void navigate(path, { state: { editorRequest: request } });
+  };
   const origin = homeAssistantUrl ? normalizeWorkspaceBindingOrigin(homeAssistantUrl) : null;
   const manager = useMemo(() => ({
     profile: (origin ? record.bindings[origin]?.published : undefined) ?? createEmptyRuntimeBindingProfile(record.homeId),
@@ -44,7 +50,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
     // The controlled real dashboard can never activate independent mappings.
     save: () => undefined,
   }), [origin, record]);
-  const editor = <RoutedHomeEditor leaveOnConnect={onboarding?.isDemo} initialRecord={record} lifecycle={lifecycle} recoveryMessage={recovery.message} recoveryRaw={recovery.raw}
+  const editor = <RoutedHomeEditor initialRecord={record} lifecycle={lifecycle} recoveryMessage={recovery.message} recoveryRaw={recovery.raw}
       homeAssistantUrl={homeAssistantUrl}
       onPrepareOrigin={async (current, url) => {
         const next = await onHomeAssistantUrlChange(url, current);
@@ -61,6 +67,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
       void Promise.resolve().then(() => onHomeAssistantUrlChange(url, record)).then((next) => { if (next) setRecord(next); })
         .catch((error) => setConnectionError(error instanceof Error ? error.message : "Connection settings could not be saved."));
     }}
+    onHomeAssistantSettings={() => void navigate(`${workspaceHomePath(record.homeId)}/home-assistant`)}
     onWorkspaces={() => void navigate("/workspaces")}
     renderActionBarDeviceIcon={modelId => <ShortcutDeviceIcon modelId={modelId} models={ownerDeviceModels} />}
     bindingManager={manager} constructionApplied={constructionApplied} onEditHome={(mode = "construct") => openEditor({ mode })}
@@ -71,7 +78,14 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
     {connectionError && <div className="workspace-connection-error" role="alert">{connectionError}<button type="button" onClick={() => setConnectionError(null)}>Dismiss</button></div>}
     <Routes>
     <Route path="/workspaces/:workspaceId" element={home} />
-    {editorRoutes.map(({ path }) => <Route key={path} path={path} element={editor} />)}
+    <Route path="/workspaces/:workspaceId/home-assistant" element={<HomeAssistantPage record={record} lifecycle={lifecycle}
+      origin={homeAssistantUrl} onChangeOrigin={async url => {
+        const next = await onHomeAssistantUrlChange(url, record); if (next) setRecord(next);
+      }} onRecordChange={setRecord} isDemo={onboarding?.isDemo ?? false} onCreatePersonal={() => onboarding?.start("connect")} />} />
+    <Route path="/workspaces/:workspaceId/mobile-editor" element={<MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />} />
+    {editorRoutes.map(({ path, handle }) => <Route key={path} path={path} element={
+      (handle.mode === "construct" || handle.mode === "furnish") && !handle.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
+        ? <Navigate to={mobileEditorPath(record.homeId, handle.mode)} replace /> : editor} />)}
     <Route path="*" element={<Navigate to={workspaceHomePath(record.homeId)} replace />} />
   </Routes></FloorNavigationProvider>;
 }

@@ -11,6 +11,10 @@ export const editorRoutes = [
   { path: "/workspaces/:workspaceId/connect/devices", handle: { mode: "connect", view: "devices" } },
 ] satisfies { path: string; handle: EditorOpenRequest }[];
 
+export function mobileEditorPath(workspaceId: string, mode: "construct" | "furnish"): string {
+  return `${workspaceHomePath(workspaceId)}/mobile-editor?mode=${mode === "furnish" ? "arrange" : "construct"}`;
+}
+
 export function editorRequestForPath(pathname: string): EditorOpenRequest | null {
   return matchRoutes(editorRoutes, pathname)?.[0].route.handle ?? null;
 }
@@ -25,6 +29,7 @@ export function workspaceIdForPath(pathname: string): string | null {
 
 export function editorPath(request: EditorOpenRequest, workspaceId: string): string {
   const base = workspaceHomePath(workspaceId);
+  if (request.panel === "home-assistant") return `${base}/home-assistant`;
   if (request.panel === "action-bar") return `${base}/shortcuts`;
   if (request.mode === "construct") return `${base}/construct`;
   if (request.mode === "furnish") return `${base}/arrange`;

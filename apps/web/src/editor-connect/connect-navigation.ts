@@ -10,7 +10,7 @@ export interface EditorCameraState {
 export interface EditorOpenRequest {
   floorId?: string;
   mode: "construct" | "furnish" | "connect";
-  panel?: "action-bar";
+  panel?: "action-bar" | "home-assistant";
   view?: "rooms" | "devices";
   roomId?: string | null;
   relationshipId?: string | null;
@@ -34,6 +34,7 @@ export function parseEditorReturn(raw: string | null, workspaceId?: string): Edi
     const request: EditorReturnRequest = {
       workspaceId: value.workspaceId,
       ...(typeof value.floorId === "string" ? { floorId: value.floorId } : {}),
+      ...(value.panel === "home-assistant" ? { panel: "home-assistant" as const } : {}),
       mode: "connect", view: value.view === "devices" ? "devices" : "rooms",
       roomId: typeof value.roomId === "string" ? value.roomId : null,
       relationshipId: typeof value.relationshipId === "string" ? value.relationshipId : null,

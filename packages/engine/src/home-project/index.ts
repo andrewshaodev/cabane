@@ -11,6 +11,7 @@ export * from "./lifecycle";
 export * from "./floor-operations";
 export * from "./workspace-contract";
 export * from "./workspace-repository";
+export { projectTransaction, SYNC_STORE } from "./project-database";
 export * from "./workspace-identity";
 export * from "./empty-project";
 
