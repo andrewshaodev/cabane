@@ -53,7 +53,9 @@ test(
     const release = join(directory, "release");
     const slow = join(directory, "a-slow.test.mjs");
     const bad = join(directory, "b-bad.test.mjs");
-    const environment = { ...process.env };
+    // This fixture specifically exercises two concurrent processes, even when
+    // the enclosing suite serializes expensive browser workers.
+    const environment = { ...process.env, CABANE_TEST_CONCURRENCY: "2" };
     delete environment.NODE_TEST_CONTEXT;
     delete environment.CABANE_TEST_SHARED_MODULES;
     await writeFile(
