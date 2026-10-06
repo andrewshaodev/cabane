@@ -13,6 +13,21 @@ await withModules(async (load) => {
 
   const { homeManifest } = await load("/tests/fixtures/bundled-home.ts");
   const { collectBindingSlots } = await load("/packages/engine/src/binding-slot-descriptors.ts");
+  const { demoLightVisualManifest } = await load("/packages/engine/src/onboarding/demo/demo-light-visuals.ts");
+  const { sceneLightState } = await load("/packages/engine/src/scene-light-state.ts");
+  test("demo light controls determine fixture visuals even for night-only home lights", () => {
+    const definition = deriveDemoSessionDefinition(homeManifest);
+    const fixture = homeManifest.sceneItems.find((item) => item.kind === "device" && item.lightState === "night-only");
+    assert.ok(fixture);
+    const entityId = definition.profile.entityIdsBySlotId[fixture.entitySlots.find((slot) => slot.deviceRole === "primary").id];
+    const demoFixture = demoLightVisualManifest(homeManifest).sceneItems.find((item) => item.id === fixture.id);
+    assert.equal(fixture.lightState, "night-only");
+    assert.equal(demoFixture.lightState, "connected");
+    const off = definition.runtime.entityStates[entityId];
+    const on = applyDemoServiceCall(off, { domain: "light", service: "turn_on", target: { entity_id: entityId } });
+    assert.equal(sceneLightState(demoFixture.lightState, off, true).state, "off");
+    assert.equal(sceneLightState(demoFixture.lightState, on, false).state, "on");
+  });
   test("bundled demo supplies available states for every non-camera slot, including outdoor lights", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
     for (const slot of collectBindingSlots(homeManifest)) {
