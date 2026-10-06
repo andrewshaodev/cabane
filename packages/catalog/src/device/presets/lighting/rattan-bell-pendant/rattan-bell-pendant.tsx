@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { Outlines, ToonMaterial, type SceneItemSize } from "@cabane/engine";
+import { RATTAN_BELL_BULB_POSITION } from "./bulb-position";
 import { createWovenBellGeometry } from "./woven-bell-geometry";
 
 export const RATTAN_BELL_PENDANT_SIZE = [0.5, 1.2, 0.5] as const;
@@ -26,15 +27,15 @@ export function RattanBellPendant({
         <ToonMaterial color="#eeeae2" />
         <Outlines color="#bab3a8" thickness={0.001} screenspace={false} />
       </mesh>
-      <mesh name="white-pendant-cord" position={[0, 0.8125, 0]}>
-        <cylinderGeometry args={[0.003, 0.003, 0.725, 8]} />
+      <mesh name="white-pendant-cord" position={[0, 0.7375, 0]}>
+        <cylinderGeometry args={[0.003, 0.003, 0.875, 8]} />
         <ToonMaterial color="#e5e0d6" />
       </mesh>
-      <mesh name="bulb-socket" position={[0, 0.419, 0]}>
+      <mesh name="bulb-socket" position={[0, 0.285, 0]}>
         <cylinderGeometry args={[0.018, 0.021, 0.07, 16]} />
         <ToonMaterial color="#e5e0d6" />
       </mesh>
-      <mesh name="opal-bulb" position={[0, 0.355, 0]} scale={[1, 1.25, 1]}>
+      <mesh name="opal-bulb" position={RATTAN_BELL_BULB_POSITION} scale={[1, 1.25, 1]}>
         <sphereGeometry args={[0.034, 20, 12]} />
         <ToonMaterial color="#f4ead4" emissive="#ffe1a3" emissiveIntensity={brightness} />
       </mesh>

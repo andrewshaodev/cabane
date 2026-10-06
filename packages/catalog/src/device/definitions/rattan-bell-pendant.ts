@@ -1,3 +1,4 @@
+import { RATTAN_BELL_BULB_POSITION } from "../presets/lighting/rattan-bell-pendant/bulb-position";
 import { defineDeviceModel } from "@cabane/engine";
 import {
   RattanBellPendantModel,
@@ -16,7 +17,12 @@ export const rattanBellPendantDeviceDefinition = defineDeviceModel({
   supportedDomains: ["light"],
   mountKind: "surface",
   outlineContact: true,
-  sceneLight: { position: [0, 0.355, 0], color: "#ffe1a3", maxIntensity: 4, distance: 4.5 },
+  sceneLight: {
+    position: RATTAN_BELL_BULB_POSITION,
+    color: "#ffe1a3",
+    maxIntensity: 0.45,
+    distance: 3,
+  },
   interaction: { target: "device-dashboard", tapTolerancePixels: 10 },
   complexity: { visibleMeshes: 10, triangles: 40_000 },
 });

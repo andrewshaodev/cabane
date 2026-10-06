@@ -1,9 +1,9 @@
 {
-  "revision": 5,
-  "fingerprint": "36eddbb266baf8a361716e230d42eee21a0d0427a1bb44c560ae28f11cda8e42",
-  "summary": "Make rattan bell pendants bindable light devices",
+  "revision": 6,
+  "fingerprint": "09399316f668236b8e09e48617cbab6ac0770a62b6dd5258381332922aba183d",
+  "summary": "Soften rattan pendant lighting and lower its bulb into the shade chamber",
   "breakingChanges": [
-    "Existing furnishing pendants remain readable as hidden legacy items. New rattan-bell-pendant instances are light devices and require the matching panel release."
+    "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
   ],
   "history": [
     {
@@ -32,6 +32,13 @@
       "summary": "Add the woven rattan bell pendant catalog preset",
       "breakingChanges": [
         "Existing homes remain compatible. Homes using rattan-bell-pendant require the matching panel release; older panels must update before loading this new model."
+      ]
+    },
+    {
+      "revision": 5,
+      "summary": "Make rattan bell pendants bindable light devices",
+      "breakingChanges": [
+        "Existing furnishing pendants remain readable as hidden legacy items. New rattan-bell-pendant instances are light devices and require the matching panel release."
       ]
     }
   ]

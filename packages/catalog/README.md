@@ -771,7 +771,10 @@ Dimensions are inferred, not manufacturer specifications: 50 cm diameter,
 48 cm shade height and 120 cm overall drop. Proportional resizing is supported.
 The centered X/Z origin is at the shade's lower rim, with the ceiling contact at
 Y=1.2 m. New instances are light devices with a primary light binding, dimming-aware bulb
-glow and engine-managed scene illumination. Inactive, unavailable and disconnected
+glow and engine-managed scene illumination. The bulb and physical emitter share a
+position 22 cm above the lower rim, in the wider shade chamber; the socket and
+internal cord meet the lowered bulb. Maximum scene intensity is 0.45 with a 3 m
+reach, and bulb emission tops out at 0.18. Inactive, unavailable and disconnected
 bulbs do not glow. The former furnishing is hidden from Arrange but retained for
 saved-project compatibility. No home placement is added, and the source photo is
 not stored in Git.

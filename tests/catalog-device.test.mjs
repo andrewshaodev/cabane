@@ -1099,7 +1099,7 @@ await withModules(async (load) => {
     const cases = [
       ["floor-lamp", "floor-lamp-emitter", 0.65],
       ["terracotta-pendant", "terracotta-pendant-emitter", 0.9],
-      ["rattan-bell-pendant", "opal-bulb", 0.72, "terracotta-pendant"],
+      ["rattan-bell-pendant", "opal-bulb", 0.18, "terracotta-pendant"],
     ];
     for (const [model, emitterName, maximumIntensity, fixtureModel = model] of cases) {
       const binding = room.devices.find((device) => device.model === fixtureModel);
@@ -1140,6 +1140,36 @@ await withModules(async (load) => {
         await renderer.unmount();
       }
     }
+  });
+
+  test("rattan pendant light sits in the broad shade chamber with restrained output", async () => {
+    const definition = catalog.stableDeviceRegistry["rattan-bell-pendant"];
+    const renderer = await create(
+      createElement(definition.component, {
+        visualState: "connected-active",
+        state: { entityId: "light.test", state: "on", attributes: { brightness: 255 } },
+      }),
+    );
+    const bulb = renderer.scene.findByProps({ name: "opal-bulb" }).instance;
+    renderer.scene.instance.updateMatrixWorld(true);
+    assert.deepEqual(
+      definition.sceneLight.position,
+      bulb.getWorldPosition(new Vector3()).toArray(),
+    );
+    assert.ok(
+      bulb.position.y >= 0.18 && bulb.position.y <= 0.25,
+      "bulb must sit below the narrow shoulder",
+    );
+    assert.ok(
+      definition.sceneLight.maxIntensity <= 0.5,
+      "woven shade must not be flooded by a high-intensity source",
+    );
+    assert.ok(bulb.material.emissiveIntensity <= 0.2, "bulb glow stays restrained");
+    const socket = renderer.scene.findByProps({ name: "bulb-socket" }).instance;
+    const socketBounds = new Box3().setFromObject(socket);
+    const bulbBounds = new Box3().setFromObject(bulb);
+    assert.ok(socketBounds.intersectsBox(bulbBounds), "lowered bulb stays connected to its socket");
+    await renderer.unmount();
   });
 
   test("keeps physical HA light sources engine-owned and powered-off sources at zero intensity", async () => {
