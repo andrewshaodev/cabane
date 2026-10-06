@@ -41,10 +41,13 @@ test("sync cursor is origin scoped and restore rejects invalid data", async () =
       let wrongTargetRejected = false;
       try { await restoreRemoteWorkspace(repository, otherBackup, entry.record.revision, id); }
       catch { wrongTargetRejected = true; }
-      return { sameId: entry.metadata.id === id, invalidRejected, bareRejected, wrongTargetRejected,
+      let wrongOriginRejected = false;
+      try { await restoreRemoteWorkspace(repository, backup, entry.record.revision, id, "https://ha.other"); }
+      catch { wrongOriginRejected = true; }
+      return { wrongOriginRejected, sameId: entry.metadata.id === id, invalidRejected, bareRejected, wrongTargetRejected,
         unchanged: (await repository.read(id)).record.homeId === id,
         otherUnchanged: (await repository.read(other.metadata.id)).record.revision === other.record.revision };
     });
-    assert.deepEqual(restored, { sameId: true, invalidRejected: true, bareRejected: true, wrongTargetRejected: true, unchanged: true, otherUnchanged: true });
+    assert.deepEqual(restored, { wrongOriginRejected: true, sameId: true, invalidRejected: true, bareRejected: true, wrongTargetRejected: true, unchanged: true, otherUnchanged: true });
   } finally { await browser?.close(); await server.close(); }
 });

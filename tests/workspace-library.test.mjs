@@ -60,4 +60,18 @@ await withModules(async load => {
   test("empty library keeps creation and import available", async () => {
     const h = await mount({ entries: [] }); try { assert.match(h.dom.window.document.body.textContent, /A place for your next home/); await h.click("New workspace"); assert.equal(h.dom.window.document.querySelector('button.workspace-primary:disabled')?.textContent, "Create workspace"); } finally { await h.close(); }
   });
+  test("connection and storage are separate static facts with explicit menu destinations", async () => {
+    const intents = [];
+    const h = await mount({ onSettings: async (...args) => intents.push(args), remoteImport: createElement("p", null, "Remote homes") });
+    try {
+      assert.match(h.dom.window.document.querySelector(".workspace-availability").textContent, /ConnectionHA not connectedStorageLocal only/);
+      assert.equal(h.dom.window.document.querySelector(".workspace-availability button"), null);
+      await h.click("Add to HA dashboard");
+      assert.deepEqual(intents, [["a", "dashboard"]]);
+      await h.click("Open from Home Assistant");
+      assert.match(h.dom.window.document.querySelector("dialog").textContent, /Open from Home Assistant/);
+      assert.match(h.dom.window.document.querySelector("dialog").textContent, /Remote homes/);
+    } finally { await h.close(); }
+  });
+
 });

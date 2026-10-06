@@ -11,6 +11,7 @@ export interface EditorOpenRequest {
   floorId?: string;
   mode: "construct" | "furnish" | "connect";
   panel?: "action-bar" | "home-assistant";
+  destination?: "sync" | "dashboard" | "device";
   view?: "rooms" | "devices";
   roomId?: string | null;
   relationshipId?: string | null;
@@ -35,6 +36,7 @@ export function parseEditorReturn(raw: string | null, workspaceId?: string): Edi
       workspaceId: value.workspaceId,
       ...(typeof value.floorId === "string" ? { floorId: value.floorId } : {}),
       ...(value.panel === "home-assistant" ? { panel: "home-assistant" as const } : {}),
+      ...(["sync", "dashboard", "device"].includes(value.destination) ? { destination: value.destination as "sync" | "dashboard" | "device" } : {}),
       mode: "connect", view: value.view === "devices" ? "devices" : "rooms",
       roomId: typeof value.roomId === "string" ? value.roomId : null,
       relationshipId: typeof value.relationshipId === "string" ? value.relationshipId : null,

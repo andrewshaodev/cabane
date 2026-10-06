@@ -1,4 +1,4 @@
-import type { WorkspaceEntry, WorkspaceRepository } from "@cabane/engine";
+import { normalizeHomeAssistantUrl, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { ownerProjectRegistries } from "../project-runtime";
 import { parseWorkspaceImport } from "./workspace-transfer";
 
@@ -8,6 +8,7 @@ export function restoreRemoteWorkspace(
   document: string,
   expectedLocalRevision?: number,
   expectedHomeId?: string,
+  expectedOrigin?: string,
 ): Promise<WorkspaceEntry> {
   let envelope: unknown;
   try { envelope = JSON.parse(document); } catch { throw new Error("The HA workspace copy is not valid JSON."); }
@@ -17,6 +18,9 @@ export function restoreRemoteWorkspace(
   const imported = parseWorkspaceImport(document, ownerProjectRegistries);
   if (expectedHomeId && imported.record.homeId !== expectedHomeId) {
     throw new Error("The HA workspace copy belongs to a different workspace.");
+  }
+  if (expectedOrigin && normalizeHomeAssistantUrl(imported.homeAssistantUrl) !== normalizeHomeAssistantUrl(expectedOrigin)) {
+    throw new Error("This saved workspace belongs to a different Home Assistant. Open it from its original server.");
   }
   const metadata = {
     id: imported.record.homeId,

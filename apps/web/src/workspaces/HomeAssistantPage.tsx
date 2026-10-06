@@ -1,3 +1,4 @@
+import { workspaceDestination } from "./workspace-open-link";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useHomeAssistantRuntime, validateHomeAssistantUrlInput, type HomeProjectRecord, type HomeProjectLifecycle } from "@cabane/engine";
@@ -40,7 +41,7 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   };
   const signIn = useConnectSignIn(runtime, async next => {
     await onChangeOrigin(next);
-    window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant" }));
+    window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant", destination: workspaceDestination(window.location.search) }));
     setEditing(false);
   });
   const latest = async () => (await storage?.repository.read(record.homeId))?.record ?? record;

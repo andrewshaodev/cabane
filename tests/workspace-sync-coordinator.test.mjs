@@ -75,3 +75,51 @@ test("manual restore requires explicit conflict resolution for edited local copy
   await f.coordinator.resolveConflict("home", "https://ha", "remote");
   assert.equal(f.local.record.value, "HA edit");
 });
+
+test("enable sync uploads and enables together, then reconciles later edits", async () => {
+  const f = fixture();
+  assert.equal((await f.coordinator.enableSync("home", "https://ha")).kind, "synced");
+  assert.equal(f.remote.version, 1);
+  assert.equal(f.cursor.enabled, true);
+  f.setLocal("next");
+  assert.equal((await f.coordinator.reconcile("home", "https://ha")).kind, "synced");
+  assert.equal(JSON.parse(f.remote.document).record.value, "next");
+});
+
+test("failed or conflicting activation never enables sync or replaces HA", async () => {
+  const f = fixture();
+  f.setRemote("another browser");
+  assert.equal((await f.coordinator.enableSync("home", "https://ha")).kind, "conflict");
+  assert.equal(f.cursor, null);
+  assert.equal(JSON.parse(f.remote.document).record.value, "another browser");
+  const offline = fixture();
+  offline.client.put = async () => { throw new Error("offline"); };
+  await assert.rejects(offline.coordinator.enableSync("home", "https://ha"), /offline/);
+  assert.equal(offline.cursor, null);
+});
+
+test("opening a remote workspace enables sync but never replaces divergent local data", async () => {
+  const f = fixture();
+  await f.coordinator.manualSave("home", "https://ha");
+  f.setRemote("updated elsewhere");
+  assert.equal((await f.coordinator.openRemote("home", "https://ha")).kind, "synced");
+  assert.equal(f.local.record.value, "updated elsewhere");
+  assert.equal(f.cursor.enabled, true);
+  f.setLocal("unsynced changes");
+  f.setRemote("another edit");
+  assert.equal((await f.coordinator.openRemote("home", "https://ha")).kind, "conflict");
+  assert.equal(f.local.record.value, "unsynced changes");
+});
+
+
+test("opening never overwrites a damaged browser record", async () => {
+  let restores = 0;
+  const coordinator = createWorkspaceSyncCoordinator({
+    repository: { read: async () => ({ metadata: { id: "home" }, error: "damaged" }) },
+    client: { get: async () => ({ version: 1, document: "remote" }) },
+    cursors: { read: async () => null },
+    restore: async () => { restores++; },
+  });
+  assert.equal((await coordinator.openRemote("home", "https://ha")).kind, "conflict");
+  assert.equal(restores, 0);
+});

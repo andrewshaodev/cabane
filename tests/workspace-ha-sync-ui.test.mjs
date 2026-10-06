@@ -3,7 +3,7 @@ import test from "node:test";
 import { createServer } from "vite";
 import { chromium } from "playwright-core";
 
-test("authenticated storage controls save manually then opt into sync", async () => {
+test("authenticated storage enables sync in one action without a preliminary upload", async () => {
   const server = await createServer({ root: process.cwd(), configFile: false, appType: "custom", server: { host: "127.0.0.1", port: 0, hmr: false } });
   let browser;
   try {
@@ -17,11 +17,9 @@ test("authenticated storage controls save manually then opt into sync", async ()
       window.haHarness = await harness.mountHaStorageHarness();
       return window.haHarness.id;
     });
-    await page.getByRole("button", { name: "Enable HA storage" }).click();
-    await page.getByRole("button", { name: "Save", exact: true }).click();
-    await page.getByText("Workspace saved on Home Assistant.").waitFor();
+    await page.getByRole("button", { name: "Enable sync", exact: true }).click();
+    await page.getByText("Synced with HA", { exact: true }).waitFor();
     assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), 1);
-    await page.getByRole("switch", { name: "Sync automatically" }).click();
     await page.evaluate(async homeId => {
       const entry = await window.haHarness.repository.read(homeId);
       await window.haHarness.repository.rename(homeId, entry.record.revision, "Renamed room");
@@ -66,7 +64,6 @@ test("storage setup explains a missing integration and never offers unavailable 
       const harness = await import("/tests/fixtures/ha-storage-harness.tsx");
       await harness.mountHaStorageHarness({ missing: true });
     });
-    await page.getByRole("button", { name: "Enable HA storage" }).click();
     await page.getByText("Install the Cabane integration", { exact: true }).waitFor();
     assert.equal(await page.getByRole("link", { name: /Setup guide/ }).getAttribute("href"), "https://github.com/cabane-app/cabane-home-assistant#installation");
     assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
@@ -90,16 +87,14 @@ test("deleting the remote copy disables sync and preserves the local workspace",
       const harness = await import("/tests/fixtures/ha-storage-harness.tsx");
       window.haHarness = await harness.mountHaStorageHarness();
     });
-    await page.getByRole("button", { name: "Enable HA storage" }).click();
-    assert.equal(await page.getByRole("button", { name: "Load", exact: true }).isDisabled(), true);
-    assert.equal(await page.getByRole("switch").isDisabled(), true);
-    await page.getByRole("button", { name: "Save", exact: true }).click();
-    await page.getByText("Workspace saved on Home Assistant.").waitFor();
-    await page.getByRole("switch").click();
+    assert.equal(await page.getByRole("switch").count(), 0);
+    await page.getByRole("button", { name: "Enable sync", exact: true }).click();
+    await page.getByText("Synced with HA", { exact: true }).waitFor();
+    await page.getByText("Manage saved copy", { exact: true }).click();
     await page.getByRole("button", { name: "Delete saved copy" }).click();
     await page.getByText("Home Assistant copy deleted. Your browser copy is safe.").waitFor();
     assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), null);
-    assert.equal(await page.getByRole("switch").getAttribute("aria-checked"), "false");
+    assert.equal(await page.getByRole("button", { name: "Enable sync", exact: true }).count(), 1);
     assert.equal(await page.evaluate(async () => Boolean((await window.haHarness.repository.read(window.haHarness.id))?.record)), true);
   } finally { await browser?.close(); await server.close(); }
 });
@@ -132,5 +127,24 @@ test("the settings page imports a full backup into the draft without publishing 
     assert.equal(saved.draft.home.name, "Restored draft");
     assert.equal(JSON.stringify(saved.published), imported.originalPublished);
     assert.equal(saved.publishedAt, 0);
+  } finally { await browser?.close(); await server.close(); }
+});
+
+
+test("a first manual backup remains available without enabling sync", async () => {
+  const server = await createServer({ root: process.cwd(), configFile: false, appType: "custom", server: { host: "127.0.0.1", port: 0, hmr: false } });
+  let browser;
+  try {
+    server.middlewares.use((req, res, next) => req.url === "/" ? (res.setHeader("Content-Type", "text/html"), res.end("<!doctype html>")) : next());
+    await server.listen(); browser = await chromium.launch({ channel: "chrome", headless: true }); const page = await browser.newPage();
+    await page.goto(server.resolvedUrls.local[0]);
+    await page.evaluate(async () => { const h = await import("/tests/fixtures/ha-storage-harness.tsx"); window.haHarness = await h.mountHaStorageHarness(); });
+    await page.getByRole("button", { name: "Enable sync", exact: true }).waitFor();
+    assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), null);
+    await page.getByText("Manage saved copy", { exact: true }).click({ timeout: 1500 });
+    await page.getByRole("button", { name: "Save a copy now" }).click();
+    await page.getByText("Saved to HA · sync off", { exact: true }).waitFor();
+    const enabled = await page.evaluate(async () => { const {readSyncCursor} = await import("/apps/web/src/workspaces/workspace-sync-state.ts"); return (await readSyncCursor(indexedDB, "https://ha.test", window.haHarness.id)).enabled; });
+    assert.equal(enabled, false);
   } finally { await browser?.close(); await server.close(); }
 });

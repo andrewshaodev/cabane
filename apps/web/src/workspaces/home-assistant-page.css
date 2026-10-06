@@ -55,3 +55,18 @@
 .ha-page__footer { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--ha-line); padding-top: 24px; color: var(--ha-muted); font-size: 12px; }
 .ha-page__footer span { margin-left: auto; }
 @media (max-width: 600px) { .ha-page__content { padding: 20px; } .ha-page__header { padding: 32px 0 28px; } .ha-section { padding: 24px 0; } .ha-section__heading { flex-wrap: wrap; gap: 4px; margin-bottom: 14px; } .ha-section__heading h2 { margin: 0; } .ha-connection-row { align-items: flex-start; flex-direction: column; } .ha-page__footer span { display: none; } }
+
+/* Warm surfaces and spacing separate tasks; one rule per section is enough. */
+.ha-sync-row { margin: 20px 0; padding: 0; border: 0; }
+.ha-storage-activate { padding: 22px 24px; background: #ebe7db; border-radius: 12px; }
+.ha-storage-activate p { margin-bottom: 16px; }
+.ha-storage-manage { margin-top: 24px; }
+.ha-storage-manage summary { cursor: pointer; min-height: 44px; display: list-item; padding: 10px 0; color: var(--ha-muted); }
+.ha-storage-manage .ha-actions { margin-top: 12px; }
+.ha-destinations { margin-top: 24px; }
+.ha-destinations button[aria-pressed="true"] { background: #e2e6d8; border-color: #71845d; }
+.ha-destination-detail { margin-top: 20px; padding: 22px 24px; background: #fcf8ef; border-radius: 12px; }
+.ha-destination-detail h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
+.ha-destination-detail label { display: block; font-size: 12px; color: var(--ha-muted); }
+.ha-destination-detail input { width: 100%; min-width: 0; margin: 8px 0 16px; min-height: 44px; padding: 10px 12px; border: 1px solid #aaa996; border-radius: 7px; background: #fffdf7; color: var(--ha-ink); font: inherit; }
+@media (max-width: 600px) { .ha-storage-activate, .ha-destination-detail { padding: 18px; } }
