@@ -53,13 +53,13 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       const select = document.querySelector("select");
-      assert.deepEqual([...select.options].map(option => option.textContent), ["Classic", "Cozy"]);
+      assert.deepEqual([...select.options].map(option => option.textContent), ["Classic — left chaise (front view)", "Cozy — left chaise (front view)", "Classic — right chaise (front view)", "Cozy — right chaise (front view)"]);
       assert.equal(select.value, "default");
       await act(async () => {
-        select.value = "cozy";
+        select.value = "cozy-right";
         select.dispatchEvent(new window.Event("change", { bubbles: true }));
       });
-      assert.equal(editor.items[0].variant, "cozy");
+      assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
       assert.equal(document.querySelector("select"), null);
     });

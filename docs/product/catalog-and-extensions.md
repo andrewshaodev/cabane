@@ -55,7 +55,11 @@ variants share the declared envelope, resize policy, and binding capabilities.
 A variant may declare `sceneLight: false` to suppress a physical light source.
 The pergola device offers String lights and Plain; its former plain furnishing
 entry remains read-compatible but is hidden from new-item browsing. The sectional
-sofa offers Classic and Cozy, which adds terracotta and beige throw cushions.
+sofa offers Classic and Cozy, which adds terracotta and beige throw cushions,
+with left- and right-chaise variants for each style (as viewed from the front).
+The existing `default` and `cozy` IDs retain the left chaise. The `right` and
+`cozy-right` variants mirror the entire sofa within the same bounds. Arrange's
+Variant selector changes handedness without changing item size or placement.
 
 Reusable models formerly registered by the owner home now live in catalog
 presets, including the cabin bed, changing table, cube storage, mirrors, shower
