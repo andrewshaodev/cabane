@@ -74,9 +74,10 @@ export function useDashboardController({
   onEditHome,
   onExportBrowserData,
   onOpenConnect,
-  walkthrough,
+  walkthrough, walkTools = [],
 }: ValidatedDashboardProps) {
   const dom = useCabaneDom();
+  const [equippedToolId, setEquippedToolId] = useState<string | null>(null);
   const onExitWalkthrough = walkthrough?.onExit;
   const walkthroughStarted = useRef(false);
   const floorNavigation = useFloorNavigation(manifest.floors);
@@ -415,6 +416,14 @@ export function useDashboardController({
     }
   };
   const runConfiguredAction = (item: ActionBarItem) => {
+    if (item.target.kind === "walk-tool") {
+      const toolId = item.target.toolId;
+      if (walkMode && walkTools.some(tool => tool.id === toolId)) {
+        setEquippedToolId(current => current === toolId ? null : toolId);
+        requestWalkPointerLock();
+      }
+      return;
+    }
     if (item.target.kind === "built-in") {
       const action = { walk: "walk-mode", night: "lighting-mode", "all-lights": "all-lights" } as const;
       if (item.target.action in action) runAction(action[item.target.action as keyof typeof action]);
@@ -508,7 +517,7 @@ export function useDashboardController({
     if (dom.root.pointerLockElement === shellRef.current) document.exitPointerLock();
   }, [walkMode]);
   const handleExtensionInteraction = useCallback((target: ExtensionInteractionTarget) => {
-    if (walkthrough) return;
+    if (walkthrough || (walkMode && equippedToolId)) return;
     const openingDescriptor = collectBindingSlots(manifest).find((descriptor) => descriptor.kind === "opening-cover" && descriptor.openingId === target.id);
     const room = floor.rooms.find((candidate) =>
       openingDescriptor?.roomIds.includes(candidate.id) || candidate.devices.some((device) =>
@@ -536,7 +545,7 @@ export function useDashboardController({
     setSelectedDeviceId(null);
     setDevicePanelRoomId(null);
     setMode("room");
-  }, [walkthrough, floor.rooms, manifest, openCameraViewer, openDevicePanel]);
+  }, [walkthrough, walkMode, equippedToolId, floor.rooms, manifest, openCameraViewer, openDevicePanel]);
   const openWalkDevice = useCallback(() => {
     if (!walkDeviceTarget) return;
     if (floor.openings.some((opening) => opening.id === walkDeviceTarget.id && opening.coverSlot)) {
@@ -561,7 +570,7 @@ export function useDashboardController({
       openWalkDevice();
     };
     const activateWithPointer = (event: PointerEvent) => {
-      if (event.button !== 0 || dom.root.pointerLockElement !== shellRef.current) return;
+      if (equippedToolId || event.defaultPrevented || event.button !== 0 || dom.root.pointerLockElement !== shellRef.current) return;
       openWalkDevice();
     };
     dom.events.addEventListener("keydown", activateWithKeyboard);
@@ -570,7 +579,10 @@ export function useDashboardController({
       dom.events.removeEventListener("keydown", activateWithKeyboard);
       dom.events.removeEventListener("pointerdown", activateWithPointer);
     };
-  }, [coarsePointer, openWalkDevice, selectedDeviceId, walkDeviceTarget, walkMode, walkthrough]);
+  }, [coarsePointer, equippedToolId, openWalkDevice, selectedDeviceId, walkDeviceTarget, walkMode, walkthrough]);
+  useEffect(() => {
+    if (!walkMode || !walkTools.some(tool => tool.id === equippedToolId)) setEquippedToolId(null);
+  }, [walkMode, walkTools, equippedToolId]);
   useEffect(() => {
     if (walkMode || walkthrough || setupOpen || mappingOpen || deviceOverlay || selectedCamera) return;
     const activateEditorShortcut = (event: KeyboardEvent) => {
@@ -588,6 +600,7 @@ export function useDashboardController({
     return () => dom.events.removeEventListener("keydown", activateEditorShortcut);
   }, [deviceOverlay, mappingOpen, mode, selectedCamera, setupOpen, walkMode, walkthrough]);
   return {
+    equippedToolId,
     floorNavigation, elevation, setCameraResetKey, requestWalkPointerLock,
     cameraStreamRequirements, runtime, documentVisible, shellRef, mode, mappingOpen, setupOpen,
     manifest, canvasDpr, walkMode, quality, lightingMode, chooseLightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,

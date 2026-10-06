@@ -1,5 +1,6 @@
 export { createBrowserUuid } from "./browser-uuid";
 export * from "./types";
+export * from "./walk-tools";
 export * from "./action-bar/action-bar-config";
 export { DEFAULT_ROOF_SETTINGS, type RoofSettings } from "./roof/roof-settings";
 export * from "./room-types";

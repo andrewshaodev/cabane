@@ -578,6 +578,9 @@ export const validateHomeProjectSchemaShape = (
           if (!["build", "walk", "night", "view", "all-lights"].includes(String(target.action))) {
             addProjectIssue(issues, "project.action-bar-built-in", `${targetPath}.action`, "Action bar built-in action is invalid.");
           }
+        } else if (target.kind === "walk-tool") {
+          keys(target, ["kind", "toolId"], targetPath, issues);
+          string(target.toolId, `${targetPath}.toolId`, issues);
         } else if (target.kind === "room") {
           keys(target, ["kind", "roomId"], targetPath, issues);
           string(target.roomId, `${targetPath}.roomId`, issues);

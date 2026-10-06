@@ -85,6 +85,10 @@ for (const file of files) {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
       inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
     }
+    if (rule.reason === "external visual asset reference" && relativePath === "packages/walk-laser/src/LaserIcon.tsx") {
+      // User-requested bundled toolbar illustration, never a scene texture.
+      inspectedSource = inspectedSource.replace('"./assets/laser-icon.png"', '"bundled-laser-shortcut-icon"');
+    }
     if (rule.reason === "external visual asset reference" && relativePath === "packages/engine/src/onboarding/OnboardingIntroduction.tsx") {
       inspectedSource = inspectedSource.replace('`${previewBaseUrl}${name}.png`', '"bundled-onboarding-preview"');
     }

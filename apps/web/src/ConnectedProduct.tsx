@@ -1,3 +1,4 @@
+import { installedWalkTools } from "./walk-tools";
 import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
@@ -65,7 +66,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   const home = record.publishedAt === 0
     ? <Navigate to={editorPath({ mode: "construct" }, record.homeId)} replace />
     : <ShortcutThumbnailSurface><CabaneAppExperience manifest={publishedManifest!} architectureModels={stableArchitectureModelRegistry}
-    onboarding={onboarding}
+    onboarding={onboarding} walkTools={installedWalkTools}
     deviceModels={ownerDeviceModels} homeAssistantUrl={homeAssistantUrl} onHomeAssistantUrlChange={(url) => {
       setConnectionError(null);
       void Promise.resolve().then(() => onHomeAssistantUrlChange(url, record)).then((next) => { if (next) setRecord(next); })

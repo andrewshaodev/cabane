@@ -142,3 +142,32 @@ In the Shortcuts editor, clicking or tapping a shortcut selects it for editing.
 The selected shortcut keeps its outlined style and edit controls when the pointer
 moves away or over another shortcut; hover and focus alone do not change selection.
 Native keyboard activation also selects a shortcut.
+
+The web host offers an optional **Laser** action in Shortcuts → Add action,
+alongside Lights off and View. It is absent from the default bar. Save the shortcut,
+enter Walk, and select Laser to equip or unequip a procedural cartoon laser gun.
+Leaving Walk unequips it. Desktop pointer lock enables center-screen aim and
+left-click or F to fire; touch uses the existing sticks and a dedicated Fire button.
+The initiating pointer-lock click does not fire. Overlays, hidden documents, and
+paused mouse control disable firing. Stowing the tool restores ordinary device-panel interaction.
+
+Shots raycast at trigger time. The first visible surface blocks the shot, including
+walls and furniture; gun/effect geometry does not intercept it. Only a single valid,
+available, fresh light binding can toggle, through the normal guarded runtime call
+and demo adapter. Unsupported, ambiguous, or unmapped controls do not highlight the crosshair or issue commands; failed calls do not open a device panel or retry. Shots have a 300 ms
+cooldown and cannot overlap a pending control. Reduced motion retains the targeting crosshair while removing recoil, the traveling pulse, muzzle flash, and impact burst. The experimental package
+owns visuals and firing input; the engine owns generic tool installation and light
+activation.
+
+G equips or stows Laser while walking when its shortcut is on the bar, including
+while the mouse is captured. The key does nothing in a text field or overlay.
+
+Laser visuals use a layered ivory/brass procedural blaster with cyan energy details.
+A short tapered pulse travels to the hit instead of leaving a full-length beam
+suspended in the room. Its muzzle flash follows the gun and its impact burst
+expands and fades at the collision point. The generated toolbar icon matches
+the blaster and the existing sculpted action icons; it is never a scene texture.
+
+The blaster includes a matching padded glove. Idle breathing and speed-driven walk/sprint sway move the hand and weapon together; reduced motion disables these offsets. A text-free four-tick crosshair becomes cyan corner brackets only over an eligible light, using the same host-owned authorization guards as firing.
+
+Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.

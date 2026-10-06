@@ -2,6 +2,7 @@ export type ActionBarBuiltIn = "build" | "walk" | "night" | "view" | "all-lights
 
 export type ActionBarTarget =
   | { kind: "built-in"; action: ActionBarBuiltIn }
+  | { kind: "walk-tool"; toolId: string }
   | { kind: "room"; roomId: string }
   | { kind: "device"; deviceId: string };
 
@@ -42,9 +43,11 @@ export function resolvePublishedActionBarItems(config: unknown): readonly Action
     if (typeof item.id !== "string" || !item.id.trim() || seen.has(item.id)
       || item.target === null || typeof item.target !== "object" || Array.isArray(item.target)) return fallback;
     seen.add(item.id);
-    const target = item.target as { kind?: unknown; action?: unknown; roomId?: unknown; deviceId?: unknown };
+    const target = item.target as { kind?: unknown; action?: unknown; roomId?: unknown; deviceId?: unknown; toolId?: unknown };
     if (target.kind === "built-in" && builtInActions.has(target.action as ActionBarBuiltIn))
       return { id: item.id, target: { kind: "built-in", action: target.action as ActionBarBuiltIn } };
+    if (target.kind === "walk-tool" && typeof target.toolId === "string" && target.toolId.trim())
+      return { id: item.id, target: { kind: "walk-tool", toolId: target.toolId } };
     if (target.kind === "room" && typeof target.roomId === "string" && target.roomId.trim())
       return { id: item.id, target: { kind: "room", roomId: target.roomId } };
     if (target.kind === "device" && typeof target.deviceId === "string" && target.deviceId.trim())

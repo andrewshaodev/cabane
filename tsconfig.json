@@ -16,6 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "paths": {
+      "@cabane/walk-laser": ["./packages/walk-laser/src/index.ts"],
       "@cabane/engine": ["./packages/engine/src/index.ts"],
       "@cabane/catalog/architecture": ["./packages/catalog/src/architecture/index.ts"],
       "@cabane/catalog/furnishing": ["./packages/catalog/src/furnishing/index.ts"],

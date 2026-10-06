@@ -1,0 +1,66 @@
+import { ToonMaterial } from "@cabane/engine";
+import { useFrame } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import { AdditiveBlending, Group, Mesh, MeshToonMaterial, Quaternion, Vector3 } from "three";
+import { ElectricArc } from "./ElectricArc";
+import { ElectricScorch } from "./ElectricScorch";
+import { sampleLaserPulse } from "./laser-pulse";
+
+export interface ShotVisual { id: number; start: Vector3; end: Vector3; hit: boolean; normal?: Vector3; createdAt?: number; }
+const noRaycast = () => undefined;
+
+export function LaserShot({ shot }: { shot: ShotVisual }) {
+  const pulse = useRef<Group>(null);
+  const impact = useRef<Group>(null);
+  const ring = useRef<Mesh>(null);
+  const age = useRef(0);
+  const path = useMemo(() => {
+    const direction = shot.end.clone().sub(shot.start);
+    const distance = direction.length();
+    direction.normalize();
+    return { distance, direction, rotation: new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), direction) };
+  }, [shot]);
+  useFrame((_, delta) => {
+    age.current += delta;
+    const sample = sampleLaserPulse(path.distance, age.current);
+    if (pulse.current) {
+      pulse.current.visible = sample.traveling;
+      pulse.current.position.copy(shot.start).addScaledVector(path.direction, (sample.head + sample.tail) / 2);
+      pulse.current.scale.set(1, 1, Math.max(0.001, sample.head - sample.tail));
+    }
+    if (impact.current) {
+      impact.current.visible = shot.hit && sample.impact;
+      const expansion = 0.5 + sample.impactProgress * 2;
+      impact.current.scale.setScalar(expansion);
+      if (ring.current) ring.current.scale.setScalar(1 + sample.impactProgress);
+      for (const child of impact.current.children) {
+        if ((child as Mesh).isMesh) ((child as Mesh).material as MeshToonMaterial).opacity = (child.userData.glowOpacity ?? 1) * (1 - sample.impactProgress) ** 2;
+      }
+    }
+  });
+  const surfaceRotation = new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), shot.normal ?? path.direction.clone().negate());
+  const surfacePoint = shot.end.clone().addScaledVector(shot.normal ?? path.direction.clone().negate(), .004);
+  return <group userData={{ walkToolVisual: true }}>
+    <ElectricArc start={shot.start} end={shot.end} duration={.3} />
+    {shot.hit && <group position={surfacePoint.toArray()} quaternion={surfaceRotation.toArray()}><ElectricScorch delay={0} lifetime={3.2} /></group>}
+    <group name="laser-pulse" ref={pulse} quaternion={path.rotation.toArray()} visible={false}>
+      <mesh raycast={noRaycast} scale={[0.02, 0.02, 0.5]}>
+        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color="#f5ffff" emissive="#caffff" emissiveIntensity={4} toneMapped={false} transparent blending={AdditiveBlending} depthWrite={false} />
+      </mesh>
+      <mesh raycast={noRaycast} scale={[0.06, 0.06, 0.55]}>
+        <sphereGeometry args={[1, 8, 6]} /><ToonMaterial color="#41dfff" emissive="#41dfff" emissiveIntensity={2} toneMapped={false} transparent opacity={0.22} blending={AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
+    <group name="laser-impact" ref={impact} position={surfacePoint.toArray()} quaternion={surfaceRotation.toArray()} visible={false}>
+      <mesh raycast={noRaycast}><icosahedronGeometry args={[0.045, 1]} /><ToonMaterial color="#d5f6ff" emissive="#168fff" emissiveIntensity={3} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
+      <mesh ref={ring} raycast={noRaycast}><torusGeometry args={[0.052, 0.006, 5, 20]} /><ToonMaterial color="#6dcaff" emissive="#6dcaff" emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} /></mesh>
+      <mesh userData={{ glowOpacity: 0.24 }} raycast={noRaycast}><sphereGeometry args={[0.09, 8, 6]} /><ToonMaterial color="#47eaff" emissive="#47eaff" emissiveIntensity={2} toneMapped={false} transparent opacity={0.24} depthWrite={false} blending={AdditiveBlending} /></mesh>
+      {Array.from({ length: 7 }, (_, index) => {
+        const angle = index * Math.PI * 2 / 7;
+        return <mesh key={index} position={[Math.cos(angle) * 0.07, Math.sin(angle) * 0.07, -0.008]} rotation={[0, 0, angle - Math.PI / 2]} raycast={noRaycast}>
+          <coneGeometry args={[0.009, 0.06, 4]} /><ToonMaterial color="#d5f6ff" emissive="#218fff" emissiveIntensity={2} toneMapped={false} transparent depthWrite={false} blending={AdditiveBlending} />
+        </mesh>;
+      })}
+    </group>
+  </group>;
+}

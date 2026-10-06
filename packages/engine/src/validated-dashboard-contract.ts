@@ -17,6 +17,7 @@ export interface ValidatedDashboardProps {
   manifest: HomeManifest;
   architectureModels: ArchitectureModelRegistry;
   deviceModels: DeviceModelRegistry;
+  walkTools?: readonly import("./walk-tools").WalkToolDefinition[];
   renderActionBarDeviceIcon?: (modelId: string) => ReactNode;
   bindingManager: RuntimeBindingProfileManager;
   fallbackDemo: boolean;

@@ -2,6 +2,7 @@ import type { ActionBarItem } from "@cabane/engine";
 
 const sameTarget = (a: ActionBarItem["target"], b: ActionBarItem["target"]): boolean =>
   a.kind === b.kind && (a.kind === "built-in" && b.kind === "built-in" ? a.action === b.action
+    : a.kind === "walk-tool" && b.kind === "walk-tool" ? a.toolId === b.toolId
     : a.kind === "room" && b.kind === "room" ? a.roomId === b.roomId
       : a.kind === "device" && b.kind === "device" && a.deviceId === b.deviceId);
 

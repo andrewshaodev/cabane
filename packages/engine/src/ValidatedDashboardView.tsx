@@ -1,3 +1,4 @@
+import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate-walk-target";
 import { connectedCanvasEvents } from "./connected-canvas-events";
 import { useCabaneDom } from "./CabaneDom";
 import { ScenePreview } from "./ScenePreview";
@@ -68,6 +69,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
   const closePreferences = useCallback(() => setPreferencesOpen(false), []);
   const {
+    equippedToolId,
     floorNavigation, elevation, requestWalkPointerLock,
     cameraStreamRequirements, runtime, documentVisible, shellRef, mode, mappingOpen, setupOpen,
     manifest, canvasDpr, walkMode, quality, lightingMode, chooseLightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,
@@ -83,6 +85,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     openWalkDevice, walkPointerLocked, allLightsCall, allLightsBusy, runAction, runConfiguredAction,
     sceneActionError, setSceneActionError
   } = useDashboardController(props);
+  const equippedTool = walkMode && !walkthrough ? props.walkTools?.find(tool => tool.id === equippedToolId) : undefined;
+  const toolInputEnabled = documentVisible && !setupOpen && !mappingOpen && !deviceOverlay && !selectedCamera && !preferencesOpen;
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar);
   const preferencesMenuItem = walkMode && <button type="button" onClick={event => {
     event.currentTarget.closest("details")?.removeAttribute("open");
@@ -90,7 +94,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     setPreferencesOpen(true);
   }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>;
   const actionBarTargets = Object.fromEntries(actionBarItems.flatMap(item => {
-    if (item.target.kind === "built-in") return [];
+    if (item.target.kind === "built-in" || item.target.kind === "walk-tool") return [];
     const destination = resolveActionBarDestination(manifest, item.target);
     if (!destination) return [[item.id, { label: `Unavailable ${item.target.kind}`, available: false }]];
     if (item.target.kind === "room") {
@@ -207,9 +211,15 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     interactionMode={!walkMode && floorNavigation.wholeBuilding ? "editor" : "runtime"}
                     onSelectRoom={floorNavigation.wholeBuilding ? undefined : selectRoom}
                     onInteract={handleExtensionInteraction}
-                    onWalkDeviceTargetChange={walkthrough ? undefined : setWalkDeviceTarget}
+                    onWalkDeviceTargetChange={walkthrough || equippedTool ? undefined : setWalkDeviceTarget}
                     liveMediaByEntityId={liveMediaByEntityId}
                   /></SceneNightContext.Provider>
+                  {equippedTool && <Suspense fallback={null}><equippedTool.Scene enabled={toolInputEnabled} pointerLocked={walkPointerLocked}
+                    coarsePointer={coarsePointer} reducedMotion={reducedMotion}
+                    canActivateTarget={target => toolInputEnabled && canActivateWalkTarget(target, resolvedBindings, runtime.canMutate)}
+                    activateTarget={target => toolInputEnabled
+                      ? activateWalkTarget(target, resolvedBindings, runtime)
+                      : Promise.resolve({ status: "unavailable", message: "Resume walking to use this tool." })} /></Suspense>}
                   {!walkthrough && !floorNavigation.wholeBuilding && shouldShowRoomStatusOverlays(mode) && (
                     <group position={[0, elevation, 0]}><RoomStatusOverlays
                       floor={floor}
@@ -401,8 +411,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           )}
           {walkMode && (
             <div className="walk-controls">
-              <div className="walk-reticle" aria-hidden="true" />
-              {!walkthrough && walkDeviceTarget && (
+              {!equippedTool && <div className="walk-reticle" aria-hidden="true" />}
+              {!walkthrough && !equippedTool && walkDeviceTarget && (
                 <button
                   type="button"
                   className="walk-device-action"
@@ -427,11 +437,12 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
 
           {!walkthrough && <SceneActionBar
             items={actionBarItems}
+            walkTools={props.walkTools} activeWalkToolId={walkMode ? equippedToolId : null}
             targets={actionBarTargets}
             renderDeviceIcon={props.renderActionBarDeviceIcon}
             mode={mode}
             roofVisible={floorNavigation.wholeBuilding}
-            keyboardEnabled={!setupOpen && !mappingOpen && !deviceOverlay && !selectedCamera}
+            keyboardEnabled={toolInputEnabled}
             onToggleRoof={walkMode ? undefined : () => {
               floorNavigation.setWholeBuilding(!floorNavigation.wholeBuilding);
               setSelectedRoomId(null); setSelectedDeviceId(null); setMode("overview");

@@ -148,7 +148,7 @@ export function clampActionTrayLeft(
 
 export function SceneActionBar({
   items = defaultActionBarItems,
-  targets = {},
+  targets = {}, walkTools = [], activeWalkToolId,
   mode,
   lighting,
   wallFade,
@@ -160,6 +160,8 @@ export function SceneActionBar({
   roofVisible = false, onToggleRoof, keyboardEnabled = true,
 }: {
   items?: readonly ActionBarItem[];
+  walkTools?: readonly import("./walk-tools").WalkToolDefinition[];
+  activeWalkToolId?: string | null;
   targets?: Readonly<Record<string, { label: string; available: boolean; pictureUrl?: string | null; modelId?: string }>>;
   renderDeviceIcon?: (modelId: string) => ReactNode;
   roofVisible?: boolean;
@@ -208,10 +210,16 @@ export function SceneActionBar({
         root.current?.querySelector<HTMLButtonElement>(`[data-group="${open}"]`)?.focus();
         setOpen(null); event.preventDefault(); return;
       }
-      if (!keyboardEnabled || mode === "walk" || event.defaultPrevented || event.repeat || event.isComposing
+      if (!keyboardEnabled || event.defaultPrevented || event.repeat || event.isComposing
         || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey
         || dom.root.querySelector("dialog[open]")
         || (event.target instanceof HTMLElement && (event.target.closest("input, textarea, select") || event.target.isContentEditable))) return;
+      if (mode === "walk") {
+        const tool = walkTools.find(tool => tool.shortcutKey?.toLowerCase() === event.key.toLowerCase());
+        const item = tool && items.find(item => item.target.kind === "walk-tool" && item.target.toolId === tool.id);
+        if (item) { event.preventDefault(); onAction(item); }
+        return;
+      }
       const group = event.key.toLowerCase() === "b" ? "Build" : event.key.toLowerCase() === "v" ? "View" : null;
       if (group && items.some(item => item.target.kind === "built-in" && item.target.action === group.toLowerCase())) {
         event.preventDefault(); setOpen(open === group ? null : group);
@@ -222,7 +230,7 @@ export function SceneActionBar({
     dom.events.addEventListener("pointerdown", outside);
     dom.events.addEventListener("keydown", keydown);
     return () => { dom.events.removeEventListener("pointerdown", outside); dom.events.removeEventListener("keydown", keydown); };
-  }, [open, overflowOpen, keyboardEnabled, mode, onToggleRoof, items]);
+  }, [open, overflowOpen, keyboardEnabled, mode, onToggleRoof, items, walkTools, onAction]);
   useEffect(() => {
     if (!open) return;
     const trigger = root.current?.querySelector<HTMLButtonElement>(`[data-group="${open}"]`);
@@ -301,6 +309,18 @@ export function SceneActionBar({
     );
   };
   const renderItem = (item: ActionBarItem) => {
+    if (item.target.kind === "walk-tool") {
+      const toolId = item.target.toolId;
+      const tool = walkTools.find(tool => tool.id === toolId);
+      const active = activeWalkToolId === toolId;
+      return <button key={item.id} type="button" className={`scene-action-slot is-filled ${active ? "is-active" : ""}`}
+        aria-label={tool ? `${active ? "Unequip" : "Equip"} ${tool.label}` : "Unavailable tool"} aria-pressed={active}
+        aria-keyshortcuts={tool?.shortcutKey}
+        title={mode === "walk" ? tool?.label : "Enter Walk mode to equip this tool"} disabled={!tool || mode !== "walk"}
+        onClick={() => { setOverflowOpen(false); onAction(item); }}>
+        <SceneActionSlotFace label={tool?.label ?? "Unavailable"} shortcut={tool?.shortcutKey} icon={tool ? <tool.Icon /> : null} />
+      </button>;
+    }
     if (item.target.kind !== "built-in") {
       const target = targets[item.id] ?? { label: `Unavailable ${item.target.kind}`, available: false };
       return <button key={item.id} type="button" className="scene-action-slot is-filled"

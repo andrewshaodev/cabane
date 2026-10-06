@@ -1,3 +1,4 @@
+import { installedWalkTools } from "../walk-tools";
 import { StairPlacementPanel } from "../editor-floors";
 import { convertStairShape } from "../editor-floors/stair-placement-geometry";
 import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
@@ -222,7 +223,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         runtime, constructEditor, dragging, floorZoneDrawing, poolDrawing, workspace, undoProject,
         redoProject, shortcutsMode, onModeTabChange
       }} />
-      {shortcutsMode && <ShortcutThumbnailSurface><ActionBarEditor project={editorProject}
+      {shortcutsMode && <ShortcutThumbnailSurface><ActionBarEditor walkTools={installedWalkTools} project={editorProject}
         deviceModels={deviceModels} roomPictures={roomPictures} roomNames={roomNames} deviceNames={deviceNames}
         disabled={editingLocked || unsettled || publishOpen || previewOpen}
         canUndo={workspace.canUndo && !unsettled} canRedo={workspace.canRedo && !unsettled}

@@ -24,11 +24,12 @@ export interface OnboardingOptions {
 }
 
 export function CabaneAppExperience({ manifest, architectureModels, deviceModels, homeAssistantUrl, onHomeAssistantUrlChange,
-  renderActionBarDeviceIcon,
+  renderActionBarDeviceIcon, walkTools,
   onEditHome, onCustomizeActionBar, onHomeAssistantSettings, onWorkspaces, onImportBrowserData, onExportBrowserData = () => undefined, bindingManager, onOpenConnect,
   constructionApplied = false, onboarding,
 }: {
   manifest: HomeManifest; architectureModels: ArchitectureModelRegistry; deviceModels: DeviceModelRegistry;
+  walkTools?: readonly import("../walk-tools").WalkToolDefinition[];
   renderActionBarDeviceIcon?: (modelId: string) => ReactNode;
   homeAssistantUrl: string | null; onHomeAssistantUrlChange: (url: string | null) => void;
   onEditHome?: (mode?: "construct" | "furnish" | "connect") => void;
@@ -75,7 +76,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   };
   const dashboard = (bindingManager: RuntimeBindingProfileManager) => <CabaneDashboard
     manifest={dashboardManifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
-    renderActionBarDeviceIcon={renderActionBarDeviceIcon}
+    renderActionBarDeviceIcon={renderActionBarDeviceIcon} walkTools={walkTools}
     sessionPresentation={isDemo ? { mode: "demo", label: "Demo", detail: "Simulated devices", menuDescription: "Explore freely. These controls only change simulated devices in this browser." } : undefined}
     setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => onboarding?.openWelcome ? onboarding.openWelcome() : setSurface("intro") }
       : personalSetup && !setupState.record.activated ? { label: "Continue setup", detail: "Connect a device in this home", attention: false, onOpen: connect } : undefined}

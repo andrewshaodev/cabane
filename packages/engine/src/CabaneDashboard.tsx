@@ -24,7 +24,7 @@ export function CabaneDashboard({
   manifest,
   architectureModels,
   deviceModels = {},
-  renderActionBarDeviceIcon,
+  renderActionBarDeviceIcon, walkTools,
   bindingManager,
   sessionPresentation,
   setupAction,
@@ -60,6 +60,7 @@ export function CabaneDashboard({
       architectureModels={architectureModels}
       deviceModels={deviceModels}
       renderActionBarDeviceIcon={renderActionBarDeviceIcon}
+      walkTools={walkTools}
       bindingManager={bindingManager}
       fallbackDemo={manifest === null}
       sessionPresentation={sessionPresentation}
@@ -82,6 +83,7 @@ export function CabaneDashboard({
       architectureModels={architectureModels}
       deviceModels={deviceModels}
       renderActionBarDeviceIcon={renderActionBarDeviceIcon}
+      walkTools={walkTools}
       fallbackDemo={manifest === null}
       sessionPresentation={sessionPresentation}
       setupAction={setupAction}

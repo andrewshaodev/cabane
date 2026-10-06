@@ -36,6 +36,7 @@ export interface CabaneDashboardProps {
   manifest: HomeManifest | null;
   architectureModels: ArchitectureModelRegistry;
   deviceModels?: DeviceModelRegistry;
+  walkTools?: readonly import("./walk-tools").WalkToolDefinition[];
   renderActionBarDeviceIcon?: (modelId: string) => ReactNode;
   bindingManager?: RuntimeBindingProfileManager;
   sessionPresentation?: DashboardSessionPresentation;

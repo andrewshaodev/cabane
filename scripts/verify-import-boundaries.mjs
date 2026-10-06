@@ -5,6 +5,7 @@ const root = process.cwd();
 const sourceRoots = ["apps", "packages", "home"];
 const sourceExtensions = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const documentedPackageExports = new Set([
+  "@cabane/walk-laser",
   "@cabane/engine",
   "@cabane/engine/styles.css",
   "@cabane/catalog/architecture",
@@ -80,8 +81,14 @@ for (const file of files) {
     const imports = [...source.matchAll(/(?:from\s+|import\s*\(|import\s+)(["'])([^"']+)\1/g)]
       .map((match) => match[2]);
     for (const specifier of imports) {
+      if (specifier === "@cabane/walk-laser" && !displayPath.startsWith("apps/web/")) {
+        errors.push(`${displayPath}: only the web host may install experimental walk tools`);
+      }
       const resolvedImport = specifier.startsWith(".")
         ? relative(root, resolve(dirname(file), specifier)) : specifier;
+      if (resolvedImport.startsWith("packages/walk-laser/") && !displayPath.startsWith("packages/walk-laser/")) {
+        errors.push(`${displayPath}: walk-laser internals are private; use its public package export`);
+      }
       if (resolvedImport.startsWith(demoRoot) && !displayPath.startsWith(demoRoot) && displayPath !== demoFacade) {
         errors.push(`${displayPath}: demo internals must be accessed through the onboarding facade`);
       }

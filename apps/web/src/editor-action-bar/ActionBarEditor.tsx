@@ -14,7 +14,8 @@ const builtIns: ActionBarBuiltIn[] = ["build", "walk", "night", "view", "all-lig
 type Category = "built-in" | "room" | "device";
 type Picker = { kind: Category; replacingId: string | null } | null;
 
-export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames = {}, deviceNames = {}, disabled, canUndo, canRedo, onUndo, onRedo, onChange }: {
+export function ActionBarEditor({ project, deviceModels, walkTools = [], roomPictures, roomNames = {}, deviceNames = {}, disabled, canUndo, canRedo, onUndo, onRedo, onChange }: {
+  walkTools?: readonly import("@cabane/engine").WalkToolDefinition[];
   project: HomeProject; deviceModels: DeviceModelRegistry;
   roomPictures: Readonly<Record<string, string | null>>;
   roomNames?: Readonly<Record<string, string>>;
@@ -69,6 +70,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
   const label = (item: ActionBarItem): string => {
     const target = item.target;
     if (target.kind === "built-in") return actionBarBuiltInLabels[target.action];
+    if (target.kind === "walk-tool") return walkTools.find(tool => tool.id === target.toolId)?.label ?? "Unavailable tool";
     if (target.kind === "room") return roomNames[target.roomId] ?? rooms.find(room => room.id === target.roomId)?.name ?? "Missing room";
     const device = devices.find(device => device.id === target.deviceId);
     return device ? deviceNames[device.id] ?? deviceModels[device.modelId]?.label ?? device.modelId.replaceAll("-", " ") : "Missing device";
@@ -76,6 +78,10 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
   const icon = (item: ActionBarItem) => {
     const target = item.target;
     if (target.kind === "built-in") return <ActionBarBuiltInIcon action={target.action} />;
+    if (target.kind === "walk-tool") {
+      const tool = walkTools.find(tool => tool.id === target.toolId);
+      return tool ? <tool.Icon /> : <EditorIcon name="devices" />;
+    }
     if (target.kind === "room") return <RoomShortcutIcon name={label(item)} pictureUrl={roomPictures[target.roomId]} />;
     const device = devices.find(device => device.id === target.deviceId);
     return device ? <ShortcutDeviceIcon modelId={device.modelId} models={deviceModels} /> : <EditorIcon name="devices" />;
@@ -86,7 +92,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
     onClick={() => { setSelectedId(item.id); setPicker(null); }}
     onKeyDown={event => { if (event.key === "ArrowUp") { event.preventDefault(); setSelectedId(item.id); requestAnimationFrame(() => tray.current?.querySelector<HTMLButtonElement>("button")?.focus()); } }}>
     <SceneActionSlotFace icon={icon(item)} label={label(item)} shortcut={item.target.kind === "built-in"
-      ? { build: "B", walk: "W", night: "N", view: "V", "all-lights": "L" }[item.target.action] : undefined}
+      ? { build: "B", walk: "W", night: "N", view: "V", "all-lights": "L" }[item.target.action] : item.target.kind === "walk-tool" ? walkTools.find(tool => item.target.kind === "walk-tool" && tool.id === item.target.toolId)?.shortcutKey : undefined}
       chevron={item.target.kind === "built-in" && (item.target.action === "build" || item.target.action === "view")} />
   </button>;
   const choose = (target: ActionBarItem["target"]) => {
@@ -120,6 +126,11 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
             const target = { kind: "built-in" as const, action };
             return <button key={action} type="button" aria-label={actionBarBuiltInLabels[action]} disabled={disabled || duplicate(target)} onClick={() => choose(target)}>
               <span className="shortcuts-picker__icon"><ActionBarBuiltInIcon action={action} /></span><strong>{actionBarBuiltInLabels[action]}</strong></button>;
+          })}
+          {picker.kind === "built-in" && walkTools.filter(tool => matching(tool.label)).map(tool => {
+            const target = { kind: "walk-tool" as const, toolId: tool.id };
+            return <button key={tool.id} type="button" aria-label={tool.label} disabled={disabled || duplicate(target)} onClick={() => choose(target)}>
+              <span className="shortcuts-picker__icon"><tool.Icon /></span><strong>{tool.label}</strong><small>Walk mode</small></button>;
           })}
           {picker.kind === "room" && rooms.filter(room => matching(roomNames[room.id] ?? room.name)).map(room => {
             const target = { kind: "room" as const, roomId: room.id };
