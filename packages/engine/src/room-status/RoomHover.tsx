@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
 
 function createRoomHoverStore() {
@@ -38,12 +39,13 @@ export function useRoomHoverTarget() {
 }
 
 function RoomHoverCursor() {
+  const dom = useCabaneDom();
   const hovered = useHoveredRoom() !== null;
   useEffect(() => {
     if (!hovered) return;
-    const previous = document.body.style.cursor;
-    document.body.style.cursor = "pointer";
-    return () => { document.body.style.cursor = previous; };
+    const previous = dom.container.style.cursor;
+    dom.container.style.cursor = "pointer";
+    return () => { dom.container.style.cursor = previous; };
   }, [hovered]);
   return null;
 }

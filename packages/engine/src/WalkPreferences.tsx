@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
 
@@ -39,22 +40,23 @@ export function WalkPreferences({ inverted, onChange, lightingMode, onLightingMo
   onLightingModeChange: (mode: SolarLightingMode) => void;
   onClose: () => void;
 }) {
+  const dom = useCabaneDom();
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousFocus = dom.root.activeElement instanceof HTMLElement ? dom.root.activeElement : null;
     closeRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); onClose(); }
       if (event.key === "Tab") {
-        const focusable = Array.from(document.querySelectorAll<HTMLElement>(".walk-preferences button, .walk-preferences input"));
+        const focusable = Array.from(dom.root.querySelectorAll<HTMLElement>(".walk-preferences button, .walk-preferences input"));
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        if (event.shiftKey && dom.root.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && dom.root.activeElement === last) { event.preventDefault(); first?.focus(); }
       }
     };
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => { document.removeEventListener("keydown", onKeyDown, true); previousFocus?.focus(); };
+    dom.events.addEventListener("keydown", onKeyDown, true);
+    return () => { dom.events.removeEventListener("keydown", onKeyDown, true); previousFocus?.focus(); };
   }, [onClose]);
   return <div className="walk-preferences-backdrop" onMouseDown={event => {
     if (event.target === event.currentTarget) onClose();

@@ -1,3 +1,5 @@
+import { useCabaneAssetUrl } from "@cabane/engine";
+import { useLocation, useNavigate } from "react-router";
 import { useState, type ReactNode } from "react";
 import { WorkspaceCard, type WorkspaceCardAction, type WorkspaceLibraryEntry } from "./WorkspaceCard";
 import { WorkspaceNameDialog } from "./WorkspaceNameDialog";
@@ -21,7 +23,10 @@ export interface WorkspaceLibraryProps {
   onSettings?: (id: string) => Promise<void>;
 }
 export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
-  const [dialog, setDialog] = useState<Dialog | null>(() => new URLSearchParams(window.location.search).get("import") === "home-assistant" ? { action: "import" } : null);
+  const iconUrl = useCabaneAssetUrl("cabane-icon.png");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [dialog, setDialog] = useState<Dialog | null>(() => new URLSearchParams(location.search).get("import") === "home-assistant" ? { action: "import" } : null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const openDialog = (next: Dialog) => { setError(null); setDialog(next); };
@@ -30,9 +35,9 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
     try { await action(); setDialog(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not complete this action. Please try again."); }
     finally { setBusy(false); }
   };
-  const cancel = () => { setDialog(null); setError(null); window.history.replaceState(window.history.state, "", "/workspaces"); };
+  const cancel = () => { setDialog(null); setError(null); void navigate("/workspaces", { replace: true }); };
   return <main className="workspace-library">
-    <header className="workspace-library-header"><div><p className="workspace-brand"><img src="/cabane-icon.png" alt="" width="28" height="33" />Cabane</p><h1>Your workspaces</h1></div>
+    <header className="workspace-library-header"><div><p className="workspace-brand"><img src={iconUrl} alt="" width="28" height="33" />Cabane</p><h1>Your workspaces</h1></div>
       <div className="workspace-library-actions"><button disabled={busy} onClick={() => openDialog({ action: "import" })}>Import</button>
         <button className="workspace-primary" disabled={busy} onClick={() => openDialog({ action: "create" })}>New workspace</button></div></header>
     {!dialog && error && <p role="alert" className="workspace-error">{error}</p>}

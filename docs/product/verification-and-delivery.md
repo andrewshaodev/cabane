@@ -34,6 +34,22 @@ There is no checked-in Dockerfile or Compose stack. A build or hosting
 configuration does not prove a deployed service, secured private access, or a
 working network route from every client to HA.
 
+The native panel has a separate build: `npm run build:panel` produces
+`apps/web/dist-panel/cabane-panel.js`, scoped CSS, local assets, license notices,
+and `manifest.json` with the source commit and SHA-256 file inventory. Release
+builds require a clean committed tree. `CABANE_PANEL_ALLOW_DIRTY=1` permits local
+development builds and marks the manifest as development-only.
+
+After building, `node scripts/verify-panel.mjs` serves the production artifact
+under a nested local asset path and opens a synthetic Home Assistant host in
+Chrome (`CHROME_PATH` can override the executable). It exercises the real
+workspace/editor UI, host-session selection, HA import/storage, reconnect and
+detach behavior, and local asset loading while retaining the host URL. Unit and
+browser regressions additionally cover origin mismatch, demo isolation, stale
+connection work, token-storage traps, and standalone migration compatibility.
+These fixtures use fake HA data and do not establish live household acceptance
+or deploy the artifact to Home Assistant.
+
 Uncompleted acceptance/deployment concerns remain explicit:
 
 - Household binding completeness and real-device/camera acceptance require an

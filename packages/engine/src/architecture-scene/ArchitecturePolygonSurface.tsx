@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { cutSurfaceShapes, useStairSurfaceApertures } from "../stairs/surface-apertures";
 import { useFrame, useThree } from "@react-three/fiber";
 
@@ -57,6 +58,7 @@ export const PolygonSurface = memo(function PolygonSurface({
   onSelect?: () => void;
   name?: string;
 }) {
+  const dom = useCabaneDom();
   const apertures = useStairSurfaceApertures("floor");
   const geometry = useMemo(
     () => new ShapeGeometry(cutSurfaceShapes(polygon, floor.coordinates, apertures)),
@@ -72,9 +74,9 @@ export const PolygonSurface = memo(function PolygonSurface({
 
   useEffect(() => {
     if (!hovered || !onSelect || typeof document === "undefined") return;
-    const previousCursor = document.body.style.cursor;
-    document.body.style.cursor = "pointer";
-    return () => { document.body.style.cursor = previousCursor; };
+    const previousCursor = dom.container.style.cursor;
+    dom.container.style.cursor = "pointer";
+    return () => { dom.container.style.cursor = previousCursor; };
   }, [hovered, onSelect]);
 
   useEffect(() => {

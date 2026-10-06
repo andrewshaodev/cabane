@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState } from "react";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import { Plane, Vector3 } from "three";
@@ -44,6 +45,7 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
     if (current) latest.current.onDraggingChange(false);
   };
   const releaseRef = useRef(release); releaseRef.current = release;
+  const dom = useCabaneDom();
   useEffect(() => {
     if (!enabled || !selected) releaseRef.current();
   }, [enabled, selected, stair]);
@@ -54,10 +56,10 @@ export function EditableStair({ building, stair, activeFloorId, selected, enable
       }
     };
     const lost = (event: PointerEvent) => { if (active.current?.pointerId === event.pointerId) releaseRef.current(); };
-    window.addEventListener("keydown", cancel, true);
+    dom.events.addEventListener("keydown", cancel, true);
     gl.domElement.addEventListener("lostpointercapture", lost);
     return () => {
-      window.removeEventListener("keydown", cancel, true);
+      dom.events.removeEventListener("keydown", cancel, true);
       gl.domElement.removeEventListener("lostpointercapture", lost);
       releaseRef.current();
     };

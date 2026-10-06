@@ -1,3 +1,4 @@
+import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
 import { BuildTutorial } from "../editor-onboarding/BuildTutorial";
@@ -72,6 +73,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const tutorial = useBuildTutorial(editorProject, mode);
   const requestedActionBar = props.navigation?.request.panel === "action-bar" || props.initialRequest?.panel === "action-bar";
   const [actionBarPanelOpen, setActionBarPanelOpen] = useState(requestedActionBar);
+  const dom = useCabaneDom();
+  const iconUrl = useCabaneAssetUrl("cabane-icon.png");
   useEffect(() => { setActionBarPanelOpen(requestedActionBar); }, [requestedActionBar]);
   const shortcutsMode = props.navigation ? requestedActionBar : actionBarPanelOpen;
   const sidebar = useRef<HTMLElement>(null);
@@ -135,8 +138,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   useEffect(() => { setWalkStartFloor(null); }, [mode, activeFloorId]);
   useEffect(() => {
     const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") setWalkStartFloor(null); };
-    window.addEventListener("keydown", cancel);
-    return () => window.removeEventListener("keydown", cancel);
+    dom.events.addEventListener("keydown", cancel);
+    return () => dom.events.removeEventListener("keydown", cancel);
   }, []);
   useEffect(() => { if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null); }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
@@ -200,7 +203,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       <aside ref={sidebar} className="direction-rail" inert={editingLocked || publishOpen || previewOpen}>
         <div className="direction-rail__brand">
-          <img src="/cabane-icon.png" alt="" width="43" height="51" />
+          <img src={iconUrl} alt="" width="43" height="51" />
           <div className="direction-rail__identity">
             <h1>Cabane</h1>
             {onWorkspaces && <button type="button" className="editor-workspace-link"

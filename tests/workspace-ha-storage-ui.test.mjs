@@ -15,9 +15,13 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.getByRole("button", { name: /^Explore the demo/ }).click();
     assert.equal(await page.getByRole("button", { name: "Workspace storage" }).count(), 0);
     const demoHomeUrl = page.url();
-    await page.goto(`${demoHomeUrl}/connect/devices`);
-    await page.getByRole("button", { name: "Connection settings" }).click();
-    assert.equal(await page.getByRole("button", { name: "Workspace storage" }).count(), 0);
+    await page.getByLabel("More options", { exact: true }).click();
+    await page.getByRole("button", { name: "Home Assistant", exact: true }).click();
+    await page.waitForURL("**/home-assistant");
+    await page.getByRole("heading", { name: "Make this home yours" }).waitFor();
+    assert.equal(await page.getByRole("heading", { name: "Save across devices" }).count(), 0);
+    assert.equal(await page.getByLabel("Home Assistant URL").count(), 0);
+    assert.equal(await page.getByRole("button", { name: "Enable HA storage" }).count(), 0);
     await page.goto(demoHomeUrl);
     await page.getByLabel("More options", { exact: true }).click();
     await page.getByRole("button", { name: /^Getting started/ }).click();
@@ -29,6 +33,7 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.waitForURL("**/home-assistant");
     await page.getByRole("heading", { name: "Home Assistant", exact: true }).waitFor();
     await page.getByLabel("Home Assistant URL").waitFor();
+    await page.getByRole("heading", { name: "Save across devices" }).waitFor();
     await page.getByText("Connect Home Assistant first").waitFor();
     assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);

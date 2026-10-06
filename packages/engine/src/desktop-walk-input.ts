@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import {
   useEffect,
   type MutableRefObject
@@ -13,6 +14,7 @@ export const useDesktopWalkInput = (
   sprintRef: MutableRefObject<boolean>,
   jumpRequestRef?: MutableRefObject<boolean>,
 ) => {
+  const dom = useCabaneDom();
   useEffect(() => {
     if (!active) return;
     const keys = new Set<string>();
@@ -28,7 +30,7 @@ export const useDesktopWalkInput = (
       };
     };
     const down = (event: KeyboardEvent) => {
-      const target = event.target;
+      const target = event.composedPath()[0] ?? event.target;
       if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select"))) return;
       if (event.code === "Space") {
         event.preventDefault();
@@ -51,12 +53,17 @@ export const useDesktopWalkInput = (
       if (jumpRequestRef) jumpRequestRef.current = false;
       update();
     };
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
+    const focusOut = (event: FocusEvent) => {
+      if (!(event.relatedTarget instanceof HTMLElement) || !dom.root.contains(event.relatedTarget)) reset();
+    };
+    dom.events.addEventListener("focusout", focusOut);
+    dom.events.addEventListener("keydown", down);
+    dom.events.addEventListener("keyup", up);
     window.addEventListener("blur", reset);
     return () => {
-      window.removeEventListener("keydown", down);
-      window.removeEventListener("keyup", up);
+      dom.events.removeEventListener("focusout", focusOut);
+      dom.events.removeEventListener("keydown", down);
+      dom.events.removeEventListener("keyup", up);
       window.removeEventListener("blur", reset);
       reset();
     };

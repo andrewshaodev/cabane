@@ -1,3 +1,4 @@
+import { useHomeAssistantHostSession } from "./HomeAssistantHostSession";
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { BrowserDataImportResult } from "./browser-data-transfer";
 import { HomeAssistantCorsHelp } from "./HomeAssistantCorsHelp";
@@ -32,6 +33,7 @@ export function HomeAssistantConnectionFlow({
   onDefer: () => void;
   onClose: () => void;
 }) {
+  const hostSession = useHomeAssistantHostSession();
   const [value, setValue] = useState(homeAssistantUrl ?? "");
   const [error, setError] = useState<string | null>(null);
   const [importMessage, setImportMessage] = useState<string | null>(null);
@@ -62,7 +64,15 @@ export function HomeAssistantConnectionFlow({
         <span>Connect Home Assistant</span>
       </header>
       <div className="setup-task-surface__body">
-        {!homeAssistantUrl ? (
+        {hostSession ? <>
+          <h2 id="ha-connection-title">Connect this Home Assistant</h2>
+          <p>Sign-in is managed by Home Assistant.</p><p>{hostSession.origin}</p>
+          {homeAssistantUrl && homeAssistantUrl !== hostSession.origin && <p role="alert">This workspace uses a different Home Assistant: {homeAssistantUrl}. Select this instance explicitly; its mappings remain separate.</p>}
+          {runtime.error && <p role="alert">{runtime.error}</p>}
+          {homeAssistantUrl !== hostSession.origin && <button type="button" onClick={() => onHomeAssistantUrlChange(hostSession.origin)}>Use this Home Assistant</button>}
+          {homeAssistantUrl === hostSession.origin && ["error", "disconnected"].includes(runtime.status) && <button type="button" onClick={runtime.retry}>Retry connection</button>}
+          <button type="button" onClick={onDefer}>Do it later</button>
+        </> : !homeAssistantUrl ? (
           <>
             <p className="setup-task-surface__eyebrow">Home Assistant address</p>
             <h2 id="ha-connection-title">Where does your Home Assistant live?</h2>
@@ -124,8 +134,8 @@ export function HomeAssistantConnectionFlow({
           </>
         )}
 
-        <HomeAssistantCorsHelp />
-        {onImportBrowserData && (
+        {!hostSession && <HomeAssistantCorsHelp />}
+        {!hostSession && onImportBrowserData && (
           <div className="ha-connection-flow__import">
             <label>
               Import Cabane browser data

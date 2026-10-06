@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ActionBarBuiltInIcon, RoomShortcutIcon, SceneActionSlotFace, actionBarBuiltInLabels,
@@ -21,6 +22,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
   disabled: boolean; canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void;
   onChange: (items: readonly ActionBarItem[]) => void;
 }) {
+  const dom = useCabaneDom();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [picker, setPicker] = useState<Picker>(null);
   const [query, setQuery] = useState("");
@@ -58,8 +60,8 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
       else if (overflowOpen) setOverflowOpen(false);
       else setSelectedId(null);
     };
-    window.addEventListener("keydown", dismiss);
-    return () => window.removeEventListener("keydown", dismiss);
+    dom.events.addEventListener("keydown", dismiss);
+    return () => dom.events.removeEventListener("keydown", dismiss);
   }, [picker, selectedId, overflowOpen]);
   const hasOverflow = capacity !== null && items.length + 1 > capacity;
   const visible = hasOverflow ? items.slice(0, Math.max(0, capacity - 2)) : items;

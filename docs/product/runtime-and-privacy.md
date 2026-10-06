@@ -1,11 +1,28 @@
 # Home Assistant runtime and privacy
 
-The browser connects directly to the owner's normalized HTTPS HA origin (or paired loopback HTTP in development) through
+The standalone browser app connects directly to the owner's normalized HTTPS HA origin (or paired loopback HTTP in development) through
 `home-assistant-js-websocket`. OAuth is initiated by a user connection action;
 callback handling removes auth parameters from the visible URL. Runtime state
 covers unconfigured, disconnected, authenticating, connecting, connected,
 reconnecting, expired authorization, and errors. Subscription teardown and stale
 state marking keep old data from appearing authoritative after disconnection.
+
+The native panel instead borrows Home Assistant's existing connection through
+`HomeAssistantHostSessionProvider`. HA owns authentication, reconnection, and the
+socket lifetime. Cabane attaches its registry/state subscriptions and guarded
+service and camera clients only when the workspace selects the host origin.
+Replacement or teardown releases Cabane's subscriptions, cancels pending work,
+and rejects stale results; it never closes the host connection or logs HA out.
+An origin mismatch requires explicit workspace selection and never remaps device
+bindings silently. The same HTTPS/paired-loopback policy applies to borrowed
+sessions; native hosting does not permit ordinary LAN HTTP.
+
+Native initialization skips standalone legacy URL and authentication migration.
+It does not read, copy, remove, or persist legacy OAuth material, write OAuth
+return state, or consume the host URL's callback parameters. Ordinary workspace
+initialization and browser-local project storage remain available. Demo providers
+explicitly disable the host session. Native settings and import offer a safe
+connection retry without starting OAuth.
 
 Embedded first-time sign-in opens HA authorization in a popup so HA does not
 read the parent dashboard's query parameters. A static callback page returns only
@@ -33,8 +50,9 @@ launch gate; static builds do not complete Docker/LAN deployment acceptance.
 See [transport acceptance](../transport-acceptance.md) for the required checks.
 
 Switching homes disposes the prior runtime, clears its visible state, and ignores
-stale connection completion. The library mounts no HA provider. Each workspace
-stores its own server selection.
+stale connection completion. The library mounts an HA provider only while the
+Home Assistant import source is open; native import uses the borrowed host session.
+Each workspace stores its own server selection.
 
 The runtime reads area/device/entity registries, subscribes to entity states, and
 exposes refresh and connection errors. Supported service calls are scheduled and
@@ -52,7 +70,7 @@ projects/authentication or opens a network connection. Import checks restrict
 access to its internals and its dependencies. Dashboard controls and real HA
 networking contain no new simulation logic.
 
-OAuth auth data, including tokens, is persisted in browser localStorage when
+In standalone mode, OAuth auth data, including tokens, is persisted in browser localStorage when
 available; storage failure can leave it session-only. Tokens are not encrypted
 by an application server. The configured origin and client identity are checked
 when reusing stored auth. Authentication keys include normalized server origin

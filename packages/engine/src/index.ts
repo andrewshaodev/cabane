@@ -75,3 +75,8 @@ export { BUILD_TUTORIAL_STEPS, createBuildTutorialState } from "./onboarding/bui
 export type { BuildTutorialState, BuildTutorialStep } from "./onboarding/build-tutorial-state";
 export { rollUpDoorGeometry } from "./roll-up-door-geometry";
 export { DEFAULT_DOOR_CONFIGURATION, doorFromConfiguration, doorConfiguration } from "./door-configuration";
+
+export { HomeAssistantHostSessionProvider, useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
+export { CabaneDomProvider, useCabaneDom, useCabaneAssetUrl, type CabaneDomEnvironment } from "./CabaneDom";
+
+export { connectedCanvasEvents } from "./connected-canvas-events";

@@ -10,6 +10,8 @@ import {
   evaluateDerivedWalkNavigation,
   polygonCentroid,
   useHomeAssistantRuntime,
+  useHomeAssistantHostSession,
+  useCabaneDom,
   validateWorkspaceBindings,
   type FloorFinishSpec,
   type ActionBarItem,
@@ -91,6 +93,7 @@ export function useHomeEditorController({
   autosaveDelayMs?: number;
   onClose: (record: HomeProjectRecord, reason: HomeEditorExitReason) => void;
 }) {
+  const dom = useCabaneDom();
   const [localMode, setMode] = useState<EditorMode>(initialRequest?.mode ?? "construct");
   const mode = navigation?.request.mode ?? localMode;
   const workspace = useEditorWorkspace({ initialRecord, lifecycle, autosaveDelayMs });
@@ -166,7 +169,7 @@ export function useHomeEditorController({
   useEffect(() => { setPreviewOpen(false); }, [mode]);
   const walkButton = useRef<HTMLButtonElement>(null);
   const closeWalk = useCallback(() => {
-    if (document.pointerLockElement) document.exitPointerLock();
+    if (dom.root.pointerLockElement) document.exitPointerLock();
     setPreviewOpen(false);
     requestAnimationFrame(() => walkButton.current?.focus());
   }, []);
@@ -451,6 +454,7 @@ export function useHomeEditorController({
       navigation.go({ ...navigation.request, view: connect.defaultView }, true);
     }
   }, [navigation, connect.defaultView]);
+  const hostSession = useHomeAssistantHostSession();
   const signIn = useConnectSignIn(runtime, async (origin) => {
     setConnectionBusy(true);
     try {
@@ -461,6 +465,7 @@ export function useHomeEditorController({
         const next = await onPrepareOrigin(workspace.getRecord(), origin);
         if (!workspace.adoptRecord(next)) throw new Error("The workspace changed while connecting. Reopen Connect to retry.");
       }
+      if (hostSession) return;
       const request: EditorOpenRequest = {
         floorId: activeFloorId,
         mode: "connect", view: connect.view, roomId: connect.roomId,

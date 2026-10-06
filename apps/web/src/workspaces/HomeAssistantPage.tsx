@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import { useHomeAssistantRuntime, validateHomeAssistantUrlInput, type HomeProjectRecord, type HomeProjectLifecycle } from "@cabane/engine";
+import { useHomeAssistantHostSession, useCabaneAssetUrl, useHomeAssistantRuntime, validateHomeAssistantUrlInput, type HomeProjectRecord, type HomeProjectLifecycle } from "@cabane/engine";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { useConnectSignIn } from "../editor-connect/useConnectSignIn";
 import { CONNECT_RETURN_KEY } from "../editor-connect/connect-navigation";
@@ -16,6 +16,8 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   onChangeOrigin: (origin: string | null) => Promise<void>; onRecordChange: (record: HomeProjectRecord) => void;
   isDemo: boolean; onCreatePersonal: () => void;
 }) {
+  const hostSession = useHomeAssistantHostSession();
+  const iconUrl = useCabaneAssetUrl("cabane-icon.png");
   const runtime = useHomeAssistantRuntime();
   const storage = useWorkspaceStorage();
   const [address, setAddress] = useState(origin ?? "");
@@ -26,13 +28,13 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   const connecting = ["authenticating", "connecting", "reconnecting"].includes(runtime.status);
   const connected = runtime.status === "connected";
   useEffect(() => {
-    if (connected) {
+    if (connected && !hostSession) {
       try {
         const request = JSON.parse(window.sessionStorage.getItem(CONNECT_RETURN_KEY) ?? "null");
         if (request?.workspaceId === record.homeId && request?.panel === "home-assistant") window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
       } catch { /* A malformed return request cannot affect this page. */ }
     }
-  }, [connected, record.homeId]);
+  }, [connected, record.homeId, hostSession]);
   const run = async (action: () => Promise<void>) => {
     setBusy(true); setError(null); setNotice(null);
     try { await action(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Please try again."); }
@@ -40,7 +42,7 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   };
   const signIn = useConnectSignIn(runtime, async next => {
     await onChangeOrigin(next);
-    window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant" }));
+    if (!hostSession) window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant" }));
     setEditing(false);
   });
   const latest = async () => (await storage?.repository.read(record.homeId))?.record ?? record;
@@ -71,7 +73,14 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
         <button className="ha-primary" onClick={onCreatePersonal}>Create my workspace<EditorIcon name="chevron" /></button></section> : <>
       <section className="ha-section" aria-labelledby="ha-connection-title">
         <div className="ha-section__heading"><h2 id="ha-connection-title">Connection</h2><span className={`ha-status${connected ? " is-connected" : ""}`}><i />{connected ? "Connected" : connecting ? "Connecting…" : origin ? "Disconnected" : "Not connected"}</span></div>
-        {editing ? <form onSubmit={event => { event.preventDefault(); const result = validateHomeAssistantUrlInput(address); if (result.error) setError(result.error); else if (result.normalized) void run(() => signIn(result.normalized!)); }}>
+        {hostSession ? <div className="ha-connection-row">
+          <p>Sign-in is managed by Home Assistant.</p><p className="ha-address">{hostSession.origin}</p>
+          {origin && origin !== hostSession.origin && <p role="alert">This workspace uses a different Home Assistant: {origin}. Select this instance explicitly; its mappings remain separate.</p>}
+          <div className="ha-actions">{origin !== hostSession.origin && <button className="ha-primary" disabled={busy} onClick={() => void run(() => onChangeOrigin(hostSession.origin))}>Use this Home Assistant</button>}
+            {origin === hostSession.origin && ["error", "disconnected"].includes(runtime.status) && <button disabled={busy} onClick={runtime.retry}>Retry connection</button>}
+            {origin && <button disabled={busy} onClick={() => void run(async () => { await onChangeOrigin(null); await runtime.disconnect(); })}>Disconnect workspace</button>}
+          </div><p className="ha-help">Disconnecting this workspace keeps you signed in to Home Assistant.</p>
+        </div> : editing ? <form onSubmit={event => { event.preventDefault(); const result = validateHomeAssistantUrlInput(address); if (result.error) setError(result.error); else if (result.normalized) void run(() => signIn(result.normalized!)); }}>
           <label htmlFor="ha-address">Home Assistant URL</label>
           <div className="ha-address-form"><input id="ha-address" type="url" required placeholder="https://home.example.com" autoCapitalize="none" spellCheck={false} value={address} disabled={busy || connecting} onChange={event => setAddress(event.target.value)} />
             <button className="ha-primary" disabled={busy || connecting}>{connecting ? "Connecting…" : "Connect"}<EditorIcon name="external" /></button>
@@ -94,7 +103,7 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
       </section>
       {error && <p role="alert" className="ha-error">{error}</p>}
       {notice && <p role="status" className="ha-notice">{notice}</p>}
-      <footer className="ha-page__footer"><img src="/cabane-icon.png" alt="" width="18" height="22" />Cabane<span>Your home, on your terms.</span></footer>
+      <footer className="ha-page__footer"><img src={iconUrl} alt="" width="18" height="22" />Cabane<span>Your home, on your terms.</span></footer>
     </div>
   </main>;
 }

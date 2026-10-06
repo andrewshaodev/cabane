@@ -35,7 +35,8 @@
     "fixture:preview:connected": "node scripts/fixture-preview.mjs --stage room --scenario connected",
     "fixture:preview:mapping": "node scripts/mapping-preview.mjs",
     "fixture:evidence": "node scripts/capture-visual-evidence.mjs --fixture all",
-    "verify": "npm run typecheck && npm test && npm run verify:boundaries && npm run verify:policy && npm run verify:furnishing-surfaces && npm run build && npm run verify:bundle"
+    "verify": "npm run typecheck && npm test && npm run verify:boundaries && npm run verify:policy && npm run verify:furnishing-surfaces && npm run build && npm run verify:bundle",
+    "build:panel": "node scripts/build-panel.mjs"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",

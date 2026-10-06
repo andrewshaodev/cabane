@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from "react";
-import { HomeAssistantCorsHelp, OnboardingPrivacy, validateHomeAssistantUrlInput, type HomeAssistantRuntimeValue } from "@cabane/engine";
+import { useHomeAssistantHostSession, HomeAssistantCorsHelp, OnboardingPrivacy, validateHomeAssistantUrlInput, type HomeAssistantRuntimeValue } from "@cabane/engine";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 
 export function ConnectSetup({ origin, runtime, busy, pendingDevice, onConnect, onBack }: {
@@ -9,8 +9,17 @@ export function ConnectSetup({ origin, runtime, busy, pendingDevice, onConnect, 
   const [value, setValue] = useState(origin ?? "");
   const [error, setError] = useState<string | null>(null);
   const id = useId();
+  const hostSession = useHomeAssistantHostSession();
   useEffect(() => { setValue(origin ?? ""); }, [origin]);
   const connecting = ["authenticating", "connecting", "reconnecting"].includes(runtime.status);
+  if (hostSession) return <section className="connect-setup" aria-labelledby={`${id}-title`}>
+    {onBack && <button type="button" onClick={onBack}>Back to connections</button>}
+    <h3 id={`${id}-title`}>Connect this Home Assistant</h3>
+    <p>Sign-in is managed by Home Assistant.</p><p>{hostSession.origin}</p>
+    {origin && origin !== hostSession.origin && <p role="alert">This workspace uses a different Home Assistant: {origin}. Select this instance explicitly; its mappings remain separate.</p>}
+    {runtime.error && <p role="alert">{runtime.error}</p>}
+    <button type="button" disabled={busy || connecting} onClick={() => void onConnect(hostSession.origin)}>{origin === hostSession.origin ? "Retry connection" : "Use this Home Assistant"}</button>
+  </section>;
   return <section className="connect-setup" aria-labelledby={`${id}-title`} aria-busy={busy || connecting}>
     {onBack && <button className="connect-back" type="button" onClick={onBack}><EditorIcon name="back" />Back to connections</button>}
     <header className="connect-inspector__heading"><h3 id={`${id}-title`}>{connecting ? "Connecting your home…" : "Sign in to Home Assistant"}</h3></header>

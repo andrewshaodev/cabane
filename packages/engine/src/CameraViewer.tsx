@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { DeviceLiveMedia } from "./types";
 
@@ -59,6 +60,7 @@ export function CameraViewer({
   onClose: () => void;
   onReviewConnections: () => void;
 }) {
+  const dom = useCabaneDom();
   const viewerRef = useRef<HTMLElement>(null);
   const videoSlotRef = useRef<HTMLDivElement>(null);
   const [muted, setMuted] = useState(true);
@@ -68,8 +70,8 @@ export function CameraViewer({
   useLayoutEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return undefined;
-    const previousFocus = document.activeElement instanceof HTMLElement
-      ? document.activeElement
+    const previousFocus = dom.root.activeElement instanceof HTMLElement
+      ? dom.root.activeElement
       : null;
     const parent = viewer.parentElement;
     const siblings = parent
@@ -86,8 +88,8 @@ export function CameraViewer({
       element.inert = true;
       element.setAttribute("aria-hidden", "true");
     });
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const previousOverflow = dom.container.style.overflow;
+    dom.container.style.overflow = "hidden";
     viewer.querySelector<HTMLElement>("[data-camera-close]")?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -102,18 +104,18 @@ export function CameraViewer({
       if (controls.length === 0) return;
       const first = controls[0];
       const last = controls[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && dom.root.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && dom.root.activeElement === last) {
         event.preventDefault();
         first.focus();
       }
     };
-    window.addEventListener("keydown", onKeyDown);
+    dom.events.addEventListener("keydown", onKeyDown);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
+      dom.events.removeEventListener("keydown", onKeyDown);
+      dom.container.style.overflow = previousOverflow;
       previousStates.forEach(({ element, inert, ariaHidden }) => {
         element.inert = inert;
         if (ariaHidden === null) element.removeAttribute("aria-hidden");
@@ -142,7 +144,7 @@ export function CameraViewer({
       }
       video.className = "camera-stream-video is-parked";
       video.setAttribute("aria-hidden", "true");
-      document.body.appendChild(video);
+      dom.container.appendChild(video);
     };
   }, [media?.video]);
 

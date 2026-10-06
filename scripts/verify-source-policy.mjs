@@ -13,7 +13,7 @@ const forbidden = [
 ];
 const stableUiAssetReferences = [
   /(["'`])\.\/assets\/scene-actions\/[a-z0-9-]+\.png\1/g,
-  /(["'`])\/cabane-icon\.png\1/g,
+  /(["'`])\/?cabane-icon\.png\1/g,
 ];
 const generatedVisualForbidden = [
   { pattern: /<meshToonMaterial\b/, reason: "local toon material instead of engine ToonMaterial" },
@@ -25,7 +25,7 @@ async function filesBelow(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
-    if (entry.name === "node_modules" || entry.name === "dist") continue;
+    if (entry.name === "node_modules" || entry.name === "dist" || entry.name === "dist-panel") continue;
     const path = join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await filesBelow(path));
     else if (extensions.has(extname(entry.name))) files.push(path);
@@ -80,7 +80,7 @@ for (const file of files) {
       inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
     }
     if (rule.reason === "external visual asset reference" && relativePath === "packages/engine/src/onboarding/OnboardingIntroduction.tsx") {
-      inspectedSource = inspectedSource.replace('`/onboarding/${name}.png`', '"bundled-onboarding-preview"');
+      inspectedSource = inspectedSource.replace('`${previewBaseUrl}${name}.png`', '"bundled-onboarding-preview"');
     }
 
     if (rule.reason === "external visual asset reference" && [
@@ -90,7 +90,7 @@ for (const file of files) {
       "apps/web/src/workspaces/HomeAssistantPage.tsx",
     ].includes(relativePath)) {
       // The editor and workspace library reuse the checked-in engine UI brand mark.
-      inspectedSource = inspectedSource.replace(/(["'`])\/cabane-icon\.png\1/g, '"bundled-cabane-brand"');
+      inspectedSource = inspectedSource.replace(/(["'`])\/?cabane-icon\.png\1/g, '"bundled-cabane-brand"');
     }
     if (
       rule.reason === "external visual asset reference"

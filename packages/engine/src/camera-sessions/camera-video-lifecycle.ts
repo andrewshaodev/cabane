@@ -1,4 +1,4 @@
-export const makeVideo = (requestCorsFrames = true) => {
+export const makeVideo = (requestCorsFrames = true, container: HTMLElement = document.body) => {
   const video = document.createElement("video");
   video.autoplay = true;
   video.muted = true;
@@ -8,7 +8,7 @@ export const makeVideo = (requestCorsFrames = true) => {
   video.disablePictureInPicture = true;
   video.className = "camera-stream-video is-parked";
   video.setAttribute("aria-hidden", "true");
-  document.body.appendChild(video);
+  container.appendChild(video);
   return video;
 };
 

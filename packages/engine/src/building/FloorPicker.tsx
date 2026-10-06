@@ -1,3 +1,4 @@
+import { useCabaneDom } from "./../CabaneDom";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { adjacentFloorId, floorShortcutDirection } from "./floor-selection";
 
@@ -13,6 +14,7 @@ export interface FloorPickerProps {
 }
 
 export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailable = {}, onAdd, onRename, onRemove }: FloorPickerProps) {
+  const dom = useCabaneDom();
   const [expanded, setExpanded] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -26,20 +28,20 @@ export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailabl
   };
   useEffect(() => {
     const keydown = (event: KeyboardEvent) => {
-      if (disabled || document.querySelector("dialog[open]")) return;
+      if (disabled || dom.root.querySelector("dialog[open]")) return;
       const direction = floorShortcutDirection(event);
       const id = direction && adjacentFloorId(order, selectedId, direction);
       if (id && !unavailable[id]) { event.preventDefault(); choose(id); }
     };
-    document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
+    dom.events.addEventListener("keydown", keydown);
+    return () => dom.events.removeEventListener("keydown", keydown);
   });
   useEffect(() => {
     const outside = (event: PointerEvent) => {
       if (!root.current?.contains(event.target as Node)) close();
     };
-    document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
+    dom.events.addEventListener("pointerdown", outside);
+    return () => dom.events.removeEventListener("pointerdown", outside);
   }, []);
   const runAction = (action: () => void) => {
     if (disabled) return;
@@ -54,7 +56,7 @@ export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailabl
     onPointerLeave={event => {
       if (event.pointerType === "touch") return;
       hovered.current = false;
-      if (!root.current?.contains(document.activeElement)) close();
+      if (!root.current?.contains(dom.root.activeElement)) close();
     }}
     onPointerDownCapture={event => {
       touchPointer.current = event.pointerType === "touch";

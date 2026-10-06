@@ -1,13 +1,15 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState } from "react";
 export function FloorManagementDialog({ action, name, itemCount, stairCount, height, onSave, onCancel }: {
   action: "rename" | "remove"; name: string; itemCount: number; stairCount: number; height: number;
   onSave: (name: string, height: number) => void; onCancel: () => void;
 }) {
+  const dom = useCabaneDom();
   const dialog = useRef<HTMLDialogElement>(null);
   const [value, setValue] = useState(name);
   const [floorHeight, setFloorHeight] = useState(String(height));
   useEffect(() => {
-    const previous = document.activeElement as HTMLElement | null;
+    const previous = dom.root.activeElement as HTMLElement | null;
     dialog.current?.showModal?.();
     return () => previous?.focus();
   }, []);

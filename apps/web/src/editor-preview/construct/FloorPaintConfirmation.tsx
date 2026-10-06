@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef } from "react";
 
 export function FloorPaintConfirmation({
@@ -11,13 +12,14 @@ export function FloorPaintConfirmation({
   onReplaceEverything: () => void;
   onCancel: () => void;
 }) {
+  const dom = useCabaneDom();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const firstActionRef = useRef<HTMLButtonElement>(null);
   const priorFocusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    priorFocusRef.current = document.activeElement as HTMLElement | null;
+    priorFocusRef.current = dom.root.activeElement as HTMLElement | null;
     if (typeof dialog.showModal === "function") dialog.showModal();
     else dialog.setAttribute("open", "");
     firstActionRef.current?.focus();

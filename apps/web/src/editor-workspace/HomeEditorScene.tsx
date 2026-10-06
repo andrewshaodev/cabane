@@ -12,6 +12,7 @@ import { Canvas } from "@react-three/fiber";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 
 import {
+  connectedCanvasEvents,
   deriveFloorLevels,
   StylizedScene,
   ArchitectureScene,
@@ -69,7 +70,7 @@ export function HomeEditorScene({
       roomIcons={Object.fromEntries(connectFloor.rooms.map((room) => [room.id, connect.displayRuntime.areas.find((area) => area.area_id === connect.profile.roomAreaIds[room.id])?.icon ?? null]))}
     />}
     <div hidden={mode === "connect"} style={{ width: "100%", height: "100%" }}>
-    <Canvas
+    <Canvas events={connectedCanvasEvents}
       tabIndex={0}
       aria-label="Home editor canvas"
       onPointerDownCapture={(event) => {

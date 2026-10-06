@@ -3,7 +3,7 @@ import { lastOpenedWorkspace, forgetWorkspacePresentation } from "./workspace-pr
 import { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
 import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
-import { serializeCanonicalJson, setupStorageKey, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
+import { serializeCanonicalJson, setupStorageKey, useHomeAssistantHostSession, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
 import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
@@ -17,6 +17,7 @@ import { ownerProjectRegistries } from "../project-runtime";
 
 export function WorkspaceApplication() {
   const location = useLocation();
+  const hostSession = useHomeAssistantHostSession();
   const navigate = useNavigate();
   const [repository, setRepository] = useState<WorkspaceRepository | null>(null);
   const onboarding = useWorkspaceOnboarding(repository);
@@ -25,10 +26,10 @@ export function WorkspaceApplication() {
   const [migrationError, setMigrationError] = useState<string | undefined>();
   // Keep the initiating identity while the runtime asynchronously consumes OAuth.
   // ConnectedProduct removes its session return request after restoring navigation.
-  const [callbackRequest] = useState(() => readEditorReturn());
+  const [callbackRequest] = useState(() => hostSession ? null : readEditorReturn());
   useEffect(() => {
     let active = true;
-    void initializeWorkspaces(window.indexedDB, window.localStorage).then(async result => {
+    void initializeWorkspaces(window.indexedDB, window.localStorage, { skipLegacyMigration: Boolean(hostSession) }).then(async result => {
       const all = await result.repository.list();
       if (active) { setRepository(result.repository); setEntries(all); setMigrationError(result.migrationError); }
     }).catch(cause => { if (active) setError(cause instanceof Error ? cause.message : "Browser storage is unavailable."); });
@@ -45,7 +46,7 @@ export function WorkspaceApplication() {
   }, [refresh, location.pathname]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not load your workspaces.</strong><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></main>;
   if (!repository || !entries) return <main className="direction-project-loading">Loading your workspaces…</main>;
-  const isCallback = location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
+  const isCallback = !hostSession && location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
   const callback = isCallback ? callbackRequest : null;
   if (isCallback) {
     if (!callback || !entries.some(entry => entry.metadata.id === callback.workspaceId)) {

@@ -33,9 +33,26 @@ Cabane links back to the library, using the same guarded save-on-exit flow.
 In the library, the whole home card opens its workspace; its three-dot menu keeps
 management actions separate. Only draft or recovery states need a status label.
 
-OAuth return state includes the workspace ID, mapping target, selected item, and
-Arrange camera. Callback identity is validated before a home's runtime opens.
-The library does not mount Home Assistant connections.
+In the standalone app, OAuth return state includes the workspace ID, mapping
+target, selected item, and Arrange camera. Callback identity is validated before
+a home's runtime opens. The library mounts a connection only while its Home
+Assistant import source is open.
+
+The native Home Assistant panel uses the same workspace and editor routes in a
+memory router. Internal navigation, import selection, and dialogs do not change
+Home Assistant's browser URL or interpret its query parameters as OAuth callbacks.
+The panel mounts inside a shadow root, scopes portals, focus, and input handling
+to that root, and resolves bundled UI assets beside its module. The HA menu
+control opens the host navigation; Cabane's workspace navigation stays internal.
+
+Personal workspaces explicitly select “Use this Home Assistant” to borrow the
+current host session. A workspace configured for another origin shows the
+mismatch and requires that same explicit action; existing mappings remain keyed
+to their original instance. Settings identify sign-in as managed by Home Assistant.
+“Disconnect workspace” clears only that workspace's selection and detaches its
+runtime. “Retry connection” retries a failed borrowed session without OAuth.
+Home Assistant import uses the host session directly. The demo never borrows
+that session and continues to use simulated devices.
 
 A genuinely fresh installation opens `/welcome` over the default furnished villa
 with two immediate choices. Explore (or closing the introduction) navigates to

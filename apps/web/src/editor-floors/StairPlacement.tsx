@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { Plane, Raycaster, Vector2, Vector3 } from "three";
@@ -24,6 +25,7 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
   const latest = useRef({ stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation });
   latest.current = { stair, coordinates, building, onComplete, onCancel, onDraggingChange, validation };
   const flight = candidate ? deriveStairFlight(building, candidate) : null;
+  const dom = useCabaneDom();
   useEffect(() => {
     const canvas = gl.domElement;
     const raycaster = new Raycaster();
@@ -97,14 +99,14 @@ export function StairPlacement({ stair, coordinates, building, onComplete, onCan
     canvas.addEventListener("pointerup", up, true);
     canvas.addEventListener("pointercancel", interrupted, true);
     canvas.addEventListener("lostpointercapture", interrupted, true);
-    window.addEventListener("keydown", key, true);
+    dom.events.addEventListener("keydown", key, true);
     return () => {
       canvas.removeEventListener("pointerdown", down, true);
       canvas.removeEventListener("pointermove", move, true);
       canvas.removeEventListener("pointerup", up, true);
       canvas.removeEventListener("pointercancel", interrupted, true);
       canvas.removeEventListener("lostpointercapture", interrupted, true);
-      window.removeEventListener("keydown", key, true);
+      dom.events.removeEventListener("keydown", key, true);
       release();
     };
   }, [gl, camera]);

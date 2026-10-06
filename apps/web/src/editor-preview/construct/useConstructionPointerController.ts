@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useThree } from "@react-three/fiber";
 
 import {
@@ -95,6 +96,7 @@ export function useConstructionPointerController({
   onDraggingChange,
   onMarqueeChange,
 }: ConstructionEditLayerProps) {
+  const dom = useCabaneDom();
   const ToonMaterial = planMode ? PlanOverlayMaterial : LitMaterial;
   const getCanvasState = useThree((state) => state.get);
   const scratch = useRef(new Vector3());
@@ -167,8 +169,8 @@ export function useConstructionPointerController({
       event.preventDefault();
       releaseMarquee();
     };
-    globalThis.addEventListener("keydown", cancel, true);
-    return () => globalThis.removeEventListener("keydown", cancel, true);
+    dom.events.addEventListener("keydown", cancel, true);
+    return () => dom.events.removeEventListener("keydown", cancel, true);
   }, [releaseMarquee]);
   useEffect(() => () => {
     const current = activeMarquee.current;
