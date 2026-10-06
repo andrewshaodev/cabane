@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
-import { Matrix4, Triangle, Vector3 } from "three";
+import { Box3, Matrix4, Triangle } from "three";
 import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -52,39 +52,54 @@ await withModules(async (load) => {
                 else moving.push(o);
               });
               assert.equal(frames.length, 3);
+              assert.ok(
+                moving.length > 0,
+                "door leaves and handles must participate in collision checks",
+              );
               await renderer.update(render(1, false));
               const motions = [];
               scene.traverse((o) => {
                 if (o.name === "opening-leaf-motion") motions.push(o);
               });
+              assert.equal(motions.length, leafCount, "every leaf must animate");
+              // Geometry is immutable during animation. Reject disjoint transformed
+              // bounds before the exact triangle test; never sample fewer frames.
+              const frameBounds = frames.map((frame) => {
+                frame.geometry.computeBoundingBox();
+                return frame.geometry.boundingBox.clone().expandByScalar(-0.00001);
+              });
+              for (const mesh of moving) mesh.geometry.computeBoundingBox();
+              const meshBounds = new Box3();
+              const triangle = new Triangle();
+              const transform = new Matrix4();
               for (let step = 0; step <= 65; step++) {
                 if (step === 65) {
                   await renderer.update(render(1, true));
                   await renderer.advanceFrames(1, 0.016);
                 } else if (step) await renderer.advanceFrames(1, 0.016);
                 scene.updateMatrixWorld(true);
-                for (const frame of frames) {
-                  frame.geometry.computeBoundingBox();
-                  const box = frame.geometry.boundingBox.clone().expandByScalar(-0.00001);
+                for (const [frameIndex, frame] of frames.entries()) {
+                  const box = frameBounds[frameIndex];
                   const inverse = frame.matrixWorld.clone().invert();
                   for (const mesh of moving) {
-                    const transform = new Matrix4().multiplyMatrices(inverse, mesh.matrixWorld);
+                    transform.multiplyMatrices(inverse, mesh.matrixWorld);
+                    meshBounds.copy(mesh.geometry.boundingBox).applyMatrix4(transform);
+                    if (!box.intersectsBox(meshBounds)) continue;
                     const vertices = mesh.geometry.attributes.position,
                       indices = mesh.geometry.index;
                     const count = indices ? indices.count : vertices.count;
                     for (let offset = 0; offset < count; offset += 3) {
-                      const points = [0, 1, 2].map((i) =>
-                        new Vector3()
+                      for (const [i, point] of [triangle.a, triangle.b, triangle.c].entries())
+                        point
                           .fromBufferAttribute(
                             vertices,
                             indices ? indices.getX(offset + i) : offset + i,
                           )
-                          .applyMatrix4(transform),
-                      );
-                      assert.ok(
-                        !box.intersectsTriangle(new Triangle(...points)),
-                        `${variant}/${leafCount}/${openingSide}/${hingeSide} step${step} ${mesh.name || mesh.parent.name || mesh.geometry.type} localPos=${mesh.position.toArray()} enters${frame.name}`,
-                      );
+                          .applyMatrix4(transform);
+                      if (box.intersectsTriangle(triangle))
+                        assert.fail(
+                          `${variant}/${leafCount}/${openingSide}/${hingeSide} step${step} ${mesh.name || mesh.parent.name || mesh.geometry.type} localPos=${mesh.position.toArray()} enters${frame.name}`,
+                        );
                     }
                   }
                 }

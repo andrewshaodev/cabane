@@ -1,3 +1,6 @@
+import { tmpdir } from "node:os";
+import { mkdtemp, readFile, writeFile, rm, mkdir } from "node:fs/promises";
+import { join, dirname, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
 // Node buffers cross-file reporter events in file order. Give each existing
@@ -11,6 +14,11 @@ const shards = files.length
   ? files
   : Array.from({ length: 4 }, (_, index) => `tests/shards/shard-${index}.test.mjs`);
 const children = new Set();
+const startedAt = performance.now();
+const reportPath = process.env.CABANE_TEST_REPORT;
+const reportDirectory = reportPath ? await mkdtemp(join(tmpdir(), "cabane-test-report-")) : null;
+const workers = [];
+let nextShard = 0;
 let interrupted = false;
 const stop = (signal) => {
   interrupted = true;
@@ -34,12 +42,16 @@ try {
     Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
       while (queue.length && !interrupted) {
         const file = queue.shift();
+        const shardIndex = nextShard++;
         const status = await new Promise((resolve) => {
           const environment = {
             ...process.env,
             CABANE_TEST_SHARED_MODULES: files.length ? "0" : "1",
           };
           delete environment.NODE_TEST_CONTEXT;
+          delete environment.CABANE_TEST_REPORT;
+          delete environment.CABANE_TEST_REPORT_DIRECTORY;
+          if (reportDirectory) environment.CABANE_TEST_REPORT_DIRECTORY = reportDirectory;
           const child = spawn(
             process.execPath,
             [
@@ -57,6 +69,7 @@ try {
           });
           child.on("close", (code) => {
             children.delete(child);
+            workers.push({ pid: child.pid, shardIndex, file, code });
             resolve(code ?? 1);
           });
         });
@@ -67,5 +80,44 @@ try {
 } finally {
   process.removeListener("SIGINT", interrupt);
   process.removeListener("SIGTERM", terminate);
+}
+if (reportDirectory) {
+  try {
+    const reports = await Promise.all(
+      workers.map(async (worker) => {
+        try {
+          return {
+            ...worker,
+            ...JSON.parse(await readFile(join(reportDirectory, `${worker.pid}.json`), "utf8")),
+          };
+        } catch (error) {
+          failed = true;
+          return { ...worker, reportError: error.message };
+        }
+      }),
+    );
+    await mkdir(dirname(resolve(reportPath)), { recursive: true });
+    await writeFile(
+      reportPath,
+      JSON.stringify(
+        {
+          version: 1,
+          node: process.version,
+          platform: process.platform,
+          arch: process.arch,
+          concurrency,
+          suite: process.env.CABANE_TEST_SUITE ?? "all",
+          group: process.env.CABANE_VERIFY_GROUP ?? null,
+          elapsedMs: performance.now() - startedAt,
+          passed: !failed && !interrupted,
+          workers: reports,
+        },
+        null,
+        2,
+      ) + "\n",
+    );
+  } finally {
+    await rm(reportDirectory, { recursive: true, force: true });
+  }
 }
 process.exitCode = failed || interrupted ? 1 : 0;

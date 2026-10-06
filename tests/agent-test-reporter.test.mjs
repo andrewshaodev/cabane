@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -55,7 +55,11 @@ test(
     const bad = join(directory, "b-bad.test.mjs");
     // This fixture specifically exercises two concurrent processes, even when
     // the enclosing suite serializes expensive browser workers.
-    const environment = { ...process.env, CABANE_TEST_CONCURRENCY: "2" };
+    const environment = {
+      ...process.env,
+      CABANE_TEST_CONCURRENCY: "2",
+      CABANE_TEST_REPORT: join(directory, "report.json"),
+    };
     delete environment.NODE_TEST_CONTEXT;
     delete environment.CABANE_TEST_SHARED_MODULES;
     await writeFile(
@@ -85,6 +89,17 @@ test(
       assert.doesNotMatch(output, /1 passed/);
       await writeFile(release, "go");
       assert.equal(await exit, 1);
+      const report = JSON.parse(await readFile(environment.CABANE_TEST_REPORT, "utf8"));
+      assert.equal(report.passed, false);
+      assert.equal(report.workers.length, 2);
+      assert.deepEqual(
+        report.workers.flatMap((worker) => worker.durations.map((entry) => entry.name)).sort(),
+        ["other", "room's [count]", "slow"],
+      );
+      assert.equal(
+        report.workers.reduce((total, worker) => total + worker.failed, 0),
+        2,
+      );
       const command = output
         .split("\n")
         .find((line) => line.startsWith("Rerun:"))
