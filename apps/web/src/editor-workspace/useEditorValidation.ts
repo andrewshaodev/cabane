@@ -1,10 +1,5 @@
 import type { evaluateDerivedWalkNavigation } from "@cabane/engine";
-import {
-  validateHomeProject,
-  type DeviceModelRegistry,
-  type FurnishingModelRegistry,
-  type HomeProject,
-} from "@cabane/engine";
+import { validateHomeProject, type HomeProject } from "@cabane/engine";
 import { useMemo } from "react";
 import type { EditorMode } from "../editor-chrome/EditorModeNav";
 import type { useConstructEditor } from "../editor-preview/construct";
@@ -17,8 +12,6 @@ import { ownerProjectRegistries } from "../project-runtime";
 interface ValidationContext {
   editorProject: HomeProject;
   constructEditor: ReturnType<typeof useConstructEditor>;
-  furnishingModels: FurnishingModelRegistry;
-  deviceModels: DeviceModelRegistry;
   previewSceneItems: ReturnType<typeof useSceneItemDependencies>["items"];
   ceilingDependencies: ReturnType<typeof useSceneItemDependencies>;
   walkNavigation: ReturnType<typeof evaluateDerivedWalkNavigation>;

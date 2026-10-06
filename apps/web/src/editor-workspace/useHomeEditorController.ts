@@ -307,6 +307,7 @@ export function useHomeEditorController({
   useHomeEditorShortcuts({
     clearConstructionSelection,
     clearFurnishingSelection,
+    closeWalk,
     constructEditor,
     constructMeasure,
     dragging,
@@ -323,6 +324,9 @@ export function useHomeEditorController({
     redoProject,
     selectedOpening,
     undoProject,
+    unsettled,
+    setCameraView,
+    walkButton,
     setPendingRoomPaintId,
     setDragging,
   });
@@ -396,8 +400,6 @@ export function useHomeEditorController({
   const { contextualIssues, displayedContextualIssues } = useEditorValidation({
     editorProject,
     constructEditor,
-    furnishingModels,
-    deviceModels,
     previewSceneItems,
     ceilingDependencies,
     walkNavigation,

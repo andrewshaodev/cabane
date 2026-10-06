@@ -44,8 +44,11 @@ try {
   await openEditor();
   await page.getByText("Draft saved locally", { exact: true }).waitFor();
   const initial = await record();
-  assert.equal(await page.getByRole("button", { name: "3D", exact: true }).count(), 0);
-  assert.equal(await page.locator(".construction-plan__indicator").textContent(), "2D");
+  assert.equal(await page.getByRole("button", { name: "3D", exact: true }).isDisabled(), true);
+  assert.equal(
+    await page.getByRole("button", { name: "2D", exact: true }).getAttribute("aria-pressed"),
+    "true",
+  );
   assert.equal(
     await page.locator(".construction-plan__room-label").count(),
     initial.draft.floor.rooms.length,

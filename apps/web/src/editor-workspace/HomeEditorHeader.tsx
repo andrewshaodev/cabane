@@ -105,37 +105,44 @@ export function HomeEditorHeader({
         </button>
         {mode !== "connect" && (
           <div className="direction-camera" role="group" aria-label="Camera controls">
-            {mode === "construct" ? (
-              <span className="construction-plan__indicator" title="2D floor plan">
-                <EditorIcon name="plan" />
-                2D
-              </span>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  title="View the home in 3D"
-                  aria-pressed={cameraView === "3d"}
-                  onClick={() => setCameraView("3d")}
-                >
-                  <EditorIcon name="cube" />
-                  3D
-                </button>
-                <button
-                  type="button"
-                  title="View the floor plan"
-                  aria-pressed={cameraView === "top"}
-                  onClick={() => setCameraView("top")}
-                >
-                  <EditorIcon name="plan" />
-                  2D
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              title={
+                mode === "construct"
+                  ? "3D is available in Arrange"
+                  : "View the home in 3D (Shift+1)"
+              }
+              aria-label="3D"
+              aria-keyshortcuts="Shift+1"
+              aria-pressed={mode !== "construct" && cameraView === "3d"}
+              disabled={mode === "construct" || editingLocked || unsettled}
+              onClick={() => setCameraView("3d")}
+            >
+              <EditorIcon name="cube" />
+              3D
+              <kbd aria-hidden="true">⇧1</kbd>
+            </button>
+            <button
+              type="button"
+              title="View the floor plan (Shift+2)"
+              aria-label="2D"
+              aria-keyshortcuts="Shift+2"
+              aria-pressed={mode === "construct" || cameraView === "top"}
+              disabled={editingLocked || unsettled}
+              onClick={() => {
+                if (mode === "furnish") setCameraView("top");
+              }}
+            >
+              <EditorIcon name="plan" />
+              2D
+              <kbd aria-hidden="true">⇧2</kbd>
+            </button>
             <button
               ref={walkButton}
               type="button"
-              title="Walk through the draft at eye level"
+              title="Walk through the draft at eye level (Shift+3)"
+              aria-label="Explore"
+              aria-keyshortcuts="Shift+3"
               aria-haspopup="dialog"
               disabled={editingLocked || unsettled}
               onClick={(event) => {
@@ -158,6 +165,7 @@ export function HomeEditorHeader({
             >
               <EditorIcon name="walk" />
               Explore
+              <kbd aria-hidden="true">⇧3</kbd>
             </button>
           </div>
         )}

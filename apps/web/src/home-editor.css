@@ -28,18 +28,6 @@
 .direction-preview.is-plan {
   background: #f5f0e7;
 }
-.construction-plan__indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 37px;
-  padding: 0 10px;
-  border-radius: 7px;
-  color: #35483c;
-  background: #dedfce;
-  font-size: var(--editor-text-control, 0.875rem);
-  font-weight: 600;
-}
 .construction-plan__room-label {
   display: block;
   width: max-content;
@@ -170,6 +158,17 @@
 .direction-camera [aria-pressed="true"] {
   color: #35483c;
   background: #dedfce;
+}
+.direction-camera kbd {
+  margin-left: 2px;
+  font:
+    400 var(--editor-text-caption) "Roboto",
+    sans-serif;
+}
+@media (pointer: coarse), (max-width: 760px) {
+  .direction-camera kbd {
+    display: none;
+  }
 }
 .editor-action-bar {
   grid-column: 1 / -1;
@@ -1717,9 +1716,6 @@
   .editor-header button {
     min-width: 44px;
   }
-  .construction-plan__indicator {
-    min-height: 44px;
-  }
   .direction-preview__model {
     top: 195px;
   }
@@ -1803,7 +1799,7 @@
 }
 @media (max-width: 760px) {
   .editor-floor-controls {
-    bottom: calc(40dvh + 12px);
+    bottom: calc(40dvh + 64px);
     right: max(12px, env(safe-area-inset-right));
   }
   .editor-floor-controls [role="status"] > button:hover {
