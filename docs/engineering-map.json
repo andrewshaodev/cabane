@@ -32,7 +32,7 @@
       }
     ],
     "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.",
-    "checks": ["test:unit", "test:browser"]
+    "checks": ["verify:workspace"]
   },
   {
     "title": "Editor coordination",
@@ -69,7 +69,7 @@
       }
     ],
     "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.",
-    "checks": ["test:unit", "test:browser", "fixture:verify:layout"]
+    "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {
     "title": "Arrange and placement",
@@ -103,7 +103,7 @@
       }
     ],
     "invariant": "Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.",
-    "checks": ["test:unit", "test:browser", "fixture:verify:scale"]
+    "checks": ["verify:runtime", "fixture:verify:scale"]
   },
   {
     "title": "Home Assistant runtime and controls",
@@ -120,7 +120,7 @@
       }
     ],
     "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source.",
-    "checks": ["test:unit", "test:browser"]
+    "checks": ["verify:runtime"]
   },
   {
     "title": "Dashboard, navigation and cameras",
@@ -226,7 +226,7 @@
     "spec": "docs/product/verification-and-delivery.md",
     "owners": ["scripts", "tests", "eslint.config.mjs", "knip.config.mjs"],
     "interfaces": [],
-    "invariant": "Choose checks for the changed surface as well as the repository gates. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
-    "checks": ["verify:fast", "verify", "browser:install"]
+    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
+    "checks": ["verify:help", "verify:fast", "verify", "browser:install"]
   }
 ]

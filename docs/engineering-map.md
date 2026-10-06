@@ -48,7 +48,7 @@ Contract: [Project schema and persistence](../docs/product/workspace.md).
 - Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts).
 - Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.
-- Checks: `test:unit`, `test:browser`.
+- Checks: `verify:workspace`.
 
 ### Editor coordination
 
@@ -66,7 +66,7 @@ Contract: [Construct and floor topology](../docs/product/construct.md).
 - Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors).
 - Interface: `FloorSpec` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.
-- Checks: `test:unit`, `test:browser`, `fixture:verify:layout`.
+- Checks: `verify:construct`, `fixture:verify:layout`.
 
 ### Arrange and placement
 
@@ -84,7 +84,7 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 - Owners: [`apps/web/src/editor-connect/useConnectEditor.ts`](../apps/web/src/editor-connect/useConnectEditor.ts), [`packages/engine/src/home-assistant-mapping`](../packages/engine/src/home-assistant-mapping), [`packages/engine/src/runtime-binding-profile.ts`](../packages/engine/src/runtime-binding-profile.ts).
 - Interface: `RuntimeBindingProfile`, `HomeAssistantMappingScreen` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.
-- Checks: `test:unit`, `test:browser`, `fixture:verify:scale`.
+- Checks: `verify:runtime`, `fixture:verify:scale`.
 
 ### Home Assistant runtime and controls
 
@@ -93,7 +93,7 @@ Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-priv
 - Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts).
 - Interface: `HomeAssistantRuntimeProvider`, `useHomeAssistantRuntime` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source.
-- Checks: `test:unit`, `test:browser`.
+- Checks: `verify:runtime`.
 
 ### Dashboard, navigation and cameras
 
@@ -146,8 +146,8 @@ Contract: [Verification and delivery](../docs/product/verification-and-delivery.
 
 - Owners: [`scripts`](../scripts), [`tests`](../tests), [`eslint.config.mjs`](../eslint.config.mjs), [`knip.config.mjs`](../knip.config.mjs).
 - Interface: repository commands below.
-- Review invariant: Choose checks for the changed surface as well as the repository gates. Fixture/build success does not establish household, deployment or cross-browser acceptance.
-- Checks: `verify:fast`, `verify`, `browser:install`.
+- Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.
+- Checks: `verify:help`, `verify:fast`, `verify`, `browser:install`.
 
 ## Package import boundaries
 
