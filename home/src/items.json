@@ -794,22 +794,6 @@
   },
   {
     "floorId": "ground-floor",
-    "id": "foyer-coat-rack",
-    "kind": "furnishing",
-    "modelId": "wall-coat-rack",
-    "placement": {
-      "depthOffsetMeters": 0.004,
-      "elevationMeters": 1.24,
-      "face": "left",
-      "kind": "wall",
-      "offsetFromWallStartPlanUnits": 3.65,
-      "rotationOffsetRadians": 0,
-      "wallId": "ground-service-divider"
-    },
-    "size": [0.9, 0.36, 0.22]
-  },
-  {
-    "floorId": "ground-floor",
     "id": "foyer-console",
     "kind": "furnishing",
     "modelId": "hallway-console-table",
@@ -818,7 +802,7 @@
       "elevationMeters": 0.001,
       "face": "right",
       "kind": "wall",
-      "offsetFromWallStartPlanUnits": 4.4541,
+      "offsetFromWallStartPlanUnits": 8.7919,
       "rotationOffsetRadians": 0,
       "wallId": "ground-east-wall"
     },
@@ -832,13 +816,13 @@
     "placement": {
       "depthOffsetMeters": 0,
       "elevationMeters": 1.35,
-      "face": "right",
+      "face": "left",
       "kind": "wall",
-      "offsetFromWallStartPlanUnits": 4.6739,
+      "offsetFromWallStartPlanUnits": 3.7423,
       "rotationOffsetRadians": 0,
-      "wallId": "ground-east-wall"
+      "wallId": "ground-service-divider"
     },
-    "size": [0.8, 0.6, 0.04]
+    "size": [0.7993947603124634, 0.5995460702343475, 0.03996973801562317]
   },
   {
     "floorId": "ground-floor",
@@ -1712,27 +1696,14 @@
   },
   {
     "floorId": "first-floor",
-    "id": "primary-bedroom-reading-chair",
-    "kind": "furnishing",
-    "modelId": "upholstered-armchair",
-    "placement": {
-      "at": [8.8, 1.2],
-      "elevationMeters": 0.001,
-      "kind": "absolute",
-      "rotationYRadians": -2.356194490192345
-    },
-    "size": [0.85, 0.9, 0.88]
-  },
-  {
-    "floorId": "first-floor",
     "id": "primary-bedroom-reading-plant",
     "kind": "furnishing",
     "modelId": "potted-plant",
     "placement": {
-      "at": [7.55, 0.62],
+      "at": [4, 0.6000000000000001],
       "elevationMeters": 0.001,
       "kind": "absolute",
-      "rotationYRadians": 0.39269908169872414
+      "rotationYRadians": 0
     },
     "size": [0.615, 1.105, 0.44]
   },
@@ -3017,6 +2988,201 @@
       "rotationYRadians": 1.5707963267948966
     },
     "size": [1.2, 1.1, 0.6],
+    "variant": "default"
+  },
+  {
+    "floorId": "ground-floor",
+    "id": "65f5e5b5-ba59-4c67-9019-2b8ab8cb9fec",
+    "kind": "furnishing",
+    "modelId": "neutral-area-rug",
+    "placement": {
+      "at": [11.8, 2.2],
+      "elevationMeters": 0.001,
+      "kind": "absolute",
+      "rotationYRadians": 0
+    },
+    "size": [2, 0.015, 3],
+    "variant": "default"
+  },
+  {
+    "floorId": "ground-floor",
+    "id": "4e982529-1ef5-4f04-8d19-e9f75b64b2a3",
+    "kind": "furnishing",
+    "modelId": "book-row",
+    "placement": {
+      "depthOffsetMeters": 0.09,
+      "elevationMeters": 0.8442074652777777,
+      "face": "right",
+      "kind": "wall",
+      "offsetFromWallStartPlanUnits": 6.578,
+      "rotationOffsetRadians": 0,
+      "wallId": "ground-west-day-wall"
+    },
+    "size": [0.4, 0.28, 0.18],
+    "variant": "default"
+  },
+  {
+    "entitySlots": [
+      {
+        "autoMap": "manual",
+        "compatibleDomains": ["fan"],
+        "deviceRole": "primary",
+        "id": "fef4ac62-8237-49f5-b19c-2acf038007b2",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "Ceiling fan"
+        },
+        "required": true
+      }
+    ],
+    "floorId": "ground-floor",
+    "id": "2c9cc397-ef42-4327-b280-30715919d7e5",
+    "kind": "device",
+    "modelId": "ceiling-fan",
+    "placement": {
+      "at": [3.6, 15.8],
+      "dropMeters": 0.403,
+      "kind": "ceiling",
+      "roomId": "open-plan-living",
+      "rotationYRadians": 0
+    },
+    "size": [1.2, 0.4, 1.2],
+    "variant": "default"
+  },
+  {
+    "floorId": "ground-floor",
+    "id": "foyer-coat-rack",
+    "kind": "furnishing",
+    "modelId": "wall-coat-rack",
+    "placement": {
+      "depthOffsetMeters": 0,
+      "elevationMeters": 1.25,
+      "face": "left",
+      "kind": "wall",
+      "offsetFromWallStartPlanUnits": 0.9774,
+      "rotationOffsetRadians": 0,
+      "wallId": "ground-service-divider"
+    },
+    "size": [0.8, 0.32, 0.22],
+    "variant": "default"
+  },
+  {
+    "floorId": "ground-floor",
+    "id": "641f95a6-0ca9-4958-b0e6-f0ac0c3f08af",
+    "kind": "furnishing",
+    "modelId": "utility-shelving",
+    "placement": {
+      "depthOffsetMeters": 0.225,
+      "elevationMeters": 0.001,
+      "face": "right",
+      "kind": "wall",
+      "offsetFromWallStartPlanUnits": 7.1459,
+      "rotationOffsetRadians": 0,
+      "wallId": "ground-north-wall"
+    },
+    "size": [0.9, 1.8, 0.45],
+    "variant": "default"
+  },
+  {
+    "floorId": "ground-floor",
+    "id": "bde809ef-5910-40e3-b102-116a726c025f",
+    "kind": "furnishing",
+    "modelId": "toolbox",
+    "placement": {
+      "depthOffsetMeters": 0.12,
+      "elevationMeters": 1.7850711805555552,
+      "face": "right",
+      "kind": "wall",
+      "offsetFromWallStartPlanUnits": 7.2502,
+      "rotationOffsetRadians": 0,
+      "wallId": "ground-north-wall"
+    },
+    "size": [0.45, 0.3, 0.24],
+    "variant": "default"
+  },
+  {
+    "entitySlots": [
+      {
+        "autoMap": "manual",
+        "compatibleDomains": ["valve", "switch"],
+        "deviceRole": "primary",
+        "id": "02848dea-8596-4c2a-9106-99fa3943ccab",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "Rotating sprinkler"
+        },
+        "required": true
+      }
+    ],
+    "floorId": "ground-floor",
+    "id": "9c927896-91a3-4db7-b905-9458172701a7",
+    "kind": "device",
+    "modelId": "rotating-sprinkler",
+    "placement": {
+      "at": [8.4, -2.6],
+      "elevationMeters": 0.001,
+      "kind": "absolute",
+      "rotationYRadians": 0
+    },
+    "size": [0.28, 0.164, 0.28],
+    "variant": "default"
+  },
+  {
+    "floorId": "first-floor",
+    "id": "ae250fd9-b5de-48dd-9a71-e8a9c7d818d5",
+    "kind": "furnishing",
+    "modelId": "neutral-area-rug",
+    "placement": {
+      "at": [4.2, 3.8000000000000003],
+      "elevationMeters": 0.001,
+      "kind": "absolute",
+      "rotationYRadians": 6.283001142274436
+    },
+    "size": [2.4710575181141143, 0.018532931385855857, 3.7065862771711715],
+    "variant": "kilim"
+  },
+  {
+    "floorId": "first-floor",
+    "id": "primary-bedroom-reading-chair",
+    "kind": "furnishing",
+    "modelId": "sage-tub-armchair",
+    "placement": {
+      "at": [2.9000000000000004, 0.6000000000000001],
+      "elevationMeters": 0.001,
+      "kind": "absolute",
+      "rotationYRadians": 0.3325130789452819
+    },
+    "size": [0.78, 0.86, 0.8],
+    "variant": "default"
+  },
+  {
+    "entitySlots": [
+      {
+        "autoMap": "manual",
+        "compatibleDomains": ["camera"],
+        "deviceRole": "primary",
+        "id": "8547d43a-5958-4eac-a9ca-de5c8b12b891",
+        "presentation": {
+          "dashboardRole": "primary",
+          "label": "Indoor security camera"
+        },
+        "required": true
+      }
+    ],
+    "floorId": "first-floor",
+    "id": "ef74193a-a255-4cdd-9186-801f7882ae7d",
+    "kind": "device",
+    "modelId": "indoor-security-camera",
+    "placement": {
+      "depthOffsetMeters": 0.05000000000000001,
+      "elevationMeters": 1.4475060763888883,
+      "face": "right",
+      "kind": "wall",
+      "offsetFromWallStartPlanUnits": 0.8981,
+      "rotationOffsetRadians": 0,
+      "wallId": "first-north-wall"
+    },
+    "size": [0.1, 0.16, 0.1],
     "variant": "default"
   }
 ]

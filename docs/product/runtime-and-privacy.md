@@ -71,6 +71,9 @@ speaker and television, lock/unlock, and alarm home/away/disarm. Classless statu
 sensors start idle, and simulated lights start on when the demo opens in night
 lighting, following the saved preview mode or local time. Visitors can still turn
 them off independently.
+Fans start on at 50% speed and valves start fully open, activating the existing
+fan and sprinkler animations. Their normal power, speed and valve controls update
+only the in-memory demo state; reduced motion still suppresses animation.
 Outdoor devices receive bindings without an area. It resets when remounted or given a different manifest. It never writes
 projects/authentication or opens a network connection. Import checks restrict
 access to its internals and its dependencies. Dashboard controls and real HA

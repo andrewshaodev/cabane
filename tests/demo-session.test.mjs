@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { withModules } from "./test-server.mjs";
 import { connectedManifestFixture } from "./fixtures/home-assistant.mjs";
+import { createElement } from "react";
+import { create } from "@react-three/test-renderer";
+
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 await withModules(async (load) => {
   const { applyDemoServiceToStates } = await load(
@@ -18,6 +22,91 @@ await withModules(async (load) => {
     "/packages/engine/src/onboarding/demo/demo-light-visuals.ts",
   );
   const { sceneLightState } = await load("/packages/engine/src/scene-light-state.ts");
+  const { deviceVisualStateForSnapshot } = await load("/packages/engine/src/devices.ts");
+  const { stableDeviceRegistry } = await load("/packages/catalog/src/device/index.ts");
+
+  test("bundled fan and sprinkler animate from demo state and stop through normal controls", async () => {
+    const definition = deriveDemoSessionDefinition(homeManifest);
+    for (const [modelId, domain, stop, start, rotorName, axis] of [
+      ["ceiling-fan", "fan", "turn_off", "turn_on", "fan-rotor", "z"],
+      ["rotating-sprinkler", "valve", "close_valve", "open_valve", "sprinkler-rotor", "y"],
+    ]) {
+      const item = homeManifest.sceneItems.find((item) => item.modelId === modelId);
+      assert.ok(item, `${modelId} belongs to the bundled home`);
+      const entityId = definition.profile.entityIdsBySlotId[item.entitySlots[0].id];
+      assert.ok(entityId.startsWith(`${domain}.`));
+      let state = definition.runtime.entityStates[entityId];
+      const props = () => ({
+        state,
+        visualState: deviceVisualStateForSnapshot(state),
+        reducedMotion: false,
+      });
+      const component = stableDeviceRegistry[modelId].component;
+      const renderer = await create(createElement(component, props()));
+      try {
+        const rotor = renderer.scene.findByProps({ name: rotorName }).instance;
+        const original = rotor.rotation[axis];
+        await renderer.advanceFrames(2, 0.02);
+        assert.notEqual(rotor.rotation[axis], original);
+        if (domain === "valve")
+          assert.equal(renderer.scene.findAllByProps({ name: "sprinkler-water" }).length, 1);
+        state = applyDemoServiceCall(state, {
+          domain,
+          service: stop,
+          target: { entity_id: entityId },
+        });
+        await renderer.update(createElement(component, props()));
+        const stopped = rotor.rotation[axis];
+        await renderer.advanceFrames(2, 0.02);
+        assert.equal(rotor.rotation[axis], stopped);
+        if (domain === "valve")
+          assert.equal(renderer.scene.findAllByProps({ name: "sprinkler-water" }).length, 0);
+        state = applyDemoServiceCall(state, {
+          domain,
+          service: start,
+          target: { entity_id: entityId },
+        });
+        await renderer.update(createElement(component, props()));
+        await renderer.advanceFrames(2, 0.02);
+        assert.notEqual(rotor.rotation[axis], stopped);
+        await renderer.update(createElement(component, { ...props(), reducedMotion: true }));
+        const reduced = rotor.rotation[axis];
+        await renderer.advanceFrames(2, 0.02);
+        assert.equal(rotor.rotation[axis], reduced);
+      } finally {
+        await renderer.unmount();
+      }
+    }
+  });
+
+  test("demo fan speed and valve position follow their normal controls", () => {
+    const definition = deriveDemoSessionDefinition(homeManifest);
+    for (const [domain, attribute, service] of [
+      ["fan", "percentage", "set_percentage"],
+      ["valve", "current_position", "set_valve_position"],
+    ]) {
+      const initial = Object.values(definition.runtime.entityStates).find((state) =>
+        state.entityId.startsWith(`${domain}.`),
+      );
+      const call = (value) => ({
+        domain,
+        service,
+        target: { entity_id: initial.entityId },
+        data: { [domain === "fan" ? "percentage" : "position"]: value },
+      });
+      assert.equal(applyDemoServiceCall(initial, call(25)).attributes[attribute], 25);
+      const stopped = applyDemoServiceCall(initial, call(0));
+      assert.equal(stopped.state, domain === "fan" ? "off" : "closed");
+      const resumed = applyDemoServiceCall(stopped, {
+        domain,
+        service: domain === "fan" ? "turn_on" : "open_valve",
+        target: { entity_id: initial.entityId },
+      });
+      assert.ok(resumed.attributes[attribute] > 0);
+      assert.throws(() => applyDemoServiceCall(initial, call(NaN)), /demo/i);
+      assert.equal(initial.attributes[attribute], domain === "fan" ? 50 : 100);
+    }
+  });
   test("demo lights start on at night and remain individually controllable", () => {
     const night = deriveDemoSessionDefinition(homeManifest, true);
     const day = deriveDemoSessionDefinition(homeManifest, false);
