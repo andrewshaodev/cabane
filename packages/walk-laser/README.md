@@ -51,7 +51,20 @@ Walls align the oval to standing height. The whole oval must fit; ceilings, devi
 furniture, overlapping portals and unsupported/blocked exits are rejected. An unpaired
 portal has a toon energy membrane; a linked pair shows the live scene beyond its
 partner, with perspective tracking as the walker moves.
-Stowing the gun or leaving Walk removes the pair; nothing is persisted.
+Portal positions and the next color autosave with the home. Stowing or leaving Walk
+unmounts their visuals; re-equipping restores the saved pair, including after reload.
+Either fire action aimed at an existing entrance removes it, with a 400 ms inward
+collapse (a short still confirmation under reduced motion). The entrance stops
+transporting immediately. Nearer scene geometry blocks removal shots.
+
+The engine exposes only `WalkToolStorage`, a namespaced JSON read/write adapter.
+The web host saves opaque tool state to both home slices through the existing
+revision-checked repository, without publishing pending editor changes. The gun
+package owns its versioned codec, support revalidation, targeting and lifecycle.
+Portable exports, workspace copies and private backups retain portal state.
+Failed writes report a host storage error and restore the previous pair. Damaged
+anchors are ignored; entrances whose support or landing no longer fits are pruned
+when the gun is equipped.
 
 `src/portals/` owns the feature: placement geometry, alternating pair state,
 traversal, desktop input, the coordinating hook, and the procedural surface each
@@ -102,3 +115,7 @@ Touch uses two separate right-side icon buttons for zap and portal, with the nex
 portal color shown on its button. Both fire on contact without taking over a
 second finger on the movement/look sticks. Portal travel does not require pointer
 lock on touch; disabled controls and overlays still prevent firing and relocation.
+
+The exported tool definition sets `defaultShortcut: true`, so the host's generic
+action-bar resolver includes Laser in default/restored bars without gun-specific
+core logic. Explicit custom configurations are preserved.

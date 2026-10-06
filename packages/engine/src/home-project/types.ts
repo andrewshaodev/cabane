@@ -133,6 +133,8 @@ export interface HomeProject {
   openingProfiles: Readonly<Record<string, OpeningProfileSpec>>;
   shortcuts: readonly ShortcutSpec[];
   actionBar?: ActionBarConfiguration;
+  /** Namespaced JSON owned and validated by optional tool packages. */
+  toolState?: Readonly<Record<string, unknown>>;
   assumptions: readonly Assumption[];
 }
 

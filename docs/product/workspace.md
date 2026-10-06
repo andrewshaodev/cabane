@@ -153,3 +153,10 @@ Basement floors persist optional `belowGround: true` in the existing V2 floor re
 They must form a contiguous prefix with at least one non-basement (ground) floor.
 Omitted classification preserves existing projects. Import/export, drafts, and
 undo/redo retain this flag; derived negative preview elevations are not persisted.
+
+Optional `toolState` is namespaced pure JSON in each home project. Tool packages own
+its versioned contents and validation; the engine only exposes the injected
+`WalkToolStorage` interface. Live tool changes save to both draft and published
+slices through the existing revision-checked repository, preserving unrelated
+draft edits. They survive reload, duplication, portable exports and private
+backups, and use the same workspace sync path. No separate browser store is used.

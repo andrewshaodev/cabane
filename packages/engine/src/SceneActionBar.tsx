@@ -29,7 +29,7 @@ import type {
   SceneMode,
   ShortcutSpec
 } from "./types";
-import { defaultActionBarItems, type ActionBarItem } from "./action-bar/action-bar-config";
+import { resolveActionBarItems, type ActionBarItem } from "./action-bar/action-bar-config";
 import { ActionBarBuiltInIcon, RoomShortcutIcon, SceneActionSlotFace } from "./SceneActionSlotFace";
 
 const sceneActions: readonly ShortcutSpec[] = [
@@ -147,8 +147,8 @@ export function clampActionTrayLeft(
 }
 
 export function SceneActionBar({
-  items = defaultActionBarItems,
-  targets = {}, walkTools = [], activeWalkToolId,
+  walkTools = [], items = resolveActionBarItems(undefined, walkTools),
+  targets = {}, activeWalkToolId,
   mode,
   lighting,
   wallFade,

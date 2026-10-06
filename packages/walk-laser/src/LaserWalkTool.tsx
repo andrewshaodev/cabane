@@ -80,6 +80,8 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
       scene.updateMatrixWorld(true);
       raycaster.setFromCamera(center, camera);
       const { hit, target } = raycastWalkScene(raycaster, scene);
+      const removed = portalControls.current?.remove(raycaster.ray, hit?.distance ?? 30);
+      if (removed) { emitShot({ end: removed.point, normal: removed.normal, hit: true, scorch: false }); return; }
       const end = hit?.point.clone() ?? raycaster.ray.at(30, new Vector3());
       const normal = hit?.face?.normal.clone().applyMatrix3(new Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize();
       if (normal && normal.dot(raycaster.ray.direction) > 0) normal.negate();
@@ -109,7 +111,7 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
   }, [emitShot]);
 
   return <>
-    <GunPortals active={ready} navigation={navigation} reducedMotion={reducedMotion} onPlaced={portalShot} controls={portalControls} />
+    <GunPortals active={ready} navigation={navigation} reducedMotion={reducedMotion} onPlaced={portalShot} onNextColor={setNextPortal} controls={portalControls} />
     {createPortal(<><ambientLight intensity={1.1} /><directionalLight position={[-2, 4, 3]} intensity={2.2} />
       <group ref={gun}><LaserGun muzzleRef={muzzle} shotId={shot?.id ?? 0} /></group></>, weaponScene)}
     {shots.map(item => <LaserShot key={item.id} shot={item} />)}

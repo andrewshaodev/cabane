@@ -10,9 +10,19 @@ import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const dashboard = await load("/packages/engine/src/CabaneDashboard.tsx");
   const { CustomizeActionBarMenuItem } = await load("/packages/engine/src/CustomizeActionBarMenuItem.tsx");
-  const { defaultActionBarItems } = await load("/packages/engine/src/action-bar/action-bar-config.ts");
+  const { defaultActionBarItems, resolveActionBarItems } = await load("/packages/engine/src/action-bar/action-bar-config.ts");
   const { resolvePublishedActionBarItems } = await load("/packages/engine/src/action-bar/action-bar-config.ts");
   const { clampActionTrayLeft } = await load("/packages/engine/src/SceneActionBar.tsx");
+  test("installed tools opt into defaults without replacing a customized bar", () => {
+    const tools = [{ id: "example.tool", defaultShortcut: true }, { id: "example.optional" }];
+    const defaults = resolveActionBarItems(undefined, tools);
+    assert.deepEqual(defaults.at(-1), { id: "default-tool-example.tool", target: { kind: "walk-tool", toolId: "example.tool" } });
+    assert.equal(defaults.length, defaultActionBarItems.length + 1);
+    assert.deepEqual(resolvePublishedActionBarItems(undefined, tools), defaults);
+    assert.deepEqual(resolveActionBarItems({ items: [] }, tools), []);
+    assert.deepEqual(resolvePublishedActionBarItems({ items: [] }, tools), []);
+  });
+
   test("Home menu customization action closes its menu and opens the editor", async () => {
     const dom = new JSDOM('<details open><div id="root"></div></details>');
     const previous = { window: globalThis.window, document: globalThis.document, HTMLElement: globalThis.HTMLElement,

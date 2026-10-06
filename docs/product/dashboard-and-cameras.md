@@ -199,7 +199,11 @@ its own capture to avoid overlapping fragments during movement. Views are one
 level deep, skip back-facing/off-screen openings, and use targets capped at 1024
 pixels per side; reduced motion preserves perspective tracking. Arrival protection avoids
 immediate return trips, and controls/overlays pause traversal. Stowing Laser or
-leaving Walk clears the pair. This first version is grounded travel: no ceiling
+leaving Walk hides the pair; equipping restores it from the home, including after reload.
+Either fire action aimed at an existing entrance removes it and plays a short inward
+collapse. Removal immediately disables travel; nearer geometry occludes the shot.
+Reduced motion uses a brief still confirmation. Positions and next color autosave,
+and failed writes restore the prior pair with a storage error. This first version is grounded travel: no ceiling
 portals, retained launch momentum or flinging. Touch supports both actions and portal travel without pointer lock.
 Successful portal placement fires the same electrical zap as primary fire, tinted
 blue or gold to match its destination. Each portal blooms from zero with a brief
@@ -214,3 +218,8 @@ zap glyph and right portal glyph, with matching highlighted mouse buttons. The
 portal cue shows the next blue/gold placement color. In landscape touch Walk,
 two right-side icon buttons fire zap and portal on contact. The portal button
 shows its next color; the central targeting reticle and movement/look sticks remain.
+
+Laser opts into the default shortcuts through installed-tool metadata. All homes
+using the default bar receive it, and Shortcuts → Restore defaults includes it.
+Explicitly customized bars remain exactly as saved. The engine does not hardcode
+a gun ID or import the optional gun package.

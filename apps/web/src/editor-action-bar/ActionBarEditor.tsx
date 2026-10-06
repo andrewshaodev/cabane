@@ -2,7 +2,7 @@ import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ActionBarBuiltInIcon, RoomShortcutIcon, SceneActionSlotFace, actionBarBuiltInLabels,
-  createBrowserUuid, defaultActionBarItems, isActionBarDeviceNavigable, resolveActionBarItems, resolvedRoomIdForItem,
+  createBrowserUuid, isActionBarDeviceNavigable, resolveActionBarItems, resolvedRoomIdForItem,
   type ActionBarBuiltIn, type ActionBarItem, type DeviceModelRegistry, type HomeProject,
 } from "@cabane/engine";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
@@ -31,7 +31,7 @@ export function ActionBarEditor({ project, deviceModels, walkTools = [], roomPic
   const [capacity, setCapacity] = useState<number | null>(null);
   const bar = useRef<HTMLDivElement>(null);
   const tray = useRef<HTMLDivElement>(null);
-  const items = resolveActionBarItems(project.actionBar);
+  const items = resolveActionBarItems(project.actionBar, walkTools);
   const rooms = project.floors.flatMap(floor => floor.rooms);
   const devices = project.sceneItems.filter(item => item.kind === "device" && isActionBarDeviceNavigable(project, item.id));
   const selected = items.find(item => item.id === selectedId);
@@ -110,7 +110,7 @@ export function ActionBarEditor({ project, deviceModels, walkTools = [], roomPic
       <div className="shortcuts-workspace__history" role="group" aria-label="Shortcut history">
         <button type="button" disabled={disabled || !canUndo} onClick={onUndo}><EditorIcon name="undo" />Undo</button>
         <button type="button" disabled={disabled || !canRedo} onClick={onRedo}><EditorIcon name="redo" />Redo</button>
-        <button type="button" aria-label="Restore defaults" disabled={disabled} onClick={() => { onChange(defaultActionBarItems.map(item => ({ ...item, target: { ...item.target } }))); setSelectedId(null); setPicker(null); }}>Restore defaults</button>
+        <button type="button" aria-label="Restore defaults" disabled={disabled} onClick={() => { onChange(resolveActionBarItems(undefined, walkTools).map(item => ({ ...item, target: { ...item.target } }))); setSelectedId(null); setPicker(null); }}>Restore defaults</button>
       </div>
     </div>
     {missingCount > 0 && <p className="shortcuts-workspace__warning" role="alert">{missingCount} shortcut target{missingCount === 1 ? " is" : "s are"} missing. Replace or remove before Save.</p>}

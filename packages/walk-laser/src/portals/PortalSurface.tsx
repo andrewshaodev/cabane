@@ -9,17 +9,17 @@ import { PORTAL_COLORS, PORTAL_HEIGHT, PORTAL_WIDTH, type PortalAnchor, type Por
 const noRaycast = () => undefined;
 
 /** The energy rim surrounds a live doorway once a partner is available. */
-export function PortalSurface({ anchor, color, exit, reducedMotion }: {
-  anchor: PortalAnchor; color: PortalColor; exit?: PortalAnchor; reducedMotion: boolean;
+export function PortalSurface({ anchor, color, exit, reducedMotion, closing = false, onClosed }: {
+  anchor: PortalAnchor; color: PortalColor; exit?: PortalAnchor; reducedMotion: boolean; closing?: boolean; onClosed?: () => void;
 }) {
   const linked = Boolean(exit);
   const energy = useRef<Group>(null);
-  const { opening, ripple } = usePortalAppearance(anchor, reducedMotion);
+  const { opening, ripple } = usePortalAppearance(anchor, reducedMotion, closing, onClosed);
   const tint = PORTAL_COLORS[color];
   useFrame((_, delta) => {
     if (energy.current && !reducedMotion) energy.current.rotation.z += delta * (color === "blue" ? .3 : -.3);
   });
-  return <group name={`gun-portal-${color}`} position={anchor.center.toArray()} quaternion={anchor.rotation.toArray()} userData={{ walkToolVisual: true, portalAnchor: anchor }}>
+  return <group name={closing ? `gun-portal-closing-${color}` : `gun-portal-${color}`} position={anchor.center.toArray()} quaternion={anchor.rotation.toArray()} userData={{ walkToolVisual: true, portalAnchor: anchor }}>
     <group ref={opening} name="portal-opening">
     <group scale={[PORTAL_WIDTH, PORTAL_HEIGHT, 1]}>
       <mesh raycast={noRaycast}>

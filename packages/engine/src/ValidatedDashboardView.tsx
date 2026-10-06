@@ -89,7 +89,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   } = useDashboardController(props);
   const equippedTool = walkMode && !walkthrough ? props.walkTools?.find(tool => tool.id === equippedToolId) : undefined;
   const toolInputEnabled = documentVisible && !setupOpen && !mappingOpen && !deviceOverlay && !selectedCamera && !preferencesOpen;
-  const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar);
+  const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar, props.walkTools);
   const preferencesMenuItem = walkMode && <button type="button" onClick={event => {
     event.currentTarget.closest("details")?.removeAttribute("open");
     if (dom.root.pointerLockElement) document.exitPointerLock();
