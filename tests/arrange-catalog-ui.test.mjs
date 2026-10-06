@@ -255,6 +255,61 @@ await withModules(async (load) => {
     });
   });
 
+  const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
+  const { catalogEntries } = await load("/apps/web/src/editor-preview/furnish/catalog/catalog.ts");
+  const { validateHomeProject } = await load("/packages/engine/src/index.ts");
+  const { createCatalogItem } = await load("/apps/web/src/editor-preview/furnish/placement/item-creation.ts");
+  test("catalog placement and duplication reserve identities across floors", async () => {
+    await withDom(async ({ root }) => {
+      const project = makeThreeFloorProject();
+      const entries = catalogEntries(ownerProjectRegistries.furnishingModels, ownerProjectRegistries.deviceModels);
+      // Existing copies on another floor must reserve both item and slot IDs.
+      for (const modelId of ["concealed-cistern-toilet", "counter-stool", "table-lamp"]) {
+        const item = createCatalogItem(entries.find(entry => entry.modelId === modelId),
+          { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 }, [], [], "second");
+        item.id += "-copy";
+        if (item.kind === "device") item.entitySlots[0].id += "-copy";
+        project.sceneItems.push(item);
+      }
+      const record = createSeedProjectRecord(project, 1);
+      const lifecycle = { autosave: async (current, draft, _now, bindings) => ({
+        status: "saved", record: { ...current, draft, bindings, revision: current.revision + 1 },
+      }) };
+      let controller;
+      function Harness() {
+        controller = useHomeEditorController({ initialRecord: record, lifecycle, autosaveDelayMs: 5,
+          onClose() {}, initialRequest: { mode: "furnish" } });
+        return null;
+      }
+      const settle = () => act(async () => new Promise(resolve => setTimeout(resolve, 20)));
+      await act(async () => root.render(React.createElement(Harness)));
+      for (const floor of project.floors) {
+        await act(async () => controller.floorNavigation.selectFloor(floor.id));
+        await settle();
+        controller.handleCameraTargetChange([2, 2], () => true);
+        for (const modelId of ["concealed-cistern-toilet", "counter-stool", "table-lamp"]) {
+          for (let repeat = 0; repeat < 2; repeat++) {
+            await act(async () => controller.addCatalogItem(entries.find(entry => entry.modelId === modelId)));
+            await settle();
+            assert.equal(controller.catalogError, null);
+            if (repeat === 0) {
+              const source = controller.furnishingEditor.items.at(-1);
+              await act(async () => controller.duplicateArrangeItem(source.id));
+              await settle();
+            }
+          }
+        }
+      }
+      const draft = controller.snapshot.project;
+      assert.equal(draft.sceneItems.length, 30);
+      const result = validateHomeProject(draft, ownerProjectRegistries);
+      assert.deepEqual(result.issues, [], JSON.stringify(result.issues));
+      assert.equal(new Set(draft.sceneItems.map(item => item.id)).size, 30);
+      // Room display names deliberately repeat across the fixture's floors.
+      assert.equal(draft.floors[0].rooms[0].name, draft.floors[1].rooms[0].name);
+    });
+  });
+
   test("history floor restoration preserves room identities and shared ceilings after settling", async () => {
     await withDom(async ({ root }) => {
       let editor;

@@ -1,7 +1,7 @@
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
-import { createBrowserUuid } from "@cabane/engine";
+import { collectProjectIds, createBrowserUuid } from "@cabane/engine";
 import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StraightStairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
@@ -352,13 +352,9 @@ export function useHomeEditorController({
   const duplicateArrangeItem = useCallback((id: string) => {
     if (!furnishingEditor.items.some((item) => item.id === id)) return false;
     setDetailsItemId(null);
-    const slots = [
-      ...Object.values(editorProject.roomProfiles).flatMap((room) => room.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((opening) => [opening.contactSlot?.id, opening.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    furnishingEditor.duplicate(id, constructEditor.previewFloor, slots);
+    furnishingEditor.duplicate(id, constructEditor.previewFloor, collectProjectIds(editorProject));
     return true;
-  }, [constructEditor.previewFloor, editorProject.openingProfiles, editorProject.roomProfiles, furnishingEditor]);
+  }, [constructEditor.previewFloor, editorProject, furnishingEditor]);
   const duplicateConstructionOpening = useCallback((id: string) => {
     setDetailsOpeningId(null);
     return constructEditor.duplicateOpening(id);
@@ -495,16 +491,8 @@ export function useHomeEditorController({
       { items: visualSceneItems, furnishingModels, deviceModels }, arrangeVisibility.current);
     setCatalogError(candidate.error);
     if (!candidate.placement) return;
-    const occupiedSlots = [
-      ...editorProject.floors.flatMap((floor) => [floor.id,
-        ...floor.rooms.map((room) => room.id), ...floor.walls.map((wall) => wall.id),
-        ...floor.wallJunctions.map((junction) => junction.id), ...floor.openings.map((opening) => opening.id),
-        ...(floor.ceilings ?? []).map((ceiling) => ceiling.id), ...(floor.groundZones ?? []).map(zone => zone.id)]),
-      ...editorProject.shortcuts.map((shortcut) => shortcut.id),
-      ...Object.values(editorProject.roomProfiles).flatMap((profile) => profile.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((profile) => [profile.contactSlot?.id, profile.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items, occupiedSlots, constructEditor.previewFloor.id);
+    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items,
+      collectProjectIds(editorProject), constructEditor.previewFloor.id);
     furnishingEditor.addItem(candidate.size ? { ...item, size: candidate.size } : item);
     setDetailsItemId(null);
     setArrangeAnnouncement(`${entry.definition.label} added. Drag to move it; use Undo to remove it.`);

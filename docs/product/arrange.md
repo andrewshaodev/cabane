@@ -35,7 +35,11 @@ group with a shared grid-snapped offset (Alt disables snapping), preserving spac
 height, and rotation. Group movement uses free placement and is one undo step;
 Escape or pointer cancellation restores every item. Clicking empty space clears
 the selection. Delete or Backspace removes the entire selection in one undo step. Duplicating preserves model configuration while allocating
-new item/slot identities. Failed placement reports a catalog error.
+new item/slot identities. Placement and duplication reserve the complete project's
+identity namespace across every floor, including architecture and implicit opening
+slots. Catalog models and room display names may repeat; instance IDs must remain
+unique. Identity-conflict errors distinguish rooms, items, and device slots and
+identify their floors with recovery guidance. Failed placement reports a catalog error.
 
 Wall and ceiling dependencies are evaluated against the edited architecture.
 Shortening a collinear wall preserves attached items at their original anchors
