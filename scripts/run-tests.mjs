@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { browserTestPreflight } from "./browser-test-preflight.mjs";
 
 // Node buffers cross-file reporter events in file order. Give each existing
 // shard its own streaming reporter. Small software-rendering CI runners can
@@ -10,6 +11,7 @@ const files = process.argv.slice(2);
 const shards = files.length
   ? files
   : Array.from({ length: 4 }, (_, index) => `tests/shards/shard-${index}.test.mjs`);
+if (!files.length && process.env.CABANE_TEST_SUITE !== "unit") await browserTestPreflight();
 const children = new Set();
 let interrupted = false;
 const stop = (signal) => {

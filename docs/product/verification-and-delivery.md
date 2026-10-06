@@ -14,6 +14,29 @@ furnishing-surface checks, and the production build. The contract-release workfl
 builds and publishes the matching panel; full verification runs locally before
 pushing, not on GitHub Actions.
 
+`npm ci` installs the tracked `.githooks/pre-push` hook through `prepare` (CI and
+source archives skip installation). The hook runs `npm run verify` before pushes
+and blocks on failure. It requires a clean checkout matching the pushed commit;
+deletion-only pushes need no verification. Existing custom hook configurations
+are preserved and must be integrated explicitly. Linked worktrees share the Git
+configuration; each checkout must contain the tracked hooks. Git hooks are local
+and can be bypassed, so this is a developer guardrail, not server enforcement.
+
+For Codex execution, full verification, focused verification, browser tests and
+pushes (which invoke this hook) require localhost listening and Chromium child
+processes. In a restricted session, request approved execution for the complete
+command from the first invocation (`sandbox_permissions: "require_escalated"`
+when that tool option is available). Keep ordinary reads and edits sandboxed.
+Use the existing Verify local-environment action for a user-run terminal check.
+Do not retry the browser suite in the same denied execution mode or treat an
+infrastructure failure as a product regression. Shell children inherit their
+parent's restrictions; changing a Node flag cannot grant OS permissions.
+
+Before starting the full/browser test shards, the runner checks localhost binding
+and pinned Chromium launch once. Restricted agent environments need approved
+local-server and browser-process permissions; a failed preflight stops before
+shards start. Unit-only runs do not need these capabilities.
+
 For the smallest sufficient iteration check, run `npm run verify:help`. Its
 selection guidance comes from the maintained test inventory, rather than a second
 script list in documentation. Focused checks retain the static gate and both Node

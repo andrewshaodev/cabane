@@ -240,6 +240,7 @@
       "catalog-device.test.mjs",
       "catalog-structure.test.mjs",
       "editor-furnish-preview.test.mjs",
+      "git-hooks.test.mjs",
       "gun-portals-browser.test.mjs",
       "gun-portals.test.mjs",
       "laser-device-performance.test.mjs",

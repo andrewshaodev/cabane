@@ -54,7 +54,8 @@
     "verify:map": "node scripts/engineering-map.mjs",
     "verify:ha-contract": "node scripts/ha-contract.mjs",
     "contract:record": "node scripts/ha-contract.mjs --record",
-    "release:ha-contract": "node scripts/release-ha-contract.mjs"
+    "release:ha-contract": "node scripts/release-ha-contract.mjs",
+    "prepare": "node scripts/install-git-hooks.mjs"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",
