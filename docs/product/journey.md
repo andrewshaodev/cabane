@@ -54,7 +54,15 @@ runtime. “Retry connection” retries a failed borrowed session without OAuth.
 Home Assistant import uses the host session directly. The demo never borrows
 that session and continues to use simulated devices.
 
-A genuinely fresh installation opens `/welcome` over the default furnished villa
+On the first native-panel launch, a browser with only its untouched demo checks
+for homes saved on the host HA instance. Saved homes open **Import a workspace**
+with the host library and explicit Open choices; nothing is imported automatically.
+Create a new home and Explore the demo remain available. An empty result opens
+the usual welcome screen; errors or a timed-out check offer retry instead of
+claiming there are no saved homes. Existing local homes and dismissed welcome
+flows retain their usual startup, and standalone startup does not query HA.
+
+Otherwise, a genuinely fresh installation opens `/welcome` over the default furnished villa
 with two immediate choices. Explore (or closing the introduction) navigates to
 `/demo`. Build creates a blank workspace and opens Construct at `/build` without
 authentication. These URLs render real surfaces, not tracking-only redirects.

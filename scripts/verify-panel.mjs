@@ -30,7 +30,7 @@ page.on("response",response=>{if(response.status()>=400)errors.push(`${response.
 try {
   await page.goto(`${origin}/cabane?host=kept`);
   await page.getByRole("button",{name:"Build my home"}).waitFor({timeout:60000});
-  assert.equal(await page.evaluate(()=>window.__hostFixture.stats.requests.length),0,"demo must not read host registries");
+  assert.ok(await page.evaluate(()=>window.__hostFixture.stats.requests.every(type => type === "cabane/workspaces/list")), "first launch may list saved homes but must not read host registries");
   await page.getByRole("button",{name:"Open Home Assistant menu"}).click();
   assert.equal(await page.evaluate(()=>window.__hostFixture.stats.menus),1);
   await page.getByRole("button",{name:"Build my home"}).click();

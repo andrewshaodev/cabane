@@ -4,12 +4,13 @@ import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import type { HaWorkspaceSummary } from "./ha-workspace-client";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 
-function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void> }) {
+function WorkspaceHaLibraryContent({ repository, onRestored, onBusyChange }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; onBusyChange?: (busy: boolean) => void }) {
   const hostSession = useHomeAssistantHostSession();
   const { runtime, client, coordinator } = useWorkspaceSyncCoordinator(repository);
   const [remote, setRemote] = useState<HaWorkspaceSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  useEffect(() => { onBusyChange?.(busy); }, [busy, onBusyChange]);
   const load = useCallback(async () => { try { setRemote(await client.list()); setError(null); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not list HA workspaces."); } }, [client]);
   useEffect(() => { if (runtime.status === "connected") void load(); }, [runtime.status, load]);
   const restore = async (summary: HaWorkspaceSummary) => {
@@ -39,7 +40,7 @@ function WorkspaceHaLibraryContent({ repository, onRestored }: { repository: Wor
   </div>;
 }
 
-export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; initialOrigin: string | null }) {
+export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin, onBusyChange }: { repository: WorkspaceRepository; onRestored: (id: string) => Promise<void>; initialOrigin: string | null; onBusyChange?: (busy: boolean) => void }) {
   const hostSession = useHomeAssistantHostSession();
   const [originInput, setOriginInput] = useState(() => window.sessionStorage.getItem("cabane:ha-library-origin") ?? initialOrigin ?? "");
   const origin = hostSession?.origin ?? normalizeHomeAssistantUrl(originInput);
@@ -48,7 +49,7 @@ export function WorkspaceHaLibrary({ repository, onRestored, initialOrigin }: { 
     {hostSession ? <p>Choose a workspace saved on {hostSession.origin}. Sign-in is managed by Home Assistant.</p> : <p>Sign in to choose a saved workspace.</p>}
     {!hostSession && <label>Home Assistant address<input value={originInput} onChange={event => setOriginInput(event.target.value)} placeholder="Enter HTTPS address" /></label>}
     {origin && <HomeAssistantRuntimeProvider key={origin} homeAssistantUrl={origin}>
-      <WorkspaceHaLibraryContent repository={repository} onRestored={onRestored} />
+      <WorkspaceHaLibraryContent repository={repository} onRestored={onRestored} onBusyChange={onBusyChange} />
     </HomeAssistantRuntimeProvider>}
   </section>;
 }
