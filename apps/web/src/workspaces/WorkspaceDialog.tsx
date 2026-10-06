@@ -2,12 +2,14 @@ import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, type ReactNode } from "react";
 export function WorkspaceDialog({
   title,
+  titleIcon,
   busy,
   error,
   onCancel,
   children,
 }: {
   title: string;
+  titleIcon?: ReactNode;
   busy: boolean;
   error: string | null;
   onCancel: () => void;
@@ -30,7 +32,10 @@ export function WorkspaceDialog({
         if (!busy) onCancel();
       }}
     >
-      <h2 id="workspace-dialog-title">{title}</h2>
+      <h2 id="workspace-dialog-title">
+        {titleIcon}
+        {title}
+      </h2>
       {children}
       {error && (
         <p role="alert" className="workspace-error">

@@ -1,3 +1,5 @@
+import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { HomeAssistantIcon } from "./HomeAssistantIcon";
 import { readCabaneFile } from "@cabane/engine";
 import { useLocation, useNavigate } from "react-router";
 import { useState, type ReactNode } from "react";
@@ -29,6 +31,7 @@ export function WorkspaceTransferDialog({
   return (
     <WorkspaceDialog
       title={mode === "import" ? "Import workspace" : "Export workspace"}
+      titleIcon={mode === "import" ? <EditorIcon name="import" /> : undefined}
       busy={busy}
       error={fileError ?? error}
       onCancel={onCancel}
@@ -42,6 +45,7 @@ export function WorkspaceTransferDialog({
               setSource("file");
             }}
           >
+            <EditorIcon name="file" />
             From file
           </button>
           <button
@@ -51,6 +55,7 @@ export function WorkspaceTransferDialog({
               setSource("ha");
             }}
           >
+            <HomeAssistantIcon />
             From Home Assistant
           </button>
         </div>
@@ -91,6 +96,7 @@ export function WorkspaceTransferDialog({
             />
           </label>
           <button className="workspace-primary" disabled={busy || !json}>
+            <EditorIcon name="import" />
             {busy ? "Importing…" : "Import workspace"}
           </button>
         </form>

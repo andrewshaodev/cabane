@@ -76,6 +76,7 @@
 .workspace-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+  grid-auto-rows: 1fr;
   gap: 18px;
   padding: 4px;
   margin: -4px;
@@ -518,4 +519,68 @@
   .workspace-library-actions {
     grid-template-columns: 1fr;
   }
+}
+
+.workspace-card.workspace-card--suggested {
+  border: 2px dotted #8c927b;
+  background: transparent;
+  box-shadow: none;
+  padding: 26px;
+}
+.workspace-card--suggested h2 {
+  padding-right: 0;
+}
+.workspace-card--suggested:has(.workspace-card-target:hover:not(:disabled)) {
+  background: #eee8db;
+  box-shadow: none;
+}
+.workspace-suggestion-description {
+  color: #59634f;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+.workspace-suggestion-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #42553a;
+  font-size: 14px;
+  font-weight: 500;
+}
+.workspace-suggestion-action svg {
+  width: 18px;
+  height: 18px;
+}
+.workspace-suggestion-error {
+  grid-column: 1 / -1;
+}
+
+.workspace-ha-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.workspace-suggestion-server {
+  margin-top: 12px;
+}
+.workspace-dialog h2,
+.workspace-import-sources button,
+.workspace-dialog .workspace-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.workspace-dialog h2 {
+  justify-content: flex-start;
+}
+.workspace-dialog h2 .editor-icon {
+  width: 24px;
+  height: 24px;
+}
+.workspace-dialog .editor-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }

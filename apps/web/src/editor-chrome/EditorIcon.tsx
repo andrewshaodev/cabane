@@ -47,6 +47,9 @@ const paths = {
       <path d="M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z" />
     </>
   ),
+  file: (
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8ZM14 2v6h6M8 13h8M8 17h5" />
+  ),
   import: <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5" />,
   export: <path d="M12 15V3m-5 5 5-5 5 5M4 16v5h16v-5" />,
   grid: (

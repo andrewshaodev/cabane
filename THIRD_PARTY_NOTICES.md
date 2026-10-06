@@ -112,3 +112,10 @@ The hosted cloud sprite is the upstream default asset from
 pinned to commit `9225a9f1fbd449d9411125c2f419b843d0308c9f` and served by rawcdn.githack.com.
 The asset repository does not separately identify a cloud-image license; the
 component's MIT license should not be read as a separate asset license claim.
+
+## Home Assistant logo
+
+The workspace library and import dialog use the official Home Assistant SVG mark
+from [Home Assistant frontend](https://github.com/home-assistant/frontend/blob/dev/src/resources/home-assistant-logo-svg.ts)
+to identify Home Assistant connections. The logo is a trademark of the Open Home
+Foundation; see the [official logo guidelines](https://github.com/home-assistant/assets/tree/master/logo).

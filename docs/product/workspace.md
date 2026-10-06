@@ -38,7 +38,16 @@ users share the instance's Cabane library. Browser deletion leaves the HA copy;
 remote deletion is a separate confirmed action. Installation and the integration source are maintained in
 [the dedicated repository](https://github.com/cabane-app/cabane-home-assistant).
 Storage controls live on the workspace-specific Home Assistant page. The library
-shows saved/sync indicators on ordinary workspace cards; Open from Home Assistant is a direct library action (the legacy Import → From Home Assistant route remains supported). Opening a saved home restores its exact identity and enables sync, while divergent local copies require explicit review. There is no separate HA library section.
+shows saved/sync indicators on ordinary workspace cards; Open from Home Assistant is a direct library action (the legacy Import → From Home Assistant route remains supported). Opening a saved home restores its exact identity and enables sync, while divergent local copies require explicit review. In the native HACS panel, healthy saved homes that are absent from this browser
+appear as dotted cards at the end of the same workspace grid. They share ordinary
+card sizing and open in one click through the existing identity-preserving,
+conflict-checked restore with sync enabled. Discovery uses only the authenticated
+host connection, refreshes on library entry and browser focus, and never imports
+automatically. Already-local IDs and damaged remote copies are excluded from
+suggestions; damaged copies remain accessible through Import. Workspace server
+addresses and the From Home Assistant import option use the official HA mark; the
+import dialog labels file and import actions with the editor icon set. Failed listing or
+opening offers retry and preserves existing homes. There is no separate HA library section.
 IndexedDB uses the `cabane-projects-v2` database with project records, workspace
 metadata, and persistent initialization state. Metadata contains the name, HA
 origin, creation time, and applied status. Related writes share a transaction. The

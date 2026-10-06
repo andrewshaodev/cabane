@@ -25,7 +25,7 @@ import {
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
 import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
-import { WorkspaceHaLibrary } from "./WorkspaceHaLibrary";
+import { WorkspaceHaLibrary, WorkspaceHaSuggestions } from "./WorkspaceHaLibrary";
 import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
@@ -328,6 +328,15 @@ export function WorkspaceApplication() {
           if (raw === null) throw new Error("No saved record exists.");
           downloadConnectData(raw, `${id}-recovery.json`);
         }}
+        renderSuggestions={(busy, onBusyChange) => (
+          <WorkspaceHaSuggestions
+            repository={repository}
+            onRestored={openedRemote}
+            localWorkspaceIds={entries.map((entry) => entry.metadata.id)}
+            busy={busy}
+            onBusyChange={onBusyChange}
+          />
+        )}
         remoteImport={
           <WorkspaceHaLibrary
             repository={repository}

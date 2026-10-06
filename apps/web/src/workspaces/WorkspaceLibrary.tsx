@@ -32,6 +32,7 @@ export interface WorkspaceLibraryProps {
   onRecover: (id: string) => Promise<void>;
   onExportRaw: (id: string) => Promise<void>;
   remoteImport?: ReactNode;
+  renderSuggestions?: (busy: boolean, onBusyChange: (busy: boolean) => void) => ReactNode;
   onSettings?: (id: string, intent?: WorkspaceDestination) => Promise<void>;
 }
 export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
@@ -119,36 +120,36 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
           {error}
         </p>
       )}
-      {!props.entries.length ? (
+      {!props.entries.length && (
         <section className="workspace-empty">
           <h2>A place for your next home</h2>
           <p>Create a workspace from scratch, or import a saved Cabane project.</p>
         </section>
-      ) : (
-        <section className="workspace-grid" aria-label="Homes">
-          {props.entries.map((entry) => (
-            <WorkspaceCard
-              key={entry.metadata.id}
-              entry={entry}
-              busy={busy}
-              onOpen={() => void run(() => props.onOpen(entry.metadata.id))}
-              onAction={(action) =>
-                ["settings", "sync", "dashboard", "device"].includes(action)
-                  ? void run(
-                      () =>
-                        props.onSettings?.(
-                          entry.metadata.id,
-                          action === "settings" ? undefined : (action as WorkspaceDestination),
-                        ) ?? Promise.resolve(),
-                    )
-                  : openDialog({ action, entry })
-              }
-              onRecover={() => void run(() => props.onRecover(entry.metadata.id))}
-              onExportRaw={() => void run(() => props.onExportRaw(entry.metadata.id))}
-            />
-          ))}
-        </section>
       )}
+      <section className="workspace-grid" aria-label="Homes">
+        {props.entries.map((entry) => (
+          <WorkspaceCard
+            key={entry.metadata.id}
+            entry={entry}
+            busy={busy}
+            onOpen={() => void run(() => props.onOpen(entry.metadata.id))}
+            onAction={(action) =>
+              ["settings", "sync", "dashboard", "device"].includes(action)
+                ? void run(
+                    () =>
+                      props.onSettings?.(
+                        entry.metadata.id,
+                        action === "settings" ? undefined : (action as WorkspaceDestination),
+                      ) ?? Promise.resolve(),
+                  )
+                : openDialog({ action, entry })
+            }
+            onRecover={() => void run(() => props.onRecover(entry.metadata.id))}
+            onExportRaw={() => void run(() => props.onExportRaw(entry.metadata.id))}
+          />
+        ))}
+        {props.renderSuggestions?.(busy, setBusy)}
+      </section>
       {dialog?.action === "setup-ha" && (
         <WorkspaceDialog
           title="Add Cabane to Home Assistant"

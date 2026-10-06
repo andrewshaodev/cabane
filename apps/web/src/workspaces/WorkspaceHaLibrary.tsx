@@ -7,22 +7,29 @@ import {
 } from "@cabane/engine";
 import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import type { HaWorkspaceSummary } from "./ha-workspace-client";
+import { HomeAssistantIcon } from "./HomeAssistantIcon";
+import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 
 function WorkspaceHaLibraryContent({
   repository,
   onRestored,
   onBusyChange,
+  localWorkspaceIds,
+  disabled = false,
 }: {
   repository: WorkspaceRepository;
   onRestored: (id: string) => Promise<void>;
   onBusyChange?: ((busy: boolean) => void) | undefined;
+  localWorkspaceIds?: string[] | undefined;
+  disabled?: boolean | undefined;
 }) {
   const hostSession = useHomeAssistantHostSession();
   const { runtime, client, coordinator } = useWorkspaceSyncCoordinator(repository);
   const [remote, setRemote] = useState<HaWorkspaceSummary[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const busy = pendingId !== null;
   useEffect(() => {
     onBusyChange?.(busy);
   }, [busy, onBusyChange]);
@@ -35,10 +42,14 @@ function WorkspaceHaLibraryContent({
     }
   }, [client]);
   useEffect(() => {
-    if (runtime.status === "connected") void load();
+    if (runtime.status !== "connected") return;
+    void load();
+    const refresh = () => void load();
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
   }, [runtime.status, load]);
   const restore = async (summary: HaWorkspaceSummary) => {
-    setBusy(true);
+    setPendingId(summary.home_id);
     setError(null);
     try {
       const status = await coordinator.openRemote(summary.home_id, runtime.origin!);
@@ -50,7 +61,7 @@ function WorkspaceHaLibraryContent({
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not restore this workspace.");
     } finally {
-      setBusy(false);
+      setPendingId(null);
     }
   };
   const downloadDamaged = async (summary: HaWorkspaceSummary) => {
@@ -62,6 +73,57 @@ function WorkspaceHaLibraryContent({
       setError(cause instanceof Error ? cause.message : "Could not download HA data.");
     }
   };
+  if (localWorkspaceIds) {
+    const suggestions = remote.filter(
+      (item) => !item.corrupt && !localWorkspaceIds.includes(item.home_id),
+    );
+    return (
+      <>
+        {runtime.status === "connected" &&
+          suggestions.map((item) => (
+            <article className="workspace-card workspace-card--suggested" key={item.home_id}>
+              <button
+                type="button"
+                className="workspace-card-target"
+                disabled={busy || disabled}
+                aria-label={`Add ${item.name} from Home Assistant`}
+                aria-busy={pendingId === item.home_id}
+                onClick={() => void restore(item)}
+              />
+              <h2>{item.name}</h2>
+              <p className="workspace-suggestion-description">Saved in Home Assistant</p>
+              <p className="workspace-server workspace-suggestion-server">
+                <HomeAssistantIcon />
+                <span>{new URL(runtime.origin!).host}</span>
+              </p>
+              <div className="workspace-card-footer">
+                <span className="workspace-suggestion-action">
+                  <EditorIcon name="plus" />
+                  {pendingId === item.home_id ? "Adding workspace…" : "Add workspace"}
+                </span>
+              </div>
+            </article>
+          ))}
+        {(error || runtime.error) && (
+          <div className="workspace-suggestion-error">
+            <p role="alert" className="workspace-error">
+              {error ?? runtime.error}
+            </p>
+            <button
+              type="button"
+              disabled={busy || disabled}
+              onClick={() => {
+                if (runtime.status === "connected") void load();
+                else runtime.retry();
+              }}
+            >
+              Retry suggested workspaces
+            </button>
+          </div>
+        )}
+      </>
+    );
+  }
   return (
     <div className="workspace-ha-library-content">
       {runtime.status !== "connected" ? (
@@ -153,5 +215,33 @@ export function WorkspaceHaLibrary({
         </HomeAssistantRuntimeProvider>
       )}
     </section>
+  );
+}
+
+export function WorkspaceHaSuggestions({
+  repository,
+  onRestored,
+  localWorkspaceIds,
+  busy,
+  onBusyChange,
+}: {
+  repository: WorkspaceRepository;
+  onRestored: (id: string) => Promise<void>;
+  localWorkspaceIds: string[];
+  busy: boolean;
+  onBusyChange: (busy: boolean) => void;
+}) {
+  const hostSession = useHomeAssistantHostSession();
+  if (!hostSession) return null;
+  return (
+    <HomeAssistantRuntimeProvider key={hostSession.origin} homeAssistantUrl={hostSession.origin}>
+      <WorkspaceHaLibraryContent
+        repository={repository}
+        onRestored={onRestored}
+        localWorkspaceIds={localWorkspaceIds}
+        disabled={busy}
+        onBusyChange={onBusyChange}
+      />
+    </HomeAssistantRuntimeProvider>
   );
 }

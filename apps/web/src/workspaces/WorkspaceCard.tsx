@@ -1,3 +1,4 @@
+import { HomeAssistantIcon } from "./HomeAssistantIcon";
 import { workspaceStorageStatus } from "./workspace-availability";
 import { useEffect, useState } from "react";
 import { readSyncCursor, fingerprintWorkspace, type SyncCursor } from "./workspace-sync-state";
@@ -153,7 +154,12 @@ export function WorkspaceCard({
       )}
       <div className="workspace-card-footer">
         <p className="workspace-server">
-          {metadata.homeAssistantUrl ? new URL(metadata.homeAssistantUrl).host : ""}
+          {metadata.homeAssistantUrl && (
+            <>
+              <HomeAssistantIcon />
+              <span>{new URL(metadata.homeAssistantUrl).host}</span>
+            </>
+          )}
         </p>
         {!error && (
           <span className="workspace-card-arrow" aria-hidden="true">
