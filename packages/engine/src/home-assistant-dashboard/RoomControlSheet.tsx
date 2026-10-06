@@ -4,12 +4,15 @@ import type { SupportedServiceCall } from "../home-assistant-controls";
 import type { HomeAssistantConnectionStatus, ResolvedRoomBindings } from "../types";
 import { RoomStatusBadges } from "../room-status/RoomStatusBadges";
 import type { RoomStatusSummary } from "../room-status/model";
+import { RoomModuleReorder, ReorderIcon } from "./RoomModuleReorder";
+import { useRoomModuleOrder } from "./useRoomModuleOrder";
 import { RoomModule } from "./RoomModule";
 import { buildRoomModules, focusedDeviceModule } from "./module-model";
 import { useBottomSheetDrag } from "./useBottomSheetDrag";
 import { useRoomHeroParallax } from "./useRoomHeroParallax";
 
 export interface RoomControlSheetProps {
+  homeId?: string;
   resolved: ResolvedRoomBindings;
   roomStatus: RoomStatusSummary;
   status: HomeAssistantConnectionStatus;
@@ -102,6 +105,7 @@ function ConnectionProblem({
 }
 
 export function RoomControlSheet({
+  homeId = "default",
   resolved,
   roomStatus,
   status,
@@ -121,6 +125,9 @@ export function RoomControlSheet({
 }: RoomControlSheetProps) {
   const dom = useCabaneDom();
   const modules = useMemo(() => buildRoomModules(resolved), [resolved]);
+  const { ordered, move } = useRoomModuleOrder(homeId, resolved.room.id, modules);
+  const [reorderingRoom, setReorderingRoom] = useState<string | null>(null);
+  const reordering = reorderingRoom === resolved.room.id && !selectedDeviceId && !deviceOverlay;
   const selectedModule = useMemo(
     () => focusedDeviceModule(modules, selectedDeviceId),
     [modules, selectedDeviceId],
@@ -158,6 +165,10 @@ export function RoomControlSheet({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
+        if (reordering) {
+          setReorderingRoom(null);
+          return;
+        }
         if (onEscape) onEscape();
         else goBack();
         return;
@@ -181,7 +192,7 @@ export function RoomControlSheet({
     };
     dom.events.addEventListener("keydown", onKeyDown);
     return () => dom.events.removeEventListener("keydown", onKeyDown);
-  }, [deviceOverlay, goBack, onEscape, dom]);
+  }, [deviceOverlay, goBack, onEscape, dom, reordering]);
 
   useEffect(() => {
     if (deviceOverlay) backButtonRef.current?.focus();
@@ -246,11 +257,25 @@ export function RoomControlSheet({
           >
             <span aria-hidden="true">←</span>
           </button>
-          {!deviceOverlay && (
-            <button type="button" className="room-control-sheet__walk" onClick={onWalk}>
-              Walk inside
-            </button>
-          )}
+          <div className="room-control-sheet__actions">
+            {!deviceOverlay && !focused && modules.length > 1 && (
+              <button
+                type="button"
+                className="room-control-sheet__walk"
+                aria-label={reordering ? "Done reordering devices" : "Reorder devices"}
+                title={reordering ? "Done reordering devices" : "Reorder devices"}
+                aria-pressed={reordering}
+                onClick={() => setReorderingRoom(reordering ? null : resolved.room.id)}
+              >
+                {reordering ? "Done" : <ReorderIcon />}
+              </button>
+            )}
+            {!deviceOverlay && (
+              <button type="button" className="room-control-sheet__walk" onClick={onWalk}>
+                Walk inside
+              </button>
+            )}
+          </div>
         </nav>
 
         <div
@@ -306,7 +331,9 @@ export function RoomControlSheet({
           <div className="room-control-sheet__content">
             <ConnectionProblem status={status} onReconnect={onReconnect} onRetry={onRetry} />
 
-            {selectedModule ? (
+            {reordering ? (
+              <RoomModuleReorder modules={ordered} onMove={move} />
+            ) : selectedModule ? (
               <div className="room-control-sheet__grid is-focused">
                 <RoomModule
                   module={selectedModule}
@@ -323,7 +350,7 @@ export function RoomControlSheet({
               </div>
             ) : modules.length > 0 ? (
               <div className="room-control-sheet__grid">
-                {modules.map((module) => (
+                {ordered.map((module) => (
                   <RoomModule
                     key={module.id}
                     module={module}

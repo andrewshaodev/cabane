@@ -539,6 +539,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
 
           {controlRoom && resolvedBindings.rooms[controlRoom.id] && (
             <RoomDashboardPanel
+              homeId={manifest.home.id}
               resolved={resolvedBindings.rooms[controlRoom.id]}
               roomStatus={roomStatuses[controlRoom.id]}
               status={runtime.status}

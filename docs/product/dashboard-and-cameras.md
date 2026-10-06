@@ -286,3 +286,5 @@ HA area, then fall back to the first usable mapped room sensor of that device cl
 in resolved order (primary, secondary, diagnostic, then modeled devices).
 Unknown, unavailable, and stale readings are skipped; unbound area sensors are not
 fallback candidates. This does not create bindings or change HA configuration.
+
+Room panels offer Reorder devices beside Walk inside when at least two modules are visible. Reorder mode displays a compact list with pointer/touch drag handles and keyboard-accessible up/down buttons. Done or Escape returns to controls. Each move saves browser-local order per home and room using local module IDs; new modules append in default order and missing modules are ignored. Ordering does not change bindings or call Home Assistant services. The normal grid follows the saved sequence without dense gap filling.
