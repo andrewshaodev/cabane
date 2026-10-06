@@ -13,7 +13,7 @@ export function BuildWorkspaceEntry({
     if (started.current) return;
     started.current = true;
     void onboarding.start("build");
-  }, [onboarding.start]);
+  }, [onboarding, onboarding.start]);
   return (
     <main className="direction-project-loading">
       {onboarding.error ? (

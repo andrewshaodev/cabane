@@ -36,7 +36,7 @@ await withModules(async (load) => {
       return {
         connected: true,
         close() {
-          assert.fail("Closed host connection");
+          return assert.fail("Closed host connection");
         },
         addEventListener(type, cb) {
           const set = listeners.get(type) ?? new Set();
@@ -67,10 +67,10 @@ await withModules(async (load) => {
     };
     const client = {
       getAuth() {
-        assert.fail("getAuth");
+        return assert.fail("getAuth");
       },
       createConnection() {
-        assert.fail("createConnection");
+        return assert.fail("createConnection");
       },
       subscribeEntities(c, cb) {
         entityCallback = cb;
@@ -261,7 +261,7 @@ await withModules(async (load) => {
       });
       Object.defineProperty(window, "localStorage", {
         get() {
-          assert.fail("token storage accessed");
+          return assert.fail("token storage accessed");
         },
       });
       let latest,
@@ -271,7 +271,7 @@ await withModules(async (load) => {
         addEventListener() {},
         removeEventListener() {},
         close() {
-          assert.fail("close");
+          return assert.fail("close");
         },
         async sendMessagePromise() {
           reads++;
@@ -283,16 +283,16 @@ await withModules(async (load) => {
       };
       const client = {
         getAuth() {
-          assert.fail("getAuth");
+          return assert.fail("getAuth");
         },
         createConnection() {
-          assert.fail("createConnection");
+          return assert.fail("createConnection");
         },
         subscribeEntities() {
           return () => {};
         },
         callService() {
-          assert.fail("unsolicited service");
+          return assert.fail("unsolicited service");
         },
       };
       function Probe() {

@@ -42,7 +42,7 @@ async function startServer(kind) {
 }
 
 export async function createBrowserTestSession() {
-  browserPromise ??= chromium.launch({ channel: "chrome", headless: true });
+  browserPromise ??= chromium.launch({ channel: "chromium", headless: true });
   const browser = await browserPromise;
   const contexts = new Set();
   const newContext = async (options) => {

@@ -21,7 +21,7 @@ type Dialog = {
 };
 export interface WorkspaceLibraryProps {
   entries: WorkspaceLibraryEntry[];
-  demoWorkspaceId?: string | null;
+  demoWorkspaceId?: (string | null) | undefined;
   onOpen: (id: string) => Promise<void>;
   onCreate: (name: string) => Promise<void>;
   onRename: (id: string, name: string) => Promise<void>;

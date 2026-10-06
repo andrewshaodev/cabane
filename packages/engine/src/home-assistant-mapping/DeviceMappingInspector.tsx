@@ -98,7 +98,7 @@ export function DeviceMappingInspector({
   let primaryChoice: MappingChoice;
   let functionChoices: MappingChoice[] = [];
   let relationshipLabel = "Not connected";
-  let connectionDetails: ReactNode = null;
+  let connectionDetails: ReactNode;
 
   if (relationship.kind === "entity-slot") {
     const { descriptor } = relationship;

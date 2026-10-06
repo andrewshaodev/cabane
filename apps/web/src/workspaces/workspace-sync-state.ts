@@ -23,7 +23,9 @@ export const readSyncCursor = (
   homeId: string,
 ): Promise<SyncCursor | null> =>
   projectTransaction(factory, "readonly", SYNC_STORE, (tx, request, done) =>
-    request(tx.objectStore(SYNC_STORE).get(key(origin, homeId)), (value) => done(value ?? null)),
+    request(tx.objectStore(SYNC_STORE).get(key(origin, homeId)), (value) =>
+      done((value as SyncCursor | undefined) ?? null),
+    ),
   );
 
 export const writeSyncCursor = (factory: IDBFactory, cursor: SyncCursor): Promise<void> =>

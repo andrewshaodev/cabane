@@ -20,7 +20,7 @@ export function openingPlanSymbol(
 ): OpeningPlanStroke[] {
   const strokes: OpeningPlanStroke[] = [];
   const line = (from: PlanPoint, to: PlanPoint, color: string, strokeWidth?: number) => {
-    strokes.push({ from, to, color, width: strokeWidth });
+    strokes.push({ from, to, color, ...(strokeWidth === undefined ? {} : { width: strokeWidth }) });
   };
   line([0, -thickness / 2], [0, thickness / 2], "#596057");
   line([width, -thickness / 2], [width, thickness / 2], "#596057");

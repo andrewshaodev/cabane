@@ -38,15 +38,21 @@ change the Cabane product itself.
 
 ## Run locally
 
-Requires Node.js 20.19 or newer and npm.
+Use Node.js **24.11.1** and npm **11.6.2**, pinned in `.nvmrc`, `.node-version`, and `package.json`. With nvm, run `nvm install && nvm use` first.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by the development server. Run `npm run verify` for
-the repository's automated checks. Build the standalone app with `npm run build`.
+Open the local URL printed by the development server. For automated checks, install the
+Playwright-pinned browser once with `npm run browser:install` (Linux hosts may need
+`npm run browser:install -- --with-deps`). Run `npm run verify:fast` for formatting,
+typed ESLint, TypeScript, Knip, and repository rules; run `npm run verify` for the
+full tests, furnishing checks, and production build. These are local commands; no hosted CI is configured.
+
+Use `npm run format` to format changes and `npm run lint:fix` for safe lint fixes.
+Build the standalone app with `npm run build`.
 
 Cabane also runs as the native `cabane-panel` custom element inside Home
 Assistant. It borrows the signed-in host connection; each personal workspace

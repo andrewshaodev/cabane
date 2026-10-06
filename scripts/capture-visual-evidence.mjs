@@ -131,7 +131,7 @@ const capture = async ({
 
 try {
   browser = await chromium.launch({
-    channel: "chrome",
+    channel: "chromium",
     headless: true,
     args: ["--use-angle=swiftshader"],
   });

@@ -86,7 +86,7 @@ function PlanImportDialog({
     const previous = dom.root.activeElement as HTMLElement | null;
     dialog.current?.showModal?.();
     return () => previous?.focus();
-  }, []);
+  }, [dom]);
   const copy = async () => {
     setError(null);
     try {
@@ -182,20 +182,22 @@ function PlanImportDialog({
               type="file"
               accept=".json,application/json"
               disabled={disabled || reading}
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                event.target.value = "";
-                if (!file) return;
-                setReading(true);
-                setError(null);
-                setJson("");
-                try {
-                  setJson(await file.text());
-                } catch {
-                  setError("Could not read this file. Select it again or paste the JSON below.");
-                } finally {
-                  setReading(false);
-                }
+              onChange={(event) => {
+                void (async () => {
+                  const file = event.target.files?.[0];
+                  event.target.value = "";
+                  if (!file) return;
+                  setReading(true);
+                  setError(null);
+                  setJson("");
+                  try {
+                    setJson(await file.text());
+                  } catch {
+                    setError("Could not read this file. Select it again or paste the JSON below.");
+                  } finally {
+                    setReading(false);
+                  }
+                })();
               }}
             />
           </label>

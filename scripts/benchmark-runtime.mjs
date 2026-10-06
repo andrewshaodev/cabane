@@ -13,7 +13,7 @@ const walkOnly = process.env.BENCH_WALK_ONLY === "1";
 const quick = process.env.BENCH_QUICK === "1";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({
-  channel: "chrome",
+  channel: "chromium",
   headless: false,
   // Preserve normal background behavior rather than Playwright's testing overrides.
   ignoreDefaultArgs: [

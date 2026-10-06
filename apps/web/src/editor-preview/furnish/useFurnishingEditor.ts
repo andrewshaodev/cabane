@@ -74,7 +74,12 @@ export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
     ),
     duplicate: useCallback(
       (id: string, floor?: FloorSpec, reservedSlotIds?: readonly string[]) =>
-        dispatch({ type: "duplicate", id, floor, reservedSlotIds }),
+        dispatch({
+          type: "duplicate",
+          id,
+          ...(floor === undefined ? {} : { floor: floor }),
+          ...(reservedSlotIds === undefined ? {} : { reservedSlotIds: reservedSlotIds }),
+        }),
       [],
     ),
     deleteItems: useCallback(
@@ -89,14 +94,26 @@ export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
         definition: FurnishingModelDefinition,
         planCenter: PlanPoint,
         placement?: ItemPlacement,
-      ) => dispatch({ type: "add-preset", floorId, modelId, definition, planCenter, placement }),
+      ) =>
+        dispatch({
+          type: "add-preset",
+          floorId,
+          modelId,
+          definition,
+          planCenter,
+          ...(placement === undefined ? {} : { placement: placement }),
+        }),
       [],
     ),
     undo: useCallback(() => dispatch({ type: "undo" }), []),
     redo: useCallback(() => dispatch({ type: "redo" }), []),
     replaceItems: useCallback((items: readonly SceneItemSpec[], selectedId?: string | null) => {
       setMultipleIds([]);
-      dispatch({ type: "replace-items", items, selectedId });
+      dispatch({
+        type: "replace-items",
+        items,
+        ...(selectedId === undefined ? {} : { selectedId: selectedId }),
+      });
     }, []),
   };
 };

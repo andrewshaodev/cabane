@@ -23,13 +23,11 @@ test("the settings page imports a full backup into the draft without publishing 
     const backupDownload = page.waitForEvent("download");
     await page.getByRole("button", { name: "Export backup", exact: true }).click();
     assert.match((await backupDownload).suggestedFilename(), /-backup\.json$/);
-    await page
-      .locator('input[type="file"]')
-      .setInputFiles({
-        name: "backup.json",
-        mimeType: "application/json",
-        buffer: Buffer.from(imported.json),
-      });
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "backup.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(imported.json),
+    });
     await page
       .getByText("Backup imported into the draft. Open the editor to review and save it.")
       .waitFor();

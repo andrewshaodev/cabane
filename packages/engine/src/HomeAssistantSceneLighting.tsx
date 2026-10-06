@@ -108,9 +108,10 @@ function PhysicalSceneLight({
   intensity: number;
   distance: number;
 }) {
+  const [x, y, z] = position;
   const direction = useMemo(
-    () => inwardDirectionAtWall(floor, position, distance),
-    [floor, position[0], position[1], position[2], distance],
+    () => inwardDirectionAtWall(floor, [x, y, z], distance),
+    [floor, x, y, z, distance],
   );
   const target = useMemo(() => new Object3D(), []);
   if (!direction)
@@ -158,7 +159,7 @@ export function HomeAssistantSceneLighting({
   deviceModels: DeviceModelRegistry;
   extensionDeviceModels: DeviceModelRegistry;
   sceneItems?: readonly SceneItemSpec[];
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 }) {
   const nightLighting = useContext(SceneNightContext);
   if (!enabled) return <group name="home-assistant-scene-lighting" />;
@@ -253,7 +254,7 @@ export function HomeAssistantSceneLighting({
             : undefined;
         const transform = sceneItem
           ? resolveItemTransform(sceneItem.placement, floor)
-          : deviceWorldTransform(resolved!.slot, floor.coordinates);
+          : deviceWorldTransform(resolved.slot, floor.coordinates);
         const state = sceneLightState(sceneItem?.lightState, entity?.state, nightLighting);
         const brightness = lightBrightnessRatio(state);
         if (brightness <= 0) return [];
@@ -263,7 +264,7 @@ export function HomeAssistantSceneLighting({
         if (sceneItem && sceneItemScale === null) return [];
         const scale = sceneItem
           ? sceneItemScale!
-          : deviceWorldTransform(resolved!.slot, floor.coordinates).scale;
+          : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
         const source = definition.sceneLight;
         return [
           <PhysicalSceneLight

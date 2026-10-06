@@ -5,7 +5,7 @@ import { chromium } from "playwright-core";
 // Measure the end of the first populated WebGL frame, not a loading label.
 const origin = process.argv[2] ?? "http://127.0.0.1:4174";
 const fromLibrary = process.argv.includes("--library");
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   const samples = [];
   for (let i = 0; i < 5; i++) {

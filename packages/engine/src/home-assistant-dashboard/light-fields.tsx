@@ -17,19 +17,29 @@ import { useOptimisticCommand } from "./control-primitives";
 
 import { confirmationKey, numberAttribute, toggleCallForPressed } from "./entity-field-contract";
 
-export function PhysicalToggle({
-  binding,
-  enabled,
-  tone,
-  onCallService,
-}: {
+export function PhysicalToggle(props: {
   binding: ResolvedEntityBinding;
   enabled: boolean;
   tone: "light" | "switch";
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
 }) {
-  const entity = binding.state;
+  const entity = props.binding.state;
   if (!entity) return null;
+  return <PhysicalToggleWithEntity {...props} binding={{ ...props.binding, state: entity }} />;
+}
+
+function PhysicalToggleWithEntity({
+  binding,
+  enabled,
+  tone,
+  onCallService,
+}: {
+  binding: ResolvedEntityBinding & { state: NonNullable<ResolvedEntityBinding["state"]> };
+  enabled: boolean;
+  tone: "light" | "switch";
+  onCallService: (call: SupportedServiceCall) => Promise<unknown>;
+}) {
+  const entity = binding.state;
   const command = useOptimisticCommand({
     confirmedKey: confirmationKey(entity),
     confirmedValue: entity.state === "on",
@@ -68,17 +78,26 @@ export function PhysicalToggle({
   );
 }
 
-function LightDimmer({
-  binding,
-  enabled,
-  onCallService,
-}: {
+function LightDimmer(props: {
   binding: ResolvedEntityBinding;
   enabled: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
 }) {
-  const entity = binding.state;
+  const entity = props.binding.state;
   if (!entity) return null;
+  return <LightDimmerWithEntity {...props} binding={{ ...props.binding, state: entity }} />;
+}
+
+function LightDimmerWithEntity({
+  binding,
+  enabled,
+  onCallService,
+}: {
+  binding: ResolvedEntityBinding & { state: NonNullable<ResolvedEntityBinding["state"]> };
+  enabled: boolean;
+  onCallService: (call: SupportedServiceCall) => Promise<unknown>;
+}) {
+  const entity = binding.state;
   const brightness = Math.min(
     100,
     Math.max(1, Math.round(numberAttribute(entity.attributes.brightness, 255) / 2.55)),

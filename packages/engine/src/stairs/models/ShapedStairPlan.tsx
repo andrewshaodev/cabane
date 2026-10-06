@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../../defined-properties";
 import { useMemo } from "react";
 import type { ThreeElements } from "@react-three/fiber";
 import type { StairFlight } from "../flight-geometry";
@@ -54,15 +55,20 @@ export function ShapedStairPlan({
         elevation={0.14}
         thickness={0.004}
         emissive={invalid ? "#f5c8c4" : selected ? "#f5d1ba" : "#f3ede0"}
-        onClick={onSelect ? (event) => event.stopPropagation() : undefined}
-        onPointerDown={
-          onSelect
-            ? (event) => {
+        {...omitUndefinedProperties({
+          onClick: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<MouseEvent>) =>
+                event.stopPropagation()
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerDown: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 onSelect();
               }
-            : undefined
-        }
+            : undefined,
+        })}
         {...(!onSelect && !handlers ? { raycast: () => undefined } : {})}
         {...handlers}
       />

@@ -63,6 +63,7 @@ export function useEditorWorkspace({
     history.present.references,
     initializeReferences,
   );
+  const { cleanup: referenceStorageCleanup } = referenceStorage;
   const cleanupState = useRef(history);
   cleanupState.current = history;
   useEffect(
@@ -70,11 +71,11 @@ export function useEditorWorkspace({
       const present = cleanupState.current.present;
       if (!present.references) return;
       const floors = new Set(present.project.floors.map((floor) => floor.id));
-      referenceStorage.cleanup(
+      referenceStorageCleanup(
         Object.fromEntries(Object.entries(present.references).filter(([id]) => floors.has(id))),
       );
     },
-    [referenceStorage.cleanup],
+    [referenceStorageCleanup],
   );
   const [record, setRecord] = useState(initialRecord);
   const recordRef = useRef(record);
@@ -224,7 +225,9 @@ export function useEditorWorkspace({
       changeHistory(
         commitWorkspaceSnapshot(historyRef.current, {
           ...snapshot,
-          references: historyRef.current.present.references,
+          ...(historyRef.current.present.references === undefined
+            ? {}
+            : { references: historyRef.current.present.references }),
         }),
       ) !== null,
     [changeHistory],
@@ -298,7 +301,7 @@ export function useEditorWorkspace({
         ...(historyRef.current.present.references ? { references } : {}),
       });
       historyRef.current = nextHistory;
-      if (nextHistory.present.references) referenceStorage.cleanup(references);
+      if (nextHistory.present.references) referenceStorageCleanup(references);
       savedRevision.current = ++revision.current;
       failure.current = null;
       acceptRecord(next);
@@ -308,7 +311,7 @@ export function useEditorWorkspace({
         setError(null);
       }
     },
-    [acceptRecord, referenceStorage.cleanup],
+    [acceptRecord, referenceStorageCleanup],
   );
   const reset = useCallback(
     async (kind: "resetDraftToPublished" | "resetToSeed"): Promise<AutosaveResult> => {

@@ -22,7 +22,11 @@
       "@cabane/catalog/furnishing": ["./packages/catalog/src/furnishing/index.ts"],
       "@cabane/catalog/device": ["./packages/catalog/src/device/index.ts"],
       "@cabane/home": ["./home/src/index.ts"]
-    }
+    },
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true
   },
   "include": [
     "apps/**/*.ts",

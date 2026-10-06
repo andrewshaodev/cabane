@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import {
   type FloorEditorTool,
   type FloorSpec,
@@ -164,10 +165,7 @@ export const constructValidationTargetForPath = (
   }
   const reference = pathReference(path);
   if (!reference) return undefined;
-  const collection = collectionFor(
-    reference.collection,
-    input as ConstructContextualValidationInput,
-  );
+  const collection = collectionFor(reference.collection, input);
   const numericIndex = /^(?:0|[1-9]\d*)$/.test(reference.reference)
     ? Number(reference.reference)
     : undefined;
@@ -222,7 +220,7 @@ const contextualize = (
         "Click “Name room” on the plan, or enter a name in the room panel before applying.",
     };
   }
-  return {
+  return omitUndefinedProperties({
     ...issue,
     source,
     target,
@@ -233,7 +231,7 @@ const contextualize = (
         : undefined) ??
       defaultCorrections[issue.code] ??
       "Review the highlighted context and correct this issue before publishing.",
-  };
+  });
 };
 
 const wallCompletionIssueCodes = new Set([

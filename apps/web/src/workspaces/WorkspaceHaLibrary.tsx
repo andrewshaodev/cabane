@@ -16,7 +16,7 @@ function WorkspaceHaLibraryContent({
 }: {
   repository: WorkspaceRepository;
   onRestored: (id: string) => Promise<void>;
-  onBusyChange?: (busy: boolean) => void;
+  onBusyChange?: ((busy: boolean) => void) | undefined;
 }) {
   const hostSession = useHomeAssistantHostSession();
   const { runtime, client, coordinator } = useWorkspaceSyncCoordinator(repository);

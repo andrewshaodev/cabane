@@ -39,7 +39,7 @@ export function HomeAssistantConnectionFlow({
   homeAssistantUrl: string | null;
   runtime: HomeAssistantRuntimeValue;
   onHomeAssistantUrlChange: (url: string | null) => void;
-  onImportBrowserData?: (json: string) => BrowserDataImportResult;
+  onImportBrowserData?: ((json: string) => BrowserDataImportResult) | undefined;
   onDefer: () => void;
   onClose: () => void;
 }) {

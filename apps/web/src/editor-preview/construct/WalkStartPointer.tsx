@@ -15,7 +15,7 @@ export function WalkStartPointer({
   onPlace,
 }: {
   floor: FloorSpec;
-  start?: { floorId: string; at: PlanPoint };
+  start?: { floorId: string; at: PlanPoint } | undefined;
   placing: boolean;
   onPlace: (at: PlanPoint) => void;
 }) {

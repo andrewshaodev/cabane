@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../defined-properties";
 import { useCabaneDom } from "./../CabaneDom";
 import { useHoveredRoom, useRoomHoverTarget, useRoomHoverEnabled } from "../room-status/RoomHover";
 import { useStairSurfaceApertures } from "../stairs/surface-apertures";
@@ -24,11 +25,11 @@ interface FinishSurfaceProps {
   textureSet: FloorFinishTextureSet;
   layer: number;
   name: string;
-  roomId?: string;
+  roomId?: string | undefined;
   interactionColor?: string;
   selected?: boolean;
   reducedMotion?: boolean;
-  onSelect?: () => void;
+  onSelect?: (() => void) | undefined;
   elevation?: number;
   cutPools?: boolean;
 }
@@ -96,7 +97,7 @@ function FinishSurface({
     return () => {
       dom.container.style.cursor = previous;
     };
-  }, [hovered, onSelect, roomId, sharedHoverEnabled]);
+  }, [hovered, onSelect, roomId, sharedHoverEnabled, dom]);
 
   useFrame((_state, delta) => {
     const interaction = interactionRef.current;
@@ -173,7 +174,7 @@ function FinishSurface({
         key={texture ? "pattern" : "solid"}
         color="#000000"
         emissive={texture ? "#ffffff" : color}
-        emissiveMap={texture ?? undefined}
+        {...omitUndefinedProperties({ emissiveMap: texture ?? undefined })}
         emissiveIntensity={1}
         toneMapped={false}
         side={DoubleSide}
@@ -185,7 +186,7 @@ function FinishSurface({
       <ToonMaterial
         key={texture ? "pattern" : "solid"}
         color={texture ? "#ffffff" : color}
-        map={texture ?? undefined}
+        {...omitUndefinedProperties({ map: texture ?? undefined })}
         side={DoubleSide}
         polygonOffset={layer > 0}
         polygonOffsetFactor={-layer}
@@ -241,7 +242,7 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
   variant: FloorPatternVariant;
   selectedRoomId?: string | null;
   reducedMotion?: boolean;
-  onSelectRoom?: (id: string) => void;
+  onSelectRoom?: ((id: string) => void) | undefined;
 }) {
   const textureSet = useMemo(() => createFloorFinishTextureSet(variant), [variant]);
   useEffect(() => () => textureSet.dispose(), [textureSet]);

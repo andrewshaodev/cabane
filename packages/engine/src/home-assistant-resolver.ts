@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { coverPosition } from "./cover-state";
 import { bindingDomainMatchRank } from "./binding-slot-compatibility";
 import { deviceMappingRooms } from "./outside-room-devices";
@@ -209,7 +210,7 @@ const resolveEntity = ({
     );
   }
 
-  return {
+  return omitUndefinedProperties({
     entityId,
     domain,
     path,
@@ -222,7 +223,7 @@ const resolveEntity = ({
     areaId,
     deviceId: registry?.device_id ?? null,
     issues,
-  };
+  });
 };
 
 const unmappedSlotIssue = (
@@ -372,7 +373,7 @@ export const resolveHomeAssistantBindings = (
           displayEntity?.registry?.name?.trim() ||
           (typeof friendlyName === "string" ? friendlyName.trim() : undefined) ||
           undefined;
-        return { slot, displayName, entities, issues: deviceIssues };
+        return omitUndefinedProperties({ slot, displayName, entities, issues: deviceIssues });
       });
       roomIssues.push(...devices.flatMap((device) => device.issues));
       rooms[room.id] = {
@@ -452,7 +453,7 @@ export const resolveHomeAssistantBindings = (
             : `Opening contact "${entityId}" has no live state.`,
         });
       }
-      openings[opening.id] = {
+      openings[opening.id] = omitUndefinedProperties({
         openingId: opening.id,
         slotId: descriptor.slotId,
         entityId,
@@ -471,7 +472,7 @@ export const resolveHomeAssistantBindings = (
         coverSlotId,
         coverEntityId,
         issue: coverBinding?.issues[0] ?? openingIssue,
-      };
+      });
       if (openingIssue) allIssues.push(openingIssue);
     }
   }

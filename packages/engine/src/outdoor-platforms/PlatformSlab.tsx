@@ -14,7 +14,7 @@ export function PlatformSlab({
 }: {
   platform: OutdoorPlatformSpec;
   floor: FloorSpec;
-  below?: FloorSpec;
+  below?: FloorSpec | undefined;
 }) {
   const apertures = useStairSurfaceApertures("floor");
   const pieces = useMemo(
@@ -45,6 +45,8 @@ export function PlatformSlab({
           geometry: new ExtrudeGeometry(shapes, { depth: piece.depth, bevelEnabled: false }),
         };
       }),
+    // Slab geometry uses polygon, coordinate transform, lower ceiling and apertures; rail and style edits do not change it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [platform.polygon, floor.coordinates, below, apertures],
   );
   useEffect(() => () => pieces.forEach((piece) => piece.geometry.dispose()), [pieces]);

@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { useFrame } from "@react-three/fiber";
 import { ToonMaterial as LitMaterial } from "@cabane/engine";
 import { useRef } from "react";
@@ -27,7 +28,7 @@ export function ConstructionPointMarker({
     }
   });
   return (
-    <group ref={marker} name={name} position={position}>
+    <group ref={marker} {...omitUndefinedProperties({ name: name })} position={position}>
       <mesh renderOrder={30} raycast={noPlanRaycast}>
         <cylinderGeometry args={[0.055, 0.055, 0.025, 18]} />
         <ToonMaterial color="#fff7f1" depthTest={false} depthWrite={false} />

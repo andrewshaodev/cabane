@@ -22,9 +22,15 @@ export function useReferencePlan(
 ) {
   const { events } = useCabaneDom();
   const storage = workspace.referenceStorage;
+  const {
+    preferences: storagePreferences,
+    setPreference: storageSetPreference,
+    ready: storageReady,
+    addAsset: storageAddAsset,
+  } = storage;
   const input = useRef<HTMLInputElement>(null);
   const saved = workspace.snapshot.references?.[floorId];
-  const preference = storage.preferences[floorId] ?? defaultReferencePreference;
+  const preference = storagePreferences[floorId] ?? defaultReferencePreference;
   const [session, setSession] = useState<{ floorId: string; plan: ReferencePlan } | null>(null);
   const [calibrating, setCalibrating] = useState(false);
   const [points, setPoints] = useState<readonly ReferencePoint[]>([]);
@@ -41,30 +47,30 @@ export function useReferencePlan(
     gestureCancel.current?.();
     gestureCancel.current = null;
     if (initialPreference.current)
-      storage.setPreference(initialPreference.current.floorId, initialPreference.current.value);
+      storageSetPreference(initialPreference.current.floorId, initialPreference.current.value);
     initialPreference.current = null;
     setSession(null);
     setCalibrating(false);
     setPoints([]);
     setError(null);
-  }, [storage.setPreference]);
+  }, [storageSetPreference]);
   useEffect(() => {
-    generation.current++;
+    generation.current = generation.current + 1;
     cancel();
     setLoading(false);
     return () => {
-      generation.current++;
+      generation.current = generation.current + 1;
     };
   }, [enabled, floorId, cancel]);
   const begin = (scale = false) => {
-    if (!plan || busy || !storage.ready) return;
+    if (!plan || busy || !storageReady) return;
     initialPreference.current ??= { floorId, value: preference };
     setSession({ floorId, plan });
     setExpanded(true);
     setCalibrating(scale);
     setPoints([]);
     setError(null);
-    storage.setPreference(floorId, { ...preference, visible: true });
+    storageSetPreference(floorId, { ...preference, visible: true });
   };
   const update = (next: ReferencePlan) => {
     if (
@@ -80,7 +86,7 @@ export function useReferencePlan(
     setError(null);
   };
   const upload = async (files: FileList | readonly File[]) => {
-    if (!enabled || busy || adjusting || !storage.ready) return;
+    if (!enabled || busy || adjusting || !storageReady) return;
     if (files.length !== 1) {
       setError("Choose one reference image for this floor.");
       return;
@@ -93,7 +99,7 @@ export function useReferencePlan(
       const decoded = await decodeReferenceImage(file);
       if (ticket !== generation.current) return;
       const assetId = createBrowserUuid();
-      storage.addAsset(assetId, decoded.blob);
+      storageAddAsset(assetId, decoded.blob);
       const view = viewport.current;
       const width = 0.8 * Math.min(view.width, (view.height * decoded.width) / decoded.height);
       initialPreference.current = { floorId, value: preference };
@@ -112,7 +118,7 @@ export function useReferencePlan(
       setExpanded(true);
       setCalibrating(false);
       setPoints([]);
-      storage.setPreference(floorId, defaultReferencePreference);
+      storageSetPreference(floorId, defaultReferencePreference);
     } catch (cause) {
       if (ticket === generation.current)
         setError(cause instanceof Error ? cause.message : "Could not open this image.");
@@ -175,7 +181,7 @@ export function useReferencePlan(
   return {
     input,
     openPicker: () => {
-      if (!busy && storage.ready) {
+      if (!busy && storageReady) {
         setExpanded(true);
         input.current?.click();
       }
@@ -192,7 +198,7 @@ export function useReferencePlan(
     gestureCancel,
     points,
     calibrating,
-    disabled: busy || loading || !storage.ready,
+    disabled: busy || loading || !storageReady,
     begin,
     update,
     cancel,
@@ -209,7 +215,7 @@ export function useReferencePlan(
       cancel();
     },
     setPreference: (change: Partial<typeof preference>) =>
-      storage.setPreference(floorId, { ...preference, ...change }),
+      storageSetPreference(floorId, { ...preference, ...change }),
   };
 }
 export type ReferencePlanController = ReturnType<typeof useReferencePlan>;

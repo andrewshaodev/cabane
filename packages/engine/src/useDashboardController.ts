@@ -1,10 +1,11 @@
+import { useEffectEvent } from "react";
 import { useCabaneDom } from "./CabaneDom";
 import { collectBindingSlots } from "./binding-slot-descriptors";
 import { resolveOpeningPositions, type RetainedOpeningPositions } from "./opening-pose";
 import { pointInsidePolygon, worldPointToPlan } from "./geometry";
 import { requestWalkPointerLock as acquireWalkPointerLock } from "./request-walk-pointer-lock";
 import { safeBuildingSpawn } from "./stairs/stair-navigation";
-import { FloorPicker, useFloorNavigation, deriveFloorLevels } from "./building";
+import { useFloorNavigation, deriveFloorLevels } from "./building";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAdaptiveSceneQuality } from "./useAdaptiveSceneQuality";
 import { useSceneCameraRequirements } from "./useSceneCameraRequirements";
@@ -72,8 +73,10 @@ export function useDashboardController({
   const onExitWalkthrough = walkthrough?.onExit;
   const walkthroughStarted = useRef(false);
   const floorNavigation = useFloorNavigation(manifest.floors);
+  const { activeFloorId: floorNavigationActiveFloorId, selectFloor: floorNavigationSelectFloor } =
+    floorNavigation;
   const floor =
-    manifest.floors.find((floor) => floor.id === floorNavigation.activeFloorId) ??
+    manifest.floors.find((floor) => floor.id === floorNavigationActiveFloorId) ??
     manifest.floors[0];
   const floorLevels = deriveFloorLevels(manifest.floors);
   const elevation = floorLevels.find((level) => level.floorId === floor.id)?.elevationMeters ?? 0;
@@ -194,7 +197,7 @@ export function useDashboardController({
       walkPointerLockPendingRef.current = false;
       setSceneActionError("Click the scene to resume mouse control.");
     });
-  }, [coarsePointer, walkthrough?.pointerLockTarget]);
+  }, [coarsePointer, walkthrough, dom]);
   const { quality, canvasDpr, adjustQuality } = useAdaptiveSceneQuality(coarsePointer, walkMode);
   const boundOpeningIds = useMemo(
     () =>
@@ -243,7 +246,7 @@ export function useDashboardController({
     };
     dom.events.addEventListener("keydown", exit);
     return () => dom.events.removeEventListener("keydown", exit);
-  }, [deviceOverlay, onExitWalkthrough, selectedRoomId, walkMode]);
+  }, [deviceOverlay, onExitWalkthrough, selectedRoomId, walkMode, dom]);
 
   useEffect(() => {
     const shell = walkthrough?.pointerLockTarget ?? shellRef.current;
@@ -279,7 +282,7 @@ export function useDashboardController({
           document.exitPointerLock();
       });
     };
-  }, [coarsePointer, onExitWalkthrough, selectedRoomId, walkMode, walkthrough?.pointerLockTarget]);
+  }, [coarsePointer, onExitWalkthrough, selectedRoomId, walkMode, walkthrough, dom]);
 
   const enterWalkMode = useCallback(() => {
     walkDevicePanelOpenRef.current = false;
@@ -292,7 +295,7 @@ export function useDashboardController({
       );
       return;
     }
-    floorNavigation.selectFloor(safeSpawn.floorId);
+    floorNavigationSelectFloor(safeSpawn.floorId);
     requestWalkPointerLock();
     poseRef.current = safeSpawn;
     const spawnFloor = manifest.floors.find((candidate) => candidate.id === safeSpawn.floorId)!;
@@ -305,7 +308,7 @@ export function useDashboardController({
     setDevicePanelRoomId(null);
     setSceneActionError(null);
     setMode("walk");
-  }, [floor, floorNavigation, manifest, requestWalkPointerLock]);
+  }, [floor.id, floorNavigationSelectFloor, manifest, requestWalkPointerLock]);
 
   const leaveWalkMode = useCallback(() => {
     movementInputRef.current = { x: 0, y: 0 };
@@ -321,7 +324,7 @@ export function useDashboardController({
       return;
     }
     setMode(selectedRoomId ? "room" : "overview");
-  }, [onExitWalkthrough, selectedRoomId]);
+  }, [onExitWalkthrough, selectedRoomId, dom]);
 
   useEffect(() => {
     if (!coarsePointer) return;
@@ -351,7 +354,7 @@ export function useDashboardController({
         void document.exitFullscreen().catch(() => undefined);
       }
     }
-  }, [walkMode]);
+  }, [walkMode, dom]);
 
   const requestMobileLandscape = useCallback(() => {
     setSceneActionError("Rotate your device to landscape to use walk mode.");
@@ -372,7 +375,7 @@ export function useDashboardController({
         }
       }
     })();
-  }, [walkthrough]);
+  }, [walkthrough, dom]);
 
   useEffect(() => {
     if (!onExitWalkthrough || walkthroughStarted.current) return;
@@ -505,7 +508,7 @@ export function useDashboardController({
     openActionBarDestination(destination, {
       walkMode,
       leaveWalkMode,
-      selectFloor: floorNavigation.selectFloor,
+      selectFloor: floorNavigationSelectFloor,
       selectRoom,
       openDevice: (roomId, deviceId) => {
         setDevicePanelRoomId(roomId);
@@ -518,14 +521,18 @@ export function useDashboardController({
     setAutomaticOpeningIds(new Set([...next].filter((openingId) => doorOpeningIds.has(openingId))));
   };
   const closeCameraViewer = useCallback(() => setSelectedCamera(null), []);
-  useEffect(() => {
+  // A focus request selects a room once; later floor and selection changes remain user controlled.
+  const focusRequestedRoom = useEffectEvent(() => {
     if (!focusRoomId) return;
     const targetFloor = manifest.floors.find((candidate) =>
       candidate.rooms.some((room) => room.id === focusRoomId),
     );
     if (!targetFloor) return;
-    floorNavigation.selectFloor(targetFloor.id);
+    floorNavigationSelectFloor(targetFloor.id);
     selectRoom(focusRoomId);
+  });
+  useEffect(() => {
+    focusRequestedRoom();
   }, [focusRoomId]);
 
   const openCameraViewer = useCallback(
@@ -601,7 +608,7 @@ export function useDashboardController({
       walkPointerLockPendingRef.current = false;
       if (dom.root.pointerLockElement === shellRef.current) document.exitPointerLock();
     },
-    [walkMode],
+    [walkMode, dom],
   );
   const handleExtensionInteraction = useCallback(
     (target: ExtensionInteractionTarget) => {
@@ -666,7 +673,14 @@ export function useDashboardController({
     if (!room) return;
     setWalkDeviceTarget(null);
     openDevicePanel(room.id, walkDeviceTarget.id);
-  }, [floor.rooms, floor.openings, handleExtensionInteraction, openDevicePanel, walkDeviceTarget]);
+  }, [
+    floor.rooms,
+    floor.openings,
+    handleExtensionInteraction,
+    openDevicePanel,
+    walkDeviceTarget,
+    dom,
+  ]);
 
   useEffect(() => {
     if (walkthrough || !walkMode || !walkDeviceTarget || coarsePointer || selectedDeviceId) return;
@@ -699,10 +713,12 @@ export function useDashboardController({
     walkDeviceTarget,
     walkMode,
     walkthrough,
+    dom,
   ]);
   useEffect(() => {
     if (!walkMode || !walkTools.some((tool) => tool.id === equippedToolId)) setEquippedToolId(null);
   }, [walkMode, walkTools, equippedToolId]);
+  const runKeyboardAction = useEffectEvent(runAction);
   useEffect(() => {
     if (walkMode || walkthrough || setupOpen || mappingOpen || deviceOverlay || selectedCamera)
       return;
@@ -725,11 +741,11 @@ export function useDashboardController({
       const action = orbitalEditorActionFromKey(event.key, event.shiftKey);
       if (!action) return;
       event.preventDefault();
-      runAction(action);
+      runKeyboardAction(action);
     };
     dom.events.addEventListener("keydown", activateEditorShortcut);
     return () => dom.events.removeEventListener("keydown", activateEditorShortcut);
-  }, [deviceOverlay, mappingOpen, mode, selectedCamera, setupOpen, walkMode, walkthrough]);
+  }, [deviceOverlay, mappingOpen, mode, selectedCamera, setupOpen, walkMode, walkthrough, dom]);
   return {
     equippedToolId,
     floorNavigation,

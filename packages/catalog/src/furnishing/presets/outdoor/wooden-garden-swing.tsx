@@ -3,7 +3,6 @@ import { RoundedFurniturePanel } from "../construction";
 export const WOODEN_GARDEN_SWING_SIZE = [2.2, 2.1, 1.4] as const;
 export function WoodenGardenSwing({
   size = WOODEN_GARDEN_SWING_SIZE,
-  variant = "default",
 }: {
   size?: SceneItemSize;
   variant?: string;

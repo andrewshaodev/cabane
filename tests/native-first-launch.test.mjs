@@ -64,7 +64,7 @@ test("native first launch imports a saved home through the real host and preserv
   let browser;
   try {
     await server.listen();
-    browser = await chromium.launch({ channel: "chrome", headless: true });
+    browser = await chromium.launch({ channel: "chromium", headless: true });
     const open = async (mode) => {
       const context = await browser.newContext();
       const page = await context.newPage();

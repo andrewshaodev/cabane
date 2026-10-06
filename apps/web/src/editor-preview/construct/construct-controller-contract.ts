@@ -1,7 +1,5 @@
 import {
-  availableOpeningOffsetRanges,
   deriveFloorTopology,
-  nearestAvailableOpeningOffset,
   type DerivedWallRun,
   type EditorOpening,
   type EditorWall,
@@ -46,8 +44,6 @@ export type ConstructEditorAction =
       >;
     }
   | { type: "replace-selected-opening"; opening: EditorOpening };
-
-export { availableOpeningOffsetRanges, nearestAvailableOpeningOffset };
 
 export interface ConstructEditorController extends ConstructEditorState {
   doorConfiguration: import("@cabane/engine").DoorConfiguration;

@@ -105,7 +105,9 @@ export const validateEntitySlot = (
   }
   if (
     rawSlot.deviceRole !== undefined &&
-    !["primary", "secondary"].includes(String(rawSlot.deviceRole))
+    !["primary", "secondary"].includes(
+      typeof rawSlot.deviceRole === "string" ? rawSlot.deviceRole : "",
+    )
   ) {
     issues.push(
       issue(

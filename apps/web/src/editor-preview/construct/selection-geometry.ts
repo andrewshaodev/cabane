@@ -179,7 +179,7 @@ export const resolveConstructionDeletionTargets = ({
   previewFloor: FloorSpec;
   wallRuns: readonly DerivedWallRun[];
 }): readonly FloorEditorSelectionTarget[] => {
-  const selected = Array.isArray(selection)
+  const selected: readonly FloorEditorSelectionTarget[] = Array.isArray(selection)
     ? selection
     : floorEditorSelectionTargets(selection as FloorEditorSelection);
   const selectedRoomIds = new Set(

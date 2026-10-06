@@ -2,9 +2,9 @@ import { ArchitecturalOutdoorPlatforms, floorSlabPolygons } from "../outdoor-pla
 import { ArchitecturalHedges } from "../hedges";
 export type FloorSceneProps = {
   sourceFloor: HomeManifest["floors"][number];
-  below?: HomeManifest["floors"][number];
+  below?: HomeManifest["floors"][number] | undefined;
   platformBelow?: HomeManifest["floors"][number];
-  above?: HomeManifest["floors"][number];
+  above?: HomeManifest["floors"][number] | undefined;
   showGround: boolean;
   showCeiling: boolean;
   manifest: HomeManifest;
@@ -15,11 +15,11 @@ export type FloorSceneProps = {
   architectureModels: ArchitectureModelRegistry;
   deviceModels: DeviceModelRegistry;
   openingPositions: import("../opening-pose").OpeningPositions;
-  onSelectRoom?: (roomId: string) => void;
+  onSelectRoom?: ((roomId: string) => void) | undefined;
   onInteract: (target: ExtensionInteractionTarget) => void;
-  onWalkDeviceTargetChange?: (target: ExtensionInteractionTarget | null) => void;
+  onWalkDeviceTargetChange?: ((target: ExtensionInteractionTarget | null) => void) | undefined;
   liveMediaByEntityId?: Readonly<Partial<Record<EntityId, DeviceLiveMedia>>>;
-  interactionMode?: "runtime" | "editor";
+  interactionMode?: ("runtime" | "editor") | undefined;
   sceneLightingEnabled?: boolean;
 };
 import { type Object3D } from "three";
@@ -38,7 +38,6 @@ import { mergeDeviceModelRegistriesStableFirst, resolveDeviceModelDefinition } f
 
 import { roomIdForItem } from "../home-project";
 
-import { CameraFacingFade, Outlines, ToonMaterial } from "../rendering";
 import { LegacyDeviceItemRenderer, SceneItemRenderer } from "../SceneItemRenderer";
 
 import { ArchitecturalWall, ArchitecturalWalls } from "../architecture-scene/ArchitecturalWalls";
@@ -93,6 +92,8 @@ export const FloorScene = memo(function FloorScene({
     // R3F raycasts each registered event object, not just the scene root.
     // Guard every descendant, including handlers owned by catalog components.
     visualRoot.current.traverse((object) => {
+      // Retain the method for restoration on its original object; it is never called detached.
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       originals.set(object, object.raycast);
       object.raycast = () => false;
     });

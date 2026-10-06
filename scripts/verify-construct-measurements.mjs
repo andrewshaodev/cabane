@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { chromium } from "playwright-core";
 
 const origin = process.env.EDITOR_ORIGIN ?? "http://127.0.0.1:4186";
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });
   page.setDefaultTimeout(15_000);

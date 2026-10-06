@@ -19,7 +19,7 @@ export const homeAssistantErrorMessage = (error: unknown) => {
     return "Home Assistant could not be reached. Check the configured URL and network.";
   }
   if (error && typeof error === "object" && "message" in error) {
-    return String((error as { message: unknown }).message);
+    return String(error.message);
   }
   return "Home Assistant returned an unexpected connection error.";
 };

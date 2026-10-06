@@ -239,7 +239,7 @@ const isSceneModelDefinition = (value: unknown): value is RawObject => {
     Array.isArray(max) &&
     max.length === 3 &&
     max.every(isFiniteNumber) &&
-    min.every((coordinate, index) => coordinate <= (max[index] as number)) &&
+    min.every((coordinate, index) => coordinate <= max[index]) &&
     Number.isInteger(value.complexity.visibleMeshes) &&
     (value.complexity.visibleMeshes as number) >= 0 &&
     Number.isInteger(value.complexity.triangles) &&
@@ -262,7 +262,9 @@ export const isDeviceModelDefinition = (value: unknown): value is DeviceModelDef
     return false;
   return (
     (value.interaction.target === undefined ||
-      ["device-dashboard", "camera-viewer"].includes(String(value.interaction.target))) &&
+      ["device-dashboard", "camera-viewer"].includes(
+        typeof value.interaction.target === "string" ? value.interaction.target : "",
+      )) &&
     (value.liveMedia === undefined ||
       (isObject(value.liveMedia) &&
         value.liveMedia.kind === "camera-stream" &&
@@ -280,7 +282,7 @@ export const isDeviceModelDefinition = (value: unknown): value is DeviceModelDef
         value.sceneLight.distance > 0 &&
         (value.supportedDomains as unknown[]).includes("light"))) &&
     isFiniteNumber(value.interaction.tapTolerancePixels) &&
-    (value.interaction.tapTolerancePixels as number) > 0
+    value.interaction.tapTolerancePixels > 0
   );
 };
 

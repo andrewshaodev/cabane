@@ -19,5 +19,7 @@ export function useSceneArchitectureFloor<T extends FloorSpec>(floor: T): T {
   // key changes, even if an editor updated the supplied FloorSpec in place.
   // Reusing `floor` directly left the previous solid wall mesh mounted while
   // the new opening model rendered inside it.
+  // Structural key excludes runtime bindings; including floor would rebuild architectural meshes on entity updates.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => ({ ...floor }), [key]);
 }

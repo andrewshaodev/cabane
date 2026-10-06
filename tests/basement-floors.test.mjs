@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { act, createElement } from "react";
+import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
 import { Shape, ShapeGeometry } from "three";
 import { withModules } from "./test-server.mjs";

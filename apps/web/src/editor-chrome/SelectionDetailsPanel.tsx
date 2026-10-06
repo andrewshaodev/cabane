@@ -26,7 +26,7 @@ export function SelectionDetailsPanel({
     return () => {
       if (previous?.isConnected) previous.focus();
     };
-  }, []);
+  }, [dom]);
   return (
     <aside
       ref={panel}

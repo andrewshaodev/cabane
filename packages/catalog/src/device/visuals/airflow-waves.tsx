@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import {
@@ -112,8 +113,12 @@ export function AirflowWaves({
           <mesh
             key={index}
             geometry={geometry}
-            position={reducedMotion || forward ? positionFor(staticState) : undefined}
-            scale={reducedMotion || forward ? staticState.scale : undefined}
+            {...omitUndefinedProperties({
+              position: reducedMotion || forward ? positionFor(staticState) : undefined,
+            })}
+            {...omitUndefinedProperties({
+              scale: reducedMotion || forward ? staticState.scale : undefined,
+            })}
             renderOrder={2}
           >
             <ToonMaterial

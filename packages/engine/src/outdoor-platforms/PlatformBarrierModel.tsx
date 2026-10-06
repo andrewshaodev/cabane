@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../defined-properties";
 import type { OutdoorPlatformEdgeConfiguration, PlanPoint } from "../types";
 import { PlatformLowWall } from "./PlatformLowWall";
 import { PlatformRailing } from "./PlatformRailing";
@@ -19,7 +20,7 @@ export function PlatformBarrierModel({
   const height = configuration.heightMeters;
   return (
     <group
-      name={name}
+      {...omitUndefinedProperties({ name: name })}
       position={[(from[0] + to[0]) / 2, 0, (from[1] + to[1]) / 2]}
       rotation={[0, -Math.atan2(to[1] - from[1], to[0] - from[0]), 0]}
     >

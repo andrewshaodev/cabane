@@ -37,8 +37,8 @@ export function createOliveWoodGeometry() {
       0.03,
     );
   });
-  const trunk = mergeGeometries(trunkParts)!;
-  const boughs = mergeGeometries(boughParts)!;
+  const trunk = mergeGeometries(trunkParts);
+  const boughs = mergeGeometries(boughParts);
   [...trunkParts, ...boughParts].forEach((geometry) => geometry.dispose());
   return { trunk, boughs };
 }

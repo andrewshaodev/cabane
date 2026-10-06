@@ -2,12 +2,14 @@ import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
 
-export const WALK_PREFERENCES_KEY = "cabane.walk.preferences.v1";
+const WALK_PREFERENCES_KEY = "cabane.walk.preferences.v1";
 
 function loadPreferences(): Record<string, unknown> {
   try {
-    const value = JSON.parse(window.localStorage.getItem(WALK_PREFERENCES_KEY) ?? "{}");
-    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const value: unknown = JSON.parse(window.localStorage.getItem(WALK_PREFERENCES_KEY) ?? "{}");
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
   } catch {
     return {};
   }
@@ -85,7 +87,7 @@ export function WalkPreferences({
       dom.events.removeEventListener("keydown", onKeyDown, true);
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [onClose, dom]);
   return (
     <div
       className="walk-preferences-backdrop"

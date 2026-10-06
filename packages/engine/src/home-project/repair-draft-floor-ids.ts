@@ -16,10 +16,14 @@ export function repairDraftFloorIds(project: HomeProject): HomeProject {
   const rewrite = <T>(value: T, map: Map<string, string>, key = ""): T => {
     if (typeof value === "string")
       return (referenceKeys.has(key) ? (map.get(value) ?? value) : value) as T;
-    if (Array.isArray(value)) return value.map((child) => rewrite(child, map, key)) as T;
+    if (Array.isArray(value))
+      return (value as unknown[]).map((child) => rewrite(child, map, key)) as T;
     if (value && typeof value === "object")
       return Object.fromEntries(
-        Object.entries(value).map(([key, child]) => [key, rewrite(child, map, key)]),
+        Object.entries(value as Record<string, unknown>).map(([key, child]) => [
+          key,
+          rewrite(child, map, key),
+        ]),
       ) as T;
     return value;
   };

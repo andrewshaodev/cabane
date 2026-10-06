@@ -5,7 +5,6 @@ import type {
   HomeProject,
   HomeProjectIssue,
   DraftLayoutFloorSpec,
-  LayoutOpeningSpec,
   LayoutRoomSpec,
   ProjectCommand,
   ProjectModelRegistries,
@@ -42,9 +41,12 @@ const layoutFloors = new WeakMap<FloorSpec, DraftLayoutFloorSpec>();
 export const layoutFloorFromEditorFloor = (floor: FloorSpec): DraftLayoutFloorSpec => {
   const cached = layoutFloors.get(floor);
   if (cached) return cached;
+  const { ceilings: _ceilings, ...architecture } = floor;
   const layout: DraftLayoutFloorSpec = {
-    ...floor,
-    ceilings: floor.ceilings?.filter((ceiling) => ceiling.kind === "flat"),
+    ...architecture,
+    ...(floor.ceilings
+      ? { ceilings: floor.ceilings.filter((ceiling) => ceiling.kind === "flat") }
+      : {}),
     rooms: floor.rooms.map((room) => {
       const {
         furnishings: _furnishings,
@@ -60,7 +62,7 @@ export const layoutFloorFromEditorFloor = (floor: FloorSpec): DraftLayoutFloorSp
     }),
     openings: floor.openings.map((opening) => {
       const { contactSlot: _contactSlot, coverSlot: _coverSlot, ...layoutOpening } = opening;
-      return layoutOpening as LayoutOpeningSpec;
+      return layoutOpening;
     }),
   };
   layoutFloors.set(floor, layout);

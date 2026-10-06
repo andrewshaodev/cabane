@@ -20,11 +20,11 @@ export function SceneRoomContext({
 }: {
   mode: SceneMode;
   displayName: string;
-  roomStatus?: RoomStatusSummary;
+  roomStatus?: RoomStatusSummary | undefined;
   homePresence?: HomePresenceSummary | null;
   connectionStatus: HomeAssistantConnectionStatus;
   connectionDescription: string;
-  sessionStatus?: string;
+  sessionStatus?: string | undefined;
 }) {
   return (
     <div className="scene-context" aria-live="polite">

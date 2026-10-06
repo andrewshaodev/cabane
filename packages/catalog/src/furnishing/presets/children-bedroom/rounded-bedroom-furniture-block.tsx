@@ -4,7 +4,6 @@ export function RoundedBedroomFurnitureBlock({
   size,
   position,
   color,
-  radius = 0.025,
   rotation = [0, 0, 0],
   outlineColor = "#655957",
   outlineThickness = 0.006,

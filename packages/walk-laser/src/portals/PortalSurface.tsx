@@ -25,7 +25,7 @@ export function PortalSurface({
 }: {
   anchor: PortalAnchor;
   color: PortalColor;
-  exit?: PortalAnchor;
+  exit?: PortalAnchor | undefined;
   reducedMotion: boolean;
   closing?: boolean;
   onClosed?: () => void;

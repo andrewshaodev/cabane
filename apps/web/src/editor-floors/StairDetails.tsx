@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { StairShapeSelect } from "./StairShapeSelect";
 import { convertStairShape } from "./stair-placement-geometry";
 import {
@@ -144,7 +145,14 @@ export function StairDetails({
           aria-label="Stair railings"
           value={draft.railings ?? "both"}
           onChange={(event) =>
-            update({ ...draft, railings: event.target.value as StairSpec["railings"] })
+            update(
+              omitUndefinedProperties({
+                ...draft,
+                ...((event.target.value as StairSpec["railings"]) === undefined
+                  ? {}
+                  : { railings: event.target.value as StairSpec["railings"] }),
+              }),
+            )
           }
         >
           <option value="both">Both sides</option>

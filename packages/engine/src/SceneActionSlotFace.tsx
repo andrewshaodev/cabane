@@ -34,7 +34,7 @@ export function SceneActionSlotFace({
 }: {
   icon: ReactNode;
   label: string;
-  shortcut?: string;
+  shortcut?: string | undefined;
   chevron?: boolean;
 }) {
   return (
@@ -64,7 +64,7 @@ export function RoomShortcutIcon({
   pictureUrl,
 }: {
   name: string;
-  pictureUrl?: string | null;
+  pictureUrl?: (string | null) | undefined;
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
   const initials =

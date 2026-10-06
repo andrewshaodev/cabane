@@ -152,13 +152,15 @@ export function SceneOutlines({
     });
   });
 
+  const currentAngle = useRef(angle);
+  currentAngle.current = angle;
   useEffect(
     () => () => {
       const group = ref.current;
       if (!group) return;
       const mesh = group.children[0] as Mesh | undefined;
       if (mesh) {
-        if (angle) mesh.geometry.dispose();
+        if (currentAngle.current) mesh.geometry.dispose();
         group.remove(mesh);
       }
     },

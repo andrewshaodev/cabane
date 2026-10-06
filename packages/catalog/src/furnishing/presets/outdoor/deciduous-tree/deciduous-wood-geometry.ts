@@ -91,7 +91,7 @@ export function createDeciduousWoodGeometry() {
       5,
     );
   }
-  const wood = mergeGeometries(parts)!;
+  const wood = mergeGeometries(parts);
   parts.forEach((part) => part.dispose());
   return wood;
 }

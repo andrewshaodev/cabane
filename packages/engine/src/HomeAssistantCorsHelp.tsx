@@ -17,13 +17,15 @@ export function HomeAssistantCorsHelp() {
         <button
           type="button"
           disabled={!origin}
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(origin);
-              setCopyMessage("Address copied.");
-            } catch {
-              setCopyMessage("Could not copy. Select and copy the address above.");
-            }
+          onClick={() => {
+            void (async () => {
+              try {
+                await navigator.clipboard.writeText(origin);
+                setCopyMessage("Address copied.");
+              } catch {
+                setCopyMessage("Could not copy. Select and copy the address above.");
+              }
+            })();
           }}
         >
           Copy address

@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
-  const { CabaneDomProvider } = await load("/packages/engine/src/CabaneDom.tsx");
+  const { CabaneDomProvider, useCabaneDom } = await load("/packages/engine/src/CabaneDom.tsx");
   const { useDesktopWalkInput } = await load("/packages/engine/src/desktop-walk-input.ts");
   const { FloorPicker } = await load("/packages/engine/src/building/FloorPicker.tsx");
   const { EditorActionButton } = await load("/apps/web/src/editor-chrome/EditorActionButton.tsx");
@@ -43,6 +43,20 @@ await withModules(async (load) => {
       Object.assign(globalThis, previous);
     }
   }
+  test("DOM environment identity stays stable across unrelated renders", async () => {
+    await fixture(async ({ render, shadow }) => {
+      const values = [];
+      function Probe() {
+        values.push(useCabaneDom());
+        return null;
+      }
+      await render(h(Probe, { revision: 1 }));
+      await render(h(Probe, { revision: 2 }));
+      assert.equal(values.length, 2);
+      assert.equal(values[0], values[1]);
+      assert.equal(values[1].root, shadow);
+    });
+  });
   test("panel keyboard shortcuts ignore host events and host dialogs while respecting local inputs", async () =>
     fixture(async ({ browser, shadow, render }) => {
       const selected = [];
@@ -98,15 +112,13 @@ await withModules(async (load) => {
       await act(async () => document.querySelector("#host").focus());
       assert.deepEqual(movement.current, { x: 0, y: 0 });
       await act(async () =>
-        document
-          .querySelector("#host")
-          .dispatchEvent(
-            new browser.window.KeyboardEvent("keydown", {
-              code: "KeyW",
-              bubbles: true,
-              composed: true,
-            }),
-          ),
+        document.querySelector("#host").dispatchEvent(
+          new browser.window.KeyboardEvent("keydown", {
+            code: "KeyW",
+            bubbles: true,
+            composed: true,
+          }),
+        ),
       );
       assert.deepEqual(movement.current, { x: 0, y: 0 });
     }));
@@ -161,15 +173,13 @@ await withModules(async (load) => {
       assert.equal(container.style.overflow, "hidden");
       assert.equal(shadow.activeElement, shadow.querySelector("[data-camera-close]"));
       await act(async () =>
-        document
-          .querySelector("#host")
-          .dispatchEvent(
-            new browser.window.KeyboardEvent("keydown", {
-              key: "Escape",
-              bubbles: true,
-              composed: true,
-            }),
-          ),
+        document.querySelector("#host").dispatchEvent(
+          new browser.window.KeyboardEvent("keydown", {
+            key: "Escape",
+            bubbles: true,
+            composed: true,
+          }),
+        ),
       );
       assert.equal(closes, 0);
       await act(async () =>

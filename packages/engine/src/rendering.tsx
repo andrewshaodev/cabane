@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import type { OutlinesProps as DreiOutlinesProps } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
@@ -7,7 +8,6 @@ import {
   NearestFilter,
   RedFormat,
   type Group,
-  type Material,
   type Mesh,
 } from "three";
 import { createContext, useContext, useEffect, useRef, type ComponentProps } from "react";
@@ -39,12 +39,18 @@ export function ToonMaterial(props: ToonMaterialProps) {
     const source = props.color ?? "white";
     const tint = Array.isArray(source)
       ? source.length === 3
-        ? new Color(source[0], source[1], source[2])
-        : new Color(source[0])
+        ? new Color(...(source as [number, number, number]))
+        : new Color(source[0] as ColorRepresentation)
       : new Color(source as ColorRepresentation);
     color = tint.lerp(new Color("white"), 0.08);
   }
-  return <meshToonMaterial {...props} color={color} gradientMap={toonGradient} />;
+  return (
+    <meshToonMaterial
+      {...props}
+      {...omitUndefinedProperties({ color: color })}
+      gradientMap={toonGradient}
+    />
+  );
 }
 
 export type OutlinesProps = DreiOutlinesProps;
@@ -66,7 +72,7 @@ export const applyCameraFadeToMesh = (mesh: Mesh, opacity: number) => {
   }
   mesh.castShadow = Boolean(mesh.userData.cameraFadeBaseCastShadow) && opacity >= 0.995;
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-  for (const material of materials as Material[]) {
+  for (const material of materials) {
     if (material.userData.cameraFadeBaseOpacity === undefined) {
       material.userData.cameraFadeBaseOpacity = material.opacity;
       material.userData.cameraFadeBaseTransparent = material.transparent;

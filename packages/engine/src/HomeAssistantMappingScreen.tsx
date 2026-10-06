@@ -1,3 +1,4 @@
+import { useEffectEvent } from "react";
 import { useEffect, useMemo, useState, type ChangeEvent } from "react";
 import {
   automaticallyMapRuntimeBindings,
@@ -51,7 +52,7 @@ function MappingHeader({
   refreshing: boolean;
   refreshError: string | null;
   onRefresh: () => Promise<void>;
-  onClose?: () => void;
+  onClose?: (() => void) | undefined;
   onboarding: boolean;
 }) {
   return (
@@ -198,9 +199,8 @@ export function HomeAssistantMappingScreen({
   onEnterHome,
   onboarding = false,
 }: HomeAssistantMappingScreenProps) {
-  const automaticallyMapped = useMemo(
+  const [automaticallyMapped] = useState(
     () => automaticallyMapRuntimeBindings(manifest, manager.profile, runtime).profile,
-    [],
   );
   const [activeView, setActiveView] = useState<MappingView>(initialView);
   const [savedProfile, setSavedProfile] = useState(manager.profile);
@@ -222,13 +222,17 @@ export function HomeAssistantMappingScreen({
     [roomAreaIds, savedProfile.roomAreaIds],
   );
 
-  useEffect(() => {
+  // Reconsider automatic mappings when registry data changes, preserving manual draft edits between updates.
+  const remapRegistry = useEffectEvent(() => {
     const current: RuntimeBindingProfile = { ...savedProfile, roomAreaIds, entityIdsBySlotId };
     const next = automaticallyMapRuntimeBindings(manifest, current, runtime).profile;
     setRoomAreaIds((value) => (recordsEqual(value, next.roomAreaIds) ? value : next.roomAreaIds));
     setEntityIdsBySlotId((value) =>
       recordsEqual(value, next.entityIdsBySlotId) ? value : next.entityIdsBySlotId,
     );
+  });
+  useEffect(() => {
+    remapRegistry();
   }, [manifest, runtime.areas, runtime.devices, runtime.entityRegistry, runtime.entityStates]);
 
   const commitSavedProfile = (next: RuntimeBindingProfile) => {

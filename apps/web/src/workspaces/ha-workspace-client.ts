@@ -63,4 +63,3 @@ export function createHaWorkspaceClient(send: StorageSender) {
       }),
   };
 }
-export type HaWorkspaceClient = ReturnType<typeof createHaWorkspaceClient>;

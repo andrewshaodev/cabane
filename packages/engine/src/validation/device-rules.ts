@@ -106,7 +106,7 @@ export const validateDevice = (
             slot.compatibleDomains.includes("camera"),
         ))
     ) {
-      const cameraSlot = rawDevice.entitySlots[0];
+      const cameraSlot: unknown = rawDevice.entitySlots[0];
       if (
         rawDevice.entitySlots.length !== 1 ||
         !isObject(cameraSlot) ||

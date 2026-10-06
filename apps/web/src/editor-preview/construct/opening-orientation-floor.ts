@@ -46,12 +46,13 @@ export function floorWithOpeningOrientations(
       .filter((opening, index) => opening !== before.openings[index])
       .map((opening) => [opening.id, opening]),
   );
-  let nextFloor = before.pools === after.pools ? floor : { ...floor, pools: after.pools };
+  let nextFloor: FloorSpec =
+    before.pools === after.pools ? floor : { ...floor, pools: after.pools ?? [] };
   if (before.outdoorPlatforms !== after.outdoorPlatforms)
-    nextFloor = { ...nextFloor, outdoorPlatforms: after.outdoorPlatforms };
-  if (before.hedges !== after.hedges) nextFloor = { ...nextFloor, hedges: after.hedges };
+    nextFloor = { ...nextFloor, outdoorPlatforms: after.outdoorPlatforms ?? [] };
+  if (before.hedges !== after.hedges) nextFloor = { ...nextFloor, hedges: after.hedges ?? [] };
   if (before.groundZones !== after.groundZones) {
-    nextFloor = { ...nextFloor, groundZones: after.groundZones };
+    nextFloor = { ...nextFloor, groundZones: after.groundZones ?? [] };
   }
   if (!changed.size) return nextFloor;
   return {

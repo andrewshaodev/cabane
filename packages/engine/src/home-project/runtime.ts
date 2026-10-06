@@ -2,7 +2,6 @@ import { deriveFloorLevels } from "../building/floor-levels";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import type {
   DeviceSlotSpec,
-  FloorSpec,
   RenderableFloorSpec,
   HomeExtensionRegistry,
   HomeManifest,
@@ -109,7 +108,7 @@ export const composeHomeBindingManifest = (
   }),
   sceneItems: project.sceneItems,
   shortcuts: project.shortcuts,
-  actionBar: project.actionBar,
+  ...(project.actionBar === undefined ? {} : { actionBar: project.actionBar }),
   extensions,
   assumptions: project.assumptions,
 });

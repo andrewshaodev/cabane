@@ -1,3 +1,4 @@
+import type { HomeManifest } from "./types";
 import { isOutdoorPlatformOutline } from "./outdoor-platforms/platform-geometry";
 import { SceneRoomSelection } from "./building/RoomSelectionSurfaces";
 import { StairPlan } from "./stairs/models/StairPlan";
@@ -52,10 +53,17 @@ export const ArchitectureScene = memo(function ArchitectureScene({
       !floor.belowGround && (floor.elevationMeters === undefined || floor.elevationMeters === 0),
   );
   const apertureKey = JSON.stringify(deriveStairApertures(manifest));
+  const apertureFloorsKey = JSON.stringify(
+    manifest.floors.map(({ id, outdoorPlatforms }) => ({ id, outdoorPlatforms })),
+  );
   const aperturesByFloor = useMemo(() => {
-    const apertures: ReturnType<typeof deriveStairApertures> = JSON.parse(apertureKey);
+    const floors = JSON.parse(apertureFloorsKey) as Pick<
+      HomeManifest["floors"][number],
+      "id" | "outdoorPlatforms"
+    >[];
+    const apertures = JSON.parse(apertureKey) as ReturnType<typeof deriveStairApertures>;
     return new Map(
-      manifest.floors.map((floor) => [
+      floors.map((floor) => [
         floor.id,
         {
           floor: apertures
@@ -65,19 +73,14 @@ export const ArchitectureScene = memo(function ArchitectureScene({
             ...apertures
               .filter((a) => a.floorId === floor.id && a.surface === "ceiling")
               .map((a) => a.polygon),
-            ...(manifest.floors[manifest.floors.indexOf(floor) + 1]?.outdoorPlatforms ?? [])
+            ...(floors[floors.indexOf(floor) + 1]?.outdoorPlatforms ?? [])
               .filter((platform) => isOutdoorPlatformOutline(platform.polygon))
               .map((platform) => platform.polygon),
           ],
         },
       ]),
     );
-  }, [
-    apertureKey,
-    JSON.stringify(
-      manifest.floors.map((f) => ({ id: f.id, outdoorPlatforms: f.outdoorPlatforms })),
-    ),
-  ]);
+  }, [apertureKey, apertureFloorsKey]);
   const floorManifests = useMemo(
     () =>
       new Map(

@@ -30,14 +30,14 @@ class PreviewBoundary extends Component<
   { children: ReactNode; onError: () => void },
   { failed: boolean }
 > {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  componentDidCatch() {
+  override componentDidCatch() {
     this.props.onError();
   }
-  render() {
+  override render() {
     return this.state.failed ? null : this.props.children;
   }
 }
@@ -70,6 +70,9 @@ function ThumbnailScene({
   const extents = max.map((v, i) => (v - min[i]) / span);
 
   useLayoutEffect(() => {
+    const { min, max } = request.entry.definition.bounds;
+    const span = Math.max(...max.map((v, i) => v - min[i]), 0.01);
+    const extents = max.map((v, i) => (v - min[i]) / span);
     const cam = camera.current;
     cam.position.set(3, 2.6, 4);
     cam.lookAt(0, 0, 0);
@@ -174,7 +177,7 @@ export function ModelThumbnailRenderer({
   const [unavailable, setUnavailable] = useState(false);
   const pump = useCallback(() => {
     if (!alive.current || active.current) return;
-    const next = pending.current.values().next().value as Request | undefined;
+    const next = pending.current.values().next().value;
     if (!next) return;
     pending.current.delete(next.canvas);
     active.current = next;
@@ -196,9 +199,10 @@ export function ModelThumbnailRenderer({
   );
   useEffect(() => {
     alive.current = true;
+    const queue = pending.current;
     return () => {
       alive.current = false;
-      pending.current.clear();
+      queue.clear();
       active.current = null;
     };
   }, []);

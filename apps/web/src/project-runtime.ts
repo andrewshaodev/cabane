@@ -30,7 +30,7 @@ export const ownerDeviceModels = mergeDeviceModelRegistriesStableFirst(
 
 export const ownerProjectRegistries: ProjectModelRegistries = {
   furnishingModels: Object.assign(
-    Object.create(null),
+    Object.create(null) as Record<string, never>,
     stableFurnishingRegistry,
     ownerProjectManifest.extensions.furnishingModels,
   ),
@@ -134,14 +134,21 @@ export async function migrateOriginProfile(
     storage.getItem(legacyRuntimeBindingProfileStorageKey(key, record.homeId));
   if (raw === null) return record;
   const published = composeOwnerProjectManifest(record.published);
-  const input = JSON.parse(raw);
+  const input: unknown = JSON.parse(raw);
   const parsed = validateRuntimeBindingProfile(input, published);
   if (!parsed.valid || !parsed.profile)
     throw new Error(
       `Saved connections need recovery: ${parsed.issues[0]?.message ?? "Invalid profile"}`,
     );
+  // Preserve the validated raw object so workspace validation also rejects unknown private fields.
   const bindings = reconcileWorkspaceBindings(
-    migrateWorkspaceBindingProfile(record.bindings, key, input, published, published),
+    migrateWorkspaceBindingProfile(
+      record.bindings,
+      key,
+      input as NonNullable<typeof parsed.profile>,
+      published,
+      published,
+    ),
     composeOwnerProjectManifest(record.draft),
   );
   return replace({ ...record, bindings }, record.revision);

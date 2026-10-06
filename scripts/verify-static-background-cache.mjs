@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { chromium } from "playwright-core";
 // Bounded feasibility prototype: can cached, resolved HDR color/depth seed the
 // existing 4-sample render target without losing per-sample edge coverage?
-const browser = await chromium.launch({ channel: "chrome", headless: false });
+const browser = await chromium.launch({ channel: "chromium", headless: false });
 try {
   const page = await browser.newPage();
   const result = await page.evaluate(() => {

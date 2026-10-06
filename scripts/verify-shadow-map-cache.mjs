@@ -9,7 +9,7 @@ const server = await createServer({
 await server.listen();
 let browser;
 try {
-  browser = await chromium.launch({ channel: "chrome", headless: false });
+  browser = await chromium.launch({ channel: "chromium", headless: false });
   const page = await browser.newPage();
   await page.route("**/__shadow-test", (route) =>
     route.fulfill({ contentType: "text/html", body: "<html><body></body></html>" }),

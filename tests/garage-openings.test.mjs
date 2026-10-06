@@ -9,9 +9,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
   const engine = await load("/packages/engine/src/index.ts");
   const { DOOR_PRESETS, DoorModel } = await load("/packages/catalog/src/architecture/index.ts");
-  const { ownerHomeProject, ownerProjectManifest, homeExtensions } = await load(
-    "/tests/fixtures/bundled-home.ts",
-  );
+  const { ownerHomeProject, ownerProjectManifest } = await load("/tests/fixtures/bundled-home.ts");
   const { deriveDemoSessionDefinition } = await load(
     "/packages/engine/src/onboarding/demo/demo-session-definition.ts",
   );
@@ -101,9 +99,37 @@ await withModules(async (load) => {
 
   test("cover resolution prioritizes position, falls back to contact, retains only one binding identity, and feeds room controls", () => {
     const { runtime, profile } = deriveDemoSessionDefinition(ownerProjectManifest);
-    const coverId = profile.entityIdsBySlotId[garage.coverSlot.id];
-    const contactId = profile.entityIdsBySlotId[garage.contactSlot.id];
-    const cover = runtime.entityStates[coverId];
+    const coverId = "cover.test_garage";
+    const contactId = "binary_sensor.test_garage_contact";
+    profile.entityIdsBySlotId[garage.coverSlot.id] = coverId;
+    profile.entityIdsBySlotId[garage.contactSlot.id] = contactId;
+    const cover = {
+      entityId: coverId,
+      state: "closed",
+      available: true,
+      stale: false,
+      attributes: { device_class: "garage", current_position: 0 },
+    };
+    runtime.entityStates[coverId] = cover;
+    runtime.entityStates[contactId] = {
+      entityId: contactId,
+      state: "off",
+      available: true,
+      stale: false,
+      attributes: { device_class: "door" },
+    };
+    const areaId = profile.roomAreaIds[garage.coverSlot.roomId];
+    runtime.entityRegistry.push(
+      ...[coverId, contactId].map((entityId) => ({
+        entity_id: entityId,
+        area_id: areaId,
+        device_id: null,
+        disabled_by: null,
+        hidden_by: null,
+        name: null,
+        original_name: entityId,
+      })),
+    );
     const retained = new Map();
     const resolve = () =>
       engine.resolveHomeAssistantBindings(ownerProjectManifest, profile, runtime);

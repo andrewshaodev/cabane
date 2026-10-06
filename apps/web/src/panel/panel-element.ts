@@ -21,7 +21,8 @@ interface PanelOptions {
 const fontLinks = new WeakMap<Document, Map<string, { link: HTMLLinkElement; count: number }>>();
 function retainFonts(document: Document, href: string) {
   let links = fontLinks.get(document);
-  if (!links) fontLinks.set(document, (links = new Map()));
+  if (!links)
+    fontLinks.set(document, (links = new Map<string, { link: HTMLLinkElement; count: number }>()));
   let entry = links.get(href);
   if (!entry) {
     const link = document.createElement("link");

@@ -22,12 +22,14 @@ export const requestPopupAuthorizationCode = (
       host.clearInterval(timer);
       popup.close();
     };
-    const receive = (event: MessageEvent) => {
+    const receive = (event: MessageEvent<unknown>) => {
+      if (!event.data || typeof event.data !== "object") return;
+      const data = event.data as Record<string, unknown>;
       if (
         event.origin !== host.location.origin ||
         event.source !== popup ||
-        event.data?.type !== "cabane:ha-authorization" ||
-        event.data.state !== state
+        data.type !== "cabane:ha-authorization" ||
+        data.state !== state
       )
         return;
       if (!isCurrent()) {
@@ -35,9 +37,9 @@ export const requestPopupAuthorizationCode = (
         reject(new Error("Home Assistant sign-in was cancelled."));
         return;
       }
-      if (typeof event.data.code !== "string" || !event.data.code) return;
+      if (typeof data.code !== "string" || !data.code) return;
       cleanup();
-      resolve(event.data.code);
+      resolve(data.code);
     };
     host.addEventListener("message", receive);
     const deadline = Date.now() + 5 * 60_000;

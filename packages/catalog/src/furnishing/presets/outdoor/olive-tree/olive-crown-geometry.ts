@@ -30,7 +30,7 @@ export function createOliveCrownGeometry() {
     }),
   );
   const leaves = createOliveLeafSprays();
-  const olives = mergeGeometries(fruit)!;
+  const olives = mergeGeometries(fruit);
   fruit.forEach((geometry) => geometry.dispose());
   return { leaves, olives };
 }

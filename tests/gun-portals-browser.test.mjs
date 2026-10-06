@@ -510,8 +510,8 @@ for (const reducedMotion of ["no-preference", "reduce"])
       await shoot("right");
       await page.waitForFunction(() => window.portalObservation.portals.length === 1);
       await page.locator("[data-action=portal][data-next-portal=gold]").waitFor();
-      // Let the revision-checked home write settle before another action or reload.
-      await page.waitForTimeout(150);
+      // Rendering is optimistic, especially with reduced motion. Await the durable write.
+      await page.waitForFunction(async () => Boolean((await window.readSavedPortals())?.pair.blue));
       await turn(0);
       await shoot("right");
       await page.waitForFunction(
@@ -519,6 +519,10 @@ for (const reducedMotion of ["no-preference", "reduce"])
           window.portalObservation.portals.length === 2 &&
           window.portalObservation.portals.every((p) => p.scale === 1),
       );
+      await page.waitForFunction(async () => {
+        const state = await window.readSavedPortals();
+        return Boolean(state?.pair.blue && state.pair.gold);
+      });
       const before = await saved();
       assert.ok(before.pair.blue && before.pair.gold);
       await page.keyboard.press("g");
@@ -548,10 +552,18 @@ for (const reducedMotion of ["no-preference", "reduce"])
           window.portalObservation.portals.length === 1 &&
           window.portalObservation.portals[0].name === "gun-portal-blue",
       );
+      await page.waitForFunction(async () => {
+        const state = await window.readSavedPortals();
+        return Boolean(state?.pair.blue && !state.pair.gold);
+      });
       assert.equal((await saved()).pair.gold, undefined);
       await turn(Math.PI);
       await shoot("right");
       await page.waitForFunction(() => window.portalObservation.portals.length === 0);
+      await page.waitForFunction(async () => {
+        const state = await window.readSavedPortals();
+        return state && Object.keys(state.pair).length === 0;
+      });
       assert.deepEqual((await saved()).pair, {});
       await page.reload();
       await equip();

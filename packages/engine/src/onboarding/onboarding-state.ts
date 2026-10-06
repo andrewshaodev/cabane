@@ -1,4 +1,4 @@
-export type OnboardingEntry = "explore" | "connect" | "build" | null;
+type OnboardingEntry = "explore" | "connect" | "build" | null;
 export interface LaunchOnboardingState {
   entry: OnboardingEntry;
   target?: { roomId: string; deviceId: string; slotId: string };

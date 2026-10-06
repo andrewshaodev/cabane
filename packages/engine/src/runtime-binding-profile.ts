@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { bindingDomainMatchRank } from "./binding-slot-compatibility";
 import { entityAreaId } from "./binding-entity-candidates";
 import {
@@ -168,10 +169,10 @@ export const validateRuntimeBindingProfile = (
       }
     }
   const valid = issues.length === 0;
-  return {
+  return omitUndefinedProperties({
     profile: valid
       ? {
-          schemaVersion: 1,
+          schemaVersion: 1 as const,
           homeId: input.homeId as string,
           roomAreaIds: { ...(input.roomAreaIds as Record<string, string>) },
           entityIdsBySlotId: { ...(input.entityIdsBySlotId as Record<string, EntityId>) },
@@ -179,7 +180,7 @@ export const validateRuntimeBindingProfile = (
       : undefined,
     issues,
     valid,
-  };
+  });
 };
 
 export const exportRuntimeBindingProfile = (profile: RuntimeBindingProfile) =>

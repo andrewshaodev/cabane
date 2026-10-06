@@ -1,4 +1,8 @@
-import { MemoryProjectRecordStore, ProjectRecordStore } from "./project-record-contract";
+import {
+  MemoryProjectRecordStore,
+  ProjectRecordStore,
+  HomeProjectRecord,
+} from "./project-record-contract";
 
 import { projectTransaction, PROJECT_STORE, WORKSPACE_STORE } from "./project-database";
 import type { WorkspaceMetadata } from "./workspace-contract";
@@ -52,24 +56,27 @@ export const createIndexedDbProjectRecordStore = (indexedDB: IDBFactory): Projec
           else
             request(store.put(next, homeId), () => {
               const metadata = tx.objectStore(WORKSPACE_STORE);
-              request(metadata.get(homeId), (value: WorkspaceMetadata | undefined) => {
-                if (!value) {
-                  verify();
-                  return;
-                }
-                const record = JSON.parse(next);
-                request(
-                  metadata.put(
-                    {
-                      ...value,
-                      name: record.draft.home.name,
-                      hasPublished: record.publishedAt !== 0,
-                    },
-                    homeId,
-                  ),
-                  verify,
-                );
-              });
+              request(
+                metadata.get(homeId) as IDBRequest<WorkspaceMetadata | undefined>,
+                (value) => {
+                  if (!value) {
+                    verify();
+                    return;
+                  }
+                  const record = JSON.parse(next) as HomeProjectRecord;
+                  request(
+                    metadata.put(
+                      {
+                        ...value,
+                        name: record.draft.home.name,
+                        hasPublished: record.publishedAt !== 0,
+                      },
+                      homeId,
+                    ),
+                    verify,
+                  );
+                },
+              );
             });
         };
         if (expected === undefined) replace();

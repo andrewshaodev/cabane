@@ -1,4 +1,4 @@
-import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
+import { type SceneItemSize } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../construction";
 
 export const OUTDOOR_DINING_CHAIR_SIZE = [0.56, 0.85, 0.58] as const;

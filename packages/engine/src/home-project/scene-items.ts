@@ -9,7 +9,7 @@ import { validateDeviceSlotsAgainstModel } from "./profiles";
 import type { HomeProject, SceneItemSpec } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
-export const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly string[] => {
+const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly string[] => {
   const floor = project.floors.find((candidate) => candidate.id === item.floorId);
   if (!floor) return [];
   const transform = resolveItemTransform(item.placement, floor);

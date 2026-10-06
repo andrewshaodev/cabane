@@ -3,7 +3,9 @@ import { RoundedFurniturePanel } from "../construction";
 import { CozySofaCushions, TailoredCushion } from "./sofa-upholstery";
 
 /** Existing sectional envelope and offset origin retained for saved placements. */
-export function CustomSectionalSofa({ variant = "default" }: { variant?: string } = {}) {
+export function CustomSectionalSofa({
+  variant = "default",
+}: { variant?: string | undefined } = {}) {
   const mirrored = variant === "right" || variant === "cozy-right";
   const cozy = variant === "cozy" || variant === "cozy-right";
   return (

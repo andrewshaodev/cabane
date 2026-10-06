@@ -5,7 +5,7 @@ const server = await startFixtureServer({ port: 4193 });
 let browser;
 try {
   browser = await chromium.launch({
-    channel: "chrome",
+    channel: "chromium",
     headless: true,
     args: ["--use-angle=swiftshader"],
   });

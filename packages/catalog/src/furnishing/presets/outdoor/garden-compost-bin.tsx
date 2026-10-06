@@ -1,4 +1,4 @@
-import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
+import { type SceneItemSize } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../construction";
 
 export const GARDEN_COMPOST_BIN_SIZE = [0.8, 1, 0.8] as const;

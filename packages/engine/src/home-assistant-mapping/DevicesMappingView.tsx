@@ -26,7 +26,7 @@ export function DevicesMappingView({
   roomAreaIds: RuntimeBindingProfile["roomAreaIds"];
   entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"];
   dirtyRoomIds: ReadonlySet<string>;
-  initialRoomId?: string | null;
+  initialRoomId?: (string | null) | undefined;
   onEntityIdsBySlotIdChange: (
     entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"],
   ) => void;

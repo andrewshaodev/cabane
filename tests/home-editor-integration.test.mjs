@@ -370,7 +370,7 @@ await withModules(async (load) => {
       assert.equal(dom.window.document.querySelector('[aria-labelledby="publish-title"]'), null);
     } catch (error) {
       if (error instanceof AggregateError)
-        throw new Error(error.errors.map((entry) => entry.stack).join("\n"));
+        throw new Error(error.errors.map((entry) => entry.stack).join("\n"), { cause: error });
       throw error;
     } finally {
       release();
@@ -472,7 +472,7 @@ await withModules(async (load) => {
         });
       } catch (error) {
         if (error instanceof AggregateError)
-          throw new Error(error.errors.map((entry) => entry.stack).join("\n"));
+          throw new Error(error.errors.map((entry) => entry.stack).join("\n"), { cause: error });
         throw error;
       } finally {
         await act(async () => root.unmount());
@@ -776,8 +776,8 @@ test("the product opens the unified editor and exposes its approved chrome", asy
   assert.match(workspaceHost, /<HomeAssistantRuntimeProvider/);
   assert.match(workspaceHost, /<ConnectedProduct/);
   assert.match(app, /onEditHome=\{onEditHome\}/);
-  assert.match(dashboard, /case "construct-mode": onEditHome\?\.\("construct"\)/);
-  assert.match(dashboard, /case "arrange-mode": onEditHome\?\.\("furnish"\)/);
+  assert.match(dashboard, /case "construct-mode":\s*onEditHome\?\.\("construct"\)/);
+  assert.match(dashboard, /case "arrange-mode":\s*onEditHome\?\.\("furnish"\)/);
   assert.doesNotMatch(app, /FloorLayoutEditor/);
   assert.match(
     editor,
@@ -791,8 +791,8 @@ test("the product opens the unified editor and exposes its approved chrome", asy
     editor,
     /Coming later|Home model|direction-gesture|direction-rail__heading|ConnectRail/,
   );
-  assert.match(editor, />3D</);
-  assert.match(editor, />2D</);
+  assert.match(editor, />\s*3D\s*</);
+  assert.match(editor, />\s*2D\s*</);
   assert.match(editor, /wallFadeEnabled=\{cameraView === "3d"\}/);
   assert.doesNotMatch(editor, />Fit<|>Top</);
   assert.match(editor, /handleConstructShortcut/);
@@ -827,7 +827,7 @@ test("the product opens the unified editor and exposes its approved chrome", asy
     ),
     /useSetupRecord\(manifest\.home\.id, constructionApplied\)/,
   );
-  assert.match(editor, /name="save" \/>Save<\/EditorButton>/);
+  assert.match(editor, /name="save" \/>\s*Save\s*<\/EditorButton>/);
   assert.match(editor, /"Saving…"[\s\S]*"Save anyway"[\s\S]*"Save changes"/);
   assert.doesNotMatch(editor, /[">](?:Publish|Publishing|Ready to publish)/);
   assert.doesNotMatch(editor, /<SolarLighting/);
@@ -872,7 +872,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
   ).join("\n");
   assert.match(inspector, /construction-inspector__wall-facts/);
   assert.match(inspector, />Direction</);
-  assert.match(inspector, /Thickness<CommittedNumberInput/);
+  assert.match(inspector, /Thickness\s*<CommittedNumberInput/);
   assert.match(inspector, /CommittedNumberInput/);
   assert.match(inspector, /label="Wall thickness"/);
   assert.match(inspector, /DebouncedColorInput/);

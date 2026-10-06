@@ -95,7 +95,9 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
         for (const key of keys)
           request(metadataStore.get(key), (metadata) => {
             request(tx.objectStore(PROJECT_STORE).get(key), (raw) => {
-              entries.push(entry(String(key), metadata, raw));
+              entries.push(
+                entry(typeof key === "string" ? key : JSON.stringify(key), metadata, raw),
+              );
               if (entries.length === keys.length)
                 done(
                   entries.sort(
@@ -162,7 +164,7 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
                 } catch {
                   /* Keep a recoverable library entry. */
                 }
-                const id = String(key);
+                const id = typeof key === "string" ? key : JSON.stringify(key);
                 metadata.put(
                   {
                     id,
@@ -225,29 +227,32 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
     projectTransaction<WorkspaceEntry>(factory, "readwrite", stores, (tx, request, done) => {
       const metadataStore = tx.objectStore(WORKSPACE_STORE);
       const records = tx.objectStore(PROJECT_STORE);
-      request(metadataStore.get(id), (metadata: WorkspaceMetadata | undefined) => {
-        if (!metadata) throw new WorkspaceConflictError();
-        request(records.get(id), (raw) => {
-          const record = parse(raw);
-          if (record.revision !== revision) throw new WorkspaceConflictError();
-          const commit = () => {
-            update(metadata, record);
-            record.revision++;
-            const serialized = serializeHomeProjectRecord(record);
-            parse(serialized);
-            request(records.put(serialized, id), () =>
-              request(metadataStore.put(metadata, id), () => done({ metadata, record })),
-            );
-          };
-          if (personalOnly)
-            request(tx.objectStore(STATE_STORE).get(WORKSPACE_ONBOARDING_KEY), (value) => {
-              if (parseWorkspaceOnboarding(value)?.demoWorkspaceId === id)
-                throw new Error("Connect a personal copy of the demo instead.");
-              commit();
-            });
-          else commit();
-        });
-      });
+      request(
+        metadataStore.get(id) as IDBRequest<WorkspaceMetadata | undefined>,
+        (metadata: WorkspaceMetadata | undefined) => {
+          if (!metadata) throw new WorkspaceConflictError();
+          request(records.get(id), (raw) => {
+            const record = parse(raw);
+            if (record.revision !== revision) throw new WorkspaceConflictError();
+            const commit = () => {
+              update(metadata, record);
+              record.revision++;
+              const serialized = serializeHomeProjectRecord(record);
+              parse(serialized);
+              request(records.put(serialized, id), () =>
+                request(metadataStore.put(metadata, id), () => done({ metadata, record })),
+              );
+            };
+            if (personalOnly)
+              request(tx.objectStore(STATE_STORE).get(WORKSPACE_ONBOARDING_KEY), (value) => {
+                if (parseWorkspaceOnboarding(value)?.demoWorkspaceId === id)
+                  throw new Error("Connect a personal copy of the demo instead.");
+                commit();
+              });
+            else commit();
+          });
+        },
+      );
     });
   const readOnboarding = () =>
     projectTransaction<WorkspaceOnboardingState | null>(

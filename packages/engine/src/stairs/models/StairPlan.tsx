@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../../defined-properties";
 import { ShapedStairPlan } from "./ShapedStairPlan";
 import type { ThreeElements } from "@react-three/fiber";
 import type { StairFlight } from "../flight-geometry";
@@ -13,10 +14,12 @@ export function StairPlan({
   handlers,
   onSelect,
 }: {
-  handlers?: Pick<
-    ThreeElements["mesh"],
-    "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel"
-  >;
+  handlers?:
+    | Pick<
+        ThreeElements["mesh"],
+        "onPointerDown" | "onPointerMove" | "onPointerUp" | "onPointerCancel"
+      >
+    | undefined;
   invalid?: boolean;
   flight: StairFlight;
   upper?: boolean;
@@ -24,7 +27,11 @@ export function StairPlan({
   onSelect?: () => void;
 }) {
   if (flight.shape !== "straight")
-    return <ShapedStairPlan {...{ flight, upper, selected, invalid, handlers, onSelect }} />;
+    return (
+      <ShapedStairPlan
+        {...omitUndefinedProperties({ flight, upper, selected, invalid, handlers, onSelect })}
+      />
+    );
   const width = flight.widthMeters;
   const run = flight.runMeters;
   const ink = invalid ? "#bc433a" : selected ? "#ff754d" : upper ? "#6b7881" : "#35434c";
@@ -37,15 +44,20 @@ export function StairPlan({
       <mesh
         name={`stair-plan-hit-${flight.id}`}
         position={[0, 0, run / 2]}
-        onClick={onSelect ? (event) => event.stopPropagation() : undefined}
-        onPointerDown={
-          onSelect
-            ? (event) => {
+        {...omitUndefinedProperties({
+          onClick: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<MouseEvent>) =>
+                event.stopPropagation()
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerDown: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 onSelect();
               }
-            : undefined
-        }
+            : undefined,
+        })}
         {...(!onSelect && !handlers ? { raycast: () => undefined } : {})}
         {...handlers}
       >

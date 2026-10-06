@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import type { DoorConfiguration } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 export function DoorDesignFields({
@@ -50,21 +51,27 @@ export function DoorDesignFields({
                 heightMeters: value.heightMeters,
               };
               if (event.target.value === "roll-up")
-                onChange({ ...base, operation: "roll-up", variant: "slatted" });
+                onChange(
+                  omitUndefinedProperties({ ...base, operation: "roll-up", variant: "slatted" }),
+                );
               else if (event.target.value === "sliding")
-                onChange({
-                  ...base,
-                  operation: "sliding",
-                  variant: value.operation === "roll-up" ? "panel" : value.variant,
-                  leafCount: value.leafCount ?? 1,
-                });
+                onChange(
+                  omitUndefinedProperties({
+                    ...base,
+                    operation: "sliding",
+                    variant: value.operation === "roll-up" ? "panel" : value.variant,
+                    leafCount: value.leafCount ?? 1,
+                  }),
+                );
               else
-                onChange({
-                  ...base,
-                  operation: "hinged",
-                  variant: value.operation === "roll-up" ? "panel" : value.variant,
-                  leafCount: value.leafCount ?? 1,
-                });
+                onChange(
+                  omitUndefinedProperties({
+                    ...base,
+                    operation: "hinged",
+                    variant: value.operation === "roll-up" ? "panel" : value.variant,
+                    leafCount: value.leafCount ?? 1,
+                  }),
+                );
             }}
           >
             <option value="hinged">Hinged</option>

@@ -1398,5 +1398,5 @@ const stableFurnishingDefinitions = {
 };
 
 export const stableFurnishingRegistry = defineFurnishingModelRegistry(
-  Object.assign(Object.create(null), stableFurnishingDefinitions),
+  Object.assign(Object.create(null) as Record<string, never>, stableFurnishingDefinitions),
 );

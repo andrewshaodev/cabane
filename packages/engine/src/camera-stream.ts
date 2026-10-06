@@ -132,7 +132,10 @@ export const normalizeRemoteCameraCandidate = (
 ): RTCIceCandidateInit =>
   candidate.sdpMid || candidate.sdpMLineIndex != null
     ? candidate
-    : { candidate: candidate.candidate, sdpMid: "0" };
+    : {
+        ...(candidate.candidate === undefined ? {} : { candidate: candidate.candidate }),
+        sdpMid: "0",
+      };
 
 export const cameraEntityAvailable = (state: EntityStateSnapshot | undefined) =>
   Boolean(

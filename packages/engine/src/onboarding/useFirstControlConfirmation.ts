@@ -19,7 +19,7 @@ export function useFirstControlConfirmation(
     before: EntityStateSnapshot;
     succeeded: boolean;
     origin: string | null;
-    workspaceId?: string;
+    workspaceId: string | undefined;
   } | null>(null);
   const inspect = useCallback(() => {
     const candidate = pending.current;

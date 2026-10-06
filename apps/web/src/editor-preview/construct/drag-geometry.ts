@@ -1,10 +1,10 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import {
   snapPlanPoint,
   availableOpeningOffsetRanges,
   type FloorEditorDraft,
   wallOpeningOffsetAtPoint,
   type SnapTarget,
-  type EditorOpening,
   type EditorWall,
   type FloorCoordinates,
   type PlanPoint,
@@ -83,7 +83,7 @@ export const worldDragToSnappedConstructPlan = ({
   pixelsPerMeter: number;
   pointerType?: string;
   snapRadiusPixels?: number;
-  angleOrigin?: PlanPoint;
+  angleOrigin?: PlanPoint | undefined;
   angleReferenceRadians?: number;
   movingEndpoint?: PlanPoint;
   onSnap?: (target: SnapTarget | null) => void;
@@ -94,17 +94,19 @@ export const worldDragToSnappedConstructPlan = ({
     onSnap?.(null);
     return candidate;
   }
-  const target = snapPlanPoint({
-    candidate,
-    walls,
-    pixelsPerMeter,
-    pointerType,
-    snapRadiusPixels,
-    angleOrigin,
-    angleReferenceRadians,
-    movingEndpoint,
-    coordinates,
-  });
+  const target = snapPlanPoint(
+    omitUndefinedProperties({
+      candidate,
+      walls,
+      pixelsPerMeter,
+      ...(pointerType === undefined ? {} : { pointerType: pointerType }),
+      ...(snapRadiusPixels === undefined ? {} : { snapRadiusPixels: snapRadiusPixels }),
+      ...(angleOrigin === undefined ? {} : { angleOrigin: angleOrigin }),
+      angleReferenceRadians,
+      movingEndpoint,
+      coordinates,
+    }),
+  );
   onSnap?.(target);
   return target.point;
 };
@@ -240,7 +242,7 @@ export const openingPlacementIsValid = ({
     wallId,
     widthPlanUnits,
     sillHeightMeters,
-    excludeOpeningId,
+    ...(excludeOpeningId === undefined ? {} : { excludeOpeningId: excludeOpeningId }),
   }).some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max);
 
 export const resizeOpeningSpan = ({

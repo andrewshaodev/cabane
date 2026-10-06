@@ -1,3 +1,4 @@
+import { textAttribute } from "./entity-field-contract";
 import { useEffect, useRef, useState } from "react";
 import {
   VACUUM_FEATURE_FAN_SPEED,
@@ -79,7 +80,7 @@ export function VacuumFields({ binding, enabled, onCallService }: DomainFieldsPr
   const entity = binding.state;
   if (!entity) return null;
   const fanSpeeds = stringOptions(entity.attributes.fan_speed_list);
-  const fanSpeed = String(entity.attributes.fan_speed ?? fanSpeeds[0] ?? "");
+  const fanSpeed = textAttribute(entity.attributes.fan_speed ?? fanSpeeds[0] ?? "");
   const moving = ["cleaning", "returning"].includes(entity.state);
   const rooms = binding.registry?.platform === "dreame_vacuum" ? vacuumRooms(entity) : [];
   const batteryLevel = Number(entity.attributes.battery_level);

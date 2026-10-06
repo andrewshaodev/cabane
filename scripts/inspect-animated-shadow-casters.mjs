@@ -1,5 +1,5 @@
 import { chromium } from "playwright-core";
-const browser = await chromium.launch({ channel: "chrome", headless: false });
+const browser = await chromium.launch({ channel: "chromium", headless: false });
 try {
   const context = await browser.newContext();
   await context.addInitScript(() => {

@@ -1,5 +1,5 @@
-import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
-import { RoundedFurniturePanel } from "../construction";
+import { type SceneItemSize } from "@cabane/engine";
+
 import { OutdoorBasin } from "./outdoor-basin";
 
 export const TERRACOTTA_PLANTER_SIZE = [0.5, 0.5, 0.5] as const;

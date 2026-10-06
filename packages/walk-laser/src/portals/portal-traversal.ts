@@ -25,7 +25,7 @@ export function createPortalTraversal() {
   let previous: Vector3 | null = null;
   let blocked: PortalColor | null = null;
   return {
-    reset() {
+    reset(this: void) {
       previous = null;
       blocked = null;
     },

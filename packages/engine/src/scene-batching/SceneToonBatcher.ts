@@ -38,10 +38,14 @@ export class SceneToonBatcher {
     const material = sourceMaterial.clone();
     material.color.set(0xffffff);
     material.transparent =
-      sourceMaterial.userData.cameraFadeBaseTransparent ?? sourceMaterial.transparent;
-    material.opacity = sourceMaterial.userData.cameraFadeBaseOpacity ?? sourceMaterial.opacity;
+      (sourceMaterial.userData.cameraFadeBaseTransparent as boolean | undefined) ??
+      sourceMaterial.transparent;
+    material.opacity =
+      (sourceMaterial.userData.cameraFadeBaseOpacity as number | undefined) ??
+      sourceMaterial.opacity;
     material.depthWrite =
-      sourceMaterial.userData.cameraFadeBaseDepthWrite ?? sourceMaterial.depthWrite;
+      (sourceMaterial.userData.cameraFadeBaseDepthWrite as boolean | undefined) ??
+      sourceMaterial.depthWrite;
     // Static geometry bakes transforms/tints once. This avoids the matrix,
     // indirect-ID and color texture fetches of the default batching shader.
     material.vertexColors = true;
@@ -63,7 +67,9 @@ export class SceneToonBatcher {
     );
     const mesh = new BatchedMesh(sources.length, vertices, indices, material);
     mesh.name = "opaque-toon-batch";
-    mesh.castShadow = sources[0].userData.cameraFadeBaseCastShadow ?? sources[0].castShadow;
+    mesh.castShadow =
+      (sources[0].userData.cameraFadeBaseCastShadow as boolean | undefined) ??
+      sources[0].castShadow;
     mesh.receiveShadow = sources[0].receiveShadow;
     mesh.layers.mask = sources[0].layers.mask;
     mesh.renderOrder = sources[0].renderOrder;

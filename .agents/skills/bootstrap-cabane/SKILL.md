@@ -10,7 +10,9 @@ after the page loads.
 
 ## Run
 
-1. From the repository root, install the locked dependencies with `npm ci`.
+1. From the repository root, use the Node/npm versions pinned in `.nvmrc` and
+   `package.json`, then install the locked dependencies with `npm ci`. Before
+   running browser verification, install its pinned browser with `npm run browser:install`.
    Preserve the checked-in lockfile and package manager.
 2. Start `npm run dev` and keep the server running on the loopback address it
    prints. Do not change the bind address.

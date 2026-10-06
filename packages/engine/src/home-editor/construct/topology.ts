@@ -292,7 +292,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
       id = `${preferredId}-${room.id}`;
       let suffix = 2;
       while (reservedCeilingIds.has(id)) id = `${preferredId}-${room.id}-${suffix++}`;
-    } else ceilingGroups.set(preferredId, (groups = new Map()));
+    } else ceilingGroups.set(preferredId, (groups = new Map<number, (typeof ceilings)[number]>()));
     reservedCeilingIds.add(id);
     const ceiling = { id, kind: "flat" as const, roomIds: [room.id], heightMeters };
     groups.set(heightMeters, ceiling);

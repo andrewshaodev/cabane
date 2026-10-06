@@ -30,17 +30,17 @@ export class ApplicationErrorBoundary extends Component<
   { children: ReactNode },
   { hasError: boolean }
 > {
-  state = { hasError: false };
+  override state = { hasError: false };
 
   static getDerivedStateFromError() {
     return { hasError: true };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Cabane application failed:", error, info.componentStack);
   }
 
-  render() {
+  override render() {
     return this.state.hasError ? <ApplicationErrorPage /> : this.props.children;
   }
 }

@@ -71,7 +71,9 @@ export class DeviceCommandScheduler {
       try {
         return this.dispatch(call);
       } catch (error) {
-        return Promise.reject(error);
+        return Promise.reject(
+          error instanceof Error ? error : new Error("Operation failed.", { cause: error }),
+        );
       }
     }
 
@@ -161,7 +163,10 @@ export class DeviceCommandScheduler {
       const result = await this.dispatch(pending.call);
       for (const waiter of pending.waiters) waiter.resolve(result);
     } catch (error) {
-      for (const waiter of pending.waiters) waiter.reject(error);
+      for (const waiter of pending.waiters)
+        waiter.reject(
+          error instanceof Error ? error : new Error("Operation failed.", { cause: error }),
+        );
     }
   }
 }

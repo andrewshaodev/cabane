@@ -131,7 +131,7 @@ async function run(options) {
     // produces spurious browser errors, especially on an ephemeral port.
     server = await startFixtureServer({ port: 0, fixture: false, hmr: true });
     browser = await chromium.launch({
-      channel: "chrome",
+      channel: "chromium",
       headless: true,
       args: options.nativeGpu ? [] : ["--use-angle=swiftshader"],
     });

@@ -3,7 +3,7 @@ import { chromium } from "playwright-core";
 import { mkdir, writeFile } from "node:fs/promises";
 const output = process.env.BENCH_OUTPUT ?? "/tmp/cabane-perf-lifecycle";
 await mkdir(output, { recursive: true });
-const browser = await chromium.launch({ channel: "chrome", headless: false });
+const browser = await chromium.launch({ channel: "chromium", headless: false });
 try {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },

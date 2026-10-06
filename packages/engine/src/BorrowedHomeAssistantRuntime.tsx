@@ -37,7 +37,7 @@ export function BorrowedHomeAssistantRuntime({
   children,
 }: {
   session: HomeAssistantHostSession;
-  homeAssistantUrl?: string | null;
+  homeAssistantUrl?: (string | null) | undefined;
   client: HomeAssistantRuntimeClient;
   children: ReactNode;
 }) {
@@ -98,7 +98,6 @@ export function BorrowedHomeAssistantRuntime({
     let registryDeviceIds = new Map<string, string | null>();
     let request = 0;
     let transportReady = connection.connected !== false;
-    let registrySubscriptions: Promise<unknown>;
     const subscriptions = new Set<() => void>();
     const attachment: Attachment = {
       active: true,
@@ -221,7 +220,7 @@ export function BorrowedHomeAssistantRuntime({
           }));
       }),
     );
-    registrySubscriptions = Promise.all(
+    const registrySubscriptions = Promise.all(
       ["area_registry_updated", "device_registry_updated", "entity_registry_updated"].map((event) =>
         connection
           .subscribeEvents(() => {

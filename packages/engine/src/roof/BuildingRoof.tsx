@@ -14,6 +14,8 @@ export function BuildingRoof({ manifest }: { manifest: HomeManifest }) {
         settings,
         manifest.home.palette.exterior,
       ),
+    // Roof color is applied to materials separately; only direction affects its geometry.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [manifest.floors, settings.direction, manifest.home.palette.exterior],
   );
   useEffect(

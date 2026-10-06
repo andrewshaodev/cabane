@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   createBuildTutorialState,
   type HomeProject,
@@ -13,14 +13,17 @@ export function useBuildTutorial(project: HomeProject, mode: string, hasReferenc
   const state = stored.state
     ? reconcileBuildTutorial(stored.state, project, mode, hasReference)
     : undefined;
-  const update = (next: BuildTutorialState) => {
-    const durable = writeBuildTutorial(homeId, next);
-    setStored({ state: next, durable });
-  };
+  const update = useCallback(
+    (next: BuildTutorialState) => {
+      const durable = writeBuildTutorial(homeId, next);
+      setStored({ state: next, durable });
+    },
+    [homeId],
+  );
   const serialized = JSON.stringify(state);
   useEffect(() => {
     if (state && serialized !== JSON.stringify(stored.state)) update(state);
-  }, [serialized]);
+  }, [serialized, state, stored.state, update]);
   return {
     state,
     warning: stored.durable

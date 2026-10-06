@@ -54,7 +54,7 @@ function HomeAssistantRuntimeProviderImpl({
   children,
   client,
 }: {
-  homeAssistantUrl?: string | null;
+  homeAssistantUrl?: (string | null) | undefined;
   children: ReactNode;
   client: HomeAssistantRuntimeClient;
 }) {
@@ -545,7 +545,7 @@ function HomeAssistantRuntimeProviderImpl({
 
 export function HomeAssistantRuntimeProvider(props: {
   homeAssistantUrl?: string | null;
-  hostSession?: HomeAssistantHostSession | null;
+  hostSession?: (HomeAssistantHostSession | null) | undefined;
   children: ReactNode;
 }) {
   return <HomeAssistantRuntimeTestProvider {...props} client={DEFAULT_CLIENT} />;
@@ -558,7 +558,7 @@ export function HomeAssistantRuntimeTestProvider({
   children,
 }: {
   homeAssistantUrl?: string | null;
-  hostSession?: HomeAssistantHostSession | null;
+  hostSession?: HomeAssistantHostSession | null | undefined;
   client: HomeAssistantRuntimeClient;
   children: ReactNode;
 }) {

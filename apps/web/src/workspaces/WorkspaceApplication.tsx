@@ -44,11 +44,12 @@ export function WorkspaceApplication() {
   const [migrationError, setMigrationError] = useState<string | undefined>();
   // Keep the initiating identity while the runtime asynchronously consumes OAuth.
   // ConnectedProduct removes its session return request after restoring navigation.
+  const [skipLegacyMigration] = useState(() => Boolean(hostSession));
   const [callbackRequest] = useState(() => (hostSession ? null : readEditorReturn()));
   useEffect(() => {
     let active = true;
     void initializeWorkspaces(window.indexedDB, window.localStorage, {
-      skipLegacyMigration: Boolean(hostSession),
+      skipLegacyMigration,
     })
       .then(async (result) => {
         const all = await result.repository.list();
@@ -65,7 +66,7 @@ export function WorkspaceApplication() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [skipLegacyMigration]);
   const refresh = useCallback(async () => {
     if (repository) setEntries(await repository.list());
   }, [repository]);

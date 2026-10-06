@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 
@@ -23,7 +24,7 @@ export function RoundedFurniturePanel({
 }) {
   return (
     <RoundedBox
-      name={name}
+      {...omitUndefinedProperties({ name: name })}
       args={size}
       position={position}
       rotation={rotation}

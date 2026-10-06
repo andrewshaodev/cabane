@@ -5,7 +5,7 @@ import { mkdir } from "node:fs/promises";
 const origin = process.env.EDITOR_ORIGIN ?? "http://127.0.0.1:4186";
 const output = "/tmp/cabane-construct-validation";
 await mkdir(output, { recursive: true });
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   // Isolated browser storage: never mutate the owner's saved draft.
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });

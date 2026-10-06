@@ -22,8 +22,8 @@ export function FloorManagementDialog({
   height: number;
   onSave: (name: string, height: number) => void;
   onCancel: () => void;
-  onRemove?: () => void;
-  removeDisabledReason?: string;
+  onRemove?: (() => void) | undefined;
+  removeDisabledReason?: string | undefined;
 }) {
   const dom = useCabaneDom();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -41,7 +41,7 @@ export function FloorManagementDialog({
     return () => {
       if (previous?.isConnected) previous.focus();
     };
-  }, []);
+  }, [dom]);
   return (
     <dialog
       ref={dialog}

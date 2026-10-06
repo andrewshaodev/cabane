@@ -15,7 +15,7 @@ async function transaction<T>(
       request.result.createObjectStore("assets");
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
+    request.onerror = () => reject(request.error ?? new Error("IndexedDB request failed."));
   });
   return new Promise<T>((resolve, reject) => {
     const tx = database.transaction(["homes", "assets"], mode);
@@ -34,14 +34,15 @@ async function transaction<T>(
       });
     } catch (error) {
       tx.abort();
-      reject(error);
+      reject(error instanceof Error ? error : new Error("Operation failed.", { cause: error }));
     }
   });
 }
 export const readReferences = (homeId: string) =>
   transaction<StoredReferences>("readonly", (tx, done) => {
     const request = tx.objectStore("homes").get(homeId);
-    request.onsuccess = () => done(request.result ?? { plans: {}, preferences: {} });
+    request.onsuccess = () =>
+      done((request.result as StoredReferences | undefined) ?? { plans: {}, preferences: {} });
   });
 export const writeReferences = (
   homeId: string,
@@ -55,7 +56,7 @@ export const writeReferences = (
 export const readReferenceAsset = (homeId: string, assetId: string) =>
   transaction<Blob | undefined>("readonly", (tx, done) => {
     const request = tx.objectStore("assets").get([homeId, assetId]);
-    request.onsuccess = () => done(request.result);
+    request.onsuccess = () => done(request.result as Blob | undefined);
   });
 export const cleanReferenceAssets = (homeId: string, retained: readonly string[]) =>
   transaction<void>("readwrite", (tx) => {

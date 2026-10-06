@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { RollUpDoorModel } from "./roll-up-door-model";
 import { openingWorldPlacement, resolveOpeningOrientation } from "@cabane/engine";
 import type { DoorSpec } from "@cabane/engine";
@@ -67,7 +68,9 @@ export function DoorModel({
         return (
           <group
             key={index}
-            name={frontMountedPlankDoor ? "opening-plank-sliding-leaf-mount" : undefined}
+            {...omitUndefinedProperties({
+              name: frontMountedPlankDoor ? "opening-plank-sliding-leaf-mount" : undefined,
+            })}
             position={[
               pivotX,
               opening.openingHeightMeters / 2,

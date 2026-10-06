@@ -60,7 +60,7 @@ const record = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
 };
 
 const array = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  if (Array.isArray(value)) return value;
+  if (Array.isArray(value)) return value as unknown[];
   addProjectIssue(issues, "project.array", path, "Expected an array.");
   return null;
 };
@@ -186,7 +186,7 @@ const entitySlot = (value: unknown, path: string, issues: HomeProjectIssue[]) =>
   }
   if (
     slot.deviceRole !== undefined &&
-    !["primary", "secondary"].includes(String(slot.deviceRole))
+    !["primary", "secondary"].includes(typeof slot.deviceRole === "string" ? slot.deviceRole : "")
   ) {
     addProjectIssue(
       issues,
@@ -393,7 +393,10 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
       openingSide: ["left", "right"],
       ...(candidate.kind === "door" ? { slideDirection: ["start", "end"] } : {}),
     })) {
-      if (candidate[key] !== undefined && !allowed.includes(String(candidate[key]))) {
+      if (
+        candidate[key] !== undefined &&
+        !allowed.includes(typeof candidate[key] === "string" ? candidate[key] : "")
+      ) {
         addProjectIssue(
           issues,
           "project.opening-orientation",
@@ -824,7 +827,7 @@ export const validateHomeProjectSchemaShape = (
             "Choose a left–right or front–back roof ridge, or a flat roof.",
           );
         for (const field of ["color", "edgeColor"]) {
-          if (typeof roof[field] !== "string" || !/^#[0-9a-f]{6}$/i.test(roof[field] as string))
+          if (typeof roof[field] !== "string" || !/^#[0-9a-f]{6}$/i.test(roof[field]))
             addProjectIssue(
               issues,
               "project.roof-color",
@@ -940,7 +943,9 @@ export const validateHomeProjectSchemaShape = (
       const shape = stair.shape ?? "straight";
       if (
         stair.railings !== undefined &&
-        !["both", "left", "right", "none"].includes(String(stair.railings))
+        !["both", "left", "right", "none"].includes(
+          typeof stair.railings === "string" ? stair.railings : "",
+        )
       )
         addProjectIssue(
           issues,
@@ -974,7 +979,11 @@ export const validateHomeProjectSchemaShape = (
         path,
         issues,
       );
-      if (!["straight", "l-shaped", "u-shaped", "spiral"].includes(String(shape)))
+      if (
+        !["straight", "l-shaped", "u-shaped", "spiral"].includes(
+          typeof shape === "string" ? shape : "",
+        )
+      )
         addProjectIssue(issues, "stair.shape", `${path}.shape`, "Unknown stair shape.");
       if (
         shape === "spiral" &&

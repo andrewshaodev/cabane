@@ -4,7 +4,7 @@ import { chromium } from "playwright-core";
 // Run against a Vite development server: React's development profiling data is
 // needed to include the deferred R3F commit, not just the earlier DOM panel paint.
 const origin = process.argv[2] ?? "http://127.0.0.1:4173";
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });
   const errors = [];

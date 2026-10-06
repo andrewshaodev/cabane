@@ -26,7 +26,7 @@ export function ConstructionWallGuide({
   labelAvoidPoint,
 }: {
   name?: string;
-  wallId?: string;
+  wallId?: string | undefined;
   from: PlanPoint;
   to: PlanPoint;
   coordinates: FloorCoordinates;
@@ -34,7 +34,7 @@ export function ConstructionWallGuide({
   showMarkers?: boolean;
   wallThicknessMeters?: number;
   labelKind?: string;
-  labelAvoidPoint?: PlanPoint;
+  labelAvoidPoint?: PlanPoint | undefined;
 }) {
   const measurement = useMemo(
     () => measureConstructPoints(from, to, coordinates),

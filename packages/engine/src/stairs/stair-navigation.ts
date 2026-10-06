@@ -151,11 +151,11 @@ export const moveBuildingWalker = (
         Math.hypot(resolved.x - next.x, resolved.z - next.z) > 1e-8
       )
         return pose;
+      const { stairId: _stairId, ...landed } = candidate;
       return {
-        ...candidate,
+        ...landed,
         floorId: destinationId,
         elevation: flight.baseElevationMeters + (exitingBelow ? 0 : flight.riseMeters),
-        stairId: undefined,
       };
     }
     const projected = projectStairPath(flight, next, localElevation);

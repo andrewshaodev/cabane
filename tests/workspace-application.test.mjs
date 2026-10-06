@@ -121,7 +121,7 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     );
     await page.goto(`${base}?auth_callback=1`);
     await page.waitForURL(`**/workspaces/${second}/connect/rooms*`);
-    await page.getByRole("navigation", { name: "Editor mode" }).waitFor();
+    await page.getByRole("button", { name: "Connect", exact: true, pressed: true }).waitFor();
     assert.equal(
       await page.getByRole("button", { name: "Connect", exact: true }).getAttribute("aria-pressed"),
       "true",

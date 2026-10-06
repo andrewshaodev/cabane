@@ -1,27 +1,15 @@
+import { omitUndefinedProperties } from "../defined-properties";
 import { useCabaneDom } from "./../CabaneDom";
 import { cutSurfaceShapes, useStairSurfaceApertures } from "../stairs/surface-apertures";
 import { useFrame, useThree } from "@react-three/fiber";
 
-import { DoubleSide, Shape, ShapeGeometry, type Mesh } from "three";
+import { DoubleSide, ShapeGeometry, type Mesh } from "three";
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
-
-import { planPointToWorld } from "../geometry";
 
 import { Outlines, ToonMaterial } from "../rendering";
 
 import type { FloorSpec, Polygon } from "../types";
-
-export const shapeForPolygon = (polygon: Polygon, floor: FloorSpec) => {
-  const shape = new Shape();
-  polygon.forEach((point, index) => {
-    const [x, z] = planPointToWorld(point, floor.coordinates);
-    if (index === 0) shape.moveTo(x, -z);
-    else shape.lineTo(x, -z);
-  });
-  shape.closePath();
-  return shape;
-};
 
 export const PolygonSurface = memo(function PolygonSurface({
   polygon,
@@ -69,7 +57,7 @@ export const PolygonSurface = memo(function PolygonSurface({
     return () => {
       dom.container.style.cursor = previousCursor;
     };
-  }, [hovered, onSelect]);
+  }, [hovered, onSelect, dom]);
 
   useEffect(() => {
     invalidate();
@@ -100,31 +88,31 @@ export const PolygonSurface = memo(function PolygonSurface({
   return (
     <group>
       <mesh
-        name={name}
+        {...omitUndefinedProperties({ name: name })}
         geometry={geometry}
         position={[0, elevation, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow={receiveShadow}
-        onPointerOver={
-          onSelect
-            ? (event) => {
+        {...omitUndefinedProperties({
+          onPointerOver: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 setHovered(true);
               }
-            : undefined
-        }
-        onPointerOut={
-          onSelect
-            ? (event) => {
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerOut: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 setHovered(false);
                 clearPress();
               }
-            : undefined
-        }
-        onPointerDown={
-          onSelect
-            ? (event) => {
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerDown: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 setPressed(true);
                 press.current = {
@@ -133,11 +121,11 @@ export const PolygonSurface = memo(function PolygonSurface({
                   y: event.nativeEvent.clientY,
                 };
               }
-            : undefined
-        }
-        onPointerMove={
-          onSelect
-            ? (event) => {
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerMove: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 const candidate = press.current;
                 if (!candidate || candidate.pointerId !== event.pointerId) return;
                 if (
@@ -148,19 +136,19 @@ export const PolygonSurface = memo(function PolygonSurface({
                 )
                   clearPress();
               }
-            : undefined
-        }
-        onPointerUp={
-          onSelect
-            ? (event) => {
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerUp: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
                 event.stopPropagation();
                 const candidate = press.current;
                 clearPress();
                 if (candidate?.pointerId === event.pointerId) onSelect();
               }
-            : undefined
-        }
-        onPointerCancel={onSelect ? clearPress : undefined}
+            : undefined,
+        })}
+        {...omitUndefinedProperties({ onPointerCancel: onSelect ? clearPress : undefined })}
       >
         <ToonMaterial
           color={color}

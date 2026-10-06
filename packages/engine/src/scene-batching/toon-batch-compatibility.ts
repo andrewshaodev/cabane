@@ -24,16 +24,16 @@ export function toonBatchKey(
   if (Array.isArray(material) || !material.isMeshToonMaterial) return null;
   const fade = material.userData;
   const transparent = cacheMembership
-    ? (fade.cameraFadeBaseTransparent ?? material.transparent)
+    ? ((fade.cameraFadeBaseTransparent as boolean | undefined) ?? material.transparent)
     : material.transparent;
   const opacity = cacheMembership
-    ? (fade.cameraFadeBaseOpacity ?? material.opacity)
+    ? ((fade.cameraFadeBaseOpacity as number | undefined) ?? material.opacity)
     : material.opacity;
   const depthWrite = cacheMembership
-    ? (fade.cameraFadeBaseDepthWrite ?? material.depthWrite)
+    ? ((fade.cameraFadeBaseDepthWrite as boolean | undefined) ?? material.depthWrite)
     : material.depthWrite;
   const castShadow = cacheMembership
-    ? (mesh.userData.cameraFadeBaseCastShadow ?? mesh.castShadow)
+    ? ((mesh.userData.cameraFadeBaseCastShadow as boolean | undefined) ?? mesh.castShadow)
     : mesh.castShadow;
   if (
     mesh.type !== "Mesh" ||
@@ -134,10 +134,10 @@ type Revision = {
   position: BufferGeometry["attributes"][string];
   normal: BufferGeometry["attributes"][string];
   color: BufferGeometry["attributes"][string];
-  indexVersion?: number;
-  positionVersion?: number;
-  normalVersion?: number;
-  colorVersion?: number;
+  indexVersion: number | undefined;
+  positionVersion: number | undefined;
+  normalVersion: number | undefined;
+  colorVersion: number | undefined;
   token: string;
 };
 const revisions = new WeakMap<BufferGeometry, Revision>();

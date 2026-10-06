@@ -3,7 +3,6 @@ import { RoundedFurniturePanel } from "../construction";
 export const OUTDOOR_BBQ_SIZE = [1.2, 1.1, 0.6] as const;
 export function OutdoorBbq({
   size = OUTDOOR_BBQ_SIZE,
-  variant = "default",
 }: {
   size?: SceneItemSize;
   variant?: string;

@@ -56,7 +56,10 @@ export const mergeDeviceModelRegistriesStableFirst = (
   stableModels: DeviceModelRegistry,
   extensionModels: DeviceModelRegistry,
 ): DeviceModelRegistry => {
-  const merged: Record<string, DeviceModelDefinition> = Object.create(null);
+  const merged: Record<string, DeviceModelDefinition> = Object.create(null) as Record<
+    string,
+    DeviceModelDefinition
+  >;
   for (const modelId of new Set([...Object.keys(extensionModels), ...Object.keys(stableModels)])) {
     const definition = resolveDeviceModelDefinition(modelId, stableModels, extensionModels);
     if (definition) merged[modelId] = definition;

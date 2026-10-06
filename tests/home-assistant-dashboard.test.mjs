@@ -34,6 +34,46 @@ await withModules(async (load) => {
     "/packages/engine/src/home-assistant-dashboard/useRoomHeroParallax.ts",
   );
 
+  const { PhysicalToggle, LightFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/light-fields.tsx",
+  );
+  const { ClimateDialFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/climate-dial-fields.tsx",
+  );
+  const { MediaFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/media-fields.tsx",
+  );
+
+  test("entity controls survive missing, available, and missing state without changing Hook order", async () => {
+    await withDom(async ({ root, dom }) => {
+      const runtime = connectedRuntimeFixture();
+      for (const [Control, entityId] of [
+        [PhysicalToggle, "light.demo_ceiling"],
+        [LightFields, "light.demo_ceiling"],
+        [ClimateDialFields, "climate.demo"],
+        [MediaFields, "media_player.demo_speaker"],
+      ]) {
+        const entity = runtime.entityStates[entityId];
+        assert.ok(entity, entityId);
+        const render = (state) =>
+          React.createElement(Control, {
+            binding: { state, label: "Test control" },
+            enabled: true,
+            tone: "light",
+            onCallService: async () => undefined,
+          });
+        for (const state of [undefined, entity, undefined, entity]) {
+          await act(async () => root.render(render(state)));
+          assert.equal(
+            Boolean(dom.window.document.querySelector("#root").children.length),
+            Boolean(state),
+          );
+        }
+        await act(async () => root.render(null));
+      }
+    });
+  });
+
   const serviceCall = {
     domain: "light",
     service: "turn_on",

@@ -7,11 +7,11 @@ export interface FloorPickerProps {
   selectedId: string;
   onSelect: (id: string) => void;
   disabled?: boolean;
-  unavailable?: Readonly<Record<string, string>>;
-  onAdd?: () => void;
-  onAddBelow?: () => void;
-  onRename?: () => void;
-  onRemove?: () => void;
+  unavailable?: Readonly<Record<string, string>> | undefined;
+  onAdd?: (() => void) | undefined;
+  onAddBelow?: (() => void) | undefined;
+  onRename?: (() => void) | undefined;
+  onRemove?: (() => void) | undefined;
 }
 
 export function FloorPicker({
@@ -59,7 +59,7 @@ export function FloorPicker({
     };
     dom.events.addEventListener("pointerdown", outside);
     return () => dom.events.removeEventListener("pointerdown", outside);
-  }, []);
+  }, [dom]);
   const runAction = (action: () => void) => {
     if (disabled) return;
     close();

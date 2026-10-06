@@ -11,7 +11,7 @@ const scanObjectDescriptors = (
 ) => {
   const array = Array.isArray(value);
   const expectedPrototype = array ? Array.prototype : Object.prototype;
-  const prototype = Object.getPrototypeOf(value);
+  const prototype: unknown = Object.getPrototypeOf(value);
   if (prototype !== expectedPrototype && !(prototype === null && !array)) {
     addProjectIssue(
       issues,

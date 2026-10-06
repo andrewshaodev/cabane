@@ -102,8 +102,8 @@ const resolveSegmentCollision = (
 const resolveBoxCollision = (point: WalkPoint, collider: BoxWalkCollider, radius: number) => {
   const closestX = Math.max(collider.minX, Math.min(point.x, collider.maxX));
   const closestZ = Math.max(collider.minZ, Math.min(point.z, collider.maxZ));
-  let dx = point.x - closestX;
-  let dz = point.z - closestZ;
+  const dx = point.x - closestX;
+  const dz = point.z - closestZ;
   const distance = Math.hypot(dx, dz);
   if (distance >= radius) return;
   if (distance > 1e-8) {

@@ -12,8 +12,8 @@ export function RoomNameControl({
   roomId: string;
   name: string;
   disabled: boolean;
-  focusRequest?: { roomId: string; serial: number } | null;
-  onFocusRequestHandled?: () => void;
+  focusRequest?: ({ roomId: string; serial: number } | null) | undefined;
+  onFocusRequestHandled?: (() => void) | undefined;
   onCommit: (name: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -28,7 +28,7 @@ export function RoomNameControl({
       setEditing(true);
       onFocusRequestHandled?.();
     }
-  }, [focusRequest]);
+  }, [disabled, focusRequest, name, onFocusRequestHandled, roomId]);
   useLayoutEffect(() => {
     if (editing) {
       input.current?.focus({ preventScroll: true });

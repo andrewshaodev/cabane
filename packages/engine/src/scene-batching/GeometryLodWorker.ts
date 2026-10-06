@@ -10,7 +10,7 @@ import {
 
 /** No main-thread simplification fallback: unavailable workers keep full detail. */
 export class GeometryLodWorker {
-  private worker?: Worker;
+  private worker: Worker | undefined;
   private failed = false;
   private nextId = 0;
   private pending = new Map<number, (levels: GeometryLod[]) => void>();

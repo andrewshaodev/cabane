@@ -187,5 +187,8 @@ export function useHomeEditorShortcuts({
     redoProject,
     selectedOpening,
     undoProject,
+    dom,
+    setPendingRoomPaintId,
+    setDragging,
   ]);
 }

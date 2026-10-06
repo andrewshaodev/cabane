@@ -118,7 +118,7 @@ export function SelectedItemControls({
         callbacks.current.onCancel();
       }
     };
-  }, []);
+  }, [dom]);
   useLayoutEffect(() => {
     invalidate();
   }, [camera, invalidate, item, size]);

@@ -45,7 +45,7 @@ export function parseWorkspaceOnboarding(value: unknown): WorkspaceOnboardingSta
     demoWorkspaceId: v.demoWorkspaceId,
     welcomeDismissed: v.welcomeDismissed,
     nudgeDismissed: v.nudgeDismissed,
-    destinations: { ...destinations } as WorkspaceOnboardingState["destinations"],
+    destinations: { ...destinations },
   };
 }
 export class DeletedOnboardingWorkspaceError extends Error {

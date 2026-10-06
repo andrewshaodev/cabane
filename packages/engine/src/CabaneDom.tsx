@@ -1,4 +1,4 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 /** DOM boundaries owned by one Cabane application instance. */
 export interface CabaneDomEnvironment {
@@ -20,26 +20,29 @@ export function CabaneDomProvider({
 }
 export function useCabaneDom() {
   const environment = useContext(CabaneDomContext);
-  return {
-    get root() {
-      return environment?.root ?? document;
-    },
-    get container() {
-      return environment?.container ?? document.body;
-    },
-    get portalContainer() {
-      return environment?.portalContainer ?? document.body;
-    },
-    // These EventTarget operations are shared; retain typed browser event names.
-    get events() {
-      return (environment?.eventTarget ??
-        (typeof window === "undefined" ? globalThis : window)) as Pick<
-        Window,
-        "addEventListener" | "removeEventListener"
-      >;
-    },
-    assetBaseUrl: environment?.assetBaseUrl,
-  };
+  return useMemo(
+    () => ({
+      get root() {
+        return environment?.root ?? document;
+      },
+      get container() {
+        return environment?.container ?? document.body;
+      },
+      get portalContainer() {
+        return environment?.portalContainer ?? document.body;
+      },
+      // These EventTarget operations are shared; retain typed browser event names.
+      get events() {
+        return (environment?.eventTarget ??
+          (typeof window === "undefined" ? globalThis : window)) as Pick<
+          Window,
+          "addEventListener" | "removeEventListener"
+        >;
+      },
+      assetBaseUrl: environment?.assetBaseUrl,
+    }),
+    [environment],
+  );
 }
 export function useCabaneAssetUrl(path: string) {
   const { assetBaseUrl } = useCabaneDom();

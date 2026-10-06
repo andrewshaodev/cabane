@@ -1,5 +1,5 @@
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
-import { RoundedFurniturePanel } from "../construction";
+
 import { OutdoorBasin } from "./outdoor-basin";
 
 export const GARDEN_BIRDBATH_SIZE = [0.6, 0.8, 0.6] as const;

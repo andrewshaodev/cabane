@@ -1,8 +1,4 @@
-import type {
-  DeviceModelDefinition,
-  EntityBindingSlotSpec,
-  OpeningContactSlotSpec,
-} from "../types";
+import type { DeviceModelDefinition, EntityBindingSlotSpec } from "../types";
 import type { DeviceItemSpec, HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
@@ -173,5 +169,3 @@ export const validateDeviceSlotsAgainstModel = (
     }
   }
 };
-
-export type ProjectSlotSpec = EntityBindingSlotSpec | OpeningContactSlotSpec;

@@ -46,7 +46,7 @@ const scaleRecord = process.argv.includes("--scale")
       });
     })
   : null;
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 960 } });
   await context.addInitScript(() => {

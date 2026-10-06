@@ -28,7 +28,7 @@ export function FloorPaintConfirmation({
       else dialog.removeAttribute("open");
       priorFocusRef.current?.focus();
     };
-  }, []);
+  }, [dom]);
   return (
     <dialog
       ref={dialogRef}

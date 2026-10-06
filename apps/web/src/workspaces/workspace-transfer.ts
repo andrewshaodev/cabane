@@ -128,7 +128,7 @@ export function exportWorkspaceBackup(
         homeAssistantUrl: metadata.homeAssistantUrl,
         hasPublished: metadata.hasPublished,
       },
-      record: JSON.parse(exportPrivateWorkspaceRecord(record)),
+      record: JSON.parse(exportPrivateWorkspaceRecord(record)) as unknown,
     },
     null,
     2,

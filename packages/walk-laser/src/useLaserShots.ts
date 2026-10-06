@@ -26,7 +26,7 @@ export function useLaserShots(
   const emitShot = useCallback(
     (effect: Omit<ShotVisual, "id" | "start" | "createdAt">) => {
       const id = ++sequence.current;
-      setTrigger({ id, color: effect.color });
+      setTrigger({ id, ...(effect.color === undefined ? {} : { color: effect.color }) });
       if (reducedMotion) return;
       muzzle.current?.updateWorldMatrix(true, false);
       const start = muzzle.current?.getWorldPosition(new Vector3()) ?? camera.position.clone();

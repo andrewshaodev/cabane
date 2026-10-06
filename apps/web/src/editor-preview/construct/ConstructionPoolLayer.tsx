@@ -33,12 +33,14 @@ function PoolFill({
   draft: FloorEditorDraft;
   name: string;
   color: string;
-  handlers?: {
-    onPointerDown: (event: Pointer) => void;
-    onPointerMove: (event: Pointer) => void;
-    onPointerUp: (event: Pointer) => void;
-    onPointerCancel: (event: Pointer) => void;
-  };
+  handlers?:
+    | {
+        onPointerDown: (event: Pointer) => void;
+        onPointerMove: (event: Pointer) => void;
+        onPointerUp: (event: Pointer) => void;
+        onPointerCancel: (event: Pointer) => void;
+      }
+    | undefined;
 }) {
   const geometry = useMemo(() => {
     if (!isPoolOutline(polygon)) return null;
@@ -94,7 +96,7 @@ export function ConstructionPoolLayer({
     tool,
     onSelect,
     onUpdate,
-    onDraggingChange,
+    ...(onDraggingChange === undefined ? {} : { onDraggingChange: onDraggingChange }),
   });
   const pending =
     preview &&

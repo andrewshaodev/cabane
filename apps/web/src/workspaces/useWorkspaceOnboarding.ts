@@ -66,7 +66,9 @@ export function useWorkspaceOnboarding(repository: WorkspaceRepository | null) {
       setDeleted(null);
       try {
         const previous = await repository.readOnboarding();
-        const entry = await repository.startOnboarding(path, { replaceDeletedId });
+        const entry = await repository.startOnboarding(path, {
+          ...(replaceDeletedId === undefined ? {} : { replaceDeletedId: replaceDeletedId }),
+        });
         if (!entry.record) throw new Error(entry.error ?? "Open Workspaces to recover this home.");
         let progress = createSetupRecord();
         try {
@@ -123,8 +125,8 @@ export function useWorkspaceOnboarding(repository: WorkspaceRepository | null) {
               {
                 mode: "connect",
                 view: "devices",
-                roomId: target?.roomId,
-                relationshipId: target?.deviceId,
+                ...(target?.roomId === undefined ? {} : { roomId: target?.roomId }),
+                ...(target?.deviceId === undefined ? {} : { relationshipId: target?.deviceId }),
               },
               entry.metadata.id,
             ),

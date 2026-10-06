@@ -6,7 +6,7 @@ import { chromium } from "playwright-core";
 
 const origin = process.env.EDITOR_ORIGIN ?? "http://127.0.0.1:4319";
 const output = await mkdtemp(join(tmpdir(), "cabane-pool-evidence-"));
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 const errors = [];
 try {
   // Normal UI against an isolated browser context; never alter the owner's saved home.

@@ -4,10 +4,10 @@ import type { FloorCoordinates } from "../types";
 import type { StairFlight } from "./flight-geometry";
 
 type Point = readonly [number, number];
-export const STAIR_CONTACT_EPSILON = 1e-7;
+const STAIR_CONTACT_EPSILON = 1e-7;
 export const stairPolygon = (points: readonly Point[]): MultiPolygon =>
   points.length < 3 ? [] : [[points.map((p) => [p[0], p[1]])]];
-export const stairPolygonArea = (geometry: MultiPolygon) =>
+const stairPolygonArea = (geometry: MultiPolygon) =>
   geometry.reduce(
     (total, polygon) =>
       total +

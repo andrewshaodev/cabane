@@ -11,7 +11,7 @@ export function ArchitecturalOutdoorPlatforms({
   below,
 }: {
   floor: FloorSpec;
-  below?: FloorSpec;
+  below?: FloorSpec | undefined;
 }) {
   const barriers = useMemo(() => deriveOutdoorPlatformBarriers(floor), [floor]);
   return (

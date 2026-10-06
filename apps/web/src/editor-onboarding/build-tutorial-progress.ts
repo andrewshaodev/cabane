@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import {
   BUILD_TUTORIAL_STEPS,
   type BuildTutorialState,
@@ -68,10 +69,10 @@ export function reconcileBuildTutorial(
   const step = BUILD_TUTORIAL_STEPS.find(
     (step) => !complete[step] && !state.skipped.includes(step),
   );
-  return {
+  return omitUndefinedProperties({
     ...state,
     target: target ? { floorId: target.floor.id, roomId: target.room.id } : undefined,
     step: step ?? "connect",
     status: step ? "active" : "completed",
-  };
+  });
 }

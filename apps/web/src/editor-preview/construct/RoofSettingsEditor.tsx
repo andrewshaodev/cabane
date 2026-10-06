@@ -5,7 +5,7 @@ export function RoofSettingsEditor({
   value = DEFAULT_ROOF_SETTINGS,
   onChange,
 }: {
-  value?: RoofSettings;
+  value?: RoofSettings | undefined;
   onChange: (settings: RoofSettings) => void;
 }) {
   return (

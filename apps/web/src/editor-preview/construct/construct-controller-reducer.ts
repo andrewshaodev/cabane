@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { incompleteFloorPreview } from "./incomplete-floor-preview";
 import {
   availableOpeningOffsetRanges,
@@ -6,7 +7,6 @@ import {
   deriveFloorTopology,
   floorEditorReducer,
   nearestAvailableOpeningOffset,
-  type EditorOpening,
   type FloorEditorAction,
   type FloorEditorHistory,
   type FloorSpec,
@@ -20,26 +20,30 @@ export const topologyForDraft = (
   draft: FloorEditorHistory["present"],
   reservedRoomNames: readonly string[] = [],
 ) => {
-  return deriveFloorTopology({
-    floorToFloorHeightMeters: draft.floorToFloorHeightMeters,
-    belowGround: draft.belowGround,
-    floorId: draft.floorId,
-    floorName: draft.floorName,
-    coordinates: draft.coordinates,
-    walls: draft.walls,
-    openings: draft.openings,
-    rooms: draft.rooms,
-    reservedRoomNames,
-    junctions: draft.junctions,
-    hedges: draft.hedges,
-    pools: draft.pools,
-    outdoorPlatforms: draft.outdoorPlatforms,
-    groundZones: draft.groundZones,
-    defaultWallHeightMeters: draft.defaultWallHeightMeters,
-    defaultCeilingHeightMeters: draft.defaultCeilingHeightMeters,
-    exteriorWallThicknessMeters: draft.exteriorWallThicknessMeters,
-    interiorWallThicknessMeters: draft.interiorWallThicknessMeters,
-  });
+  return deriveFloorTopology(
+    omitUndefinedProperties({
+      ...(draft.floorToFloorHeightMeters === undefined
+        ? {}
+        : { floorToFloorHeightMeters: draft.floorToFloorHeightMeters }),
+      ...(draft.belowGround === undefined ? {} : { belowGround: draft.belowGround }),
+      floorId: draft.floorId,
+      floorName: draft.floorName,
+      coordinates: draft.coordinates,
+      walls: draft.walls,
+      openings: draft.openings,
+      rooms: draft.rooms,
+      reservedRoomNames,
+      junctions: draft.junctions,
+      ...(draft.hedges === undefined ? {} : { hedges: draft.hedges }),
+      pools: draft.pools,
+      outdoorPlatforms: draft.outdoorPlatforms,
+      groundZones: draft.groundZones,
+      defaultWallHeightMeters: draft.defaultWallHeightMeters,
+      defaultCeilingHeightMeters: draft.defaultCeilingHeightMeters,
+      exteriorWallThicknessMeters: draft.exteriorWallThicknessMeters,
+      interiorWallThicknessMeters: draft.interiorWallThicknessMeters,
+    }),
+  );
 };
 
 export const topologyIssueKey = (issue: ConstructEditorState["topologyIssues"][number]) =>
@@ -73,9 +77,7 @@ const engineActionFor = (
         : undefined;
     if (!opening) return null;
     const updated =
-      action.type === "replace-selected-opening"
-        ? action.opening
-        : ({ ...opening, ...action.patch } as EditorOpening);
+      action.type === "replace-selected-opening" ? action.opening : { ...opening, ...action.patch };
     if (updated.id !== opening.id || updated.kind !== opening.kind) return null;
     const constrainedOffset = nearestAvailableOpeningOffset(
       updated.offsetPlanUnits,
@@ -90,7 +92,7 @@ const engineActionFor = (
     if (constrainedOffset === undefined) return null;
     return {
       type: "update-opening",
-      opening: { ...updated, offsetPlanUnits: constrainedOffset } as EditorOpening,
+      opening: { ...updated, offsetPlanUnits: constrainedOffset },
     };
   }
   return action;

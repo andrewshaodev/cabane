@@ -60,7 +60,7 @@ export function CameraViewer({
 }: {
   roomName: string;
   label: string;
-  media?: DeviceLiveMedia;
+  media?: DeviceLiveMedia | undefined;
   onClose: () => void;
   onReviewConnections: () => void;
 }) {
@@ -128,7 +128,7 @@ export function CameraViewer({
       });
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [onClose, dom]);
 
   useEffect(() => {
     const video = media?.video;
@@ -138,7 +138,6 @@ export function CameraViewer({
     video.removeAttribute("aria-hidden");
     delete video.dataset.cameraClosed;
     video.controls = false;
-    video.muted = muted;
     slot.appendChild(video);
     void video.play().catch(() => undefined);
     return () => {
@@ -151,7 +150,7 @@ export function CameraViewer({
       video.setAttribute("aria-hidden", "true");
       dom.container.appendChild(video);
     };
-  }, [media?.video]);
+  }, [media?.video, dom]);
 
   useEffect(() => {
     if (media?.video) media.video.muted = muted;

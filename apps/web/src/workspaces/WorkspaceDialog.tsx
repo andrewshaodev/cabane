@@ -19,7 +19,7 @@ export function WorkspaceDialog({
     const previous = dom.root.activeElement as HTMLElement | null;
     ref.current?.showModal?.();
     return () => previous?.focus();
-  }, []);
+  }, [dom]);
   return (
     <dialog
       ref={ref}

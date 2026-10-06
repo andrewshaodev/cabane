@@ -180,7 +180,6 @@ await withModules(async (load) => {
 
   test("custom-area drawing keeps invalid outlines recoverable", () => {
     const floor = baseFloor();
-    const rooms = floor.rooms;
     let state = advanceFloorZoneDrawing(
       emptyFloorZoneDrawing,
       { type: "point", point: [0.5, 0.5] },

@@ -156,7 +156,7 @@ export function validatePools(
           issue(
             "pool.overlap",
             `${poolPath}.polygon`,
-            `Pool “${pool.id}” and its rim overlap or touch pool “${other.id}”.`,
+            `Pool “${typeof pool.id === "string" ? pool.id : "unknown"}” and its rim overlap or touch pool “${typeof other.id === "string" ? other.id : "unknown"}”.`,
             "error",
           ),
         );

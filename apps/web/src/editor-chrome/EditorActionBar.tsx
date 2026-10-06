@@ -15,7 +15,7 @@ const constructionTools = [
 ] as const;
 
 export interface EditorActionBarProps {
-  inert?: boolean;
+  inert?: boolean | undefined;
   mode: EditorMode;
   tool: FloorEditorTool;
   onToolChange: (tool: FloorEditorTool) => void;
@@ -25,7 +25,7 @@ export interface EditorActionBarProps {
   onRedo: () => void;
   onStairs?: () => void;
   stairsActive?: boolean;
-  stairsDisabledReason?: string;
+  stairsDisabledReason?: string | undefined;
 }
 
 export function EditorActionBar({

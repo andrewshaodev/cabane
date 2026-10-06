@@ -63,16 +63,16 @@ export function CabaneAppExperience({
   renderActionBarDeviceIcon?: (modelId: string) => ReactNode;
   homeAssistantUrl: string | null;
   onHomeAssistantUrlChange: (url: string | null) => void;
-  onEditHome?: (mode?: "construct" | "furnish" | "connect") => void;
+  onEditHome?: ((mode?: "construct" | "furnish" | "connect") => void) | undefined;
   onCustomizeActionBar?: () => void;
   onHomeAssistantSettings?: () => void;
-  onWorkspaces?: () => void;
+  onWorkspaces?: (() => void) | undefined;
   onImportBrowserData?: (json: string) => BrowserDataImportResult;
   onExportBrowserData?: () => void;
   bindingManager?: RuntimeBindingProfileManager;
   onOpenConnect?: (view: "rooms" | "devices", roomId?: string | null) => void;
   constructionApplied?: boolean;
-  onboarding?: OnboardingOptions;
+  onboarding?: OnboardingOptions | undefined;
 }) {
   const runtime = useHomeAssistantRuntime();
   const shell = useRef<HTMLDivElement>(null);

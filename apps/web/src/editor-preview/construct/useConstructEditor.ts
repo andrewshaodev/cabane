@@ -97,6 +97,7 @@ export const useConstructEditor = (
       ),
     history.present.tool === "platform" ? "platform" : "pool",
   );
+  const { cancel: poolDrawingCancel } = poolDrawing;
   const [drawPreview, setDrawPreview] = useState<PlanPoint | null>(null);
   const [drawAngleReferenceRadians, setDrawAngleReferenceRadians] = useState<number | null>(null);
   const drawStartRef = useRef<PlanPoint | null>(null);
@@ -148,6 +149,8 @@ export const useConstructEditor = (
       ),
       wallRuns: topology.wallRuns,
     });
+    // Topology tracks the architectural fields below; selection changes must not derive topology again. Initial topology is immutable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     draft.defaultCeilingHeightMeters,
     draft.defaultWallHeightMeters,
@@ -171,7 +174,7 @@ export const useConstructEditor = (
   ]);
   const setTool = useCallback(
     (tool: FloorEditorTool) => {
-      poolDrawing.cancel();
+      poolDrawingCancel();
       drawStartRef.current = null;
       setDrawStart(null);
       setDrawPreview(null);
@@ -182,19 +185,19 @@ export const useConstructEditor = (
         tool: tool === "floor" && floorPaintTarget === "outdoor-platform" ? "platform" : tool,
       });
     },
-    [poolDrawing.cancel, floorPaintTarget],
+    [poolDrawingCancel, floorPaintTarget],
   );
   const setFloorPaintTarget = useCallback(
     (target: ConstructEditorController["floorPaintTarget"]) => {
       rememberFloorPaintTarget(target);
-      poolDrawing.cancel();
+      poolDrawingCancel();
       drawStartRef.current = null;
       setDrawStart(null);
       setDrawPreview(null);
       setDrawAngleReferenceRadians(null);
       dispatch({ type: "set-tool", tool: target === "outdoor-platform" ? "platform" : "floor" });
     },
-    [poolDrawing.cancel],
+    [poolDrawingCancel],
   );
   const select = useCallback((selection: FloorEditorSelection) => {
     setOpeningError(null);
@@ -585,7 +588,7 @@ export const useConstructEditor = (
     redo: () => dispatch({ type: "redo" }),
     replaceFloor: (floor) => {
       cancelWall();
-      poolDrawing.cancel();
+      poolDrawingCancel();
       // History already owns the resolved architecture. Re-deriving it here
       // can change room identities or split a ceiling shared by several rooms.
       restoredFloor.current = { floor, draft: null };

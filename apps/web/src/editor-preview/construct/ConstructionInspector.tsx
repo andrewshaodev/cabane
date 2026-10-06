@@ -42,7 +42,7 @@ export interface ConstructionInspectorProps {
   planImportControls?: import("react").ReactNode;
   tutorialControls?: import("react").ReactNode;
   walkStartControls?: import("react").ReactNode;
-  roof?: RoofSettings;
+  roof?: RoofSettings | undefined;
   onRoofChange?: (settings: RoofSettings) => void;
   editor: ConstructEditorController;
   dependencyIssues?: readonly ManifestIssue[];

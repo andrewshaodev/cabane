@@ -12,8 +12,14 @@ export const useSceneItemDependencies = (
   floor: FloorSpec,
   wallRuns: readonly DerivedWallRun[],
 ) => {
+  const {
+    transaction: editorTransaction,
+    items: editorItems,
+    selectedId: editorSelectedId,
+    replaceItems: editorReplaceItems,
+  } = editor;
   const rememberedWalls = useRef(new Map(floor.walls.map((wall) => [wall.id, wall])));
-  const items = editor.transaction?.items ?? editor.items;
+  const items = editorTransaction?.items ?? editorItems;
   const wallItems = useMemo(
     () => reconcileSceneItemWallDependencies(items, floor, rememberedWalls.current, wallRuns),
     [items, floor, wallRuns],
@@ -24,27 +30,27 @@ export const useSceneItemDependencies = (
   );
 
   useLayoutEffect(() => {
-    if (editor.transaction) return;
+    if (editorTransaction) return;
     floor.walls.forEach((wall) => rememberedWalls.current.set(wall.id, wall));
     if (
-      dependencies.items.length === editor.items.length &&
-      dependencies.items.every((item, index) => item === editor.items[index])
+      dependencies.items.length === editorItems.length &&
+      dependencies.items.every((item, index) => item === editorItems[index])
     )
       return;
     // The mutable Arrange state (including the next drag/cancel snapshot) must
     // use the same placements as the preview. Shared workspace history records
     // the support change together with the architecture, not as a second edit.
-    const selectedId = dependencies.items.some((item) => item.id === editor.selectedId)
-      ? editor.selectedId
+    const selectedId = dependencies.items.some((item) => item.id === editorSelectedId)
+      ? editorSelectedId
       : null;
-    editor.replaceItems(dependencies.items, selectedId);
+    editorReplaceItems(dependencies.items, selectedId);
   }, [
     floor,
     dependencies.items,
-    editor.items,
-    editor.transaction,
-    editor.selectedId,
-    editor.replaceItems,
+    editorItems,
+    editorTransaction,
+    editorSelectedId,
+    editorReplaceItems,
   ]);
 
   return dependencies;

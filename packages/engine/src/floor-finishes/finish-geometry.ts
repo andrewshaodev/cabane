@@ -2,12 +2,7 @@ import { cutSurfaceShapes } from "../stairs/surface-apertures";
 import { cutPoolOpenings } from "../pools/pool-shapes";
 import polygonClipping from "polygon-clipping";
 import { BufferAttribute, ShapeGeometry } from "three";
-import {
-  planPointToWorld,
-  pointInsidePolygon,
-  polygonSelfIntersects,
-  polygonSignedArea,
-} from "../geometry";
+import { pointInsidePolygon, polygonSelfIntersects, polygonSignedArea } from "../geometry";
 import type { FloorCoordinates, FloorSpec, PlanPoint, Polygon } from "../types";
 
 const EPSILON = 1e-8;

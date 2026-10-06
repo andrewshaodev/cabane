@@ -30,22 +30,22 @@ export interface CabaneDashboardProps {
   manifest: HomeManifest | null;
   architectureModels: ArchitectureModelRegistry;
   deviceModels?: DeviceModelRegistry;
-  walkTools?: readonly import("./walk-tools").WalkToolDefinition[];
-  renderActionBarDeviceIcon?: (modelId: string) => ReactNode;
+  walkTools?: readonly import("./walk-tools").WalkToolDefinition[] | undefined;
+  renderActionBarDeviceIcon?: ((modelId: string) => ReactNode) | undefined;
   bindingManager?: RuntimeBindingProfileManager;
-  sessionPresentation?: DashboardSessionPresentation;
-  setupAction?: DashboardSetupAction;
+  sessionPresentation?: DashboardSessionPresentation | undefined;
+  setupAction?: DashboardSetupAction | undefined;
   setupOpen?: boolean;
-  focusRoomId?: string;
+  focusRoomId?: string | undefined;
   mappingRequest?: DashboardMappingRequest | null;
-  onEditHome?: (mode?: EditorMode) => void;
-  onCustomizeActionBar?: () => void;
+  onEditHome?: ((mode?: EditorMode) => void) | undefined;
+  onCustomizeActionBar?: (() => void) | undefined;
   onExportBrowserData?: () => void;
-  onHomeAssistantSettings?: () => void;
-  onWorkspaces?: () => void;
-  onOpenConnect?: (view: "rooms" | "devices", roomId?: string | null) => void;
+  onHomeAssistantSettings?: (() => void) | undefined;
+  onWorkspaces?: (() => void) | undefined;
+  onOpenConnect?: ((view: "rooms" | "devices", roomId?: string | null) => void) | undefined;
   /** Open an isolated draft walkthrough and return to its editor when walking ends. */
-  walkthrough?: { onExit: () => void; pointerLockTarget?: HTMLElement | null };
+  walkthrough?: { onExit: () => void; pointerLockTarget?: HTMLElement | null | undefined };
 }
 
 export const connectionLabel: Record<HomeAssistantConnectionStatus, string> = {

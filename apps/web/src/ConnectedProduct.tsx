@@ -1,7 +1,7 @@
 import { useWorkspaceToolStorage } from "./workspaces/useWorkspaceToolStorage";
 import { installedWalkTools } from "./walk-tools";
 import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 import {
@@ -51,8 +51,8 @@ export function ConnectedProduct({
     url: string | null,
     current?: HomeProjectRecord,
   ) => void | Promise<HomeProjectRecord | void>;
-  recoveryMessage?: string;
-  recoveryRaw?: string;
+  recoveryMessage?: string | undefined;
+  recoveryRaw?: string | undefined;
   initialRequest?: EditorOpenRequest;
   onboarding?: OnboardingOptions;
   demoWorkspaceId: string | null;
@@ -72,7 +72,8 @@ export function ConnectedProduct({
   const [entryRequest] = useState<EditorOpenRequest | null>(
     () => initialRequest ?? (hostSession ? null : readEditorReturn(initialRecord.homeId)),
   );
-  useEffect(() => {
+  // Consume the entry redirect on mount; later route changes belong to the user.
+  const restoreEntry = useEffectEvent(() => {
     if (entryRequest) {
       // Preserve OAuth query parameters until the runtime has consumed them.
       const search = new URLSearchParams(location.search);
@@ -83,6 +84,9 @@ export function ConnectedProduct({
       );
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
     }
+  });
+  useEffect(() => {
+    restoreEntry();
   }, []);
   const openEditor = async (request: EditorOpenRequest) => {
     await toolStorage.flush();
@@ -166,9 +170,19 @@ export function ConnectedProduct({
             )}
             bindingManager={manager}
             constructionApplied={constructionApplied}
-            onEditHome={(mode = "construct") => openEditor({ mode })}
-            onCustomizeActionBar={() => openEditor({ mode: "construct", panel: "action-bar" })}
-            onOpenConnect={(view, roomId) => openEditor({ mode: "connect", view, roomId })}
+            onEditHome={(mode = "construct") => {
+              void openEditor({ mode });
+            }}
+            onCustomizeActionBar={() => {
+              void openEditor({ mode: "construct", panel: "action-bar" });
+            }}
+            onOpenConnect={(view, roomId) => {
+              void openEditor({
+                mode: "connect",
+                view,
+                ...(roomId === undefined ? {} : { roomId: roomId }),
+              });
+            }}
             onExportBrowserData={() =>
               downloadConnectData(
                 exportWorkspaceBackup(
@@ -213,7 +227,9 @@ export function ConnectedProduct({
               }}
               onRecordChange={setRecord}
               isDemo={onboarding?.isDemo ?? false}
-              onCreatePersonal={() => onboarding?.start("connect")}
+              onCreatePersonal={() => {
+                void onboarding?.start("connect");
+              }}
             />
           }
         />

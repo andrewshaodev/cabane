@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { RoundedBox } from "@cabane/engine";
 import type { RefObject } from "react";
 import type { Group } from "three";
@@ -9,7 +10,7 @@ export function BlasterBarrel({
   muzzleRef,
   shotId,
 }: {
-  muzzleRef?: RefObject<Group | null>;
+  muzzleRef?: RefObject<Group | null> | undefined;
   shotId: number;
 }) {
   return (
@@ -53,7 +54,7 @@ export function BlasterBarrel({
         <BlasterFinish kind="armor" />
       </RoundedBox>
       <BlasterMuzzle />
-      <group ref={muzzleRef} position={[0, 0.075, -0.476]}>
+      <group {...omitUndefinedProperties({ ref: muzzleRef })} position={[0, 0.075, -0.476]}>
         <MuzzleFlash shotId={shotId} />
       </group>
     </group>

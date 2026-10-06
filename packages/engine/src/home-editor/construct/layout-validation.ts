@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../../defined-properties";
 import { legacyFloorHeight } from "../../building/floor-levels";
 import type { LegacyHomeManifest, ManifestIssue } from "../../types";
 import type { LayoutFloorSpec } from "../../home-project/types";
@@ -124,7 +125,7 @@ export const validateLayoutFloorSpec = (input: unknown): LayoutFloorValidationRe
   );
   const valid = issues.length === 0;
   const candidate = input as LayoutFloorSpec;
-  return {
+  return omitUndefinedProperties({
     valid,
     floor: valid
       ? candidate.floorToFloorHeightMeters === undefined
@@ -132,7 +133,7 @@ export const validateLayoutFloorSpec = (input: unknown): LayoutFloorValidationRe
         : candidate
       : undefined,
     issues,
-  };
+  });
 };
 
 export const assertValidLayoutFloorSpec = (input: unknown): LayoutFloorSpec => {

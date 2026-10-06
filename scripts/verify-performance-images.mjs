@@ -9,7 +9,7 @@ for (const [build, port] of [
   ["baseline", 4198],
   ["candidate", 4199],
 ]) {
-  const browser = await chromium.launch({ channel: "chrome", headless: false });
+  const browser = await chromium.launch({ channel: "chromium", headless: false });
   try {
     const context = await browser.newContext({
       viewport: { width: 1440, height: 900 },

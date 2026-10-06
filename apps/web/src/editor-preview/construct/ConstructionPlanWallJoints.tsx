@@ -108,6 +108,8 @@ export const ConstructionPlanWallJoints = memo(function ConstructionPlanWallJoin
     result.setAttribute("position", new Float32BufferAttribute(jointTriangles(draft), 3));
     result.computeVertexNormals();
     return result;
+    // Joint geometry depends only on these architectural fields, not selection or editor metadata.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draft.walls, draft.openings, draft.coordinates, draft.interiorWallThicknessMeters]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return (

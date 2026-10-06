@@ -41,7 +41,9 @@ export function parseEditorReturn(
 ): EditorReturnRequest | null {
   try {
     if (!raw) return null;
-    const value = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const value = parsed as Record<string, unknown>;
     if (
       !value ||
       value.mode !== "connect" ||
@@ -54,7 +56,7 @@ export function parseEditorReturn(
       workspaceId: value.workspaceId,
       ...(typeof value.floorId === "string" ? { floorId: value.floorId } : {}),
       ...(value.panel === "home-assistant" ? { panel: "home-assistant" as const } : {}),
-      ...(["sync", "dashboard", "device"].includes(value.destination)
+      ...(["sync", "dashboard", "device"].includes(String(value.destination))
         ? { destination: value.destination as "sync" | "dashboard" | "device" }
         : {}),
       mode: "connect",
@@ -63,18 +65,20 @@ export function parseEditorReturn(
       relationshipId: typeof value.relationshipId === "string" ? value.relationshipId : null,
     };
     if (value.arrange && typeof value.arrange === "object") {
+      const arrange = value.arrange as Record<string, unknown>;
       request.arrange = {
-        selectedItemId:
-          typeof value.arrange.selectedItemId === "string" ? value.arrange.selectedItemId : null,
+        selectedItemId: typeof arrange.selectedItemId === "string" ? arrange.selectedItemId : null,
       };
-      const camera = value.arrange.camera;
-      const point = (v: unknown) =>
+      const rawCamera = arrange.camera;
+      const camera =
+        rawCamera && typeof rawCamera === "object" ? (rawCamera as Record<string, unknown>) : null;
+      const point = (v: unknown): v is [number, number, number] =>
         Array.isArray(v) &&
         v.length === 3 &&
         v.every((n) => typeof n === "number" && Number.isFinite(n));
       if (
         camera &&
-        ["3d", "top"].includes(camera.view) &&
+        (camera.view === "3d" || camera.view === "top") &&
         point(camera.position) &&
         point(camera.target) &&
         typeof camera.zoom === "number" &&

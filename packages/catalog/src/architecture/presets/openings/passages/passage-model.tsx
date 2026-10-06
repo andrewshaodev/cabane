@@ -7,15 +7,15 @@ import type { OpeningModelProps } from "../opening-model-props";
 
 export function PassageModel({ wall, opening, floor }: OpeningModelProps<PassageSpec>) {
   const placement = openingWorldPlacement(wall, opening, floor.coordinates);
+  const { openingHeightMeters, variant } = opening;
+  const archRiseMeters = opening.variant === "arched" ? opening.archRiseMeters : 0;
   const arch = useMemo(() => {
-    if (opening.variant !== "arched") return null;
-    return buildArchedPassageSpandrelShape(opening, placement.widthMeters);
-  }, [
-    opening.openingHeightMeters,
-    opening.variant,
-    opening.variant === "arched" ? opening.archRiseMeters : 0,
-    placement.widthMeters,
-  ]);
+    if (variant !== "arched") return null;
+    return buildArchedPassageSpandrelShape(
+      { openingHeightMeters, archRiseMeters },
+      placement.widthMeters,
+    );
+  }, [openingHeightMeters, variant, archRiseMeters, placement.widthMeters]);
 
   return (
     <group

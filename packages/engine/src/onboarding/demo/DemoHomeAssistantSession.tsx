@@ -62,7 +62,7 @@ export function DemoHomeAssistantSession({
   const runtime = useMemo<HomeAssistantRuntimeValue>(
     () => ({
       ...definition.runtime,
-      entityStates: current.current.entityStates,
+      entityStates: snapshot.entityStates,
       connect: () => undefined,
       disconnect: async () => undefined,
       retry: () => undefined,
@@ -80,7 +80,7 @@ export function DemoHomeAssistantSession({
 
   const manager = useMemo<RuntimeBindingProfileManager>(
     () => ({
-      profile: current.current.profile,
+      profile: snapshot.profile,
       loaded: true,
       hasStoredProfile: false,
       save: (profile) => {

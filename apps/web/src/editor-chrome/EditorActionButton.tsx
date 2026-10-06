@@ -9,10 +9,10 @@ interface EditorActionButtonProps {
   shortcut?: string;
   keyShortcuts?: string;
   showLabel?: boolean;
-  pressed?: boolean;
-  disabled?: boolean;
-  disabledReason?: string;
-  warning?: string;
+  pressed?: boolean | undefined;
+  disabled?: boolean | undefined;
+  disabledReason?: string | undefined;
+  warning?: string | undefined;
   onClick: () => void;
 }
 
@@ -60,7 +60,7 @@ export function EditorActionButton({
       window.removeEventListener("scroll", dismiss, true);
       dom.events.removeEventListener("keydown", onKeyDown);
     };
-  }, [position]);
+  }, [position, dom]);
 
   return (
     <>

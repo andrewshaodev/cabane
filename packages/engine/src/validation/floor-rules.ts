@@ -2,7 +2,7 @@ import { validateOutdoorPlatforms } from "./platform-rules";
 import { validateHedges } from "./hedge-rules";
 import { pointInsidePolygon, polygonSelfIntersects, polygonSignedArea } from "../geometry";
 import { groundZoneOutsideFootprint, isFloorZoneOutline } from "../floor-finishes/finish-geometry";
-import type { FloorSpec, ManifestIssue, Polygon } from "../types";
+import type { ManifestIssue, Polygon } from "../types";
 import {
   isFiniteNumber,
   isNonEmptyString,
@@ -58,7 +58,7 @@ const validateGroundZones = (
       !groundZoneOutsideFootprint(rawZone.polygon, {
         footprint,
         ...(regions ? { footprintRegions: regions } : {}),
-      } as Pick<FloorSpec, "footprint" | "footprintRegions">)
+      })
     ) {
       zoneIssues.push(
         issue(

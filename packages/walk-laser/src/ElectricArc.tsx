@@ -13,7 +13,7 @@ export function ElectricArc({
   start: Vector3;
   end: Vector3;
   duration: number;
-  color?: string;
+  color?: string | undefined;
 }) {
   const mesh = useRef<Mesh>(null);
   const age = useRef(0);

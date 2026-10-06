@@ -18,7 +18,7 @@ export function RoutedHomeEditor({ onClose, ...props }: ComponentProps<typeof Ho
   const request = useMemo(
     () =>
       ({
-        ...location.state?.editorRequest,
+        ...(location.state as { editorRequest?: EditorOpenRequest } | null)?.editorRequest,
         ...editorRequestForPath(location.pathname),
       }) as EditorOpenRequest,
     [location.pathname, location.state],

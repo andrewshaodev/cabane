@@ -47,7 +47,7 @@ export function LiveCameraSurface({
   active = true,
   opacity = 0.82,
 }: {
-  media?: DeviceLiveMedia;
+  media?: DeviceLiveMedia | undefined;
   width: number;
   height: number;
   active?: boolean;

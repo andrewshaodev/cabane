@@ -42,7 +42,11 @@ export const waitForFirstFrame = (video: HTMLVideoElement, signal: AbortSignal) 
     };
     const aborted = () => {
       cleanup();
-      reject(signal.reason ?? new Error("Camera connection interrupted."));
+      reject(
+        signal.reason instanceof Error
+          ? signal.reason
+          : new Error("Camera connection interrupted.", { cause: signal.reason }),
+      );
     };
     if (signal.aborted) aborted();
     else {
@@ -54,7 +58,12 @@ export const waitForFirstFrame = (video: HTMLVideoElement, signal: AbortSignal) 
 
 export const waitWithSignal = <T>(promise: Promise<T>, signal: AbortSignal) =>
   new Promise<T>((resolve, reject) => {
-    const aborted = () => reject(signal.reason ?? new Error("Camera connection interrupted."));
+    const aborted = () =>
+      reject(
+        signal.reason instanceof Error
+          ? signal.reason
+          : new Error("Camera connection interrupted.", { cause: signal.reason }),
+      );
     if (signal.aborted) {
       aborted();
       return;
@@ -67,7 +76,7 @@ export const waitWithSignal = <T>(promise: Promise<T>, signal: AbortSignal) =>
       },
       (error) => {
         signal.removeEventListener("abort", aborted);
-        reject(error);
+        reject(error instanceof Error ? error : new Error("Operation failed.", { cause: error }));
       },
     );
   });

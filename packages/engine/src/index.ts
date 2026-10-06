@@ -109,3 +109,4 @@ export {
 export { connectedCanvasEvents } from "./connected-canvas-events";
 
 export * from "./outdoor-platforms";
+export { omitUndefinedProperties } from "./defined-properties";

@@ -70,16 +70,18 @@ export function WorkspaceTransferDialog({
               type="file"
               accept=".json,application/json"
               disabled={busy}
-              onChange={async (event) => {
-                const file = event.target.files?.[0];
-                setFileError(null);
-                setJson("");
-                if (file)
-                  try {
-                    setJson(await file.text());
-                  } catch {
-                    setFileError("Could not read that file. Please choose it again.");
-                  }
+              onChange={(event) => {
+                void (async () => {
+                  const file = event.target.files?.[0];
+                  setFileError(null);
+                  setJson("");
+                  if (file)
+                    try {
+                      setJson(await file.text());
+                    } catch {
+                      setFileError("Could not read that file. Please choose it again.");
+                    }
+                })();
               }}
             />
           </label>

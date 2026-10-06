@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../../defined-properties";
 import { useLayoutEffect, useRef } from "react";
 import { InstancedMesh, Object3D, Vector3 } from "three";
 import { ToonMaterial } from "../../rendering";
@@ -43,7 +44,7 @@ export function StairStrokeSegments({
       <boxGeometry />
       <ToonMaterial
         color={plan ? "#000000" : color}
-        emissive={plan ? color : undefined}
+        {...omitUndefinedProperties({ emissive: plan ? color : undefined })}
         emissiveIntensity={plan ? 1 : 0}
         toneMapped={!plan}
       />

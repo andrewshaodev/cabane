@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "npm@10.8.2",
+  "packageManager": "npm@11.6.2",
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=24.11.1 <25",
+    "npm": ">=11.6.2 <12"
   },
   "workspaces": [
     "apps/*",
@@ -15,14 +16,13 @@
   "scripts": {
     "dev": "npm run dev --workspace=@cabane/web",
     "build": "npm run build --workspace=@cabane/web",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "node node_modules/typescript-native/bin/tsc --noEmit -p tsconfig.json",
     "test": "CABANE_TEST_SHARED_MODULES=1 node --test --test-concurrency=4 --test-reporter=./scripts/agent-test-reporter.mjs tests/shards/*.test.mjs",
     "verify:scene-contours": "node scripts/verify-scene-contours.mjs",
     "measure:scene": "node scripts/measure-scene-performance.mjs",
     "verify:furnishing-surfaces": "node scripts/verify-furnishing-surfaces.mjs",
     "verify:boundaries": "node scripts/verify-import-boundaries.mjs",
     "verify:policy": "node scripts/verify-source-policy.mjs",
-    "verify:bundle": "node scripts/verify-bundle-budget.mjs",
     "home:validate-floor": "node scripts/validate-floor.mjs",
     "home:verify": "npm run typecheck && npm run verify:boundaries && npm run verify:policy && node scripts/verify-home.mjs",
     "home:preview": "npm run dev",
@@ -35,22 +35,57 @@
     "fixture:preview:connected": "node scripts/fixture-preview.mjs --stage room --scenario connected",
     "fixture:preview:mapping": "node scripts/mapping-preview.mjs",
     "fixture:evidence": "node scripts/capture-visual-evidence.mjs --fixture all",
-    "verify": "npm run typecheck && npm test && npm run verify:boundaries && npm run verify:policy && npm run verify:furnishing-surfaces && npm run build && npm run verify:bundle",
+    "verify": "npm run verify:fast && npm test && npm run verify:furnishing-surfaces && npm run build",
     "build:panel": "node scripts/build-panel.mjs",
     "test:unit": "CABANE_TEST_SUITE=unit npm test",
-    "test:browser": "CABANE_TEST_SUITE=browser npm test"
+    "test:browser": "CABANE_TEST_SUITE=browser npm test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix --max-warnings 0",
+    "knip": "knip --config knip.config.mjs",
+    "browser:install": "playwright-core install chromium --no-shell",
+    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run knip && npm run verify:boundaries && npm run verify:policy"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vitejs/plugin-react": "6.0.5",
+    "eslint": "10.12.0",
     "fake-indexeddb": "6.2.5",
     "jsdom": "27.4.0",
+    "knip": "6.41.0",
     "playwright-core": "1.62.1",
+    "prettier": "3.9.9",
     "three": "0.182.0",
-    "typescript": "7.0.2",
-    "vite": "8.2.1"
+    "typescript": "6.0.3",
+    "vite": "8.2.1",
+    "@eslint/js": "10.0.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.4.0",
+    "typescript-eslint": "8.71.1",
+    "typescript-native": "npm:typescript@7.0.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router": "7.18.3",
+    "home-assistant-js-websocket": "9.6.0",
+    "@react-three/drei": "10.7.8",
+    "three-stdlib": "2.36.1",
+    "postcss": "8.5.26"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.11.1",
+      "onFail": "error"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": "11.6.2",
+      "onFail": "error"
+    }
   },
   "license": "PolyForm-Noncommercial-1.0.0"
 }

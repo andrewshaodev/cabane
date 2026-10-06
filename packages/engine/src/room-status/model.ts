@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../defined-properties";
 import { collectBindingSlots } from "../runtime-binding-profile";
 import type {
   EntityId,
@@ -125,7 +126,7 @@ export const deriveRoomStatusMap = (
             Boolean(doorRoomIds.get(opening.openingId)?.includes(room.id)),
         );
 
-        const summary: RoomStatusSummary = {
+        const summary: RoomStatusSummary = omitUndefinedProperties({
           roomId: room.id,
           connected: Boolean(area),
           temperature: areaReading(area?.temperature_entity_id, runtime),
@@ -141,7 +142,7 @@ export const deriveRoomStatusMap = (
                 ? "present"
                 : "absent",
           doorOpen,
-        };
+        });
         return [room.id, summary] as const;
       }),
   );

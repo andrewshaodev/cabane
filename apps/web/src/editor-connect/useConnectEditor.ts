@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   deviceMappingRooms,
   automaticallyMapRuntimeBindings,
@@ -39,7 +39,7 @@ export function useConnectEditor({
   onChange: (bindings: WorkspaceBindings) => void;
   initialRequest?: EditorOpenRequest;
   routeView?: "rooms" | "devices";
-  onViewChange?: (view: "rooms" | "devices") => void;
+  onViewChange?: ((view: "rooms" | "devices") => void) | undefined;
 }) {
   const key = origin ? normalizeWorkspaceBindingOrigin(origin) : null;
   const empty = useMemo(
@@ -48,8 +48,11 @@ export function useConnectEditor({
   );
   const state = key ? bindings[key] : undefined;
   const profile = state?.draft ?? empty;
-  const rooms =
-    (manifest.floors.find((floor) => floor.id === floorId) ?? manifest.floors[0])?.rooms ?? [];
+  const rooms = useMemo(
+    () =>
+      (manifest.floors.find((floor) => floor.id === floorId) ?? manifest.floors[0])?.rooms ?? [],
+    [manifest.floors, floorId],
+  );
   const hasUnmappedRooms = rooms.some((room) => !profile.roomAreaIds[room.id]);
   const defaultView: "rooms" | "devices" =
     rooms.length > 0 && !hasUnmappedRooms ? "devices" : "rooms";
@@ -81,7 +84,10 @@ export function useConnectEditor({
   if (!disconnected && key) cache.current = { origin: key, runtime };
   const displayRuntime =
     disconnected && cache.current?.origin === key ? cache.current.runtime : runtime;
-  const deviceRooms = deviceMappingRooms(manifest, floorId ?? manifest.floors[0]?.id);
+  const deviceRooms = useMemo(
+    () => deviceMappingRooms(manifest, floorId ?? manifest.floors[0]?.id),
+    [manifest, floorId],
+  );
   const room = deviceRooms.find((candidate) => candidate.id === roomId) ?? null;
   const groupsByRoom = useMemo(
     () =>
@@ -91,7 +97,7 @@ export function useConnectEditor({
           groupRoomMappingRelationships(manifest, candidate.id),
         ]),
       ),
-    [manifest, floorId],
+    [manifest, deviceRooms],
   );
   const groups = room ? groupsByRoom[room.id] : [];
   const roomDeviceSummaries = useMemo(
@@ -125,7 +131,7 @@ export function useConnectEditor({
           ];
         }),
       ),
-    [groupsByRoom, profile.entityIdsBySlotId],
+    [groupsByRoom, profile.entityIdsBySlotId, rooms],
   );
   const relationship =
     groups
@@ -145,30 +151,35 @@ export function useConnectEditor({
   useEffect(() => {
     if (initialRequest?.relationshipId) {
       setRoomId(
-        deviceRoom(manifest, initialRequest.relationshipId)?.id ?? initialRequest.roomId ?? null,
+        deviceRoom(current.current.manifest, initialRequest.relationshipId)?.id ??
+          initialRequest.roomId ??
+          null,
       );
       setRelationshipId(initialRequest.relationshipId);
     } else if (initialRequest?.roomId) setRoomId(initialRequest.roomId);
   }, [initialRequest]);
 
-  const commitProfile = (
-    next: RuntimeBindingProfile,
-    manualRoomIds: readonly string[] = [],
-    manualSlotIds: readonly string[] = [],
-  ) => {
-    const latest = current.current;
-    if (!latest.key) return;
-    latest.onChange({
-      ...latest.bindings,
-      [latest.key]: {
-        draft: next,
-        published: latest.state?.published ?? empty,
-        manualRoomIds: [...new Set([...(latest.state?.manualRoomIds ?? []), ...manualRoomIds])],
-        manualSlotIds: [...new Set([...(latest.state?.manualSlotIds ?? []), ...manualSlotIds])],
-      },
-    });
-    setMessage("Draft changes");
-  };
+  const commitProfile = useCallback(
+    (
+      next: RuntimeBindingProfile,
+      manualRoomIds: readonly string[] = [],
+      manualSlotIds: readonly string[] = [],
+    ) => {
+      const latest = current.current;
+      if (!latest.key) return;
+      latest.onChange({
+        ...latest.bindings,
+        [latest.key]: {
+          draft: next,
+          published: latest.state?.published ?? empty,
+          manualRoomIds: [...new Set([...(latest.state?.manualRoomIds ?? []), ...manualRoomIds])],
+          manualSlotIds: [...new Set([...(latest.state?.manualSlotIds ?? []), ...manualSlotIds])],
+        },
+      });
+      setMessage("Draft changes");
+    },
+    [empty],
+  );
   // History edits are deliberately absent from this trigger. Undo must stay undone.
   const entryKey = JSON.stringify([
     key,
@@ -190,7 +201,7 @@ export function useConnectEditor({
       latest.state,
     );
     if (result.applied.length) commitProfile(result.profile);
-  }, [entryKey, active, disconnected]);
+  }, [entryKey, active, disconnected, commitProfile]);
   useEffect(() => {
     if (relationshipId && !relationship) {
       const currentRoom = deviceRoom(manifest, relationshipId);

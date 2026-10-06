@@ -237,7 +237,6 @@ await withModules(async (load) => {
     ];
 
     assert.deepEqual(validateHomeManifest(invalid, options), {
-      manifest: undefined,
       issues: expectedIssues,
       canRender: false,
     });

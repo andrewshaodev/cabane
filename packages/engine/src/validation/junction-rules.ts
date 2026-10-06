@@ -119,7 +119,7 @@ export const validateJunctions = (
     const declaredWalls = validWalls.filter((wall) => uniqueDeclaredIds.includes(wall.id));
     if (
       declaredWalls.length === uniqueDeclaredIds.length &&
-      !junctionTopologyIsValid(rawJunction.at as PlanPoint, declaredWalls)
+      !junctionTopologyIsValid(rawJunction.at, declaredWalls)
     ) {
       issues.push(
         issue(
@@ -141,7 +141,7 @@ export const validateJunctions = (
       );
     }
     validJunctions.push({
-      at: rawJunction.at as PlanPoint,
+      at: rawJunction.at,
       wallIds: uniqueDeclaredIds,
       path: junctionPath,
     });

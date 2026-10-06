@@ -9,7 +9,7 @@ export function PergolaFrame({
   bulbFinish,
 }: {
   children?: ReactNode;
-  bulbFinish?: { color: string; emissiveIntensity: number };
+  bulbFinish?: { color: string; emissiveIntensity: number } | undefined;
 }) {
   const geometry = useMemo(createPergolaGeometry, []);
   useEffect(

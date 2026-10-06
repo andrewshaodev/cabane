@@ -69,7 +69,9 @@ await withModules(async (load) => {
       await run({ root, document: dom.window.document, window: dom.window });
     } catch (error) {
       if (error instanceof AggregateError)
-        throw new Error([...new Set(error.errors.map((entry) => entry.stack))].join("\n"));
+        throw new Error([...new Set(error.errors.map((entry) => entry.stack))].join("\n"), {
+          cause: error,
+        });
       throw error;
     } finally {
       await act(async () => root.unmount());

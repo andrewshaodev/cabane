@@ -85,7 +85,10 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
     material.uniforms.farPlane.value = lens.far;
     material.uniforms.perspective.value = Boolean(lens.isPerspectiveCamera);
     // About one CSS pixel, including high-DPI and adaptive-resolution canvases.
-    material.uniforms.texel.value.set(gl.getPixelRatio() / size.x, gl.getPixelRatio() / size.y);
+    (material.uniforms.texel.value as import("three").Vector2).set(
+      gl.getPixelRatio() / size.x,
+      gl.getPixelRatio() / size.y,
+    );
     const previousTarget = gl.getRenderTarget();
     const autoClear = gl.autoClear;
     try {

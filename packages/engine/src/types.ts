@@ -160,7 +160,7 @@ export interface EntityBindingSlotSpec {
 
 export interface DeviceSlotSpec {
   id: string;
-  model: StableDeviceModelId | ExtensionKey;
+  model: ExtensionKey;
   entitySlots: readonly EntityBindingSlotSpec[];
   placement: DevicePlacement;
 }

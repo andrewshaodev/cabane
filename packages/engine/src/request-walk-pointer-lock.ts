@@ -26,7 +26,7 @@ export function requestWalkPointerLock(target: HTMLElement): Promise<void> {
         return;
       }
       // Older browsers return void and report completion through events.
-      const request = target.requestPointerLock();
+      const request = (target.requestPointerLock as () => Promise<void> | void)();
       if (request) void request.then(changed, failed);
     } catch {
       failed();

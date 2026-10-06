@@ -20,7 +20,7 @@ export const normalizeEntityStates = (
         lastUpdated: entity.last_updated,
       },
     ]),
-  ) as Readonly<Record<EntityId, EntityStateSnapshot>>;
+  );
 
 export const markEntityStatesStale = (states: Readonly<Record<EntityId, EntityStateSnapshot>>) =>
   Object.fromEntries(

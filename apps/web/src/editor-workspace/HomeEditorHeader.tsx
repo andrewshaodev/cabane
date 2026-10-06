@@ -63,7 +63,6 @@ export function HomeEditorHeader({
   walkButton,
   unsettled,
   setPreviewOpen,
-  selectMode,
   closeEditor,
   closing,
   setPublishMessage,
@@ -139,20 +138,22 @@ export function HomeEditorHeader({
               title="Walk through the draft at eye level"
               aria-haspopup="dialog"
               disabled={editingLocked || unsettled}
-              onClick={async (event) => {
-                setWalkError(null);
-                if (window.matchMedia("(pointer: coarse)").matches) {
-                  setPreviewOpen(true);
-                  return;
-                }
-                const target = event.currentTarget.closest("main");
-                try {
-                  if (!target) throw new Error("Pointer lock unavailable");
-                  await requestWalkPointerLock(target);
-                  setPreviewOpen(true);
-                } catch {
-                  setWalkError("Allow pointer lock in your browser to explore this home.");
-                }
+              onClick={(event) => {
+                void (async () => {
+                  setWalkError(null);
+                  if (window.matchMedia("(pointer: coarse)").matches) {
+                    setPreviewOpen(true);
+                    return;
+                  }
+                  const target = event.currentTarget.closest("main");
+                  try {
+                    if (!target) throw new Error("Pointer lock unavailable");
+                    await requestWalkPointerLock(target);
+                    setPreviewOpen(true);
+                  } catch {
+                    setWalkError("Allow pointer lock in your browser to explore this home.");
+                  }
+                })();
               }}
             >
               <EditorIcon name="walk" />
@@ -170,15 +171,17 @@ export function HomeEditorHeader({
           aria-label="Reset changes"
           disabled={editingLocked || unsettled || !hasChanges}
           title="Discard draft changes and restore the saved version"
-          onClick={async () => {
-            if (
-              !window.confirm(
-                "Reset changes? This discards all draft home and connection changes and restores the last saved version.",
+          onClick={() => {
+            void (async () => {
+              if (
+                !window.confirm(
+                  "Reset changes? This discards all draft home and connection changes and restores the last saved version.",
+                )
               )
-            )
-              return;
-            const result = await workspace.resetDraftToPublished();
-            if (result.status === "saved") replaceEditorsFromProject(result.record.draft);
+                return;
+              const result = await workspace.resetDraftToPublished();
+              if (result.status === "saved") replaceEditorsFromProject(result.record.draft);
+            })();
           }}
         >
           <EditorIcon name="reset" />

@@ -20,7 +20,7 @@ export function OnboardingIntroduction({
   onDismiss: () => void;
   busy: boolean;
   error: string | null;
-  links?: OnboardingLinks;
+  links?: OnboardingLinks | undefined;
 }) {
   const previewBaseUrl = useCabaneAssetUrl("onboarding/");
   const title = useRef<HTMLHeadingElement>(null);

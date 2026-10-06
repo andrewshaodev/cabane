@@ -102,7 +102,7 @@ export function ActionBarEditor({
     };
     dom.events.addEventListener("keydown", dismiss);
     return () => dom.events.removeEventListener("keydown", dismiss);
-  }, [picker, selectedId, overflowOpen]);
+  }, [picker, selectedId, overflowOpen, dom]);
   const hasOverflow = capacity !== null && items.length + 1 > capacity;
   const visible = hasOverflow ? items.slice(0, Math.max(0, capacity - 2)) : items;
   const overflow = hasOverflow ? items.slice(visible.length) : [];

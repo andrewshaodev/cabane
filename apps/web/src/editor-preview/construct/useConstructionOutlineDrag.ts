@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   type FloorEditorDraft,
@@ -7,7 +8,7 @@ import {
   type SnapTarget,
   type Polygon,
 } from "@cabane/engine";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { Plane, Vector3 } from "three";
 import { worldDragToConstructPlan, worldDragToSnappedConstructPlan } from "./drag-geometry";
 import { constructPixelsPerMeter, wallSnapRadiusPixels } from "./plan-screen-scale";
@@ -68,13 +69,14 @@ export function useConstructionOutlineDrag<T extends readonly PlanPoint[] = Poly
     setSnap(null);
     if (current?.dragActive) onDraggingChange?.(false);
   };
+  const releaseOnSelectionChange = useEffectEvent(release);
   useEffect(() => {
     if (
       active.current &&
       (tool !== "select" || selection?.kind !== selectionKind || selection.id !== active.current.id)
     )
-      release();
-  }, [tool, selection]);
+      releaseOnSelectionChange();
+  }, [tool, selection, selectionKind]);
   useEffect(
     () => () => {
       const current = active.current;
@@ -101,23 +103,25 @@ export function useConstructionOutlineDrag<T extends readonly PlanPoint[] = Poly
             to: current.original[(index + 1) % current.original.length],
           }))
         : [];
-    return worldDragToSnappedConstructPlan({
-      point: intersection,
-      coordinates: draft.coordinates,
-      walls: [...draft.walls, ...(draft.hedges ?? []), ...outlineWalls],
-      onSnap: setSnap,
-      movingEndpoint: current?.corner != null ? current.original[current.corner] : undefined,
-      pixelsPerMeter: constructPixelsPerMeter(camera, size.height),
-      snapRadiusPixels: wallSnapRadiusPixels(event.nativeEvent.pointerType),
-      angleOrigin:
-        current?.corner != null
-          ? current.original[
-              (current.corner + current.original.length - 1) % current.original.length
-            ]
-          : undefined,
-      pointerType: event.nativeEvent.pointerType,
-      absolute: event.nativeEvent.altKey,
-    });
+    return worldDragToSnappedConstructPlan(
+      omitUndefinedProperties({
+        point: intersection,
+        coordinates: draft.coordinates,
+        walls: [...draft.walls, ...(draft.hedges ?? []), ...outlineWalls],
+        onSnap: setSnap,
+        movingEndpoint: current?.corner != null ? current.original[current.corner] : undefined,
+        pixelsPerMeter: constructPixelsPerMeter(camera, size.height),
+        snapRadiusPixels: wallSnapRadiusPixels(event.nativeEvent.pointerType),
+        angleOrigin:
+          current?.corner != null
+            ? current.original[
+                (current.corner + current.original.length - 1) % current.original.length
+              ]
+            : undefined,
+        pointerType: event.nativeEvent.pointerType,
+        absolute: event.nativeEvent.altKey,
+      }),
+    );
   };
   const polygonForEvent = (event: Pointer, current: Drag): T => {
     const point = pointForEvent(event, current.corner !== null, current);

@@ -147,10 +147,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     setFloorFinish,
     setFloorPaintTarget,
     homeAssistantUrl,
-    signIn,
     snapshot,
-    flush,
-    lifecycle,
     commit,
     replaceEditorsFromProject,
     catalogBrowsing,
@@ -287,7 +284,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       state.step === "arrange" ? "furnish" : state.step === "connect" ? "connect" : "construct";
     if (state.target) floorNavigation.selectFloor(state.target.floorId);
     selectMode(nextMode);
-    setTutorialAction({ step: state.step, target: state.target });
+    setTutorialAction({
+      step: state.step,
+      ...(state.target === undefined ? {} : { target: state.target }),
+    });
   };
   useEffect(() => {
     if (!tutorialAction || tutorialBusy) return;
@@ -309,7 +309,15 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       setNameFocusRequest({ roomId: target.roomId, serial: Date.now() });
     }
     setTutorialAction(null);
-  }, [tutorialAction, tutorialBusy, mode, activeFloorId, constructEditor.previewFloor.id]);
+  }, [
+    tutorialAction,
+    tutorialBusy,
+    mode,
+    activeFloorId,
+    constructEditor.previewFloor.id,
+    constructEditor,
+    focusRoom,
+  ]);
   const [walkStartFloor, setWalkStartFloor] = useState<string | null>(null);
   useEffect(() => {
     setWalkStartFloor(null);
@@ -320,7 +328,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     };
     dom.events.addEventListener("keydown", cancel);
     return () => dom.events.removeEventListener("keydown", cancel);
-  }, []);
+  }, [dom]);
   useEffect(() => {
     if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null);
   }, [constructEditor.tool, stairPlacement]);

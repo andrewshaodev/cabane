@@ -15,7 +15,7 @@ await withModules(async (load) => {
   const { collectConstructContextualIssues, visibleConstructIssues } = await load(
     "/apps/web/src/editor-preview/construct/contextual-validation.ts",
   );
-  const { constructIssueKey, constructIssuePlanPoint, constructIssueVisualTargets } = await load(
+  const { constructIssueKey } = await load(
     "/apps/web/src/editor-preview/construct/validation-visuals.ts",
   );
   const { ConstructionInspector } = await load(

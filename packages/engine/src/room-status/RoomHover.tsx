@@ -70,7 +70,7 @@ function RoomHoverCursor() {
     return () => {
       dom.container.style.cursor = previous;
     };
-  }, [hovered]);
+  }, [hovered, dom]);
   return null;
 }
 

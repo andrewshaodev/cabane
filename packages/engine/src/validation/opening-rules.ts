@@ -105,7 +105,10 @@ export const validateOpenings = (
         openingSide: ["left", "right"],
         ...(rawOpening.kind === "door" ? { slideDirection: ["start", "end"] } : {}),
       })) {
-        if (rawOpening[key] !== undefined && !allowed.includes(String(rawOpening[key]))) {
+        if (
+          rawOpening[key] !== undefined &&
+          !allowed.includes(typeof rawOpening[key] === "string" ? rawOpening[key] : "")
+        ) {
           issues.push(
             issue(
               "opening.orientation",

@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { ConstructionAlignmentGuide } from "./ConstructionAlignmentGuide";
 import { ConstructionOutlineMeasurements } from "./ConstructionOutlineMeasurements";
 import { useConstructionOutlineDrag } from "./useConstructionOutlineDrag";
@@ -80,7 +81,7 @@ function FloorHit({
   name: string;
   elevation: number;
   selected?: boolean;
-  handlers?: Partial<ZonePointerHandlers>;
+  handlers?: Partial<ZonePointerHandlers> | undefined;
 }) {
   const geometry = useMemo(
     () =>
@@ -102,7 +103,7 @@ function FloorHit({
       <PlanOverlayMaterial
         color="#ff754d"
         transparent
-        visible={selected}
+        {...omitUndefinedProperties({ visible: selected })}
         opacity={selected ? 0.12 : 0}
         depthTest={false}
         depthWrite={false}
@@ -150,7 +151,7 @@ export function ConstructionFloorLayer({
     tool,
     onSelect: onSelectZone,
     onUpdate: onUpdateZone,
-    onDraggingChange,
+    ...(onDraggingChange === undefined ? {} : { onDraggingChange: onDraggingChange }),
   });
   const lockedRoom = floor.rooms.find((room) => room.id === drawingRoomId);
   const previewValid =

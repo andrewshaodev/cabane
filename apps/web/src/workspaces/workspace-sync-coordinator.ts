@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import type { WorkspaceEntry } from "@cabane/engine";
 import type { SyncCursor } from "./workspace-sync-state";
 
@@ -77,7 +78,7 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
   const reconcile = (homeId: string, origin: string) =>
     run(homeId, async (): Promise<SyncStatus> => {
       const cursor = await deps.cursors.read(origin, homeId);
-      if (!cursor?.enabled) return { kind: "off" };
+      if (!cursor?.enabled) return { kind: "off" } satisfies SyncStatus;
       const entry = await local(homeId);
       const fingerprint = await deps.fingerprint(entry);
       let remote;
@@ -101,7 +102,10 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
           await acknowledge(origin, restored, remote.version, true);
           return { kind: "synced", detail: "restored" };
         } catch (error) {
-          return { kind: "conflict", detail: error instanceof Error ? error.message : undefined };
+          return omitUndefinedProperties({
+            kind: "conflict",
+            detail: error instanceof Error ? error.message : undefined,
+          });
         }
       }
       if (!localChanged) return { kind: "synced" };
@@ -178,7 +182,7 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
       const cursor = await deps.cursors.read(origin, homeId);
       if (!cursor) throw new Error("Save this workspace to Home Assistant before enabling sync.");
       await deps.cursors.write({ ...cursor, enabled });
-      return { kind: enabled ? "pending" : "off" } as SyncStatus;
+      return { kind: enabled ? "pending" : "off" } satisfies SyncStatus;
     });
   const resolveConflict = (
     homeId: string,
@@ -218,7 +222,7 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
       if (!remote?.document) throw new Error("No HA copy of this workspace exists.");
       await deps.client.delete(homeId, remote.version);
       await deps.cursors.remove(origin, homeId);
-      return { kind: "off" } as SyncStatus;
+      return { kind: "off" } satisfies SyncStatus;
     });
   return {
     reconcile,

@@ -20,9 +20,9 @@ import { selectionBoxGeometry } from "../furnish/editor-state";
 import { PlanStrokeBatch, type BatchedPlanStroke } from "./PlanStrokeBatch";
 
 type NamingProps = {
-  onNameFocusHandled?: () => void;
+  onNameFocusHandled?: (() => void) | undefined;
   namingDisabled?: boolean;
-  nameFocusRequest?: { roomId: string; serial: number } | null;
+  nameFocusRequest?: ({ roomId: string; serial: number } | null) | undefined;
   onRoomNameChange?: (roomId: string, name: string) => void;
 };
 

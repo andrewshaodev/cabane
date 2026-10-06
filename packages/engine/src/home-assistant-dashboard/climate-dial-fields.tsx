@@ -1,3 +1,4 @@
+import { textAttribute } from "./entity-field-contract";
 import { useLayoutEffect, useRef, useState } from "react";
 
 import {
@@ -146,10 +147,10 @@ function ClimateOptionPicker({
 }
 
 const vthermStatuses = (entity: EntityStateSnapshot) => {
-  const motion = String(entity.attributes.motion_state ?? "unavailable");
-  const windowState = String(entity.attributes.window_state ?? "unavailable");
-  const safety = String(entity.attributes.safety_state ?? "unavailable");
-  const overpowering = String(entity.attributes.overpowering_state ?? "unavailable");
+  const motion = textAttribute(entity.attributes.motion_state ?? "unavailable");
+  const windowState = textAttribute(entity.attributes.window_state ?? "unavailable");
+  const safety = textAttribute(entity.attributes.safety_state ?? "unavailable");
+  const overpowering = textAttribute(entity.attributes.overpowering_state ?? "unavailable");
   const windowBypass =
     entity.attributes.is_window_bypass === true || entity.attributes.window_bypass_state === true;
   return [
@@ -160,12 +161,22 @@ const vthermStatuses = (entity: EntityStateSnapshot) => {
   ].filter((status): status is string => Boolean(status));
 };
 
-export function ClimateDialFields({
+export function ClimateDialFields(props: {
+  binding: ResolvedEntityBinding;
+  enabled: boolean;
+  onCallService: (call: SupportedServiceCall) => Promise<unknown>;
+}) {
+  const entity = props.binding.state;
+  if (!entity) return null;
+  return <ClimateDialFieldsWithEntity {...props} binding={{ ...props.binding, state: entity }} />;
+}
+
+function ClimateDialFieldsWithEntity({
   binding,
   enabled,
   onCallService,
 }: {
-  binding: ResolvedEntityBinding;
+  binding: ResolvedEntityBinding & { state: NonNullable<ResolvedEntityBinding["state"]> };
   enabled: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
 }) {
@@ -173,7 +184,6 @@ export function ClimateDialFields({
     "mode" | "preset" | "fan mode" | "swing mode" | null
   >(null);
   const entity = binding.state;
-  if (!entity) return null;
   const modeCommand = useOptimisticCommand({
     confirmedKey: confirmationKey(entity, entity.state),
     confirmedValue: entity.state,
@@ -231,11 +241,11 @@ export function ClimateDialFields({
   const pickerCount = [modeOptions, presetOptions, fanOptions, swingOptions].filter(
     (options) => options.length > 0,
   ).length;
-  const presetMode = String(entity.attributes.preset_mode ?? "");
-  const fanMode = String(entity.attributes.fan_mode ?? "");
-  const swingMode = String(entity.attributes.swing_mode ?? "");
+  const presetMode = textAttribute(entity.attributes.preset_mode ?? "");
+  const fanMode = textAttribute(entity.attributes.fan_mode ?? "");
+  const swingMode = textAttribute(entity.attributes.swing_mode ?? "");
   const statuses = isVersatileThermostat(binding) ? vthermStatuses(entity) : [];
-  const rawAction = String(
+  const rawAction = textAttribute(
     entity.attributes.hvac_action ?? (entity.state === "off" ? "off" : entity.state),
   );
   const actionLabel =

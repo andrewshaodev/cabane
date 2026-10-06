@@ -9,7 +9,7 @@ import {
   type ItemPlacement,
   type SceneItemSpec,
 } from "@cabane/engine";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
 import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
 import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
@@ -144,23 +144,24 @@ export function FurnishingEditLayer({
     event.stopPropagation();
     endDrag(false);
   };
+  const cancelDrag = useEffectEvent(() => endDrag(true));
   useEffect(() => {
     if (typeof window === "undefined") return;
     const cancel = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || (!drag.current && !marquee.current)) return;
       event.preventDefault();
       event.stopPropagation();
-      endDrag(true);
+      cancelDrag();
     };
-    const blur = () => endDrag(true);
+    const blur = () => cancelDrag();
     dom.events.addEventListener("keydown", cancel, true);
     window.addEventListener("blur", blur);
     return () => {
       dom.events.removeEventListener("keydown", cancel, true);
       window.removeEventListener("blur", blur);
-      endDrag(true);
+      cancelDrag();
     };
-  }, []);
+  }, [dom]);
 
   return (
     <group name="furnishing-edit-layer">

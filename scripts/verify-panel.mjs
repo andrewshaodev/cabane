@@ -40,8 +40,8 @@ const server = createServer(async (req, res) => {
 await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch({
-  executablePath:
-    process.env.CHROME_PATH ?? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  channel: "chromium",
+  executablePath: process.env.CHROME_PATH,
   headless: true,
   args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
 });

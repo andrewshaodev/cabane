@@ -139,7 +139,6 @@ export function HomeEditorScene({
   editingLocked,
   publishOpen,
   previewOpen,
-  connectManifest,
   connect,
   clearConstructionSelection,
   clearFurnishingSelection,

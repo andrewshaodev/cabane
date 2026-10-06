@@ -2,7 +2,6 @@ import { Shape } from "three";
 import {
   vehicleFinish as finish,
   vehiclePane,
-  vehiclePanel,
   vehicleProfile,
   vehicleSeam,
   type VehiclePoint,

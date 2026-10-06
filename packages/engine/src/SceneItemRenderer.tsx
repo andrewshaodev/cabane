@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { useCabaneDom } from "./CabaneDom";
 import { resolveModelVariant } from "./model-variants";
 import { memo, useContext, useEffect, useRef, useState } from "react";
@@ -99,7 +100,7 @@ function DeviceSceneItem({
     return () => {
       dom.container.style.cursor = previousCursor;
     };
-  }, [hovered]);
+  }, [hovered, dom]);
 
   const renderable = scale !== null;
   useEffect(() => {
@@ -118,7 +119,7 @@ function DeviceSceneItem({
   const walkInteractionTarget = {
     id: item.id,
     label: primarySlot?.presentation.label ?? item.id,
-    slotId: primarySlot?.id,
+    ...(primarySlot ? { slotId: primarySlot.id } : {}),
   } satisfies ExtensionInteractionTarget;
   const interactionTarget = {
     ...walkInteractionTarget,
@@ -141,38 +142,38 @@ function DeviceSceneItem({
         visualState,
         walkDeviceInteraction: walkInteractionTarget,
       }}
-      onPointerOver={
-        walkMode
+      {...omitUndefinedProperties({
+        onPointerOver: walkMode
           ? undefined
-          : (event) => {
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
               event.stopPropagation();
               setHovered(true);
-            }
-      }
-      onPointerOut={
-        walkMode
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerOut: walkMode
           ? undefined
-          : (event) => {
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
               event.stopPropagation();
               setHovered(false);
-            }
-      }
-      onPointerDown={
-        walkMode
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerDown: walkMode
           ? undefined
-          : (event) => {
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
               event.stopPropagation();
               press.current = {
                 pointerId: event.pointerId,
                 x: event.nativeEvent.clientX,
                 y: event.nativeEvent.clientY,
               };
-            }
-      }
-      onPointerMove={
-        walkMode
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerMove: walkMode
           ? undefined
-          : (event) => {
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
               const candidate = press.current;
               if (!candidate || candidate.pointerId !== event.pointerId) return;
               if (
@@ -182,32 +183,34 @@ function DeviceSceneItem({
                 ) > definition.interaction.tapTolerancePixels
               )
                 press.current = null;
-            }
-      }
-      onPointerUp={
-        walkMode
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerUp: walkMode
           ? undefined
-          : (event) => {
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
               event.stopPropagation();
               const candidate = press.current;
               press.current = null;
               if (candidate?.pointerId === event.pointerId) interact();
-            }
-      }
-      onPointerCancel={
-        walkMode
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerCancel: walkMode
           ? undefined
           : () => {
               press.current = null;
-            }
-      }
+            },
+      })}
     >
       <DeviceHoverContext.Provider value={hovered}>
         <Component
           variant={resolveModelVariant(definition, item.variant).id}
           slot={binding}
-          state={state}
-          liveMedia={primary ? liveMediaByEntityId[primary.entityId] : undefined}
+          {...omitUndefinedProperties({ state: state })}
+          {...omitUndefinedProperties({
+            liveMedia: primary ? liveMediaByEntityId[primary.entityId] : undefined,
+          })}
           visualState={visualState}
           reducedMotion={reducedMotion}
           walkMode={walkMode}

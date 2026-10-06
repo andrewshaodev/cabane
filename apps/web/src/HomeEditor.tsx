@@ -32,8 +32,8 @@ export function HomeEditor({
 }: ConnectWorkspaceProps & {
   initialRecord: HomeProjectRecord;
   lifecycle: HomeProjectLifecycle;
-  recoveryMessage?: string;
-  recoveryRaw?: string;
+  recoveryMessage?: string | undefined;
+  recoveryRaw?: string | undefined;
   autosaveDelayMs?: number;
   onClose: (record: HomeProjectRecord, reason: HomeEditorExitReason) => void;
 }) {

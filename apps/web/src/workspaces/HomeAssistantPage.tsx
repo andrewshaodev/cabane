@@ -54,7 +54,11 @@ export function HomeAssistantPage({
   useEffect(() => {
     if (connected && !hostSession) {
       try {
-        const request = JSON.parse(window.sessionStorage.getItem(CONNECT_RETURN_KEY) ?? "null");
+        const parsed: unknown = JSON.parse(
+          window.sessionStorage.getItem(CONNECT_RETURN_KEY) ?? "null",
+        );
+        const request =
+          parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
         if (request?.workspaceId === record.homeId && request?.panel === "home-assistant")
           window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
       } catch {

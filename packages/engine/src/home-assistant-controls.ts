@@ -6,7 +6,7 @@ export type CoalescedControlChannel =
 export interface SupportedServiceCall {
   domain: ControllableDeviceDomain | "dreame_vacuum";
   service: string;
-  data?: Readonly<Record<string, unknown>>;
+  data?: Readonly<Record<string, unknown>> | undefined;
   target: { entity_id: EntityId | EntityId[] };
   delivery?: {
     mode: "coalesced-value";

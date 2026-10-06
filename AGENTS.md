@@ -137,6 +137,11 @@ processed by their chosen agent provider.
 
 ## Working and verification rules
 
+- Use the pinned Node/npm versions and `npm ci`. Install the pinned Chromium with
+  `npm run browser:install` before browser verification.
+- Run `npm run format` after edits and `npm run verify:fast` before handing off code.
+  Run `npm run verify` for shared product changes; use the surface-specific checks
+  below as well. Fix failures instead of weakening lint, compiler, or Knip rules.
 - Inspect the existing tree and Git status before editing. Preserve unrelated
   user changes and do not overwrite generated home work outside the task.
 - Prefer the repository's public types, helpers, fixtures, and verification

@@ -11,8 +11,8 @@ export function StairNumberField({
   label: string;
   value: number;
   onCommit: (value: number) => void;
-  minimum?: number;
-  maximum?: number;
+  minimum?: number | undefined;
+  maximum?: number | undefined;
 }) {
   const [text, setText] = useState(String(Number(value.toFixed(2))));
   const [error, setError] = useState<string | null>(null);

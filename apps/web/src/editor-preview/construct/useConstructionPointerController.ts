@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { useCabaneDom } from "@cabane/engine";
 import { useThree } from "@react-three/fiber";
 
@@ -185,7 +186,7 @@ export function useConstructionPointerController({
     };
     dom.events.addEventListener("keydown", cancel, true);
     return () => dom.events.removeEventListener("keydown", cancel, true);
-  }, [releaseMarquee]);
+  }, [releaseMarquee, dom]);
   useEffect(
     () => () => {
       const current = activeMarquee.current;
@@ -317,22 +318,24 @@ export function useConstructionPointerController({
         return outlinePoints[0];
       }
     }
-    return worldDragToSnappedConstructPlan({
-      point: intersection,
-      coordinates,
-      walls: drawing || draggingEndpoint ? drawingWalls : snapWalls,
-      onSnap: setSnap,
-      pixelsPerMeter,
-      snapRadiusPixels: editingWall
-        ? wallSnapRadiusPixels(event.nativeEvent.pointerType)
-        : undefined,
-      pointerType: event.nativeEvent.pointerType,
-      angleOrigin:
-        draggingEndpoint?.angleOrigin ?? (drawing ? (segmentStart ?? undefined) : undefined),
-      angleReferenceRadians: draggingEndpoint ? undefined : angleReference,
-      movingEndpoint: draggingEndpoint?.origin,
-      absolute: event.nativeEvent.altKey,
-    });
+    return worldDragToSnappedConstructPlan(
+      omitUndefinedProperties({
+        point: intersection,
+        coordinates,
+        walls: drawing || draggingEndpoint ? drawingWalls : snapWalls,
+        onSnap: setSnap,
+        pixelsPerMeter,
+        snapRadiusPixels: editingWall
+          ? wallSnapRadiusPixels(event.nativeEvent.pointerType)
+          : undefined,
+        pointerType: event.nativeEvent.pointerType,
+        angleOrigin:
+          draggingEndpoint?.angleOrigin ?? (drawing ? (segmentStart ?? undefined) : undefined),
+        angleReferenceRadians: draggingEndpoint ? undefined : angleReference,
+        movingEndpoint: draggingEndpoint?.origin,
+        absolute: event.nativeEvent.altKey,
+      }),
+    );
   };
 
   const rawPlanPointForEvent = (event: PointerEvent3D) => {
@@ -537,24 +540,27 @@ export function useConstructionPointerController({
     if (draggingWall.dragActive) onDraggingChange?.(false);
   };
 
-  const previewPoint = (point: PlanPoint): PlanPoint => {
-    if (draggingEndpoint && samePlanPoint(point, draggingEndpoint.origin)) {
-      return draggingEndpoint.point;
-    }
-    if (draggingWall) {
-      if (samePlanPoint(point, draggingWall.from))
-        return [
-          draggingWall.from[0] + draggingWall.delta[0],
-          draggingWall.from[1] + draggingWall.delta[1],
-        ];
-      if (samePlanPoint(point, draggingWall.to))
-        return [
-          draggingWall.to[0] + draggingWall.delta[0],
-          draggingWall.to[1] + draggingWall.delta[1],
-        ];
-    }
-    return point;
-  };
+  const previewPoint = useCallback(
+    (point: PlanPoint): PlanPoint => {
+      if (draggingEndpoint && samePlanPoint(point, draggingEndpoint.origin)) {
+        return draggingEndpoint.point;
+      }
+      if (draggingWall) {
+        if (samePlanPoint(point, draggingWall.from))
+          return [
+            draggingWall.from[0] + draggingWall.delta[0],
+            draggingWall.from[1] + draggingWall.delta[1],
+          ];
+        if (samePlanPoint(point, draggingWall.to))
+          return [
+            draggingWall.to[0] + draggingWall.delta[0],
+            draggingWall.to[1] + draggingWall.delta[1],
+          ];
+      }
+      return point;
+    },
+    [draggingEndpoint, draggingWall],
+  );
 
   const preview =
     drawing && segmentStart && segmentPreview
@@ -624,16 +630,7 @@ export function useConstructionPointerController({
             })
           : draft.openings,
     }),
-    [
-      draft.walls,
-      draft.openings,
-      draft.coordinates,
-      draft.interiorWallThicknessMeters,
-      draggingEndpoint,
-      draggingWall,
-      draggingOpening,
-      resizingOpening,
-    ],
+    [draft, draggingEndpoint, draggingWall, draggingOpening, resizingOpening, previewPoint],
   );
   const resizedWall = draggingEndpoint
     ? displayedDraft.walls.find((wall) => wall.id === draggingEndpoint.wallId)

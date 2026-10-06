@@ -122,7 +122,7 @@ export function createPergolaGeometry() {
     }
   }
   const merge = (parts: BufferGeometry[]) => {
-    const geometry = mergeGeometries(parts)!;
+    const geometry = mergeGeometries(parts);
     parts.forEach((part) => part.dispose());
     return geometry;
   };

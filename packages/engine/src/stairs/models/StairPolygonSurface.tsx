@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "../../defined-properties";
 import { useMemo } from "react";
 import { Shape } from "three";
 import type { ThreeElements } from "@react-three/fiber";
@@ -35,7 +36,7 @@ export function StairPolygonSurface({
       <extrudeGeometry args={[shape, { depth: thickness, bevelEnabled: false }]} />
       <ToonMaterial
         color={emissive ? "#000000" : color}
-        emissive={emissive}
+        {...omitUndefinedProperties({ emissive: emissive })}
         emissiveIntensity={emissive ? 1 : 0}
         toneMapped={!emissive}
       />

@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { Canvas, useFrame, useThree, type Camera } from "@react-three/fiber";
 import { FloorFinishSurfaces, type FloorSpec } from "@cabane/engine";
 import {
@@ -11,7 +12,6 @@ import { Plane, Raycaster, Vector2, Vector3 } from "three";
 import { ConstructionGrid } from "../editor-preview/construct/ConstructionGrid";
 import {
   imagePointToWorld,
-  referenceHeight,
   resizeReference,
   worldPointToImage,
   type ReferencePlan,
@@ -31,7 +31,7 @@ const corners: readonly ReferencePoint[] = [
   [0, 1],
 ];
 const ground = new Plane(new Vector3(0, 1, 0), 0);
-export function projectReferencePoint(
+function projectReferencePoint(
   point: ReferencePoint,
   camera: Camera,
   width: number,
@@ -61,10 +61,11 @@ function BackgroundCamera({ projection }: { projection: RefObject<Projection> })
       set({ camera });
       invalidate();
     };
-    projection.current.background = update;
-    if (projection.current.camera) update(projection.current.camera);
+    const currentProjection = projection.current;
+    currentProjection.background = update;
+    if (currentProjection.camera) update(currentProjection.camera);
     return () => {
-      projection.current.background = null;
+      currentProjection.background = null;
     };
   }, [projection, set, invalidate]);
   return null;
@@ -155,26 +156,29 @@ export function useReferenceCanvas(
   const [url, setUrl] = useState<{ id: string; value: string } | null>(null);
   const [assetError, setAssetError] = useState<string | null>(null);
   const assetId = reference.plan?.assetId;
+  const { getAsset } = reference.storage;
   useEffect(() => {
     let current = true,
       objectUrl: string | undefined;
     setAssetError(null);
     if (assetId)
-      void reference.storage
-        .getAsset(assetId)
+      void getAsset(assetId)
         .then((blob) => {
           if (!current) return;
           objectUrl = URL.createObjectURL(blob);
           setUrl({ id: assetId, value: objectUrl });
         })
         .catch((error) => {
-          if (current) setAssetError(error.message);
+          if (current)
+            setAssetError(
+              error instanceof Error ? error.message : "Could not load the reference plan.",
+            );
         });
     return () => {
       current = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [assetId, reference.storage.getAsset]);
+  }, [assetId, getAsset]);
   const visible = Boolean(
     active && reference.plan && reference.preference.visible && url?.id === assetId,
   );
@@ -271,7 +275,12 @@ export function useReferenceCanvas(
   const background = visible ? (
     <>
       <div className="reference-canvas-layer" aria-hidden="true">
-        <Canvas frameloop="demand" dpr={1} gl={{ antialias: true, alpha: true }} events={undefined}>
+        <Canvas
+          frameloop="demand"
+          dpr={1}
+          gl={{ antialias: true, alpha: true }}
+          {...omitUndefinedProperties({ events: undefined })}
+        >
           <BackgroundCamera projection={projection} />
           <ConstructionGrid />
           <FloorFinishSurfaces floor={floor} variant="plan" />

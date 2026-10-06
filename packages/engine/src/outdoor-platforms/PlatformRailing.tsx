@@ -7,7 +7,7 @@ export function PlatformRailing({
 }: {
   length: number;
   height: number;
-  name?: string;
+  name?: string | undefined;
 }) {
   const divisions = Math.ceil(length / 0.14);
   const topHeight = Math.min(0.05, height);

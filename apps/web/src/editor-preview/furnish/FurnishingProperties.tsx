@@ -49,22 +49,24 @@ export function FurnishingProperties({
   floor,
   onWindowFit,
 }: {
-  floor?: FloorSpec;
-  onWindowFit?: (
-    id: string,
-    placement: ItemPlacement,
-    size: SceneItemSize,
-    definition: SceneModelEditorDescriptor,
-  ) => void;
+  floor?: FloorSpec | undefined;
+  onWindowFit?:
+    | ((
+        id: string,
+        placement: ItemPlacement,
+        size: SceneItemSize,
+        definition: SceneModelEditorDescriptor,
+      ) => void)
+    | undefined;
   selected: SceneItemSpec;
   definition: SceneModelEditorDescriptor;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
   onSizeChange: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
-  onVariantChange?: (id: string, variant: string, definition: SceneModelEditorDescriptor) => void;
-  onLightStateChange?: (
-    id: string,
-    lightState: "always-off" | "always-on" | "night-only" | "connected",
-  ) => void;
+  onVariantChange?:
+    ((id: string, variant: string, definition: SceneModelEditorDescriptor) => void) | undefined;
+  onLightStateChange?:
+    | ((id: string, lightState: "always-off" | "always-on" | "night-only" | "connected") => void)
+    | undefined;
   onClose: () => void;
 }) {
   const updatePlacement = (patch: Partial<ItemPlacement>) =>

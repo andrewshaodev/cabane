@@ -7,7 +7,7 @@ import { RoomHoverProvider } from "./room-status/RoomHover";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { OrbitNavigation } from "./OrbitNavigation";
 import { safeBuildingSpawn } from "./stairs/stair-navigation";
-import { FloorPicker, useFloorNavigation, deriveFloorLevels } from "./building";
+import { FloorPicker, deriveFloorLevels } from "./building";
 import { StylizedScene } from "./StylizedScene";
 import { PerformanceMonitor } from "@react-three/drei";
 
@@ -215,9 +215,10 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
         ? !candidate.belowGround
         : index <= manifest.floors.indexOf(floor),
     );
+  const { wholeBuilding, setWholeBuilding } = floorNavigation;
   useEffect(() => {
-    if (walkMode && floorNavigation.wholeBuilding) floorNavigation.setWholeBuilding(false);
-  }, [walkMode, floorNavigation.wholeBuilding, floorNavigation.setWholeBuilding]);
+    if (walkMode && wholeBuilding) setWholeBuilding(false);
+  }, [walkMode, wholeBuilding, setWholeBuilding]);
   return (
     <CameraStreamCoordinator
       requirements={cameraStreamRequirements}

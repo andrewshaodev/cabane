@@ -1,3 +1,4 @@
+import { textAttribute } from "./entity-field-contract";
 import {
   fanPercentageCall,
   fanPowerCall,
@@ -55,10 +56,13 @@ export function FanFields({
         <AdvancedControls label="More settings" defaultExpanded={focused}>
           <CommandOption
             label="Preset"
-            value={String(entity.attributes.preset_mode ?? "")}
+            value={textAttribute(entity.attributes.preset_mode ?? "")}
             options={presetOptions}
             disabled={!enabled}
-            confirmedKey={confirmationKey(entity, String(entity.attributes.preset_mode ?? ""))}
+            confirmedKey={confirmationKey(
+              entity,
+              textAttribute(entity.attributes.preset_mode ?? ""),
+            )}
             callForValue={(value) => fanPresetCall(entity, value)}
             onCallService={onCallService}
           />

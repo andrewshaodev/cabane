@@ -24,3 +24,11 @@ export const toggleCallForPressed = (entity: EntityStateSnapshot, pressed: boole
 
 export const isVersatileThermostat = (binding: ResolvedEntityBinding) =>
   binding.domain === "climate" && binding.registry?.platform === "versatile_thermostat";
+
+/** Display scalar HA attributes without rendering arbitrary objects as text. */
+export const textAttribute = (value: unknown): string =>
+  typeof value === "string"
+    ? value
+    : typeof value === "number" || typeof value === "boolean"
+      ? String(value)
+      : "";

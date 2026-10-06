@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { validateStairs } from "./stairs/stair-validation";
 import type { HomeManifest, LegacyHomeManifest, ManifestValidationResult } from "./types";
 import { migrateLegacyManifest } from "./building/manifest-migration";
@@ -46,7 +47,7 @@ export const validateHomeManifest = (
     (left, right) => left.path.localeCompare(right.path) || left.code.localeCompare(right.code),
   );
   const canRender = !issues.some((candidate) => candidate.severity === "fatal");
-  return {
+  return omitUndefinedProperties({
     manifest: canRender
       ? input.schemaVersion === 1
         ? migrateLegacyManifest(input as unknown as LegacyHomeManifest)
@@ -54,7 +55,7 @@ export const validateHomeManifest = (
       : undefined,
     issues,
     canRender,
-  };
+  });
 };
 
 export const assertValidHomeManifest = (

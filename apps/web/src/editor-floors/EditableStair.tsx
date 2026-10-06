@@ -71,7 +71,7 @@ export function EditableStair({
   selected: boolean;
   enabled: boolean;
   registries?: StairValidationRegistries;
-  onIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
+  onIssuesChange?: ((issues: readonly ManifestIssue[] | null) => void) | undefined;
   onSelect: () => void;
   onCommit: (stair: StairSpec) => void;
   onDraggingChange: (value: boolean) => void;
@@ -89,10 +89,11 @@ export function EditableStair({
     selected && enabled ? candidate : null,
     registries,
   );
+  const hasDraft = Boolean(draft);
   useEffect(() => {
-    onIssuesChange?.(selected && draft ? validation.issues : null);
+    onIssuesChange?.(selected && hasDraft ? validation.issues : null);
     return () => onIssuesChange?.(null);
-  }, [onIssuesChange, selected, Boolean(draft), validation.issues]);
+  }, [onIssuesChange, selected, hasDraft, validation.issues]);
   const flight = deriveStairFlight(building, candidate);
   const latest = useRef({ onDraggingChange, validation });
   latest.current = { onDraggingChange, validation };
@@ -134,7 +135,7 @@ export function EditableStair({
       gl.domElement.removeEventListener("lostpointercapture", lost);
       releaseRef.current();
     };
-  }, [gl]);
+  }, [gl, dom]);
   const project = (event: Pointer, current?: Drag): StairPlacementPoint | null => {
     const hit = event.ray.intersectPlane(new Plane(new Vector3(0, 1, 0), 0), new Vector3());
     if (!hit) return null;

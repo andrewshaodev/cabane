@@ -8,7 +8,7 @@ export interface SelectedItemActions {
   onDuplicate: () => void;
   onDelete: () => void;
   /** Supplied by the Connect workspace once its device deep link is available. */
-  onMap?: () => void;
+  onMap?: (() => void) | undefined;
 }
 
 export const SelectedItemActionBar = forwardRef<

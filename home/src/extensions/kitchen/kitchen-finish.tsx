@@ -10,7 +10,7 @@ export const KITCHEN_OAK = "#b77b43";
 export const KITCHEN_OAK_LIGHT = "#d09a62";
 export const KITCHEN_BRASS = "#b78332";
 export const KITCHEN_DARK = "#292b2a";
-export const KITCHEN_OUTLINE = "#665c50";
+const KITCHEN_OUTLINE = "#665c50";
 
 export function KitchenBox({
   size,

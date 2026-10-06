@@ -59,7 +59,7 @@ export function useReferencePersistence(
     void load();
     return () => {
       alive.current = false;
-      loadGeneration.current++;
+      loadGeneration.current = loadGeneration.current + 1;
     };
   }, [load]);
   const save = useCallback(() => {

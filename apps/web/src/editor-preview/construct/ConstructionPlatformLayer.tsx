@@ -35,12 +35,14 @@ function PlatformFill({
   name: string;
   color: string;
   opacity?: number;
-  handlers?: {
-    onPointerDown: (event: Pointer) => void;
-    onPointerMove: (event: Pointer) => void;
-    onPointerUp: (event: Pointer) => void;
-    onPointerCancel: (event: Pointer) => void;
-  };
+  handlers?:
+    | {
+        onPointerDown: (event: Pointer) => void;
+        onPointerMove: (event: Pointer) => void;
+        onPointerUp: (event: Pointer) => void;
+        onPointerCancel: (event: Pointer) => void;
+      }
+    | undefined;
 }) {
   const geometry = useMemo(() => {
     if (!isOutdoorPlatformOutline(polygon)) return null;
@@ -100,7 +102,7 @@ export function ConstructionPlatformLayer({
     tool,
     onSelect,
     onUpdate,
-    onDraggingChange,
+    ...(onDraggingChange === undefined ? {} : { onDraggingChange: onDraggingChange }),
   });
   const pending =
     preview &&
@@ -158,9 +160,9 @@ export function ConstructionPlatformLayer({
                       {...handlers(platform.id, polygon)}
                       onPointerDown={(event) => {
                         handlers(platform.id, polygon).onPointerDown(event);
-                        if (!event.nativeEvent.shiftKey && tool === "select")
-                          platform.edges[index] &&
-                            onSelectEdge(platform.id, platform.edges[index].id);
+                        const edge = platform.edges[index];
+                        if (!event.nativeEvent.shiftKey && tool === "select" && edge)
+                          onSelectEdge(platform.id, edge.id);
                       }}
                     >
                       <boxGeometry args={[transform.length, 0.02, 0.18]} />

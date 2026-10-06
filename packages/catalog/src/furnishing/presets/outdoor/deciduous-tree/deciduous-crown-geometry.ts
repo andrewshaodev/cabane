@@ -56,7 +56,7 @@ export function createDeciduousCrownGeometry() {
       return geometry;
     });
   });
-  const crown = mergeGeometries(parts)!;
+  const crown = mergeGeometries(parts);
   parts.forEach((part) => part.dispose());
   return crown;
 }

@@ -217,7 +217,7 @@ export function SceneActionBar({
   keyboardEnabled = true,
 }: {
   items?: readonly ActionBarItem[];
-  walkTools?: readonly import("./walk-tools").WalkToolDefinition[];
+  walkTools?: readonly import("./walk-tools").WalkToolDefinition[] | undefined;
   activeWalkToolId?: string | null;
   targets?: Readonly<
     Record<
@@ -225,9 +225,9 @@ export function SceneActionBar({
       { label: string; available: boolean; pictureUrl?: string | null; modelId?: string }
     >
   >;
-  renderDeviceIcon?: (modelId: string) => ReactNode;
+  renderDeviceIcon?: ((modelId: string) => ReactNode) | undefined;
   roofVisible?: boolean;
-  onToggleRoof?: () => void;
+  onToggleRoof?: (() => void) | undefined;
   keyboardEnabled?: boolean;
   mode: SceneMode;
   lighting: SolarLightingMode;
@@ -338,7 +338,7 @@ export function SceneActionBar({
       dom.events.removeEventListener("pointerdown", outside);
       dom.events.removeEventListener("keydown", keydown);
     };
-  }, [open, overflowOpen, keyboardEnabled, mode, onToggleRoof, items, walkTools, onAction]);
+  }, [open, overflowOpen, keyboardEnabled, mode, onToggleRoof, items, walkTools, onAction, dom]);
   useEffect(() => {
     if (!open) return;
     const trigger = root.current?.querySelector<HTMLButtonElement>(`[data-group="${open}"]`);

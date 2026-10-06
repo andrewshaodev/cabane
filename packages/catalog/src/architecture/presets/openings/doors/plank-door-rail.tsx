@@ -5,7 +5,7 @@ const RAIL_DEPTH_METERS = 0.055;
 const WALL_GAP_METERS = 0.004;
 const RAIL_END_OVERHANG_METERS = 0.04;
 
-export function plankDoorRailSpan({
+function plankDoorRailSpan({
   openingWidth,
   leafWidth,
   orientation,

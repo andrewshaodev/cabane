@@ -80,5 +80,5 @@ export const useDesktopWalkInput = (
       window.removeEventListener("blur", reset);
       reset();
     };
-  }, [active, movementRef, sprintRef, jumpRequestRef]);
+  }, [active, movementRef, sprintRef, jumpRequestRef, dom]);
 };

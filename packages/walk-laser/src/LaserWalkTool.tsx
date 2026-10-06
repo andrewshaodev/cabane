@@ -131,7 +131,7 @@ export function LaserWalkTool({
         .applyMatrix3(new Matrix3().getNormalMatrix(hit.object.matrixWorld))
         .normalize();
       if (normal && normal.dot(raycaster.ray.direction) > 0) normal.negate();
-      emitShot({ end, hit: Boolean(hit), normal });
+      emitShot({ end, hit: Boolean(hit), ...(normal === undefined ? {} : { normal: normal }) });
       if (target) await activateTarget(target);
     });
   }, [activateTarget, camera, center, gate, raycaster, emitShot, scene]);

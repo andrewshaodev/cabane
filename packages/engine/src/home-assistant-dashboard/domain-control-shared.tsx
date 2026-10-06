@@ -127,7 +127,7 @@ export function ProtectedCodeDialog({
       dom.root.activeElement instanceof HTMLElement ? dom.root.activeElement : null;
     inputRef.current?.focus();
     return () => previousFocus.current?.focus();
-  }, []);
+  }, [dom]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();

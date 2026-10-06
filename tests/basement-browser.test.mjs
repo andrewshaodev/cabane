@@ -174,13 +174,11 @@ test(
       page.on("pageerror", (e) => errors.push(e.message));
       await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
       await page.getByRole("button", { name: "Import workspace", exact: true }).click();
-      await page
-        .getByLabel("Cabane JSON file")
-        .setInputFiles({
-          name: "basements.json",
-          mimeType: "application/json",
-          buffer: Buffer.from(JSON.stringify(record)),
-        });
+      await page.getByLabel("Cabane JSON file").setInputFiles({
+        name: "basements.json",
+        mimeType: "application/json",
+        buffer: Buffer.from(JSON.stringify(record)),
+      });
       await page
         .getByRole("dialog")
         .getByRole("button", { name: "Import workspace", exact: true })

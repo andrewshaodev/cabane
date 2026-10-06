@@ -25,7 +25,7 @@ export interface RoomControlSheetProps {
   liveCameraDeviceIds?: ReadonlySet<string>;
   onOpenLiveFeed?: (deviceId: string) => void;
   deviceOverlay?: boolean;
-  onEscape?: () => void;
+  onEscape?: (() => void) | undefined;
 }
 
 const statusContent: Partial<
@@ -176,7 +176,7 @@ export function RoomControlSheet({
     };
     dom.events.addEventListener("keydown", onKeyDown);
     return () => dom.events.removeEventListener("keydown", onKeyDown);
-  }, [deviceOverlay, goBack, onEscape]);
+  }, [deviceOverlay, goBack, onEscape, dom]);
 
   useEffect(() => {
     if (deviceOverlay) backButtonRef.current?.focus();

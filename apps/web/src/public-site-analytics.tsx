@@ -60,7 +60,7 @@ export function PublicSiteAnalytics() {
   if (
     !publicSiteAnalyticsEnabled(
       import.meta.env.PROD,
-      import.meta.env.VITE_PUBLIC_ANALYTICS_ORIGIN,
+      import.meta.env.VITE_PUBLIC_ANALYTICS_ORIGIN as string | undefined,
       url.href,
     )
   )

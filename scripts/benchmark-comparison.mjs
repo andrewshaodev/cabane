@@ -33,7 +33,7 @@ const stats = (values) => {
 for (let repeat = 0; repeat < repeats; repeat++) {
   // Alternate AB / BA. One visible scene at a time, fresh demo storage each run.
   for (const build of repeat % 2 ? [...builds].reverse() : builds) {
-    const browser = await chromium.launch({ channel: "chrome", headless: false });
+    const browser = await chromium.launch({ channel: "chromium", headless: false });
     try {
       report.browser = browser.version();
       const system = await browser.newBrowserCDPSession();

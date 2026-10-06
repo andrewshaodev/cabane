@@ -17,7 +17,7 @@ export function packGeometry(geometry: BufferGeometry, copy = true): GeometryPay
   return {
     position: attribute("position"),
     normal: attribute("normal"),
-    color: geometry.attributes.color ? attribute("color") : undefined,
+    ...(geometry.attributes.color ? { color: attribute("color") } : {}),
     index: geometry.index
       ? Uint32Array.from(geometry.index.array)
       : Uint32Array.from({ length: geometry.attributes.position.count }, (_, index) => index),

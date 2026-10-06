@@ -25,7 +25,7 @@ export interface RoomModuleProps {
   canMutate: boolean;
   focused: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
-  onOpenLiveFeed?: () => void;
+  onOpenLiveFeed?: (() => void) | undefined;
 }
 
 const readableSensorValue = (entity: EntityStateSnapshot) => {

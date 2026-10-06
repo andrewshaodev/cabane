@@ -13,7 +13,7 @@ await server.listen();
 let browser;
 try {
   browser = await chromium.launch({
-    channel: "chrome",
+    channel: "chromium",
     headless: true,
     args: ["--use-angle=swiftshader"],
   });

@@ -61,7 +61,7 @@ export function WorkspaceCard({
       active = false;
       window.removeEventListener("focus", refresh);
     };
-  }, [metadata.id, metadata.homeAssistantUrl, record]);
+  }, [metadata.id, metadata.homeAssistantUrl, record, metadata]);
   const storage = workspaceStorageStatus(sync, changed);
   const actionLabels: Record<WorkspaceCardAction, string> = {
     settings: "Home Assistant settings",

@@ -34,7 +34,7 @@ export function hedgeFoliageLobe(
 }
 
 export function mergeHedgeFoliage(parts: BufferGeometry[]) {
-  const result = mergeGeometries(parts)!;
+  const result = mergeGeometries(parts);
   parts.forEach((part) => part.dispose());
   return result;
 }

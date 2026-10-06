@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { useWalkToolNavigation } from "./walk-tools/useWalkToolNavigation";
 import type { WalkToolNavigation } from "./walk-tools";
 import { passableOpeningIds, type OpeningPositions } from "./opening-pose";
@@ -88,8 +89,14 @@ export function WalkCameraController({
   const navigation = useMemo(
     () =>
       buildingMode
-        ? { building: prepareBuildingWalk(JSON.parse(navigationKey)), floor: null }
-        : { building: undefined, floor: prepareWalkColliders(JSON.parse(navigationKey)) },
+        ? {
+            building: prepareBuildingWalk(JSON.parse(navigationKey) as BuildingGeometry),
+            floor: null,
+          }
+        : {
+            building: undefined,
+            floor: prepareWalkColliders(JSON.parse(navigationKey) as FloorSpec),
+          },
     [navigationKey, buildingMode],
   );
   const cameraRef = useRef<ThreePerspectiveCamera>(null);
@@ -129,27 +136,29 @@ export function WalkCameraController({
     furniture.current = next;
   }, [box, scene, floor.id, elevation]);
 
-  useWalkToolNavigation({
-    building,
-    floor,
-    scene,
-    box,
-    toolNavigationRef,
-    poseRef,
-    cameraRef,
-    walker,
-    velocity,
-    lookVelocity,
-    lookDeltaRef,
-    jumpHeight,
-    jumpVelocity,
-    bobWeight,
-    jumpRequestRef,
-    lastRoomId,
-    onFloorChange,
-    onRoomChange,
-    invalidate,
-  });
+  useWalkToolNavigation(
+    omitUndefinedProperties({
+      ...(building === undefined ? {} : { building: building }),
+      floor,
+      scene,
+      box,
+      ...(toolNavigationRef === undefined ? {} : { toolNavigationRef: toolNavigationRef }),
+      poseRef,
+      cameraRef,
+      walker,
+      velocity,
+      lookVelocity,
+      lookDeltaRef,
+      jumpHeight,
+      jumpVelocity,
+      bobWeight,
+      ...(jumpRequestRef === undefined ? {} : { jumpRequestRef: jumpRequestRef }),
+      lastRoomId,
+      onFloorChange,
+      onRoomChange,
+      invalidate,
+    }),
+  );
 
   useEffect(() => {
     if (!cameraRef.current) return;
@@ -161,7 +170,7 @@ export function WalkCameraController({
     );
     cameraRef.current.rotation.set(poseRef.current.pitch, poseRef.current.yaw, 0);
     invalidate();
-  }, [invalidate, poseRef]);
+  }, [elevation, invalidate, poseRef]);
 
   const openIdsRef = useRef<ReadonlySet<string>>(new Set());
   openIdsRef.current = new Set(

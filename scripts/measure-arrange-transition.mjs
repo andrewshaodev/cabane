@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { chromium } from "playwright-core";
-const browser = await chromium.launch({ channel: "chrome", headless: true });
+const browser = await chromium.launch({ channel: "chromium", headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 } });
   const errors = [];

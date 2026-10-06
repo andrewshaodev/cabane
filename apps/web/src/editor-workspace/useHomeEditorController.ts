@@ -1,3 +1,4 @@
+import { useEffectEvent } from "react";
 import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorReferences";
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
@@ -59,7 +60,6 @@ import {
 import { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
 
 import {
-  composeOwnerProjectManifest,
   editorBindingsForManifest,
   ownerDeviceModels,
   ownerProjectRegistries,
@@ -94,17 +94,31 @@ export function useHomeEditorController({
 }: ConnectWorkspaceProps & {
   initialRecord: HomeProjectRecord;
   lifecycle: HomeProjectLifecycle;
-  autosaveDelayMs?: number;
+  autosaveDelayMs?: number | undefined;
   onClose: (record: HomeProjectRecord, reason: HomeEditorExitReason) => void;
 }) {
   const dom = useCabaneDom();
   const [localMode, setMode] = useState<EditorMode>(initialRequest?.mode ?? "construct");
   const mode = navigation?.request.mode ?? localMode;
-  const workspace = useEditorWorkspace({ initialRecord, lifecycle, autosaveDelayMs });
+  const workspace = useEditorWorkspace({
+    initialRecord,
+    lifecycle,
+    ...(autosaveDelayMs === undefined ? {} : { autosaveDelayMs: autosaveDelayMs }),
+  });
+  const {
+    error: workspaceError,
+    saving: workspaceSaving,
+    busy: workspaceBusy,
+    getRecord: workspaceGetRecord,
+    adoptRecord: workspaceAdoptRecord,
+  } = workspace;
   const { snapshot, commit, undo, redo, flush, publish } = workspace;
   const floorNavigation = useFloorNavigation(snapshot.project.floors);
-  const activeFloorId = floorNavigation.activeFloorId;
-  useEffect(() => {
+  const { activeFloorId: floorNavigationActiveFloorId, selectFloor: floorNavigationSelectFloor } =
+    floorNavigation;
+  const activeFloorId = floorNavigationActiveFloorId;
+  // Apply a navigation request once, using the current draft without retriggering on edits.
+  const applyEntryFloor = useEffectEvent(() => {
     const request = initialRequest;
     if (!request) return;
     const target =
@@ -116,7 +130,10 @@ export function useHomeEditorController({
         floor.rooms.some((room) => room.id === request.roomId),
       )?.id;
     if (target && snapshot.project.floors.some((floor) => floor.id === target))
-      floorNavigation.selectFloor(target, "target");
+      floorNavigationSelectFloor(target, "target");
+  });
+  useEffect(() => {
+    applyEntryFloor();
   }, [initialRequest]);
   const [stairPlacement, setStairPlacement] = useState<StairSpec | null>(null);
   const [stairDialog, setStairDialog] = useState<StairSpec | null>(null);
@@ -182,29 +199,68 @@ export function useHomeEditorController({
       .filter((floor) => floor.id !== activeFloorId)
       .flatMap((floor) => floor.rooms.map((room) => room.name)),
   );
+  const {
+    selection: constructEditorSelection,
+    draft: constructEditorDraft,
+    previewFloor: constructEditorPreviewFloor,
+    poolDrawing: constructEditorPoolDrawing,
+    addFloorZone: constructEditorAddFloorZone,
+    addGroundZone: constructEditorAddGroundZone,
+    isSettling: constructEditorIsSettling,
+    drawStart: constructEditorDrawStart,
+    replaceFloor: constructEditorReplaceFloor,
+    tool: constructEditorTool,
+    clearSelection: constructEditorClearSelection,
+    cancelWall: constructEditorCancelWall,
+    paintRoomFloor: constructEditorPaintRoomFloor,
+    wallRuns: constructEditorWallRuns,
+    duplicateOpening: constructEditorDuplicateOpening,
+    topologyIssues: constructEditorTopologyIssues,
+    setTool: constructEditorSetTool,
+    selectOpening: constructEditorSelectOpening,
+    selectPool: constructEditorSelectPool,
+    selectRoom: constructEditorSelectRoom,
+    selectWall: constructEditorSelectWall,
+  } = constructEditor;
   const selectedOpeningId =
-    constructEditor.selection?.kind === "opening" ? constructEditor.selection.id : null;
+    constructEditorSelection?.kind === "opening" ? constructEditorSelection.id : null;
   const selectedOpening = selectedOpeningId
-    ? constructEditor.draft.openings.find((opening) => opening.id === selectedOpeningId)
+    ? constructEditorDraft.openings.find((opening) => opening.id === selectedOpeningId)
     : undefined;
   useEffect(() => {
     setDetailsOpeningId(null);
   }, [mode, selectedOpening?.id]);
-  const constructMeasure = useConstructMeasure(constructEditor.previewFloor.coordinates);
+  const constructMeasure = useConstructMeasure(constructEditorPreviewFloor.coordinates);
+  const { cancel: constructMeasureCancel } = constructMeasure;
   const furnishingEditor = useFurnishingEditor(
     initialRecord.draft.sceneItems.filter((item) => item.floorId === initialFloor.id),
   );
-  useEffect(() => {
+  const {
+    select: furnishingEditorSelect,
+    selectedId: furnishingEditorSelectedId,
+    transaction: furnishingEditorTransaction,
+    items: furnishingEditorItems,
+    replaceItems: furnishingEditorReplaceItems,
+    deleteItem: furnishingEditorDeleteItem,
+    cancelTransaction: furnishingEditorCancelTransaction,
+    duplicate: furnishingEditorDuplicate,
+    addItem: furnishingEditorAddItem,
+  } = furnishingEditor;
+  // Initial selection is consumed on entry; subsequent selection belongs to the editor.
+  const selectInitialItem = useEffectEvent(() => {
     const id = initialRequest?.arrange?.selectedItemId;
     if (id && initialRecord.draft.sceneItems.some((item) => item.id === id))
-      furnishingEditor.select(id);
+      furnishingEditorSelect(id);
+  });
+  useEffect(() => {
+    selectInitialItem();
   }, []);
   useEffect(() => {
     setDetailsItemId(null);
-  }, [mode, furnishingEditor.selectedId]);
+  }, [mode, furnishingEditorSelectedId]);
   const furnishingModels = ownerProjectManifest.extensions.furnishingModels;
   const deviceModels = ownerDeviceModels;
-  const autosaveStatus = workspace.error ? "error" : workspace.saving ? "saving" : "saved";
+  const autosaveStatus = workspaceError ? "error" : workspaceSaving ? "saving" : "saved";
   const [closing, setClosing] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   useEffect(() => {
@@ -215,38 +271,44 @@ export function useHomeEditorController({
     if (dom.root.pointerLockElement) document.exitPointerLock();
     setPreviewOpen(false);
     requestAnimationFrame(() => walkButton.current?.focus());
-  }, []);
+  }, [dom]);
   const [publishOpen, setPublishOpen] = useState(false);
-  const publishing = workspace.busy;
+  const publishing = workspaceBusy;
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
-  const poolDrawing = constructEditor.poolDrawing;
+  const poolDrawing = constructEditorPoolDrawing;
   const [floorFinish, setFloorFinish] = useState<FloorFinishSpec>({
     kind: "preset",
     preset: "light-oak",
   });
   const { floorPaintTarget, setFloorPaintTarget } = constructEditor;
   const [pendingRoomPaintId, setPendingRoomPaintId] = useState<string | null>(null);
-  const floorZoneDrawing = useFloorZoneDrawing(constructEditor.previewFloor, (roomId, polygon) =>
+  const floorZoneDrawing = useFloorZoneDrawing(constructEditorPreviewFloor, (roomId, polygon) =>
     roomId
-      ? constructEditor.addFloorZone(roomId, polygon, floorFinish)
-      : constructEditor.addGroundZone(polygon, floorFinish),
+      ? constructEditorAddFloorZone(roomId, polygon, floorFinish)
+      : constructEditorAddGroundZone(polygon, floorFinish),
   );
+  const {
+    active: floorZoneDrawingActive,
+    undo: floorZoneDrawingUndo,
+    redo: floorZoneDrawingRedo,
+    cancel: floorZoneDrawingCancel,
+  } = floorZoneDrawing;
   const constructionUnsettled =
     Boolean(stairPlacement) ||
     dragging ||
-    constructEditor.isSettling ||
-    !!furnishingEditor.transaction ||
+    constructEditorIsSettling ||
+    !!furnishingEditorTransaction ||
     poolDrawing.active ||
-    floorZoneDrawing.active ||
+    floorZoneDrawingActive ||
     pendingRoomPaintId !== null;
-  const editingLocked = workspace.busy || closing || connectionBusy;
+  const editingLocked = workspaceBusy || closing || connectionBusy;
   const reference = useReferencePlan(
     workspace,
     activeFloorId,
     mode === "construct",
     editingLocked ||
       constructionUnsettled ||
-      Boolean(constructEditor.drawStart) ||
+      Boolean(constructEditorDrawStart) ||
       publishOpen ||
       previewOpen,
   );
@@ -262,10 +324,10 @@ export function useHomeEditorController({
     if (unsettled || editingLocked) return;
     const item = snapshot.project.sceneItems.find((item) => item.id === id);
     if (!item) return;
-    if (item.floorId === activeFloorId) furnishingEditor.select(id);
+    if (item.floorId === activeFloorId) furnishingEditorSelect(id);
     else {
       pendingFloorItem.current = id;
-      floorNavigation.selectFloor(item.floorId);
+      floorNavigationSelectFloor(item.floorId);
     }
   };
 
@@ -275,7 +337,7 @@ export function useHomeEditorController({
       const restoration = projectEditorRestoration(
         previous,
         project,
-        furnishingEditor.selectedId,
+        furnishingEditorSelectedId,
         activeFloorId,
       );
       const restoredId = reconcileFloorSelection(
@@ -284,14 +346,14 @@ export function useHomeEditorController({
         project.floors.map((floor) => floor.id),
       ).activeFloorId;
       const floor = project.floors.find((entry) => entry.id === restoredId)!;
-      restoration.floorChanged ||= floor.id !== constructEditor.draft.floorId;
+      restoration.floorChanged ||= floor.id !== constructEditorDraft.floorId;
       editorSyncTarget.current = {
-        draft: constructEditor.draft,
-        items: furnishingEditor.items,
+        draft: constructEditorDraft,
+        items: furnishingEditorItems,
         floorChanged: restoration.floorChanged,
       };
-      if (restoration.floorChanged) constructEditor.replaceFloor(floor);
-      furnishingEditor.replaceItems(
+      if (restoration.floorChanged) constructEditorReplaceFloor(floor);
+      furnishingEditorReplaceItems(
         project.sceneItems.filter((item) => item.floorId === floor.id),
         pendingFloorItem.current ?? restoration.selectedItemId,
       );
@@ -304,26 +366,26 @@ export function useHomeEditorController({
     [
       activeFloorId,
       snapshot.project,
-      constructEditor.draft,
-      constructEditor.replaceFloor,
-      furnishingEditor.items,
-      furnishingEditor.replaceItems,
-      furnishingEditor.selectedId,
+      constructEditorDraft,
+      constructEditorReplaceFloor,
+      furnishingEditorItems,
+      furnishingEditorReplaceItems,
+      furnishingEditorSelectedId,
     ],
   );
 
   useEffect(() => {
-    if (constructEditor.draft.floorId === activeFloorId) return;
+    if (constructEditorDraft.floorId === activeFloorId) return;
     replaceEditorsFromProject(snapshot.project);
     setDetailsOpeningId(null);
     setDetailsItemId(null);
     setCameraFocusPoint(null);
     setCameraFocusRoomId(null);
-  }, [activeFloorId, constructEditor.draft.floorId, replaceEditorsFromProject, snapshot.project]);
+  }, [activeFloorId, constructEditorDraft.floorId, replaceEditorsFromProject, snapshot.project]);
 
   const undoProject = useCallback(() => {
-    if (!editingLocked && !dragging && floorZoneDrawing.active) {
-      floorZoneDrawing.undo();
+    if (!editingLocked && !dragging && floorZoneDrawingActive) {
+      floorZoneDrawingUndo();
       return;
     }
     if (!editingLocked && !dragging && poolDrawing.active) {
@@ -335,17 +397,18 @@ export function useHomeEditorController({
     if (next) replaceEditorsFromProject(next.project);
   }, [
     editingLocked,
-    replaceEditorsFromProject,
-    undo,
-    unsettled,
     dragging,
+    floorZoneDrawingActive,
     poolDrawing,
-    floorZoneDrawing,
+    unsettled,
+    undo,
+    replaceEditorsFromProject,
+    floorZoneDrawingUndo,
   ]);
 
   const redoProject = useCallback(() => {
-    if (!editingLocked && !dragging && floorZoneDrawing.active) {
-      floorZoneDrawing.redo();
+    if (!editingLocked && !dragging && floorZoneDrawingActive) {
+      floorZoneDrawingRedo();
       return;
     }
     if (!editingLocked && !dragging && poolDrawing.active) {
@@ -357,112 +420,91 @@ export function useHomeEditorController({
     if (next) replaceEditorsFromProject(next.project);
   }, [
     editingLocked,
+    dragging,
+    floorZoneDrawingActive,
+    poolDrawing,
+    unsettled,
     redo,
     replaceEditorsFromProject,
-    unsettled,
-    dragging,
-    poolDrawing,
-    floorZoneDrawing,
+    floorZoneDrawingRedo,
   ]);
 
   useEffect(() => {
-    if (constructEditor.selection || constructEditor.tool !== "select") setStairDialog(null);
-  }, [constructEditor.selection, constructEditor.tool]);
+    if (constructEditorSelection || constructEditorTool !== "select") setStairDialog(null);
+  }, [constructEditorSelection, constructEditorTool]);
   const clearConstructionSelection = useCallback(() => {
     setStairDialog(null);
-    constructEditor.clearSelection();
+    constructEditorClearSelection();
     setActiveIssueKey(null);
-  }, [constructEditor.clearSelection]);
+  }, [constructEditorClearSelection]);
 
   const clearFurnishingSelection = useCallback(() => {
     setDetailsItemId(null);
-    furnishingEditor.select(null);
+    furnishingEditorSelect(null);
     setSelectedRoomId(null);
     setActiveIssueKey(null);
-  }, [furnishingEditor.select]);
+  }, [furnishingEditorSelect]);
 
   const deleteSceneItem = useCallback(
     (id: string) => {
-      furnishingEditor.deleteItem(id);
+      furnishingEditorDeleteItem(id);
       clearFurnishingSelection();
     },
-    [clearFurnishingSelection, furnishingEditor.deleteItem],
+    [clearFurnishingSelection, furnishingEditorDeleteItem],
   );
 
   useEffect(() => {
-    if (mode !== "construct" || constructEditor.tool !== "measure") {
-      constructMeasure.cancel();
+    if (mode !== "construct" || constructEditorTool !== "measure") {
+      constructMeasureCancel();
     }
-  }, [constructEditor.tool, constructMeasure.cancel, mode]);
+  }, [constructEditorTool, constructMeasureCancel, mode]);
 
   useEffect(() => {
-    if (mode === "construct" && constructEditor.tool === "floor") return;
-    floorZoneDrawing.cancel();
+    if (mode === "construct" && constructEditorTool === "floor") return;
+    floorZoneDrawingCancel();
     setPendingRoomPaintId(null);
-  }, [constructEditor.tool, floorZoneDrawing.cancel, mode]);
-
-  const selectMode = (nextMode: EditorMode, preserveConnectTarget = false) => {
-    if (editingLocked) return;
-    setCatalogError(null);
-    if (furnishingEditor.transaction) furnishingEditor.cancelTransaction();
-    setDetailsItemId(null);
-    if (nextMode !== "construct") {
-      constructEditor.cancelWall();
-      poolDrawing.cancel();
-      floorZoneDrawing.cancel();
-      setPendingRoomPaintId(null);
-    }
-    setDragging(false);
-    setMarqueeSelecting(false);
-    if (navigation) {
-      if (!preserveConnectTarget) navigation.go({ mode: nextMode });
-    } else if (nextMode === "connect" && mode !== "connect" && !preserveConnectTarget)
-      connect.setView(connect.defaultView);
-    setMode(nextMode);
-  };
+  }, [constructEditorTool, floorZoneDrawingCancel, mode]);
 
   const requestRoomPaint = useCallback(
     (roomId: string) => {
-      const room = constructEditor.previewFloor.rooms.find((candidate) => candidate.id === roomId);
+      const room = constructEditorPreviewFloor.rooms.find((candidate) => candidate.id === roomId);
       if (!room) return;
       if (room.floorZones?.length) {
         setPendingRoomPaintId(roomId);
         return;
       }
-      constructEditor.paintRoomFloor(roomId, floorFinish, false);
+      constructEditorPaintRoomFloor(roomId, floorFinish, false);
     },
-    [constructEditor, floorFinish],
+    [constructEditorPaintRoomFloor, constructEditorPreviewFloor.rooms, floorFinish],
   );
 
   const confirmRoomPaint = useCallback(
     (clearZones: boolean) => {
       if (!pendingRoomPaintId) return;
-      constructEditor.paintRoomFloor(pendingRoomPaintId, floorFinish, clearZones);
+      constructEditorPaintRoomFloor(pendingRoomPaintId, floorFinish, clearZones);
       setPendingRoomPaintId(null);
     },
-    [constructEditor, floorFinish, pendingRoomPaintId],
+    [constructEditorPaintRoomFloor, floorFinish, pendingRoomPaintId],
   );
 
   const ceilingDependencies = useSceneItemDependencies(
     furnishingEditor,
-    constructEditor.previewFloor,
-    constructEditor.wallRuns,
+    constructEditorPreviewFloor,
+    constructEditorWallRuns,
   );
   const previewSceneItems = ceilingDependencies.items;
-  const visualSceneItems = furnishingEditor.transaction
-    ? furnishingEditor.items
-    : previewSceneItems;
-  const selectedItem = visualSceneItems.find((item) => item.id === furnishingEditor.selectedId);
+  const visualSceneItems = furnishingEditorTransaction ? furnishingEditorItems : previewSceneItems;
+  const selectedItem = visualSceneItems.find((item) => item.id === furnishingEditorSelectedId);
   const selectedDefinition =
     selectedItem &&
     (selectedItem.kind === "device" ? deviceModels : furnishingModels)[selectedItem.modelId];
   const walkNavigation = useMemo(
-    () => evaluateDerivedWalkNavigation(constructEditor.previewFloor),
-    [constructEditor.previewFloor],
+    () => evaluateDerivedWalkNavigation(constructEditorPreviewFloor),
+    [constructEditorPreviewFloor],
   );
   const editorProject = useMemo(
-    () => projectFromEditorState(snapshot.project, constructEditor.previewFloor, previewSceneItems),
-    [constructEditor.previewFloor, previewSceneItems, snapshot.project],
+    () => projectFromEditorState(snapshot.project, constructEditorPreviewFloor, previewSceneItems),
+    [constructEditorPreviewFloor, previewSceneItems, snapshot.project],
   );
   const editorProjectJson = useMemo(() => JSON.stringify(editorProject), [editorProject]);
   const setActionBarItems = useCallback(
@@ -474,23 +516,19 @@ export function useHomeEditorController({
   );
   const duplicateArrangeItem = useCallback(
     (id: string) => {
-      if (!furnishingEditor.items.some((item) => item.id === id)) return false;
+      if (!furnishingEditorItems.some((item) => item.id === id)) return false;
       setDetailsItemId(null);
-      furnishingEditor.duplicate(
-        id,
-        constructEditor.previewFloor,
-        collectProjectIds(editorProject),
-      );
+      furnishingEditorDuplicate(id, constructEditorPreviewFloor, collectProjectIds(editorProject));
       return true;
     },
-    [constructEditor.previewFloor, editorProject, furnishingEditor],
+    [constructEditorPreviewFloor, editorProject, furnishingEditorDuplicate, furnishingEditorItems],
   );
   const duplicateConstructionOpening = useCallback(
     (id: string) => {
       setDetailsOpeningId(null);
-      return constructEditor.duplicateOpening(id);
+      return constructEditorDuplicateOpening(id);
     },
-    [constructEditor.duplicateOpening],
+    [constructEditorDuplicateOpening],
   );
 
   useHomeEditorShortcuts({
@@ -517,15 +555,15 @@ export function useHomeEditorController({
   });
 
   useEffect(() => {
-    if (unsettled || editingLocked || constructEditor.draft.floorId !== activeFloorId) return;
+    if (unsettled || editingLocked || constructEditorDraft.floorId !== activeFloorId) return;
     const syncTarget = editorSyncTarget.current;
     if (syncTarget) {
       // Topology canonicalization need not serialize byte-for-byte like the
       // history snapshot. Wait for the requested replacements, then consume the sync
       // once; otherwise an undo can silently block every subsequent command.
       if (
-        (!syncTarget.floorChanged || constructEditor.draft !== syncTarget.draft) &&
-        furnishingEditor.items !== syncTarget.items
+        (!syncTarget.floorChanged || constructEditorDraft !== syncTarget.draft) &&
+        furnishingEditorItems !== syncTarget.items
       ) {
         editorSyncTarget.current = null;
       }
@@ -534,30 +572,31 @@ export function useHomeEditorController({
     commit(
       workspaceSnapshotFromEditorState(
         snapshot,
-        constructEditor.previewFloor,
+        constructEditorPreviewFloor,
         previewSceneItems,
         ownerProjectRegistries,
-        constructEditor.topologyIssues.map((issue) => ({ ...issue, severity: "error" as const })),
+        constructEditorTopologyIssues.map((issue) => ({ ...issue, severity: "error" as const })),
       ),
     );
   }, [
-    constructEditor.draft,
-    constructEditor.previewFloor,
+    constructEditorDraft,
+    constructEditorPreviewFloor,
     editorProjectJson,
-    constructEditor.topologyIssues,
+    constructEditorTopologyIssues,
     editingLocked,
     unsettled,
     commit,
     snapshot,
-    furnishingEditor.items,
-    furnishingEditor.transaction,
+    furnishingEditorItems,
+    furnishingEditorTransaction,
     mode,
     previewSceneItems,
+    activeFloorId,
   ]);
 
   const startStairs = () => {
     if (editingLocked || unsettled) return;
-    constructEditor.setTool("select");
+    constructEditorSetTool("select");
     clearConstructionSelection();
     const index = snapshot.project.floors.findIndex((f) => f.id === activeFloorId);
     const floor = snapshot.project.floors[index];
@@ -604,12 +643,12 @@ export function useHomeEditorController({
   );
   const placementFloor = useMemo(
     () => ({
-      ...constructEditor.previewFloor,
+      ...constructEditorPreviewFloor,
       elevationMeters:
         deriveFloorLevels(snapshot.project.floors).find((level) => level.floorId === activeFloorId)
           ?.elevationMeters ?? 0,
     }),
-    [constructEditor.previewFloor, snapshot.project.floors, activeFloorId],
+    [constructEditorPreviewFloor, snapshot.project.floors, activeFloorId],
   );
   const connectManifest = useMemo(
     () => composeHomeBindingManifest(snapshot.project, ownerProjectManifest.extensions),
@@ -625,16 +664,60 @@ export function useHomeEditorController({
     origin: homeAssistantUrl,
     active: mode === "connect" && !editingLocked && !unsettled && !publishOpen,
     onChange: (bindings) => commit({ ...snapshot, bindings }),
-    initialRequest,
-    routeView: navigation?.request.view,
+    ...(initialRequest === undefined ? {} : { initialRequest: initialRequest }),
+    ...(navigation?.request.view === undefined ? {} : { routeView: navigation?.request.view }),
     onViewChange: navigation ? (view) => navigation.go({ mode: "connect", view }) : undefined,
   });
+  const {
+    setView: connectSetView,
+    defaultView: connectDefaultView,
+    selectRelationship: connectSelectRelationship,
+    view: connectView,
+    roomId: connectRoomId,
+    relationshipId: connectRelationshipId,
+    issues: connectIssues,
+  } = connect;
+  const { cancel: cancelPoolDrawing } = poolDrawing;
+  const selectMode = useCallback(
+    (nextMode: EditorMode, preserveConnectTarget = false) => {
+      if (editingLocked) return;
+      setCatalogError(null);
+      if (furnishingEditorTransaction) furnishingEditorCancelTransaction();
+      setDetailsItemId(null);
+      if (nextMode !== "construct") {
+        constructEditorCancelWall();
+        cancelPoolDrawing();
+        floorZoneDrawingCancel();
+        setPendingRoomPaintId(null);
+      }
+      setDragging(false);
+      setMarqueeSelecting(false);
+      if (navigation) {
+        if (!preserveConnectTarget) navigation.go({ mode: nextMode });
+      } else if (nextMode === "connect" && mode !== "connect" && !preserveConnectTarget)
+        connectSetView(connectDefaultView);
+      setMode(nextMode);
+    },
+    [
+      editingLocked,
+      furnishingEditorTransaction,
+      furnishingEditorCancelTransaction,
+      constructEditorCancelWall,
+      cancelPoolDrawing,
+      floorZoneDrawingCancel,
+      navigation,
+      mode,
+      connectSetView,
+      connectDefaultView,
+    ],
+  );
+
   useEffect(() => {
     if (navigation?.request.mode === "connect" && !navigation.request.view) {
-      connect.selectRelationship(null);
-      navigation.go({ ...navigation.request, view: connect.defaultView }, true);
+      connectSelectRelationship(null);
+      navigation.go({ ...navigation.request, view: connectDefaultView }, true);
     }
-  }, [navigation, connect.defaultView]);
+  }, [navigation, connectDefaultView, connectSelectRelationship]);
   const hostSession = useHomeAssistantHostSession();
   const signIn = useConnectSignIn(runtime, async (origin) => {
     setConnectionBusy(true);
@@ -645,19 +728,19 @@ export function useHomeEditorController({
       if (origin !== homeAssistantUrl) {
         if (!onPrepareOrigin)
           throw new Error("Connection settings are unavailable in this preview.");
-        const next = await onPrepareOrigin(workspace.getRecord(), origin);
-        if (!workspace.adoptRecord(next))
+        const next = await onPrepareOrigin(workspaceGetRecord(), origin);
+        if (!workspaceAdoptRecord(next))
           throw new Error("The workspace changed while connecting. Reopen Connect to retry.");
       }
       if (hostSession) return;
       const request: EditorOpenRequest = {
         floorId: activeFloorId,
         mode: "connect",
-        view: connect.view,
-        roomId: connect.roomId,
-        relationshipId: connect.relationshipId,
+        view: connectView,
+        roomId: connectRoomId,
+        relationshipId: connectRelationshipId,
         arrange: {
-          selectedItemId: furnishingEditor.selectedId,
+          selectedItemId: furnishingEditorSelectedId,
           ...(savedCamera.current ? { camera: savedCamera.current } : {}),
         },
       };
@@ -680,14 +763,11 @@ export function useHomeEditorController({
       ...validateWorkspaceBindings(
         snapshot.bindings,
         connectManifest,
-        composeHomeBindingManifest(
-          workspace.getRecord().published,
-          ownerProjectManifest.extensions,
-        ),
+        composeHomeBindingManifest(workspaceGetRecord().published, ownerProjectManifest.extensions),
       ),
-      ...connect.issues,
+      ...connectIssues,
     ],
-    [snapshot.bindings, connectManifest, connect.issues],
+    [snapshot.bindings, connectManifest, workspaceGetRecord, connectIssues],
   );
   // Device additions/duplicates need a typed preview slot, but moving an item
   // must not recreate every device's binding props. No live entities are used.
@@ -702,6 +782,8 @@ export function useHomeEditorController({
   );
   const editorResolvedBindings = useMemo(
     () => editorBindingsForManifest(editedManifest),
+    // The key captures room and device slot identity; moving furniture must preserve preview binding objects.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [editorBindingKey],
   );
   const visualManifest = useMemo(
@@ -715,14 +797,14 @@ export function useHomeEditorController({
               ...visualSceneItems,
             ],
           },
-    [editedManifest, visualSceneItems],
+    [activeFloorId, editedManifest, visualSceneItems],
   );
   const addCatalogItem = (entry: CatalogEntry) => {
     if (editingLocked || unsettled) return;
     const candidate = catalogStartPlacement(
       entry,
       placementFloor,
-      arrangeTarget.current ?? polygonCentroid(constructEditor.previewFloor.footprint),
+      arrangeTarget.current ?? polygonCentroid(constructEditorPreviewFloor.footprint),
       { items: visualSceneItems, furnishingModels, deviceModels },
       arrangeVisibility.current,
     );
@@ -731,11 +813,11 @@ export function useHomeEditorController({
     const item = createCatalogItem(
       entry,
       candidate.placement,
-      furnishingEditor.items,
+      furnishingEditorItems,
       collectProjectIds(editorProject),
-      constructEditor.previewFloor.id,
+      constructEditorPreviewFloor.id,
     );
-    furnishingEditor.addItem(candidate.size ? { ...item, size: candidate.size } : item);
+    furnishingEditorAddItem(candidate.size ? { ...item, size: candidate.size } : item);
     setDetailsItemId(null);
     setArrangeAnnouncement(
       `${entry.definition.label} added. Drag to move it; use Undo to remove it.`,
@@ -757,37 +839,48 @@ export function useHomeEditorController({
       setCameraFocusRoomId(null);
       const targets = constructIssueVisualTargets(
         issue,
-        constructEditor.previewFloor,
+        constructEditorPreviewFloor,
         previewSceneItems,
       );
       const itemTarget = targets.find((target) => target.kind === "scene-item");
       if (itemTarget) {
         selectMode("furnish");
-        furnishingEditor.select(itemTarget.id);
+        furnishingEditorSelect(itemTarget.id);
       } else {
         selectMode("construct");
-        constructEditor.setTool("select");
+        constructEditorSetTool("select");
         const openingTarget = targets.find((target) => target.kind === "opening");
         const roomTarget = targets.find((target) => target.kind === "room");
         const wallTarget = targets.find((target) => target.kind === "wall");
         const poolTarget = targets.find((target) => target.kind === "pool");
-        if (openingTarget) constructEditor.selectOpening(openingTarget.id);
-        else if (poolTarget) constructEditor.selectPool(poolTarget.id);
-        else if (roomTarget) constructEditor.selectRoom(roomTarget.id);
+        if (openingTarget) constructEditorSelectOpening(openingTarget.id);
+        else if (poolTarget) constructEditorSelectPool(poolTarget.id);
+        else if (roomTarget) constructEditorSelectRoom(roomTarget.id);
         else if (wallTarget)
-          constructEditor.selectWall(
-            constructEditor.wallRuns.find((run) => run.wallId === wallTarget.id)?.sourceWallId ??
+          constructEditorSelectWall(
+            constructEditorWallRuns.find((run) => run.wallId === wallTarget.id)?.sourceWallId ??
               wallTarget.id,
           );
       }
       setActiveIssueKey(constructIssueKey(issue));
       setIssueFocusVersion((version) => version + 1);
       setCameraFocusPoint(
-        constructIssuePlanPoint(issue, constructEditor.previewFloor, previewSceneItems),
+        constructIssuePlanPoint(issue, constructEditorPreviewFloor, previewSceneItems),
       );
       setCameraResetKey((key) => key + 1);
     },
-    [constructEditor, furnishingEditor, previewSceneItems],
+    [
+      constructEditorPreviewFloor,
+      constructEditorSelectOpening,
+      constructEditorSelectPool,
+      constructEditorSelectRoom,
+      constructEditorSelectWall,
+      constructEditorSetTool,
+      constructEditorWallRuns,
+      furnishingEditorSelect,
+      previewSceneItems,
+      selectMode,
+    ],
   );
   const publishIssues = useMemo(
     () =>
@@ -836,7 +929,7 @@ export function useHomeEditorController({
     setActionBarItems,
     cameraFocusRoomId,
     focusRoom: (roomId: string) => {
-      const room = constructEditor.previewFloor.rooms.find((room) => room.id === roomId);
+      const room = constructEditorPreviewFloor.rooms.find((room) => room.id === roomId);
       if (!room) return;
       setSelectedRoomId(roomId);
       setCameraFocusRoomId(roomId);

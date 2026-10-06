@@ -24,7 +24,7 @@ export function DeviceMappingRelationshipCard({
   disabled: boolean;
   selected: boolean;
   onOpen: (input: DeviceMappingActivationInput) => void;
-  onTriggerElement?: (element: HTMLButtonElement | null) => void;
+  onTriggerElement?: ((element: HTMLButtonElement | null) => void) | undefined;
 }) {
   const pointerActivation = useRef(false);
 

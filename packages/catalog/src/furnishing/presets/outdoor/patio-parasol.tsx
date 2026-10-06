@@ -1,5 +1,4 @@
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
-import { RoundedFurniturePanel } from "../construction";
 
 export const PATIO_PARASOL_SIZE = [2.4, 2.5, 2.4] as const;
 

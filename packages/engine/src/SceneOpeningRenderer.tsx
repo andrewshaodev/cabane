@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { OpeningThreshold } from "./architecture-scene/OpeningThreshold";
 import { memo, useRef } from "react";
 import type {
@@ -15,7 +16,7 @@ function SceneOpening<Opening extends OpeningSpec>({
   ...props
 }: ArchitectureModelProps<Opening> & {
   model: ArchitectureModelComponent<Opening>;
-  onInteract?: (target: ExtensionInteractionTarget) => void;
+  onInteract?: ((target: ExtensionInteractionTarget) => void) | undefined;
   walkMode?: boolean;
 }) {
   const press = useRef<{ pointerId: number; x: number; y: number } | null>(null);
@@ -26,36 +27,40 @@ function SceneOpening<Opening extends OpeningSpec>({
       : undefined;
   return (
     <group
-      userData={target ? { walkDeviceInteraction: target } : undefined}
-      onPointerDown={
-        !target || walkMode
-          ? undefined
-          : (event) => {
-              event.stopPropagation();
-              press.current = {
-                pointerId: event.pointerId,
-                x: event.nativeEvent.clientX,
-                y: event.nativeEvent.clientY,
-              };
-            }
-      }
-      onPointerUp={
-        !target || walkMode
-          ? undefined
-          : (event) => {
-              event.stopPropagation();
-              const start = press.current;
-              press.current = null;
-              if (
-                start?.pointerId === event.pointerId &&
-                Math.hypot(
-                  event.nativeEvent.clientX - start.x,
-                  event.nativeEvent.clientY - start.y,
-                ) <= 6
-              )
-                onInteract?.(target);
-            }
-      }
+      {...omitUndefinedProperties({
+        userData: target ? { walkDeviceInteraction: target } : undefined,
+      })}
+      {...omitUndefinedProperties({
+        onPointerDown:
+          !target || walkMode
+            ? undefined
+            : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                press.current = {
+                  pointerId: event.pointerId,
+                  x: event.nativeEvent.clientX,
+                  y: event.nativeEvent.clientY,
+                };
+              },
+      })}
+      {...omitUndefinedProperties({
+        onPointerUp:
+          !target || walkMode
+            ? undefined
+            : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                const start = press.current;
+                press.current = null;
+                if (
+                  start?.pointerId === event.pointerId &&
+                  Math.hypot(
+                    event.nativeEvent.clientX - start.x,
+                    event.nativeEvent.clientY - start.y,
+                  ) <= 6
+                )
+                  onInteract?.(target);
+              },
+      })}
       onPointerCancel={() => {
         press.current = null;
       }}

@@ -19,7 +19,7 @@ interface PreviewCameraProps {
   floor: FloorSpec;
   controlsEnabled: boolean;
   focusPoint: PlanPoint | null;
-  focusRoomId?: string | null;
+  focusRoomId?: (string | null) | undefined;
   onTargetChange: (point: PlanPoint, isVisible: (position: readonly number[]) => boolean) => void;
   savedCamera: RefObject<EditorCameraState | null>;
 }
@@ -68,8 +68,8 @@ function PreviewCameraRig({
     if (target && camera)
       savedCamera.current = {
         view,
-        position: camera.position.toArray() as [number, number, number],
-        target: target.toArray() as [number, number, number],
+        position: camera.position.toArray(),
+        target: target.toArray(),
         zoom: camera.zoom,
       };
     if (target && camera)

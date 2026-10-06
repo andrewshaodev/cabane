@@ -69,7 +69,7 @@ export function WorkspaceHaStorageProvider({
       void refreshBackground();
     }, 3000);
     return () => {
-      epoch.current++;
+      epoch.current = epoch.current + 1;
       window.clearInterval(timer);
     };
   }, [refreshBackground]);
@@ -116,6 +116,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
     setHasCopy(Boolean(remote?.document));
     return cursor;
   }, [client, id, origin]);
+  const { sendStorageMessage } = runtime;
   const check = useCallback(async () => {
     const generation = ++checkGeneration.current;
     setChecking(true);
@@ -125,7 +126,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
       client.list(),
       nativePanel
         ? Promise.resolve(null)
-        : runtime.sendStorageMessage<
+        : sendStorageMessage<
             Record<
               string,
               { component_name?: string; config?: { _panel_custom?: { name?: string } } }
@@ -160,7 +161,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
         setChecking(false);
       }
     }
-  }, [client, refresh, runtime.sendStorageMessage, nativePanel]);
+  }, [client, refresh, sendStorageMessage, nativePanel]);
   useEffect(() => {
     let current = true;
     setHasCopy(false);
@@ -188,12 +189,13 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
     setNotice(null);
     if (origin && runtime.status === "connected") void check();
     return () => {
-      checkGeneration.current++;
+      checkGeneration.current = checkGeneration.current + 1;
     };
   }, [origin, runtime.status, id, check]);
+  const backgroundStatus = active?.backgroundStatus;
   useEffect(() => {
-    if (active?.backgroundStatus.kind !== "off" && active) setStatus(active.backgroundStatus);
-  }, [active?.backgroundStatus]);
+    if (backgroundStatus && backgroundStatus.kind !== "off") setStatus(backgroundStatus);
+  }, [backgroundStatus]);
   useEffect(() => {
     if (active || !enabled || !origin) return;
     const timer = window.setInterval(() => {

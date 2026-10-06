@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -59,11 +60,9 @@ export function useFloorNavigation(floors: readonly { id: string; belowGround?: 
     previousOrder.current = order;
     if (selected.activeFloorId !== state.activeFloorId)
       setState((value) => ({ ...value, ...selected }));
-  }, [order.join("\u0000"), selected.activeFloorId, state.activeFloorId, setState]);
-  return {
-    ...state,
-    ...selected,
-    selectFloor: (id: string, source: FloorSelectionSource = "picker") => {
+  }, [order, selected, state.activeFloorId, setState]);
+  const selectFloor = useCallback(
+    (id: string, source: FloorSelectionSource = "picker") => {
       if (!id) return;
       setState((value) => ({
         activeFloorId: id,
@@ -72,6 +71,12 @@ export function useFloorNavigation(floors: readonly { id: string; belowGround?: 
         request: value.request + (source === "walk" ? 0 : 1),
       }));
     },
+    [setState],
+  );
+  return {
+    ...state,
+    ...selected,
+    selectFloor,
     setWholeBuilding: (wholeBuilding: boolean) =>
       setState((value) => ({ ...value, wholeBuilding })),
     views: views.current,

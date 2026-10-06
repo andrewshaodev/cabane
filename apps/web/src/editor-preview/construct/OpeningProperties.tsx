@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { doorConfiguration, doorFromConfiguration } from "@cabane/engine";
 import { DoorPresetPalette } from "./DoorPresetPalette";
 import { DoorDesignFields } from "./DoorDesignFields";
@@ -134,14 +135,16 @@ export function OpeningProperties({
               value={selectedOpening.variant}
               onChange={(event) => {
                 const variant = event.target.value as typeof selectedOpening.variant;
-                editor.replaceSelectedOpening({
-                  ...selectedOpening,
-                  variant,
-                  muntins:
-                    variant === "muntined"
-                      ? (selectedOpening.muntins ?? { columns: 2, rows: 2 })
-                      : undefined,
-                });
+                editor.replaceSelectedOpening(
+                  omitUndefinedProperties({
+                    ...selectedOpening,
+                    variant,
+                    muntins:
+                      variant === "muntined"
+                        ? (selectedOpening.muntins ?? { columns: 2, rows: 2 })
+                        : undefined,
+                  }),
+                );
               }}
             >
               <option value="plain">Plain</option>

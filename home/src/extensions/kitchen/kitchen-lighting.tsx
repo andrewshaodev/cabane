@@ -11,7 +11,7 @@ const LIGHT_ON = "#fff2c8";
 const LIGHT_GLOW = "#f2b75c";
 const GLASS_CABINET_SPOT_Y = 1.35 + 0.66 / 2 - 0.022;
 
-export function KitchenLighting({ state }: { state?: EntityStateSnapshot }) {
+export function KitchenLighting({ state }: { state?: EntityStateSnapshot | undefined }) {
   const brightness = lightBrightnessRatio(state);
   return (
     <group name="eclairage-cuisine-custom">

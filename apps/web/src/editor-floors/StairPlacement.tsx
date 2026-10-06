@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState } from "react";
 import { useThree } from "@react-three/fiber";
@@ -45,7 +46,7 @@ export function StairPlacement({
   coordinates: FloorCoordinates;
   building: HomeProject;
   registries?: StairValidationRegistries;
-  onIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
+  onIssuesChange?: ((issues: readonly ManifestIssue[] | null) => void) | undefined;
   onComplete: (stair: StairSpec) => void;
   onCancel: () => void;
   onDraggingChange: (dragging: boolean) => void;
@@ -101,17 +102,19 @@ export function StairPlacement({
       const walls = building.floors
         .filter((f) => f.id === stair.lowerFloorId || f.id === stair.upperFloorId)
         .flatMap((f) => f.walls);
-      const point = worldDragToSnappedConstructPlan({
-        point: hit,
-        coordinates,
-        walls,
-        onSnap: setSnap,
-        pixelsPerMeter: constructPixelsPerMeter(camera, rect.height),
-        pointerType: event.pointerType,
-        absolute: event.altKey,
-        angleOrigin:
-          (corner ?? anchor) ? worldPointToPlan((corner ?? anchor)!, coordinates) : undefined,
-      });
+      const point = worldDragToSnappedConstructPlan(
+        omitUndefinedProperties({
+          point: hit,
+          coordinates,
+          walls,
+          onSnap: setSnap,
+          pixelsPerMeter: constructPixelsPerMeter(camera, rect.height),
+          pointerType: event.pointerType,
+          absolute: event.altKey,
+          angleOrigin:
+            (corner ?? anchor) ? worldPointToPlan((corner ?? anchor)!, coordinates) : undefined,
+        }),
+      );
       const [x, z] = planPointToWorld(point, coordinates);
       return { x, z };
     };
@@ -228,7 +231,7 @@ export function StairPlacement({
       dom.events.removeEventListener("keydown", key, true);
       release();
     };
-  }, [gl, camera]);
+  }, [gl, camera, dom]);
   const other = building.floors.find((f) => f.id === stair.upperFloorId);
   return (
     <group name="stair-placement-preview">

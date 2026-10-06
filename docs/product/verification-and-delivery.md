@@ -1,24 +1,44 @@
 # Verification, delivery, and known limits
 
-The root package defines the executable checks. Run `npm run verify` for strict
-TypeScript checking, Node tests, package-boundary and source-policy checks,
-production build, and bundle-size reporting. `verify:bundle` currently reports
-bytes relative to a historical baseline; it does **not** enforce a size budget.
+The root package defines the executable checks. Run `npm run verify:fast` for
+Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
+package-boundary/source-policy checks. `npm run verify` also runs all tests,
+furnishing-surface checks, and the production build. No hosted CI is configured.
+
+Node 24.11.1 and npm 11.6.2 are pinned. Install with `npm ci`, then
+`npm run browser:install` to install Playwright's matching Chromium build; tests
+use modern headless Chromium rather than an independently updated system browser.
+Linux environments without browser libraries can use
+`npm run browser:install -- --with-deps`. Reinstall the browser after Playwright upgrades.
+
+The application checker uses native TypeScript 7 (`typescript-native` alias).
+Typed ESLint uses the TypeScript 6 compiler API, which typescript-eslint currently
+supports. Both versions are locked; remove the alias when the lint ecosystem
+supports the native compiler API. Strict checks include exact optional properties,
+explicit overrides, complete return paths, and switch fallthrough protection.
+`noUncheckedIndexedAccess` remains a separate migration; geometry algorithms need
+real length invariants, not blanket non-null assertions.
+
+Knip tracks the workspace exports and Vite harness imports as entry points.
+Keep those entry points explicit when adding runtime-loaded modules. The engine's
+Roboto font dependency is retained because CSS imports are outside this analysis.
 
 The test command runs four cost-balanced shards with shared harness modules and a
-compact agent reporter. `npm test` always includes both Node and Chrome coverage.
-`npm run test:unit` runs the Node/DOM tests without Chrome or listening HTTP servers;
+compact agent reporter. `npm test` always includes both Node and Chromium coverage.
+`npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
-through `node --test tests/<name>.test.mjs`. Set `TEST_PROFILE=1` to report slow tests.
+through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.
+The flag lets older JSDOM fixtures install their own navigator, as the shard
+runner does. Set `TEST_PROFILE=1` to report slow tests.
 
 Storage, migration, restore, native startup states, and HA settings/sync cases run against the real
 repository and React components in Node, with an isolated `fake-indexeddb` factory
 per scenario. DOM checks wait for state or transaction completion; sync tests drive
-interval callbacks explicitly. Keep Chrome for browser-specific behavior: real
+interval callbacks explicitly. Keep Chromium for browser-specific behavior: real
 IndexedDB through the application, route/reload persistence, file upload/download,
 reference-image interaction, responsive editor controls, and rendered scenes.
 
-Browser tests reuse Vite and Chrome within each shard, with fresh browser contexts
+Browser tests reuse Vite and Chromium within each shard, with fresh browser contexts
 for each test/session and teardown even after failure. Each Vite browser server
 owns a temporary dependency cache; it cannot race another shard or the development
 server over optimized modules. File watchers are disabled in test servers. New
@@ -39,7 +59,7 @@ not established by their presence alone.
 
 `npm run measure:scene` measures main-canvas draw calls and submitted triangles
 for the bundled home's default Orbit, Walk, Construct, and 3D Arrange views in
-an isolated Chrome session. JSON reports include steady samples, a forced shadow
+an isolated Chromium session. JSON reports include steady samples, a forced shadow
 refresh, and optional baseline comparisons. The opt-in `--check` gate requires
 each measured peak to stay below 50 calls and 100,000 triangles; it is separate
 from `verify`. These viewpoint-specific counts do not establish an FPS target or
@@ -59,7 +79,7 @@ development builds and marks the manifest as development-only.
 
 After building, `node scripts/verify-panel.mjs` serves the production artifact
 under a nested local asset path and opens a synthetic Home Assistant host in
-Chrome (`CHROME_PATH` can override the executable). It exercises the real
+Chromium (`CHROME_PATH` can override the executable). It exercises the real
 workspace/editor UI, host-session selection, HA import/storage, reconnect and
 detach behavior, and local asset loading while retaining the host URL. Unit and
 browser regressions additionally cover origin mismatch, demo isolation, stale

@@ -8,7 +8,7 @@ export function PlatformLowWall({
 }: {
   length: number;
   height: number;
-  name?: string;
+  name?: string | undefined;
 }) {
   return (
     <mesh name={`${name}-wall`} position={[0, height / 2, 0]} castShadow receiveShadow>

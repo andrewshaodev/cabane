@@ -10,7 +10,7 @@ export function ComicPew({
   reducedMotion,
 }: {
   shotId: number;
-  shotColor?: string;
+  shotColor?: string | undefined;
   anchor: RefObject<HTMLDivElement | null>;
   reducedMotion: boolean;
 }) {

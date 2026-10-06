@@ -126,10 +126,10 @@ export function ArchitecturalWalls({
   onSelectRoom,
 }: {
   floor: FloorSpec;
-  onSelectRoom?: (roomId: string) => void;
-  baseElevationMeters?: number;
-  below?: FloorSpec;
-  above?: FloorSpec;
+  onSelectRoom?: ((roomId: string) => void) | undefined;
+  baseElevationMeters?: number | undefined;
+  below?: FloorSpec | undefined;
+  above?: FloorSpec | undefined;
   interiorColor: string;
   exteriorColor: string;
   fade: boolean;
@@ -139,8 +139,8 @@ export function ArchitecturalWalls({
   const groups = useMemo(
     () =>
       buildArchitecturalWallGeometries(floor, interiorColor, exteriorColor, baseElevationMeters, {
-        below,
-        above,
+        ...(below === undefined ? {} : { below: below }),
+        ...(above === undefined ? {} : { above: above }),
       }),
     [exteriorColor, floor, interiorColor, baseElevationMeters, below, above],
   );

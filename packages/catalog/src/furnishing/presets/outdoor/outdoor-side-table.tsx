@@ -1,5 +1,4 @@
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
-import { RoundedFurniturePanel } from "../construction";
 
 export const OUTDOOR_SIDE_TABLE_SIZE = [0.5, 0.45, 0.5] as const;
 

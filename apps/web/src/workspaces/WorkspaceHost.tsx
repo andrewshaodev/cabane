@@ -91,7 +91,7 @@ export function WorkspaceHost({
       active = false;
       window.removeEventListener("focus", check);
     };
-  }, [id, repository, loaded?.metadata.homeAssistantUrl]);
+  }, [id, repository, loaded]);
   if (error)
     return (
       <main className="direction-project-loading is-error">

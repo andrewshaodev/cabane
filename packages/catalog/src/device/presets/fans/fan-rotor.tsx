@@ -36,7 +36,7 @@ export function FanRotor({
     return result;
   }, [radius]);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  const speed = fanSpeedFactor({ state, visualState });
+  const speed = fanSpeedFactor({ ...(state === undefined ? {} : { state: state }), visualState });
   useFrame(({ invalidate }, delta) => {
     if (!rotor.current || reducedMotion || speed === 0) return;
     rotor.current.rotation.z =

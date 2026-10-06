@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import {
   deriveStairFlight,
   planPointToWorld,
@@ -133,7 +134,7 @@ export function convertStairShape(
   };
   const rise = building.floors.find((f) => f.id === stair.lowerFloorId)!.floorToFloorHeightMeters;
   if (shape === "spiral")
-    return {
+    return omitUndefinedProperties({
       ...base,
       shape,
       at: worldPointToPlan(
@@ -146,17 +147,22 @@ export function convertStairShape(
       diameterMeters: 2,
       totalTurnDegrees: 360,
       direction: "clockwise",
-    };
+    });
   if (shape === "l-shaped" || shape === "u-shaped")
-    return {
+    return omitUndefinedProperties({
       ...base,
       shape,
       widthMeters: 1,
       lowerRunMeters: rounded(rise * 0.75),
       upperRunMeters: rounded(rise * 0.75),
       turn: "right",
-    };
-  return { ...base, shape, widthMeters: 1, runMeters: rounded(rise * 1.5) };
+    });
+  return omitUndefinedProperties({
+    ...base,
+    shape,
+    widthMeters: 1,
+    runMeters: rounded(rise * 1.5),
+  });
 }
 export function stairEditHandles(
   flight: StairFlight,

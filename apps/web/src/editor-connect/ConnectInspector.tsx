@@ -27,7 +27,7 @@ export function ConnectInspector({
   runtime: HomeAssistantRuntimeValue;
   deviceModels?: DeviceModelRegistry;
   homeAssistantUrl: string | null;
-  onSettings?: () => void;
+  onSettings?: (() => void) | undefined;
 }) {
   const openSettings = () => onSettings?.();
   const scroll = useRef<HTMLDivElement>(null);

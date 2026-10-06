@@ -90,21 +90,12 @@ export function ConstructionInteractionLayer(
     cancelOpeningResize,
     preview,
     wallExteriorColor,
-    drawStart,
-    drawPreview,
     resizedWall,
     placementPreview,
     onClearSelection,
     onPlaceMeasure,
-    drawingFloorZone,
-    onPreviewWall,
-    onBeginWall,
     measurePhase,
     onPreviewMeasure,
-    onPreviewFloorZonePoint,
-    onPlaceFloorZonePoint,
-    onAddWall,
-    onCancelWall,
   } = useConstructionPointerController(props);
   const startingPress = useRef<SegmentPress | null>(null);
   useEffect(() => {
