@@ -21,6 +21,7 @@ export const reconcileRuntimeBindingProfile = (
   const roomIds = new Set(manifest.floors.flatMap((floor) => floor.rooms).map((room) => room.id));
   const slotIds = new Set(collectBindingSlots(manifest).map((slot) => slot.slotId));
   return {
+    ...profile,
     schemaVersion: 1,
     homeId: manifest.home.id,
     roomAreaIds: Object.fromEntries(Object.entries(profile.roomAreaIds)

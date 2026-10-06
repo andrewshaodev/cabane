@@ -39,3 +39,11 @@ Implementation: [web startup](../../apps/web/src/main.tsx),
 [import boundary check](../../scripts/verify-import-boundaries.mjs).
 
 [Back to product overview](../../PRODUCT_SPEC.md).
+
+For shortcut work, route editor changes through
+`apps/web/src/editor-action-bar/ActionBarEditor.tsx` and the atomic workspace
+callback in `editor-workspace/useHomeEditorController.ts`. The engine's
+`action-bar/` directory owns portable targets, HA action resolution and command
+feedback. `runtime-binding-profile.ts` and `home-project/workspace-bindings.ts`
+own the private scene/script mapping contract; the dashboard composes resolved
+labels and availability into the shared `SceneActionBar`.

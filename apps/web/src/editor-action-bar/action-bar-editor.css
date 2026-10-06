@@ -45,10 +45,11 @@
 .shortcuts-workspace .scene-action-slot[aria-pressed="true"] { border-color: #f0d7a5; box-shadow: 0 0 0 2px #9f663c; }
 .shortcuts-workspace__empty { color: #f7fbf5; border-style: dashed; }
 .shortcuts-workspace__empty .editor-icon { width: 28px; height: 28px; }
-.shortcuts-workspace__tray { position: absolute; z-index: 5; bottom: calc(50% + 52px); left: 50%; display: flex; align-items: center; gap: 5px; max-width: min(92vw, 720px); padding: 6px; border-radius: 12px; color: white; background: #263b31; box-shadow: 0 12px 32px rgba(26,41,29,.2); transform: translateX(-50%); }
+.shortcuts-workspace__tray { position: absolute; z-index: 5; bottom: calc(50% + 52px); left: 50%; display: flex; align-items: center; gap: 5px; max-width: min(92vw, 1000px); overflow-x: auto; padding: 6px; border-radius: 12px; color: white; background: #263b31; box-shadow: 0 12px 32px rgba(26,41,29,.2); transform: translateX(-50%); }
 .shortcuts-workspace__tray button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none; min-height: 37px; padding: 0 10px; border: 0; border-radius: 7px; color: inherit; background: transparent; font: 600 .78rem Roboto, sans-serif; white-space: nowrap; }
 .shortcuts-workspace__tray button:hover:not(:disabled) { background: #405a48; }
 .shortcuts-workspace__tray-separator { height: 26px; border-left: 1px solid #718a73; }
+.shortcuts-workspace .scene-action-overflow { position: static; }
 .shortcuts-workspace .scene-action-overflow__tray { bottom: calc(100% + 12px); }
 .direction-preview.is-shortcuts .editor-floor-controls,
 .direction-preview.is-shortcuts .direction-camera,
@@ -83,3 +84,5 @@
 @media (max-width: 1240px) {
   .direction-preview.is-shortcuts .direction-project-actions { grid-row: 2; }
 }
+
+.shortcuts-picker__grid small { max-width: 100%; overflow-wrap: anywhere; }

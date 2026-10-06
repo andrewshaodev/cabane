@@ -8,6 +8,7 @@ import { useEditorValidation } from "./useEditorValidation";
 import { useHomeEditorShortcuts } from "./useHomeEditorShortcuts";
 
 import {
+  createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin, type EntityId,
   evaluateDerivedWalkNavigation,
   polygonCentroid,
   useHomeAssistantRuntime,
@@ -347,10 +348,26 @@ export function useHomeEditorController({
     previewSceneItems,
   ), [constructEditor.previewFloor, previewSceneItems, snapshot.project]);
   const editorProjectJson = useMemo(() => JSON.stringify(editorProject), [editorProject]);
-  const setActionBarItems = useCallback((items: readonly ActionBarItem[]) => {
+  const setActionBarItems = useCallback((items: readonly ActionBarItem[], mapping?: { id: string; entityId: EntityId }) => {
     if (editingLocked || unsettled) return;
-    commit({ ...snapshot, project: { ...editorProject, actionBar: { items } } });
-  }, [commit, editingLocked, editorProject, snapshot, unsettled]);
+    let bindings = snapshot.bindings;
+    if (mapping) {
+      if (!homeAssistantUrl || runtime.status !== "connected" || runtime.origin !== normalizeWorkspaceBindingOrigin(homeAssistantUrl)) return;
+      const origin = normalizeWorkspaceBindingOrigin(homeAssistantUrl);
+      const state = bindings[origin] ?? { draft: createEmptyRuntimeBindingProfile(editorProject.home.id), published: createEmptyRuntimeBindingProfile(editorProject.home.id), manualRoomIds: [], manualSlotIds: [] };
+      bindings = { ...bindings, [origin]: { ...state, draft: { ...state.draft,
+        actionEntityIdsByShortcutId: { ...state.draft.actionEntityIdsByShortcutId, [mapping.id]: mapping.entityId },
+      } } };
+    }
+    bindings = Object.fromEntries(Object.entries(bindings).map(([origin, state]) => [origin, {
+      ...state, draft: { ...state.draft, ...(state.draft.actionEntityIdsByShortcutId ? {
+        actionEntityIdsByShortcutId: Object.fromEntries(Object.entries(state.draft.actionEntityIdsByShortcutId)
+          .filter(([id, entityId]) => items.some(item => item.id === id &&
+            (item.target.kind === "scene" || item.target.kind === "script") && entityId.startsWith(`${item.target.kind}.`)))),
+      } : {}) },
+    }]));
+    commit({ ...snapshot, bindings, project: { ...editorProject, actionBar: { items } } });
+  }, [commit, editingLocked, editorProject, snapshot, unsettled, homeAssistantUrl, runtime]);
   const duplicateArrangeItem = useCallback((id: string) => {
     if (!furnishingEditor.items.some((item) => item.id === id)) return false;
     setDetailsItemId(null);

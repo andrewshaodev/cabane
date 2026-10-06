@@ -142,3 +142,10 @@ In the Shortcuts editor, clicking or tapping a shortcut selects it for editing.
 The selected shortcut keeps its outlined style and edit controls when the pointer
 moves away or over another shortcut; hover and focus alone do not change selection.
 Native keyboard activation also selects a shortcut.
+
+Shortcuts also offers searchable Scene and Script choices from the connected HA
+runtime, with recognizable names and unavailable choices disabled. Both reuse
+selection, replacement, reordering, removal, history, Save and overflow behavior.
+Their Home buttons show pending requests and expose unavailable reasons; they do
+not indicate an on/off state. Portable imports retain unmapped buttons and can be
+reconnected in Shortcuts.

@@ -72,3 +72,10 @@ Implementation: [commands](../../package.json),
 `node scripts/verify-multiple-floor-ui.mjs` checks upper-floor paint persistence
 and visible patterns, Explore with mandatory pointer lock, keyboard movement, mouse
 look, and return to Construct using an isolated synthetic building.
+
+`node scripts/verify-ha-shortcuts.mjs` exercises the normal Shortcuts editor and
+Home action bar against a synthetic runtime: scene/script mapping, unavailable
+choices, history, Save, pending and failed commands, disconnection, mobile
+overflow, and IndexedDB reload. It makes no household service calls. Screenshots
+are written to `/tmp/cabane-ha-shortcuts` by default (`CABANE_SHORTCUT_EVIDENCE`
+overrides the destination).

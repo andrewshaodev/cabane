@@ -160,7 +160,7 @@ export function SceneActionBar({
   roofVisible = false, onToggleRoof, keyboardEnabled = true,
 }: {
   items?: readonly ActionBarItem[];
-  targets?: Readonly<Record<string, { label: string; available: boolean; pictureUrl?: string | null; modelId?: string }>>;
+  targets?: Readonly<Record<string, { label: string; available: boolean; pending?: boolean; reason?: string; pictureUrl?: string | null; modelId?: string }>>;
   renderDeviceIcon?: (modelId: string) => ReactNode;
   roofVisible?: boolean;
   onToggleRoof?: () => void;
@@ -304,9 +304,11 @@ export function SceneActionBar({
     if (item.target.kind !== "built-in") {
       const target = targets[item.id] ?? { label: `Unavailable ${item.target.kind}`, available: false };
       return <button key={item.id} type="button" className="scene-action-slot is-filled"
-        aria-label={target.label} title={target.label} disabled={!target.available}
+        aria-label={target.label} title={target.reason ?? target.label} aria-busy={target.pending || undefined} disabled={!target.available}
         onClick={() => { setOverflowOpen(false); onAction(item); }}>
-        <SceneActionSlotFace label={target.label} icon={item.target.kind === "room"
+        <SceneActionSlotFace label={target.pending ? "Running…" : target.label} icon={item.target.kind === "scene" || item.target.kind === "script"
+          ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7z" /></svg>
+          : item.target.kind === "room"
           ? <RoomShortcutIcon name={target.label} pictureUrl={target.pictureUrl} />
           : target.modelId && renderDeviceIcon ? renderDeviceIcon(target.modelId)
             : <svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M9 6h6" /></svg>} />

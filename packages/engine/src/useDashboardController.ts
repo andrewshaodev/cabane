@@ -1,3 +1,4 @@
+import { useHaActionShortcuts } from "./action-bar/useHaActionShortcuts";
 import { useCabaneDom } from "./CabaneDom";
 import { collectBindingSlots } from "./binding-slot-descriptors";
 import { resolveOpeningPositions, type RetainedOpeningPositions } from "./opening-pose";
@@ -414,7 +415,13 @@ export function useDashboardController({
         break;
     }
   };
+  const haActions = useHaActionShortcuts(runtime, bindingManager.profile, setSceneActionError);
+  const pendingHaActions = haActions.pending;
   const runConfiguredAction = (item: ActionBarItem) => {
+    if (item.target.kind === "scene" || item.target.kind === "script") {
+      void haActions.run(item);
+      return;
+    }
     if (item.target.kind === "built-in") {
       const action = { walk: "walk-mode", night: "lighting-mode", "all-lights": "all-lights" } as const;
       if (item.target.action in action) runAction(action[item.target.action as keyof typeof action]);
@@ -601,6 +608,6 @@ export function useDashboardController({
     onOpenConnect, setMappingView, liveCameraDeviceIds, openCameraViewer, bindingManager, mappingView,
     selectedCamera, closeCameraViewer, setSelectedCamera, setSelectedRoomId, setMode, walkDeviceTarget,
     openWalkDevice, walkPointerLocked, allLightsCall, allLightsBusy, runAction, runConfiguredAction,
-    sceneActionError, setSceneActionError
+    sceneActionError, setSceneActionError, pendingHaActions
   };
 }

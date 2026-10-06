@@ -52,6 +52,7 @@ export const automaticallyMapRuntimeBindings = (
   }
 
   const workingProfile: RuntimeBindingProfile = {
+    ...current,
     schemaVersion: 1,
     homeId: current.homeId,
     roomAreaIds,

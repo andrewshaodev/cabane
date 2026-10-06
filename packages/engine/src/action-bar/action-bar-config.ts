@@ -3,7 +3,9 @@ export type ActionBarBuiltIn = "build" | "walk" | "night" | "view" | "all-lights
 export type ActionBarTarget =
   | { kind: "built-in"; action: ActionBarBuiltIn }
   | { kind: "room"; roomId: string }
-  | { kind: "device"; deviceId: string };
+  | { kind: "device"; deviceId: string }
+  | { kind: "scene" }
+  | { kind: "script" };
 
 export interface ActionBarItem {
   id: string;
@@ -45,6 +47,8 @@ export function resolvePublishedActionBarItems(config: unknown): readonly Action
     const target = item.target as { kind?: unknown; action?: unknown; roomId?: unknown; deviceId?: unknown };
     if (target.kind === "built-in" && builtInActions.has(target.action as ActionBarBuiltIn))
       return { id: item.id, target: { kind: "built-in", action: target.action as ActionBarBuiltIn } };
+    if (target.kind === "scene" || target.kind === "script")
+      return { id: item.id, target: { kind: target.kind } };
     if (target.kind === "room" && typeof target.roomId === "string" && target.roomId.trim())
       return { id: item.id, target: { kind: "room", roomId: target.roomId } };
     if (target.kind === "device" && typeof target.deviceId === "string" && target.deviceId.trim())

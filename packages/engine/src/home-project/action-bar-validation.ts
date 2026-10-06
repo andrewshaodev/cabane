@@ -6,7 +6,7 @@ import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 const targetKey = (item: ActionBarItem): string => {
   const target = item.target;
   return target.kind === "built-in" ? `built-in:${target.action}`
-    : target.kind === "room" ? `room:${target.roomId}` : `device:${target.deviceId}`;
+    : target.kind === "room" ? `room:${target.roomId}` : target.kind === "device" ? `device:${target.deviceId}` : `ha-action:${item.id}`;
 };
 
 export function isActionBarDeviceNavigable(project: HomeProject, deviceId: string): boolean {

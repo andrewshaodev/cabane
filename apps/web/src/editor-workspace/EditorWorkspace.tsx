@@ -212,7 +212,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         runtime, constructEditor, dragging, floorZoneDrawing, poolDrawing, workspace, undoProject,
         redoProject, shortcutsMode, onModeTabChange
       }} />
-      {shortcutsMode && <ShortcutThumbnailSurface><ActionBarEditor project={editorProject}
+      {shortcutsMode && <ShortcutThumbnailSurface><ActionBarEditor project={editorProject} runtime={runtime} profile={connect.profile}
+        actionMappingEnabled={!!bindingOrigin && runtime.origin === bindingOrigin}
         deviceModels={deviceModels} roomPictures={roomPictures} roomNames={roomNames} deviceNames={deviceNames}
         disabled={editingLocked || unsettled || publishOpen || previewOpen}
         canUndo={workspace.canUndo && !unsettled} canRedo={workspace.canRedo && !unsettled}
@@ -237,7 +238,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
         {shortcutsMode && <div className="shortcuts-guide">
           <h3>Add a shortcut</h3>
-          <p>Select the empty slot in the bar, then choose an action, room or device.</p>
+          <p>Select the empty slot in the bar, then choose an action, room, device, scene or script.</p>
           <h3>Edit your bar</h3>
           <p>Select a shortcut to replace, move or remove it.</p>
           <h3>Update Home</h3>

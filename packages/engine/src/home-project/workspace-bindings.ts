@@ -22,6 +22,7 @@ const PROFILE_KEYS = new Set([
   "homeId",
   "roomAreaIds",
   "entityIdsBySlotId",
+  "actionEntityIdsByShortcutId",
 ]);
 const STATE_KEYS = new Set(["draft", "published", "manualRoomIds", "manualSlotIds"]);
 
@@ -218,6 +219,11 @@ export const reconcileWorkspaceBindings = (
         homeId: state.draft.homeId,
         roomAreaIds: retainedRooms,
         entityIdsBySlotId: retainedSlots,
+        ...(state.draft.actionEntityIdsByShortcutId ? { actionEntityIdsByShortcutId: Object.fromEntries(
+          Object.entries(state.draft.actionEntityIdsByShortcutId).filter(([id, entityId]) =>
+            manifest.actionBar?.items.some(item => item.id === id &&
+              (item.target.kind === "scene" || item.target.kind === "script") && entityId.startsWith(`${item.target.kind}.`))),
+        ) } : {}),
       },
       published: clone(state.published),
       manualRoomIds: state.manualRoomIds.filter((id) => roomIds.has(id)),

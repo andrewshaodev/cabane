@@ -1,3 +1,4 @@
+import { resolveHaActionShortcut } from "./action-bar/ha-action-shortcuts";
 import { connectedCanvasEvents } from "./connected-canvas-events";
 import { useCabaneDom } from "./CabaneDom";
 import { ScenePreview } from "./ScenePreview";
@@ -81,7 +82,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     onOpenConnect, setMappingView, liveCameraDeviceIds, openCameraViewer, bindingManager, mappingView,
     selectedCamera, closeCameraViewer, setSelectedCamera, setSelectedRoomId, setMode, walkDeviceTarget,
     openWalkDevice, walkPointerLocked, allLightsCall, allLightsBusy, runAction, runConfiguredAction,
-    sceneActionError, setSceneActionError
+    sceneActionError, setSceneActionError, pendingHaActions
   } = useDashboardController(props);
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar);
   const preferencesMenuItem = walkMode && <button type="button" onClick={event => {
@@ -91,6 +92,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>;
   const actionBarTargets = Object.fromEntries(actionBarItems.flatMap(item => {
     if (item.target.kind === "built-in") return [];
+    if (item.target.kind === "scene" || item.target.kind === "script") {
+      const target = resolveHaActionShortcut(item, bindingManager.profile, runtime);
+      const pending = pendingHaActions.has(item.id);
+      return [[item.id, { ...target, pending, available: target.available && !pending }]];
+    }
     const destination = resolveActionBarDestination(manifest, item.target);
     if (!destination) return [[item.id, { label: `Unavailable ${item.target.kind}`, available: false }]];
     if (item.target.kind === "room") {

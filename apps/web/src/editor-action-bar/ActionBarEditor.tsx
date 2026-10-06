@@ -2,6 +2,7 @@ import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ActionBarBuiltInIcon, RoomShortcutIcon, SceneActionSlotFace, actionBarBuiltInLabels,
+  haActionShortcutChoices, resolveHaActionShortcut, type HomeAssistantRuntimeValue, type RuntimeBindingProfile, type EntityId,
   createBrowserUuid, defaultActionBarItems, isActionBarDeviceNavigable, resolveActionBarItems, resolvedRoomIdForItem,
   type ActionBarBuiltIn, type ActionBarItem, type DeviceModelRegistry, type HomeProject,
 } from "@cabane/engine";
@@ -11,16 +12,17 @@ import { moveActionBarItem, removeActionBarItem, replaceActionBarItem } from "./
 import "./action-bar-editor.css";
 
 const builtIns: ActionBarBuiltIn[] = ["build", "walk", "night", "view", "all-lights"];
-type Category = "built-in" | "room" | "device";
+type Category = "built-in" | "room" | "device" | "scene" | "script";
 type Picker = { kind: Category; replacingId: string | null } | null;
 
-export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames = {}, deviceNames = {}, disabled, canUndo, canRedo, onUndo, onRedo, onChange }: {
+export function ActionBarEditor({ project, runtime, profile, actionMappingEnabled = false, deviceModels, roomPictures, roomNames = {}, deviceNames = {}, disabled, canUndo, canRedo, onUndo, onRedo, onChange }: {
+  runtime?: HomeAssistantRuntimeValue; profile?: RuntimeBindingProfile; actionMappingEnabled?: boolean;
   project: HomeProject; deviceModels: DeviceModelRegistry;
   roomPictures: Readonly<Record<string, string | null>>;
   roomNames?: Readonly<Record<string, string>>;
   deviceNames?: Readonly<Record<string, string>>;
   disabled: boolean; canUndo: boolean; canRedo: boolean; onUndo: () => void; onRedo: () => void;
-  onChange: (items: readonly ActionBarItem[]) => void;
+  onChange: (items: readonly ActionBarItem[], mapping?: { id: string; entityId: EntityId }) => void;
 }) {
   const dom = useCabaneDom();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -34,6 +36,8 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
   const rooms = project.floors.flatMap(floor => floor.rooms);
   const devices = project.sceneItems.filter(item => item.kind === "device" && isActionBarDeviceNavigable(project, item.id));
   const selected = items.find(item => item.id === selectedId);
+  const actionWarnings = runtime && profile ? items.filter(item => item.target.kind === "scene" || item.target.kind === "script")
+    .map(item => resolveHaActionShortcut(item, profile, runtime)).filter(target => !target.available) : [];
   const missingCount = items.filter(item => {
     const target = item.target;
     return target.kind === "room" ? !rooms.some(room => room.id === target.roomId)
@@ -70,6 +74,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
     const target = item.target;
     if (target.kind === "built-in") return actionBarBuiltInLabels[target.action];
     if (target.kind === "room") return roomNames[target.roomId] ?? rooms.find(room => room.id === target.roomId)?.name ?? "Missing room";
+    if (target.kind === "scene" || target.kind === "script") return runtime && profile ? resolveHaActionShortcut(item, profile, runtime).label : `Unmapped ${target.kind}`;
     const device = devices.find(device => device.id === target.deviceId);
     return device ? deviceNames[device.id] ?? deviceModels[device.modelId]?.label ?? device.modelId.replaceAll("-", " ") : "Missing device";
   };
@@ -77,6 +82,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
     const target = item.target;
     if (target.kind === "built-in") return <ActionBarBuiltInIcon action={target.action} />;
     if (target.kind === "room") return <RoomShortcutIcon name={label(item)} pictureUrl={roomPictures[target.roomId]} />;
+    if (target.kind === "scene" || target.kind === "script") return <EditorIcon name={target.kind === "scene" ? "grid" : "chevron"} />;
     const device = devices.find(device => device.id === target.deviceId);
     return device ? <ShortcutDeviceIcon modelId={device.modelId} models={deviceModels} /> : <EditorIcon name="devices" />;
   };
@@ -89,9 +95,11 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
       ? { build: "B", walk: "W", night: "N", view: "V", "all-lights": "L" }[item.target.action] : undefined}
       chevron={item.target.kind === "built-in" && (item.target.action === "build" || item.target.action === "view")} />
   </button>;
-  const choose = (target: ActionBarItem["target"]) => {
+  const choose = (target: ActionBarItem["target"], entityId?: EntityId) => {
     if (!picker) return;
-    onChange(replaceActionBarItem(items, picker.replacingId, target, createBrowserUuid));
+    const id = picker.replacingId ?? createBrowserUuid();
+    const next = replaceActionBarItem(items, picker.replacingId, target, () => id);
+    onChange(next, entityId ? { id, entityId } : undefined);
     setSelectedId(null); setPicker(null); setQuery(""); setOverflowOpen(false);
   };
   const openPicker = (kind: Category) => { setPicker({ kind, replacingId: selected?.id ?? null }); setQuery(""); };
@@ -108,14 +116,28 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
       </div>
     </div>
     {missingCount > 0 && <p className="shortcuts-workspace__warning" role="alert">{missingCount} shortcut target{missingCount === 1 ? " is" : "s are"} missing. Replace or remove before Save.</p>}
+    {actionWarnings.length > 0 && <p className="shortcuts-workspace__warning" role="status">
+      {actionWarnings.map(target => `${target.label}: ${target.reason}`).join(" ")}
+    </p>}
     <div className="shortcuts-workspace__canvas">
       {picker ? <div className="shortcuts-picker">
-        <div className="shortcuts-picker__heading"><div><h2>{picker.kind === "built-in" ? "Choose an action" : picker.kind === "room" ? "Choose a room" : "Choose a device"}</h2>
+        <div className="shortcuts-picker__heading"><div><h2>{picker.kind === "built-in" ? "Choose an action" : picker.kind === "room" ? "Choose a room" : picker.kind === "device" ? "Choose a device" : `Choose a ${picker.kind}`}</h2>
           <p>{picker.replacingId ? "Replace the selected shortcut" : "Add a shortcut to the bar"}</p></div>
           <button type="button" onClick={() => setPicker(null)} aria-label="Close choices"><EditorIcon name="close" /></button></div>
         <label className="shortcuts-picker__search"><EditorIcon name="search" /><input type="search" value={query} placeholder="Search…"
           aria-label="Search shortcut choices" onChange={event => setQuery(event.target.value)} /></label>
         <div className="shortcuts-picker__grid">
+          {(picker.kind === "scene" || picker.kind === "script") && <>
+            {(!actionMappingEnabled || runtime?.status !== "connected") ? <p>Connect to Home Assistant to choose scenes and scripts.</p>
+              : <>{haActionShortcutChoices(picker.kind, runtime).filter(choice => matching(choice.label) || matching(choice.entityId)).map(choice =>
+                <button key={choice.entityId} type="button" aria-label={choice.label} title={choice.reason}
+                  disabled={disabled || !choice.available || Object.entries(profile?.actionEntityIdsByShortcutId ?? {}).some(([id, entityId]) => id !== picker.replacingId && entityId === choice.entityId)}
+                  onClick={() => choose({ kind: picker.kind as "scene" | "script" }, choice.entityId)}>
+                  <span className="shortcuts-picker__icon"><EditorIcon name={picker.kind === "scene" ? "grid" : "chevron"} /></span>
+                  <strong>{choice.label}</strong><small>{choice.entityId}</small>{!choice.available && <small>Unavailable</small>}
+                </button>)}
+                {haActionShortcutChoices(picker.kind, runtime).length === 0 && <p>No {picker.kind}s are available in Home Assistant.</p>}</>}
+          </>}
           {picker.kind === "built-in" && builtIns.filter(action => matching(actionBarBuiltInLabels[action])).map(action => {
             const target = { kind: "built-in" as const, action };
             return <button key={action} type="button" aria-label={actionBarBuiltInLabels[action]} disabled={disabled || duplicate(target)} onClick={() => choose(target)}>
@@ -170,6 +192,7 @@ export function ActionBarEditor({ project, deviceModels, roomPictures, roomNames
         <button type="button" disabled={disabled} onClick={() => openPicker("built-in")}><EditorIcon name="grid" />{selected ? "Replace with action" : "Add action"}</button>
         <button type="button" disabled={disabled} onClick={() => openPicker("room")}><EditorIcon name="rooms" />{selected ? "Replace with room" : "Add room"}</button>
         <button type="button" disabled={disabled} onClick={() => openPicker("device")}><EditorIcon name="devices" />{selected ? "Replace with device" : "Add device"}</button>
+        {(["scene", "script"] as const).map(kind => <button key={kind} type="button" disabled={disabled} onClick={() => openPicker(kind)}><EditorIcon name={kind === "scene" ? "grid" : "chevron"} />{selected ? `Replace with ${kind}` : `Add ${kind}`}</button>)}
         {selected && <><span className="shortcuts-workspace__tray-separator" />
           <button type="button" aria-label="Move left" disabled={disabled || items[0]?.id === selected.id} onClick={() => onChange(moveActionBarItem(items, selected.id, -1))}><EditorIcon name="chevronLeft" /></button>
           <button type="button" aria-label="Move right" disabled={disabled || items.at(-1)?.id === selected.id} onClick={() => onChange(moveActionBarItem(items, selected.id, 1))}><EditorIcon name="chevron" /></button>
