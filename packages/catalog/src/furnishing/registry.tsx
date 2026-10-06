@@ -1,3 +1,5 @@
+import { childrenCurtainDefinition } from "./presets/children-bedroom/curtain-definition";
+import { singleWindowCurtainDefinition } from "./presets/curtains/definition";
 import { DryingRack, DRYING_RACK_SIZE } from "./presets/laundry";
 import { IroningBoard, IRONING_BOARD_SIZE } from "./presets/laundry";
 import { TwoStepStool, TWO_STEP_STOOL_SIZE } from "./presets/kitchen";
@@ -77,7 +79,6 @@ import {
   WoodenVanity,
 } from "./presets/bathroom";
 import {
-  ChildrenBedroomFrenchDoorCurtains,
   ChildrenBedroomNarrowToyShelf,
   ChildrenBedroomToddlerTableSet,
   ChildrenBedroomWovenFloorBasket,
@@ -1188,22 +1189,8 @@ const stableFurnishingDefinitions = {
     outlineContact: true,
     complexity: { visibleMeshes: 18, triangles: 4_800 },
   }),
-  "children-curtains": defineFurnishingModel({
-    defaultRoomType: "bedroom",
-    component: ({ size }) => (
-      <group scale={[size[0] / 1.9, size[1] / 2.205, size[2] / 0.076]}>
-        <ChildrenBedroomFrenchDoorCurtains />
-      </group>
-    ),
-    label: "Children's curtains",
-    category: "Children",
-    defaultSize: [1.9, 2.205, 0.076],
-    bounds: { min: [-0.95, 0.08, -0.01], max: [0.95, 2.285, 0.066] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "wall",
-    outlineContact: true,
-    complexity: { visibleMeshes: 12, triangles: 3_200 },
-  }),
+  "single-window-curtain": singleWindowCurtainDefinition,
+  "children-curtains": childrenCurtainDefinition,
   "children-floor-basket": defineFurnishingModel({
     defaultRoomType: "bedroom",
     component: ({ size }) => (

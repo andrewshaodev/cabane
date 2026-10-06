@@ -128,7 +128,7 @@ Contract: [Catalog and model extensions](../docs/product/catalog-and-extensions.
 
 - Owners: [`packages/catalog/src/architecture`](../packages/catalog/src/architecture), [`packages/catalog/src/furnishing`](../packages/catalog/src/furnishing), [`packages/catalog/src/device`](../packages/catalog/src/device), [`home/src/extensions`](../home/src/extensions), [`packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts`](../packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts), [`packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx`](../packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx).
 - Interface: `stableFurnishingRegistry` via [`packages/catalog/src/furnishing/index.ts`](../packages/catalog/src/furnishing/index.ts).
-- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls.
+- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls.
 - Checks: `verify:boundaries`, `verify:policy`, `verify:furnishing-surfaces`.
 
 ### Optional walk tools

@@ -185,6 +185,71 @@ await withModules(async (load) => {
       assert.equal(catalogStartPlacement(entry, changedFloor, [2, 2]).placement, null);
   });
 
+  test("single curtains fit separate windows on one wall and retain independent dimensions", () => {
+    const entry = get("single-window-curtain");
+    assert.equal(filterCatalog(entries, "living-room", "single window curtain")[0], entry);
+    const source = ownerHomeProject.floors[0];
+    const firstWindow = windowPlacements(entry.definition, source, [10, 4])[0];
+    assert.ok(firstWindow);
+    const opening = source.openings.find((opening) => opening.id === firstWindow.openingId);
+    const width = opening.widthPlanUnits / 3;
+    const twoWindows = {
+      ...source,
+      rooms: source.rooms.filter((room) => room.name === firstWindow.roomName),
+      openings: [
+        { ...opening, id: "curtain-window-left", widthPlanUnits: width },
+        {
+          ...opening,
+          id: "curtain-window-right",
+          widthPlanUnits: width,
+          offsetFromWallStartPlanUnits: opening.offsetFromWallStartPlanUnits + width * 2,
+        },
+      ],
+    };
+    const visible = (position) =>
+      engine.pointInsidePolygon(
+        [
+          position[0] / source.coordinates.metersPerPlanUnit + source.coordinates.origin[0],
+          position[2] / source.coordinates.metersPerPlanUnit + source.coordinates.origin[1],
+        ],
+        twoWindows.rooms[0].polygon,
+      );
+    const first = catalogStartPlacement(entry, twoWindows, [10, 4], undefined, visible);
+    assert.ok(first.placement, first.error);
+    const item = { ...createCatalogItem(entry, first.placement, []), size: first.size };
+    const second = catalogStartPlacement(
+      entry,
+      twoWindows,
+      [10, 4],
+      {
+        items: [item],
+        ...ownerProjectRegistries,
+      },
+      visible,
+    );
+    assert.ok(second.placement, second.error);
+
+    assert.equal(first.placement.wallId, second.placement.wallId);
+    assert.notEqual(
+      first.placement.offsetFromWallStartPlanUnits,
+      second.placement.offsetFromWallStartPlanUnits,
+    );
+    const spacing =
+      Math.abs(
+        first.placement.offsetFromWallStartPlanUnits -
+          second.placement.offsetFromWallStartPlanUnits,
+      ) * source.coordinates.metersPerPlanUnit;
+    assert.ok(spacing > (first.size[0] + second.size[0]) / 2);
+    const customSize = [first.size[0] * 0.8, first.size[1] * 0.7, first.size[2]];
+    const aligned = windowPlacements(entry.definition, twoWindows, [10, 4], customSize)[0];
+    assert.deepEqual(aligned.size, customSize);
+    assert.deepEqual(second.size, first.size);
+    assert.deepEqual(
+      entry.definition.variants.map(({ id }) => id),
+      ["left", "right"],
+    );
+  });
+
   test("window alignment respects translated coordinates, plan scale, and reversed walls", () => {
     const definition = get("motorized-blind").definition;
     const original = windowPlacements(definition, floor, [2, 2])[0];

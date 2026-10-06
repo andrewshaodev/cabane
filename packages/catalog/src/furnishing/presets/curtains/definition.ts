@@ -1,0 +1,24 @@
+import { defineFurnishingModel } from "@cabane/engine";
+import { SingleWindowCurtain } from "./single-window-curtain";
+
+export const singleWindowCurtainDefinition = defineFurnishingModel({
+  defaultRoomType: "living-room",
+  component: SingleWindowCurtain,
+  label: "Single window curtain",
+  category: "Decor",
+  variants: [
+    { id: "left", label: "Gathered left" },
+    { id: "right", label: "Gathered right" },
+  ],
+  defaultSize: [1.2, 2.4, 0.12],
+  bounds: { min: [-0.6, 0, 0], max: [0.6, 2.4, 0.12] },
+  resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+  preferredPlacement: "wall",
+  windowFit: {
+    openingWidthRatio: 0.95,
+    openingHeightRatio: 2.32 / 2.4,
+    depthOffsetMeters: 0.003,
+  },
+  outlineContact: true,
+  complexity: { visibleMeshes: 6, triangles: 72 },
+});

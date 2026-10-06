@@ -11,3 +11,4 @@ export * from "./entryway";
 export * from "./hallway";
 export * from "./outdoor";
 export * from "./laundry";
+export * from "./curtains";
