@@ -124,6 +124,9 @@ universal device or end-to-end 10× speed guarantee.
 Closing device controls while walking keeps the current walk camera and pose.
 Browser pointer-lock loss or refusal pauses mouse input without changing views;
 clicking the scene resumes mouse control. Explicit walk-mode exit remains available.
+Walk and draft Explore show Preferences in the top-right More options menu. The
+Preferences dialog offers Invert Y axis for mouse and touch look controls; the
+choice is saved locally in the browser and applies to both walking contexts.
 
 The More options menu uses aligned action rows for Switch workspace, Send feedback,
 and contextual connection actions. Disconnect identifies Home Assistant in secondary

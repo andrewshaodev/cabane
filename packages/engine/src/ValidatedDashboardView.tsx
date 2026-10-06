@@ -11,8 +11,10 @@ import { Canvas } from "@react-three/fiber";
 
 import {
   Suspense,
+  useCallback,
   useEffect,
   useRef,
+  useState,
   type CSSProperties
 } from "react";
 
@@ -49,6 +51,7 @@ import { resolveActionBarDestination } from "./action-bar/action-bar-navigation"
 import { CustomizeActionBarMenuItem } from "./CustomizeActionBarMenuItem";
 
 import { SceneMenuIcon } from "./SceneMenuIcon";
+import { WalkPreferences, loadInvertYAxis, saveInvertYAxis } from "./WalkPreferences";
 
 import { SceneRoomContext } from "./SceneRoomContext";
 
@@ -58,6 +61,9 @@ import { useDashboardController } from './useDashboardController';
 
 export function ValidatedDashboardView(props: Parameters<typeof useDashboardController>[0]) {
   const orbitControls = useRef<OrbitControlsImpl | null>(null);
+  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
+  const closePreferences = useCallback(() => setPreferencesOpen(false), []);
   const {
     floorNavigation, elevation, requestWalkPointerLock,
     cameraStreamRequirements, runtime, documentVisible, shellRef, mode, mappingOpen, setupOpen,
@@ -153,6 +159,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                       jumpRequestRef={jumpRequestRef}
                       lookInputRef={lookInputRef}
                       lookDeltaRef={lookDeltaRef}
+                      invertYAxis={invertYAxis}
                       reducedMotion={reducedMotion}
                       openingPositions={openingPositions}
                       boundOpeningIds={boundOpeningIds}
@@ -212,7 +219,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
             </Suspense>
           </div>
 
-          {!walkthrough && <header className="scene-hud">
+          <header className="scene-hud">
+            {!walkthrough && <>
             <SceneRoomContext
               mode={mode}
               displayName={walkMode ? walkRoomDisplayName : selectedRoomDisplayName}
@@ -225,12 +233,19 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                 ? [sessionPresentation.label, sessionPresentation.detail].filter(Boolean).join(" · ")
                 : undefined}
             />
+            </>}
             <details className="scene-menu">
               <summary aria-label="More options">
                 <span aria-hidden="true">•••</span>
                 {setupAction?.attention && <i className="scene-menu__attention-dot" aria-hidden="true" />}
               </summary>
               <div>
+                {walkMode && <button type="button" onClick={event => {
+                  event.currentTarget.closest("details")?.removeAttribute("open");
+                  if (document.pointerLockElement) document.exitPointerLock();
+                  setPreferencesOpen(true);
+                }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>}
+                {!walkthrough && <>
                 <p>{sessionPresentation?.menuDescription ?? runtime.error ?? (runtime.configured
                   ? "Your home stays local."
                   : "Connect Home Assistant to control your home.")}</p>
@@ -295,9 +310,13 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     <span className="scene-menu__copy"><strong>Disconnect</strong><small>Home Assistant</small></span>
                   </button>
                 )}
+                </>}
               </div>
             </details>
-          </header>}
+          </header>
+          {preferencesOpen && <WalkPreferences inverted={invertYAxis} onChange={value => {
+            setInvertYAxis(value); saveInvertYAxis(value);
+          }} onClose={closePreferences} />}
 
           {controlRoom && resolvedBindings.rooms[controlRoom.id] && (
             <RoomDashboardPanel

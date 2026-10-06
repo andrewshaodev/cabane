@@ -50,6 +50,7 @@ export function WalkCameraController({
   jumpRequestRef,
   lookInputRef,
   lookDeltaRef,
+  invertYAxis = false,
   reducedMotion,
   openingPositions,
   boundOpeningIds,
@@ -67,6 +68,7 @@ export function WalkCameraController({
   jumpRequestRef?: MutableRefObject<boolean>;
   lookInputRef: MutableRefObject<StickVector>;
   lookDeltaRef: MutableRefObject<StickVector>;
+  invertYAxis?: boolean;
   reducedMotion: boolean;
   openingPositions: OpeningPositions;
   boundOpeningIds: ReadonlySet<string>;
@@ -131,7 +133,7 @@ export function WalkCameraController({
     const delta = Math.min(0.05, rawDelta);
     const pose = poseRef.current;
     pose.yaw -= lookDeltaRef.current.x * 0.0024;
-    pose.pitch = clampPitch(pose.pitch - lookDeltaRef.current.y * 0.002);
+    pose.pitch = clampPitch(pose.pitch - lookDeltaRef.current.y * (invertYAxis ? -0.002 : 0.002));
     lookDeltaRef.current = { x: 0, y: 0 };
     lookVelocity.current.x +=
       (lookInputRef.current.x * 2.4 - lookVelocity.current.x) *
@@ -140,7 +142,7 @@ export function WalkCameraController({
       (lookInputRef.current.y * 1.7 - lookVelocity.current.y) *
       (1 - Math.exp(-18 * delta));
     pose.yaw -= lookVelocity.current.x * delta;
-    pose.pitch = clampPitch(pose.pitch - lookVelocity.current.y * delta);
+    pose.pitch = clampPitch(pose.pitch - lookVelocity.current.y * delta * (invertYAxis ? -1 : 1));
 
     velocity.current = integrateWalkVelocity(
       velocity.current,
