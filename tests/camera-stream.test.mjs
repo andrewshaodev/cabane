@@ -78,6 +78,7 @@ await withModules(async (load) => {
 
   test("staggered transport race returns the first frame and aborts the loser", async () => {
     let loserAborted = false;
+    const aborted = Promise.withResolvers();
     const winner = await camera.runCameraTransportRace(
       ["webrtc", "hls"],
       (transport, signal) =>
@@ -87,6 +88,7 @@ await withModules(async (load) => {
                 "abort",
                 () => {
                   loserAborted = true;
+                  aborted.resolve();
                   reject(signal.reason);
                 },
                 { once: true },
@@ -96,7 +98,7 @@ await withModules(async (load) => {
       1,
     );
     assert.equal(winner, "hls-session");
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await aborted.promise;
     assert.equal(loserAborted, true);
   });
 

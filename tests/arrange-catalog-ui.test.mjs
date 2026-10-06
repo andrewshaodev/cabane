@@ -16,7 +16,7 @@ await withModules(async (load) => {
   const { ownerProjectRegistries } = await load("/apps/web/src/project-runtime.ts");
   const { createSeedProjectRecord } = await load("/packages/engine/src/index.ts");
   const { ownerHomeProject, ownerProjectManifest } = await load("/tests/fixtures/bundled-home.ts");
-  const { useConstructEditor, CONSTRUCT_ARCHITECTURE_SETTLE_MS } = await load(
+  const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
   );
   const { FurnishingInspector } = await load(
@@ -318,7 +318,8 @@ await withModules(async (load) => {
     });
   });
 
-  test("catalog clicks immediately add real items without a placement panel; shared history restores them", async () => {
+  test("catalog clicks immediately add real items without a placement panel; shared history restores them", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     await withDom(async ({ root, document, window }) => {
       const record = createSeedProjectRecord(ownerHomeProject, 1);
       const saved = [];
@@ -332,7 +333,7 @@ await withModules(async (load) => {
         },
       };
       const button = (label) => document.querySelector(`[aria-label="${label}"]`);
-      const settle = () => act(async () => new Promise((resolve) => setTimeout(resolve, 15)));
+      const settle = () => act(async () => context.mock.timers.tick(5));
       function ArrangeHarness() {
         const controller = useHomeEditorController({
           initialRecord: record,
@@ -430,7 +431,8 @@ await withModules(async (load) => {
   const { createCatalogItem } = await load(
     "/apps/web/src/editor-preview/furnish/placement/item-creation.ts",
   );
-  test("catalog placement and duplication reserve identities across floors", async () => {
+  test("catalog placement and duplication reserve identities across floors", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     await withDom(async ({ root }) => {
       const project = makeThreeFloorProject();
       const entries = catalogEntries(
@@ -468,7 +470,7 @@ await withModules(async (load) => {
         });
         return null;
       }
-      const settle = () => act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+      const settle = () => act(async () => context.mock.timers.tick(5));
       await act(async () => root.render(React.createElement(Harness)));
       for (const floor of project.floors) {
         await act(async () => controller.floorNavigation.selectFloor(floor.id));
@@ -505,7 +507,8 @@ await withModules(async (load) => {
     });
   });
 
-  test("history floor restoration preserves room identities and shared ceilings after settling", async () => {
+  test("history floor restoration preserves room identities and shared ceilings after settling", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     await withDom(async ({ root }) => {
       let editor;
       const floor = ownerProjectManifest.floors[0];
@@ -515,10 +518,7 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       await act(async () => editor.replaceFloor(structuredClone(floor)));
-      await act(
-        async () =>
-          new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30)),
-      );
+      await act(async () => context.mock.timers.runAll());
       assert.deepEqual(editor.previewFloor, floor);
       assert.equal(
         new Set(editor.previewFloor.ceilings.map((ceiling) => ceiling.id)).size,

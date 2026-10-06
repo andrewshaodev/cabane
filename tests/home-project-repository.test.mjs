@@ -259,11 +259,16 @@ await withModules(async (load) => {
   test("serializes concurrent writes so late autosaves cannot overtake", async () => {
     let raw = null;
     let writes = 0;
+    const secondWriteStarted = Promise.withResolvers();
+    const releaseSecondWrite = Promise.withResolvers();
     const store = {
       read: async () => raw,
       write: async (_homeId, serialized) => {
         writes += 1;
-        if (writes === 2) await new Promise((resolve) => setTimeout(resolve, 20));
+        if (writes === 2) {
+          secondWriteStarted.resolve();
+          await releaseSecondWrite.promise;
+        }
         raw = serialized;
       },
     };
@@ -271,6 +276,9 @@ await withModules(async (load) => {
     const first = await repository.replace(createSeedProjectRecord(fixtureProject(), 1000));
     const saveOne = repository.replace({ ...first, draftUpdatedAt: 2000 });
     const saveTwo = repository.replace({ ...first, draftUpdatedAt: 3000 });
+    await secondWriteStarted.promise;
+    assert.equal(writes, 2, "the newer write waits for the in-flight write");
+    releaseSecondWrite.resolve();
     await Promise.all([saveOne, saveTwo]);
     assert.equal(JSON.parse(raw).draftUpdatedAt, 3000);
   });
