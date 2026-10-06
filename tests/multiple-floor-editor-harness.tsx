@@ -7,6 +7,11 @@ import { makeStairProject, makeOutdoorPlatformProject } from "./fixtures/multipl
 import "@cabane/engine/styles.css";
 const scenario = new URLSearchParams(window.location.search).get("scenario");
 const seed = scenario === "outdoor" ? makeOutdoorPlatformProject() : makeStairProject();
+if (scenario === "handle-overlap") {
+  const floor = seed.floors[0];
+  floor.walls.push({...floor.walls[0],id:"handle-wall",from:[2,5.5],to:[6,5.5],thicknessMeters:.2});
+  floor.openings.push({id:"handle-passage",kind:"passage",variant:"rectangular",wallId:"handle-wall",offsetFromWallStartPlanUnits:1,widthPlanUnits:2,openingHeightMeters:2.2,sillHeightMeters:0});
+}
 if (scenario === "clearance") {
   seed.sceneItems = [
     {id:"test-wardrobe",kind:"furnishing",modelId:"cane-wardrobe",floorId:"ground",size:[4,2.15,.474],

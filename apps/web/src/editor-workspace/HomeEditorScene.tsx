@@ -1,3 +1,4 @@
+import { editorCanvasEvents } from "./editor-canvas-events";
 import { ConstructionPlatformLayer } from "../editor-preview/construct/ConstructionPlatformLayer";
 import { useReferenceCanvas } from "../editor-reference-plan/ReferenceCanvasLayers";
 import type { ReferencePlanController } from "../editor-reference-plan/useReferencePlan";
@@ -16,7 +17,6 @@ import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 
 import {
   type ManifestIssue,
-  connectedCanvasEvents,
   deriveFloorLevels,
   StylizedScene,
   ArchitectureScene,
@@ -80,7 +80,7 @@ export function HomeEditorScene({
     />}
     {referenceCanvas.background}
     <div hidden={mode === "connect"} style={{ width: "100%", height: "100%", position: "relative" }}>
-    <Canvas events={connectedCanvasEvents}
+    <Canvas events={editorCanvasEvents}
       tabIndex={0}
       aria-label="Home editor canvas"
       onPointerDownCapture={(event) => {
