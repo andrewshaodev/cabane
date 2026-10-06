@@ -1,8 +1,11 @@
 # Verification, delivery, and known limits
 
-The persisted contract is tracked by `docs/ha-contract.json` and checked by
-`verify:ha-contract` inside `verify:fast`. Contract changes require a revision and
-compatibility notes. The GitHub `Home Assistant contract release` workflow checks
+The persisted contract is explicitly defined by `docs/ha-compatibility.json`,
+with release revisions in `docs/ha-contract.json`, and checked by
+`verify:ha-contract` inside `verify:fast`. Portable field/type changes require a reviewed manifest snapshot; compatibility
+changes require a revision and upgrade notes. Rendering/UI and catalog model
+additions/deletions do not trigger automatic releases. Behavioral validation and
+migration changes require an explicit semantic revision. The GitHub `Home Assistant contract release` workflow checks
 PRs and publishes a verified matching integration patch release after a push to
 main, using its scoped deploy key. See [contract releases](../ha-contract-releases.md)
 for the source coverage, Codex reminder hook, credential and retry behavior.
