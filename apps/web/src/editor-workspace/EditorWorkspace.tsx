@@ -12,7 +12,7 @@ import { EditorModeIntroduction } from "../editor-chrome/EditorModeIntroduction"
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { FloorPicker, addTopFloor, renameFloor, removeTopFloor, setFloorHeight } from "@cabane/engine";
 import { StairDetails } from "../editor-floors/StairDetails";
-import { FloorManagementDialog } from "../editor-floors";
+import { FloorManagementDialog, ConstructFloorControls } from "../editor-floors";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
 
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -145,6 +145,14 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   }, []);
   useEffect(() => { if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null); }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
+  const floorControlsDisabled = editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+  const addFloorAbove = () => {
+    const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
+    commit(next);
+    floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
+    constructEditor.replaceFloor(next.project.floors.at(-1)!);
+    furnishingEditor.replaceItems([]);
+  };
   return ((
     <main className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`} data-editor-mode={shortcutsMode ? "shortcuts" : mode}>
       {!shortcutsMode && <HomeEditorScene reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
@@ -162,14 +170,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       <div className="editor-floor-controls" inert={publishOpen || previewOpen}>
         <FloorPicker floors={snapshot.project.floors} selectedId={activeFloorId}
-          disabled={editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog)} onSelect={(id) => floorNavigation.selectFloor(id)}
-          onAdd={mode === "construct" ? () => {
-            const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
-            commit(next);
-            floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
-            constructEditor.replaceFloor(next.project.floors.at(-1)!);
-            furnishingEditor.replaceItems([]);
-          } : undefined}
+          disabled={floorControlsDisabled} onSelect={(id) => floorNavigation.selectFloor(id)}
+          onAdd={mode === "construct" ? addFloorAbove : undefined}
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
           onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
             ? () => setFloorDialog("remove") : undefined} />
@@ -215,6 +217,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             </button>}
           </div>
         </div>
+        {!shortcutsMode && mode === "construct" && <ConstructFloorControls
+          floors={snapshot.project.floors} selectedId={activeFloorId} disabled={floorControlsDisabled}
+          onSelect={id => floorNavigation.selectFloor(id)} onAdd={addFloorAbove}
+          onSettings={() => setFloorDialog("rename")} />}
         <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
         {shortcutsMode && <div className="shortcuts-guide">
           <h3>Add a shortcut</h3>

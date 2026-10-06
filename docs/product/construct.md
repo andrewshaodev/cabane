@@ -113,6 +113,13 @@ Construct supports adding above, renaming, changing floor height, and removing
 only the top floor with confirmation and undo. Ground cannot be removed.
 Reordering, duplication, basements, and non-straight stairs remain excluded.
 
+A compact row above the Construct sidebar introduction keeps the current floor
+visible independently of the active tool. Its dropdown lists floors from top to
+bottom and ends with “Add floor above…”, which creates and selects an empty top
+floor. The adjacent Floor settings icon opens the existing name and floor-height
+dialog. The row shares navigation, edit locks, and undo history with the retained
+corner floor picker; adding or switching does not copy rooms or furnishings.
+
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 
 

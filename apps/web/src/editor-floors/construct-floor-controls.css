@@ -1,0 +1,19 @@
+.construct-floor-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+}
+.construct-floor-controls select {
+  flex: 1;
+  min-width: 0;
+  min-height: 37px;
+  padding: 7px 10px;
+  border: 1px solid var(--editor-line);
+  border-radius: 7px;
+  color: var(--preview-ink);
+  background: #faf6ef;
+  font: 500 var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif;
+}
+.construct-floor-controls select:disabled { opacity: .45; cursor: not-allowed; }
+.construct-floor-controls .editor-button { flex: none; padding: 9px; }

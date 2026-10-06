@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright-core';
+import { startFixtureServer, serverOrigin } from './fixture-server.mjs';
+const server = await startFixtureServer({ port: 4193 });
+let browser;
+try {
+  browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-angle=swiftshader'] });
+  const page = await browser.newPage({ viewport: { width: 1400, height: 1000 } });
+  page.setDefaultTimeout(10000);
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto(`${serverOrigin(server)}/tests/multiple-floor-editor-harness.html`);
+  const select = page.getByRole('combobox', { name: 'Current floor', exact: true });
+  await select.waitFor();
+  const initial = await page.evaluate(() => window.readFixtureProject());
+  await select.selectOption(initial.floors[1].id);
+  await page.getByRole('button', { name: 'Floor settings', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Floor name' }).fill('Upstairs');
+  await page.getByRole('button', { name: 'Save floor', exact: true }).click();
+  await page.waitForFunction(async () => (await window.readFixtureProject()).floors[1].name === 'Upstairs');
+  await select.selectOption('');
+  const addedResult = await page.waitForFunction(async () => {
+    const project = await window.readFixtureProject();
+    return project.floors.length === 4 ? project : null;
+  });
+  const added = await addedResult.jsonValue();
+  assert.equal(await select.inputValue(), added.floors.at(-1).id, 'adding selects the new floor, never the action option');
+  assert.deepEqual(added.floors.slice(0, 3).map(f => f.id), initial.floors.map(f => f.id));
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await page.waitForFunction(async () => (await window.readFixtureProject()).floors.length === 3);
+  const restoredFloor = await select.inputValue();
+  assert.ok(initial.floors.some(f => f.id === restoredFloor), 'undo returns to an existing floor');
+  await select.selectOption(initial.floors[0].id);
+  await page.screenshot({ path: '/tmp/cabane-floor-sidebar.png' });
+  await page.setViewportSize({ width: 900, height: 800 });
+  assert.equal(await select.isVisible(), true);
+  const row = await page.locator('.construct-floor-controls').boundingBox();
+  const settings = await page.getByRole('button', { name: 'Floor settings', exact: true }).boundingBox();
+  assert.ok(settings.x + settings.width <= row.x + row.width + 1, 'settings fits beside selector');
+  assert.deepEqual(errors, []);
+  console.log('Floor sidebar: switching, settings, adding, undo, and compact layout passed.');
+} finally { await browser?.close(); await server.close(); }
