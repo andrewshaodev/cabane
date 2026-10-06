@@ -9,10 +9,12 @@ export function DoorFrame({
   wall,
   width,
   height,
+  color = "#d8d2c6",
 }: {
   wall: WallSpec;
   width: number;
   height: number;
+  color?: string;
 }) {
   return (
     <>
@@ -26,7 +28,7 @@ export function DoorFrame({
           <boxGeometry
             args={[itemWidth, itemHeight, wall.thicknessMeters + DOOR_FRAME_EXTRA_DEPTH_METERS]}
           />
-          <ToonMaterial color="#d8d2c6" />
+          <ToonMaterial color={color} />
           <Outlines color="#676965" thickness={0.006} screenspace={false} />
         </mesh>
       ))}

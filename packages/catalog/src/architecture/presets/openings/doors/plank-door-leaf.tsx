@@ -10,6 +10,7 @@ export function PlankDoorLeaf({
   height,
   handleSide,
   finish,
+  color,
   railHangers = true,
   depthScale = 1,
 }: {
@@ -17,12 +18,13 @@ export function PlankDoorLeaf({
   height: number;
   handleSide: -1 | 1;
   finish: DoorSpec["finish"];
+  color?: string;
   railHangers?: boolean;
   depthScale?: number;
 }) {
   const white = finish === "white";
-  const wood = white ? "#e6e3dc" : "#85583b";
-  const woodLight = white ? "#f1f0eb" : "#9c6b49";
+  const wood = color ?? (white ? "#e6e3dc" : "#85583b");
+  const woodLight = color ?? (white ? "#f1f0eb" : "#9c6b49");
   const woodDark = white ? "#bdbbb5" : "#68432e";
   const innerWidth = Math.max(0.02, width - Math.min(0.12, width * 0.3));
   const stileWidth = Math.min(0.1, width * 0.22);

@@ -160,6 +160,7 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
           "operation",
           "variant",
           "finish",
+          "color",
           "leafCount",
           "hingeSide",
           "openingSide",
@@ -168,7 +169,16 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
           "frontSide",
         ]
       : candidate.kind === "window"
-        ? ["operation", "variant", "panelCount", "glazing", "muntins", "hingeSide", "openingSide"]
+        ? [
+            "operation",
+            "variant",
+            "panelCount",
+            "glazing",
+            "muntins",
+            "hingeSide",
+            "openingSide",
+            "color",
+          ]
         : candidate.kind === "passage"
           ? ["variant", "archRiseMeters"]
           : [];
@@ -184,6 +194,16 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
     finite(candidate[key], `${path}.${key}`, issues);
   }
   if (candidate.kind === "door" || candidate.kind === "window") {
+    if (
+      candidate.color !== undefined &&
+      (typeof candidate.color !== "string" || !/^#[0-9a-f]{6}$/i.test(candidate.color))
+    )
+      addProjectIssue(
+        issues,
+        "project.opening-color",
+        `${path}.color`,
+        "Choose a six-digit hex opening color.",
+      );
     for (const [key, allowed] of Object.entries({
       hingeSide: ["start", "end"],
       openingSide: ["left", "right"],

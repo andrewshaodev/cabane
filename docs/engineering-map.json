@@ -80,7 +80,7 @@
         "symbols": ["FloorSpec"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {

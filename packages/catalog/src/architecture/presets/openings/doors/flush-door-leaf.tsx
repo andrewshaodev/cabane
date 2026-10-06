@@ -4,12 +4,14 @@ export function FlushDoorLeaf({
   width,
   height,
   finish,
+  color,
   handleSide = 1,
   knob = false,
 }: {
   width: number;
   height: number;
   finish: DoorFinish;
+  color?: string;
   handleSide?: -1 | 1;
   knob?: boolean;
 }) {
@@ -17,7 +19,7 @@ export function FlushDoorLeaf({
   return (
     <group name="flush-door-leaf">
       <RoundedBox args={[width, height, 0.02]} radius={0.002} smoothness={2} castShadow>
-        <ToonMaterial color={finish === "white" ? "#e9e8e2" : "#b89a73"} />
+        <ToonMaterial color={color ?? (finish === "white" ? "#e9e8e2" : "#b89a73")} />
       </RoundedBox>
       {knob ? (
         <group

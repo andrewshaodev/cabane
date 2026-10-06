@@ -1,12 +1,14 @@
 import { ToonMaterial } from "@cabane/engine";
 export function RollUpDoorFrame({
   width,
+  color,
   height,
   depth,
   jambWidth,
   headerHeight,
 }: {
   width: number;
+  color?: string;
   height: number;
   depth: number;
   jambWidth: number;
@@ -17,12 +19,12 @@ export function RollUpDoorFrame({
       {[jambWidth / 2, width - jambWidth / 2].map((x) => (
         <mesh key={x} position={[x, height / 2, 0]} castShadow receiveShadow>
           <boxGeometry args={[jambWidth, height, depth]} />
-          <ToonMaterial color="#7d8581" />
+          <ToonMaterial color={color ?? "#7d8581"} />
         </mesh>
       ))}
       <mesh position={[width / 2, height - headerHeight / 2, 0]} castShadow receiveShadow>
         <boxGeometry args={[width - jambWidth * 2, headerHeight, depth]} />
-        <ToonMaterial color="#dddcd6" />
+        <ToonMaterial color={color ?? "#dddcd6"} />
       </mesh>
     </group>
   );

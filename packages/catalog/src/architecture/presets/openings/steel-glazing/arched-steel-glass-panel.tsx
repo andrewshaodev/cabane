@@ -7,10 +7,12 @@ export function ArchedSteelGlassPanel({
   width,
   height,
   privacy = false,
+  frameColor = "#292e2d",
 }: {
   width: number;
   height: number;
   privacy?: boolean;
+  frameColor?: string;
 }) {
   const arch = useMemo(() => {
     const radius = width * 0.4,
@@ -38,11 +40,11 @@ export function ArchedSteelGlassPanel({
         rows={1}
         privacy={privacy}
         frameDepth={0.045}
-        frameColor="#292e2d"
+        frameColor={frameColor}
       />
       <mesh name="steel-arch" position={[0, 0, -0.018]} castShadow>
         <extrudeGeometry args={[arch, { depth: 0.036, bevelEnabled: false, curveSegments: 32 }]} />
-        <ToonMaterial color="#292e2d" />
+        <ToonMaterial color={frameColor} />
       </mesh>
     </group>
   );

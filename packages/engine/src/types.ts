@@ -209,6 +209,8 @@ export interface OpeningCoverSlotSpec {
 }
 
 interface DoorBaseSpec extends OpeningBaseSpec {
+  /** Optional six-digit hex finish override; omission preserves the original palette. */
+  color?: string;
   /** Optional flush-front jamb overlap, capped by adjacent structural margins. */
   frontOverlayMeters?: number;
   /** Concealed door finish plane; independent of the swing side. */
@@ -261,6 +263,8 @@ export type WindowOperation = "fixed" | "casement";
 export type WindowVariant = "plain" | "muntined" | "steel-arched";
 
 export interface WindowSpec extends OpeningBaseSpec, OpeningOrientation {
+  /** Optional six-digit hex finish override; omission preserves the original palette. */
+  color?: string;
   kind: "window";
   operation: WindowOperation;
   variant: WindowVariant;

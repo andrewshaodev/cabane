@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { ArchedSteelGlassPanel } from "../steel-glazing";
 import { openingWorldPlacement, resolveOpeningOrientation } from "@cabane/engine";
 import type { WindowSpec } from "@cabane/engine";
@@ -49,6 +50,7 @@ export function WindowModel({
                     width={Math.max(0.08, panelWidth)}
                     height={opening.openingHeightMeters}
                     privacy={opening.glazing === "privacy"}
+                    {...omitUndefinedProperties({ frameColor: opening.color })}
                   />
                 ) : (
                   <FramedGlassPanel
@@ -57,6 +59,7 @@ export function WindowModel({
                     columns={columns}
                     rows={rows}
                     privacy={opening.glazing === "privacy"}
+                    {...omitUndefinedProperties({ frameColor: opening.color })}
                     frameDepth={opening.glazing === "privacy" ? 0.105 : 0.09}
                   />
                 )}
@@ -77,6 +80,7 @@ export function WindowModel({
         <OpeningFrameBox
           size={[placement.widthMeters + 0.08, 0.055, wall.thicknessMeters + 0.06]}
           position={[placement.widthMeters / 2, -opening.openingHeightMeters / 2 - 0.02, 0]}
+          {...omitUndefinedProperties({ color: opening.color })}
         />
       )}
     </group>

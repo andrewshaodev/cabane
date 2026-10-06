@@ -6,11 +6,74 @@ import { Box3, Vector3 } from "three";
 import { withModules } from "./test-server.mjs";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
-  const { ArchedSteelGlassPanel, DoorModel } = await load(
+  const { ArchedSteelGlassPanel, DoorModel, WindowModel } = await load(
     "/packages/catalog/src/architecture/index.ts",
   );
   const engine = await load("/packages/engine/src/index.ts");
   const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
+  test("opening colors survive portable parsing and recolor every door/window family with exact reset", async () => {
+    const project = structuredClone(ownerHomeProject);
+    const floor = project.floors[0];
+    const door = floor.openings.find(
+      (opening) => opening.kind === "door" && opening.operation === "hinged",
+    );
+    const window = floor.openings.find((opening) => opening.kind === "window");
+    door.color = window.color = "#325a84";
+    const parsed = engine.parseHomeProjectSchema(JSON.parse(JSON.stringify(project)));
+    assert.equal(parsed.valid, true, JSON.stringify(parsed.issues));
+    window.color = "red";
+    assert.equal(engine.parseHomeProjectSchema(project).valid, false);
+    delete window.color;
+    delete door.color;
+    const openings = [
+      ...[
+        "panel",
+        "panel-white-lever",
+        "concealed",
+        "flush",
+        "flush-knob",
+        "plank",
+        "french",
+        "full-glass",
+        "steel-arched",
+      ].map((variant) => ({ ...door, variant })),
+      { ...door, operation: "sliding", variant: "plank" },
+      { ...door, operation: "roll-up", variant: "slatted", leafCount: undefined },
+      ...["plain", "muntined", "steel-arched"].map((variant) => ({
+        ...window,
+        variant,
+        muntins: variant === "muntined" ? { columns: 2, rows: 2 } : undefined,
+      })),
+    ];
+    for (const opening of openings) {
+      const Component = opening.kind === "door" ? DoorModel : WindowModel;
+      const props = {
+        floor,
+        wall: floor.walls.find((wall) => wall.id === opening.wallId),
+        opening,
+        position: 0,
+        reducedMotion: true,
+      };
+      const renderer = await create(createElement(Component, props));
+      const colors = () => {
+        const found = [];
+        renderer.scene.instance.traverse((object) => {
+          if (object.isMesh && object.material?.type === "MeshToonMaterial")
+            found.push(object.material.color.getHexString());
+        });
+        return found.sort();
+      };
+      const original = colors();
+      await renderer.update(
+        createElement(Component, { ...props, opening: { ...opening, color: "#325a84" } }),
+      );
+      assert.ok(colors().includes("325a84"), opening.variant);
+      await renderer.update(createElement(Component, props));
+      assert.deepEqual(colors(), original, opening.variant);
+      await renderer.unmount();
+    }
+  });
+
   test("steel arched door and sidelight styles survive portable schema parsing", () => {
     const project = structuredClone(ownerHomeProject);
     const openings = project.floors.flatMap((floor) => floor.openings);

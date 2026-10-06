@@ -4,12 +4,14 @@ export function RollUpDoorSlats({
   clearHeight,
   travel,
   finish,
+  color,
   side,
 }: {
   width: number;
   clearHeight: number;
   travel: number;
   finish: "wood" | "white";
+  color?: string;
   side: number;
 }) {
   const count = Math.max(1, Math.ceil(clearHeight / 0.16));
@@ -26,13 +28,14 @@ export function RollUpDoorSlats({
             <boxGeometry args={[width, height, 0.045]} />
             <ToonMaterial
               color={
-                finish === "wood"
+                color ??
+                (finish === "wood"
                   ? index % 2
                     ? "#ba9365"
                     : "#ad8559"
                   : index % 2
                     ? "#e8e6df"
-                    : "#dddcd6"
+                    : "#dddcd6")
               }
             />
           </mesh>

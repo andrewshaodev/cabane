@@ -104,6 +104,7 @@ export function DoorModel({
         !flush &&
         !concealed && (
           <DoorFrame
+            {...omitUndefinedProperties({ color: opening.color })}
             wall={wall}
             width={placement.widthMeters}
             height={opening.openingHeightMeters}

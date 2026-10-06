@@ -290,3 +290,10 @@ neutral grout (and the checkerboard’s cream alternate tiles). Reset color rest
 the preset default. Optional six-digit hex `color` on these preset finishes survives
 history, draft reload, Save, duplication, and import/export; omitted color preserves
 existing projects. Patterns are generated in memory and rendered with toon materials.
+
+Selected doors and windows expose Finish color in Details, including garage,
+sliding, glass, and steel-arched designs. The optional six-digit hex `color`
+override paints the door leaf and frame or window frame/muntins; glass and
+hardware retain their original finishes. Reset color removes the override and
+restores the original multi-tone palette. Color follows ordinary opening
+history, autosave, Apply, and import/export. Passages have no color picker.

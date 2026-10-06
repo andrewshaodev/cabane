@@ -1,3 +1,4 @@
+import { OpeningColorControls } from "./OpeningColorControls";
 import { omitUndefinedProperties } from "@cabane/engine";
 import { doorConfiguration, doorFromConfiguration } from "@cabane/engine";
 import { DoorPresetPalette } from "./DoorPresetPalette";
@@ -40,6 +41,9 @@ export function OpeningProperties({
   );
   return (
     <>
+      {selectedOpening.kind !== "passage" && (
+        <OpeningColorControls opening={selectedOpening} onChange={editor.replaceSelectedOpening} />
+      )}
       <fieldset>
         <legend>Size</legend>
         <label>

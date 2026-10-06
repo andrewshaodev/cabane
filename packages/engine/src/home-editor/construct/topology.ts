@@ -262,6 +262,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
           ...(opening.hingeSide !== undefined ? { hingeSide: opening.hingeSide } : {}),
           ...(opening.openingSide !== undefined ? { openingSide: opening.openingSide } : {}),
           glazing: opening.glazing,
+          ...(opening.color !== undefined ? { color: opening.color } : {}),
           ...(opening.muntins ? { muntins: { ...opening.muntins } } : {}),
         },
       ];
