@@ -249,3 +249,7 @@ with different edge finishes retains the general interior finish.
 `DEFAULT_WALL_COLORS` is the public engine source for default exterior and interior
 wall colors. New homes, previews, geometry, roof infill and generation prompts
 reuse it; renderers honor the project palette and authored wall finishes.
+
+Interior walls ignore any stale exteriorColor metadata when resolving Auto edges;
+matching face colors still extend onto caps, while differing colors use the
+home interior palette. Explicit edgeColor continues to take precedence.

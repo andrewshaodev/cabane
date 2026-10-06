@@ -6,6 +6,18 @@ import { Color } from "three";
 import { withModules } from "./test-server.mjs";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
+  const { wallEdgeFinish } = await load(
+    "/packages/engine/src/architecture-geometry/wall-face-finish.ts",
+  );
+  test("interior Auto edges ignore stale exterior paint when sides differ", () => {
+    const wall = {
+      classification: "interior",
+      exteriorColor: "#ff0000",
+      faceColors: { left: "#aabbcc", right: "#334455" },
+    };
+    assert.equal(wallEdgeFinish(wall, "#112233"), "#112233");
+    assert.equal(wallEdgeFinish({ ...wall, edgeColor: "#445566" }, "#112233"), "#445566");
+  });
   const { buildArchitecturalWallGeometries } = await load(
     "/packages/engine/src/architecture-geometry.ts",
   );

@@ -120,7 +120,8 @@
       "terrain-landing.test.mjs",
       "validate-floor-cli.test.mjs",
       "wall-cap-fade.test.mjs",
-      "wall-edge-colors.test.mjs"
+      "wall-edge-colors.test.mjs",
+      "wall-face-colors-browser.test.mjs"
     ]
   },
   "runtime": {
