@@ -51,6 +51,7 @@ export function createCabanePanelElement(options: PanelOptions) {
     #container: HTMLElement;
     #portals: HTMLElement;
     #waiting: HTMLElement;
+    #resize = () => this.#measure();
 
     constructor() {
       super();
@@ -61,7 +62,7 @@ export function createCabanePanelElement(options: PanelOptions) {
       stylesheet.href = new URL("cabane-panel.css", options.assetBaseUrl).href;
       const style = document.createElement("style");
       style.textContent = `
-        :host { display:grid; grid-template-rows:48px minmax(0,1fr); height:100%; min-height:0; min-width:0; contain:layout paint; }
+        :host { display:grid; grid-template-rows:48px minmax(0,1fr); height:calc(100dvh - var(--cabane-panel-top, 0px) - var(--safe-area-inset-bottom, 0px)); min-height:0; min-width:0; contain:layout paint; }
         .panel-toolbar { display:flex; gap:12px; align-items:center; background:var(--app-header-background-color,#f4efe5); color:var(--app-header-text-color,#35433a); font:500 16px system-ui; padding:0 12px; border-bottom:1px solid #80808030; }
         .panel-toolbar button { display:grid; place-items:center; background:none; border:0; color:inherit; width:40px; height:40px; padding:8px; border-radius:8px; }
         .panel-toolbar svg { width:24px; height:24px; fill:currentColor; }
@@ -123,6 +124,7 @@ export function createCabanePanelElement(options: PanelOptions) {
     set panel(_value: unknown) {}
 
     connectedCallback() {
+      this.ownerDocument.defaultView?.addEventListener("resize", this.#resize);
       this.#releaseFonts ??= retainFonts(
         this.ownerDocument,
         new URL("cabane-fonts.css", options.assetBaseUrl).href,
@@ -135,6 +137,7 @@ export function createCabanePanelElement(options: PanelOptions) {
       this.#render();
     }
     disconnectedCallback() {
+      this.ownerDocument.defaultView?.removeEventListener("resize", this.#resize);
       this.#application?.dispose();
       this.#application = null;
       this.#observer?.disconnect();
@@ -144,6 +147,12 @@ export function createCabanePanelElement(options: PanelOptions) {
       this.#portals.replaceChildren();
     }
     #measure() {
+      // HA's custom-panel wrapper has auto height, so percentage height collapses.
+      // Stay in normal flow and fill the viewport below host chrome and safe areas.
+      this.style.setProperty(
+        "--cabane-panel-top",
+        `${Math.max(0, this.getBoundingClientRect().top)}px`,
+      );
       const { width, height } = this.#content.getBoundingClientRect();
       if (width > 0) this.style.setProperty("--cabane-panel-width", `${width}px`);
       if (height > 0) this.style.setProperty("--cabane-panel-height", `${height}px`);

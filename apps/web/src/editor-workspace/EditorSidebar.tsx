@@ -1,3 +1,5 @@
+import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
+import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
@@ -98,6 +100,7 @@ export function EditorSidebar({
   floorPaintTarget,
   unsettled,
   onWorkspaces,
+  workspace,
   runtime,
   reference,
   floorFinish,
@@ -337,6 +340,21 @@ export function EditorSidebar({
             onBrowse={setCatalogBrowsing}
             error={catalogError}
             onChoose={addCatalogItem}
+            customModels={
+              <CustomModelLibrary
+                workspace={workspace}
+                disabled={editingLocked || unsettled}
+                onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
+              />
+            }
+            renderCustomModel={(entry) => (
+              <CustomModelCard
+                workspace={workspace}
+                entry={entry}
+                disabled={editingLocked || unsettled}
+                onChoose={() => addCatalogItem(entry)}
+              />
+            )}
           />
         </div>
       </aside>

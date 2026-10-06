@@ -115,21 +115,36 @@ const junctionEndpointArmPolygon = (
   ];
 };
 
-export const junctionExteriorMiterPolygon = (
+export const junctionCornerMiterPolygon = (
   junction: WallJunctionSpec,
   activeWalls: readonly WallSpec[],
   floor: WallPlanFloor,
 ): ClippingPolygon | null => {
   if (junction.wallIds.length !== 2) return null;
-  const walls = activeWalls.filter(
-    (wall) => junction.wallIds.includes(wall.id) && wall.classification === "exterior",
-  );
+  const walls = activeWalls.filter((wall) => junction.wallIds.includes(wall.id));
   if (walls.length !== 2) return null;
   const [left, right] = walls;
   const leftFrame = wallFrame(left, floor);
   const rightFrame = wallFrame(right, floor);
-  const leftNormal = wallExteriorNormal(left, floor);
-  const rightNormal = wallExteriorNormal(right, floor);
+  let leftNormal = wallExteriorNormal(left, floor);
+  let rightNormal = wallExteriorNormal(right, floor);
+  if (left.classification !== "exterior" || right.classification !== "exterior") {
+    // Interior endpoint corners need the same outside quadrant as facade corners.
+    // Restrict this fallback to right angles; preserve existing angled-wall behavior.
+    const outward = (wall: WallSpec, direction: Horizontal): Horizontal | null => {
+      const atStart =
+        Math.hypot(...wall.from.map((value, axis) => value - junction.at[axis])) <= EPSILON;
+      const atEnd =
+        Math.hypot(...wall.to.map((value, axis) => value - junction.at[axis])) <= EPSILON;
+      return atStart ? direction : atEnd ? [-direction[0], -direction[1]] : null;
+    };
+    const a = outward(left, leftFrame.direction);
+    const b = outward(right, rightFrame.direction);
+    if (!a || !b || Math.abs(a[0] * b[0] + a[1] * b[1]) > EPSILON) return null;
+    const sign = Math.sign(a[0] * b[1] - a[1] * b[0]);
+    leftNormal = [sign * a[1], -sign * a[0]];
+    rightNormal = [-sign * b[1], sign * b[0]];
+  }
   if (!leftNormal || !rightNormal) return null;
   const denominator =
     leftFrame.direction[0] * rightFrame.direction[1] -
@@ -171,7 +186,7 @@ export const wallSolidFootprintPolygons = (
 ): ClippingPolygon[] => [
   ...activeWalls.map((wall) => orientedWallPolygon(wall, floor)),
   ...floor.wallJunctions.flatMap((junction) => {
-    const miter = junctionExteriorMiterPolygon(junction, activeWalls, floor);
+    const miter = junctionCornerMiterPolygon(junction, activeWalls, floor);
     return miter ? [miter] : [];
   }),
 ];
@@ -243,3 +258,16 @@ export const createWallAssemblyPointTest = (wall: WallSpec, floor: FloorSpec) =>
   return (point: Horizontal) =>
     pointCoveredByWall(point, wall, frame) || arms.some((arm) => pointInsideRing(point, arm));
 };
+
+/** Footprints used to assign finishes to a wall and its junction arms. */
+export const wallAssemblyFootprintPolygons = (
+  wall: WallSpec,
+  floor: FloorSpec,
+): ClippingPolygon[] => [
+  orientedWallPolygon(wall, floor),
+  ...floor.wallJunctions.flatMap((junction) => {
+    if (!junction.wallIds.includes(wall.id)) return [];
+    const arm = junctionEndpointArmPolygon(wall, junction, floor);
+    return arm ? [arm] : [];
+  }),
+];

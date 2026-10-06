@@ -1,6 +1,6 @@
 import { EditorButton } from "../../../editor-chrome/EditorButton";
 import { ROOM_TYPES, type DeviceModelRegistry, type FurnishingModelRegistry } from "@cabane/engine";
-import { useMemo, useRef } from "react";
+import { Fragment, useMemo, useRef, type ReactNode } from "react";
 import { EditorIcon, type EditorIconName } from "../../../editor-chrome/EditorIcon";
 import { catalogEntries, filterCatalog, type CatalogEntry, type CatalogRoom } from "./catalog";
 import { ModelThumbnail, ModelThumbnailRenderer } from "./ModelThumbnailRenderer";
@@ -9,6 +9,7 @@ import "./arrange-catalog.css";
 const roomIcons: Record<CatalogRoom, EditorIconName> = {
   all: "grid",
   devices: "devices",
+  "my-models": "cube",
   "living-room": "furnish",
   kitchen: "kitchen",
   bedroom: "bed",
@@ -21,7 +22,11 @@ const roomIcons: Record<CatalogRoom, EditorIconName> = {
   outdoor: "outdoor",
 };
 const rooms = [{ id: "all" as const, label: "All items" }, ...ROOM_TYPES];
-const filters = [...rooms, { id: "devices" as const, label: "Devices" }];
+const filters = [
+  ...rooms,
+  { id: "devices" as const, label: "Devices" },
+  { id: "my-models" as const, label: "My models" },
+];
 
 export interface CatalogBrowsing {
   room: CatalogRoom;
@@ -36,8 +41,12 @@ export function ArrangeCatalog({
   error,
   onChoose,
   enabled = true,
+  customModels,
+  renderCustomModel,
 }: {
   enabled?: boolean;
+  customModels?: ReactNode;
+  renderCustomModel?: (entry: CatalogEntry) => ReactNode;
   furnishingModels: FurnishingModelRegistry;
   deviceModels: DeviceModelRegistry;
   browsing: CatalogBrowsing;
@@ -82,6 +91,14 @@ export function ArrangeCatalog({
           <div className="catalog-device-filter">
             <button
               type="button"
+              aria-pressed={browsing.room === "my-models"}
+              onClick={() => chooseFilter("my-models")}
+            >
+              <EditorIcon name="cube" />
+              <span>My models</span>
+            </button>
+            <button
+              type="button"
               aria-pressed={browsing.room === "devices"}
               onClick={() => chooseFilter("devices")}
             >
@@ -104,6 +121,7 @@ export function ArrangeCatalog({
               ))}
             </select>
           </label>
+          {browsing.room === "my-models" && customModels}
           <div className="catalog-search">
             <EditorIcon name="search" />
             <input
@@ -125,38 +143,46 @@ export function ArrangeCatalog({
           </div>
           <ModelThumbnailRenderer scrollRoot={scrollRoot} enabled={enabled}>
             <div className="catalog-grid" ref={scrollRoot} aria-label={`${filterLabel} catalog`}>
-              {results.map((entry) => (
-                <button
-                  type="button"
-                  className="catalog-card"
-                  key={entry.key}
-                  aria-label={`Add ${entry.definition.label}`}
-                  disabled={
-                    entry.kind === "device" && entry.definition.supportedDomains.length === 0
-                  }
-                  onClick={() => onChoose(entry)}
-                >
-                  <ModelThumbnail entry={entry} />
-                  <strong>{entry.definition.label}</strong>
-                  <small>{entry.kind === "device" ? "Device" : "Furniture"}</small>
-                </button>
-              ))}
+              {results.map((entry) =>
+                browsing.room === "my-models" && renderCustomModel ? (
+                  <Fragment key={entry.key}>{renderCustomModel(entry)}</Fragment>
+                ) : (
+                  <button
+                    type="button"
+                    className="catalog-card"
+                    key={entry.key}
+                    aria-label={`Add ${entry.definition.label}`}
+                    disabled={
+                      entry.kind === "device" && entry.definition.supportedDomains.length === 0
+                    }
+                    onClick={() => onChoose(entry)}
+                  >
+                    <ModelThumbnail entry={entry} />
+                    <strong>{entry.definition.label}</strong>
+                    <small>{entry.kind === "device" ? "Device" : "Furniture"}</small>
+                  </button>
+                ),
+              )}
               {results.length === 0 && (
                 <div className="catalog-empty" role="status">
                   <p>
                     {browsing.query.trim()
                       ? "No matching items"
-                      : "No items for this room type yet"}
+                      : browsing.room === "my-models"
+                        ? "Your models will appear here. Import one or create one with your AI."
+                        : "No items for this room type yet"}
                   </p>
-                  <EditorButton
-                    onClick={() =>
-                      browsing.query.trim()
-                        ? onBrowse({ ...browsing, query: "" })
-                        : chooseFilter("all")
-                    }
-                  >
-                    {browsing.query.trim() ? "Clear search" : "Browse all items"}
-                  </EditorButton>
+                  {(browsing.query.trim() || browsing.room !== "my-models") && (
+                    <EditorButton
+                      onClick={() =>
+                        browsing.query.trim()
+                          ? onBrowse({ ...browsing, query: "" })
+                          : chooseFilter("all")
+                      }
+                    >
+                      {browsing.query.trim() ? "Clear search" : "Browse all items"}
+                    </EditorButton>
+                  )}
                 </div>
               )}
             </div>

@@ -62,6 +62,21 @@ await withModules(async (load) => {
     assert.equal(engine.validateHomeProject(input, registries).valid, true);
   });
 
+  test("colored ceramic finishes survive portable JSON and reject invalid colors", () => {
+    for (const preset of ["square-tile", "subway-tile", "checkerboard-tile"]) {
+      const input = project();
+      const finish = { kind: "preset", preset, color: "#237a91" };
+      input.floors[0].rooms[0].floorFinish = finish;
+      const restored = engine.parseHomeProjectSchema(JSON.parse(JSON.stringify(input)));
+      assert.equal(restored.valid, true);
+      assert.deepEqual(restored.project.floors[0].rooms[0].floorFinish, finish);
+      assert.equal(engine.validateHomeProject(input, registries).valid, true);
+      input.floors[0].rooms[0].floorFinish.color = "invalid";
+      assert.equal(engine.parseHomeProjectSchema(input).valid, false);
+      assert.equal(engine.validateHomeProject(input, registries).valid, false);
+    }
+  });
+
   test("strict schema rejects malformed discriminators and unknown keys", () => {
     const badKind = project();
     badKind.floors[0].rooms[0].floorFinish = { kind: "wood" };
@@ -285,8 +300,13 @@ await withModules(async (load) => {
       assert.equal(canvasCount, engine.FLOOR_PATTERN_PRESET_IDS.length);
       assert.ok(resolved.every(Boolean));
       assert.equal(new Set(resolved).size, engine.FLOOR_PATTERN_PRESET_IDS.length);
+      const colored = textureSet.get("square-tile", "#237a91");
+      assert.ok(colored);
+      assert.equal(textureSet.get("square-tile", "#237a91"), colored);
+      assert.notEqual(colored, textureSet.get("square-tile"));
+      assert.equal(canvasCount, engine.FLOOR_PATTERN_PRESET_IDS.length + 1);
       textureSet.dispose();
-      assert.equal(disposeCount, engine.FLOOR_PATTERN_PRESET_IDS.length);
+      assert.equal(disposeCount, engine.FLOOR_PATTERN_PRESET_IDS.length + 1);
     } finally {
       CanvasTexture.prototype.dispose = originalDispose;
     }

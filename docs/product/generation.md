@@ -19,6 +19,13 @@ content remains code-native/procedural and uses the public toon vocabulary.
 Stable catalog models are preferred where they fit; bespoke reusable geometry
 belongs to domain-specific home extensions.
 
+The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) is a distinct standalone authoring
+route for users of hosted Cabane. It produces a standard GLB, recommends the
+Cabane aesthetic, and respects an explicitly requested alternative style. It
+requires no repository access or household HA information. Its import exception
+does not change the procedural policy for repository home generation; see
+[personal models](personal-models.md).
+
 Generation does not authenticate to or inspect HA. Household mapping is a later,
 explicit authenticated browser activity. Source plans/photos, credentials,
 registry exports, HA histories, camera images, and private household IDs must

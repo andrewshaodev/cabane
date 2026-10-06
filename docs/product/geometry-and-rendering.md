@@ -64,9 +64,15 @@ colors and the preset IDs exported by `FLOOR_PATTERN_PRESET_IDS`, including wood
 stone/tile, dirt, bark, and outdoor stone treatments. Ordered room/ground zones
 compose finishes; implementation belongs to the engine finish modules.
 
-Visible home content uses procedural geometry, toon materials, and restrained
+Native and repository-generated home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable
 product. Shared lighting, fading, and outline behavior stay engine-owned.
+Personal GLB instances preserve original materials and embedded textures; their
+foreground pixels are excluded from compulsory contours. Imported resources are
+owned, shared, and disposed by the dedicated import module and use ordinary
+draws. Floor imports add a simple envelope collider. The exception does not
+permit asset loading in native models or generated home extensions. See
+[personal models](personal-models.md).
 Physical lights render only on the active floor. On that floor, supported emitters
 stay mounted at zero intensity while off or unavailable. Device and dashboard
 light updates change uniforms without changing shader light counts, avoiding
@@ -111,7 +117,7 @@ and without HA bindings; other unbound devices show their disconnected state.
 Garden lanterns use a short, warm inverse-square falloff to softly illuminate
 nearby ground in night mode.
 
-Walk collision derives from walls, openings, junctions, and pools. Navigation
+Walk collision derives from walls, openings, junctions, pools, and boundaries. Boundary styles (including open fences) use the existing continuous hedge segment collider at their authored width; visible rail gaps do not create walk apertures. Navigation
 derives optional clear spawn points and checks room connectivity; rooms without
 a safe spawn (such as small cupboards) do not produce a validation diagnostic.
 Walk entry still requires a safe spawn and skips rooms without one. Navigation
@@ -222,7 +228,24 @@ including translated and scaled plans. Luminaires remain unshadowed.
 
 Wall caps and opening reveals use the optional `WallSpec.edgeColor` override.
 When absent, matching authored left/right colors extend onto these surfaces;
-otherwise the existing general wall finish remains. Standalone and batched wall
+otherwise an authored exterior color is used, falling back to the general interior wall finish. Standalone and batched wall
 rendering share this rule. Shared horizontal junction surfaces use the general
 finish when their participating walls disagree, without changing geometry,
 collision, shadows or fade ownership.
+
+Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
+
+Construct’s floor palette includes Square tile, Rectangular tile (staggered), and
+Checkerboard tile. Their Tile color picker changes the ceramic color while keeping
+neutral grout (and the checkerboard’s cream alternate tiles). Reset color restores
+the preset default. Optional six-digit hex `color` on these preset finishes survives
+history, draft reload, Save, duplication, and import/export; omitted color preserves
+existing projects. Patterns are generated in memory and rendered with toon materials.
+
+Horizontal caps are partitioned by finish ownership before triangulation so adjacent
+wall colors do not bleed across their boundary. Overlapping junction ownership
+with different edge finishes retains the general interior finish.
+
+`DEFAULT_WALL_COLORS` is the public engine source for default exterior and interior
+wall colors. New homes, previews, geometry, roof infill and generation prompts
+reuse it; renderers honor the project palette and authored wall finishes.

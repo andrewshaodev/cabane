@@ -157,6 +157,9 @@ function OrbitCameraRig({
     },
     [controlsRef],
   );
+  // MapControls reconnects its pointer listeners when onStart changes. Keep the
+  // callback stable so dashboard updates cannot strand an active touch/drag.
+  const interruptNavigation = useCallback(() => interruptRoomFlight.current?.(), []);
   const { width, height } = useThree((state) => state.size);
   const defaultFraming = useMemo(() => {
     const bounds = worldBoundsForFloorScene(floor);
@@ -230,7 +233,7 @@ function OrbitCameraRig({
       <OrbitDoubleTapZoom />
       <MapControls
         ref={attachControls}
-        onStart={() => interruptRoomFlight.current?.()}
+        onStart={interruptNavigation}
         makeDefault
         target={framing.target}
         enablePan

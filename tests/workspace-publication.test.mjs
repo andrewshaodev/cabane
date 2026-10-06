@@ -109,7 +109,7 @@ const transactionalIndexedDb = () => {
     },
     open: (name, version) => {
       assert.equal(name, "cabane-projects-v2");
-      assert.equal(version, 3);
+      assert.equal(version, 4);
       const request = { result: database, error: null };
       queueMicrotask(() => {
         if (!created.size) request.onupgradeneeded?.();

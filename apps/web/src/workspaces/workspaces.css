@@ -321,6 +321,23 @@
   cursor: pointer;
 }
 
+.workspace-model-assets-error {
+  display: grid;
+  gap: 12px;
+}
+
+.workspace-model-assets-error > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.workspace-model-assets-error a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
 .workspace-preview {
   display: block;
   width: calc(100% + 56px);

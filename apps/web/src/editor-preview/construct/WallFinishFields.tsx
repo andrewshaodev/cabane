@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "@cabane/engine";
 import type { EditorWall } from "@cabane/engine";
 import type { ConstructEditorController } from "./useConstructEditor";
 import { DebouncedColorInput } from "./DebouncedColorInput";
@@ -38,7 +39,9 @@ export function WallFinishFields({
               edgeColor:
                 event.target.value === "auto"
                   ? undefined
-                  : (wall.faceColors?.left ?? wall.faceColors?.right ?? "#e4e0d8"),
+                  : wall.faceColors?.left && wall.faceColors.left === wall.faceColors.right
+                    ? wall.faceColors.left
+                    : (wall.exteriorColor ?? DEFAULT_WALL_COLORS.interior),
             })
           }
         >

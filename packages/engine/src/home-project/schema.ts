@@ -1,63 +1,13 @@
+import { entitySlot } from "./schema-entity-slot";
+import { sceneItem } from "./schema-scene-item";
+import { validateCustomModels } from "../imported-models/model-schema";
 import { keys, record, array, string, finite, point, polygon } from "./schema-json-values";
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
-import { FLOOR_PATTERN_PRESET_IDS, type DeviceDomain } from "../types";
+import { floorFinish } from "./schema-floor-finish";
 import type { HomeProject, LegacyHomeProject } from "./types";
 import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
-
-const DEVICE_DOMAINS = new Set<DeviceDomain>([
-  "light",
-  "switch",
-  "input_boolean",
-  "climate",
-  "cover",
-  "fan",
-  "media_player",
-  "humidifier",
-  "water_heater",
-  "vacuum",
-  "lock",
-  "alarm_control_panel",
-  "valve",
-  "siren",
-  "select",
-  "number",
-  "button",
-  "camera",
-  "sensor",
-  "binary_sensor",
-]);
-const FLOOR_PRESETS = new Set<string>(FLOOR_PATTERN_PRESET_IDS);
-
-const floorFinish = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  if (candidate.kind === "solid") {
-    keys(candidate, ["kind", "color"], path, issues);
-    string(candidate.color, `${path}.color`, issues);
-    return;
-  }
-  if (candidate.kind === "preset") {
-    keys(candidate, ["kind", "preset"], path, issues);
-    if (!FLOOR_PRESETS.has(String(candidate.preset))) {
-      addProjectIssue(
-        issues,
-        "project.floor-preset",
-        `${path}.preset`,
-        "Floor preset is not supported.",
-      );
-    }
-    return;
-  }
-  keys(candidate, ["kind"], path, issues);
-  addProjectIssue(
-    issues,
-    "project.floor-finish-kind",
-    `${path}.kind`,
-    "Floor finish kind must be solid or preset.",
-  );
-};
 
 const floorZone = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   const candidate = record(value, path, issues);
@@ -70,93 +20,6 @@ const floorZone = (value: unknown, path: string, issues: HomeProjectIssue[]) => 
 
 const stringArray = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   array(value, path, issues)?.forEach((entry, index) => string(entry, `${path}[${index}]`, issues));
-};
-
-const entitySlot = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const slot = record(value, path, issues);
-  if (!slot) return;
-  keys(
-    slot,
-    [
-      "id",
-      "compatibleDomains",
-      "compatibleDeviceClasses",
-      "required",
-      "autoMap",
-      "deviceRole",
-      "presentation",
-      "sceneLight",
-    ],
-    path,
-    issues,
-  );
-  string(slot.id, `${path}.id`, issues);
-  array(slot.compatibleDomains, `${path}.compatibleDomains`, issues)?.forEach((domain, index) => {
-    if (!DEVICE_DOMAINS.has(domain as DeviceDomain)) {
-      addProjectIssue(
-        issues,
-        "project.slot-domain",
-        `${path}.compatibleDomains[${index}]`,
-        "Entity slot domain is not supported.",
-      );
-    }
-  });
-  if (slot.compatibleDeviceClasses !== undefined) {
-    stringArray(slot.compatibleDeviceClasses, `${path}.compatibleDeviceClasses`, issues);
-  }
-  if (typeof slot.required !== "boolean") {
-    addProjectIssue(
-      issues,
-      "project.boolean",
-      `${path}.required`,
-      "Slot required must be boolean.",
-    );
-  }
-  if (!["unique-compatible", "manual"].includes(String(slot.autoMap))) {
-    addProjectIssue(issues, "project.slot-auto-map", `${path}.autoMap`, "Slot autoMap is invalid.");
-  }
-  if (
-    slot.deviceRole !== undefined &&
-    !["primary", "secondary"].includes(typeof slot.deviceRole === "string" ? slot.deviceRole : "")
-  ) {
-    addProjectIssue(
-      issues,
-      "project.slot-role",
-      `${path}.deviceRole`,
-      "Slot deviceRole is invalid.",
-    );
-  }
-  const presentation = record(slot.presentation, `${path}.presentation`, issues);
-  if (presentation) {
-    keys(presentation, ["label", "dashboardRole"], `${path}.presentation`, issues);
-    string(presentation.label, `${path}.presentation.label`, issues);
-    if (
-      !["primary", "secondary", "diagnostic", "hidden"].includes(String(presentation.dashboardRole))
-    ) {
-      addProjectIssue(
-        issues,
-        "project.slot-dashboard-role",
-        `${path}.presentation.dashboardRole`,
-        "Slot dashboardRole is invalid.",
-      );
-    }
-  }
-  if (slot.sceneLight !== undefined) {
-    const light = record(slot.sceneLight, `${path}.sceneLight`, issues);
-    if (light) {
-      keys(
-        light,
-        ["at", "elevationMeters", "color", "maxIntensity", "distance"],
-        `${path}.sceneLight`,
-        issues,
-      );
-      point(light.at, `${path}.sceneLight.at`, issues);
-      finite(light.elevationMeters, `${path}.sceneLight.elevationMeters`, issues);
-      string(light.color, `${path}.sceneLight.color`, issues);
-      finite(light.maxIntensity, `${path}.sceneLight.maxIntensity`, issues);
-      finite(light.distance, `${path}.sceneLight.distance`, issues);
-    }
-  }
 };
 
 const contactSlot = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
@@ -299,13 +162,25 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
           "operation",
           "variant",
           "finish",
+          "color",
           "leafCount",
           "hingeSide",
           "openingSide",
           "slideDirection",
+          "frontOverlayMeters",
+          "frontSide",
         ]
       : candidate.kind === "window"
-        ? ["operation", "variant", "panelCount", "glazing", "muntins", "hingeSide", "openingSide"]
+        ? [
+            "operation",
+            "variant",
+            "panelCount",
+            "glazing",
+            "muntins",
+            "hingeSide",
+            "openingSide",
+            "color",
+          ]
         : candidate.kind === "passage"
           ? ["variant", "archRiseMeters"]
           : [];
@@ -321,6 +196,16 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
     finite(candidate[key], `${path}.${key}`, issues);
   }
   if (candidate.kind === "door" || candidate.kind === "window") {
+    if (
+      candidate.color !== undefined &&
+      (typeof candidate.color !== "string" || !/^#[0-9a-f]{6}$/i.test(candidate.color))
+    )
+      addProjectIssue(
+        issues,
+        "project.opening-color",
+        `${path}.color`,
+        "Choose a six-digit hex opening color.",
+      );
     for (const [key, allowed] of Object.entries({
       hingeSide: ["start", "end"],
       openingSide: ["left", "right"],
@@ -350,7 +235,7 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
         `${path}.operation`,
         "Window operation is invalid.",
       );
-    if (!["plain", "muntined"].includes(String(candidate.variant)))
+    if (!["plain", "muntined", "steel-arched"].includes(String(candidate.variant)))
       addProjectIssue(
         issues,
         "project.window-variant",
@@ -464,7 +349,7 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
           issues,
           "project.hedge",
           hedgePath,
-          "Hedges need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.",
+          "Boundaries need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.",
         );
     });
   const edgeConfiguration = (value: unknown, edgePath: string) => {
@@ -587,118 +472,6 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
     });
 };
 
-const placement = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  if (candidate.kind === "absolute") {
-    keys(candidate, ["kind", "at", "elevationMeters", "rotationYRadians"], path, issues);
-    point(candidate.at, `${path}.at`, issues);
-    finite(candidate.elevationMeters, `${path}.elevationMeters`, issues);
-    finite(candidate.rotationYRadians, `${path}.rotationYRadians`, issues);
-  } else if (candidate.kind === "wall") {
-    keys(
-      candidate,
-      [
-        "kind",
-        "wallId",
-        "face",
-        "offsetFromWallStartPlanUnits",
-        "elevationMeters",
-        "depthOffsetMeters",
-        "rotationOffsetRadians",
-      ],
-      path,
-      issues,
-    );
-    string(candidate.wallId, `${path}.wallId`, issues);
-    if (!["left", "right"].includes(String(candidate.face)))
-      addProjectIssue(
-        issues,
-        "project.wall-face",
-        `${path}.face`,
-        "Wall placement face is invalid.",
-      );
-    for (const key of [
-      "offsetFromWallStartPlanUnits",
-      "elevationMeters",
-      "depthOffsetMeters",
-      "rotationOffsetRadians",
-    ])
-      finite(candidate[key], `${path}.${key}`, issues);
-  } else if (candidate.kind === "ceiling") {
-    keys(candidate, ["kind", "roomId", "at", "dropMeters", "rotationYRadians"], path, issues);
-    string(candidate.roomId, `${path}.roomId`, issues);
-    point(candidate.at, `${path}.at`, issues);
-    finite(candidate.dropMeters, `${path}.dropMeters`, issues);
-    finite(candidate.rotationYRadians, `${path}.rotationYRadians`, issues);
-  } else {
-    keys(candidate, ["kind"], path, issues);
-    addProjectIssue(
-      issues,
-      "project.placement-kind",
-      `${path}.kind`,
-      "Item placement kind is invalid.",
-    );
-  }
-};
-
-const sceneItem = (value: unknown, path: string, issues: HomeProjectIssue[], legacy: boolean) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  const device = candidate.kind === "device";
-  keys(
-    candidate,
-    device
-      ? [
-          "id",
-          "floorId",
-          "kind",
-          "modelId",
-          "variant",
-          "placement",
-          "size",
-          "entitySlots",
-          "lightState",
-        ]
-      : ["id", "floorId", "kind", "modelId", "variant", "placement", "size"],
-    path,
-    issues,
-  );
-  string(candidate.id, `${path}.id`, issues);
-  string(candidate.modelId, `${path}.modelId`, issues);
-  if (candidate.variant !== undefined) string(candidate.variant, `${path}.variant`, issues);
-  if (!legacy) string(candidate.floorId, `${path}.floorId`, issues);
-  if (!["furnishing", "device"].includes(String(candidate.kind)))
-    addProjectIssue(issues, "project.item-kind", `${path}.kind`, "Scene item kind is invalid.");
-  placement(candidate.placement, `${path}.placement`, issues);
-  const size = array(candidate.size, `${path}.size`, issues);
-  if (size && size.length !== 3)
-    addProjectIssue(
-      issues,
-      "project.item-size-shape",
-      `${path}.size`,
-      "Item size requires exactly three dimensions.",
-    );
-  size?.forEach((entry, index) => finite(entry, `${path}.size[${index}]`, issues));
-  if (
-    device &&
-    candidate.lightState !== undefined &&
-    (typeof candidate.lightState !== "string" ||
-      !["always-off", "always-on", "night-only", "connected"].includes(candidate.lightState))
-  ) {
-    addProjectIssue(
-      issues,
-      "project.light-state",
-      `${path}.lightState`,
-      "Choose always-off, always-on, night-only, or connected.",
-    );
-  }
-  if (device)
-    array(candidate.entitySlots, `${path}.entitySlots`, issues)?.forEach((entry, index) =>
-      entitySlot(entry, `${path}.entitySlots[${index}]`, issues),
-    );
-};
-
 export const validateHomeProjectSchemaShape = (
   input: unknown,
   issues: HomeProjectIssue[],
@@ -706,6 +479,7 @@ export const validateHomeProjectSchemaShape = (
   const project = record(input, "$", issues);
   if (!project) return null;
   const legacy = project.schemaVersion === 1;
+  if (project.customModels !== undefined) validateCustomModels(project.customModels, issues);
   keys(
     project,
     [
@@ -714,6 +488,7 @@ export const validateHomeProjectSchemaShape = (
       "home",
       ...(legacy ? ["floor"] : ["floors", "coordinates", "stairs"]),
       "sceneItems",
+      "customModels",
       "roomProfiles",
       "openingProfiles",
       "shortcuts",

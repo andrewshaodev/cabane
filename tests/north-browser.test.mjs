@@ -152,7 +152,7 @@ test(
       project.home.northAngleDegrees = 90;
       await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
       await page.getByRole("button", { name: "Import workspace", exact: true }).click();
-      await page.getByLabel("Cabane JSON file").setInputFiles({
+      await page.getByLabel("Cabane archive or JSON file").setInputFiles({
         name: "north.json",
         mimeType: "application/json",
         buffer: Buffer.from(JSON.stringify(createSeedProjectRecord(project))),

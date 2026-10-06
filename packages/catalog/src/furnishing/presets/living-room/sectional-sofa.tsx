@@ -5,7 +5,8 @@ import { CozySofaCushions, TailoredCushion } from "./sofa-upholstery";
 /** Existing sectional envelope and offset origin retained for saved placements. */
 export function CustomSectionalSofa({
   variant = "default",
-}: { variant?: string | undefined } = {}) {
+  color,
+}: { variant?: string | undefined; color?: string | undefined } = {}) {
   const mirrored = variant === "right" || variant === "cozy-right";
   const cozy = variant === "cozy" || variant === "cozy-right";
   return (
@@ -17,20 +18,20 @@ export function CustomSectionalSofa({
       <RoundedFurniturePanel
         size={[2.72, 0.32, 0.72]}
         position={[0, 0.31, 0.02]}
-        color="#d2ccbd"
+        color={color ?? "#d2ccbd"}
         radius={0.055}
       />
       <RoundedFurniturePanel
         size={[0.88, 0.32, 1.56]}
         position={[-0.91, 0.31, 0.43]}
-        color="#d2ccbd"
+        color={color ?? "#d2ccbd"}
         radius={0.055}
       />
       <RoundedFurniturePanel
         name="upholstered-back-frame"
         size={[2.55, 0.65, 0.16]}
         position={[0, 0.675, -0.33]}
-        color="#d2ccbd"
+        color={color ?? "#d2ccbd"}
         radius={0.045}
       />
       <RoundedFurniturePanel
@@ -51,7 +52,7 @@ export function CustomSectionalSofa({
         name="chaise-seat-cushion"
         size={[0.84, 0.2, 1.39]}
         position={[-0.91, 0.57, 0.39]}
-        color="#eee7d8"
+        color={color ?? "#eee7d8"}
       />
       {[-0.02, 0.84].map((x) => (
         <TailoredCushion
@@ -59,7 +60,7 @@ export function CustomSectionalSofa({
           name="sectional-seat-cushion"
           size={[0.8, 0.2, 0.63]}
           position={[x, 0.57, 0.08]}
-          color="#e9e4d7"
+          color={color ?? "#e9e4d7"}
         />
       ))}
       {[-0.91, -0.02, 0.84].map((x) => (
@@ -69,7 +70,7 @@ export function CustomSectionalSofa({
           size={[0.81, 0.2, 0.6]}
           position={[x, 0.927, -0.29]}
           rotation={[Math.PI / 2, 0, 0]}
-          color="#e9e4d7"
+          color={color ?? "#e9e4d7"}
         />
       ))}
       {[-1.37, 1.37].map((x) => (
@@ -78,14 +79,14 @@ export function CustomSectionalSofa({
             name="sectional-arm"
             size={[0.19, 0.59, 0.86]}
             position={[x, 0.455, 0.01]}
-            color="#ded9ca"
+            color={color ?? "#ded9ca"}
             radius={0.065}
           />
           <TailoredCushion
             name="sectional-arm-pad"
             size={[0.18, 0.13, 0.84]}
             position={[x, 0.765, 0.01]}
-            color="#eee7d8"
+            color={color ?? "#eee7d8"}
           />
         </group>
       ))}

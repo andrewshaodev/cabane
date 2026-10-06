@@ -1,3 +1,5 @@
+import { DEFAULT_WALL_COLORS } from "./wall-colors";
+import { wallCapFinishRegions } from "./architecture-geometry/wall-cap-finishes";
 import { wallStructuralHeight } from "./architecture-geometry/wall-structural-height";
 import { wallSolidBands } from "./architecture-geometry/wall-solid-bands";
 import { wallFaceFinish, wallEdgeFinish } from "./architecture-geometry/wall-face-finish";
@@ -28,8 +30,8 @@ import type { FloorSpec, WallSpec } from "./types";
 /** Generalized version of the original house-wide occupied-grid wall union. */
 export function buildArchitecturalWallGeometries(
   sourceFloor: FloorSpec,
-  interiorColor = "#e4e0d8",
-  exteriorColor = "#c97370",
+  interiorColor: string = DEFAULT_WALL_COLORS.interior,
+  exteriorColor: string = DEFAULT_WALL_COLORS.exterior,
   baseElevationMeters = GROUND_ELEVATION_METERS,
   neighbors: { below?: FloorSpec; above?: FloorSpec } = {},
 ): ArchitecturalWallGeometryGroup[] {
@@ -135,34 +137,31 @@ export function buildArchitecturalWallGeometries(
     upward: boolean,
     activeWalls: readonly WallSpec[],
   ) => {
-    surface.forEach((polygon) => {
-      const contour = polygon[0].slice(0, -1).map(([x, z]) => new Vector2(x, z));
-      const holes = polygon
-        .slice(1)
-        .map((ring) => ring.slice(0, -1).map(([x, z]) => new Vector2(x, z)));
-      const vertices = [...contour, ...holes.flat()];
-      ShapeUtils.triangulateShape(contour, holes).forEach(([first, second, third]) => {
-        const points = [vertices[first], vertices[second], vertices[third]];
-        const center: Horizontal = [
-          (points[0].x + points[1].x + points[2].x) / 3,
-          (points[0].y + points[1].y + points[2].y) / 3,
-        ];
-        // A cap belongs to the same camera-fade group as the wall directly
-        // beneath it. This keeps its opacity synchronized with the wall face
-        // instead of fading every cap whenever any exterior wall faces camera.
-        const buffers = buffersFor(fadeNormalAt(center, activeWalls));
-        const [a, b, c] = points.map((point) => [point.x, elevation, point.y] as const);
-        const finishes = activeWalls
-          .filter((wall) => wallData.get(wall)!.contains(center))
-          .map((wall) => wallEdgeFinish(wall, interiorColor));
-        const color =
-          finishes.length && finishes.every((value) => value === finishes[0])
-            ? customColor(finishes[0])
-            : insideColor;
-        if (upward) addTriangle(buffers, a, c, b, color);
-        else addTriangle(buffers, a, b, c, color);
-      });
-    });
+    wallCapFinishRegions(surface, activeWalls, floor, interiorColor).forEach(
+      ({ surface: region, color }) => {
+        region.forEach((polygon) => {
+          const contour = polygon[0].slice(0, -1).map(([x, z]) => new Vector2(x, z));
+          const holes = polygon
+            .slice(1)
+            .map((ring) => ring.slice(0, -1).map(([x, z]) => new Vector2(x, z)));
+          const vertices = [...contour, ...holes.flat()];
+          ShapeUtils.triangulateShape(contour, holes).forEach(([first, second, third]) => {
+            const points = [vertices[first], vertices[second], vertices[third]];
+            const center: Horizontal = [
+              (points[0].x + points[1].x + points[2].x) / 3,
+              (points[0].y + points[1].y + points[2].y) / 3,
+            ];
+            // A cap belongs to the same camera-fade group as the wall directly
+            // beneath it. This keeps its opacity synchronized with the wall face
+            // instead of fading every cap whenever any exterior wall faces camera.
+            const buffers = buffersFor(fadeNormalAt(center, activeWalls));
+            const [a, b, c] = points.map((point) => [point.x, elevation, point.y] as const);
+            if (upward) addTriangle(buffers, a, c, b, customColor(color));
+            else addTriangle(buffers, a, b, c, customColor(color));
+          });
+        });
+      },
+    );
   };
 
   const wallFaceColor = (
@@ -185,8 +184,7 @@ export function buildArchitecturalWallGeometries(
       owner = { wall, alignment };
     }
     if (!owner) return fallback;
-    if (owner.alignment < 0.999)
-      return customColor(wallEdgeFinish(owner.wall, outside ? exteriorColor : interiorColor));
+    if (owner.alignment < 0.999) return customColor(wallEdgeFinish(owner.wall, interiorColor));
     const normal = wallData.get(owner.wall)!.frame.normal;
     const side =
       visibleNormal[0] * normal[0] + visibleNormal[1] * normal[1] >= 0 ? "left" : "right";
@@ -284,6 +282,7 @@ export function buildArchitecturalWallGeometries(
 
   return [...buffersByDirection.values()].map((buffers) => {
     const geometry = new BufferGeometry();
+    geometry.userData.preservePlanarFaces = true;
     geometry.setAttribute("position", new Float32BufferAttribute(buffers.positions, 3));
     geometry.setAttribute("color", new Float32BufferAttribute(buffers.colors, 3));
     geometry.setIndex(buffers.indices);

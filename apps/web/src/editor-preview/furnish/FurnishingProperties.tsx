@@ -45,6 +45,7 @@ export function FurnishingProperties({
   onSizeChange,
   onLightStateChange,
   onVariantChange,
+  onColorChange,
   onClose,
   floor,
   onWindowFit,
@@ -62,6 +63,9 @@ export function FurnishingProperties({
   definition: SceneModelEditorDescriptor;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
   onSizeChange: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
+  onColorChange?:
+    | ((id: string, color: string | null, definition: SceneModelEditorDescriptor) => void)
+    | undefined;
   onVariantChange?:
     ((id: string, variant: string, definition: SceneModelEditorDescriptor) => void) | undefined;
   onLightStateChange?:
@@ -105,6 +109,26 @@ export function FurnishingProperties({
               ))}
             </select>
           </label>
+        </fieldset>
+      )}
+      {definition.defaultColor && onColorChange && (
+        <fieldset>
+          <legend>Fabric</legend>
+          <label>
+            <span>Color</span>
+            <input
+              type="color"
+              value={selected.color ?? definition.defaultColor}
+              onInput={(event) => onColorChange(selected.id, event.currentTarget.value, definition)}
+            />
+          </label>
+          <button
+            type="button"
+            disabled={selected.color === undefined}
+            onClick={() => onColorChange(selected.id, null, definition)}
+          >
+            Reset color
+          </button>
         </fieldset>
       )}
       {definition.windowFit && onWindowFit && (

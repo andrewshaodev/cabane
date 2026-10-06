@@ -16,6 +16,19 @@ export const DOOR_PRESETS = [
     },
   },
   {
+    id: "panel-white-lever",
+    label: "Panel white · Compact lever",
+    configuration: {
+      kind: "door",
+      operation: "hinged",
+      variant: "panel-white-lever",
+      finish: "white",
+      leafCount: 1,
+      widthMeters: 0.9,
+      heightMeters: 2.04,
+    },
+  },
+  {
     id: "french",
     label: "French",
     configuration: {
@@ -64,6 +77,19 @@ export const DOOR_PRESETS = [
       finish: "white",
       widthMeters: 2.4,
       heightMeters: 2.1,
+    },
+  },
+  {
+    id: "steel-arched",
+    label: "Arched steel glass",
+    configuration: {
+      kind: "door",
+      operation: "hinged",
+      variant: "steel-arched",
+      finish: "white",
+      leafCount: 1,
+      widthMeters: 0.9,
+      heightMeters: 2.3,
     },
   },
 ] as const satisfies readonly { id: string; label: string; configuration: DoorConfiguration }[];

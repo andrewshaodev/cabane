@@ -11,11 +11,12 @@ import {
   CabaneAppExperience,
   createEmptyRuntimeBindingProfile,
   normalizeWorkspaceBindingOrigin,
+  resolveProjectModels,
   type HomeProjectLifecycle,
   type HomeProjectRecord,
   type OnboardingOptions,
 } from "@cabane/engine";
-import { composeOwnerProjectManifest, ownerDeviceModels } from "./project-runtime";
+import { composeOwnerProjectManifest, ownerProjectRegistries } from "./project-runtime";
 import type { EditorOpenRequest } from "./editor-connect/useConnectEditor";
 import { downloadConnectData } from "./editor-connect/profile-transfer";
 import { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-navigation";
@@ -61,6 +62,10 @@ export function ConnectedProduct({
   const publishedManifest = useMemo(
     () => (record.publishedAt === 0 ? null : composeOwnerProjectManifest(record.published)),
     [record.published, record.publishedAt],
+  );
+  const publishedDeviceModels = useMemo(
+    () => resolveProjectModels(record.published, ownerProjectRegistries).deviceModels,
+    [record.published],
   );
   const [recovery, setRecovery] = useState({ message: recoveryMessage, raw: recoveryRaw });
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -144,7 +149,7 @@ export function ConnectedProduct({
             architectureModels={stableArchitectureModelRegistry}
             onboarding={onboarding}
             walkTools={installedWalkTools}
-            deviceModels={ownerDeviceModels}
+            deviceModels={publishedDeviceModels}
             homeAssistantUrl={homeAssistantUrl}
             onHomeAssistantUrlChange={(url) => {
               setConnectionError(null);
@@ -166,7 +171,7 @@ export function ConnectedProduct({
             }
             onWorkspaces={() => void navigate("/workspaces")}
             renderActionBarDeviceIcon={(modelId) => (
-              <ShortcutDeviceIcon modelId={modelId} models={ownerDeviceModels} />
+              <ShortcutDeviceIcon modelId={modelId} models={publishedDeviceModels} />
             )}
             bindingManager={manager}
             constructionApplied={constructionApplied}

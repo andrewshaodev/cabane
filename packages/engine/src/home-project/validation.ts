@@ -1,3 +1,4 @@
+import { resolveProjectModels } from "../imported-models/resolve-models";
 import { validateStairs } from "../stairs/stair-validation";
 import { validateLayoutFloorSpec } from "../home-editor/construct/layout-validation";
 import type { ProjectModelRegistries } from "../types";
@@ -73,7 +74,7 @@ export const validateHomeProject = (
   validateProfileReferencesAndSlots(project, issues);
   validateGlobalProjectIds(project, issues);
   validateActionBarTargets(project, issues);
-  validateSceneItemsAndSupports(project, registries, issues);
+  validateSceneItemsAndSupports(project, resolveProjectModels(project, registries), issues);
   const ordered = sortProjectIssues(issues);
   return !ordered.some((issue) => issue.severity === "error")
     ? { valid: true, project, issues: ordered }

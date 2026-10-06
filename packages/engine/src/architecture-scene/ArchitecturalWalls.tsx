@@ -33,6 +33,7 @@ const splitArchitectureGeometry = (source: BufferGeometry) => {
       });
     if (!positions.length) return null;
     const geometry = new BufferGeometry();
+    geometry.userData.preservePlanarFaces = true;
     geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
     geometry.computeVertexNormals();
     geometry.computeBoundingSphere();
@@ -78,7 +79,7 @@ export function ArchitecturalWall({
         const color = new Color(
           Math.abs(alignment) > 0.999
             ? wallFaceFinish(wall, alignment >= 0 ? "left" : "right", outside, fallback)
-            : wallEdgeFinish(wall, fallback),
+            : wallEdgeFinish(wall, interiorColor),
         );
         colors.push(color.r, color.g, color.b);
       }
@@ -96,6 +97,7 @@ export function ArchitecturalWall({
   const normal = wallExteriorNormal(wall, floor) ?? ([0, 0] as const);
   return (
     <CameraFacingFade
+      retainShadows
       enabled={fade && wall.classification === "exterior"}
       normal={normal}
       reducedMotion={reducedMotion}
@@ -163,6 +165,7 @@ export function ArchitecturalWalls({
         return normals.length ? (
           <CameraFacingFade
             key={`wall-group-${index}`}
+            retainShadows
             enabled={fade}
             normals={normals}
             reducedMotion={reducedMotion}

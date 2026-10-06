@@ -743,3 +743,11 @@ The ceiling lamp and soundbar declare no smart capabilities.
 `compact-wall-television` is a separate Media device (1.58 × .9 × .07 m), reusing
 the existing wall television's media-player behavior. Its back plane is Z=0,
 width/height resize independently, and household mapping stays in runtime slots.
+
+The `single-window-curtain` furnishing preset covers one window with its own
+track and a single gathered panel. Arrange → Living room → Decor offers Gathered
+left and Gathered right variants, as viewed from the room. Each instance has
+independent width (track length), height (drop), depth, and elevation controls.
+Fit to window aligns one window; adding another prefers an unoccupied window.
+The inferred default envelope is 120 × 240 × 12 cm; the panel drops 232 cm
+below its track. Existing paired and motorized curtains remain unchanged.

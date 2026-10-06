@@ -4,7 +4,7 @@ import { planPointToWorld, polygonSignedArea } from "../geometry";
 
 import type { FloorSpec, RoomSpec } from "../types";
 import { differenceClippingGeometry, unionClippingPolygons } from "./architecture-clipping";
-import { junctionExteriorMiterPolygon, orientedWallPolygon } from "./wall-solid-footprints";
+import { junctionCornerMiterPolygon, orientedWallPolygon } from "./wall-solid-footprints";
 
 /** Interior floor area in m², excluding wall footprints and doorway recesses. */
 export const roomInteriorAreaSquareMeters = (
@@ -21,7 +21,7 @@ export const roomInteriorAreaSquareMeters = (
   const walls = [
     ...floor.walls.map((wall) => orientedWallPolygon(wall, floor)),
     ...floor.wallJunctions.flatMap((junction) => {
-      const miter = junctionExteriorMiterPolygon(junction, floor.walls, floor);
+      const miter = junctionCornerMiterPolygon(junction, floor.walls, floor);
       return miter ? [miter] : [];
     }),
   ];

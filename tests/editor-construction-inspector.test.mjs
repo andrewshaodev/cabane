@@ -16,6 +16,10 @@ await withModules(async (load) => {
   const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
   );
+  const { OpeningColorControls } = await load(
+    "/apps/web/src/editor-preview/construct/OpeningColorControls.tsx",
+  );
+  const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { OpeningDetails } = await load(
     "/apps/web/src/editor-preview/construct/OpeningDetails.tsx",
@@ -26,6 +30,57 @@ await withModules(async (load) => {
   const { SelectedOpeningActionBar } = await load(
     "/apps/web/src/editor-preview/construct/SelectedOpeningControls.tsx",
   );
+
+  test("window and door color pickers update the published floor preview, undo/redo, and reset", async () => {
+    for (const kind of ["door", "window"]) {
+      await withDom(async ({ dom, root }) => {
+        const floor = ownerHomeProject.floors[0];
+        const id = floor.openings.find((opening) => opening.kind === kind).id;
+        let controller;
+        function Harness() {
+          controller = useConstructEditor(floor);
+          return React.createElement(OpeningColorControls, {
+            opening: controller.draft.openings.find((opening) => opening.id === id),
+            onChange: controller.replaceSelectedOpening,
+          });
+        }
+        await act(async () => root.render(React.createElement(Harness)));
+        await act(async () => controller.selectOpening(id));
+        const input = dom.window.document.querySelector('input[type="color"]');
+        assert.ok(input);
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+        await act(async () => {
+          input.value = "#325a84";
+          input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+        });
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          "#325a84",
+        );
+        await act(async () => controller.undo());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+        await act(async () => controller.redo());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          "#325a84",
+        );
+        const reset = [...dom.window.document.querySelectorAll("button")].find(
+          (button) => button.textContent === "Reset color",
+        );
+        await act(async () => reset.click());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+      });
+    }
+  });
 
   const wall = { id: "living-east", from: [0, 0], to: [4.25, 0] };
   const opening = {

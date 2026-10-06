@@ -1,3 +1,4 @@
+import type { CustomModel } from "../imported-models/contracts";
 import type {
   Assumption,
   EntityBindingSlotSpec,
@@ -66,6 +67,8 @@ export type ItemPlacement =
     };
 
 interface SceneItemBase {
+  /** Optional six-digit hex fabric override; omitted preserves the model palette. */
+  color?: string;
   /** Omitted values use the model's first variant. */
   variant?: string;
   id: string;
@@ -99,6 +102,7 @@ export interface OpeningProfileSpec {
 }
 
 export interface HomeProject {
+  customModels?: readonly CustomModel[];
   schemaVersion: 2;
   seedRevision: string;
   home: {

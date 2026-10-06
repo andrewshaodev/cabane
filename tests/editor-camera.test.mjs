@@ -109,6 +109,82 @@ await withModules(async (load) => {
     }
   });
 
+  test("orbit touch rotation and pan survive a parent render during the gesture", async () => {
+    const elementListeners = new Map();
+    const documentListeners = new Map();
+    const target = (listeners) => ({
+      addEventListener(type, listener) {
+        if (!listeners.has(type)) listeners.set(type, new Set());
+        listeners.get(type).add(listener);
+      },
+      removeEventListener(type, listener) {
+        listeners.get(type)?.delete(listener);
+      },
+    });
+    const dispatch = (listeners, type, pointerId, x, y) => {
+      const event = {
+        pointerId,
+        pointerType: "touch",
+        clientX: x,
+        clientY: y,
+        pageX: x,
+        pageY: y,
+        preventDefault() {},
+        timeStamp: 1000,
+      };
+      for (const listener of listeners.get(type) ?? []) listener(event);
+    };
+    const props = { floor, resetKey: 0 };
+    const renderer = await create(createElement(OrbitCamera, props), {
+      ...options,
+      beforeReturn(canvas) {
+        Object.assign(canvas, target(elementListeners));
+        canvas.ownerDocument = target(documentListeners);
+        canvas.clientWidth = 1000;
+        canvas.clientHeight = 800;
+        canvas.setPointerCapture = () => {};
+        canvas.releasePointerCapture = () => {};
+        canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1000, height: 800 });
+      },
+    });
+    try {
+      const controls = controlsFor(renderer);
+      controls.enableDamping = false;
+      await act(async () => {
+        dispatch(elementListeners, "pointerdown", 1, 400, 400);
+        dispatch(elementListeners, "pointerdown", 2, 600, 400);
+        dispatch(documentListeners, "pointermove", 1, 430, 400);
+      });
+      const before = controls.getAzimuthalAngle();
+      await renderer.update(createElement(OrbitCamera, { ...props }));
+      await act(async () => {
+        dispatch(documentListeners, "pointermove", 1, 480, 400);
+        dispatch(documentListeners, "pointermove", 2, 680, 400);
+      });
+      assert.notEqual(
+        controls.getAzimuthalAngle(),
+        before,
+        "two-finger rotation must continue after a parent render",
+      );
+      await act(async () => {
+        dispatch(documentListeners, "pointerup", 1, 480, 400);
+        dispatch(documentListeners, "pointerup", 2, 680, 400);
+      });
+      const beforePan = controls.target.toArray();
+      await act(async () => dispatch(elementListeners, "pointerdown", 3, 400, 400));
+      await renderer.update(createElement(OrbitCamera, { ...props }));
+      await act(async () => dispatch(documentListeners, "pointermove", 3, 500, 430));
+      assert.notDeepEqual(
+        controls.target.toArray(),
+        beforePan,
+        "one-finger pan must still work after the rotation ends",
+      );
+      await act(async () => dispatch(documentListeners, "pointerup", 3, 500, 430));
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("orbit camera preserves the live pose when roof visibility or active floors change", async () => {
     const upper = { ...extendedFloor, id: "upper" };
     const props = { floor, buildingFloors: [floor], resetKey: 0 };

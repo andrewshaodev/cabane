@@ -1,3 +1,4 @@
+import { resolveProjectModels } from "../imported-models/resolve-models";
 import type { ProjectModelRegistries } from "../types";
 
 import type { HomeProject } from "./types";
@@ -24,6 +25,7 @@ const removeMissingSceneItems = (
   project: HomeProject,
   registries: ProjectModelRegistries,
 ): { project: HomeProject; removedSlotIds: readonly string[]; removedCount: number } => {
+  registries = resolveProjectModels(project, registries);
   const removedSlotIds: string[] = [];
   const sceneItems = project.sceneItems.filter((item) => {
     const registry = item.kind === "device" ? registries.deviceModels : registries.furnishingModels;

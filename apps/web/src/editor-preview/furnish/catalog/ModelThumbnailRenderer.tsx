@@ -103,6 +103,11 @@ function ThumbnailScene({
 
   useFrame(({ gl, scene }) => {
     if (drawn.current) return;
+    let loading = false;
+    scene.traverse((object) => {
+      if (object.name === "loading-imported-model") loading = true;
+    });
+    if (loading) return;
     // Canvas measures its resized container asynchronously. Keep the request alive
     // until the renderer and camera match this preview, not the previous tile.
     if (Math.abs(size.width - size.height * aspect) > 1) return;

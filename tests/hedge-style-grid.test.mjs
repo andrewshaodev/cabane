@@ -9,7 +9,7 @@ await withModules(async (load) => {
   const { HedgeProperties } = await load(
     "/apps/web/src/editor-preview/construct/HedgeProperties.tsx",
   );
-  test("hedge thumbnail cards choose all five styles, set new defaults, and preserve an existing hedge's dimensions", async () => {
+  test("hedge thumbnail cards choose boundary styles, set new defaults, and preserve an existing hedge's dimensions", async () => {
     const dom = new JSDOM('<div id="root"></div>', { url: "http://cabane.local/" });
     const names = [
       "window",
@@ -54,7 +54,7 @@ await withModules(async (load) => {
     try {
       await render();
       const document = dom.window.document;
-      assert.equal(document.querySelectorAll(".catalog-card__preview canvas").length, 5);
+      assert.equal(document.querySelectorAll(".catalog-card__preview canvas").length, 10);
       assert.equal(document.querySelector("select"), null);
       assert.equal(
         document.querySelector('[aria-label="Clipped box"]').getAttribute("aria-pressed"),
@@ -74,11 +74,11 @@ await withModules(async (load) => {
       editor.selection = { kind: "hedge", id: "existing" };
       editor.draft.hedges = [{ id: "existing", style: "mixed", heightMeters: 3, widthMeters: 1.5 }];
       await render();
-      await act(async () => document.querySelector('[aria-label="Ivy-covered wall"]').click());
+      await act(async () => document.querySelector('[aria-label="Privacy fence"]').click());
       assert.deepEqual(editor.action, {
         type: "update-hedge",
         id: "existing",
-        changes: { style: "ivy-wall" },
+        changes: { style: "privacy" },
       });
     } finally {
       await act(async () => root.unmount());

@@ -340,7 +340,7 @@ export function ConstructionInteractionLayer(
           defaultThicknessMeters={tool === "wall" ? draft.interiorWallThicknessMeters : 0.055}
           labelKind={
             tool === "hedge"
-              ? "Hedge"
+              ? "Boundary"
               : tool === "wall"
                 ? "Wall"
                 : tool === "platform"

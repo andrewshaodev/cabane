@@ -67,9 +67,12 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
       error &&
       typeof error === "object" &&
       "name" in error &&
-      error.name === "HaWorkspaceUnavailableError"
+      ["HaWorkspaceUnavailableError", "HaAssetUpgradeRequiredError"].includes(String(error.name))
     )
-      return { kind: "unavailable" };
+      return {
+        kind: "unavailable",
+        detail: error instanceof Error ? error.message : "Update the Cabane integration.",
+      };
     return {
       kind: "disconnected",
       detail: error instanceof Error ? error.message : "Home Assistant is unavailable.",

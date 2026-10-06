@@ -104,9 +104,13 @@ await withModules(async (load) => {
         [15, 3],
       );
       act(() =>
-        editor.dispatch({ type: "update-hedge", id, changes: { style: "bushy", heightMeters: 2 } }),
+        editor.dispatch({
+          type: "update-hedge",
+          id,
+          changes: { style: "picket", heightMeters: 2 },
+        }),
       );
-      assert.equal(editor.previewFloor.hedges[0].style, "bushy");
+      assert.equal(editor.previewFloor.hedges[0].style, "picket");
       const restored = importFloorSpec(exportFloorSpec(editor.previewFloor));
       assert.equal(restored.valid, true, JSON.stringify(restored.issues));
       assert.deepEqual(restored.floor.hedges, editor.previewFloor.hedges);
@@ -158,7 +162,7 @@ await withModules(async (load) => {
     assert.equal(engine.parseHomeProjectSchema(unknown).valid, false);
   });
   test("all hedge models render toon geometry and derive a matching walk obstacle", async () => {
-    for (const style of ["clipped", "rounded", "bushy", "mixed", "ivy-wall"]) {
+    for (const style of engine.HEDGE_STYLES.map((entry) => entry.id)) {
       const floor = {
         ...base,
         hedges: [
@@ -176,6 +180,9 @@ await withModules(async (load) => {
         await renderer.unmount();
       }
       assert.equal(engine.validateLayoutFloorSpec(floor).valid, true);
+      const restored = importFloorSpec(exportFloorSpec(floor));
+      assert.equal(restored.valid, true, JSON.stringify(restored.issues));
+      assert.deepEqual(restored.floor.hedges, floor.hedges);
     }
     const floor = {
       ...base,

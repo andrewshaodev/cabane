@@ -38,16 +38,16 @@ Contract: [Startup and host integration](../docs/product/journey.md).
 
 - Owners: [`apps/web/src/main.tsx`](../apps/web/src/main.tsx), [`apps/web/src/workspaces/WorkspaceApplication.tsx`](../apps/web/src/workspaces/WorkspaceApplication.tsx), [`apps/web/src/workspaces/WorkspaceHost.tsx`](../apps/web/src/workspaces/WorkspaceHost.tsx), [`apps/web/src/panel/panel-element.ts`](../apps/web/src/panel/panel-element.ts).
 - Interface: `CabaneApp`, `CabaneDomProvider`, `HomeAssistantHostSessionProvider` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host.
+- Review invariant: Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.
 - Checks: `test:browser`, `build`, `build:panel`.
 
 ### Project schema and persistence
 
 Contract: [Project schema and persistence](../docs/product/workspace.md).
 
-- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts), [`packages/engine/src/home-project/schema-json-values.ts`](../packages/engine/src/home-project/schema-json-values.ts).
-- Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.
+- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/schema-scene-item.ts`](../packages/engine/src/home-project/schema-scene-item.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts), [`packages/engine/src/home-project/schema-json-values.ts`](../packages/engine/src/home-project/schema-json-values.ts), [`packages/engine/src/home-project/schema-entity-slot.ts`](../packages/engine/src/home-project/schema-entity-slot.ts), [`packages/engine/src/home-project/project-record-stores.ts`](../packages/engine/src/home-project/project-record-stores.ts), [`packages/engine/src/imported-models/asset-storage.ts`](../packages/engine/src/imported-models/asset-storage.ts), [`packages/engine/src/sha256-digest.ts`](../packages/engine/src/sha256-digest.ts), [`packages/engine/src/home-project/schema-floor-finish.ts`](../packages/engine/src/home-project/schema-floor-finish.ts).
+- Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository`, `sha256Hex` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction.
 - Checks: `verify:workspace`.
 
 ### Editor coordination
@@ -63,9 +63,9 @@ Contract: [Editor coordination](../docs/product/workspace.md).
 
 Contract: [Construct and floor topology](../docs/product/construct.md).
 
-- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors), [`apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx`](../apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx), [`apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx`](../apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx), [`apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx`](../apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx), [`apps/web/src/editor-preview/construct/WallFinishFields.tsx`](../apps/web/src/editor-preview/construct/WallFinishFields.tsx).
+- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors), [`apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx`](../apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx), [`apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx`](../apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx), [`apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx`](../apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx), [`apps/web/src/editor-preview/construct/HedgeProperties.tsx`](../apps/web/src/editor-preview/construct/HedgeProperties.tsx), [`apps/web/src/editor-preview/construct/WallFinishFields.tsx`](../apps/web/src/editor-preview/construct/WallFinishFields.tsx).
 - Interface: `FloorSpec` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. North orientation previews around the plan; only confirmation commits the shared building angle. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, otherwise the general wall finish.
+- Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish.
 - Checks: `verify:construct`, `fixture:verify:layout`.
 
 ### Arrange and placement
@@ -74,7 +74,7 @@ Contract: [Arrange and placement](../docs/product/arrange.md).
 
 - Owners: [`apps/web/src/editor-preview/furnish/useFurnishingEditor.ts`](../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts), [`apps/web/src/editor-preview/furnish/placement`](../apps/web/src/editor-preview/furnish/placement), [`packages/engine/src/home-project/placements.ts`](../packages/engine/src/home-project/placements.ts).
 - Interface: `useFurnishingEditor` via [`apps/web/src/editor-preview/furnish/useFurnishingEditor.ts`](../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts).
-- Review invariant: Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history.
+- Review invariant: Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Optional fabric colors follow item history and persistence; model defaultColor enables the picker.
 - Checks: `test:unit`, `test:browser`, `verify:furnishing-surfaces`, `fixture:verify:room`.
 
 ### Connect and binding profiles
@@ -86,13 +86,22 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 - Review invariant: Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.
 - Checks: `verify:runtime`, `fixture:verify:scale`.
 
+### Personal GLB models and asset transfer
+
+Contract: [Personal GLB models and asset transfer](../docs/product/personal-models.md).
+
+- Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts).
+- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
+- Checks: `verify:workspace`, `verify:runtime`, `verify:policy`, `fixture:verify:scale`, `build:panel`.
+
 ### Home Assistant runtime and controls
 
 Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-privacy.md).
 
-- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts).
+- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts), [`packages/engine/src/home-assistant-storage-session.ts`](../packages/engine/src/home-assistant-storage-session.ts), [`packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx`](../packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx).
 - Interface: `HomeAssistantRuntimeProvider`, `useHomeAssistantRuntime` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source.
+- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session.
 - Checks: `verify:runtime`.
 
 ### Dashboard, navigation and cameras
@@ -101,25 +110,25 @@ Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-came
 
 - Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation), [`packages/engine/src/OrbitCamera.tsx`](../packages/engine/src/OrbitCamera.tsx), [`packages/engine/src/room-navigation`](../packages/engine/src/room-navigation), [`packages/engine/src/action-bar/dashboard-action-targets.ts`](../packages/engine/src/action-bar/dashboard-action-targets.ts), [`packages/engine/src/WalkPreferences.tsx`](../packages/engine/src/WalkPreferences.tsx), [`packages/engine/src/home-assistant-dashboard`](../packages/engine/src/home-assistant-dashboard), [`packages/engine/src/styles.css`](../packages/engine/src/styles.css).
 - Interface: `CabaneDashboard`, `LiveCameraSurface` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.
+- Review invariant: Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.
 - Checks: `test:unit`, `test:browser`, `measure:scene`.
 
 ### Scene geometry and rendering
 
 Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.md).
 
-- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs), [`packages/engine/src/SceneLighting.tsx`](../packages/engine/src/SceneLighting.tsx), [`packages/engine/src/lighting.ts`](../packages/engine/src/lighting.ts), [`packages/engine/src/solar-shadow-frame.ts`](../packages/engine/src/solar-shadow-frame.ts), [`packages/engine/src/architecture-geometry/wall-face-finish.ts`](../packages/engine/src/architecture-geometry/wall-face-finish.ts).
-- Interface: `ArchitectureScene`, `StylizedScene`, `deriveSolarLighting`, `resolveSolarLighting` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Standalone and batched wall caps and opening reveals share edge-finish precedence; shared horizontal junction surfaces retain the general finish when owners disagree.
+- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs), [`packages/engine/src/SceneLighting.tsx`](../packages/engine/src/SceneLighting.tsx), [`packages/engine/src/lighting.ts`](../packages/engine/src/lighting.ts), [`packages/engine/src/solar-shadow-frame.ts`](../packages/engine/src/solar-shadow-frame.ts), [`packages/engine/src/hedges`](../packages/engine/src/hedges), [`packages/engine/src/boundaries`](../packages/engine/src/boundaries), [`packages/engine/src/floor-finishes`](../packages/engine/src/floor-finishes), [`packages/engine/src/architecture-geometry/wall-face-finish.ts`](../packages/engine/src/architecture-geometry/wall-face-finish.ts), [`packages/engine/src/architecture-geometry/wall-cap-finishes.ts`](../packages/engine/src/architecture-geometry/wall-cap-finishes.ts), [`packages/engine/src/wall-colors.ts`](../packages/engine/src/wall-colors.ts).
+- Interface: `ArchitectureScene`, `StylizedScene`, `deriveSolarLighting`, `resolveSolarLighting`, `DEFAULT_WALL_COLORS` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout. Standalone and batched wall caps and opening reveals share edge-finish precedence; shared horizontal junction surfaces retain the general finish when owners disagree. Horizontal caps are partitioned by finish before triangulation to prevent color bleeding across adjacent walls. DEFAULT_WALL_COLORS is the single source of production wall palette defaults; authored finishes take precedence.
 - Checks: `test:unit`, `verify:policy`, `verify:scene-contours`, `fixture:verify:scale`, `measure:scene`.
 
 ### Catalog and model extensions
 
 Contract: [Catalog and model extensions](../docs/product/catalog-and-extensions.md).
 
-- Owners: [`packages/catalog/src/architecture`](../packages/catalog/src/architecture), [`packages/catalog/src/furnishing`](../packages/catalog/src/furnishing), [`packages/catalog/src/device`](../packages/catalog/src/device), [`home/src/extensions`](../home/src/extensions).
+- Owners: [`packages/catalog/src/architecture`](../packages/catalog/src/architecture), [`packages/catalog/src/furnishing`](../packages/catalog/src/furnishing), [`packages/catalog/src/device`](../packages/catalog/src/device), [`home/src/extensions`](../home/src/extensions), [`packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts`](../packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts), [`packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx`](../packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx).
 - Interface: `stableFurnishingRegistry` via [`packages/catalog/src/furnishing/index.ts`](../packages/catalog/src/furnishing/index.ts).
-- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry.
+- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls.
 - Checks: `verify:boundaries`, `verify:policy`, `verify:furnishing-surfaces`.
 
 ### Optional walk tools
@@ -144,9 +153,9 @@ Contract: [Bundled home and agent generation](../docs/product/generation.md).
 
 Contract: [Verification and delivery](../docs/product/verification-and-delivery.md).
 
-- Owners: [`scripts`](../scripts), [`tests`](../tests), [`eslint.config.mjs`](../eslint.config.mjs), [`knip.config.mjs`](../knip.config.mjs).
+- Owners: [`scripts`](../scripts), [`tests`](../tests), [`package.json`](../package.json), [`package-lock.json`](../package-lock.json), [`vercel.json`](../vercel.json), [`eslint.config.mjs`](../eslint.config.mjs), [`knip.config.mjs`](../knip.config.mjs).
 - Interface: repository commands below.
-- Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.
+- Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance.
 - Checks: `verify:help`, `verify:fast`, `verify`, `browser:install`.
 
 ### Shortcuts and private HA actions

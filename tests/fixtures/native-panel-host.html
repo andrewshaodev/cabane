@@ -33,8 +33,14 @@
         min-width: 0;
         height: 100%;
       }
-      cabane-panel {
-        height: 100%;
+      /* HA's light-DOM wrapper has no definite height or positioned ancestor. */
+      ha-panel-custom {
+        display: block;
+        box-sizing: border-box;
+        --safe-area-inset-top: 20px;
+        --safe-area-inset-bottom: 34px;
+        padding-top: var(--safe-area-inset-top);
+        padding-bottom: var(--safe-area-inset-bottom);
       }
       @media (max-width: 600px) {
         #sidebar {
@@ -49,7 +55,7 @@
     </div>
     <div id="host-body">
       <aside id="sidebar">Synthetic HA sidebar</aside>
-      <main id="panel-slot"></main>
+      <main id="panel-slot"><ha-panel-custom></ha-panel-custom></main>
     </div>
     <script type="module">
       const stats = {
@@ -141,7 +147,7 @@
         },
       });
       panel.hass = hass;
-      document.querySelector("#panel-slot").append(panel);
+      document.querySelector("ha-panel-custom").append(panel);
       window.__hostFixture = {
         stats,
         panel,
@@ -153,7 +159,7 @@
           panel.remove();
         },
         back() {
-          document.querySelector("#panel-slot").append(panel);
+          document.querySelector("ha-panel-custom").append(panel);
         },
         disconnect() {
           connection.connected = false;

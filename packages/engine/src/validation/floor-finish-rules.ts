@@ -30,6 +30,14 @@ export const validateFloorFinish = (raw: unknown, path: string): ManifestIssue[]
         ];
   }
   if (raw.kind === "preset") {
+    if (
+      raw.color !== undefined &&
+      (typeof raw.color !== "string" || !/^#[0-9a-f]{6}$/i.test(raw.color))
+    ) {
+      return [
+        issue("floor-finish.color", `${path}.color`, "Tile color must be a six-digit hex color."),
+      ];
+    }
     return floorPresetIds.has(String(raw.preset))
       ? []
       : [issue("floor-finish.preset", `${path}.preset`, "Floor preset is not supported.")];

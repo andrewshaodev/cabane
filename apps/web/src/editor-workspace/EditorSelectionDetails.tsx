@@ -75,6 +75,7 @@ export function EditorSelectionDetails({
             onSizeChange={furnishingEditor.updateSize}
             onLightStateChange={furnishingEditor.updateLightState}
             onVariantChange={furnishingEditor.updateVariant}
+            onColorChange={furnishingEditor.updateColor}
             onClose={() => setDetailsItemId(null)}
           />
         </div>

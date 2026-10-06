@@ -54,7 +54,22 @@ The Explore preview uses the edited manifest but disables service mutation.
 
 The source registries, not a hard-coded count in this document, determine which
 items are available. A model definition and a placed item are separate concepts:
-model geometry is code; item identity, size, placement, and slots are data.
+native model geometry is code, personal model geometry is a GLB asset; item
+identity, size, placement, and slots are data.
+
+**My models**, marked with a cube icon, contains the active home's imported GLBs
+and their management actions. Import, generation guidance and model management
+are shown only in this section. **Import model (.glb file)** opens the
+normalization and profile preview. **Generate a custom model** opens an
+illustrated guide for describing an object or using a reference photo with the
+user's AI tool. It links to the public skill repository and provides a copyable
+Skills CLI installation command for Codex, Claude Code and other supported agents.
+A single preview grid contains model management: download and unused-model
+removal icons appear on preview hover or keyboard focus, and remain visible on
+touch devices. Click the model name to rename it.
+Personal models preserve file materials and expose uniform resizing. Their
+metadata and instances share history/publication with native items; geometry is
+an immutable asset. See [personal models](personal-models.md).
 
 Catalog model thumbnails are cached across Arrange sessions. Cache keys include
 the model preview revision so changed models invalidate earlier previews. After its
@@ -71,3 +86,11 @@ Implementation: [catalog UI](../../apps/web/src/editor-preview/furnish/catalog/A
 [item renderer](../../packages/engine/src/SceneItemRenderer.tsx).
 
 [Back to product overview](../../PRODUCT_SPEC.md).
+
+Curtain presets (single-window, children's paired, and motorized), the 3-seat
+sofa, and the sectional sofa offer a Fabric color picker and Reset color in
+Arrange Details. A six-digit hex `color` override is optional item data and
+survives undo/redo, duplication, Apply, and project import/export. Omission
+preserves each model's original multi-tone palette. Overrides recolor fabric;
+tracks, wood, motor housings, and decorative throw cushions retain their finishes.
+Only descriptors declaring `defaultColor` offer this control.

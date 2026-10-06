@@ -1,3 +1,10 @@
+import {
+  readCabaneFile,
+  createModelAssetRepository,
+  createCabaneArchive,
+  documentModelReferences,
+  downloadCabaneBytes,
+} from "@cabane/engine";
 import { workspaceDestination } from "./workspace-open-link";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
@@ -12,7 +19,7 @@ import {
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { useConnectSignIn } from "../editor-connect/useConnectSignIn";
 import { CONNECT_RETURN_KEY } from "../editor-connect/connect-navigation";
-import { downloadConnectData, stageImportedWorkspace } from "../editor-connect/profile-transfer";
+import { stageImportedWorkspace } from "../editor-connect/profile-transfer";
 import { ownerProjectRegistries } from "../project-runtime";
 import { workspaceHomePath } from "../editor-routes";
 import { WorkspaceHaStorageInConnect, useWorkspaceStorage } from "./WorkspaceHaStorage";
@@ -112,22 +119,31 @@ export function HomeAssistantPage({
   const latest = async () => (await storage?.repository.read(record.homeId))?.record ?? record;
   const exportBackup = async () => {
     const current = await latest();
-    downloadConnectData(
-      exportWorkspaceBackup(
-        {
-          name: current.draft.home.name,
-          homeAssistantUrl: origin,
-          hasPublished: current.publishedAt !== 0,
-        },
-        current,
-      ),
-      `${record.homeId}-backup.json`,
+    const json = exportWorkspaceBackup(
+      {
+        name: current.draft.home.name,
+        homeAssistantUrl: origin,
+        hasPublished: current.publishedAt !== 0,
+      },
+      current,
+    );
+    const assets = await createModelAssetRepository(window.indexedDB).verify(
+      documentModelReferences(json),
+    );
+    downloadCabaneBytes(
+      createCabaneArchive(json, assets),
+      `${record.homeId}-backup.cabane`,
+      "application/zip",
     );
     setNotice("Backup downloaded.");
   };
   const importBackup = async (file: File) => {
     const current = await latest();
-    const imported = stageImportedWorkspace(current, await file.text(), ownerProjectRegistries);
+    const imported = stageImportedWorkspace(
+      current,
+      (await readCabaneFile(file)).json,
+      ownerProjectRegistries,
+    );
     if (
       !window.confirm(
         "Replace this home's draft with the backup? Your current draft will be downloaded first. The published home stays unchanged until you save in the editor.",
@@ -371,7 +387,7 @@ export function HomeAssistantPage({
                 Import backup
                 <input
                   type="file"
-                  accept=".json,application/json"
+                  accept=".cabane,.json,application/zip,application/json"
                   disabled={busy}
                   onChange={(event) => {
                     const file = event.target.files?.[0];

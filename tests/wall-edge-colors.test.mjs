@@ -38,10 +38,12 @@ await withModules(async (load) => {
           `vertex ${index}: ${edge ? "cap/reveal" : "face"}`,
         );
     }
-    assert.ok(caps > 0, "real cap and reveal vertices verified");
+    return caps;
   }
   test("Auto and custom edge colors agree across standalone and batched walls with an opening", async () => {
     for (const scenario of [
+      { faces: {}, exteriorColor: "#00ff00", edges: "#00ff00" },
+      { faces: {}, exteriorColor: "#00ff00", edgeColor: "#334455", edges: "#334455" },
       { faces: { left: "#bcb99b", right: "#bcb99b" }, edges: "#bcb99b" },
       { faces: { left: "#bcb99b", right: "#efece3" }, edges: "#e4e0d8" },
       { faces: { left: "#bcb99b", right: "#efece3" }, edgeColor: "#334455", edges: "#334455" },
@@ -51,10 +53,13 @@ await withModules(async (load) => {
         id: "painted",
         from: [1, 1],
         to: [3, 1],
-        classification: "interior",
+        classification: scenario.exteriorColor ? "exterior" : "interior",
         thicknessMeters: 0.2,
         heightMeters: 2.5,
         faceColors: scenario.faces,
+        ...(scenario.exteriorColor
+          ? { exteriorColor: scenario.exteriorColor, from: [0, 0], to: [4.8, 0] }
+          : {}),
         ...(scenario.edgeColor ? { edgeColor: scenario.edgeColor } : {}),
       };
       floor.walls = [wall];
@@ -75,10 +80,17 @@ await withModules(async (load) => {
         },
       ];
       const assemblies = buildArchitecturalWallGeometries(floor, "#e4e0d8", "#c97370");
+      let batchedCaps = 0;
       for (const { geometry } of assemblies) {
-        checkGeometry(geometry, scenario.edges, scenario.faces.left, scenario.faces.right);
+        batchedCaps += checkGeometry(
+          geometry,
+          scenario.edges,
+          scenario.faces.left ?? "#e4e0d8",
+          scenario.faces.right ?? scenario.exteriorColor,
+        );
         geometry.dispose();
       }
+      assert.ok(batchedCaps > 0, "batched caps and reveals verified");
       const renderer = await create(
         createElement(ArchitecturalWall, {
           floor,
@@ -93,12 +105,99 @@ await withModules(async (load) => {
       let checked = 0;
       renderer.scene.instance.traverse((node) => {
         if (node.isMesh && node.geometry.getAttribute("color")) {
-          checkGeometry(node.geometry, scenario.edges, scenario.faces.left, scenario.faces.right);
-          checked++;
+          checked += checkGeometry(
+            node.geometry,
+            scenario.edges,
+            scenario.faces.left ?? "#e4e0d8",
+            scenario.faces.right ?? scenario.exteriorColor,
+          );
         }
       });
       assert.ok(checked > 0);
       await renderer.unmount();
+    }
+  });
+  test("connected cap finishes stay within their walls and conflicting junctions use the general finish", () => {
+    const floor = structuredClone(neutralDemoManifest.floors[0]);
+    floor.openings = [];
+    floor.walls = [
+      {
+        id: "a",
+        from: [1, 1],
+        to: [2, 1],
+        classification: "interior",
+        thicknessMeters: 0.2,
+        edgeColor: "#ff0000",
+      },
+      {
+        id: "b",
+        from: [2, 1],
+        to: [3, 1],
+        classification: "interior",
+        thicknessMeters: 0.2,
+        edgeColor: "#0000ff",
+      },
+    ];
+    floor.wallJunctions = [{ id: "join", at: [2, 1], wallIds: ["a", "b"] }];
+    for (const turn of [false, true]) {
+      if (turn) floor.walls[1].to = [2, 2];
+      const groups = buildArchitecturalWallGeometries(floor);
+      const areaByColor = new Map();
+      for (const { geometry } of groups) {
+        const p = geometry.getAttribute("position"),
+          n = geometry.getAttribute("normal"),
+          c = geometry.getAttribute("color");
+        for (let i = 0; i < geometry.index.count; i += 3) {
+          const ids = [0, 1, 2].map((offset) => geometry.index.getX(i + offset));
+          if (!ids.every((id) => n.getY(id) > 0.999)) continue;
+          const points = ids.map((id) => [p.getX(id), p.getZ(id)]);
+          const center = [0, 1].map(
+            (axis) => points.reduce((sum, point) => sum + point[axis], 0) / 3,
+          );
+          const shared = turn
+            ? center[0] >= 1.9 && center[1] <= 1.1
+            : Math.abs(center[0] - 2) < 0.01201;
+          const expected = new Color(
+            shared ? "#e4e0d8" : center[0] < (turn ? 1.9 : 2) ? "#ff0000" : "#0000ff",
+          );
+          assert.ok(
+            ids.every(
+              (id) =>
+                Math.abs(c.getX(id) - expected.r) < 1e-6 &&
+                Math.abs(c.getY(id) - expected.g) < 1e-6 &&
+                Math.abs(c.getZ(id) - expected.b) < 1e-6,
+            ),
+            JSON.stringify({
+              turn,
+              points,
+              center,
+              actual: [c.getX(ids[0]), c.getY(ids[0]), c.getZ(ids[0])],
+            }),
+          );
+          if (!shared)
+            assert.ok(
+              points.every(([x, z]) =>
+                turn
+                  ? expected.r === 1
+                    ? x <= 1.90001
+                    : z >= 1.09999
+                  : expected.r === 1
+                    ? x <= 2.00001
+                    : x >= 1.99999,
+              ),
+              "no triangle crosses a finish boundary",
+            );
+          const [[ax, az], [bx, bz], [cx, cz]] = points;
+          const area = Math.abs((bx - ax) * (cz - az) - (bz - az) * (cx - ax)) / 2;
+          const key = expected.getHexString();
+          areaByColor.set(key, (areaByColor.get(key) ?? 0) + area);
+        }
+        geometry.dispose();
+      }
+      assert.ok(areaByColor.get("ff0000") > 0.17);
+      assert.ok(areaByColor.get("0000ff") > 0.17);
+      if (turn)
+        assert.ok(areaByColor.get("e4e0d8") > 0.03, "shared corner retains the general finish");
     }
   });
   test("custom edge metadata survives topology and undo/redo and Auto clears it", () => {

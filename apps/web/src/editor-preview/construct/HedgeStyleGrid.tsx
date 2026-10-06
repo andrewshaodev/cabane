@@ -41,7 +41,7 @@ export function HedgeStyleGrid({
         className="catalog-grid hedge-style-grid"
         ref={scrollRoot}
         role="group"
-        aria-label="Hedge styles"
+        aria-label="Boundary styles"
       >
         {entries.map(({ style, entry }) => (
           <button

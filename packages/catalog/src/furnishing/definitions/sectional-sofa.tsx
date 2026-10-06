@@ -3,9 +3,9 @@ import { CustomSectionalSofa } from "../presets/living-room/sectional-sofa";
 
 export const sectionalSofaDefinition = defineFurnishingModel({
   defaultRoomType: "living-room",
-  component: ({ size, variant }) => (
+  component: ({ size, variant, color }) => (
     <group scale={[size[0] / 2.93, size[1] / 1.227, size[2] / 1.63]}>
-      <CustomSectionalSofa variant={variant} />
+      <CustomSectionalSofa variant={variant} color={color} />
     </group>
   ),
   variants: [
@@ -15,6 +15,7 @@ export const sectionalSofaDefinition = defineFurnishingModel({
     { id: "cozy-right", label: "Cozy — right chaise (front view)" },
   ],
   label: "Sectional sofa",
+  defaultColor: "#e9e4d7",
   category: "Living room",
   defaultSize: [2.93, 1.227, 1.63],
   bounds: { min: [-1.465, 0, -0.42], max: [1.465, 1.227, 1.21] },

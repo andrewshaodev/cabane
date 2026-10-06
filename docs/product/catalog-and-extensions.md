@@ -19,11 +19,16 @@ Scene-item rendering avoids drawing both declarative items and legacy room
 composition for the same declarative project. Missing model definitions surface
 validation/recovery issues.
 
-A new model should use the public engine material/geometry vocabulary, expose
+A new native model should use the public engine material/geometry vocabulary, expose
 only its supported entry points through a local barrel, and preserve catalog
 placement and slot semantics. Do not put household HA IDs into registry entries.
 The exact available models and presets are the current registry contents, not a
 frozen product-spec enumeration.
+
+Personal GLB definitions are a separate per-project data catalog. They resolve
+through the engine import owner and preserve their original materials; they do
+not change native registry ownership or home-local procedural generation. See
+[personal models](personal-models.md) for import, device, and asset contracts.
 
 Implementation: [catalog guide](../../packages/catalog/README.md),
 [architecture registry](../../packages/catalog/src/architecture/registry.ts),
@@ -76,3 +81,21 @@ architectural model, not an Arrange device. Its frame and moving slats are focus
 model modules. Opening previews use the same geometry and cached rendering queue
 as Arrange. The bundled garage uses an opening and an opening cover profile;
 there is no compatibility registration for the retired garage device.
+
+Framed hinged doors fit the jamb aperture and keep sweep clearance. Concealed and flush door variants support an explicit finish plane and optional bounded front overlap. Arched steel-glass door and window variants share procedural glazing.
+
+The `single-window-curtain` furnishing preset covers one window with its own
+track and a single gathered panel. Arrange → Living room → Decor offers Gathered
+left and Gathered right variants, as viewed from the room. Each instance has
+independent width (track length), height (drop), depth, and elevation controls.
+Fit to window aligns one window; adding another prefers an unoccupied window.
+The inferred default envelope is 120 × 240 × 12 cm; the panel drops 232 cm
+below its track. Existing paired and motorized curtains remain unchanged.
+
+Curtain presets (single-window, children's paired, and motorized), the 3-seat
+sofa, and the sectional sofa offer a Fabric color picker and Reset color in
+Arrange Details. A six-digit hex `color` override is optional item data and
+survives undo/redo, duplication, Apply, and project import/export. Omission
+preserves each model's original multi-tone palette. Overrides recolor fabric;
+tracks, wood, motor housings, and decorative throw cushions retain their finishes.
+Only descriptors declaring `defaultColor` offer this control.

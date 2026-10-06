@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "@cabane/engine";
 import { useMemo } from "react";
 import { openingWorldPlacement } from "@cabane/engine";
 import { ToonMaterial } from "@cabane/engine";
@@ -26,7 +27,7 @@ export function PassageModel({ wall, opening, floor }: OpeningModelProps<Passage
       {arch && (
         <mesh position={[0, 0, -wall.thicknessMeters / 2]} castShadow>
           <extrudeGeometry args={[arch, { depth: wall.thicknessMeters, bevelEnabled: false }]} />
-          <ToonMaterial color="#e4e0d8" />
+          <ToonMaterial color={DEFAULT_WALL_COLORS.interior} />
         </mesh>
       )}
     </group>

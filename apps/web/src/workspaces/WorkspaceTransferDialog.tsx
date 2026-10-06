@@ -1,3 +1,4 @@
+import { readCabaneFile } from "@cabane/engine";
 import { useLocation, useNavigate } from "react-router";
 import { useState, type ReactNode } from "react";
 import { WorkspaceDialog } from "./WorkspaceDialog";
@@ -65,10 +66,10 @@ export function WorkspaceTransferDialog({
         >
           <p>A project or backup creates a new workspace.</p>
           <label>
-            Cabane JSON file
+            Cabane archive or JSON file
             <input
               type="file"
-              accept=".json,application/json"
+              accept=".cabane,.json,application/zip,application/json"
               disabled={busy}
               onChange={(event) => {
                 void (async () => {
@@ -77,9 +78,13 @@ export function WorkspaceTransferDialog({
                   setJson("");
                   if (file)
                     try {
-                      setJson(await file.text());
-                    } catch {
-                      setFileError("Could not read that file. Please choose it again.");
+                      setJson((await readCabaneFile(file)).json);
+                    } catch (error) {
+                      setFileError(
+                        error instanceof Error
+                          ? error.message
+                          : "Could not read that file. Please choose it again.",
+                      );
                     }
                 })();
               }}

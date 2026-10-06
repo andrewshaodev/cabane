@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const bundle = resolve(root, "apps/web/dist-panel");
+const bundle = resolve(root, process.env.CABANE_PANEL_BUNDLE ?? "apps/web/dist-panel");
 const mime = {
   ".js": "text/javascript",
   ".css": "text/css",
@@ -54,8 +54,32 @@ page.on("request", (request) => requests.push(request.url()));
 page.on("response", (response) => {
   if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
 });
+async function assertPanelBounds() {
+  await page.waitForFunction(
+    () => {
+      const panel = document.querySelector("cabane-panel");
+      const rect = panel.getBoundingClientRect();
+      const host = panel.parentElement;
+      const hostRect = host.getBoundingClientRect();
+      const style = getComputedStyle(host);
+      const content = panel.shadowRoot.querySelector(".panel-content").getBoundingClientRect();
+      return (
+        content.height > 100 &&
+        Math.abs(rect.left - hostRect.left) < 1 &&
+        Math.abs(rect.width - hostRect.width) < 1 &&
+        Math.abs(rect.top - hostRect.top - parseFloat(style.paddingTop)) < 1 &&
+        Math.abs(rect.bottom - (innerHeight - parseFloat(style.paddingBottom))) < 1 &&
+        Math.abs(content.bottom - rect.bottom) < 1
+      );
+    },
+    null,
+    { timeout: 10000 },
+  );
+}
 try {
   await page.goto(`${origin}/cabane?host=kept`);
+  await page.waitForFunction(() => window.__hostFixture);
+  await assertPanelBounds();
   await page.getByRole("button", { name: "Build my home" }).waitFor({ timeout: 60000 });
   assert.ok(
     await page.evaluate(() =>
@@ -142,6 +166,7 @@ try {
   await mkdir(resolve(root, "screenshots/native-panel"), { recursive: true });
   await page.screenshot({ path: resolve(root, "screenshots/native-panel/desktop.png") });
   await page.setViewportSize({ width: 950, height: 900 });
+  await assertPanelBounds();
   assert.equal(
     await page.locator("cabane-panel").evaluate((element) => element.getBoundingClientRect().width),
     750,
@@ -152,7 +177,10 @@ try {
     "750px panel must use narrow layout inside a 950px host",
   );
   await page.setViewportSize({ width: 390, height: 844 });
+  await assertPanelBounds();
   await page.screenshot({ path: resolve(root, "screenshots/native-panel/mobile.png") });
+  await page.setViewportSize({ width: 844, height: 390 });
+  await assertPanelBounds();
   console.log(
     "Native panel browser fixture passed: demo isolation, host menu, editor, memory routing, HA import, storage save, reconnect, detach/remount, local assets, no OAuth/host close.",
   );

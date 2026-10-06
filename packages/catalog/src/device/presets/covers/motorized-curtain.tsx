@@ -2,7 +2,7 @@ import { coverPosition, Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
-export function MotorizedCurtainModel({ state, visualState }: HomeDeviceModelProps) {
+export function MotorizedCurtainModel({ state, visualState, color }: HomeDeviceModelProps) {
   const reported =
     visualState === "disconnected" || visualState === "unavailable" ? null : coverPosition(state);
   const openness = (reported ?? 35) / 100;
@@ -24,14 +24,14 @@ export function MotorizedCurtainModel({ state, visualState }: HomeDeviceModelPro
       {[-1, 1].map((side) => (
         <mesh key={side} position={[side * panelOffset, 1.14, 0.125]} castShadow receiveShadow>
           <boxGeometry args={[panelWidth, 2.28, 0.07]} />
-          <ToonMaterial color={side < 0 ? "#d8c8ad" : "#dfcfb6"} />
+          <ToonMaterial color={color ?? (side < 0 ? "#d8c8ad" : "#dfcfb6")} />
           <Outlines color="#81745f" thickness={0.004} />
         </mesh>
       ))}
       {[-0.6, -0.2, 0.2, 0.6].map((x) => (
         <mesh key={x} position={[x, 1.14, 0.158]}>
           <boxGeometry args={[0.012, 2.22, 0.004]} />
-          <ToonMaterial color="#b6a78f" />
+          <ToonMaterial color={color ?? "#b6a78f"} />
         </mesh>
       ))}
       <mesh position={[0.91, 2.29, 0.125]}>

@@ -1,3 +1,9 @@
+import {
+  createModelAssetRepository,
+  createCabaneArchive,
+  documentModelReferences,
+  downloadCabaneBytes,
+} from "@cabane/engine";
 import { useLocation } from "react-router";
 import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import { WorkspaceDestinations } from "./WorkspaceDestinations";
@@ -14,7 +20,6 @@ import {
   type ReactNode,
 } from "react";
 import { useHomeAssistantHostSession, type WorkspaceRepository } from "@cabane/engine";
-import { downloadConnectData } from "../editor-connect/profile-transfer";
 import { HaWorkspaceUnavailableError } from "./ha-workspace-client";
 import { createWorkspaceSyncCoordinator, type SyncStatus } from "./workspace-sync-coordinator";
 import { readSyncCursor } from "./workspace-sync-state";
@@ -226,12 +231,18 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
       setBusy(false);
     }
   };
+  const downloadBackup = async (json: string, filename: string) => {
+    const assets = await createModelAssetRepository(window.indexedDB).verify(
+      documentModelReferences(json),
+    );
+    downloadCabaneBytes(createCabaneArchive(json, assets), filename, "application/zip");
+  };
   const backupLocal = async () => {
     const entry = await repository.read(id);
     if (entry?.record)
-      downloadConnectData(
+      await downloadBackup(
         exportWorkspaceBackup(entry.metadata, entry.record),
-        `${id}-before-load.json`,
+        `${id}-before-load.cabane`,
       );
   };
   const resolve = (choice: "local" | "remote") =>
@@ -242,7 +253,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
           return coordinator.resolveConflict(id, origin!, choice);
         }
         const copy = await client.get(id);
-        if (copy?.document) downloadConnectData(copy.document, `${id}-before-replace.json`);
+        if (copy?.document) await downloadBackup(copy.document, `${id}-before-replace.cabane`);
         return coordinator.resolveConflict(id, origin!, choice, copy?.version);
       },
       "Copy updated.",
@@ -322,6 +333,7 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
               onCheck={() => void check()}
             />
           )}
+          {status.kind === "unavailable" && status.detail && <p role="alert">{status.detail}</p>}
           {available && (
             <>
               {!enabled && (panel === "ready" || intent !== "dashboard") ? (
