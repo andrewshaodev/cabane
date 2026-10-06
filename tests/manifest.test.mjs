@@ -286,6 +286,36 @@ await withModules(async (load) => {
     assert.ok(result.issues.some((issue) => issue.code === "wall-junction.opening-overlap"));
   });
 
+  test("a nearly straight room extension does not flag both distant terrace doors", () => {
+    const manifest = structuredClone(neutralDemoManifest);
+    const floor = manifest.floors[0];
+    floor.walls = [
+      { id: "south", from: [14, 17.9], to: [0, 18], classification: "exterior", thicknessMeters: 0.32 },
+      { id: "west", from: [0, 18], to: [0, 0], classification: "exterior", thicknessMeters: 0.32 },
+      { id: "extension", from: [0, 18], to: [-7, 18], classification: "exterior", thicknessMeters: 0.32 },
+    ];
+    floor.wallJunctions = [{ id: "extension-corner", at: [0, 18], wallIds: ["south", "west", "extension"] }];
+    floor.openings = [2, 8.2].map((offset, index) => ({
+      ...structuredClone(neutralDemoManifest.floors[0].openings[0]),
+      id: ["living-terrace-slider", "dining-terrace-slider"][index],
+      wallId: "south", offsetFromWallStartPlanUnits: offset, widthPlanUnits: 4.2,
+    }));
+    const overlaps = () => validateHomeManifest(manifest).issues.filter(
+      ({ code }) => code === "wall-junction.opening-overlap",
+    );
+    assert.deepEqual(overlaps(), [], "a wall extending away from the doors must not obstruct them");
+    // Stored endpoint order must not change the occupied wall span.
+    [floor.walls[2].from, floor.walls[2].to] = [floor.walls[2].to, floor.walls[2].from];
+    assert.deepEqual(overlaps(), []);
+    // A shallow-angle wall extending towards the doors really does obstruct them.
+    floor.walls[2].from = [0, 18];
+    floor.walls[2].to = [14, 18];
+    assert.equal(overlaps().length, 2);
+    // A short branch must not be treated as an infinite wall either.
+    floor.walls[2].to = [0.5, 18];
+    assert.deepEqual(overlaps(), []);
+  });
+
   test("accepts an opening whose jamb aligns with the face of a perpendicular junction wall", () => {
     const manifest = structuredClone(neutralDemoManifest);
     manifest.floors[0].walls.push({

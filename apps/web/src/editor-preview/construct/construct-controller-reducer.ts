@@ -78,6 +78,7 @@ const engineActionFor = (
         draft: history.present,
         wallId: updated.wallId,
         widthPlanUnits: updated.widthPlanUnits,
+        sillHeightMeters: updated.sillHeightMeters,
         excludeOpeningId: updated.id,
       }),
     );

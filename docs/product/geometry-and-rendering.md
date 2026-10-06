@@ -9,7 +9,12 @@ Basements are hidden in the whole-building view and visible when selected in
 cutaway or entered in Walk. Basement cutaways hide terrain and floors above.
 Ground terrain stays at ground level, with stair apertures through every layer.
 Footprint/room polygons, straight walls, explicit wall junctions, and wall-owned
-openings define architecture. Openings inherit wall thickness, orientation, fade,
+openings define architecture. Junction/opening clearance uses the finite spans of
+adjoining walls: a shallow-angle continuation extending away from an opening
+does not obstruct it. Actual intersecting wall spans remain protected, with a
+2 cm finish tolerance. Junction clearance only reserves spans where the adjoining
+wall rises above the opening sill; windows above low partitions remain valid.
+Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
 passages rectangular/arched variants.
