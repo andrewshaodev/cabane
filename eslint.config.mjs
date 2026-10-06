@@ -4,6 +4,29 @@ import hooks from "eslint-plugin-react-hooks";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 
+// Existing oversized files may shrink, but must not grow. Lower or remove each
+// ceiling when refactoring; split by responsibility rather than padding exceptions.
+const existingFileLineLimits = {
+  "apps/web/src/editor-action-bar/ActionBarEditor.tsx": 512,
+  "apps/web/src/editor-preview/construct/ConstructionInspector.tsx": 605,
+  "apps/web/src/editor-preview/construct/useConstructEditor.ts": 598,
+  "apps/web/src/editor-preview/construct/useConstructionPointerController.ts": 701,
+  "apps/web/src/editor-workspace/EditorWorkspace.tsx": 567,
+  "apps/web/src/editor-workspace/HomeEditorScene.tsx": 734,
+  "apps/web/src/editor-workspace/useHomeEditorController.ts": 856,
+  "packages/catalog/src/device/registry.ts": 1210,
+  "packages/catalog/src/furnishing/registry.tsx": 1396,
+  "packages/engine/src/HomeAssistantRuntime.tsx": 584,
+  "packages/engine/src/SceneActionBar.tsx": 645,
+  "packages/engine/src/ValidatedDashboardView.tsx": 720,
+  "packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx": 690,
+  "packages/engine/src/home-editor/construct/draft-reducer.ts": 639,
+  "packages/engine/src/home-project/schema.ts": 1133,
+  "packages/engine/src/types.ts": 739,
+  "packages/engine/src/useDashboardController.ts": 801,
+};
+const fileLineLimit = (max) => ["error", { max, skipBlankLines: true, skipComments: true }];
+
 export default [
   {
     ignores: [
@@ -90,5 +113,13 @@ export default [
       ],
     },
   },
+  {
+    files: ["apps/**/*.{ts,tsx}", "packages/**/*.{ts,tsx}", "home/**/*.{ts,tsx}"],
+    rules: { "max-lines": fileLineLimit(500) },
+  },
+  ...Object.entries(existingFileLineLimits).map(([file, max]) => ({
+    files: [file],
+    rules: { "max-lines": fileLineLimit(max) },
+  })),
   prettier,
 ];
