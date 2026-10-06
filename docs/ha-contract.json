@@ -1,9 +1,9 @@
 {
-  "revision": 7,
-  "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
-  "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
+  "revision": 8,
+  "fingerprint": "11b1b83d818d6905a602057831a7d9045695b5421930761ee25be133e42f9961",
+  "summary": "Publish reusable furnishing and device presets after main merge",
   "breakingChanges": [
-    "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
+    "Homes using the new catalog model IDs require the matching integration release; existing model IDs remain compatible."
   ],
   "history": [
     {
@@ -46,6 +46,13 @@
       "summary": "Soften rattan pendant lighting and lower its bulb into the shade chamber",
       "breakingChanges": [
         "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
+      ]
+    },
+    {
+      "revision": 7,
+      "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
+      "breakingChanges": [
+        "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
       ]
     }
   ]
