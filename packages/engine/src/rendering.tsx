@@ -5,7 +5,7 @@ import {
   Color,
   type ColorRepresentation,
   DataTexture,
-  NearestFilter,
+  LinearFilter,
   RedFormat,
   type Group,
   type Mesh,
@@ -23,14 +23,21 @@ import { SceneContourContext } from "./StylizedScene";
 import { SceneOutlines } from "./SceneOutlines";
 
 export const TOON_GRADIENT_DATA = [55, 115, 185, 255] as const;
+// Wide constant bands retain cel shading. Linear filtering only blends their
+// one-texel boundaries, so view-space dot-product roundoff cannot flash a whole
+// planar wall between two bands (especially when sunlight is parallel to it).
+const TOON_BAND_TEXELS = 64;
 const toonGradient = new DataTexture(
-  new Uint8Array(TOON_GRADIENT_DATA),
-  TOON_GRADIENT_DATA.length,
+  Uint8Array.from(
+    { length: TOON_GRADIENT_DATA.length * TOON_BAND_TEXELS },
+    (_, index) => TOON_GRADIENT_DATA[Math.floor(index / TOON_BAND_TEXELS)],
+  ),
+  TOON_GRADIENT_DATA.length * TOON_BAND_TEXELS,
   1,
   RedFormat,
 );
-toonGradient.minFilter = NearestFilter;
-toonGradient.magFilter = NearestFilter;
+toonGradient.minFilter = LinearFilter;
+toonGradient.magFilter = LinearFilter;
 toonGradient.generateMipmaps = false;
 toonGradient.needsUpdate = true;
 

@@ -19,14 +19,20 @@ export function WallTelevisionModel({ visualState, reducedMotion }: HomeDeviceMo
         <ToonMaterial color={playing ? "#457a88" : "#1c3039"} />
       </mesh>
       {playing && (
-        <group position={[0, 0.68, 0.0686]}>
+        <group position={[0, 0.68, 0.069]}>
           <TelevisionPicture width={2.352} height={1.312} reducedMotion={reducedMotion} />
         </group>
       )}
-      <mesh position={[-0.42, 0.96, 0.0692]} rotation={[0, 0, -0.12]}>
-        <boxGeometry args={[0.62, 0.018, 0.001]} />
-        <ToonMaterial color="#8db6bf" transparent opacity={0.24} />
-      </mesh>
+      {!playing && (
+        <mesh
+          name="wall-television-reflection"
+          position={[-0.42, 0.96, 0.0692]}
+          rotation={[0, 0, -0.12]}
+        >
+          <boxGeometry args={[0.62, 0.018, 0.001]} />
+          <ToonMaterial color="#8db6bf" transparent opacity={0.24} />
+        </mesh>
+      )}
     </group>
   );
 }

@@ -1,9 +1,9 @@
 {
-  "revision": 3,
-  "fingerprint": "d71e3fef03bba310057c70fd7532822558b39e190dcedfc5694a589cdcbf57fa",
-  "summary": "Animate garage door opening and closing smoothly",
+  "revision": 4,
+  "fingerprint": "50e99988c05e0a9e6b5e75c99d5d320f5a365c14679d43c4f529f79962598b5f",
+  "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
   "breakingChanges": [
-    "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
+    "No persisted fields or model IDs change. Existing homes remain compatible; update the panel to receive stable toon lighting during camera movement and the TV rendering fix and animation."
   ],
   "history": [
     {
@@ -18,6 +18,13 @@
       "summary": "Ship the expanded rug catalog with workspace upgrade guidance",
       "breakingChanges": [
         "Existing rug model and variant IDs remain supported. Workspaces using the new rug styles require this matching integration release; older panels must update through HACS before opening them."
+      ]
+    },
+    {
+      "revision": 3,
+      "summary": "Animate garage door opening and closing smoothly",
+      "breakingChanges": [
+        "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
       ]
     }
   ]

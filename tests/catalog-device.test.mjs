@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
-import { Box3, Raycaster, Vector3 } from "three";
+import { Box3, PerspectiveCamera, Raycaster, Vector3 } from "three";
 import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -52,6 +52,81 @@ await withModules(async (load) => {
       assert.ok(front(display) - front(controls) > 0.001, "display must clear control panel");
       await renderer.unmount();
     }
+  });
+
+  test("TV artwork keeps distinct depth layers from room and overview cameras", async () => {
+    for (const id of ["television", "wall-television", "compact-wall-television"]) {
+      const renderer = await create(
+        createElement(catalog.stableDeviceRegistry[id].component, {
+          visualState: "connected-active",
+          reducedMotion: true,
+          walkMode: false,
+          onInteract() {},
+        }),
+      );
+      const picture = renderer.scene.findByProps({ name: "television-picture" }).instance;
+      picture.updateWorldMatrix(true, true);
+      const layers = [];
+      picture.traverse((object) => {
+        if (object.isMesh) layers.push(object);
+      });
+      for (const mesh of layers) {
+        assert.equal(mesh.material.depthTest, true, "room geometry must still occlude the TV");
+      }
+      assert.equal(renderer.scene.findAllByProps({ name: "wall-television-reflection" }).length, 0);
+      const target = picture.getWorldPosition(new Vector3());
+      for (const distance of [2, 10, 30]) {
+        for (const angle of [0, Math.PI / 3]) {
+          const camera = new PerspectiveCamera(68, 1, 0.04, 120);
+          camera.position
+            .copy(target)
+            .add(new Vector3(Math.sin(angle) * distance, 0, Math.cos(angle) * distance));
+          camera.lookAt(target);
+          camera.updateMatrixWorld();
+          // Compare coincident screen points: 24-bit depth must keep each paint layer distinct.
+          const depths = layers.map((mesh) => {
+            const point = target.clone();
+            point.z = mesh.getWorldPosition(new Vector3()).z;
+            const depth = (point.project(camera).z + 1) / 2;
+            const bias = mesh.material.polygonOffset ? mesh.material.polygonOffsetUnits : 0;
+            return Math.round(depth * (2 ** 24 - 1) + bias);
+          });
+          for (let i = 1; i < depths.length; i++) {
+            assert.ok(
+              depths[i - 1] - depths[i] >= 2,
+              `${id}: artwork depth collision at ${distance}m, angle ${angle}: ${depths}`,
+            );
+          }
+        }
+      }
+      await renderer.unmount();
+    }
+  });
+
+  test("TV flight stays inside the screen and reuses geometry for a complete loop", async () => {
+    const renderer = await create(
+      createElement(catalog.stableDeviceRegistry["wall-television"].component, {
+        visualState: "connected-active",
+        reducedMotion: false,
+        walkMode: false,
+        onInteract() {},
+      }),
+    );
+    const picture = renderer.scene.findByProps({ name: "television-picture" }).instance;
+    picture.updateWorldMatrix(true, true);
+    const screen = new Box3().setFromObject(picture.children[0]);
+    const meshes = [];
+    picture.traverse((object) => {
+      if (object.isMesh) meshes.push([object, object.geometry]);
+    });
+    for (let frame = 0; frame < 460; frame++) {
+      await renderer.advanceFrames(1, 0.05);
+      const bounds = new Box3().setFromObject(picture);
+      assert.ok(bounds.min.x >= screen.min.x - 1e-6 && bounds.max.x <= screen.max.x + 1e-6);
+      assert.ok(bounds.min.y >= screen.min.y - 1e-6 && bounds.max.y <= screen.max.y + 1e-6);
+    }
+    for (const [mesh, geometry] of meshes) assert.equal(mesh.geometry, geometry);
+    await renderer.unmount();
   });
 
   test("device activity only animates active devices and freezes for reduced motion", async () => {

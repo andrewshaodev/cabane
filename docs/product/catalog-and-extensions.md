@@ -114,3 +114,9 @@ in Orbit and Walk, retain depth occlusion, and do not intercept pointer interact
 Their decorative extent does not change physical placement or collision bounds.
 
 The complete preset categorization is maintained in [device activity](../device-activity.md).
+
+TV artwork is a procedural comic-book Superman flight with a gently moving cape
+and drifting clouds. Ordered polygon depth bias separates the screen layers at
+overview and oblique camera angles while retaining scene occlusion. Wall TVs
+omit their glass reflection while active. Reduced motion freezes the composition;
+inactive and unavailable states retain their existing appearance.
