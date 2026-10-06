@@ -1,9 +1,10 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function SmartPowerStripModel({ visualState }: HomeDeviceModelProps) {
+export function SmartPowerStripModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-smart-power-strip" userData={{ walkCollider: true }}>
       <RoundedBox
@@ -26,6 +27,12 @@ export function SmartPowerStripModel({ visualState }: HomeDeviceModelProps) {
         <cylinderGeometry args={[0.011, 0.011, 0.006, 16]} />
         <ToonMaterial color={visualState === "connected-active" ? palette.coral : palette.green} />
       </mesh>
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.26, 0]}
+        scale={0.75}
+      />
       <StatusBeacon visualState={visualState} position={[0.148, 0.047, 0]} scale={0.12} />
     </group>
   );

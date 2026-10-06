@@ -1,9 +1,10 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function BathroomExtractorFanModel({ visualState }: HomeDeviceModelProps) {
+export function BathroomExtractorFanModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-bathroom-extractor-fan">
@@ -31,6 +32,12 @@ export function BathroomExtractorFanModel({ visualState }: HomeDeviceModelProps)
           <ToonMaterial color="#d3d5cf" />
         </mesh>
       ))}
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.36, 0.12]}
+        scale={0.65}
+      />
       <StatusBeacon visualState={visualState} position={[0.065, 0.152, 0.074]} scale={0.22} />
     </group>
   );

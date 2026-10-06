@@ -1,10 +1,11 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
 /** Generic floor-standing humidity appliance; front faces +Z. */
-export function HumidifierDehumidifierModel({ visualState }: HomeDeviceModelProps) {
+export function HumidifierDehumidifierModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-humidifier-dehumidifier" userData={{ walkCollider: true }}>
@@ -41,6 +42,12 @@ export function HumidifierDehumidifierModel({ visualState }: HomeDeviceModelProp
           emissiveIntensity={active ? 0.38 : 0.08}
         />
       </mesh>
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.8, 0.1]}
+        scale={0.8}
+      />
       <StatusBeacon visualState={visualState} position={[0.105, 0.558, 0.126]} scale={0.25} />
     </group>
   );

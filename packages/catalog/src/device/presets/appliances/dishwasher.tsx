@@ -1,3 +1,4 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { kitchenFinish } from "../../../furnishing/presets/kitchen/kitchen-finish";
 import { ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
@@ -6,7 +7,7 @@ import { StatusBeacon } from "../../visuals/device-visual-state";
 import { AppliancePull } from "./appliance-pull";
 
 /** Generic freestanding dishwasher, including its projecting handle. */
-export function DishwasherModel({ visualState, variant }: HomeDeviceModelProps) {
+export function DishwasherModel({ visualState, variant, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-dishwasher" userData={{ walkCollider: true }}>
       <RoundedFurniturePanel
@@ -52,6 +53,12 @@ export function DishwasherModel({ visualState, variant }: HomeDeviceModelProps) 
         color="#283231"
         radius={0.003}
         outline={false}
+      />
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 1.05, 0.34]}
+        scale={1}
       />
       <StatusBeacon visualState={visualState} position={[0.198, 0.765, 0.3]} scale={0.5} />
     </group>

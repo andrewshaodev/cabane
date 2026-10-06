@@ -19,7 +19,7 @@ export const compactWallTelevisionDefinition = defineDeviceModel({
   mountKind: "wall",
   outlineContact: true,
   interaction,
-  complexity: { visibleMeshes: 5, triangles: 100 },
+  complexity: { visibleMeshes: 7, triangles: 160 },
 });
 export const wallTelevisionDefinition = defineDeviceModel({
   defaultRoomType: "living-room",
@@ -34,5 +34,5 @@ export const wallTelevisionDefinition = defineDeviceModel({
   bounds: { min: [-1.2, 0, 0], max: [1.2, 1.36, 0.07] },
   outlineContact: true,
   interaction,
-  complexity: { visibleMeshes: 5, triangles: 100 },
+  complexity: { visibleMeshes: 7, triangles: 160 },
 });

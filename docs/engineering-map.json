@@ -175,7 +175,8 @@
       "packages/catalog/src/architecture",
       "packages/catalog/src/furnishing",
       "packages/catalog/src/device",
-      "home/src/extensions"
+      "home/src/extensions",
+      "packages/catalog/src/device/visuals"
     ],
     "interfaces": [
       {
@@ -183,8 +184,8 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry.",
-    "checks": ["verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue.",
+    "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {
     "title": "Optional walk tools",

@@ -117,10 +117,10 @@ Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.
 
 Contract: [Catalog and model extensions](../docs/product/catalog-and-extensions.md).
 
-- Owners: [`packages/catalog/src/architecture`](../packages/catalog/src/architecture), [`packages/catalog/src/furnishing`](../packages/catalog/src/furnishing), [`packages/catalog/src/device`](../packages/catalog/src/device), [`home/src/extensions`](../home/src/extensions).
+- Owners: [`packages/catalog/src/architecture`](../packages/catalog/src/architecture), [`packages/catalog/src/furnishing`](../packages/catalog/src/furnishing), [`packages/catalog/src/device`](../packages/catalog/src/device), [`home/src/extensions`](../home/src/extensions), [`packages/catalog/src/device/visuals`](../packages/catalog/src/device/visuals).
 - Interface: `stableFurnishingRegistry` via [`packages/catalog/src/furnishing/index.ts`](../packages/catalog/src/furnishing/index.ts).
-- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry.
-- Checks: `verify:boundaries`, `verify:policy`, `verify:furnishing-surfaces`.
+- Review invariant: Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue.
+- Checks: `test:unit`, `verify:boundaries`, `verify:policy`, `verify:furnishing-surfaces`.
 
 ### Optional walk tools
 

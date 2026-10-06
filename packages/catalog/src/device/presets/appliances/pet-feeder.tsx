@@ -1,10 +1,11 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../../../furnishing/presets/construction/rounded-furniture-panel";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
 /** Generic automatic dry-food feeder with one forward-facing bowl. */
-export function PetFeederModel({ visualState }: HomeDeviceModelProps) {
+export function PetFeederModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-pet-feeder" userData={{ walkCollider: true }}>
@@ -48,6 +49,12 @@ export function PetFeederModel({ visualState }: HomeDeviceModelProps) {
           emissiveIntensity={active ? 0.3 : 0}
         />
       </mesh>
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.55, 0.12]}
+        scale={0.8}
+      />
       <StatusBeacon visualState={visualState} position={[0.07, 0.085, 0.173]} scale={0.2} />
     </group>
   );

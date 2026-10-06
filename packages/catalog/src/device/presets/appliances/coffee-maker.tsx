@@ -1,10 +1,11 @@
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../../../furnishing/presets/construction/rounded-furniture-panel";
+import { ApplianceSteam } from "./appliance-steam";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
 /** Generic filter coffee maker with a glass carafe; front faces +Z. */
-export function CoffeeMakerModel({ visualState }: HomeDeviceModelProps) {
+export function CoffeeMakerModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-coffee-maker" userData={{ walkCollider: true }}>
@@ -62,6 +63,9 @@ export function CoffeeMakerModel({ visualState }: HomeDeviceModelProps) {
           emissiveIntensity={active ? 0.3 : 0}
         />
       </mesh>
+      {visualState === "connected-active" && (
+        <ApplianceSteam position={[0, 0.3, 0.08]} reducedMotion={reducedMotion} />
+      )}
       <StatusBeacon visualState={visualState} position={[0.07, 0.218, 0.01]} scale={0.2} />
     </group>
   );

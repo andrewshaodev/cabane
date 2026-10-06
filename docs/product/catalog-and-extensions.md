@@ -76,3 +76,14 @@ architectural model, not an Arrange device. Its frame and moving slats are focus
 model modules. Opening previews use the same geometry and cached rendering queue
 as Arrange. The bundled garage uses an opening and an opening cover profile;
 there is no compatibility registration for the retired garage device.
+
+## Device activity
+
+Preset activity is catalog-owned and follows resolved `visualState`; unavailable,
+disconnected and inactive devices never display an active effect. TV artwork yields
+to live camera media. Motion uses the existing scene frames, respects reduced motion,
+and does not allocate lights, textures or external assets. Holograms face the camera
+in Orbit and Walk, retain depth occlusion, and do not intercept pointer interaction.
+Their decorative extent does not change physical placement or collision bounds.
+
+The complete preset categorization is maintained in [device activity](../device-activity.md).

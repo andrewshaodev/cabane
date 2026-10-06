@@ -1,8 +1,10 @@
+import { HeatExchangerBars } from "./heat-exchanger-bars";
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function HeatedTowelRailModel({ visualState }: HomeDeviceModelProps) {
+export function HeatedTowelRailModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-heated-towel-rail">
       {[-0.24, 0.24].map((x) => (
@@ -18,13 +20,7 @@ export function HeatedTowelRailModel({ visualState }: HomeDeviceModelProps) {
           <Outlines color="#747b79" thickness={0.004} />
         </mesh>
       ))}
-      {Array.from({ length: 8 }, (_, index) => 0.12 + index * 0.145).map((y) => (
-        <mesh key={y} position={[0, y, 0.062]} castShadow>
-          <boxGeometry args={[0.54, 0.025, 0.055]} />
-          <ToonMaterial color="#f0eee9" />
-          <Outlines color="#7d8380" thickness={0.003} />
-        </mesh>
-      ))}
+      <HeatExchangerBars horizontal={true} />
       <mesh position={[0, 1.18, 0.055]} castShadow>
         <boxGeometry args={[0.6, 0.04, 0.05]} />
         <ToonMaterial color="#e8e7e2" />
@@ -34,6 +30,12 @@ export function HeatedTowelRailModel({ visualState }: HomeDeviceModelProps) {
         <ToonMaterial color={palette.charcoal} />
         <Outlines color="#303836" thickness={0.003} />
       </mesh>
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 1.4, 0.15]}
+        scale={1}
+      />
       <StatusBeacon visualState={visualState} position={[0.235, 0.105, 0.095]} scale={0.55} />
     </group>
   );

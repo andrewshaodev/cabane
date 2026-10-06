@@ -1,8 +1,9 @@
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
+import { LaundryDrum } from "./laundry-drum";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
-export function WashingMachineModel({ visualState }: HomeDeviceModelProps) {
+export function WashingMachineModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-washing-machine" userData={{ walkCollider: true }}>
       <mesh position={[0, 0.43, 0]} castShadow receiveShadow>
@@ -31,6 +32,9 @@ export function WashingMachineModel({ visualState }: HomeDeviceModelProps) {
         <boxGeometry args={[0.15, 0.075, 0.02]} />
         <ToonMaterial color="#283231" />
       </mesh>
+      {visualState === "connected-active" && (
+        <LaundryDrum position={[0, 0.35, 0.33]} radius={0.17} reducedMotion={reducedMotion} />
+      )}
       <StatusBeacon visualState={visualState} position={[0.255, 0.755, 0.314]} scale={0.7} />
       <mesh position={[0.23, 0.09, 0.301]}>
         <boxGeometry args={[0.11, 0.13, 0.018]} />

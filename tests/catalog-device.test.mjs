@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
@@ -14,6 +15,97 @@ await withModules(async (load) => {
   const validationCore = await load("/packages/engine/src/validation/core.ts");
   const fixtures = await load("/tests/fixtures/agent-home.tsx");
   const airflow = await load("/packages/catalog/src/device/visuals/airflow-waves.tsx");
+  test("the activity inventory categorizes every preset exactly once", () => {
+    const inventory = readFileSync(new URL("../docs/device-activity.md", import.meta.url), "utf8");
+    const ids = inventory
+      .split("\n")
+      .filter((line) => line.startsWith("| "))
+      .flatMap((line) => [...line.matchAll(/`([^`]+)`/g)].map((match) => match[1]));
+    assert.deepEqual(ids.sort(), [...catalog.STABLE_DEVICE_MODEL_IDS].sort());
+  });
+
+  test("microwave glass and controls sit clearly ahead of their backing surfaces", async () => {
+    for (const visualState of [
+      "connected-active",
+      "connected-inactive",
+      "unavailable",
+      "disconnected",
+    ]) {
+      const renderer = await create(
+        createElement(catalog.stableDeviceRegistry.microwave.component, {
+          visualState,
+          reducedMotion: true,
+          walkMode: false,
+          onInteract() {},
+        }),
+      );
+      const root = renderer.scene.findByProps({ name: "catalog-microwave" }).instance;
+      const front = (object) => new Box3().setFromObject(object).max.z;
+      const housing = root.getObjectByName("microwave-housing");
+      const door = root.getObjectByName("microwave-door");
+      const glass = root.getObjectByName("microwave-window");
+      const controls = root.getObjectByName("microwave-control-panel");
+      const display = root.getObjectByName("microwave-display");
+      assert.ok(front(door) - front(housing) > 0.001, "door must not be coplanar with housing");
+      assert.ok(front(glass) - front(door) > 0.001, "glass must not be coplanar with door");
+      assert.ok(front(controls) - front(housing) > 0.001, "control panel must clear housing");
+      assert.ok(front(display) - front(controls) > 0.001, "display must clear control panel");
+      await renderer.unmount();
+    }
+  });
+
+  test("device activity only animates active devices and freezes for reduced motion", async () => {
+    for (const [id, effect, moving, axis] of [
+      ["television", "television-picture", "television-picture-motion", "position"],
+      ["wall-television", "television-picture", "television-picture-motion", "position"],
+      ["compact-wall-television", "television-picture", "television-picture-motion", "position"],
+      ["washing-machine", "laundry-drum", "laundry-drum", "rotation"],
+      ["tumble-dryer", "laundry-drum", "laundry-drum", "rotation"],
+      ["electric-kettle", "appliance-steam", "appliance-steam", "steam"],
+      ["coffee-maker", "appliance-steam", "appliance-steam", "steam"],
+      ...[
+        "water-heater",
+        "dishwasher",
+        "smart-plug",
+        "smart-power-strip",
+        "pet-feeder",
+        "robot-vacuum",
+        "humidifier-dehumidifier",
+        "air-purifier",
+        "heated-towel-rail",
+        "smart-panel-radiator",
+        "bathroom-extractor-fan",
+      ].map((id) => [id, "activity-hologram", "activity-hologram-float", "position"]),
+    ]) {
+      const render = (visualState = "connected-active", reducedMotion = false) =>
+        createElement(catalog.stableDeviceRegistry[id].component, {
+          visualState,
+          reducedMotion,
+          walkMode: false,
+          onInteract() {},
+        });
+      const renderer = await create(render());
+      const pose = () => {
+        const object = renderer.scene.findByProps({ name: moving }).instance;
+        return axis === "steam" ? object.children[0].position.toArray() : object[axis].toArray();
+      };
+      const initial = pose();
+      await renderer.advanceFrames(5, 0.05);
+      assert.notDeepEqual(pose(), initial, `${id} must animate`);
+      await renderer.update(render("connected-active", true));
+      const frozen = pose();
+      await renderer.advanceFrames(5, 0.05);
+      assert.deepEqual(pose(), frozen, `${id} must respect reduced motion`);
+      for (const state of ["connected-inactive", "unavailable", "disconnected"]) {
+        await renderer.update(render(state));
+        assert.equal(renderer.scene.findAllByProps({ name: effect }).length, 0, `${id}: ${state}`);
+      }
+      await renderer.update(render());
+      assert.equal(renderer.scene.findAllByProps({ name: effect }).length, 1);
+      await renderer.unmount();
+    }
+  });
+
   const addedDeviceIds = [
     "heated-towel-rail",
     "smart-panel-radiator",
@@ -788,6 +880,7 @@ await withModules(async (load) => {
         },
       }),
     );
+    assert.equal(renderer.scene.findAllByProps({ name: "television-picture" }).length, 0);
     const surface = renderer.scene.findByProps({ name: "camera-screen-live-surface" });
     assert.equal(surface.instance.geometry.parameters.width, 1.405);
     assert.equal(surface.instance.geometry.parameters.height, 0.675);

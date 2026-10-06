@@ -1,9 +1,10 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
 /** Generic circular robot vacuum; its forward sensor faces +Z. */
-export function RobotVacuumModel({ visualState }: HomeDeviceModelProps) {
+export function RobotVacuumModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-robot-vacuum" userData={{ walkCollider: true }}>
@@ -38,6 +39,12 @@ export function RobotVacuumModel({ visualState }: HomeDeviceModelProps) {
           <ToonMaterial color="#2f3936" />
         </mesh>
       ))}
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.32, 0]}
+        scale={0.8}
+      />
       <StatusBeacon visualState={visualState} position={[0.075, 0.077, 0.065]} scale={0.18} />
     </group>
   );

@@ -1,10 +1,11 @@
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../../../furnishing/presets/construction/rounded-furniture-panel";
+import { LaundryDrum } from "./laundry-drum";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
 /** Generic condenser dryer; full envelope 60 × 85 × 65 cm (W/H/D). */
-export function TumbleDryerModel({ visualState }: HomeDeviceModelProps) {
+export function TumbleDryerModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-tumble-dryer" userData={{ walkCollider: true }}>
       <RoundedFurniturePanel
@@ -60,6 +61,9 @@ export function TumbleDryerModel({ visualState }: HomeDeviceModelProps) {
         radius={0.003}
         outline={false}
       />
+      {visualState === "connected-active" && (
+        <LaundryDrum position={[0, 0.43, 0.3]} radius={0.17} reducedMotion={reducedMotion} />
+      )}
       <StatusBeacon visualState={visualState} position={[0.22, 0.779, 0.303]} scale={0.5} />
       {[0.091, 0.113, 0.135].map((y) => (
         <mesh key={y} name="dryer-condenser-vent" position={[0, y, 0.277]}>

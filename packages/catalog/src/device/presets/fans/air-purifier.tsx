@@ -1,8 +1,9 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function AirPurifierModel({ visualState }: HomeDeviceModelProps) {
+export function AirPurifierModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-air-purifier" userData={{ walkCollider: true }}>
@@ -29,6 +30,12 @@ export function AirPurifierModel({ visualState }: HomeDeviceModelProps) {
           emissiveIntensity={active ? 0.3 : 0}
         />
       </mesh>
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.85, 0.1]}
+        scale={0.8}
+      />
       <StatusBeacon visualState={visualState} position={[0.08, 0.445, 0.09]} scale={0.35} />
     </group>
   );

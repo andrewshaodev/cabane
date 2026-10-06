@@ -121,7 +121,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.316, 0, -0.295], max: [0.316, 0.865, 0.335] },
     outlineContact: false,
     interaction,
-    complexity: { visibleMeshes: 9, triangles: 900 },
+    complexity: { visibleMeshes: 11, triangles: 936 },
   }),
   "tumble-dryer": defineDeviceModel({
     defaultRoomType: "laundry",
@@ -136,7 +136,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.3, 0, -0.325], max: [0.3, 0.85, 0.325] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 14, triangles: 2_800 },
+    complexity: { visibleMeshes: 16, triangles: 2836 },
   }),
   dishwasher: defineDeviceModel({
     variants: KITCHEN_FINISH_VARIANTS,
@@ -152,7 +152,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.3, 0, -0.325], max: [0.3, 0.85, 0.325] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 12, triangles: 2_800 },
+    complexity: { visibleMeshes: 16, triangles: 3600 },
   }),
   oven: defineDeviceModel({
     defaultRoomType: "kitchen",
@@ -183,7 +183,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.286, 0, -0.206], max: [0.286, 1.456, 0.224] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 9, triangles: 950 },
+    complexity: { visibleMeshes: 13, triangles: 1750 },
   }),
   speaker: defineDeviceModel({
     defaultRoomType: "living-room",
@@ -214,7 +214,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     outlineContact: false,
     liveMedia: { kind: "camera-stream", slotRole: "primary" },
     interaction: { target: "camera-viewer", tapTolerancePixels: 10 },
-    complexity: { visibleMeshes: 15, triangles: 4_200 },
+    complexity: { visibleMeshes: 14, triangles: 4260 },
   }),
   "compact-wall-television": compactWallTelevisionDefinition,
   "wall-television": wallTelevisionDefinition,
@@ -572,7 +572,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.3, 0, 0], max: [0.3, 1.2, 0.12] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 16, triangles: 1_300 },
+    complexity: { visibleMeshes: 13, triangles: 2100 },
   }),
   "smart-panel-radiator": defineDeviceModel({
     defaultRoomType: "living-room",
@@ -587,7 +587,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.5, 0, 0], max: [0.5, 0.6, 0.12] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 13, triangles: 1_100 },
+    complexity: { visibleMeshes: 10, triangles: 1900 },
   }),
   "smart-thermostat": defineDeviceModel({
     defaultRoomType: "hallway",
@@ -618,7 +618,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.035, 0, 0], max: [0.035, 0.07, 0.055] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 7, triangles: 1_600 },
+    complexity: { visibleMeshes: 11, triangles: 2400 },
   }),
   "ceiling-light": defineDeviceModel({
     defaultRoomType: "living-room",
@@ -833,7 +833,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.135, 0, -0.135], max: [0.135, 0.52, 0.135] },
     outlineContact: false,
     interaction,
-    complexity: { visibleMeshes: 12, triangles: 2_200 },
+    complexity: { visibleMeshes: 16, triangles: 3000 },
   }),
   "bathroom-extractor-fan": defineDeviceModel({
     defaultRoomType: "bathroom",
@@ -848,7 +848,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.09, 0, 0], max: [0.09, 0.18, 0.09] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 10, triangles: 2_000 },
+    complexity: { visibleMeshes: 14, triangles: 2800 },
   }),
   refrigerator: defineDeviceModel({
     defaultRoomType: "kitchen",
@@ -880,7 +880,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.17, 0, -0.0325], max: [0.17, 0.055, 0.0325] },
     outlineContact: false,
     interaction,
-    complexity: { visibleMeshes: 10, triangles: 2_100 },
+    complexity: { visibleMeshes: 14, triangles: 2900 },
   }),
   "humidifier-dehumidifier": defineDeviceModel({
     defaultRoomType: "bedroom",
@@ -895,7 +895,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.16, 0, -0.14], max: [0.16, 0.6, 0.14] },
     outlineContact: false,
     interaction,
-    complexity: { visibleMeshes: 11, triangles: 2_500 },
+    complexity: { visibleMeshes: 15, triangles: 3300 },
   }),
   "robot-vacuum": defineDeviceModel({
     defaultRoomType: "living-room",
@@ -910,7 +910,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.175, 0, -0.175], max: [0.175, 0.09, 0.175] },
     outlineContact: false,
     interaction,
-    complexity: { visibleMeshes: 10, triangles: 2_400 },
+    complexity: { visibleMeshes: 14, triangles: 3200 },
   }),
   "smart-lock": defineDeviceModel({
     defaultRoomType: "entryway",
@@ -1080,7 +1080,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.12, 0, -0.17], max: [0.12, 0.36, 0.17] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 11, triangles: 2_600 },
+    complexity: { visibleMeshes: 14, triangles: 2840 },
   }),
   "electric-kettle": defineDeviceModel({
     defaultRoomType: "kitchen",
@@ -1095,7 +1095,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.11, 0, -0.1], max: [0.11, 0.26, 0.1] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 9, triangles: 2_200 },
+    complexity: { visibleMeshes: 12, triangles: 2440 },
   }),
   freezer: defineDeviceModel({
     defaultRoomType: "kitchen",
@@ -1126,7 +1126,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     bounds: { min: [-0.12, 0, -0.18], max: [0.12, 0.35, 0.18] },
     outlineContact: true,
     interaction,
-    complexity: { visibleMeshes: 10, triangles: 2_400 },
+    complexity: { visibleMeshes: 14, triangles: 3200 },
   }),
   "weather-station": defineDeviceModel({
     defaultRoomType: "living-room",

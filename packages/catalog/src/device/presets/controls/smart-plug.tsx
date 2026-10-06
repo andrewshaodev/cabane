@@ -1,9 +1,10 @@
+import { ActivityHologram } from "../../visuals/activity-hologram";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function SmartPlugModel({ visualState }: HomeDeviceModelProps) {
+export function SmartPlugModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-smart-plug">
       <RoundedBox
@@ -26,6 +27,12 @@ export function SmartPlugModel({ visualState }: HomeDeviceModelProps) {
           <ToonMaterial color="#39413f" />
         </mesh>
       ))}
+      <ActivityHologram
+        visualState={visualState}
+        reducedMotion={reducedMotion}
+        position={[0, 0.24, 0.09]}
+        scale={0.65}
+      />
       <StatusBeacon visualState={visualState} position={[0.022, 0.015, 0.047]} scale={0.22} />
     </group>
   );

@@ -32,7 +32,7 @@ export function OvenModel({ visualState }: HomeDeviceModelProps) {
         name="oven-viewing-window"
         size={[0.44, 0.265, 0.005]}
         position={[0, 0.224, 0.2705]}
-        color="#495e60"
+        color={visualState === "connected-active" ? "#e6a359" : "#495e60"}
         radius={0.007}
         outline={false}
       />
