@@ -1,6 +1,24 @@
 import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
+import { SceneMenuIcon } from "./SceneMenuIcon";
+
+export function WalkPreferencesMenuItem({ onOpen }: { onOpen: () => void }) {
+  const dom = useCabaneDom();
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.currentTarget.closest("details")?.removeAttribute("open");
+        if (dom.root.pointerLockElement) document.exitPointerLock();
+        onOpen();
+      }}
+    >
+      <SceneMenuIcon name="preferences" />
+      <span>Preferences</span>
+    </button>
+  );
+}
 
 const WALK_PREFERENCES_KEY = "cabane.walk.preferences.v1";
 

@@ -735,6 +735,8 @@ export interface RuntimeBindingProfile {
   homeId: string;
   roomAreaIds: Readonly<Record<string, string>>;
   entityIdsBySlotId: Readonly<Record<string, EntityId>>;
+  /** Private HA action mappings; project targets contain only the action kind. */
+  actionEntityIdsByShortcutId?: Readonly<Record<string, EntityId>>;
 }
 
 export type BindingSlotKind = "dashboard" | "device" | "opening-contact" | "opening-cover";

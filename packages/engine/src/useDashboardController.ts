@@ -1,3 +1,5 @@
+import { useHaActionShortcuts } from "./action-bar/useHaActionShortcuts";
+import { resolvedRoomDisplayNames } from "./home-assistant-mapping/room-display-name";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useCabaneDom } from "./CabaneDom";
 import { deriveFloorLevels, useFloorNavigation } from "./building";
@@ -84,13 +86,7 @@ export function useDashboardController({
   );
   const homePresence = useMemo(() => deriveHomePresence(runtime), [runtime]);
   const roomDisplayNames = useMemo(
-    () =>
-      Object.fromEntries(
-        floor.rooms.map((room) => [
-          room.id,
-          resolvedBindings.rooms[room.id]?.displayName ?? room.name,
-        ]),
-      ),
+    () => resolvedRoomDisplayNames(floor.rooms, resolvedBindings.rooms),
     [floor.rooms, resolvedBindings.rooms],
   );
   const initialSession = useRef(
@@ -120,6 +116,7 @@ export function useDashboardController({
     return () => window.clearInterval(timer);
   }, []);
   const [cameraResetKey, setCameraResetKey] = useState(0);
+  const [roomFocusKey, setRoomFocusKey] = useState(0);
   const [automaticOpeningIds, setAutomaticOpeningIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -216,6 +213,7 @@ export function useDashboardController({
   const selectRoom = useCallback(
     (roomId: string) => {
       if (walkthrough) return;
+      setRoomFocusKey((key) => key + 1);
       setSelectedRoomId(roomId);
       setSelectedDeviceId(null);
       setDevicePanelRoomId(null);
@@ -225,6 +223,7 @@ export function useDashboardController({
     [walkDevicePanelOpenRef, walkthrough],
   );
   const goHome = useCallback(() => {
+    setRoomFocusKey((key) => key + 1);
     movementInputRef.current = { x: 0, y: 0 };
     lookInputRef.current = { x: 0, y: 0 };
     lookDeltaRef.current = { x: 0, y: 0 };
@@ -332,7 +331,13 @@ export function useDashboardController({
         break;
     }
   };
+  const haActions = useHaActionShortcuts(runtime, bindingManager.profile, setSceneActionError);
+  const pendingHaActions = haActions.pending;
   const runConfiguredAction = (item: ActionBarItem) => {
+    if (item.target.kind === "scene" || item.target.kind === "script") {
+      void haActions.run(item);
+      return;
+    }
     if (item.target.kind === "walk-tool") {
       const toolId = item.target.toolId;
       if (walkMode && walkTools.some((tool) => tool.id === toolId)) {
@@ -455,6 +460,7 @@ export function useDashboardController({
     setWalkRoomId,
     selectedRoom,
     cameraResetKey,
+    roomFocusKey,
     architectureModels,
     selectedRoomId,
     wallFadeEnabled,
@@ -503,5 +509,6 @@ export function useDashboardController({
     runConfiguredAction,
     sceneActionError,
     setSceneActionError,
+    pendingHaActions,
   };
 }

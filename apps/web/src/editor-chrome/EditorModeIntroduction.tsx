@@ -15,7 +15,8 @@ const introductions = {
   },
   shortcuts: {
     title: "Shortcuts",
-    description: "Customize the action bar on Home with your favorite actions, rooms and devices.",
+    description:
+      "Customize the action bar on Home with your favorite actions, rooms, devices, scenes and scripts.",
   },
 } satisfies Record<EditorMode | "shortcuts", { title: string; description: string }>;
 

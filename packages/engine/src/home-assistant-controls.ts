@@ -4,7 +4,7 @@ export type CoalescedControlChannel =
   "brightness" | "humidity" | "percentage" | "position" | "temperature" | "value" | "volume";
 
 export interface SupportedServiceCall {
-  domain: ControllableDeviceDomain | "dreame_vacuum";
+  domain: ControllableDeviceDomain | "dreame_vacuum" | "scene" | "script";
   service: string;
   data?: Readonly<Record<string, unknown>> | undefined;
   target: { entity_id: EntityId | EntityId[] };

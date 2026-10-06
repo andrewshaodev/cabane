@@ -37,14 +37,24 @@ can remain visible while editing. Workspace history spans construction,
 arrangement, and connections; pending gestures are settled before committing.
 Shortcuts is an editor tab beside Construct, Arrange, and Connect. It keeps the workspace sidebar with guidance for adding, editing, and applying shortcuts, and displays
 the draft action bar with the same slot visuals and overflow as Home. Hovering, focusing,
-or selecting a slot exposes actions to add a built-in action, room, or modeled device;
+or selecting a slot exposes actions to add a built-in action, room, modeled device, HA scene, or HA script;
 filled slots can also be replaced, moved, or removed. A searchable grid fills the canvas
 for each choice. Room icons use the mapped Home Assistant photo when available, then
 initials; device icons use cached procedural previews. These edits use the same history and autosave as other
 draft changes. Missing room or device targets are shown in the panel and block Apply
 until repaired. The published Home bar changes only after Apply. Portable exports,
 imports, and workspace duplication preserve the ordered per-home configuration;
-private HA entity IDs are never part of an action-bar target.
+private HA entity IDs are never part of an action-bar target. Scene/script targets
+contain only their kind; `RuntimeBindingProfile.actionEntityIdsByShortcutId` maps
+the stable shortcut ID to an exact entity in each origin's private draft/published
+profile. Project edits and mapping edits share one history transaction. Removing
+or replacing a shortcut prunes incompatible draft mappings, leaving published
+mappings intact until Save. Existing profiles without this optional map remain valid.
+Automatic room/device matching preserves these explicitly chosen mappings.
+Private backups, duplication and HA workspace sync carry the private map; portable
+exports carry unmapped action placeholders which owners can replace in Shortcuts.
+Offline or missing action targets remain saved, with unavailable controls rather
+than blocking unrelated project publication.
 Undo does not rewind already published content. Leaving the editor flushes the draft;
 it does not implicitly Apply. Apply validates the project and binding slices,
 blocks errors, requires warning confirmation, and writes the new published

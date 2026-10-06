@@ -99,9 +99,9 @@ Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-priv
 
 Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-cameras.md).
 
-- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation).
+- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation), [`packages/engine/src/OrbitCamera.tsx`](../packages/engine/src/OrbitCamera.tsx), [`packages/engine/src/room-navigation`](../packages/engine/src/room-navigation), [`packages/engine/src/action-bar/dashboard-action-targets.ts`](../packages/engine/src/action-bar/dashboard-action-targets.ts), [`packages/engine/src/WalkPreferences.tsx`](../packages/engine/src/WalkPreferences.tsx), [`packages/engine/src/home-assistant-dashboard`](../packages/engine/src/home-assistant-dashboard), [`packages/engine/src/styles.css`](../packages/engine/src/styles.css).
 - Interface: `CabaneDashboard`, `LiveCameraSurface` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Keep overview, room and walk state coherent; missing runtime data must leave a usable scene and actionable feedback.
+- Review invariant: Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.
 - Checks: `test:unit`, `test:browser`, `measure:scene`.
 
 ### Scene geometry and rendering
@@ -110,7 +110,7 @@ Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.
 
 - Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs), [`packages/engine/src/SceneLighting.tsx`](../packages/engine/src/SceneLighting.tsx), [`packages/engine/src/lighting.ts`](../packages/engine/src/lighting.ts), [`packages/engine/src/solar-shadow-frame.ts`](../packages/engine/src/solar-shadow-frame.ts).
 - Interface: `ArchitectureScene`, `StylizedScene`, `deriveSolarLighting`, `resolveSolarLighting` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.
+- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.
 - Checks: `test:unit`, `verify:policy`, `verify:scene-contours`, `fixture:verify:scale`, `measure:scene`.
 
 ### Catalog and model extensions
@@ -128,7 +128,7 @@ Contract: [Optional walk tools](../docs/product/architecture.md).
 
 - Owners: [`apps/web/src/walk-tools.ts`](../apps/web/src/walk-tools.ts), [`packages/walk-laser/src`](../packages/walk-laser/src), [`packages/engine/src/walk-tools`](../packages/engine/src/walk-tools).
 - Interface: `WalkToolDefinition`, `WalkToolProps`, `WalkToolNavigation`, `WalkToolStorage` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.
+- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.
 - Checks: `test:unit`, `test:browser`, `verify:boundaries`, `build`.
 
 ### Bundled home and agent generation
@@ -148,6 +148,15 @@ Contract: [Verification and delivery](../docs/product/verification-and-delivery.
 - Interface: repository commands below.
 - Review invariant: Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.
 - Checks: `verify:help`, `verify:fast`, `verify`, `browser:install`.
+
+### Shortcuts and private HA actions
+
+Contract: [Shortcuts and private HA actions](../docs/product/workspace.md).
+
+- Owners: [`apps/web/src/editor-action-bar/ActionBarEditor.tsx`](../apps/web/src/editor-action-bar/ActionBarEditor.tsx), [`apps/web/src/editor-action-bar/ShortcutPicker.tsx`](../apps/web/src/editor-action-bar/ShortcutPicker.tsx), [`apps/web/src/editor-workspace/useEditorProjectHistory.ts`](../apps/web/src/editor-workspace/useEditorProjectHistory.ts), [`packages/engine/src/action-bar`](../packages/engine/src/action-bar), [`packages/engine/src/home-project/workspace-bindings.ts`](../packages/engine/src/home-project/workspace-bindings.ts).
+- Interface: `ActionBarItem`, `RuntimeBindingProfile`, `haActionShortcutChoices`, `resolveHaActionShortcut` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Keep shortcut order and kinds portable; scene/script entity IDs belong to origin-scoped draft/published binding profiles. Save publishes both atomically. Activation uses guarded one-shot commands, never toggles.
+- Checks: `verify:runtime`, `verify:workspace`.
 
 ## Package import boundaries
 

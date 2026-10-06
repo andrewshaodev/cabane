@@ -6,7 +6,9 @@ export type ActionBarTarget =
   | { kind: "built-in"; action: ActionBarBuiltIn }
   | { kind: "walk-tool"; toolId: string }
   | { kind: "room"; roomId: string }
-  | { kind: "device"; deviceId: string };
+  | { kind: "device"; deviceId: string }
+  | { kind: "scene" }
+  | { kind: "script" };
 
 export interface ActionBarItem {
   id: string;
@@ -89,6 +91,8 @@ export function resolvePublishedActionBarItems(
         id: item.id,
         target: { kind: "built-in", action: target.action as ActionBarBuiltIn },
       };
+    if (target.kind === "scene" || target.kind === "script")
+      return { id: item.id, target: { kind: target.kind } };
     if (target.kind === "walk-tool" && typeof target.toolId === "string" && target.toolId.trim())
       return { id: item.id, target: { kind: "walk-tool", toolId: target.toolId } };
     if (target.kind === "room" && typeof target.roomId === "string" && target.roomId.trim())

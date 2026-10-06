@@ -142,6 +142,11 @@ export function RoomControlSheet({
   const sheetDrag = useBottomSheetDrag(goBack);
 
   useLayoutEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    roomScrollTop.current = 0;
+  }, [resolved.room.id]);
+
+  useLayoutEffect(() => {
     const scroll = scrollRef.current;
     if (!scroll) return;
     if (focused && !wasFocused.current) scroll.scrollTop = 0;

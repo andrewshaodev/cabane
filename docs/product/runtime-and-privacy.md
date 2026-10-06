@@ -150,3 +150,20 @@ the existing origin/source/state-checked popup OAuth handoff. A blocked popup
 reports the existing retry instruction; no HA authentication page is embedded in
 its own iframe. Storage operations do not call HA device services. Real household
 and cross-browser iframe acceptance still require testing on the owner's setup.
+
+Scene and script shortcuts select entities from the authenticated runtime's states,
+using registry names and friendly names. Selection never invokes a service.
+Activation uses the existing guarded runtime `callService` and command scheduler
+with an exact entity target and `scene.turn_on` or `script.turn_on`. These are
+one-shot actions, never toggles. Duplicate clicks are suppressed until the service
+request settles, pending state is visible, and request rejection shows an error.
+Missing, stale, disabled, unavailable or disconnected targets cannot dispatch.
+A scene's initial `unknown` state is allowed because scenes have no on/off state.
+Script completion is not tracked: pending ends when HA accepts the start request;
+errors later inside the script belong to Home Assistant.
+
+Implementation: [action resolution](../../packages/engine/src/action-bar/ha-action-shortcuts.ts),
+[command feedback](../../packages/engine/src/action-bar/useHaActionShortcuts.ts),
+[private profile](../../packages/engine/src/runtime-binding-profile.ts).
+HA contracts: [scenes](https://www.home-assistant.io/integrations/scene/),
+[scripts](https://www.home-assistant.io/integrations/script/).

@@ -1,11 +1,12 @@
+import { resolveDashboardActionTargets } from "./action-bar/dashboard-action-targets";
 import type { WalkToolNavigation } from "./walk-tools";
 import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate-walk-target";
 import { connectedCanvasEvents } from "./connected-canvas-events";
-import { useCabaneDom } from "./CabaneDom";
 import { ScenePreview } from "./ScenePreview";
 import { RoomHoverProvider } from "./room-status/RoomHover";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { OrbitNavigation } from "./OrbitNavigation";
+import { DashboardLocation, useRoomFocusFrame } from "./room-navigation";
 import { safeBuildingSpawn } from "./stairs/stair-navigation";
 import { FloorPicker, deriveFloorLevels } from "./building";
 import { StylizedScene } from "./StylizedScene";
@@ -39,25 +40,26 @@ import {
 
 import { SceneActionBar } from "./SceneActionBar";
 import { resolvePublishedActionBarItems } from "./action-bar/action-bar-config";
-import { resolveActionBarDestination } from "./action-bar/action-bar-navigation";
 import { CustomizeActionBarMenuItem } from "./CustomizeActionBarMenuItem";
 
 import { SceneMenuIcon } from "./SceneMenuIcon";
-import { WalkPreferences, loadInvertYAxis, saveInvertYAxis } from "./WalkPreferences";
-
-import { SceneRoomContext } from "./SceneRoomContext";
-
-import { connectionLabel } from "./dashboard-contract";
+import {
+  WalkPreferences,
+  WalkPreferencesMenuItem,
+  loadInvertYAxis,
+  saveInvertYAxis,
+} from "./WalkPreferences";
 
 import { useDashboardController } from "./useDashboardController";
 
 export function ValidatedDashboardView(props: Parameters<typeof useDashboardController>[0]) {
-  const dom = useCabaneDom();
   const toolNavigationRef = useRef<WalkToolNavigation | null>(null);
   const orbitControls = useRef<OrbitControlsImpl | null>(null);
+  const roomFocus = useRoomFocusFrame();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
   const closePreferences = useCallback(() => setPreferencesOpen(false), []);
+  const dashboard = useDashboardController(props);
   const {
     equippedToolId,
     floorNavigation,
@@ -93,6 +95,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     handleAutomaticOpeningsChange,
     setWalkRoomId,
     cameraResetKey,
+    roomFocusKey,
+    selectedRoom,
     architectureModels,
     selectedRoomId,
     wallFadeEnabled,
@@ -105,10 +109,6 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     roomDisplayNames,
     coarsePointer,
     adjustQuality,
-    walkRoomDisplayName,
-    selectedRoomDisplayName,
-    walkRoomId,
-    homePresence,
     sessionPresentation,
     demoSession,
     setupAction,
@@ -140,7 +140,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     runConfiguredAction,
     sceneActionError,
     setSceneActionError,
-  } = useDashboardController(props);
+    pendingHaActions,
+  } = dashboard;
   const equippedTool =
     walkMode && !walkthrough
       ? props.walkTools?.find((tool) => tool.id === equippedToolId)
@@ -154,69 +155,24 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     !preferencesOpen;
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar, props.walkTools);
   const preferencesMenuItem = walkMode && (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.currentTarget.closest("details")?.removeAttribute("open");
-        if (dom.root.pointerLockElement) document.exitPointerLock();
-        setPreferencesOpen(true);
-      }}
-    >
-      <SceneMenuIcon name="preferences" />
-      <span>Preferences</span>
-    </button>
+    <WalkPreferencesMenuItem onOpen={() => setPreferencesOpen(true)} />
   );
-  const actionBarTargets = Object.fromEntries(
-    actionBarItems.flatMap((item) => {
-      if (item.target.kind === "built-in" || item.target.kind === "walk-tool") return [];
-      const destination = resolveActionBarDestination(manifest, item.target);
-      if (!destination)
-        return [[item.id, { label: `Unavailable ${item.target.kind}`, available: false }]];
-      if (item.target.kind === "room") {
-        const room = manifest.floors
-          .find((floor) => floor.id === destination.floorId)
-          ?.rooms.find((room) => room.id === destination.roomId);
-        return [
-          [
-            item.id,
-            {
-              label:
-                resolvedBindings.rooms[destination.roomId]?.displayName ?? room?.name ?? "Room",
-              pictureUrl: resolvedBindings.rooms[destination.roomId]?.pictureUrl,
-              available: true,
-            },
-          ],
-        ];
-      }
-      const deviceId = item.target.deviceId;
-      const device = manifest.sceneItems.find((candidate) => candidate.id === deviceId);
-      return [
-        [
-          item.id,
-          {
-            label:
-              resolvedBindings.rooms[destination.roomId]?.devices.find(
-                (binding) => binding.slot.id === deviceId,
-              )?.displayName ??
-              (device
-                ? (deviceModels[device.modelId]?.label ?? device.modelId.replaceAll("-", " "))
-                : "Device"),
-            modelId: device?.modelId,
-            available: true,
-          },
-        ],
-      ];
-    }),
+  const actionBarTargets = resolveDashboardActionTargets(
+    actionBarItems,
+    manifest,
+    bindingManager.profile,
+    runtime,
+    resolvedBindings,
+    deviceModels,
+    pendingHaActions,
   );
+  const { wholeBuilding, setWholeBuilding } = floorNavigation;
   const floorLevels = deriveFloorLevels(manifest.floors);
   const cameraFloors = manifest.floors
     .map((floor, index) => ({ ...floor, elevationMeters: floorLevels[index].elevationMeters }))
     .filter((candidate, index) =>
-      floorNavigation.wholeBuilding
-        ? !candidate.belowGround
-        : index <= manifest.floors.indexOf(floor),
+      wholeBuilding ? !candidate.belowGround : index <= manifest.floors.indexOf(floor),
     );
-  const { wholeBuilding, setWholeBuilding } = floorNavigation;
   useEffect(() => {
     if (walkMode && wholeBuilding) setWholeBuilding(false);
   }, [walkMode, wholeBuilding, setWholeBuilding]);
@@ -238,6 +194,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
             } as CSSProperties
           }
         >
+          <div ref={roomFocus.ref} className="room-focus-frame" aria-hidden="true" />
           <div className="building-floor-controls">
             {!walkMode && <OrbitNavigation controlsRef={orbitControls} />}
             <FloorPicker
@@ -321,35 +278,36 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                         onRoomChange={setWalkRoomId}
                       />
                     ) : (
-                      // Room controls do not change the user’s current orbit or zoom.
                       <OrbitCamera
-                        showRoof={floorNavigation.wholeBuilding}
+                        showRoof={wholeBuilding}
                         controlsRef={orbitControls}
                         elevation={elevation}
                         buildingFloors={cameraFloors}
 
                         floor={floor}
                         resetKey={cameraResetKey}
+                        {...(mode === "room" && selectedRoom ? { room: selectedRoom } : {})}
+                        roomFrame={roomFocus.frame}
+                        roomRequestKey={roomFocusKey}
+                        reducedMotion={reducedMotion}
                       />
                     )}
                     <SceneNightContext.Provider value={nightLighting}>
                       <ArchitectureScene
                         activeFloorId={floor.id}
-                        floorView={floorNavigation.wholeBuilding ? "whole" : "cutaway"}
+                        floorView={wholeBuilding ? "whole" : "cutaway"}
 
                         manifest={manifest}
                         architectureModels={architectureModels}
                         selectedRoomId={selectedRoomId}
                         walkMode={walkMode}
-                        wallFadeEnabled={wallFadeEnabled && !floorNavigation.wholeBuilding}
+                        wallFadeEnabled={wallFadeEnabled && !wholeBuilding}
                         reducedMotion={reducedMotion}
                         resolvedBindings={resolvedBindings}
                         deviceModels={deviceModels}
                         openingPositions={openingPositions}
-                        interactionMode={
-                          !walkMode && floorNavigation.wholeBuilding ? "editor" : "runtime"
-                        }
-                        onSelectRoom={floorNavigation.wholeBuilding ? undefined : selectRoom}
+                        interactionMode={!walkMode && wholeBuilding ? "editor" : "runtime"}
+                        onSelectRoom={wholeBuilding ? undefined : selectRoom}
                         onInteract={handleExtensionInteraction}
                         onWalkDeviceTargetChange={
                           walkthrough || equippedTool ? undefined : setWalkDeviceTarget
@@ -387,18 +345,16 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                         />
                       </Suspense>
                     )}
-                    {!walkthrough &&
-                      !floorNavigation.wholeBuilding &&
-                      shouldShowRoomStatusOverlays(mode) && (
-                        <group position={[0, elevation, 0]}>
-                          <RoomStatusOverlays
-                            floor={floor}
-                            summaries={roomStatuses}
-                            roomNames={roomDisplayNames}
-                            onSelectRoom={selectRoom}
-                          />
-                        </group>
-                      )}
+                    {!walkthrough && !wholeBuilding && shouldShowRoomStatusOverlays(mode) && (
+                      <group position={[0, elevation, 0]}>
+                        <RoomStatusOverlays
+                          floor={floor}
+                          summaries={roomStatuses}
+                          roomNames={roomDisplayNames}
+                          onSelectRoom={selectRoom}
+                        />
+                      </group>
+                    )}
                     {walkMode && coarsePointer && (
                       <PerformanceMonitor
                         iterations={10}
@@ -415,34 +371,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           </div>
 
           <header className="scene-hud">
-            {!walkthrough && (
-              <>
-                <SceneRoomContext
-                  mode={mode}
-                  displayName={walkMode ? walkRoomDisplayName : selectedRoomDisplayName}
-                  roomStatus={
-                    walkMode && walkRoomId
-                      ? roomStatuses[walkRoomId]
-                      : selectedRoomId
-                        ? roomStatuses[selectedRoomId]
-                        : undefined
-                  }
-                  homePresence={homePresence}
-                  connectionStatus={runtime.status}
-                  connectionDescription={
-                    sessionPresentation?.label ??
-                    (demoSession ? "Offline demo" : connectionLabel[runtime.status])
-                  }
-                  sessionStatus={
-                    sessionPresentation
-                      ? [sessionPresentation.label, sessionPresentation.detail]
-                          .filter(Boolean)
-                          .join(" · ")
-                      : undefined
-                  }
-                />
-              </>
-            )}
+            <DashboardLocation dashboard={dashboard} />
             <details className="scene-menu">
               <summary aria-label="More options">
                 <span aria-hidden="true">•••</span>
@@ -700,13 +629,13 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
               targets={actionBarTargets}
               renderDeviceIcon={props.renderActionBarDeviceIcon}
               mode={mode}
-              roofVisible={floorNavigation.wholeBuilding}
+              roofVisible={wholeBuilding}
               keyboardEnabled={toolInputEnabled}
               onToggleRoof={
                 walkMode
                   ? undefined
                   : () => {
-                      floorNavigation.setWholeBuilding(!floorNavigation.wholeBuilding);
+                      setWholeBuilding(!wholeBuilding);
                       setSelectedRoomId(null);
                       setSelectedDeviceId(null);
                       setMode("overview");

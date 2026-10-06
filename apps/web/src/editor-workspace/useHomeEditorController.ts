@@ -211,25 +211,17 @@ export function useHomeEditorController({
     floorZoneDrawingActive ||
     pendingRoomPaintId !== null;
   const editingLocked = workspaceBusy || closing || connectionBusy;
+  const constructionSessionBlocked =
+    editingLocked || constructionUnsettled || publishOpen || previewOpen;
   const reference = useReferencePlan(
     workspace,
     activeFloorId,
     mode === "construct",
-    editingLocked ||
-      constructionUnsettled ||
-      Boolean(constructEditorDrawStart) ||
-      publishOpen ||
-      previewOpen,
+    constructionSessionBlocked || Boolean(constructEditorDrawStart),
   );
   const northOrientation = useNorthOrientation({
     scope: `${mode}:${activeFloorId}`,
-    enabled:
-      mode === "construct" &&
-      !editingLocked &&
-      !constructionUnsettled &&
-      !reference.adjusting &&
-      !publishOpen &&
-      !previewOpen,
+    enabled: mode === "construct" && !constructionSessionBlocked && !reference.adjusting,
     snapshot,
     commit,
   });
@@ -276,6 +268,8 @@ export function useHomeEditorController({
     redoProject,
     selectSceneItem,
   } = useEditorProjectHistory({
+    runtime,
+    homeAssistantUrl,
     workspace,
     constructEditor,
     furnishingEditor,

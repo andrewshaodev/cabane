@@ -137,7 +137,13 @@
       "packages/engine/src/useDashboardDeviceInteraction.ts",
       "packages/engine/src/CabaneDashboard.tsx",
       "packages/engine/src/LiveCameraSurface.tsx",
-      "packages/engine/src/navigation"
+      "packages/engine/src/navigation",
+      "packages/engine/src/OrbitCamera.tsx",
+      "packages/engine/src/room-navigation",
+      "packages/engine/src/action-bar/dashboard-action-targets.ts",
+      "packages/engine/src/WalkPreferences.tsx",
+      "packages/engine/src/home-assistant-dashboard",
+      "packages/engine/src/styles.css"
     ],
     "interfaces": [
       {
@@ -145,7 +151,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Keep overview, room and walk state coherent; missing runtime data must leave a usable scene and actionable feedback.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {
@@ -173,7 +179,7 @@
         ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.",
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -214,7 +220,7 @@
         "symbols": ["WalkToolDefinition", "WalkToolProps", "WalkToolNavigation", "WalkToolStorage"]
       }
     ],
-    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.",
+    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.",
     "checks": ["test:unit", "test:browser", "verify:boundaries", "build"]
   },
   {
@@ -243,5 +249,29 @@
     "interfaces": [],
     "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
     "checks": ["verify:help", "verify:fast", "verify", "browser:install"]
+  },
+  {
+    "title": "Shortcuts and private HA actions",
+    "spec": "docs/product/workspace.md",
+    "owners": [
+      "apps/web/src/editor-action-bar/ActionBarEditor.tsx",
+      "apps/web/src/editor-action-bar/ShortcutPicker.tsx",
+      "apps/web/src/editor-workspace/useEditorProjectHistory.ts",
+      "packages/engine/src/action-bar",
+      "packages/engine/src/home-project/workspace-bindings.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": [
+          "ActionBarItem",
+          "RuntimeBindingProfile",
+          "haActionShortcutChoices",
+          "resolveHaActionShortcut"
+        ]
+      }
+    ],
+    "invariant": "Keep shortcut order and kinds portable; scene/script entity IDs belong to origin-scoped draft/published binding profiles. Save publishes both atomically. Activation uses guarded one-shot commands, never toggles.",
+    "checks": ["verify:runtime", "verify:workspace"]
   }
 ]

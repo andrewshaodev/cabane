@@ -11,7 +11,9 @@ const targetKey = (item: ActionBarItem): string => {
       ? `walk-tool:${target.toolId}`
       : target.kind === "room"
         ? `room:${target.roomId}`
-        : `device:${target.deviceId}`;
+        : target.kind === "device"
+          ? `device:${target.deviceId}`
+          : `ha-action:${item.id}`;
 };
 
 export function isActionBarDeviceNavigable(project: HomeProject, deviceId: string): boolean {

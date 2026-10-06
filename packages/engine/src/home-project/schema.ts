@@ -1063,6 +1063,8 @@ export const validateHomeProjectSchemaShape = (
               "Action bar built-in action is invalid.",
             );
           }
+        } else if (target.kind === "scene" || target.kind === "script") {
+          keys(target, ["kind"], targetPath, issues);
         } else if (target.kind === "walk-tool") {
           keys(target, ["kind", "toolId"], targetPath, issues);
           string(target.toolId, `${targetPath}.toolId`, issues);
