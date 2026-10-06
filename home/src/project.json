@@ -1,0 +1,198 @@
+{
+  "assumptions": [
+    {
+      "basis": "user",
+      "id": "villa-mediterranean-refinement",
+      "subjectId": "south-garden-villa",
+      "summary": "The requested premium villa styling uses terracotta and sage rugs, a west reading lounge, dining storage, four pool loungers, a six-seat terrace table under the existing pergola, four olive trees and perimeter hedges. Dimensions and finishes are inferred generic designs. Lawn contact is -49 mm and paved terrace contact -43 mm relative to the indoor datum, each allowing a 1 mm support gap."
+    },
+    {
+      "basis": "inferred",
+      "id": "villa-large-child-room",
+      "subjectId": "bedroom-two",
+      "summary": "The large northeast bedroom is interpreted as the requested child room; the primary suite remains the adult bedroom. A cabin bed, reading and play zones, toy storage and a colorful rug are inferred without child age or reference photos. Room identity and architecture are preserved."
+    },
+    {
+      "basis": "inferred",
+      "id": "villa-scale-and-orientation",
+      "subjectId": "south-garden-villa",
+      "summary": "No measured plan was supplied. The villa uses metre plan units with origin [0, 0], north at decreasing plan Y/front, and the garden at increasing plan Y/south. The ground shell is inferred as 24 by 18 m and the inset first floor as 20 by 16 m."
+    },
+    {
+      "basis": "inferred",
+      "id": "villa-vertical-dimensions",
+      "subjectId": "south-garden-villa",
+      "summary": "Ground walls and ceilings are inferred at 3.0 m with a 3.2 m floor-to-floor height. First-floor walls and ceilings are inferred at 2.9 m with a 3.1 m upper storey height. Exterior walls are 0.32 m and interior partitions are 0.16 m thick."
+    },
+    {
+      "basis": "inferred",
+      "id": "villa-layout-program",
+      "subjectId": "south-garden-villa",
+      "summary": "The ground floor prioritizes arrival and service rooms on the north, a central stair, a guest suite and study, and a large south-facing open kitchen/dining/living room. The first floor contains a primary suite, three additional bedrooms, a family bathroom, linen room, and central gallery landing."
+    },
+    {
+      "basis": "user",
+      "id": "villa-outdoor-layout",
+      "subjectId": "ground-floor",
+      "summary": "The rear garden keeps broad lawn margins around a compact 17 by 3.3 m house terrace and a 12.4 by 6.2 m pool surround. The 10 by 4.2 m pool is centered behind the house. At the street side, hardscape is limited to a 5.3 by 4 m garage approach and a 1.7 by 2.8 m entry path."
+    },
+    {
+      "basis": "inferred",
+      "id": "villa-surface-colors",
+      "subjectId": "south-garden-villa",
+      "summary": "Room floor colors are restrained solid toon cues: warm wood tones for living and bedrooms, pale stone for circulation and bathrooms, and gray for the garage. They are not physical materials or textures."
+    },
+    {
+      "basis": "user",
+      "id": "villa-layout-stage",
+      "subjectId": "south-garden-villa",
+      "summary": "The accepted architecture is preserved. All eighteen interior rooms are equipped in this revision, including two connected vehicles in the double garage. No Home Assistant area, entity, credential, or binding data is encoded."
+    },
+    {
+      "basis": "inferred",
+      "id": "open-plan-living-equipment",
+      "subjectId": "open-plan-living",
+      "summary": "With no reference photos supplied, the 220 m² open room is inferred as a west kitchen with peninsula, a central eight-seat dining area, and an east lounge facing a 2.4 m wall-mounted television above a low media console. Furniture keeps the three south terrace sliders and the main internal passages clear."
+    },
+    {
+      "basis": "inferred",
+      "id": "open-plan-living-device-slots",
+      "subjectId": "open-plan-living",
+      "summary": "Kitchen lighting, four pendants, wall television, speaker, floor lamp, and indoor AC use local typed slots only. The television and speaker map to separate simulated media players in the demo; household mapping remains manual. The single climate device may use unique-compatible mapping after the room is explicitly connected in the browser."
+    }
+  ],
+  "home": {
+    "id": "a9654d69-cdb3-4f98-9ac1-39159767dbd6",
+    "locale": "en",
+    "name": "South Garden Villa",
+    "palette": {
+      "accent": "#d58b5d",
+      "exterior": "#d6c3aa",
+      "ground": "#8fa879",
+      "interior": "#eee7dc",
+      "secondary": "#78958a"
+    },
+    "walkStart": {
+      "at": [
+        5.41489357118754,
+        11.963419222707985
+      ],
+      "floorId": "ground-floor"
+    }
+  },
+  "openingProfiles": {
+    "bedroom-four-door": {},
+    "bedroom-four-west-window": {},
+    "dining-terrace-slider": {},
+    "dressing-landing-door": {},
+    "first-floor:window-26": {},
+    "front-entry-door": {},
+    "garage-kitchen-door": {},
+    "garage-pantry-door": {},
+    "garage-utility-door": {},
+    "garage-west-window": {},
+    "guest-bathroom-east-window": {},
+    "guest-east-window": {},
+    "kitchen-stair-passage": {},
+    "landing-north-window": {},
+    "living-east-window": {},
+    "living-terrace-slider": {},
+    "living-west-window": {},
+    "pantry-kitchen-door": {},
+    "pantry-stair-door": {},
+    "primary-bath-dressing-door": {},
+    "primary-bathroom-door": {},
+    "primary-bathroom-west-window": {},
+    "primary-bedroom-door": {},
+    "primary-dressing-door": {},
+    "primary-north-window": {},
+    "primary-west-window": {},
+    "stair-hall-south-passage": {},
+    "utility-foyer-door": {},
+    "utility-pantry-door": {},
+    "garage-motorized-vehicle-door": {
+      "coverSlot": {
+        "id": "garage-motorized-vehicle-door-entity",
+        "autoMap": "unique-compatible"
+      }
+    }
+  },
+  "roomProfiles": {
+    "bedroom-four": {
+      "dashboardSlots": []
+    },
+    "ground-floor:room-1": {
+      "dashboardSlots": []
+    },
+    "ground-floor:room-2": {
+      "dashboardSlots": []
+    },
+    "open-plan-living": {
+      "dashboardSlots": []
+    },
+    "pantry": {
+      "dashboardSlots": []
+    },
+    "primary-bathroom": {
+      "dashboardSlots": []
+    },
+    "primary-bedroom": {
+      "dashboardSlots": []
+    },
+    "primary-dressing": {
+      "dashboardSlots": []
+    },
+    "stair-hall": {
+      "dashboardSlots": []
+    },
+    "upper-landing": {
+      "dashboardSlots": []
+    }
+  },
+  "schemaVersion": 2,
+  "seedRevision": "south-garden-villa-architectural-garage-v3",
+  "shortcuts": [
+    {
+      "action": "construct-mode",
+      "context": "overview",
+      "id": "villa-construct-mode",
+      "order": 0
+    },
+    {
+      "action": "arrange-mode",
+      "context": "overview",
+      "id": "villa-arrange-mode",
+      "order": 1
+    },
+    {
+      "action": "connect-mode",
+      "context": "overview",
+      "id": "villa-connect-mode",
+      "order": 2
+    },
+    {
+      "action": "walk-mode",
+      "context": "both",
+      "id": "villa-walk-mode",
+      "order": 3
+    },
+    {
+      "action": "lighting-mode",
+      "context": "both",
+      "id": "villa-lighting-mode",
+      "order": 4
+    },
+    {
+      "action": "wall-fade",
+      "context": "both",
+      "id": "villa-wall-fade",
+      "order": 5
+    },
+    {
+      "action": "all-lights",
+      "context": "both",
+      "id": "villa-all-lights",
+      "order": 6
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+import {
+  useEffect,
+  type MutableRefObject
+} from "react";
+
+import {
+  type StickVector
+} from "./navigation";
+
+export const useDesktopWalkInput = (
+  active: boolean,
+  movementRef: MutableRefObject<StickVector>,
+  sprintRef: MutableRefObject<boolean>,
+  jumpRequestRef?: MutableRefObject<boolean>,
+) => {
+  useEffect(() => {
+    if (!active) return;
+    const keys = new Set<string>();
+    const update = () => {
+      sprintRef.current = keys.has("ShiftLeft") || keys.has("ShiftRight");
+      const left = keys.has("KeyA") || keys.has("ArrowLeft");
+      const right = keys.has("KeyD") || keys.has("ArrowRight");
+      const forward = keys.has("KeyW") || keys.has("ArrowUp");
+      const backward = keys.has("KeyS") || keys.has("ArrowDown");
+      movementRef.current = {
+        x: Number(right) - Number(left),
+        y: Number(backward) - Number(forward),
+      };
+    };
+    const down = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select"))) return;
+      if (event.code === "Space") {
+        event.preventDefault();
+        if (!event.repeat && !keys.has("Space") && jumpRequestRef) jumpRequestRef.current = true;
+        keys.add("Space");
+        return;
+      }
+      if (["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"].includes(event.code)) {
+        event.preventDefault();
+        keys.add(event.code);
+        update();
+      }
+    };
+    const up = (event: KeyboardEvent) => {
+      keys.delete(event.code);
+      update();
+    };
+    const reset = () => {
+      keys.clear();
+      if (jumpRequestRef) jumpRequestRef.current = false;
+      update();
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    window.addEventListener("blur", reset);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+      window.removeEventListener("blur", reset);
+      reset();
+    };
+  }, [active, movementRef, sprintRef, jumpRequestRef]);
+};

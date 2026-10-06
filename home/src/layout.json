@@ -1,0 +1,1576 @@
+{
+  "coordinates": {
+    "metersPerPlanUnit": 1,
+    "origin": [
+      0,
+      0
+    ],
+    "scaleBasis": "inferred"
+  },
+  "floors": [
+    {
+      "ceilings": [
+        {
+          "heightMeters": 3,
+          "id": "ground-floor:room-1-ceiling",
+          "kind": "flat",
+          "roomIds": [
+            "ground-floor:room-1"
+          ]
+        },
+        {
+          "heightMeters": 3,
+          "id": "ground-floor-ceiling",
+          "kind": "flat",
+          "roomIds": [
+            "stair-hall",
+            "open-plan-living",
+            "pantry"
+          ]
+        },
+        {
+          "heightMeters": 3,
+          "id": "ground-floor:room-2-ceiling",
+          "kind": "flat",
+          "roomIds": [
+            "ground-floor:room-2"
+          ]
+        }
+      ],
+      "coordinates": {
+        "metersPerPlanUnit": 1,
+        "origin": [
+          0,
+          0
+        ],
+        "scaleBasis": "inferred"
+      },
+      "defaultCeilingHeightMeters": 3,
+      "defaultWallHeightMeters": 3,
+      "floorToFloorHeightMeters": 3.2,
+      "footprint": [
+        [
+          0,
+          0
+        ],
+        [
+          6.5,
+          -0.04642857
+        ],
+        [
+          10,
+          -0.07142857
+        ],
+        [
+          14,
+          -0.1
+        ],
+        [
+          14,
+          17.9
+        ],
+        [
+          0,
+          18
+        ]
+      ],
+      "groundZones": [
+        {
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "id": "south-terrace",
+          "polygon": [
+            [
+              0.6,
+              18
+            ],
+            [
+              14.2,
+              18
+            ],
+            [
+              14.2,
+              21.9
+            ],
+            [
+              0.6,
+              21.9
+            ]
+          ]
+        },
+        {
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "id": "pool-terrace",
+          "polygon": [
+            [
+              4.6,
+              21.9
+            ],
+            [
+              14.2,
+              21.9
+            ],
+            [
+              14.2,
+              27.3
+            ],
+            [
+              4.6,
+              27.3
+            ]
+          ]
+        },
+        {
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "id": "front-driveway",
+          "polygon": [
+            [
+              0.6,
+              -4.2
+            ],
+            [
+              5.9,
+              -4.2
+            ],
+            [
+              5.9,
+              -0.2
+            ],
+            [
+              0.6,
+              -0.2
+            ]
+          ]
+        },
+        {
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "id": "front-entry-path",
+          "polygon": [
+            [
+              11.15,
+              -4.1
+            ],
+            [
+              12.85,
+              -4.1
+            ],
+            [
+              12.85,
+              -0.2
+            ],
+            [
+              11.15,
+              -0.2
+            ]
+          ]
+        }
+      ],
+      "hedges": [
+        {
+          "from": [
+            14.2,
+            17.8
+          ],
+          "heightMeters": 1.4,
+          "id": "ground-floor:hedge-51",
+          "style": "bushy",
+          "to": [
+            16.7,
+            17.8
+          ],
+          "widthMeters": 0.8
+        },
+        {
+          "from": [
+            16.4,
+            17.6
+          ],
+          "heightMeters": 1.4,
+          "id": "ground-floor:hedge-52",
+          "style": "bushy",
+          "to": [
+            16.4,
+            30.14182254339
+          ],
+          "widthMeters": 0.8
+        },
+        {
+          "from": [
+            16.404759929296,
+            30.141805657989
+          ],
+          "heightMeters": 1.4,
+          "id": "ground-floor:hedge-33",
+          "style": "bushy",
+          "to": [
+            0,
+            30.2
+          ],
+          "widthMeters": 0.8
+        },
+        {
+          "from": [
+            0,
+            30.2
+          ],
+          "heightMeters": 1.4,
+          "id": "ground-floor:hedge-34",
+          "style": "bushy",
+          "to": [
+            -0.04266,
+            18.174311
+          ],
+          "widthMeters": 0.8
+        }
+      ],
+      "id": "ground-floor",
+      "name": "Ground floor",
+      "openings": [
+        {
+          "finish": "wood",
+          "id": "front-entry-door",
+          "kind": "door",
+          "leafCount": 2,
+          "offsetFromWallStartPlanUnits": 11.1454,
+          "openingHeightMeters": 2.35,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "french",
+          "wallId": "ground-north-wall",
+          "widthPlanUnits": 1.7
+        },
+        {
+          "glazing": "clear",
+          "id": "guest-east-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.35,
+          "openingHeightMeters": 1.45,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 0.8,
+          "variant": "plain",
+          "wallId": "ground-east-wall",
+          "widthPlanUnits": 2.2
+        },
+        {
+          "glazing": "privacy",
+          "id": "guest-bathroom-east-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 6.05,
+          "openingHeightMeters": 1.1,
+          "operation": "fixed",
+          "panelCount": 1,
+          "sillHeightMeters": 1.2,
+          "variant": "plain",
+          "wallId": "ground-east-wall",
+          "widthPlanUnits": 1.4
+        },
+        {
+          "glazing": "clear",
+          "id": "living-east-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 12.6,
+          "openingHeightMeters": 1.6,
+          "operation": "fixed",
+          "panelCount": 2,
+          "sillHeightMeters": 0.7,
+          "variant": "plain",
+          "wallId": "ground-east-wall",
+          "widthPlanUnits": 3.2
+        },
+        {
+          "finish": "white",
+          "id": "living-terrace-slider",
+          "kind": "door",
+          "leafCount": 2,
+          "offsetFromWallStartPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "operation": "sliding",
+          "sillHeightMeters": 0,
+          "variant": "full-glass",
+          "wallId": "ground-south-wall",
+          "widthPlanUnits": 4.2
+        },
+        {
+          "finish": "white",
+          "id": "dining-terrace-slider",
+          "kind": "door",
+          "leafCount": 2,
+          "offsetFromWallStartPlanUnits": 8.2,
+          "openingHeightMeters": 2.4,
+          "operation": "sliding",
+          "sillHeightMeters": 0,
+          "variant": "full-glass",
+          "wallId": "ground-south-wall",
+          "widthPlanUnits": 4.2
+        },
+        {
+          "glazing": "clear",
+          "id": "living-west-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 6.3,
+          "openingHeightMeters": 1.6,
+          "operation": "fixed",
+          "panelCount": 2,
+          "sillHeightMeters": 0.7,
+          "variant": "plain",
+          "wallId": "ground-west-wall",
+          "widthPlanUnits": 2.8
+        },
+        {
+          "glazing": "clear",
+          "id": "garage-west-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 12.4,
+          "openingHeightMeters": 1.1,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 1.2,
+          "variant": "plain",
+          "wallId": "ground-west-wall",
+          "widthPlanUnits": 2
+        },
+        {
+          "finish": "white",
+          "id": "garage-utility-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 1.55,
+          "openingHeightMeters": 2.15,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-garage-divider",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "white",
+          "id": "garage-pantry-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 5.65,
+          "openingHeightMeters": 2.15,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-garage-divider",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "white",
+          "id": "utility-foyer-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 1.55,
+          "openingHeightMeters": 2.2,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-service-divider",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "white",
+          "id": "pantry-stair-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 6.05,
+          "openingHeightMeters": 2.2,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-service-divider",
+          "widthPlanUnits": 1
+        },
+        {
+          "id": "kitchen-stair-passage",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 9.05,
+          "openingHeightMeters": 2.5,
+          "sillHeightMeters": 0,
+          "variant": "rectangular",
+          "wallId": "ground-service-divider",
+          "widthPlanUnits": 1.45
+        },
+        {
+          "finish": "white",
+          "id": "utility-pantry-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 1.25,
+          "openingHeightMeters": 2.2,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-utility-pantry-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "white",
+          "id": "garage-kitchen-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 4.45,
+          "openingHeightMeters": 2.2,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-west-day-wall",
+          "widthPlanUnits": 1.1
+        },
+        {
+          "finish": "white",
+          "id": "pantry-kitchen-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 8,
+          "openingHeightMeters": 2.2,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "ground-west-day-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "id": "stair-hall-south-passage",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 0.8,
+          "openingHeightMeters": 2.55,
+          "sillHeightMeters": 0,
+          "variant": "rectangular",
+          "wallId": "ground-stair-south-wall",
+          "widthPlanUnits": 2.4
+        },
+        {
+          "id": "garage-motorized-vehicle-door",
+          "kind": "door",
+          "operation": "roll-up",
+          "variant": "slatted",
+          "finish": "white",
+          "openingSide": "right",
+          "wallId": "ground-north-wall",
+          "offsetFromWallStartPlanUnits": 1.0,
+          "widthPlanUnits": 4.6,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0
+        }
+      ],
+      "pools": [
+        {
+          "id": "villa-pool",
+          "polygon": [
+            [
+              5.9,
+              22.5
+            ],
+            [
+              13.5,
+              22.5
+            ],
+            [
+              13.5,
+              26.7
+            ],
+            [
+              5.9,
+              26.7
+            ]
+          ]
+        }
+      ],
+      "rooms": [
+        {
+          "accent": "#c9a477",
+          "dashboardSlots": [],
+          "devices": [],
+          "id": "ground-floor:room-1",
+          "name": "Garage",
+          "polygon": [
+            [
+              0,
+              0
+            ],
+            [
+              6.5,
+              -0.04642857
+            ],
+            [
+              6.5,
+              4.5
+            ],
+            [
+              6.5,
+              8.5
+            ],
+            [
+              0,
+              8.5
+            ]
+          ]
+        },
+        {
+          "accent": "#c3a98b",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#c9b79d",
+            "kind": "solid"
+          },
+          "id": "stair-hall",
+          "name": "Central stair hall",
+          "polygon": [
+            [
+              6.5,
+              -0.04642857
+            ],
+            [
+              10,
+              -0.07142857
+            ],
+            [
+              10,
+              4.5
+            ],
+            [
+              6.5,
+              4.5
+            ]
+          ]
+        },
+        {
+          "accent": "#c9a477",
+          "dashboardSlots": [],
+          "devices": [],
+          "id": "ground-floor:room-2",
+          "name": "Stair hall",
+          "polygon": [
+            [
+              10,
+              -0.07142857
+            ],
+            [
+              14,
+              -0.1
+            ],
+            [
+              14,
+              11
+            ],
+            [
+              10,
+              11
+            ],
+            [
+              10,
+              8.5
+            ],
+            [
+              10,
+              4.5
+            ]
+          ]
+        },
+        {
+          "accent": "#d49668",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#c8b697",
+            "kind": "solid"
+          },
+          "id": "open-plan-living",
+          "name": "Open kitchen, dining and living room",
+          "polygon": [
+            [
+              14,
+              11
+            ],
+            [
+              14,
+              17.9
+            ],
+            [
+              0,
+              18
+            ],
+            [
+              0,
+              8.5
+            ],
+            [
+              6.5,
+              8.5
+            ],
+            [
+              10,
+              8.5
+            ],
+            [
+              10,
+              11
+            ]
+          ]
+        },
+        {
+          "accent": "#c4ad83",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#d8cbb5",
+            "kind": "solid"
+          },
+          "id": "pantry",
+          "name": "Walk-in pantry",
+          "polygon": [
+            [
+              6.5,
+              8.5
+            ],
+            [
+              6.5,
+              4.5
+            ],
+            [
+              10,
+              4.5
+            ],
+            [
+              10,
+              8.5
+            ]
+          ]
+        }
+      ],
+      "wallJunctions": [
+        {
+          "at": [
+            0,
+            0
+          ],
+          "id": "ground-north-west-junction",
+          "wallIds": [
+            "ground-north-wall",
+            "ground-west-wall"
+          ]
+        },
+        {
+          "at": [
+            6.5,
+            -0.04642857
+          ],
+          "id": "junction-ground-garage-divider-ground-north-wall-6_5--0_04642857",
+          "wallIds": [
+            "ground-garage-divider",
+            "ground-north-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            -0.07142857
+          ],
+          "id": "junction-ground-north-wall-ground-service-divider-10--0_07142857",
+          "wallIds": [
+            "ground-north-wall",
+            "ground-service-divider"
+          ]
+        },
+        {
+          "at": [
+            14,
+            -0.1
+          ],
+          "id": "junction-ground-east-wall-ground-north-wall-14--0_1",
+          "wallIds": [
+            "ground-east-wall",
+            "ground-north-wall"
+          ]
+        },
+        {
+          "at": [
+            14,
+            11
+          ],
+          "id": "junction-ground-east-wall-ground-stair-south-wall-14-11",
+          "wallIds": [
+            "ground-east-wall",
+            "ground-stair-south-wall"
+          ]
+        },
+        {
+          "at": [
+            14,
+            17.9
+          ],
+          "id": "junction-ground-east-wall-ground-south-wall-14-17_9",
+          "wallIds": [
+            "ground-east-wall",
+            "ground-south-wall"
+          ]
+        },
+        {
+          "at": [
+            0,
+            18
+          ],
+          "id": "ground-south-west-junction",
+          "wallIds": [
+            "ground-south-wall",
+            "ground-west-wall"
+          ]
+        },
+        {
+          "at": [
+            0,
+            8.5
+          ],
+          "id": "ground-west-day-junction",
+          "wallIds": [
+            "ground-west-day-wall",
+            "ground-west-wall"
+          ]
+        },
+        {
+          "at": [
+            6.5,
+            4.5
+          ],
+          "id": "ground-utility-west-junction",
+          "wallIds": [
+            "ground-garage-divider",
+            "ground-utility-pantry-wall"
+          ]
+        },
+        {
+          "at": [
+            6.5,
+            8.5
+          ],
+          "id": "ground-garage-day-junction",
+          "wallIds": [
+            "ground-garage-divider",
+            "ground-west-day-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            4.5
+          ],
+          "id": "ground-utility-east-junction",
+          "wallIds": [
+            "ground-service-divider",
+            "ground-utility-pantry-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            8.5
+          ],
+          "id": "ground-service-day-junction",
+          "wallIds": [
+            "ground-service-divider",
+            "ground-west-day-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            11
+          ],
+          "id": "ground-service-stair-junction",
+          "wallIds": [
+            "ground-service-divider",
+            "ground-stair-south-wall"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "classification": "exterior",
+          "from": [
+            0,
+            0
+          ],
+          "id": "ground-north-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            14,
+            -0.1
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            14,
+            -0.1
+          ],
+          "id": "ground-east-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            14,
+            17.9
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            14,
+            17.9
+          ],
+          "id": "ground-south-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            0,
+            18
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            0,
+            18
+          ],
+          "id": "ground-west-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            0,
+            0
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            6.5,
+            -0.04642857
+          ],
+          "id": "ground-garage-divider",
+          "thicknessMeters": 0.16,
+          "to": [
+            6.5,
+            8.5
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            10,
+            -0.07142857
+          ],
+          "id": "ground-service-divider",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            11
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            6.5,
+            4.5
+          ],
+          "id": "ground-utility-pantry-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            4.5
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            0,
+            8.5
+          ],
+          "id": "ground-west-day-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            8.5
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            10,
+            11
+          ],
+          "id": "ground-stair-south-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            14,
+            11
+          ]
+        }
+      ]
+    },
+    {
+      "ceilings": [
+        {
+          "heightMeters": 2.9,
+          "id": "first-floor-ceiling",
+          "kind": "flat",
+          "roomIds": [
+            "primary-bedroom",
+            "upper-landing",
+            "bedroom-four",
+            "primary-bathroom",
+            "primary-dressing"
+          ]
+        }
+      ],
+      "coordinates": {
+        "metersPerPlanUnit": 1,
+        "origin": [
+          0,
+          0
+        ],
+        "scaleBasis": "inferred"
+      },
+      "defaultCeilingHeightMeters": 2.9,
+      "defaultWallHeightMeters": 2.9,
+      "floorToFloorHeightMeters": 3.1,
+      "footprint": [
+        [
+          2,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          16
+        ],
+        [
+          2,
+          16
+        ]
+      ],
+      "id": "first-floor",
+      "name": "First floor",
+      "openings": [
+        {
+          "glazing": "clear",
+          "id": "primary-north-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.5,
+          "openingHeightMeters": 1.5,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 0.75,
+          "variant": "plain",
+          "wallId": "first-north-wall",
+          "widthPlanUnits": 3
+        },
+        {
+          "glazing": "clear",
+          "id": "landing-north-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 9,
+          "openingHeightMeters": 1.8,
+          "operation": "fixed",
+          "panelCount": 2,
+          "sillHeightMeters": 0.55,
+          "variant": "plain",
+          "wallId": "first-north-wall",
+          "widthPlanUnits": 2
+        },
+        {
+          "glazing": "clear",
+          "id": "bedroom-four-west-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.2,
+          "openingHeightMeters": 1.5,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 0.75,
+          "variant": "plain",
+          "wallId": "first-west-wall",
+          "widthPlanUnits": 2.4
+        },
+        {
+          "glazing": "privacy",
+          "id": "primary-bathroom-west-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 5.1,
+          "openingHeightMeters": 1.1,
+          "operation": "fixed",
+          "panelCount": 1,
+          "sillHeightMeters": 1.2,
+          "variant": "plain",
+          "wallId": "first-west-wall",
+          "widthPlanUnits": 1.8
+        },
+        {
+          "glazing": "clear",
+          "id": "primary-west-window",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 10.2,
+          "openingHeightMeters": 1.5,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 0.75,
+          "variant": "plain",
+          "wallId": "first-west-wall",
+          "widthPlanUnits": 3
+        },
+        {
+          "finish": "wood",
+          "id": "primary-bedroom-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 2,
+          "openingHeightMeters": 2.25,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "first-west-gallery-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "wood",
+          "id": "dressing-landing-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 9.5,
+          "openingHeightMeters": 2.25,
+          "operation": "sliding",
+          "sillHeightMeters": 0,
+          "variant": "plank",
+          "wallId": "first-west-gallery-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "wood",
+          "id": "bedroom-four-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 13,
+          "openingHeightMeters": 2.25,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "first-west-gallery-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "wood",
+          "id": "primary-bathroom-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 1.15,
+          "openingHeightMeters": 2.25,
+          "operation": "sliding",
+          "sillHeightMeters": 0,
+          "variant": "plank",
+          "wallId": "first-primary-suite-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "wood",
+          "id": "primary-dressing-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 5.15,
+          "openingHeightMeters": 2.25,
+          "operation": "sliding",
+          "sillHeightMeters": 0,
+          "variant": "plank",
+          "wallId": "first-primary-suite-wall",
+          "widthPlanUnits": 1
+        },
+        {
+          "finish": "white",
+          "id": "primary-bath-dressing-door",
+          "kind": "door",
+          "leafCount": 1,
+          "offsetFromWallStartPlanUnits": 1.45,
+          "openingHeightMeters": 2.25,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "panel",
+          "wallId": "first-primary-bath-divider",
+          "widthPlanUnits": 1
+        },
+        {
+          "glazing": "clear",
+          "id": "first-floor:window-26",
+          "kind": "window",
+          "muntins": {
+            "columns": 2,
+            "rows": 2
+          },
+          "offsetFromWallStartPlanUnits": 8.9,
+          "openingHeightMeters": 1.2,
+          "operation": "casement",
+          "panelCount": 2,
+          "sillHeightMeters": 0.9,
+          "variant": "muntined",
+          "wallId": "first-floor:wall-28",
+          "widthPlanUnits": 2
+        }
+      ],
+      "rooms": [
+        {
+          "accent": "#a8b59c",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#ad8d68",
+            "kind": "solid"
+          },
+          "id": "primary-bedroom",
+          "name": "Primary bedroom",
+          "polygon": [
+            [
+              2,
+              0
+            ],
+            [
+              10,
+              0
+            ],
+            [
+              10,
+              8
+            ],
+            [
+              6,
+              8
+            ],
+            [
+              2,
+              8
+            ]
+          ]
+        },
+        {
+          "accent": "#c4aa87",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#c9b79d",
+            "kind": "solid"
+          },
+          "id": "upper-landing",
+          "name": "Gallery landing",
+          "polygon": [
+            [
+              10,
+              0
+            ],
+            [
+              14,
+              0
+            ],
+            [
+              14,
+              12
+            ],
+            [
+              14,
+              16
+            ],
+            [
+              10,
+              16
+            ],
+            [
+              10,
+              12
+            ],
+            [
+              10,
+              8
+            ]
+          ]
+        },
+        {
+          "accent": "#bea3ad",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#b4936e",
+            "kind": "solid"
+          },
+          "id": "bedroom-four",
+          "name": "Bedroom four",
+          "polygon": [
+            [
+              2,
+              16
+            ],
+            [
+              2,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              10,
+              12
+            ],
+            [
+              10,
+              16
+            ]
+          ]
+        },
+        {
+          "accent": "#8db3b1",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#d2cec4",
+            "kind": "solid"
+          },
+          "id": "primary-bathroom",
+          "name": "Primary bathroom",
+          "polygon": [
+            [
+              2,
+              12
+            ],
+            [
+              2,
+              8
+            ],
+            [
+              6,
+              8
+            ],
+            [
+              6,
+              12
+            ]
+          ]
+        },
+        {
+          "accent": "#c3ad91",
+          "dashboardSlots": [],
+          "devices": [],
+          "floorFinish": {
+            "color": "#b79a78",
+            "kind": "solid"
+          },
+          "id": "primary-dressing",
+          "name": "Primary dressing room",
+          "polygon": [
+            [
+              10,
+              8
+            ],
+            [
+              10,
+              12
+            ],
+            [
+              6,
+              12
+            ],
+            [
+              6,
+              8
+            ]
+          ]
+        }
+      ],
+      "wallJunctions": [
+        {
+          "at": [
+            2,
+            0
+          ],
+          "id": "first-north-west-junction",
+          "wallIds": [
+            "first-north-wall",
+            "first-west-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            0
+          ],
+          "id": "first-north-west-gallery-junction",
+          "wallIds": [
+            "first-north-wall",
+            "first-west-gallery-wall"
+          ]
+        },
+        {
+          "at": [
+            14,
+            0
+          ],
+          "id": "first-north-east-gallery-junction",
+          "wallIds": [
+            "first-east-gallery-wall",
+            "first-north-wall"
+          ]
+        },
+        {
+          "at": [
+            2,
+            16
+          ],
+          "id": "junction-first-floor:wall-28-first-west-wall-2-16",
+          "wallIds": [
+            "first-floor:wall-28",
+            "first-west-wall"
+          ]
+        },
+        {
+          "at": [
+            2,
+            12
+          ],
+          "id": "first-west-bedroom-junction",
+          "wallIds": [
+            "first-west-bedroom-wall",
+            "first-west-wall"
+          ]
+        },
+        {
+          "at": [
+            2,
+            8
+          ],
+          "id": "first-west-primary-junction",
+          "wallIds": [
+            "first-primary-suite-wall",
+            "first-west-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            8
+          ],
+          "id": "first-gallery-primary-junction",
+          "wallIds": [
+            "first-primary-suite-wall",
+            "first-west-gallery-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            12
+          ],
+          "id": "first-gallery-west-bedroom-junction",
+          "wallIds": [
+            "first-west-bedroom-wall",
+            "first-west-gallery-wall"
+          ]
+        },
+        {
+          "at": [
+            10,
+            16
+          ],
+          "id": "junction-first-floor:wall-28-first-west-gallery-wall-10-16",
+          "wallIds": [
+            "first-floor:wall-28",
+            "first-west-gallery-wall"
+          ]
+        },
+        {
+          "at": [
+            14,
+            12
+          ],
+          "id": "junction-first-east-gallery-wall-first-east-gallery-wall--split-3-14-12",
+          "wallIds": [
+            "first-east-gallery-wall",
+            "first-east-gallery-wall--split-3"
+          ]
+        },
+        {
+          "at": [
+            14,
+            16
+          ],
+          "id": "junction-first-east-gallery-wall--split-3-first-floor:wall-28-14-16",
+          "wallIds": [
+            "first-east-gallery-wall--split-3",
+            "first-floor:wall-28"
+          ]
+        },
+        {
+          "at": [
+            6,
+            8
+          ],
+          "id": "first-primary-bath-north-junction",
+          "wallIds": [
+            "first-primary-bath-divider",
+            "first-primary-suite-wall"
+          ]
+        },
+        {
+          "at": [
+            6,
+            12
+          ],
+          "id": "first-primary-bath-south-junction",
+          "wallIds": [
+            "first-primary-bath-divider",
+            "first-west-bedroom-wall"
+          ]
+        }
+      ],
+      "walls": [
+        {
+          "classification": "exterior",
+          "from": [
+            2,
+            0
+          ],
+          "id": "first-north-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            14,
+            0
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            2,
+            16
+          ],
+          "id": "first-west-wall",
+          "thicknessMeters": 0.32,
+          "to": [
+            2,
+            0
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            10,
+            0
+          ],
+          "id": "first-west-gallery-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            16
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            14,
+            0
+          ],
+          "id": "first-east-gallery-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            14,
+            12
+          ]
+        },
+        {
+          "classification": "exterior",
+          "from": [
+            14,
+            12
+          ],
+          "id": "first-east-gallery-wall--split-3",
+          "thicknessMeters": 0.16,
+          "to": [
+            14,
+            16
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            2,
+            8
+          ],
+          "id": "first-primary-suite-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            8
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            6,
+            8
+          ],
+          "id": "first-primary-bath-divider",
+          "thicknessMeters": 0.16,
+          "to": [
+            6,
+            12
+          ]
+        },
+        {
+          "classification": "interior",
+          "from": [
+            2,
+            12
+          ],
+          "id": "first-west-bedroom-wall",
+          "thicknessMeters": 0.16,
+          "to": [
+            10,
+            12
+          ]
+        },
+        {
+          "classification": "exterior",
+          "exteriorColor": "#d6c3aa",
+          "from": [
+            2,
+            16
+          ],
+          "id": "first-floor:wall-28",
+          "thicknessMeters": 0.32,
+          "to": [
+            14,
+            16
+          ]
+        }
+      ]
+    }
+  ],
+  "stairs": [
+    {
+      "at": [
+        12,
+        6
+      ],
+      "id": "central-stair",
+      "lowerFloorId": "ground-floor",
+      "rotationYRadians": 0,
+      "runMeters": 4.2,
+      "upperFloorId": "first-floor",
+      "widthMeters": 1.4
+    }
+  ]
+}

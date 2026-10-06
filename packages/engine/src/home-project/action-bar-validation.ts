@@ -1,0 +1,36 @@
+import type { ActionBarItem } from "../action-bar/action-bar-config";
+import type { HomeProject } from "./types";
+import { resolvedRoomIdForItem } from "./scene-items";
+import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
+
+const targetKey = (item: ActionBarItem): string => {
+  const target = item.target;
+  return target.kind === "built-in" ? `built-in:${target.action}`
+    : target.kind === "room" ? `room:${target.roomId}` : `device:${target.deviceId}`;
+};
+
+export function isActionBarDeviceNavigable(project: HomeProject, deviceId: string): boolean {
+  const device = project.sceneItems.find(item => item.id === deviceId);
+  return device?.kind === "device" && resolvedRoomIdForItem(device, project) !== null;
+}
+
+export function validateActionBarTargets(project: HomeProject, issues: HomeProjectIssue[]): void {
+  if (!project.actionBar) return;
+  const ids = new Set<string>();
+  const targets = new Set<string>();
+  const roomIds = new Set(project.floors.flatMap(floor => floor.rooms.map(room => room.id)));
+  project.actionBar.items.forEach((item, index) => {
+    const path = `actionBar.items[${index}]`;
+    if (ids.has(item.id)) addProjectIssue(issues, "project.action-bar-id-duplicate", `${path}.id`, "Action bar item IDs must be unique.");
+    ids.add(item.id);
+    const key = targetKey(item);
+    if (targets.has(key)) addProjectIssue(issues, "project.action-bar-target-duplicate", `${path}.target`, "This action is already in the bar.");
+    targets.add(key);
+    if (item.target.kind === "room" && !roomIds.has(item.target.roomId)) {
+      addProjectIssue(issues, "project.action-bar-room-missing", `${path}.target.roomId`, `Room “${item.target.roomId}” no longer exists. Replace or remove its action bar shortcut.`);
+    }
+    if (item.target.kind === "device" && !isActionBarDeviceNavigable(project, item.target.deviceId)) {
+      addProjectIssue(issues, "project.action-bar-device-missing", `${path}.target.deviceId`, `Device “${item.target.deviceId}” is missing or has no room sheet. Replace or remove its action bar shortcut.`);
+    }
+  });
+}

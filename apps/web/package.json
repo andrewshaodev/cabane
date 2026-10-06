@@ -1,0 +1,28 @@
+{
+  "name": "@cabane/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4173",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173"
+  },
+  "dependencies": {
+    "@cabane/catalog": "0.1.0",
+    "@cabane/engine": "0.1.0",
+    "@cabane/home": "0.1.0",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
+    "@vercel/analytics": "2.0.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router": "7.18.3",
+    "three": "0.182.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.5",
+    "vite": "8.2.1"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

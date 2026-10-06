@@ -1,0 +1,24 @@
+{
+  "name": "@cabane/engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "dependencies": {
+    "@fontsource/roboto": "5.3.0",
+    "@mdi/font": "7.4.47",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
+    "@tabler/icons-react": "3.46.0",
+    "hls.js": "1.7.0",
+    "home-assistant-js-websocket": "9.6.0",
+    "meshoptimizer": "1.1.1",
+    "polygon-clipping": "0.15.7",
+    "react": "19.2.8",
+    "three": "0.182.0"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

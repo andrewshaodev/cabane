@@ -1,0 +1,24 @@
+import { DEFAULT_ROOF_SETTINGS, type RoofSettings } from "@cabane/engine";
+import { DebouncedColorInput } from "./DebouncedColorInput";
+
+export function RoofSettingsEditor({ value = DEFAULT_ROOF_SETTINGS, onChange }: {
+  value?: RoofSettings;
+  onChange: (settings: RoofSettings) => void;
+}) {
+  return <section className="construction-inspector__floor-settings" aria-label="Roof settings">
+    <header><div><small>Whole building</small><strong>Gable roof</strong></div></header>
+    <p>One direction and palette for every roof section. Use Show roof in Home to see the result after Save.</p>
+    <fieldset>
+      <legend>Direction & colors</legend>
+      <label>Ridge direction<select aria-label="Roof ridge direction" value={value.direction}
+        onChange={event => onChange({ ...value, direction: event.target.value as RoofSettings["direction"] })}>
+        <option value="left-right">Left–right ↔</option>
+        <option value="front-back">Front–back ↕</option>
+      </select></label>
+      <label>Roof color<DebouncedColorInput label="Roof color" value={value.color}
+        onCommit={color => onChange({ ...value, color })} /></label>
+      <label>Trim color<DebouncedColorInput label="Roof trim color" value={value.edgeColor}
+        onCommit={edgeColor => onChange({ ...value, edgeColor })} /></label>
+    </fieldset>
+  </section>;
+}

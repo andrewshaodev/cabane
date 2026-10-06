@@ -1,0 +1,27 @@
+.plan-import { margin-top: 22px; }
+.plan-import .construction-inspector__tool-hint { margin-bottom: 14px; }
+.plan-import > [role="status"] { margin: 12px 0 0; color: var(--preview-muted); font-size: var(--editor-text-control, .875rem); line-height: 1.5; }
+.plan-import__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan-import__actions button, .plan-import-dialog button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 12px; border: 1px solid #bac3b3; border-radius: 8px; color: #36473c; background: #eef1e8; font: 600 var(--editor-text-control, .875rem)/1.35 "Roboto", sans-serif; cursor: pointer; }
+.plan-import__actions button:first-child, .plan-import-dialog .plan-import-dialog__primary { background: #54684a; border-color: #54684a; color: #fffaf0; }
+.plan-import__actions button:hover:not(:disabled), .plan-import-dialog button:hover:not(:disabled) { filter: brightness(.94); }
+.plan-import__actions button:disabled, .plan-import-dialog button:disabled { opacity: .5; cursor: default; }
+.plan-import :focus-visible, .plan-import-dialog :focus-visible { outline: 2px solid #54684a; outline-offset: 3px; }
+.plan-import-dialog { box-sizing: border-box; width: min(720px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 1px solid #c4c9ba; border-radius: 14px; color: #334039; background: #f7f2e9; font: 400 .9375rem/1.55 "Roboto", sans-serif; }
+.plan-import-dialog::backdrop { background: #1e26226b; }
+.plan-import-dialog header { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.plan-import-dialog h2 { margin: 0; font: 400 1.5rem/1.25 Georgia, serif; }
+.plan-import-dialog .plan-import-dialog__close { flex: 0 0 44px; }
+.plan-import-dialog ol { padding-left: 24px; }
+.plan-import-dialog li + li { margin-top: 8px; }
+.plan-import-dialog p { margin: 12px 0 16px; }
+/* Dialog fields stack above full-width controls, unlike compact inspector fields. */
+.plan-import .plan-import-dialog label { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 16px; font-weight: 600; }
+.plan-import-dialog textarea { box-sizing: border-box; width: 100%; min-height: 160px; max-height: 45dvh; padding: 12px; resize: vertical; border: 1px solid #bac3b3; border-radius: 8px; background: #fffdf7; color: #334039; font: 400 .8125rem/1.5 monospace; }
+.plan-import-dialog textarea::placeholder { color: #596454; }
+.plan-import-dialog textarea::selection { color: #fffaf0; background: #54684a; }
+.plan-import-dialog input { min-width: 0; max-width: 100%; font: inherit; }
+.plan-import-dialog form > button { margin-top: 16px; }
+.plan-import-dialog [role="status"] { margin-left: 12px; }
+.plan-import-dialog .plan-import-dialog__error { color: #873c31; white-space: pre-wrap; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .plan-import-dialog { padding: 18px; } .plan-import-dialog h2 { font-size: 1.25rem; } }

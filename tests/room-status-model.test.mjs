@@ -1,0 +1,152 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { withModules } from "./test-server.mjs";
+import {
+  connectedManifestFixture,
+  connectedProfileFixture,
+  connectedRuntimeFixture,
+} from "./fixtures/home-assistant.mjs";
+
+await withModules(async (load) => {
+  const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
+  const { resolveHomeAssistantBindings } = await load(
+    "/packages/engine/src/home-assistant-resolver.ts",
+  );
+  const { deriveRoomStatusMap } = await load(
+    "/packages/engine/src/room-status/model.ts",
+  );
+
+  const derive = (prepare = () => undefined) => {
+    const manifest = connectedManifestFixture(neutralDemoManifest);
+    const profile = connectedProfileFixture();
+    const runtime = connectedRuntimeFixture();
+    prepare({ manifest, profile, runtime });
+    const resolved = resolveHomeAssistantBindings(manifest, profile, runtime);
+    return deriveRoomStatusMap(manifest, profile, resolved, runtime)["demo-room"];
+  };
+
+  test("uses only the exact temperature and humidity references configured on the mapped area", () => {
+    const summary = derive(({ profile, runtime }) => {
+      delete profile.entityIdsBySlotId["demo-temperature-slot"];
+      runtime.entityStates["sensor.unrelated_temperature"] = {
+        ...runtime.entityStates["sensor.demo_temperature"],
+        entityId: "sensor.unrelated_temperature",
+        state: "99",
+      };
+    });
+
+    assert.deepEqual(summary.temperature, { value: "19.7", unit: "°C" });
+    assert.deepEqual(summary.humidity, { value: "48", unit: "%" });
+  });
+
+  test("hides missing, unknown, unavailable, and stale area readings without fallback", () => {
+    const missing = derive(({ runtime }) => {
+      runtime.areas[0].temperature_entity_id = "sensor.missing";
+    });
+    const unknown = derive(({ runtime }) => {
+      runtime.entityStates["sensor.demo_temperature"] = {
+        ...runtime.entityStates["sensor.demo_temperature"],
+        state: "unknown",
+      };
+    });
+    const unavailable = derive(({ runtime }) => {
+      runtime.entityStates["sensor.demo_humidity"] = {
+        ...runtime.entityStates["sensor.demo_humidity"],
+        available: false,
+      };
+    });
+    const stale = derive(({ runtime }) => {
+      runtime.entityStates["sensor.demo_humidity"] = {
+        ...runtime.entityStates["sensor.demo_humidity"],
+        stale: true,
+      };
+    });
+
+    assert.equal(missing.temperature, undefined);
+    assert.equal(unknown.temperature, undefined);
+    assert.equal(unavailable.humidity, undefined);
+    assert.equal(stale.humidity, undefined);
+  });
+
+  test("aggregates only exact reliable climate, light, presence, and adjacent door bindings", () => {
+    const summary = derive(({ manifest, profile, runtime }) => {
+      const room = manifest.floors[0].rooms[0];
+      room.dashboardSlots.push({
+        id: "demo-presence-slot",
+        compatibleDomains: ["binary_sensor"],
+        compatibleDeviceClasses: ["motion", "occupancy", "presence"],
+        required: false,
+        autoMap: "unique-compatible",
+        presentation: { label: "Presence", dashboardRole: "diagnostic" },
+      });
+      profile.entityIdsBySlotId["demo-presence-slot"] = "binary_sensor.demo_presence";
+      runtime.entityRegistry.push({
+        entity_id: "binary_sensor.demo_presence",
+        area_id: "demo_room",
+        device_id: null,
+        platform: "fixture_integration",
+        disabled_by: null,
+        hidden_by: null,
+        name: null,
+        original_name: "Presence",
+      });
+      runtime.entityStates["binary_sensor.demo_presence"] = {
+        entityId: "binary_sensor.demo_presence",
+        state: "off",
+        attributes: { device_class: "presence" },
+        available: true,
+        stale: false,
+      };
+
+      const door = manifest.floors[0].openings.find(({ kind }) => kind === "door");
+      door.contactSlot = {
+        id: "demo-door-contact-slot",
+        compatibleDeviceClasses: ["door", "opening"],
+        openState: "on",
+        autoMap: "unique-compatible",
+      };
+      profile.entityIdsBySlotId["demo-door-contact-slot"] = "binary_sensor.demo_door";
+      runtime.entityRegistry.push({
+        entity_id: "binary_sensor.demo_door",
+        area_id: "demo_room",
+        device_id: null,
+        platform: "fixture_integration",
+        disabled_by: null,
+        hidden_by: null,
+        name: null,
+        original_name: "Door",
+      });
+      runtime.entityStates["binary_sensor.demo_door"] = {
+        entityId: "binary_sensor.demo_door",
+        state: "on",
+        attributes: { device_class: "door" },
+        available: true,
+        stale: false,
+      };
+
+      runtime.entityStates["light.demo_ceiling"] = {
+        ...runtime.entityStates["light.demo_ceiling"],
+        state: "off",
+      };
+      runtime.entityStates["light.unmodeled_path"] = {
+        ...runtime.entityStates["light.demo_ceiling"],
+        entityId: "light.unmodeled_path",
+        state: "on",
+      };
+      runtime.entityStates["climate.demo"] = {
+        ...runtime.entityStates["climate.demo"],
+        state: "cool",
+        attributes: {
+          ...runtime.entityStates["climate.demo"].attributes,
+          hvac_action: "idle",
+        },
+      };
+    });
+
+    assert.equal(summary.heating, false);
+    assert.equal(summary.cooling, true, "selected cool mode remains visible while idle");
+    assert.equal(summary.lighting, "off", "unbound area lights do not affect the room badge");
+    assert.equal(summary.presence, "absent");
+    assert.equal(summary.doorOpen, true);
+  });
+});

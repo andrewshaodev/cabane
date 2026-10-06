@@ -1,0 +1,25 @@
+import type { DoorConfiguration } from "@cabane/engine";
+import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+export function DoorDesignFields({ value, onChange, showSize = true }: {
+  value: DoorConfiguration; onChange: (value: DoorConfiguration) => void; showSize?: boolean;
+}) {
+  return <>
+    {showSize && <fieldset><legend>Size</legend>
+      <label>Width<CommittedNumberInput label="Door width" min={.3} value={value.widthMeters} onCommit={(widthMeters) => onChange({ ...value, widthMeters })} /></label>
+      <label>Height<CommittedNumberInput label="Door height" min={.3} value={value.heightMeters} onCommit={(heightMeters) => onChange({ ...value, heightMeters })} /></label>
+    </fieldset>}
+    <fieldset className="construction-inspector__variants"><legend>Door design</legend>
+      <label>Motion<select aria-label="Door operation" value={value.operation} onChange={(event) => {
+        const base = { kind: "door" as const, finish: value.finish, openingSide: value.openingSide, widthMeters: value.widthMeters, heightMeters: value.heightMeters };
+        if (event.target.value === "roll-up") onChange({ ...base, operation: "roll-up", variant: "slatted" });
+        else if (event.target.value === "sliding") onChange({ ...base, operation: "sliding", variant: value.operation === "roll-up" ? "panel" : value.variant, leafCount: value.leafCount ?? 1 });
+        else onChange({ ...base, operation: "hinged", variant: value.operation === "roll-up" ? "panel" : value.variant, leafCount: value.leafCount ?? 1 });
+      }}><option value="hinged">Hinged</option><option value="sliding">Sliding</option><option value="roll-up">Roll-up</option></select></label>
+      {value.operation === "roll-up" ? <label>Style<select aria-label="Door style" value="slatted" disabled><option value="slatted">Slatted</option></select></label> : <>
+        <label>Style<select aria-label="Door style" value={value.variant} onChange={(event) => onChange({ ...value, variant: event.target.value as typeof value.variant })}><option value="panel">Panel</option><option value="french">French</option><option value="full-glass">Full glass</option><option value="plank">Plank</option></select></label>
+        <label>Leaves<select aria-label="Door leaf count" value={value.leafCount} onChange={(event) => onChange({ ...value, leafCount: Number(event.target.value) as 1 | 2 })}><option value={1}>Single</option><option value={2}>Double</option></select></label>
+      </>}
+      <label>Finish<select aria-label="Door finish" value={value.finish} onChange={(event) => onChange({ ...value, finish: event.target.value as "wood" | "white" })}><option value="wood">Wood</option><option value="white">White</option></select></label>
+    </fieldset>
+  </>;
+}

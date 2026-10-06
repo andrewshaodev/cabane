@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.vercel/
+coverage/
+.DS_Store
+.env
+.env.local
+*.local
+playwright-report/
+test-results/
+screenshots/
+.codex/config.toml
+.superpowers/
+.worktrees/

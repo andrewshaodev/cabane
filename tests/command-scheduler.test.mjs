@@ -1,0 +1,162 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { withModules } from "./test-server.mjs";
+
+await withModules(async (load) => {
+  const {
+    DEVICE_THROTTLE_MS,
+    DeviceCommandScheduler,
+    VALUE_DEBOUNCE_MS,
+  } = await load("/packages/engine/src/command-scheduler.ts");
+
+  test("uses the Phase 3 production timing contract", () => {
+    assert.equal(VALUE_DEBOUNCE_MS, 500);
+    assert.equal(DEVICE_THROTTLE_MS, 2_000);
+  });
+
+  const fakeClock = () => {
+    let now = 0;
+    let nextId = 1;
+    const timers = new Map();
+    return {
+      now: () => now,
+      setTimer: (callback, delay) => {
+        const id = nextId++;
+        timers.set(id, { callback, at: now + delay });
+        return id;
+      },
+      clearTimer: (id) => timers.delete(id),
+      advance: async (milliseconds) => {
+        now += milliseconds;
+        while (true) {
+          const due = [...timers.entries()]
+            .filter(([, timer]) => timer.at <= now)
+            .sort(([, left], [, right]) => left.at - right.at)[0];
+          if (!due) break;
+          timers.delete(due[0]);
+          due[1].callback();
+          await Promise.resolve();
+        }
+      },
+    };
+  };
+
+  const brightnessCall = (value) => ({
+    domain: "light",
+    service: "turn_on",
+    data: { brightness_pct: value },
+    target: { entity_id: "light.demo" },
+    delivery: { mode: "coalesced-value", channel: "brightness" },
+  });
+
+  test("coalesces channel values and throttles later values per device", async () => {
+    const clock = fakeClock();
+    const dispatched = [];
+    const scheduler = new DeviceCommandScheduler({
+      dispatch: async (call) => { dispatched.push(call); },
+      resolveDeviceKey: () => "device-light",
+      debounceMs: 5,
+      throttleMs: 20,
+      now: clock.now,
+      setTimer: clock.setTimer,
+      clearTimer: clock.clearTimer,
+    });
+    const first = scheduler.schedule(brightnessCall(20));
+    const second = scheduler.schedule(brightnessCall(80));
+    await clock.advance(4);
+    assert.equal(dispatched.length, 0);
+    await clock.advance(1);
+    assert.equal(dispatched.length, 1);
+    assert.equal(dispatched[0].data.brightness_pct, 80);
+    await Promise.all([first, second]);
+
+    const third = scheduler.schedule({
+      ...brightnessCall(60),
+      delivery: { mode: "coalesced-value", channel: "volume" },
+    });
+    await clock.advance(19);
+    assert.equal(dispatched.length, 1);
+    await clock.advance(1);
+    assert.equal(dispatched.length, 2);
+    await third;
+    scheduler.dispose();
+  });
+
+  test("immediate actions cancel pending values and dispatch immediately", async () => {
+    const clock = fakeClock();
+    const dispatched = [];
+    const scheduler = new DeviceCommandScheduler({
+      dispatch: async (call) => { dispatched.push(call); },
+      resolveDeviceKey: () => "device-light",
+      now: clock.now,
+      setTimer: clock.setTimer,
+      clearTimer: clock.clearTimer,
+    });
+    const pending = scheduler.schedule(brightnessCall(40));
+    await scheduler.schedule({
+      domain: "light",
+      service: "turn_off",
+      target: { entity_id: "light.demo" },
+    });
+    await pending;
+    await clock.advance(5_000);
+    assert.deepEqual(dispatched.map((call) => call.service), ["turn_off"]);
+  });
+
+  test("coalesces humidity, temperature, position, and number values independently", async () => {
+    const clock = fakeClock();
+    const dispatched = [];
+    const scheduler = new DeviceCommandScheduler({
+      dispatch: async (call) => { dispatched.push(call); },
+      resolveDeviceKey: () => "device-multifunction",
+      debounceMs: 5,
+      throttleMs: 20,
+      now: clock.now,
+      setTimer: clock.setTimer,
+      clearTimer: clock.clearTimer,
+    });
+    const makeCall = (channel, value) => ({
+      domain: "number",
+      service: "set_value",
+      data: { value },
+      target: { entity_id: "number.multifunction" },
+      delivery: { mode: "coalesced-value", channel },
+    });
+    const scheduled = [];
+    for (const [channel, first, latest] of [
+      ["humidity", 40, 45],
+      ["temperature", 20, 21],
+      ["position", 60, 70],
+      ["value", 10, 15],
+    ]) {
+      scheduled.push(scheduler.schedule(makeCall(channel, first)));
+      scheduled.push(scheduler.schedule(makeCall(channel, latest)));
+    }
+    await clock.advance(5);
+    await clock.advance(20);
+    await clock.advance(20);
+    await clock.advance(20);
+    await Promise.all(scheduled);
+    assert.deepEqual(
+      dispatched.map((call) => [call.delivery.channel, call.data.value]).sort(),
+      [["humidity", 45], ["position", 70], ["temperature", 21], ["value", 15]],
+    );
+    scheduler.dispose();
+  });
+
+  test("propagates dispatch failures and rejects scheduling after disposal", async () => {
+    const scheduler = new DeviceCommandScheduler({
+      dispatch: async () => { throw new Error("fixture failure"); },
+      resolveDeviceKey: () => "device-light",
+    });
+    await assert.rejects(
+      scheduler.schedule({ domain: "light", service: "turn_off", target: { entity_id: "light.demo" } }),
+      /fixture failure/,
+    );
+    scheduler.dispose();
+    await assert.rejects(
+      scheduler.schedule({ domain: "light", service: "turn_on", target: { entity_id: "light.demo" } }),
+      /stopped/,
+    );
+  });
+});

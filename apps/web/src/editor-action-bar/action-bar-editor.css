@@ -1,0 +1,85 @@
+.shortcuts-workspace {
+  --scene-action-size: clamp(50px, 15.5vw, 68px);
+  position: absolute;
+  inset: 0 0 0 var(--editor-rail-width);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 116px clamp(20px, 5vw, 72px) max(24px, env(safe-area-inset-bottom));
+  color: #293a32;
+  background: #e8e8dd;
+}
+.shortcuts-workspace h2, .shortcuts-workspace p { margin: 0; }
+.shortcuts-workspace__intro { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; }
+.shortcuts-workspace__intro h2 { font: 600 var(--editor-text-body)/1.4 "Roboto", sans-serif; }
+.shortcuts-workspace__history { display: flex; flex-wrap: wrap; gap: 5px; }
+.shortcuts-workspace__history button, .shortcuts-picker__heading button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 39px; padding: 0 12px; border: 1px solid #bbc8b9; border-radius: 8px;
+  color: #31473b; background: #f8f6ec; font: 600 .82rem Roboto, sans-serif;
+}
+.shortcuts-workspace button:disabled { opacity: .45; }
+.shortcuts-workspace__warning { align-self: flex-start; margin-top: 14px !important; padding: 8px 12px; border-radius: 8px; color: #813b28; background: #f4ddd3; }
+.shortcuts-workspace__canvas { display: grid; min-height: 0; flex: 1; place-items: center; overflow: auto; }
+.shortcuts-workspace__prompt { max-width: 350px; text-align: center; }
+.shortcuts-workspace__prompt h2 { font: 600 var(--editor-text-subheading)/1.3 "Roboto", sans-serif; }
+.shortcuts-workspace__prompt p { margin-top: 8px; color: #607166; }
+.shortcuts-picker { width: min(860px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 16px; padding: 22px; border-radius: 16px; background: #f7f5ec; }
+.shortcuts-picker__heading { display: flex; align-items: start; justify-content: space-between; gap: 20px; }
+.shortcuts-picker__heading h2 { font: 600 var(--editor-text-subheading)/1.3 "Roboto", sans-serif; }
+.shortcuts-picker__heading p { margin-top: 4px; color: #657568; font-size: .82rem; }
+.shortcuts-picker__heading button { width: 39px; padding: 0; }
+.shortcuts-picker__search { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 12px; border: 1px solid #b8c8b6; border-radius: 9px; background: white; }
+.shortcuts-picker__search input { min-width: 0; width: 100%; border: 0; outline: none; color: #293a32; background: transparent; font: 500 .94rem Roboto, sans-serif; }
+.shortcuts-picker__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 9px; min-height: 70px; overflow-y: auto; }
+.shortcuts-picker__grid button { display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; min-height: 132px; padding: 12px; border: 1px solid #c7d1c3; border-radius: 11px; color: #304439; background: #fffdf6; text-align: center; }
+.shortcuts-picker__grid button:hover:not(:disabled) { border-color: #679576; background: #f0f5e9; }
+.shortcuts-picker__grid strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font: 700 .82rem Roboto, sans-serif; }
+.shortcuts-picker__icon { display: grid; place-items: center; width: 68px; height: 68px; overflow: hidden; border-radius: 9px; background: #526658; }
+.shortcuts-picker__icon > img, .shortcuts-picker__icon .scene-action-device-preview, .shortcuts-picker__icon .scene-action-room-initials { width: 100%; height: 100%; object-fit: contain; }
+.shortcuts-picker__icon .scene-action-device-preview .catalog-card__preview { width: 100%; height: 100%; }
+.shortcuts-workspace__bar-zone { position: relative; display: grid; place-items: center; min-height: 132px; }
+.shortcuts-workspace__bar-measure { display: flex; justify-content: center; width: 100%; }
+.shortcuts-workspace .scene-action-dock { position: relative; inset: auto; width: max-content; max-width: 100%; }
+.shortcuts-workspace .scene-action-bar { pointer-events: auto; }
+.shortcuts-workspace .scene-action-slot[aria-pressed="true"] { border-color: #f0d7a5; box-shadow: 0 0 0 2px #9f663c; }
+.shortcuts-workspace__empty { color: #f7fbf5; border-style: dashed; }
+.shortcuts-workspace__empty .editor-icon { width: 28px; height: 28px; }
+.shortcuts-workspace__tray { position: absolute; z-index: 5; bottom: calc(50% + 52px); left: 50%; display: flex; align-items: center; gap: 5px; max-width: min(92vw, 720px); padding: 6px; border-radius: 12px; color: white; background: #263b31; box-shadow: 0 12px 32px rgba(26,41,29,.2); transform: translateX(-50%); }
+.shortcuts-workspace__tray button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none; min-height: 37px; padding: 0 10px; border: 0; border-radius: 7px; color: inherit; background: transparent; font: 600 .78rem Roboto, sans-serif; white-space: nowrap; }
+.shortcuts-workspace__tray button:hover:not(:disabled) { background: #405a48; }
+.shortcuts-workspace__tray-separator { height: 26px; border-left: 1px solid #718a73; }
+.shortcuts-workspace .scene-action-overflow__tray { bottom: calc(100% + 12px); }
+.direction-preview.is-shortcuts .editor-floor-controls,
+.direction-preview.is-shortcuts .direction-camera,
+.direction-preview.is-shortcuts .editor-action-bar,
+.direction-preview.is-shortcuts .direction-status { display: none; }
+
+@media (max-width: 760px) {
+  .shortcuts-workspace { --scene-action-size: 44px; bottom: 40dvh; padding: 122px 14px 12px; }
+  .shortcuts-workspace__intro { display: block; }
+  .shortcuts-workspace__history { margin-top: 12px; }
+  .shortcuts-workspace__history button { min-height: 36px; font-size: .74rem; }
+  .shortcuts-picker { padding: 14px; }
+  .shortcuts-picker__grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); }
+  .shortcuts-workspace__bar-zone { min-height: 110px; }
+  .shortcuts-workspace__tray { bottom: calc(50% + 42px); width: max-content; max-width: calc(100vw - 24px); overflow-x: auto; }
+  .shortcuts-workspace__tray button { font-size: .72rem; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .shortcuts-workspace { bottom: 0; padding-top: 122px; padding-bottom: 5px; }
+  .shortcuts-workspace__history button { min-height: 32px; }
+  .shortcuts-workspace__bar-zone { min-height: 76px; }
+  .shortcuts-workspace__prompt { display: none; }
+  .shortcuts-workspace__tray { bottom: calc(50% + 33px); }
+}
+
+.shortcuts-picker__room { grid-column: 1 / -1; min-width: 0; }
+.shortcuts-picker__room + .shortcuts-picker__room { margin-top: 16px; }
+.shortcuts-picker__room h3 { margin: 0 0 10px; font: 700 1rem Roboto, sans-serif; color: #304439; }
+.shortcuts-picker__room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 9px; }
+
+/* Keep the same mode navigation and project actions as the other editors. */
+@media (max-width: 1240px) {
+  .direction-preview.is-shortcuts .direction-project-actions { grid-row: 2; }
+}

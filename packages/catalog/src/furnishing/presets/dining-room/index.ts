@@ -1,0 +1,4 @@
+export { RectangularDiningTable, RECTANGULAR_DINING_TABLE_SIZE } from "./rectangular-dining-table";
+export { OakDiningChair, OAK_DINING_CHAIR_SIZE } from "./oak-dining-chair";
+export { ThreeDoorSideboard, THREE_DOOR_SIDEBOARD_SIZE } from "./three-door-sideboard";
+export { CustomDiningSet, CustomDiningChair, LivingRoomTablePlant } from "./photo-dining-set";

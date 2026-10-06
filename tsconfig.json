@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@cabane/engine": ["./packages/engine/src/index.ts"],
+      "@cabane/catalog/architecture": ["./packages/catalog/src/architecture/index.ts"],
+      "@cabane/catalog/furnishing": ["./packages/catalog/src/furnishing/index.ts"],
+      "@cabane/catalog/device": ["./packages/catalog/src/device/index.ts"],
+      "@cabane/home": ["./home/src/index.ts"]
+    }
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "home/**/*.ts",
+    "home/**/*.tsx",
+    "tests/*.types.ts"
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Catalog Presets"
+  short_description: "Build Cabane presets from descriptions or products"
+  default_prompt: "Use $build-catalog-presets to turn these descriptions or product references into reusable Cabane catalog presets. Complete the batch with numeric checks; review visuals only if I ask."

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Fast Track"
+  short_description: "Ship a small task directly to origin/main"
+  default_prompt: "Use $fast-track to complete this task with lightweight verification, commit it directly to origin/main, and clean up task-created worktree state."
+policy:
+  allow_implicit_invocation: false

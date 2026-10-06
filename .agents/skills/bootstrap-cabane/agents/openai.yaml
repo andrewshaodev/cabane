@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bootstrap Cabane"
+  short_description: "Guide first-time local and Home Assistant setup"
+  default_prompt: "Use $bootstrap-cabane to guide me through setting up this repository, its local server, browser OAuth runtime, and browser-local binding profile."

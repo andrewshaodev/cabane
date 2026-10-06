@@ -1,0 +1,66 @@
+# Arrange and catalog placement
+
+Arrange edits declarative furnishing/device items in 3D or top view. In 2D,
+two-finger trackpad scrolling pans the plan and pinch (Ctrl/Cmd-wheel) zooms
+around the cursor, matching Construct. Its catalog
+supports searching and room-category browsing, visual model previews, and
+creation from supported registry entries. Clicking furniture or a device on a visible
+lower floor in 3D switches to that floor and selects the item. Selection exposes rotate, duplicate,
+delete, details, and, for devices with slots, Connect actions. Properties edit
+dimensions and placement. All built-in furnishings expose independent width, height,
+and depth controls, including previously fixed-size presets. Resizing scales the
+procedural model, so extreme dimensions can stretch its details. Device and
+home-local extension controls follow their declared resize policies. Variant is a standard saved attribute for both
+furniture and devices. Details shows a Variant selector only when the model has
+multiple choices; the first choice is the default for older items. Variant changes
+keep identity, size, placement and bindings, participate in undo/redo and duplication,
+and are published on Apply. Lights also expose a State selector: Always off,
+Always on, Night only, or Connected (the default). Night only follows the sun's
+above/below horizon state when available and otherwise uses local time (18:00–06:00).
+The scene's Day and Night previews override this automatic choice. This
+persisted scene override controls bulb appearance and illumination without
+sending HA commands; Connected follows the
+bound entity. Changes participate in draft history and take effect in Home on Apply.
+
+Placement resolves a feasible start near the camera target (or floor center),
+using model support and outdoor-only model constraints. Furnishings and devices
+may be placed outside the house or in areas without a room; neither condition
+creates a validation issue. Absolute, wall, window-aware,
+and ceiling placement have dedicated resolution paths. Dragging previews a
+transaction; release commits it, cancel restores it, and history records the
+finished operation. Cmd-drag (Mac) or Ctrl-drag (Windows/Linux) draws a selection rectangle in either view and selects
+items whose placement anchors lie inside it. Shift-drag remains available for
+camera rotation in 3D, including when starting over an item. Dragging any selected item moves the
+group with a shared grid-snapped offset (Alt disables snapping), preserving spacing,
+height, and rotation. Group movement uses free placement and is one undo step;
+Escape or pointer cancellation restores every item. Clicking empty space clears
+the selection. Delete or Backspace removes the entire selection in one undo step. Duplicating preserves model configuration while allocating
+new item/slot identities. Failed placement reports a catalog error.
+
+Wall and ceiling dependencies are evaluated against the edited architecture.
+Shortening a collinear wall preserves attached items at their original anchors
+when their width still fits the retained wall; unsupported items are deleted.
+Other support changes can produce actionable issues. The editor's
+preview resolves typed slots without substituting live entity state. Selecting
+an item's Connect action carries its relationship into the connection workspace.
+The Explore preview uses the edited manifest but disables service mutation.
+
+The source registries, not a hard-coded count in this document, determine which
+items are available. A model definition and a placed item are separate concepts:
+model geometry is code; item identity, size, placement, and slots are data.
+
+Catalog model thumbnails are cached across Arrange sessions. Cache keys include
+the model preview revision so changed models invalidate earlier previews. After its
+first visit, the editor retains Arrange’s hidden 3D scene and WebGL resources
+across Construct/Connect visits. Hidden architecture does not rebuild for draft
+edits; returning to Arrange updates it from the current draft. Closing the editor
+releases the retained scene. The initial visit still builds the 3D models.
+
+Implementation: [catalog UI](../../apps/web/src/editor-preview/furnish/catalog/ArrangeCatalog.tsx),
+[catalog enumeration](../../apps/web/src/editor-preview/furnish/catalog/catalog.ts),
+[start placement](../../apps/web/src/editor-preview/furnish/placement/catalog-start-placement.ts),
+[furnishing controller](../../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts),
+[dependency evaluation](../../apps/web/src/editor-preview/construct/scene-item-dependencies.ts),
+[item renderer](../../packages/engine/src/SceneItemRenderer.tsx).
+
+[Back to product overview](../../PRODUCT_SPEC.md).

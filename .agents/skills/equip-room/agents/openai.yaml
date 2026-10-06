@@ -1,0 +1,4 @@
+interface:
+  display_name: "Equip Room"
+  short_description: "Furnish one room and declare typed device slots"
+  default_prompt: "Use $equip-room to furnish and equip one accepted room from my photos and descriptions, then verify it and pause for corrections."

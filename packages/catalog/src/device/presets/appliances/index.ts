@@ -1,0 +1,13 @@
+export { WashingMachineModel } from "./washing-machine";
+export { TumbleDryerModel } from "./tumble-dryer";
+export { DishwasherModel } from "./dishwasher";
+export { OvenModel } from "./oven";
+export { WaterHeaterModel } from "./water-heater";
+export { RefrigeratorModel } from "./refrigerator";
+export { HumidifierDehumidifierModel } from "./humidifier-dehumidifier";
+export { RobotVacuumModel } from "./robot-vacuum";
+export { MicrowaveModel } from "./microwave";
+export { CoffeeMakerModel } from "./coffee-maker";
+export { ElectricKettleModel } from "./electric-kettle";
+export { FreezerModel } from "./freezer";
+export { PetFeederModel } from "./pet-feeder";

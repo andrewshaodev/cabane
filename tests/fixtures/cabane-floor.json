@@ -1,0 +1,82 @@
+{
+  "id": "cabane-floor",
+  "name": "Cabane",
+  "coordinates": {
+    "origin": [0, 0],
+    "metersPerPlanUnit": 1,
+    "scaleBasis": "measured"
+  },
+  "defaultWallHeightMeters": 2.5,
+  "defaultCeilingHeightMeters": 2.5,
+  "footprint": [[0, 0], [6.92, 0], [6.92, 3.76], [0.25, 3.76]],
+  "rooms": [
+    {
+      "id": "cabane",
+      "name": "Cabane",
+      "polygon": [[0.22, 0.3], [3.62, 0.3], [3.62, 1.35], [3.62, 2.41], [3.62, 3.46], [0.24, 3.46]],
+      "accent": "#c9a477",
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "test-room",
+      "name": "Test room",
+      "polygon": [[4.22, 0.3], [6.62, 0.3], [6.62, 3.46], [4.22, 3.46]],
+      "accent": "#9eb8a7",
+      "dashboardSlots": [],
+      "devices": []
+    }
+  ],
+  "walls": [
+    { "id": "cabane-north-wall", "from": [0, 0], "to": [3.92, 0], "classification": "exterior", "thicknessMeters": 0.3 },
+    { "id": "cabane-east-wall", "from": [3.92, 0], "to": [3.92, 3.76], "classification": "interior", "thicknessMeters": 0.3 },
+    { "id": "cabane-south-wall", "from": [3.92, 3.76], "to": [0.25, 3.76], "classification": "exterior", "thicknessMeters": 0.3 },
+    { "id": "cabane-west-wall", "from": [0.25, 3.76], "to": [0, 0], "classification": "exterior", "thicknessMeters": 0.22 },
+    { "id": "cabane-divider-wall", "from": [1.695, 0], "to": [1.695, 3.76], "classification": "interior", "thicknessMeters": 0.15 },
+    { "id": "test-room-north-wall", "from": [3.92, 0], "to": [6.92, 0], "classification": "exterior", "thicknessMeters": 0.3 },
+    { "id": "test-room-east-wall", "from": [6.92, 0], "to": [6.92, 3.76], "classification": "exterior", "thicknessMeters": 0.3 },
+    { "id": "test-room-south-wall", "from": [6.92, 3.76], "to": [3.92, 3.76], "classification": "exterior", "thicknessMeters": 0.3 }
+  ],
+  "wallJunctions": [
+    { "id": "cabane-north-west-junction", "at": [0, 0], "wallIds": ["cabane-north-wall", "cabane-west-wall"] },
+    { "id": "cabane-divider-north-junction", "at": [1.695, 0], "wallIds": ["cabane-north-wall", "cabane-divider-wall"] },
+    { "id": "cabane-north-east-junction", "at": [3.92, 0], "wallIds": ["cabane-north-wall", "cabane-east-wall", "test-room-north-wall"] },
+    { "id": "test-room-north-east-junction", "at": [6.92, 0], "wallIds": ["test-room-north-wall", "test-room-east-wall"] },
+    { "id": "test-room-south-east-junction", "at": [6.92, 3.76], "wallIds": ["test-room-east-wall", "test-room-south-wall"] },
+    { "id": "cabane-south-east-junction", "at": [3.92, 3.76], "wallIds": ["cabane-east-wall", "cabane-south-wall", "test-room-south-wall"] },
+    { "id": "cabane-divider-south-junction", "at": [1.695, 3.76], "wallIds": ["cabane-south-wall", "cabane-divider-wall"] },
+    { "id": "cabane-south-west-junction", "at": [0.25, 3.76], "wallIds": ["cabane-south-wall", "cabane-west-wall"] }
+  ],
+  "openings": [
+    {
+      "id": "cabane-divider-door",
+      "wallId": "cabane-divider-wall",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.15,
+      "widthPlanUnits": 0.73,
+      "openingHeightMeters": 2.04,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "cabane-east-door",
+      "wallId": "cabane-east-wall",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.48,
+      "widthPlanUnits": 0.82,
+      "openingHeightMeters": 2.04,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    }
+  ],
+  "ceilings": [
+    { "id": "cabane-ceiling", "kind": "flat", "roomIds": ["cabane"], "heightMeters": 2.5 },
+    { "id": "test-room-ceiling", "kind": "flat", "roomIds": ["test-room"], "heightMeters": 2.5 }
+  ]
+}

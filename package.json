@@ -1,0 +1,52 @@
+{
+  "name": "cabane",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@10.8.2",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "home"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@cabane/web",
+    "build": "npm run build --workspace=@cabane/web",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "CABANE_TEST_SHARED_MODULES=1 node --test --test-concurrency=4 --test-reporter=./scripts/agent-test-reporter.mjs tests/shards/*.test.mjs",
+    "verify:scene-contours": "node scripts/verify-scene-contours.mjs",
+    "measure:scene": "node scripts/measure-scene-performance.mjs",
+    "verify:furnishing-surfaces": "node scripts/verify-furnishing-surfaces.mjs",
+    "verify:boundaries": "node scripts/verify-import-boundaries.mjs",
+    "verify:policy": "node scripts/verify-source-policy.mjs",
+    "verify:bundle": "node scripts/verify-bundle-budget.mjs",
+    "home:validate-floor": "node scripts/validate-floor.mjs",
+    "home:verify": "npm run typecheck && npm run verify:boundaries && npm run verify:policy && node scripts/verify-home.mjs",
+    "home:preview": "npm run dev",
+    "home:evidence": "node scripts/capture-visual-evidence.mjs",
+    "fixture:verify:layout": "npm run home:verify -- --stage layout --fixture layout",
+    "fixture:verify:room": "npm run home:verify -- --stage room --room-id fixture-studio --fixture room",
+    "fixture:verify:scale": "npm run home:verify -- --stage scale --fixture scale",
+    "fixture:preview:layout": "node scripts/fixture-preview.mjs --stage layout --scenario disconnected",
+    "fixture:preview:room": "node scripts/fixture-preview.mjs --stage room --scenario disconnected",
+    "fixture:preview:connected": "node scripts/fixture-preview.mjs --stage room --scenario connected",
+    "fixture:preview:mapping": "node scripts/mapping-preview.mjs",
+    "fixture:evidence": "node scripts/capture-visual-evidence.mjs --fixture all",
+    "verify": "npm run typecheck && npm test && npm run verify:boundaries && npm run verify:policy && npm run verify:furnishing-surfaces && npm run build && npm run verify:bundle"
+  },
+  "devDependencies": {
+    "@react-three/test-renderer": "9.1.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.5",
+    "jsdom": "27.4.0",
+    "playwright-core": "1.62.1",
+    "three": "0.182.0",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
+  },
+  "license": "PolyForm-Noncommercial-1.0.0"
+}

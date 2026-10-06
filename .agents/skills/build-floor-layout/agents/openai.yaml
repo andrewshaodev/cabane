@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Floor Layout"
+  short_description: "Generate one unfurnished 3D floor from a plan"
+  default_prompt: "Use $build-floor-layout to build one complete unfurnished floor from my attached plan, verify it, and pause for review."

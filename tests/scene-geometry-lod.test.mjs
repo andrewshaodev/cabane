@@ -1,0 +1,95 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { DirectionalLight, InstancedMesh, Matrix4, PCFShadowMap, Mesh, MeshToonMaterial, OrthographicCamera, Scene, SphereGeometry } from 'three';
+import { withModules } from './test-server.mjs';
+await withModules(async load => {
+  const { createGeometryLods } = await load('/packages/engine/src/scene-batching/geometry-lod.ts');
+  const { SceneGeometryLod, waitForSceneGeometryLods } = await load('/packages/engine/src/scene-batching/SceneGeometryLod.ts');
+  const { ShadowMapCache } = await load('/packages/engine/src/shadow-map-cache.ts');
+  const { roundedBoxGeometry } = await load('/packages/engine/src/rounded-box/rounded-box-geometry.ts');
+  test('rounded procedural geometry simplifies across seams with bounded attribute error', async () => {
+    const source = roundedBoxGeometry(1, 2, .1, .02, 1, 4, 4, .4);
+    const levels = await createGeometryLods(source);
+    assert.ok(levels.at(-1).geometry.index.count < source.attributes.position.count / 10);
+    assert.ok(levels.at(-1).error < .08 * 2);
+    levels.forEach(level => level.geometry.dispose()); source.dispose();
+  });
+  test('meshoptimizer reduces dense geometry without modifying authored buffers', async () => {
+    const source = new SphereGeometry(1, 48, 32), original = source.index.array.slice();
+    const levels = await createGeometryLods(source);
+    assert.ok(levels.length >= 2); assert.ok(levels.at(-1).geometry.index.count < original.length / 3);
+    for (const { geometry, error } of levels) {
+      assert.ok(error >= 0 && error <= .16);
+      assert.ok(geometry.index.array.every(index => index < geometry.attributes.position.count));
+      assert.ok(geometry.attributes.position.count < source.attributes.position.count);
+      const positions = geometry.attributes.position;
+      for (let i = 0; i < positions.count; i++) {
+        assert.ok(Math.abs(Math.hypot(positions.getX(i), positions.getY(i), positions.getZ(i)) - 1) < 1e-5);
+      }
+      geometry.dispose();
+    }
+    assert.deepEqual(source.index.array, original); source.dispose();
+  });
+  test('instanced LOD accounts for the largest instance and preserves instance data', async () => {
+    const scene = new Scene(), camera = new OrthographicCamera(-50, 50, 50, -50, .1, 100);
+    camera.position.z = 10;
+    const source = new SphereGeometry(1, 48, 32), mesh = new InstancedMesh(source, new MeshToonMaterial(), 2);
+    mesh.setMatrixAt(0, new Matrix4().makeScale(.1, .1, .1));
+    mesh.setMatrixAt(1, new Matrix4().makeScale(10000, 10000, 10000)); scene.add(mesh);
+    const matrices = mesh.instanceMatrix.array.slice(), lod = new SceneGeometryLod(() => {}, createGeometryLods);
+    lod.render(scene, camera, 100, () => {}); await lod.ready;
+    lod.render(scene, camera, 100, () => assert.equal(mesh.geometry, source));
+    mesh.setMatrixAt(1, new Matrix4());
+    lod.render(scene, camera, 100, () => assert.notEqual(mesh.geometry, source));
+    assert.equal(mesh.geometry, source); assert.equal(mesh.count, 2);
+    assert.deepEqual(mesh.instanceMatrix.array.slice(0, 16), matrices.slice(0, 16)); lod.dispose();
+  });
+  test('camera LOD changes keep cached shadows and reuse prepared families across fades', async () => {
+    let preparations = 0;
+    const lod = new SceneGeometryLod(() => {}, source => { preparations++; return createGeometryLods(source); });
+    const cache = new ShadowMapCache(), scene = new Scene();
+    const camera = new OrthographicCamera(-50, 50, 50, -50, .1, 100); camera.position.z = 10;
+    const source = new SphereGeometry(1, 48, 32), material = new MeshToonMaterial(), mesh = new Mesh(source, material);
+    mesh.castShadow = true; scene.add(mesh);
+    const light = new DirectionalLight(); light.castShadow = true; light.position.set(2, 4, 3); scene.add(light);
+    lod.render(scene, camera, 100, () => {}); await lod.ready;
+    let shadowRefreshes = 0; const geometries = new Set();
+    const renderer = { shadowMap: { enabled: true, autoUpdate: true, type: PCFShadowMap, needsUpdate: false }, localClippingEnabled: false, clippingPlanes: [], render() {
+      if (this.shadowMap.needsUpdate) { shadowRefreshes++; this.shadowMap.needsUpdate = false; }
+      geometries.add(mesh.geometry);
+    } };
+    for (let frame = 0; frame < 30; frame++) {
+      camera.zoom = frame % 2 ? 10000 : 1; camera.updateProjectionMatrix();
+      cache.render(renderer, scene, camera, () => lod.render(scene, camera, 100, () => renderer.render()));
+    }
+    assert.equal(shadowRefreshes, 1); assert.ok(geometries.size > 1); assert.equal(mesh.geometry, source);
+    material.userData.cameraFadeBaseOpacity = 1; material.userData.cameraFadeBaseTransparent = false;
+    material.userData.cameraFadeBaseDepthWrite = true; mesh.userData.cameraFadeBaseCastShadow = true;
+    for (let frame = 0; frame < 10; frame++) {
+      material.transparent = !!(frame % 2); material.opacity = frame % 2 ? .5 : 1;
+      material.depthWrite = !material.transparent; material.needsUpdate = true;
+      lod.render(scene, camera, 100, () => {}); await lod.ready;
+    }
+    assert.equal(preparations, 1); lod.dispose();
+  });
+  test('LOD prepares once, selects by projected error, restores geometry and cancels cleanly', async () => {
+    let invalidations = 0;
+    const lod = new SceneGeometryLod(() => invalidations++, createGeometryLods), scene = new Scene();
+    const camera = new OrthographicCamera(-50, 50, 50, -50, .1, 100); camera.position.z = 10;
+    const source = new SphereGeometry(1, 48, 32), mesh = new Mesh(source, new MeshToonMaterial()); scene.add(mesh);
+    lod.render(scene, camera, 100, () => assert.equal(mesh.geometry, source));
+    await waitForSceneGeometryLods(scene); assert.equal(invalidations, 1);
+    lod.render(scene, camera, 100, () => assert.ok(mesh.geometry.index.count < source.index.count / 3));
+    assert.equal(mesh.geometry, source);
+    assert.throws(() => lod.render(scene, camera, 100, () => { throw new Error('draw'); }), /draw/);
+    assert.equal(mesh.geometry, source);
+    camera.zoom = 10000; camera.updateProjectionMatrix();
+    lod.render(scene, camera, 100, () => assert.equal(mesh.geometry, source));
+    assert.equal(invalidations, 1); lod.dispose();
+    // React StrictMode retains the resource while replaying mount cleanup.
+    camera.zoom = 1; camera.updateProjectionMatrix();
+    lod.render(scene, camera, 100, () => {}); await lod.ready;
+    lod.render(scene, camera, 100, () => assert.notEqual(mesh.geometry, source));
+    assert.equal(invalidations, 2); lod.dispose();
+  });
+});

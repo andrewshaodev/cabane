@@ -1,0 +1,144 @@
+# Geometry, rendering, and navigation
+
+Runtime `HomeManifest` carries ordered floors. The building shares one origin and
+meters-per-plan-unit scale; positive floor-to-floor heights determine elevations.
+Footprint/room polygons, straight walls, explicit wall junctions, and wall-owned
+openings define architecture. Openings inherit wall thickness, orientation, fade,
+and cutout behavior. Door/window orientation is relative to wall direction.
+Doors support hinged/sliding variants, windows fixed/casement variants, and
+passages rectangular/arched variants.
+Paired hinged and sliding door leaves meet at the center in the same depth plane when closed.
+
+The engine constructs continuous walls and junction assemblies with interior and
+exterior material groups. Wall face finishes retain each wall’s boundaries,
+including continuous bands above doors and windows and each side of a corner.
+Polygon clipping and numerical normalization prevent
+near-coincident seams from destabilizing geometry. Opening cuts extend 1 mm
+past both wall faces so diagonal walls cannot leave opaque slivers across the aperture. Wall bases extend to outdoor
+terrain, 5 cm below the indoor floor datum, without shifting openings or wall tops. Floor-level exterior doors and passages
+have solid thresholds bridging that terrain-to-floor difference. Ceilings support flat and
+sloped runtime surfaces. Project authoring has the narrower flat-ceiling schema.
+The exterior roof is separate procedural geometry, visible in Home's roof view.
+Connected ceiling areas merge at equal height, with higher floor coverage removed
+from lower sections. Concave outlines, detached sections, and courtyard holes are
+retained. Enclosed construction seams narrower than wall thickness plus 1 cm are
+bridged. Each exposed flat section gets one gable using the shared ridge axis;
+authored sloped ceiling planes retain their slope. Roof faces split at the ridge
+before triangulation. The default pitch is 25 degrees, limited to a 2 m rise and
+lowered where needed below taller neighboring ceiling tiers. Edges are flush with
+the derived coverage, with an 8 cm roof skin. Infill below the roof continues
+the supporting exterior wall finish, including per-wall and face-color overrides,
+down across the slab depth. Corner infill uses the supporting wall’s junction
+geometry rather than a fixed endpoint-distance cutoff. Batched walls, standalone
+walls, and roof infill share face-override/exterior-override/palette precedence. Only the thin roof edge and underside use the trim
+color. Interior ceiling slabs are hidden in exterior roof view and remain in
+Walk and the existing cutaway views. This simple
+model clips a gable to irregular outlines; it does not solve intersecting roof
+valleys or expose pitch/overhang controls. Optional `home.roof` settings preserve
+old projects through defaults.
+Pools cut ground surfaces and contribute collision. Their translucent toon water
+uses meter-scaled analytic ripples and a grazing-angle sheen, with no textures,
+additional geometry, or reflection render targets. Ripple time advances only on
+existing scene frames and pauses for reduced motion; idle demand rendering stays
+idle. Water retains scene lighting and received shadows.
+Floor finishes support solid
+colors and the preset IDs exported by `FLOOR_PATTERN_PRESET_IDS`, including wood,
+stone/tile, dirt, bark, and outdoor stone treatments. Ordered room/ground zones
+compose finishes; implementation belongs to the engine finish modules.
+
+Visible home content uses procedural geometry, toon materials, and restrained
+outlines. Engine-owned in-memory floor finish textures remain part of the stable
+product. Shared lighting, fading, and outline behavior stay engine-owned.
+Physical lights render only on the active floor. Indoor sources close to an
+opaque wall emit into their room through an unshadowed spotlight; sources at
+openings and sources farther from walls retain point lighting. This avoids
+lighting through the wall without allocating point-light shadow maps.
+Explore and Arrange use four nearest-filtered toon bands, warm key light and
+cool sky fill. A single multisampled HDR scene render supplies color and depth
+for camera-dependent, approximately one-CSS-pixel occlusion contours. The pass
+subtracts the opposite depth slope to suppress lines on continuous slanted
+surfaces; it does not detect normal, material or triangle edges. Transparent
+surfaces retain their existing depth-write behavior. Decorative mesh shells are
+suppressed inside this scene pipeline; interaction highlights stay separate.
+Construct remains an unprocessed plan, and standalone model previews keep their
+existing mesh outlines. GPU contour regressions run with
+`npm run verify:scene-contours` (local Chrome required). The implementation uses
+Three.js [depth textures](https://threejs.org/docs/pages/DepthTexture.html) and
+[multisampled render targets](https://threejs.org/docs/pages/RenderTarget.html);
+MSAA follows the scene quality setting.
+
+Construct batches compatible wall/opening strokes, item footprints, and floor
+outlines by drawing style. Stair plan markings use instanced boxes. Invisible
+editor picking surfaces keep their meshes and raycasting but disable material
+rendering; selected and preview highlights remain visible. This reduces draw
+calls without changing the architecture or selection geometry.
+
+Walk adds a procedural clear sky with a soft horizon gradient and restrained sun
+disk. It reads the current interpolated solar light direction, color, and sky-fill
+intensity, including live data, forced day/night, and daylight fallback. The
+direction-only background has no translation parallax, depth writes, shadows, or
+interaction targets. It preserves architectural occlusion and the contour pass.
+Other camera modes keep their existing solid backgrounds.
+
+Device rendering resolves stable models before compatible local extensions.
+Devices without a resolved room binding, including outdoor scene items, remain
+visible. Supplied bindings must still match the item identity and model.
+Always-on scene items emit light at their actual placement even outside rooms
+and without HA bindings; other unbound devices show their disconnected state.
+Garden lanterns use a short, warm inverse-square falloff to softly illuminate
+nearby ground in night mode.
+
+Walk collision derives from walls, openings, junctions, and pools. Navigation
+checks clear spawn points and room connectivity; it does not maintain a second
+hand-authored collision plan. Walk controls support keyboard/mouse and touch
+input, pitch limits, collision resolution, and automatic unbound door opening.
+Mobile fullscreen/orientation requests are capability-dependent. Reduced-motion
+and document-visibility state affect behavior.
+
+Catalog rounded boxes reuse up to 64 recently generated CPU geometry templates.
+Each mounted mesh owns independent buffers; eviction and disposal cannot modify
+another instance. Bevel subdivisions, UVs, crease normals, materials, shadows,
+and contours retain their existing settings. The orbital camera points at its
+initial target before the first frame, without resetting subsequent user orbit
+when opening room controls.
+
+The normal scene uses demand rendering outside walk mode and suspends rendering
+when hidden. Mobile quality can adapt to performance changes; editor scenes use
+their own demand-rendered preview settings. These mechanisms do not establish a
+universal FPS or browser-compatibility guarantee.
+
+Implementation: [contracts](../../packages/engine/src/types.ts),
+[architecture scene](../../packages/engine/src/ArchitectureScene.tsx),
+[wall geometry](../../packages/engine/src/architecture-geometry.ts),
+[navigation](../../packages/engine/src/navigation.ts),
+[floor finishes](../../packages/engine/src/floor-finishes/index.ts),
+[quality settings](../../packages/engine/src/performance.ts).
+
+[Back to product overview](../../PRODUCT_SPEC.md).
+
+Straight stairs derive treads, landings, guards, floor/ceiling apertures, and walk
+ramps from adjacent levels. Walking updates the selected floor at landings.
+
+Only ground-floor walls extend to the terrain datum. Shared-level wall caps are
+clipped where the neighboring wall continues, preserving exposed terrace caps.
+Exterior finish continues across structural slab depth up to the next level,
+while interior ceiling heights and opening dimensions remain authored values.
+
+The shared stylized renderer uses opaque toon batching and cached automatic
+meshoptimizer LOD in Orbit, Walk, and Arrange. Static transforms/colors are baked
+into persistent batch buffers; camera LOD and fading changes retain those buffers.
+Moving/recolored and incompatible meshes retain ordinary draws. Source meshes
+remain the picking surface, and existing InstancedMesh objects retain all instances.
+LOD simplification runs in a worker; unavailable workers keep full detail.
+Shadow invalidation inspects authored geometry before LOD substitution, avoiding
+camera-only LOD redraws. Devices without native multi-draw keep ordinary draws.
+The reusable performance script includes camera-motion timings and batch-buffer
+churn checks. Real-device verification remains necessary for mobile fluidity.
+
+Roll-up doors own ordinary floor-level wall apertures. Their fixed header and
+jambs fit inside the opening envelope, and slats retract upward using normalized
+opening position. Geometry and Walk share the header, travel, and clear-width
+calculation. Walk requires eye height plus a 0.18 m head margin and current jump
+elevation; jambs remain collidable. Reported positions apply directly, without
+an independent animation timeline. Unbound doors open locally on approach;
+bound doors follow reported/retained state, even when closed or unavailable.

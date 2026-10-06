@@ -1,0 +1,282 @@
+import type { ThreeEvent } from "@react-three/fiber";
+import {
+  resolveItemTransform,
+  ToonMaterial,
+  type DeviceModelRegistry,
+  type FloorSpec,
+  type FurnishingModelRegistry,
+  type ItemPlacement,
+  type SceneItemSpec,
+} from "@cabane/engine";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
+import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
+import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
+
+interface DragSession {
+  items: readonly SceneItemSpec[];
+  origin: Vector3;
+  active: boolean;
+  id: string;
+  elevation: number;
+  offsetX: number;
+  offsetZ: number;
+  pointerId: number;
+  startClientX: number;
+  startClientY: number;
+  target: PointerCaptureTarget | null;
+}
+
+const DRAG_ACTIVATION_DISTANCE_PX = 8;
+
+export interface FurnishingEditLayerProps {
+  items: readonly SceneItemSpec[];
+  floor: FloorSpec;
+  furnishingModels: FurnishingModelRegistry;
+  deviceModels: DeviceModelRegistry;
+  selectedId: string | null;
+  selectedIds?: readonly string[];
+  onSelectMany?: (ids: string[]) => void;
+  selectionOnly?: boolean;
+  onSelect: (id: string) => void;
+  onMovePlacements?: (placements: Readonly<Record<string, ItemPlacement>>) => void;
+  onMovePlacement: (id: string, placement: ItemPlacement) => void;
+  onDragStart?: (id: string) => void;
+  onDragEnd?: (id: string) => void;
+  onDragCancel?: (id: string) => void;
+  onDraggingChange?: (dragging: boolean) => void;
+}
+
+const boxSelectionModifier = (event: ThreeEvent<MouseEvent>) =>
+  Boolean((event.nativeEvent?.metaKey || event.nativeEvent?.ctrlKey) && !event.nativeEvent?.shiftKey && !event.nativeEvent?.altKey);
+
+const cameraModifier = (event: ThreeEvent<MouseEvent>) =>
+  Boolean(event.nativeEvent?.shiftKey);
+
+const modifierIsPressed = (event: ThreeEvent<PointerEvent>) =>
+  event.nativeEvent.altKey;
+
+type PointerCaptureTarget = EventTarget & {
+  setPointerCapture?: (pointerId: number) => void;
+  releasePointerCapture?: (pointerId: number) => void;
+};
+
+const pointerCaptureTarget = (event: ThreeEvent<PointerEvent>) =>
+  event.target as PointerCaptureTarget | null;
+
+export function FurnishingEditLayer({
+  items,
+  floor,
+  furnishingModels,
+  deviceModels,
+  selectedId,
+  selectedIds = selectedId ? [selectedId] : [],
+  onSelectMany,
+  selectionOnly = false,
+  onSelect,
+  onMovePlacement,
+  onMovePlacements,
+  onDragStart,
+  onDragEnd,
+  onDragCancel,
+  onDraggingChange,
+}: FurnishingEditLayerProps) {
+  const [rectangle, setRectangle] = useState<{ from: Vector3; to: Vector3 } | null>(null);
+  const marquee = useRef<{ from: Vector3; to: Vector3; pointerId: number; target: PointerCaptureTarget | null } | null>(null);
+  const drag = useRef<DragSession | null>(null);
+  const dragPlane = useRef(new Plane(new Vector3(0, 1, 0), 0));
+  const scratch = useRef(new Vector3());
+  const callbacks = useRef({ onDragEnd, onDragCancel, onDraggingChange });
+  useLayoutEffect(() => { callbacks.current = { onDragEnd, onDragCancel, onDraggingChange }; });
+  const unitBox = useMemo(() => new BoxGeometry(1, 1, 1), []);
+  useEffect(() => () => unitBox.dispose(), [unitBox]);
+
+  const pointOnElevationPlane = (
+    event: ThreeEvent<PointerEvent>,
+    elevation: number,
+  ) => {
+    dragPlane.current.constant = -elevation;
+    return event.ray.intersectPlane(dragPlane.current, scratch.current);
+  };
+
+  const endDrag = (cancel: boolean) => {
+    if (marquee.current) {
+      const current = marquee.current;
+      marquee.current = null;
+      setRectangle(null);
+      if (!cancel) onSelectMany?.(items.filter(item => {
+        const [x, , z] = resolveItemTransform(item.placement, floor).position;
+        return x >= Math.min(current.from.x, current.to.x) && x <= Math.max(current.from.x, current.to.x)
+          && z >= Math.min(current.from.z, current.to.z) && z <= Math.max(current.from.z, current.to.z);
+      }).map(item => item.id));
+      callbacks.current.onDraggingChange?.(false);
+      current.target?.releasePointerCapture?.(current.pointerId);
+    }
+    if (!drag.current) return;
+    const { active, id, pointerId, target } = drag.current;
+    drag.current = null;
+    if (active) {
+      callbacks.current.onDraggingChange?.(false);
+      if (cancel) callbacks.current.onDragCancel?.(id);
+      else callbacks.current.onDragEnd?.(id);
+    }
+    target?.releasePointerCapture?.(pointerId);
+  };
+  const finishDrag = (event: ThreeEvent<PointerEvent>) => {
+    if (!drag.current || event.pointerId !== drag.current.pointerId) return;
+    event.stopPropagation();
+    endDrag(false);
+  };
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cancel = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || (!drag.current && !marquee.current)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      endDrag(true);
+    };
+    const blur = () => endDrag(true);
+    window.addEventListener("keydown", cancel, true);
+    window.addEventListener("blur", blur);
+    return () => {
+      window.removeEventListener("keydown", cancel, true);
+      window.removeEventListener("blur", blur);
+      endDrag(true);
+    };
+  }, []);
+
+  return (
+    <group name="furnishing-edit-layer">
+      {!selectionOnly && onSelectMany && <mesh name="arrange-marquee-surface" onClick={event => { event.stopPropagation(); if (!boxSelectionModifier(event) && !cameraModifier(event)) onSelectMany([]); }} rotation={[-Math.PI / 2, 0, 0]}
+        onPointerDown={event => {
+          if (event.button !== 0 || !boxSelectionModifier(event)) return;
+          const hit = pointOnElevationPlane(event, 0);
+          if (!hit) return;
+          event.stopPropagation();
+          marquee.current = { from: hit.clone(), to: hit.clone(), pointerId: event.pointerId, target: pointerCaptureTarget(event) };
+          setRectangle(marquee.current);
+          pointerCaptureTarget(event)?.setPointerCapture?.(event.pointerId);
+          onDraggingChange?.(true);
+        }}
+        onPointerMove={event => {
+          const current = marquee.current;
+          if (!current || current.pointerId !== event.pointerId) return;
+          event.stopPropagation();
+          const hit = pointOnElevationPlane(event, 0);
+          if (hit) { current.to = hit.clone(); setRectangle({ ...current }); }
+        }}
+        onPointerUp={event => { if (marquee.current?.pointerId === event.pointerId) { event.stopPropagation(); endDrag(false); } }}
+        onPointerCancel={() => endDrag(true)} onLostPointerCapture={() => endDrag(true)}>
+        <planeGeometry args={[10000, 10000]} />
+        <PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} side={DoubleSide} />
+      </mesh>}
+      {rectangle && <mesh name="arrange-marquee-preview" raycast={noPlanRaycast} rotation={[-Math.PI / 2, 0, 0]}
+        position={[(rectangle.from.x + rectangle.to.x) / 2, .02, (rectangle.from.z + rectangle.to.z) / 2]} renderOrder={40}>
+        <planeGeometry args={[Math.abs(rectangle.to.x - rectangle.from.x), Math.abs(rectangle.to.z - rectangle.from.z)]} />
+        <PlanOverlayMaterial color="#6b896c" transparent opacity={.25} depthTest={false} depthWrite={false} side={DoubleSide} />
+      </mesh>}
+      {items.map((item) => {
+        const definition = item.kind === "device"
+          ? deviceModels[item.modelId]
+          : furnishingModels[item.modelId];
+        if (!definition) return null;
+        const transform = resolveItemTransform(item.placement, floor);
+        const box = selectionBoxGeometry(item, definition, .035);
+        const selected = selectedIds.includes(item.id);
+        return (
+          <group
+            key={item.id}
+            name={`furnishing-edit-target-${item.id}`}
+            position={transform.position}
+            rotation={[0, transform.rotationYRadians, 0]}
+          >
+            <mesh
+              position={box.center}
+              scale={box.size}
+              geometry={unitBox}
+              onClick={(event) => {
+                event.stopPropagation();
+                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected) onSelect(item.id);
+              }}
+              onPointerDown={(event) => {
+                if (event.button !== 0 || cameraModifier(event) || boxSelectionModifier(event) || drag.current || selectionOnly) return;
+                event.stopPropagation();
+                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected) onSelect(item.id);
+                const hit = pointOnElevationPlane(event, transform.position[1]);
+                if (!hit) return;
+                drag.current = {
+                  items: selected ? items.filter(candidate => selectedIds.includes(candidate.id)) : [item],
+                  origin: new Vector3(...transform.position),
+                  active: false,
+                  id: item.id,
+                  elevation: transform.position[1],
+                  offsetX: transform.position[0] - hit.x,
+                  offsetZ: transform.position[2] - hit.z,
+                  pointerId: event.pointerId,
+                  startClientX: event.nativeEvent.clientX,
+                  startClientY: event.nativeEvent.clientY,
+                  target: pointerCaptureTarget(event),
+                };
+                pointerCaptureTarget(event)?.setPointerCapture?.(event.pointerId);
+              }}
+              onPointerMove={(event) => {
+                const session = drag.current;
+                if (!session || session.id !== item.id || session.pointerId !== event.pointerId) return;
+                event.stopPropagation();
+                if (!session.active) {
+                  const movement = Math.hypot(
+                    event.nativeEvent.clientX - session.startClientX,
+                    event.nativeEvent.clientY - session.startClientY,
+                  );
+                  if (movement < DRAG_ACTIVATION_DISTANCE_PX) return;
+                  session.active = true;
+                  onDraggingChange?.(true);
+                  onDragStart?.(item.id);
+                }
+                const hit = pointOnElevationPlane(event, session.elevation);
+                if (!hit) return;
+                if (session.items.length > 1) {
+                  const dx = hit.x + session.offsetX - session.origin.x;
+                  const dz = hit.z + session.offsetZ - session.origin.z;
+                  const x = modifierIsPressed(event) ? dx : Math.round(dx * 10) / 10;
+                  const z = modifierIsPressed(event) ? dz : Math.round(dz * 10) / 10;
+                  const placements: Record<string, ItemPlacement> = {};
+                  for (const member of session.items) {
+                    const model = member.kind === "device" ? deviceModels[member.modelId] : furnishingModels[member.modelId];
+                    if (!model) continue;
+                    const [mx, , mz] = resolveItemTransform(member.placement, floor).position;
+                    placements[member.id] = placementForWorldDrag({ world: { x: mx + x, z: mz + z }, item: member, definition: model, floor, raw: true });
+                  }
+                  onMovePlacements?.(placements);
+                  return;
+                }
+                onMovePlacement(item.id, placementForWorldDrag({
+                  world: {
+                    x: hit.x + session.offsetX,
+                    z: hit.z + session.offsetZ,
+                  },
+                  item,
+                  definition,
+                  floor,
+                  raw: modifierIsPressed(event),
+                }));
+              }}
+              onPointerUp={finishDrag}
+              onPointerCancel={() => endDrag(true)}
+              onLostPointerCapture={() => endDrag(true)}
+              renderOrder={20}
+            >
+              <ToonMaterial
+                color={selected ? "#6b896c" : "#ffffff"}
+                transparent
+                visible={selected}
+                opacity={selected ? .18 : .001}
+                depthWrite={false}
+              />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+}

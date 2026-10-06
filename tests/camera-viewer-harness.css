@@ -1,0 +1,72 @@
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #d9d4c7;
+}
+
+.synthetic-camera-fixture,
+.synthetic-camera-fixture__scene {
+  width: 100%;
+  height: 100%;
+}
+
+.synthetic-camera-fixture__scene {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent 49.8%, rgba(61, 73, 69, 0.12) 50%, transparent 50.2%),
+    linear-gradient(#e7e2d7 0 72%, #b9b0a0 72%);
+}
+
+.synthetic-camera-fixture__copy {
+  position: absolute;
+  z-index: 2;
+  left: clamp(24px, 5vw, 72px);
+  top: clamp(24px, 7vh, 72px);
+  max-width: 330px;
+  color: #263d38;
+}
+
+.synthetic-camera-fixture__copy span {
+  color: #88684f;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.synthetic-camera-fixture__copy h1 {
+  margin: 8px 0;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 0.95;
+}
+
+.synthetic-camera-fixture__copy p {
+  color: #596964;
+  line-height: 1.5;
+}
+
+.synthetic-camera-fixture__copy button {
+  min-height: 46px;
+  margin-top: 8px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 999px;
+  color: #eef8f4;
+  background: #274e47;
+  font: inherit;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .synthetic-camera-fixture__copy {
+    max-width: 250px;
+  }
+}
