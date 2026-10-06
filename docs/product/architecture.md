@@ -60,5 +60,10 @@ interface. `resolveLanding` finds a clear supported floor near a world-space fee
 position; `teleport` revalidates that landing and updates the authoritative walker,
 camera, selected floor and room, resetting velocity and jump state. The controller's
 adapter lives in `walk-tools/useWalkToolNavigation.ts`; support/collision resolution
-lives in `navigation/walk-landing.ts`. Portal placement, pairing, traversal, input,
-and rendering remain private to `walk-laser/src/portals/`.
+lives in `navigation/walk-landing.ts`. Its optional terrain-support query reads the
+existing ground mesh (including pool/stair cutouts) to admit clear outdoor exits
+on the ground storey; ordinary spawn defaults are unchanged. Portal placement, pairing, traversal, input,
+and rendering remain private to `walk-laser/src/portals/`. Live destination views
+use package-private camera transforms, exit clipping, and bounded scene captures
+with the existing renderer and scene supplied by the canvas. No portal rendering
+contract or dependency is added to the engine, catalog, or home.

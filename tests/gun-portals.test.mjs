@@ -146,8 +146,8 @@ await withModules(async load => {
     assert.equal(navigation.current,null);
   });
 
-  test('portal meshes are procedural toon geometry, ignore gun raycasts and honor reduced motion',async()=>{
-    const renderer=await create(React.createElement(PortalSurface,{anchor:anchor(),color:'blue',linked:true,reducedMotion:true}));
+  test('unpaired portal meshes are procedural toon geometry, ignore gun raycasts and honor reduced motion',async()=>{
+    const renderer=await create(React.createElement(PortalSurface,{anchor:anchor(),color:'blue',reducedMotion:true}));
     try {
       renderer.scene.instance.updateMatrixWorld(true);
       let meshes=0;
@@ -158,14 +158,14 @@ await withModules(async load => {
       const root=renderer.scene.findByProps({name:'gun-portal-blue'}).instance;
       const energy=root.children[0].children[0].children.at(-1);
       await renderer.advanceFrames(10,1/60); assert.equal(energy.rotation.z,0);
-      await renderer.update(React.createElement(PortalSurface,{anchor:anchor(),color:'blue',linked:true,reducedMotion:false}));
+      await renderer.update(React.createElement(PortalSurface,{anchor:anchor(),color:'blue',reducedMotion:false}));
       await renderer.advanceFrames(10,1/60); assert.ok(energy.rotation.z>0);
     } finally {await renderer.unmount();}
   });
 
   test('portal creation grows from zero, overshoots and settles, replays on replacement, and respects reduced motion',async()=>{
     const first=anchor();
-    const renderer=await create(React.createElement(PortalSurface,{anchor:first,color:'gold',linked:true,reducedMotion:false}));
+    const renderer=await create(React.createElement(PortalSurface,{anchor:first,color:'gold',reducedMotion:false}));
     try {
       const opening=renderer.scene.findByProps({name:'portal-opening'}).instance;
       const ripple=renderer.scene.findByProps({name:'portal-arrival-ripple'}).instance;
@@ -173,9 +173,9 @@ await withModules(async load => {
       await renderer.advanceFrames(1,.1);assert.ok(opening.scale.x>0 && opening.scale.x<1);
       await renderer.advanceFrames(3,.1);assert.ok(opening.scale.x>1);assert.equal(ripple.visible,true);
       await renderer.advanceFrames(5,.1);assert.equal(opening.scale.x,1);assert.equal(ripple.visible,false);
-      await renderer.update(React.createElement(PortalSurface,{anchor:anchor(4),color:'gold',linked:true,reducedMotion:false}));
+      await renderer.update(React.createElement(PortalSurface,{anchor:anchor(4),color:'gold',reducedMotion:false}));
       assert.equal(opening.scale.x,0);
-      await renderer.update(React.createElement(PortalSurface,{anchor:first,color:'gold',linked:true,reducedMotion:true}));
+      await renderer.update(React.createElement(PortalSurface,{anchor:first,color:'gold',reducedMotion:true}));
       assert.equal(opening.scale.x,1);await renderer.advanceFrames(1,.1);assert.equal(ripple.visible,false);
     } finally {await renderer.unmount();}
   });

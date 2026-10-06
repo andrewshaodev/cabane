@@ -23,7 +23,7 @@ The current blaster is split into receiver, barrel, grip, and muzzle-flash model
 under `src/laser-gun/`. Ivory armor, graphite/plum recesses, brass trim, and cyan
 reactors match the generated action icon in `src/assets/laser-icon.png`. Its exact
 built-in image-generation prompt is preserved in `src/assets/laser-icon.prompt.txt`.
-The icon is a UI-only bitmap; no texture is used by any scene model.
+The icon is a UI-only bitmap. Scene models remain procedural; portal views use only in-memory captures of the existing toon scene.
 
 Shot visuals travel at 180 m/s with an at-most 0.8 m tapered luminous tail. They
 never fill the muzzle-to-hit distance. A 45 ms muzzle flash follows the actual
@@ -42,9 +42,14 @@ Shots now include a 300 ms flickering blue electrical arc with short branches, a
 Desktop secondary fire places a blue portal, then a gold portal, alternating only
 on successful placement. Aim at a broad flat wall or floor, right-click with the
 mouse captured, and walk into either linked oval to emerge from its partner.
+Indoor floors, outdoor slabs, terrain, and exterior walls are supported when the
+full oval fits and the exit is clear. The navigation adapter checks the existing
+terrain mesh for ground-storey support, retaining pool holes and edge clearance;
+upper floors still need slab support.
 Walls align the oval to standing height. The whole oval must fit; ceilings, devices,
-furniture, overlapping portals and unsupported/blocked exits are rejected. The
-surfaces are opaque toon energy membranes, with no mirrors or remote scene renders.
+furniture, overlapping portals and unsupported/blocked exits are rejected. An unpaired
+portal has a toon energy membrane; a linked pair shows the live scene beyond its
+partner, with perspective tracking as the walker moves.
 Stowing the gun or leaving Walk removes the pair; nothing is persisted.
 
 `src/portals/` owns the feature: placement geometry, alternating pair state,
@@ -78,3 +83,16 @@ right, each with its corresponding mouse button highlighted. The portal glyph
 uses the next placement's blue/gold color; successful placement updates it from
 the pair's own alternating state. These cues contain no visible text, preserve
 the central light-target highlight, and are omitted on touch devices.
+
+Live portal views stay entirely in `src/portals/`: `portal-view-camera` owns the
+rigid doorway transform and oblique exit clipping; `portal-view-renderer` owns
+bounded GPU captures with the host renderer/scene injected; `usePortalView` owns
+frame ordering and cleanup; `PortalView` owns projective display. Captures run
+after camera updates and before the main scene pass, skip back-facing/off-screen
+portals, and cap each target at 1024 pixels on its longest side. The exit's own
+rim/ripple is excluded to avoid moving overlap artifacts. Other portals show
+only their membrane in the capture (one level, no recursive hall of mirrors).
+Renderer state and temporary visibility changes are restored even on failure;
+stowing disposes both targets. Reduced motion retains live perspective tracking.
+The view reuses the host's current toon geometry and lighting; it does not
+activate extra floor lights or run another contour postprocessing pass.

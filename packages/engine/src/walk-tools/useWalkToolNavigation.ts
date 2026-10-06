@@ -2,6 +2,7 @@ import { useLayoutEffect, type MutableRefObject, type RefObject } from "react";
 import type { Box3, Scene, PerspectiveCamera } from "three";
 import { clampPitch, roomAtWorldPoint, WALK_EYE_HEIGHT, type WalkPose, type StickVector, type BoxWalkCollider } from "../navigation";
 import { resolveWalkLanding } from "../navigation/walk-landing";
+import { createTerrainSupportQuery } from "../navigation/terrain-support";
 import type { BuildingGeometry } from "../stairs/types";
 import type { BuildingWalkPoint } from "../stairs/stair-navigation";
 import type { FloorSpec } from "../types";
@@ -23,6 +24,7 @@ export function useWalkToolNavigation({ building, floor, scene, box, toolNavigat
   useLayoutEffect(() => {
     if (!toolNavigationRef) return;
     const geometry = building ?? { coordinates: floor.coordinates, floors: [floor], stairs: [], sceneItems: [] };
+    const supportsTerrain = createTerrainSupportQuery(scene);
     const resolveLanding: WalkToolNavigation["resolveLanding"] = position => resolveWalkLanding(geometry, position, targetElevation => {
       scene.updateMatrixWorld(true);
       const obstacles: BoxWalkCollider[] = [];
@@ -33,7 +35,7 @@ export function useWalkToolNavigation({ building, floor, scene, box, toolNavigat
           obstacles.push({ kind: "box", id: object.uuid, minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
       });
       return obstacles;
-    });
+    }, supportsTerrain);
     const navigation: WalkToolNavigation = {
       resolveLanding,
       teleport: (landing, facing) => {

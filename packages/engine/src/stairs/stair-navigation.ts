@@ -99,7 +99,8 @@ export const moveBuildingWalker = (building: BuildingGeometry, pose: BuildingWal
   if (floor.id !== building.floors.find(floor => !floor.belowGround)?.id && !pointOnFloorSupport(plan, floor)) return pose;
   return candidate;
 };
-export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, start?: import("../types").PlanPoint) => {
+export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, start?: import("../types").PlanPoint,
+  supportsTerrain?: (point: WalkPoint) => boolean) => {
   const floor = building.floors.find(f => f.id === floorId);
   if (!floor || floor.footprint.length < 3) return null;
   const holes = building.stairs.flatMap(stair => {
@@ -114,7 +115,9 @@ export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, s
   const elevation = deriveFloorLevels(building.floors).find(f => f.floorId === floorId)!.elevationMeters;
   if (start) {
     const [x, z] = planPointToWorld(start, building.coordinates);
-    return pointOnFloorSupport(start, floor) && isWalkPointClear({ x, z }, colliders)
+    const supported = pointOnFloorSupport(start, floor)
+      || (floor.id === building.floors.find(candidate => !candidate.belowGround)?.id && supportsTerrain?.({ x, z }));
+    return supported && isWalkPointClear({ x, z }, colliders)
       ? { x, z, yaw: Math.PI, pitch: 0, floorId, elevation } : null;
   }
   const spawnRegions = [...floor.rooms, ...(floor.outdoorPlatforms ?? []).map(platform=>({

@@ -1,5 +1,5 @@
 import type { WalkToolNavigation } from "@cabane/engine";
-import type { PortalPlaced } from "./portal-contract";
+import { otherPortal, type PortalPlaced } from "./portal-contract";
 import { PortalTransitVeil } from "./PortalTransitVeil";
 import { PortalSurface } from "./PortalSurface";
 import { useGunPortals } from "./useGunPortals";
@@ -11,5 +11,5 @@ export function GunPortals({ active, navigation, reducedMotion, onPlaced }: {
   return <>
     <PortalTransitVeil veil={veil} iris={iris} />
     {(["blue", "gold"] as const).map(color => pair[color] &&
-    <PortalSurface key={color} color={color} anchor={pair[color]} linked={Boolean(pair.blue && pair.gold)} reducedMotion={reducedMotion} />)}</>;
+    <PortalSurface key={color} color={color} anchor={pair[color]} exit={pair[otherPortal(color)]} reducedMotion={reducedMotion} />)}</>;
 }

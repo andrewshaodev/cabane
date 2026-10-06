@@ -6,7 +6,8 @@ const fixture = `<!doctype html><html><head><title>Portal walk fixture</title></
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useFrame, useThree } from '@react-three/fiber';
-import { CabaneDashboard, HomeAssistantRuntimeProvider } from '@cabane/engine';
+import { DataUtils } from 'three';
+import { CabaneDashboard, HomeAssistantRuntimeProvider, ToonMaterial } from '@cabane/engine';
 import { stableArchitectureModelRegistry } from '@cabane/catalog/architecture';
 import { laserWalkTool } from '@cabane/walk-laser';
 import { neutralDemoManifest } from '/@fs/${process.cwd()}/packages/engine/src/demo.ts';
@@ -16,15 +17,39 @@ manifest.floors[0].openings = [];
 manifest.home.walkStart = {floorId: manifest.floors[0].id, at: [2.4, 1.8]};
 manifest.actionBar = {items: [{id:'walk',target:{kind:'built-in',action:'walk'}},{id:'gun',target:{kind:'walk-tool',toolId:laserWalkTool.id}}]};
 function ObservedGun(props) {
- const {scene,camera} = useThree();
+ const {scene,camera,gl} = useThree();
+ React.useEffect(() => {
+  const previous = scene.onAfterRender;
+  scene.onAfterRender = function(...args) {
+   previous.apply(this,args);
+   const target=gl.getRenderTarget();
+   if (!window.inspectPortalCapture || target?.texture.name!=='portal-destination-view') return;
+   window.inspectPortalCapture=false;
+   const pixels=new Uint16Array(target.width*target.height*4);
+   gl.readRenderTargetPixels(target,0,0,target.width,target.height,pixels);
+   let cyan=0,magenta=0,magentaX=0;
+   for(let i=0;i<pixels.length;i+=4) {
+    const r=DataUtils.fromHalfFloat(pixels[i]),g=DataUtils.fromHalfFloat(pixels[i+1]),b=DataUtils.fromHalfFloat(pixels[i+2]);
+    if(g>r*1.5 && b>r*1.5 && b>.3) cyan++;
+    if(r>.3 && b>.3 && g<r*.25 && g<b*.25) {magenta++;magentaX+=(i/4)%target.width;}
+   }
+   window.portalCapture={cyan,magenta,magentaX:magentaX/Math.max(1,magenta),width:target.width,height:target.height};
+  };
+  return () => {scene.onAfterRender=previous;};
+ },[scene,gl]);
  // Read-only instrumentation; all actions still use the ordinary dashboard inputs.
- useFrame(() => { const portals=[]; scene.traverse(object => {if(object.name.startsWith('gun-portal-')) portals.push({name:object.name,position:object.position.toArray(),scale:object.children[0].scale.x});
+ useFrame(() => { const portals=[]; scene.traverse(object => {if(object.name.startsWith('gun-portal-')) portals.push({name:object.name,position:object.position.toArray(),normal:object.userData.portalAnchor.normal.toArray(),scale:object.children[0].scale.x});
   if(object.name==='laser-electric-arc' && object.visible) { window.zapColors ??= []; const color=object.material.emissive.getHexString(); if(!window.zapColors.includes(color)) window.zapColors.push(color); } });
-  window.portalObservation = {portals,position:camera.position.toArray(),yaw:camera.rotation.y,fov:camera.fov};
+  window.portalObservation = {portals,position:camera.position.toArray(),yaw:camera.rotation.y,pitch:camera.rotation.x,fov:camera.fov};
   const veil=document.querySelector('.walk-portal-transit');
   if(veil) {window.transitSamples ??= []; window.transitSamples.push({opacity:Number(veil.style.opacity),fov:camera.fov,z:camera.position.z});}
  });
- return React.createElement(laserWalkTool.Scene,props);
+ return React.createElement(React.Fragment,null,React.createElement(laserWalkTool.Scene,props),
+  // A distinctive scene object behind the walker is visible through the gold
+  // portal. It does not participate in the placement/collision fixture.
+  React.createElement('mesh',{position:[2.4,1.4,2.7],raycast:()=>undefined,userData:{walkToolVisual:true}},
+   React.createElement('sphereGeometry',{args:[.22,16,12]}),
+   React.createElement(ToonMaterial,{color:'#ff00ff',emissive:'#ff00ff',emissiveIntensity:1})));
 }
 createRoot(document.getElementById('root')).render(React.createElement(HomeAssistantRuntimeProvider,null,
  React.createElement(CabaneDashboard,{manifest,architectureModels:stableArchitectureModelRegistry,walkTools:[{...laserWalkTool,Scene:ObservedGun}]})));
@@ -62,6 +87,26 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome paired port
       assert.deepEqual(await page.evaluate(()=>window.zapColors),['42cfff','efa632']);
     }
     await page.waitForFunction(()=>window.portalObservation.portals.every(portal=>portal.scale===1));
+    // The blue exit rim must not be drawn over the gold entry's live image.
+    // Sample during a strafe, where the overlapping rims are most apparent.
+    await page.evaluate(()=>{window.inspectPortalCapture=true;window.portalCapture=null;});
+    await page.waitForFunction(()=>window.portalCapture);
+    const capture=await page.evaluate(()=>window.portalCapture);
+    assert.equal(capture.cyan,0,'destination rim must not overlap the live portal view during movement');
+    assert.ok(capture.magenta>10,'the destination room object is visible through the supporting wall');
+    assert.ok(capture.width<=1024 && capture.height<=1024);
+    const startX=await page.evaluate(()=>window.portalObservation.position[0]);
+    await page.keyboard.down('d');
+    await page.waitForFunction(x=>window.portalObservation.position[0]>x+.15,startX);
+    await page.evaluate(()=>{window.inspectPortalCapture=true;window.portalCapture=null;});
+    await page.waitForFunction(()=>window.portalCapture);
+    await page.keyboard.up('d');
+    const moved=await page.evaluate(()=>window.portalCapture);
+    assert.equal(moved.cyan,0,'moving does not reveal clipped fragments of the exit rim');
+    assert.ok(moved.magenta>10 && Math.abs(moved.magentaX-capture.magentaX)>2,'the live scene tracks lateral movement');
+    await page.keyboard.down('a');
+    await page.waitForFunction(x=>window.portalObservation.position[0]<=x,startX);
+    await page.keyboard.up('a');
     await page.screenshot({path:'/tmp/cabane-portals-chrome.png'});
     await page.keyboard.down('w');
     await page.waitForFunction(()=>window.portalObservation.position[2]>2.5 && Math.cos(window.portalObservation.yaw)>.99,{},{timeout:5000});
@@ -84,5 +129,51 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome paired port
   } catch (error) {
     await page.screenshot({path:"/tmp/cabane-portals-failure.png"});
     console.error(errors, await page.evaluate(()=>window.portalObservation), await page.locator("body").innerText()); throw error;
+  } finally {await browser.close();}
+});
+
+test('Chrome portal placement on indoor floors, outdoor ground and exterior walls',async()=>{
+  const {server}=await getBrowserTestServer('app');
+  const browser=await createBrowserTestSession();
+  const page=await browser.newPage({viewport:{width:1280,height:800},reducedMotion:'reduce'});
+  page.setDefaultTimeout(12000);
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  // Start near the north wall, with a wide door centered on the south wall.
+  const outdoorFixture=fixture.replace('manifest.floors[0].openings = [];',
+    `manifest.floors[0].openings = [{...manifest.floors[0].openings[0],offsetFromWallStartPlanUnits:1.65,widthPlanUnits:1.5}];`)
+    .replace('at: [2.4, 1.8]','at: [2.4, .65]');
+  const aim=async(yaw,pitch)=>{
+    await page.evaluate(({yaw,pitch})=>window.dispatchEvent(new MouseEvent('mousemove',{
+      movementX:(window.portalObservation.yaw-yaw)/.0024,movementY:(window.portalObservation.pitch-pitch)/.002,
+    })),{yaw,pitch});
+    await page.waitForFunction(({yaw,pitch})=>Math.abs(window.portalObservation.yaw-yaw)<.005 && Math.abs(window.portalObservation.pitch-pitch)<.005,{yaw,pitch});
+  };
+  const shoot=async()=>{await page.mouse.down({button:'right'});await page.mouse.up({button:'right'});};
+  try {
+    await page.route('**/portal-outdoor-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-outdoor-fixture',outdoorFixture)}));
+    await page.goto(server.resolvedUrls.local[0]+'portal-outdoor-fixture');
+    await page.getByRole('button',{name:'Walk mode',exact:true}).click();await page.keyboard.press('g');
+    await page.waitForFunction(()=>window.portalObservation && document.pointerLockElement);
+    await aim(Math.PI,-.9);await shoot();
+    await page.waitForFunction(()=>window.portalObservation.portals.length===1);
+    assert.ok((await page.evaluate(()=>window.portalObservation.portals[0].normal[1]))>.98,'indoor floor portal');
+    await aim(Math.PI,0);
+    await page.keyboard.down('w');
+    await page.waitForFunction(()=>window.portalObservation.position[2]>4.6);
+    await page.keyboard.up('w');
+    await aim(Math.PI,-.9);await shoot();
+    await page.waitForFunction(()=>window.portalObservation.portals.length===2);
+    const floor=await page.evaluate(()=>window.portalObservation.portals.find(p=>p.name==='gun-portal-gold'));
+    assert.ok(floor.normal[1]>.98 && floor.position[2]>5,'outdoor ground portal');
+    // Look at solid exterior wall to the side of the passage.
+    await aim(1,0);await shoot();
+    await page.waitForFunction(()=>window.portalObservation.portals.some(p=>p.name==='gun-portal-blue' && Math.abs(p.normal[1])<.05));
+    const wall=await page.evaluate(()=>window.portalObservation.portals.find(p=>p.name==='gun-portal-blue'));
+    assert.ok(wall.normal[2]>.98 && wall.position[2]>3.6,'exterior wall portal faces the terrain');
+    await page.screenshot({path:'/tmp/cabane-portals-outdoors.png'});
+    assert.deepEqual(errors,[]);
+  } catch(error) {
+    console.error(errors,await page.evaluate(()=>window.portalObservation),await page.locator('body').innerText());
+    await page.screenshot({path:'/tmp/cabane-portals-outdoor-failure.png'});throw error;
   } finally {await browser.close();}
 });

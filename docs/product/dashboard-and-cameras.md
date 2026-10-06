@@ -175,9 +175,16 @@ Shots now include a 300 ms flickering blue electrical arc with short branches, a
 With Laser equipped and mouse capture active on desktop, right-click alternates
 between a blue and gold portal. A linked pair transports the walker from either
 entrance to the other exit, including between floors when both landings are clear.
-Portals fit on broad flat walls or supported floors; wall portals align to standing
-height. Invalid or overlapping placements leave the pair and next color unchanged.
-The opaque energy surfaces do not render the destination. Arrival protection avoids
+Portals fit on broad flat interior/exterior walls, indoor floors, outdoor slabs,
+and terrain with supported exits; wall portals align to standing height. Terrain
+landings reuse the rendered ground and its cutouts, require support across the
+player radius, and retain obstacle checks. Upper-floor exits still require slabs. Invalid or overlapping placements leave the pair and next color unchanged.
+Once paired, the oval shows a live perspective view through its partner, clipped
+at the exit surface so its supporting wall does not obstruct the view. Unpaired
+portals retain the energy membrane. The destination rim/ripple is excluded from
+its own capture to avoid overlapping fragments during movement. Views are one
+level deep, skip back-facing/off-screen openings, and use targets capped at 1024
+pixels per side; reduced motion preserves perspective tracking. Arrival protection avoids
 immediate return trips, and controls/overlays pause traversal. Stowing Laser or
 leaving Walk clears the pair. This first version is grounded travel: no ceiling
 portals, retained launch momentum or flinging. Touch keeps its existing Fire action.

@@ -1,6 +1,6 @@
 import { deriveFloorLevels } from "../building/floor-levels";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
-import { isWalkPointClear, type BoxWalkCollider } from "../navigation";
+import { isWalkPointClear, type BoxWalkCollider, type WalkPoint } from "../navigation";
 import { deriveStairFlight } from "../stairs/flight-geometry";
 import { safeBuildingSpawn } from "../stairs/stair-navigation";
 import type { BuildingGeometry } from "../stairs/types";
@@ -8,7 +8,7 @@ import type { WalkToolLanding } from "../walk-tools";
 
 /** Deliberately conservative: relocation starts on supported, clear, level ground. */
 export function resolveWalkLanding(building: BuildingGeometry, position: { x: number; y: number; z: number },
-  furniture: (elevation: number) => readonly BoxWalkCollider[]): WalkToolLanding | null {
+  furniture: (elevation: number) => readonly BoxWalkCollider[], supportsTerrain?: (point: WalkPoint) => boolean): WalkToolLanding | null {
   if (![position.x, position.y, position.z].every(Number.isFinite)) return null;
   const level = [...deriveFloorLevels(building.floors)].sort((a, b) =>
     Math.abs(a.elevationMeters - position.y) - Math.abs(b.elevationMeters - position.y))[0];
@@ -20,7 +20,7 @@ export function resolveWalkLanding(building: BuildingGeometry, position: { x: nu
     const flight = deriveStairFlight(building, stair);
     return flight && pointInsidePolygon(plan, flight.footprint);
   })) return null;
-  const spawn = safeBuildingSpawn(building, level.floorId, plan);
+  const spawn = safeBuildingSpawn(building, level.floorId, plan, supportsTerrain);
   if (!spawn || !isWalkPointClear(position, furniture(level.elevationMeters))) return null;
   return { x: position.x, z: position.z, floorId: level.floorId, elevation: level.elevationMeters };
 }
