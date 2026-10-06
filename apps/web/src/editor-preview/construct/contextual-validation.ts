@@ -8,6 +8,7 @@ export type ConstructValidationTargetKind =
   | "room"
   | "floor-zone"
   | "pool"
+  | "outdoor-platform"
   | "ceiling"
   | "junction"
   | "scene-item";
@@ -35,7 +36,7 @@ export interface ConstructContextualIssue extends ManifestIssue {
 
 export interface ConstructContextualValidationInput {
   floor: Pick<FloorSpec,
-    "footprint" | "footprintRegions" | "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "groundZones">;
+    "footprint" | "footprintRegions" | "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">;
   sceneItems?: readonly Pick<SceneItemSpec, "id" | "modelId" | "placement">[];
   topologyIssues?: readonly ConstructValidationDiagnostic[];
   projectIssues?: readonly ConstructValidationDiagnostic[];
@@ -52,6 +53,7 @@ const collectionTargetKinds = {
   openings: "opening",
   rooms: "room",
   pools: "pool",
+  outdoorPlatforms: "outdoor-platform",
   ceilings: "ceiling",
   wallJunctions: "junction",
   sceneItems: "scene-item",
@@ -64,6 +66,9 @@ const defaultCorrections: Readonly<Record<string, string>> = {
   "floor-zone.outside-room": "Move or delete the floor area so it stays inside its room.",
   "ground-zone.inside-footprint": "Move the outdoor area so it stays outside the building.",
   "project.outdoor-placement": "Move the outdoor item outside the building, keeping it on the ground.",
+  "platform.room-overlap": "Move or reshape the platform so its interior stays outside rooms on this level.",
+  "platform.polygon": "Move a corner until the platform has a simple, closed outline.",
+  "platform.overlap": "Move or reshape the platforms so their interiors do not overlap.",
   "pool.polygon": "Move a corner until the outline no longer crosses itself, or undo the edit.",
   "pool.building-overlap": "Move the pool outdoors, leaving room for its 0.25 m rim beside house walls.",
   "pool.overlap": "Move or reshape a pool so their rims do not touch.",
@@ -95,7 +100,7 @@ const collectionFor = (
 const pathReference = (
   path: string,
 ): { collection: TargetCollectionName; reference: string } | undefined => {
-  const collectionNames = "walls|wallJunctions|openings|rooms|ceilings|pools|sceneItems";
+  const collectionNames = "walls|wallJunctions|openings|rooms|ceilings|pools|outdoorPlatforms|sceneItems";
   const dottedOrBracketed = path.match(
     new RegExp(`(?:^|\\.)(?<collection>${collectionNames})(?:\\[(?<bracket>[^\\]]+)\\]|\\.(?<dotted>[^.\\[]+))`),
   );
@@ -214,7 +219,7 @@ const wallCompletionIssueCodes = new Set([
 export const isPristineConstructionFloor = (floor: FloorSpec) =>
   !floor.walls.length && !floor.rooms.length && !floor.footprint.length && !floor.openings.length
   && !floor.ceilings?.length && !floor.wallJunctions?.length && !floor.pools?.length
-  && !floor.groundZones?.length && !floor.hedges?.length;
+  && !floor.outdoorPlatforms?.length && !floor.groundZones?.length && !floor.hedges?.length;
 
 /** Presentation only: Apply must always use the complete, unfiltered list. */
 export const visibleConstructIssues = (

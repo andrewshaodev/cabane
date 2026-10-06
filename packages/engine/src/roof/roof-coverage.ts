@@ -1,3 +1,4 @@
+import { isOutdoorPlatformOutline } from "../outdoor-platforms/platform-geometry";
 import polygonClipping, { type MultiPolygon, type Polygon as ClipPolygon } from "polygon-clipping";
 import { differenceClippingGeometry, unionClippingPolygons } from "../architecture-geometry/architecture-clipping";
 import { wallSolidFootprintPolygons } from "../architecture-geometry/wall-solid-footprints";
@@ -22,7 +23,7 @@ const worldPolygon = (points: readonly PlanPoint[], floor: FloorSpec): ClipPolyg
 const coveredFloor = (floor: FloorSpec): MultiPolygon => {
   const domain = unionClippingPolygons([
     ...(floor.rooms.length ? floor.rooms.map(room => worldPolygon(room.polygon, floor))
-      : (floor.footprintRegions ?? [floor.footprint]).map(polygon => worldPolygon(polygon, floor))),
+      : floor.outdoorPlatforms?.length ? [] : (floor.footprintRegions ?? [floor.footprint]).map(polygon => worldPolygon(polygon, floor))),
     ...wallSolidFootprintPolygons(floor),
   ]);
   // Room interiors and wall solids can leave narrow service/seam gaps. These
@@ -56,11 +57,12 @@ const ceilingWithWalls = (polygon: ClipPolygon, margin: number, domain: MultiPol
 export function deriveRoofRegions(floors: readonly FloorSpec[]): RoofRegion[] {
   const levels = deriveFloorLevels(floors);
   const domains = floors.map(coveredFloor);
+  const coverDomains = floors.map((floor, index) => unionClippingPolygons([...domains[index], ...(floor.outdoorPlatforms ?? []).filter(p => isOutdoorPlatformOutline(p.polygon)).map(p => worldPolygon(p.polygon, floor))]));
   return floors.flatMap((floor, index) => {
     const domain = domains[index];
     if (!domain.length) return [];
     const elevation = levels[index].elevationMeters;
-    const above = domains.slice(index + 1).filter(polygon => polygon.length);
+    const above = coverDomains.slice(index + 1).filter(polygon => polygon.length);
     const margin = Math.max(0, ...floor.walls.map(wall => wall.thicknessMeters / 2)) + 0.002;
     const ceilings = floor.ceilings ?? [{ id: "roof-default", kind: "flat" as const,
       roomIds: floor.rooms.map(room => room.id), heightMeters: floor.defaultCeilingHeightMeters }];

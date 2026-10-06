@@ -133,6 +133,7 @@ export const constructionMarqueeTargets = ({
     ...wallTargets,
     ...openingTargets,
     ...(draft.hedges ?? []).filter((hedge) => segmentTouchesRectangle(hedge.from, hedge.to, rectangle)).map((hedge): FloorEditorSelectionTarget => ({ kind: "hedge", id: hedge.id })),
+    ...(draft.outdoorPlatforms ?? []).filter(platform=>polygonTouchesRectangle(platform.polygon,rectangle)).map((platform): FloorEditorSelectionTarget=>({kind:"outdoor-platform",id:platform.id})),
     ...poolTargets,
     ...floorZoneTargets,
   ]));
@@ -234,6 +235,7 @@ export const resolveConstructionDeletionTargets = ({
   }
 
   return floorEditorSelectionTargets(createFloorEditorSelection([
+    ...selected.filter(target=>target.kind === "outdoor-platform" && draft.outdoorPlatforms?.some(platform=>platform.id===target.id)),
     ...selected.filter((target) => target.kind === "hedge" && draft.hedges?.some((hedge) => hedge.id === target.id)),
     ...[...selectedRoomIds].map((id): FloorEditorSelectionTarget => ({ kind: "room", id })),
     ...wallTargets,

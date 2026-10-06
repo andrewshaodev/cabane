@@ -1,3 +1,4 @@
+import { wallStructuralHeight } from "./architecture-geometry/wall-structural-height";
 import { wallSolidBands } from "./architecture-geometry/wall-solid-bands";
 import { wallFaceFinish } from "./architecture-geometry/wall-face-finish";
 import { wallLevelContact } from "./architecture-geometry/wall-level-contact";
@@ -26,7 +27,7 @@ export function buildArchitecturalWallGeometries(
 ): ArchitecturalWallGeometryGroup[] {
   // Continue exterior finish across the structural slab between ceiling and next level.
   const floor = neighbors.above ? { ...sourceFloor, walls: sourceFloor.walls.map(wall =>
-    wall.classification === "exterior" ? { ...wall, heightMeters: Math.max(wall.heightMeters ?? sourceFloor.defaultWallHeightMeters, sourceFloor.floorToFloorHeightMeters) } : wall
+    ({ ...wall, heightMeters: wallStructuralHeight(wall, sourceFloor) })
   ) } : sourceFloor;
   const wallData = new Map(floor.walls.map(wall => [wall, {
     frame: wallFrame(wall, floor),

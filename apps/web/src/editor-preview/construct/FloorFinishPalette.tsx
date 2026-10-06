@@ -5,7 +5,7 @@ import {
 } from "@cabane/engine";
 import { useEffect, useRef } from "react";
 
-export type FloorPaintTarget = "room" | "custom-area";
+export type FloorPaintTarget = "room" | "custom-area" | "outdoor-platform";
 
 export interface FloorPaintingInspector {
   finish: FloorFinishSpec;
@@ -72,6 +72,7 @@ export function FloorFinishPalette({
       >
         Whole room
       </button>
+      <button type="button" aria-label="Outdoor platform" aria-pressed={target === "outdoor-platform"} onClick={() => onTargetChange("outdoor-platform")}>Outdoor platform</button>
       <button
         type="button"
         aria-label="Custom area"

@@ -13,6 +13,7 @@ const visitProjectIds = (
   project.floors.forEach((floor, floorIndex) => {
     register(floor.id, `floors[${floorIndex}].id`, "architecture");
     floor.hedges?.forEach((hedge, index) => register(hedge.id, `floors[${floorIndex}].hedges[${index}].id`, "architecture"));
+    floor.outdoorPlatforms?.forEach((platform, index) => { register(platform.id, `floors[${floorIndex}].outdoorPlatforms[${index}].id`, "architecture"); platform.edges.forEach((edge, i) => register(edge.id, `floors[${floorIndex}].outdoorPlatforms[${index}].edges[${i}].id`, "architecture")); });
     floor.pools?.forEach((pool, index) => register(pool.id, `floors[${floorIndex}].pools[${index}].id`, "architecture"));
     floor.groundZones?.forEach((zone, index) => register(zone.id, `floors[${floorIndex}].groundZones[${index}].id`, "architecture"));
     floor.rooms.forEach((room, index) => register(room.id, `floors[${floorIndex}].rooms[${index}].id`, "architecture"));

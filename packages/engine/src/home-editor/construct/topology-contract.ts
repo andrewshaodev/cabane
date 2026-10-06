@@ -14,6 +14,7 @@ import type {
   PlanPoint,
   Polygon,
   PoolSpec,
+  OutdoorPlatformSpec,
   HedgeSpec,
   WallJunctionSpec,
   WallSpec,
@@ -58,6 +59,7 @@ export interface FloorTopologyInput {
   junctions?: readonly WallJunctionSpec[];
   hedges?: readonly HedgeSpec[];
   pools?: readonly PoolSpec[];
+  outdoorPlatforms?: readonly OutdoorPlatformSpec[];
   groundZones?: readonly FloorFinishZoneSpec[];
   defaultWallHeightMeters?: number;
   defaultCeilingHeightMeters?: number;

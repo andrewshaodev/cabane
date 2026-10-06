@@ -1,3 +1,4 @@
+import { floorSupportPolygons } from "../outdoor-platforms/platform-geometry";
 import { deriveFloorLevels } from "../building/floor-levels";
 import type { ManifestIssue, FloorSpec } from "../types";
 import { deriveStairFlight } from "./flight-geometry";
@@ -50,7 +51,7 @@ export const validateStairs = (building: BuildingGeometry, registries: StairMode
         } catch { /* Scene-item validation reports unresolved supports. */ }
       }
       const landing = floorId === stair.lowerFloorId ? flight.lowerLanding : flight.upperLanding;
-      if (!stairLandingSupported(landing,floor.footprintRegions ?? [floor.footprint],building.coordinates)) {
+      if (!stairLandingSupported(landing,floorSupportPolygons(floor),building.coordinates)) {
         add("stair.landing", `The stair landing extends beyond “${floor.name}”. Move the stairs or extend the floor to support the exit.`);
       }
     }

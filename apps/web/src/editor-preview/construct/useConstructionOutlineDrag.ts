@@ -14,7 +14,7 @@ const ground = new Plane(new Vector3(0, 1, 0), 0);
 export function useConstructionOutlineDrag<T extends readonly PlanPoint[] = Polygon>({ draft, selection, selectionKind, tool, onSelect, onUpdate, onDraggingChange }: {
   draft: FloorEditorDraft;
   selection: FloorEditorSelection;
-  selectionKind: "pool" | "floor-zone" | "hedge";
+  selectionKind: "pool" | "floor-zone" | "hedge" | "outdoor-platform";
   tool: FloorEditorTool;
   onSelect: (id: string) => void;
   onUpdate: (id: string, polygon: T) => void;

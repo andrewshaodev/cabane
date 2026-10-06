@@ -1,4 +1,4 @@
-import { planPointToWorld, worldPointToPlan, pointInsidePolygon, type FloorSpec, type PlanPoint } from "@cabane/engine";
+import { planPointToWorld, worldPointToPlan, pointOnFloorSupport, type FloorSpec, type PlanPoint } from "@cabane/engine";
 import { PlanOverlayMaterial, noPlanRaycast } from "./PlanDrawing";
 
 /** The placement surface intercepts clicks before the construction geometry. */
@@ -18,7 +18,7 @@ export function WalkStartPointer({ floor, start, placing, onPlace }: {
         event.stopPropagation();
         if (event.button !== 0) return;
         const at = worldPointToPlan(event.point, floor.coordinates);
-        if (pointInsidePolygon(at, floor.footprint)) onPlace(at);
+        if (pointOnFloorSupport(at, floor)) onPlace(at);
       }}>
       <planeGeometry args={[10000, 10000]} />
       <PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} />

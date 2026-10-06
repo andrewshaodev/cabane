@@ -14,7 +14,7 @@ export const constructIssueKey = (issue: ConstructContextualIssue) =>
 
 export const constructIssueVisualTargets = (
   issue: ConstructContextualIssue,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "groundZones">,
+  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): readonly ConstructValidationTarget[] => {
   const targets: ConstructValidationTarget[] = issue.target ? [issue.target] : [];
@@ -116,7 +116,7 @@ const firstPolygonCrossing = (polygon: readonly PlanPoint[]): PlanPoint | null =
 
 export const constructTargetPlanPoint = (
   target: ConstructValidationTarget,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "groundZones">,
+  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): PlanPoint | null => {
   if (target.kind === "wall") {
@@ -149,6 +149,9 @@ export const constructTargetPlanPoint = (
     ]
       .find((candidate) => candidate.id === target.id);
     return zone ? polygonCenter(zone.polygon) : null;
+  }
+  if (target.kind === "outdoor-platform") {
+    const platform = floor.outdoorPlatforms?.find(p=>p.id===target.id); return platform ? polygonCenter(platform.polygon) : null;
   }
   if (target.kind === "pool") {
     const pool = floor.pools?.find((candidate) => candidate.id === target.id);
@@ -197,7 +200,7 @@ export const constructIssueShortLabel = (issue: ConstructContextualIssue) => {
 
 export const constructIssuePlanPoint = (
   issue: ConstructContextualIssue,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "groundZones">,
+  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): PlanPoint | null => {
   if (issue.code === "room.polygon-invalid" && issue.target?.kind === "room") {

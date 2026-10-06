@@ -33,7 +33,7 @@ export const validateRooms = (
 ): RoomValidationResult => {
   const issues: ManifestIssue[] = [];
   const roomIds = new Set<string>();
-  if (!Array.isArray(rawFloor.rooms) || rawFloor.rooms.length === 0) {
+  if (!Array.isArray(rawFloor.rooms) || (rawFloor.rooms.length === 0 && !(Array.isArray(rawFloor.outdoorPlatforms) && rawFloor.outdoorPlatforms.length))) {
     issues.push(issue(
       "rooms.required",
       `${floorPath}.rooms`,

@@ -1,4 +1,4 @@
-import { pointInsidePolygon, pointStrictlyOutsideFloorFootprint, resolveItemTransform, type FloorSpec, type ItemPlacement, type PlanPoint, type SceneModelEditorDescriptor } from "@cabane/engine";
+import { pointOnFloorSupport, pointInsidePolygon, pointStrictlyOutsideFloorFootprint, resolveItemTransform, type FloorSpec, type ItemPlacement, type PlanPoint, type SceneModelEditorDescriptor } from "@cabane/engine";
 import { insetWallPlacementIntoRoom } from "./wall-room-inset";
 
 export interface PlacementInput {
@@ -16,6 +16,7 @@ const invalid = (error: string): PlacementCandidate => ({ placement: null, error
 
 export function placementCandidate(entry: { definition: SceneModelEditorDescriptor }, floor: FloorSpec, input: PlacementInput): PlacementCandidate {
   const definition = entry.definition;
+  const elevated = ((floor as FloorSpec & { elevationMeters?: number }).elevationMeters ?? 0) > 0;
   const outdoor = definition.placementEnvironment === "outdoor";
   const scale = floor.coordinates.metersPerPlanUnit;
   if (!input.at.every(Number.isFinite) || !(scale > 0)) return invalid("Enter a valid position.");
@@ -55,7 +56,7 @@ export function placementCandidate(entry: { definition: SceneModelEditorDescript
   } else {
     const rooms = floor.rooms.filter((room) => pointInsidePolygon(at, room.polygon));
     if (outdoor) {
-      if (!pointStrictlyOutsideFloorFootprint(at, floor)) {
+      if (!floor.outdoorPlatforms?.some(p=>pointInsidePolygon(at,p.polygon)) && !pointStrictlyOutsideFloorFootprint(at, floor)) {
         return invalid("Choose a position outside the building.");
       }
     } else if (kind === "ceiling" && rooms.length !== 1) return invalid("Choose a position inside one room.");
@@ -66,6 +67,7 @@ export function placementCandidate(entry: { definition: SceneModelEditorDescript
       if (!Number.isFinite(drop) || drop < Math.max(0, definition.bounds.max[1]) || drop > height || height - drop + definition.bounds.min[1] < 0) return invalid("The item must fit below the ceiling and above the floor.");
       placement = { kind, roomId: rooms[0].id, at, dropMeters: drop, rotationYRadians: 0 };
     } else {
+      if (elevated && !pointOnFloorSupport(at, floor)) return invalid("Choose a room floor or outdoor platform on this level.");
       const elevation = input.elevation ?? Math.max(0, -definition.bounds.min[1]) + .001;
       if (!Number.isFinite(elevation) || elevation < Math.max(0, -definition.bounds.min[1])) return invalid("The item must stay above the floor.");
       placement = { kind, at, elevationMeters: elevation, rotationYRadians: 0 };
@@ -78,7 +80,7 @@ export function placementCandidate(entry: { definition: SceneModelEditorDescript
   };
   if (placement.kind === "wall") placement = insetWallPlacementIntoRoom(placement, floor);
   if (outdoor) {
-    if (placement.kind !== "absolute" || !pointStrictlyOutsideFloorFootprint(placement.at, floor)) {
+    if (placement.kind !== "absolute" || !floor.outdoorPlatforms?.some(p=>pointInsidePolygon(placement.at,p.polygon)) && !pointStrictlyOutsideFloorFootprint(placement.at, floor)) {
       return invalid("Choose a position outside the building.");
     }
   } else if (roomCount(placement) > 1) return invalid("Choose a position belonging to at most one room.");

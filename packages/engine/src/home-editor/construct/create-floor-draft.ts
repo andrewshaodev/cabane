@@ -18,6 +18,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
   floorToFloorHeightMeters: floor.floorToFloorHeightMeters,
   floorName: floor.name,
   ...(floor.hedges ? { hedges: floor.hedges.map((hedge) => ({ ...hedge })) } : {}),
+  ...(floor.outdoorPlatforms ? { outdoorPlatforms: structuredClone(floor.outdoorPlatforms) as import("../../types").OutdoorPlatformSpec[] } : {}),
   ...(floor.pools ? { pools: floor.pools.map((pool) => ({ ...pool, polygon: mapPoolOutline(pool.polygon, (point) => [...point]) })) } : {}),
   ...(floor.groundZones ? {
     groundZones: floor.groundZones.map((zone) => ({

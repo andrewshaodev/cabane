@@ -85,7 +85,12 @@ export function catalogStartPlacement(
     const margin = (radius + .45) / scale;
     const clamp = (value: number, min: number, max: number) =>
       Math.max(min, Math.min(max, value));
-    const candidates: PlanPoint[] = [];
+    const candidates: PlanPoint[] = (floor.outdoorPlatforms ?? []).flatMap(platform=> {
+      const points: PlanPoint[] = []; if(pointInsidePolygon(preferredAt,platform.polygon)) points.push(preferredAt);
+      const center: PlanPoint = [platform.polygon.reduce((n,p)=>n+p[0],0)/platform.polygon.length,platform.polygon.reduce((n,p)=>n+p[1],0)/platform.polygon.length];
+      if(pointInsidePolygon(center,platform.polygon)) points.push(center);
+      return points;
+    });
     if (pointStrictlyOutsideFloorFootprint(preferredAt, floor)) {
       candidates.push(preferredAt);
     }

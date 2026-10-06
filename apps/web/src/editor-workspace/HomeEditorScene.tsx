@@ -1,3 +1,4 @@
+import { ConstructionPlatformLayer } from "../editor-preview/construct/ConstructionPlatformLayer";
 import { useReferenceCanvas } from "../editor-reference-plan/ReferenceCanvasLayers";
 import type { ReferencePlanController } from "../editor-reference-plan/useReferencePlan";
 import { ConstructionGrid } from "../editor-preview/construct/ConstructionGrid";
@@ -47,9 +48,9 @@ import type { useHomeEditorController } from "./useHomeEditorController";
 
 
 const NO_INTERACTION = () => undefined;
-type Props = { onStairIssuesChange?: (issues: readonly ManifestIssue[] | null) => void; reference: ReferencePlanController; onNameFocusHandled?: () => void; cameraFocusRoomId?: string | null; nameFocusRequest?: { roomId: string; serial: number } | null; placingWalkStart: boolean; onWalkStartPlaced: () => void } & Pick<ReturnType<typeof useHomeEditorController>, "selectSceneItem" | "stairDialog" | "floorNavigation" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "setStairDialog" | "showFloorBelow" | "lowerFloor" | "commit" | "snapshot" | "connectFloor" | "mode" | "editingLocked" | "publishOpen" | "previewOpen" | "connectManifest" | "connect" | "clearConstructionSelection" | "clearFurnishingSelection" | "cameraView" | "cameraResetKey" | "constructEditor" | "dragging" | "cameraFocusPoint" | "handleCameraTargetChange" | "savedCamera" | "previewSceneItems" | "displayedContextualIssues" | "activeIssueKey" | "issueFocusVersion" | "poolDrawing" | "floorZoneDrawing" | "focusIssue" | "furnishingModels" | "deviceModels" | "visualManifest" | "selectedRoomId" | "editorResolvedBindings" | "marqueeSelecting" | "floorPaintTarget" | "requestRoomPaint" | "setDragging" | "constructMeasure" | "setSelectedRoomId" | "setMarqueeSelecting" | "selectedOpening" | "detailsOpeningId" | "setDetailsOpeningId" | "duplicateConstructionOpening" | "visualSceneItems" | "furnishingEditor" | "selectedItem" | "selectedDefinition" | "detailsItemId" | "setDetailsItemId" | "unsettled" | "selectMode" | "duplicateArrangeItem" | "deleteSceneItem">;
+type Props = { onStairIssuesChange?: (issues: readonly ManifestIssue[] | null) => void; reference: ReferencePlanController; onNameFocusHandled?: () => void; cameraFocusRoomId?: string | null; nameFocusRequest?: { roomId: string; serial: number } | null; placingWalkStart: boolean; onWalkStartPlaced: () => void } & Pick<ReturnType<typeof useHomeEditorController>, "placementFloor" | "selectSceneItem" | "stairDialog" | "floorNavigation" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "setStairDialog" | "showFloorBelow" | "lowerFloor" | "commit" | "snapshot" | "connectFloor" | "mode" | "editingLocked" | "publishOpen" | "previewOpen" | "connectManifest" | "connect" | "clearConstructionSelection" | "clearFurnishingSelection" | "cameraView" | "cameraResetKey" | "constructEditor" | "dragging" | "cameraFocusPoint" | "handleCameraTargetChange" | "savedCamera" | "previewSceneItems" | "displayedContextualIssues" | "activeIssueKey" | "issueFocusVersion" | "poolDrawing" | "floorZoneDrawing" | "focusIssue" | "furnishingModels" | "deviceModels" | "visualManifest" | "selectedRoomId" | "editorResolvedBindings" | "marqueeSelecting" | "floorPaintTarget" | "requestRoomPaint" | "setDragging" | "constructMeasure" | "setSelectedRoomId" | "setMarqueeSelecting" | "selectedOpening" | "detailsOpeningId" | "setDetailsOpeningId" | "duplicateConstructionOpening" | "visualSceneItems" | "furnishingEditor" | "selectedItem" | "selectedDefinition" | "detailsItemId" | "setDetailsItemId" | "unsettled" | "selectMode" | "duplicateArrangeItem" | "deleteSceneItem">;
 export function HomeEditorScene({
-  reference, onStairIssuesChange, onNameFocusHandled, cameraFocusRoomId, nameFocusRequest, placingWalkStart, onWalkStartPlaced, selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
+  reference, onStairIssuesChange, onNameFocusHandled, cameraFocusRoomId, nameFocusRequest, placingWalkStart, onWalkStartPlaced, placementFloor, selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
   mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
   clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
   handleCameraTargetChange, savedCamera, previewSceneItems, displayedContextualIssues, activeIssueKey,
@@ -183,7 +184,7 @@ export function HomeEditorScene({
             selection={marqueeSelecting ? null : constructEditor.selection}
             deletionTargets={marqueeSelecting ? [] : constructEditor.deletionTargets}
             tool={constructEditor.tool}
-            paintTarget={floorPaintTarget}
+            paintTarget={floorPaintTarget === "outdoor-platform" ? "room" : floorPaintTarget}
             drawingPoints={floorZoneDrawing.points}
             drawingPreview={floorZoneDrawing.preview}
             drawingRoomId={floorZoneDrawing.roomId}
@@ -208,12 +209,12 @@ export function HomeEditorScene({
             previewFloor={constructEditor.previewFloor}
             wallRuns={constructEditor.wallRuns}
             tool={constructEditor.tool}
-            drawStart={constructEditor.tool === "pool" ? poolDrawing.points.at(-1) ?? null : constructEditor.drawStart}
-            drawPreview={constructEditor.tool === "pool" ? poolDrawing.preview : constructEditor.drawPreview}
+            drawStart={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.points.at(-1) ?? null : constructEditor.drawStart}
+            drawPreview={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.preview : constructEditor.drawPreview}
             drawAngleReferenceRadians={constructEditor.tool === "wall" ? constructEditor.drawAngleReferenceRadians : null}
             wallExteriorColor={constructEditor.exteriorWallColor}
             poolPoints={poolDrawing.points}
-            floorPaintTarget={floorPaintTarget}
+            floorPaintTarget={floorPaintTarget === "outdoor-platform" ? "room" : floorPaintTarget}
             floorZonePoints={floorZoneDrawing.points}
               floorZonePreview={floorZoneDrawing.preview}
               onCancelFloorZone={floorZoneDrawing.cancel}
@@ -234,10 +235,10 @@ export function HomeEditorScene({
             onMoveOpening={constructEditor.moveOpening}
             onResizeOpening={constructEditor.resizeSelectedOpening}
             onPlaceOpening={constructEditor.placeOpening}
-            onBeginWall={constructEditor.tool === "pool" ? poolDrawing.place : constructEditor.beginWall}
-            onPreviewWall={constructEditor.tool === "pool" ? poolDrawing.previewPoint : constructEditor.previewWall}
-            onAddWall={constructEditor.tool === "pool" ? poolDrawing.place : constructEditor.addWall}
-            onCancelWall={constructEditor.tool === "pool" ? poolDrawing.cancel : constructEditor.cancelWall}
+            onBeginWall={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.place : constructEditor.beginWall}
+            onPreviewWall={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.previewPoint : constructEditor.previewWall}
+            onAddWall={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.place : constructEditor.addWall}
+            onCancelWall={(constructEditor.tool === "pool" || constructEditor.tool === "platform") ? poolDrawing.cancel : constructEditor.cancelWall}
             onPlaceMeasure={constructMeasure.place}
             onPreviewMeasure={constructMeasure.preview}
             onPlaceFloorZonePoint={floorZoneDrawing.place}
@@ -247,6 +248,12 @@ export function HomeEditorScene({
           />
         )}
         {mode === "construct" && !editingLocked && <ConstructionHedgeLayer editor={constructEditor} onDraggingChange={setDragging} />}
+        {mode === "construct" && <ConstructionPlatformLayer draft={constructEditor.draft}
+          selection={marqueeSelecting ? null : constructEditor.selection} tool={constructEditor.tool}
+          points={poolDrawing.points} preview={poolDrawing.preview} deletionTargets={constructEditor.deletionTargets}
+          selectedEdgeId={constructEditor.selectedPlatformEdgeId}
+          onSelect={constructEditor.selectPlatform} onSelectEdge={constructEditor.selectPlatformEdge}
+          onUpdate={(id, polygon)=>constructEditor.updatePlatform(id,{polygon})} onDraggingChange={setDragging} />}
         {mode === "construct" && <ConstructionPoolLayer draft={constructEditor.draft}
           selection={marqueeSelecting ? null : constructEditor.selection} tool={constructEditor.tool} points={poolDrawing.points} preview={poolDrawing.preview}
           deletionTargets={marqueeSelecting ? [] : constructEditor.deletionTargets}
@@ -283,7 +290,7 @@ export function HomeEditorScene({
         {mode === "furnish" && (
           <FurnishingEditLayer
             items={visualSceneItems}
-            floor={constructEditor.previewFloor}
+            floor={placementFloor}
             furnishingModels={furnishingModels}
             deviceModels={deviceModels}
             selectedId={furnishingEditor.selectedId}
@@ -300,7 +307,7 @@ export function HomeEditorScene({
         )}
         {mode === "furnish" && selectedItem && selectedDefinition && (
           <SelectedItemControls key={selectedItem.id} item={selectedItem} definition={selectedDefinition}
-            floor={constructEditor.previewFloor} busy={dragging || Boolean(furnishingEditor.transaction)}
+            floor={placementFloor} busy={dragging || Boolean(furnishingEditor.transaction)}
             onRotate={furnishingEditor.rotate}
             onMovePlacement={furnishingEditor.updatePlacement}
             onSelect={furnishingEditor.select}

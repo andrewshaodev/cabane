@@ -42,7 +42,7 @@ export function ConstructionValidationOverlay({
     constructIssueVisualTargets(issue, floor, sceneItems).map((target) => ({ issue, target }))
   ), [errorIssues, floor, sceneItems]);
   const areaEdges = useMemo(() => visuals.flatMap(({ issue, target }) => {
-    const area = target.kind === "pool"
+    const area = target.kind === "outdoor-platform" ? floor.outdoorPlatforms?.find(p=>p.id===target.id) : target.kind === "pool"
       ? floor.pools?.find((candidate) => candidate.id === target.id)
       : target.kind === "room"
         ? floor.rooms.find((candidate) => candidate.id === target.id)

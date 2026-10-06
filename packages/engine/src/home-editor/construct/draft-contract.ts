@@ -7,6 +7,7 @@ import type {
   PlanPoint,
   Polygon,
   PoolSpec,
+  OutdoorPlatformSpec,
   HedgeSpec,
   WallJunctionSpec
 } from "../../types";
@@ -29,7 +30,7 @@ export const FLOOR_EDITOR_ANGLE_STEP_RADIANS = Math.PI / 4;
 
 export const FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS = 5 * Math.PI / 180;
 
-export type FloorEditorTool = "select" | "hedge" | "wall" | "door" | "window" | "passage" | "floor" | "pool" | "measure" | "pan";
+export type FloorEditorTool = "select" | "hedge" | "wall" | "door" | "window" | "passage" | "floor" | "platform" | "pool" | "measure" | "pan";
 
 export type FloorEditorSelectionTarget =
   | { kind: "hedge"; id: string }
@@ -37,7 +38,8 @@ export type FloorEditorSelectionTarget =
   | { kind: "opening"; id: string }
   | { kind: "room"; id: string }
   | { kind: "floor-zone"; id: string }
-  | { kind: "pool"; id: string };
+  | { kind: "pool"; id: string }
+  | { kind: "outdoor-platform"; id: string };
 
 export type FloorEditorSelection =
   | FloorEditorSelectionTarget
@@ -61,6 +63,7 @@ export interface FloorEditorDraft {
   junctions: WallJunctionSpec[];
   hedges?: HedgeSpec[];
   pools?: PoolSpec[];
+  outdoorPlatforms?: OutdoorPlatformSpec[];
   groundZones?: FloorFinishZoneSpec[];
   defaultWallHeightMeters: number;
   defaultCeilingHeightMeters: number;
@@ -92,6 +95,8 @@ export type FloorEditorAction =
   | { type: "add-hedge"; hedge: Omit<HedgeSpec, "id"> }
   | { type: "update-hedge"; id: string; changes: Partial<Omit<HedgeSpec, "id">> }
   | { type: "add-pool"; polygon: Polygon }
+  | { type: "add-outdoor-platform"; polygon: Polygon; finish: FloorFinishSpec; defaultEdge: OutdoorPlatformSpec["defaultEdge"] }
+  | { type: "update-outdoor-platform"; id: string; changes: Partial<Omit<OutdoorPlatformSpec, "id">> }
   | {
     type: "add-floor-zone";
     room: Pick<EditorRoomIdentity, "id" | "name" | "accent" | "anchor">;

@@ -166,3 +166,20 @@ U-shaped stairs use two adjacent parallel flights and a flat 180° landing. They
 the L-shaped stair controls: lower/upper flight lengths, width, and left/right turn.
 Place the bottom, lower-flight landing center, then the returning upper endpoint.
 The landing depth equals the flight width; curved half-turn stairs remain unsupported.
+
+Optional `FloorSpec.outdoorPlatforms` stores an independent polygon and finish,
+a default edge configuration, and an ordered edge record for every polygon edge.
+Platform and edge IDs share the architecture identity namespace. Missing platforms
+mean none in existing projects; no version migration is needed. Procedural toon
+slabs and railing/low-wall barriers render at the floor's existing level. Platform
+coverage participates in scene bounds, placement support, stair landing support,
+walk spawn and elevated-floor boundary checks; Open removes its barrier while
+retaining the elevated-floor support boundary. Barriers share their facade-aware
+geometry with walk collision, so existing door apertures remain usable.
+
+Platform footprints clip lower roofs without acquiring their own roofing. Slabs
+above enclosed rooms retain the authored ceiling underside and replace overlapping
+lower ceiling slab coverage; remaining slab regions use 0.16 m thickness. Higher
+floors cover their actual indoor and outdoor support footprints. Explicit low
+exterior walls retain their height when another floor exists, while full-height
+facades continue across the real inter-floor slab.

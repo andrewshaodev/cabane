@@ -1,7 +1,9 @@
+import { ArchitecturalOutdoorPlatforms } from "../outdoor-platforms";
 import { ArchitecturalHedges } from "../hedges";
 export type FloorSceneProps = {
   sourceFloor: HomeManifest["floors"][number];
   below?: HomeManifest["floors"][number];
+  platformBelow?: HomeManifest["floors"][number];
   above?: HomeManifest["floors"][number];
   showGround: boolean;
   showCeiling: boolean;
@@ -65,7 +67,7 @@ import type {
 } from "../types";
 
 export const FloorScene = memo(function FloorScene({
-  sourceFloor, showGround, showCeiling, below, above,
+  sourceFloor, showGround, showCeiling, below, above, platformBelow,
   manifest,
   walkMode,
   wallFadeEnabled,
@@ -127,9 +129,10 @@ export const FloorScene = memo(function FloorScene({
         size={groundSize}
         color={manifest.home.palette.ground}
       />}
+      <ArchitecturalOutdoorPlatforms floor={floor} below={platformBelow} />
       <ArchitecturalHedges floor={floor} />
       <ArchitecturalPools floor={floor} reducedMotion={reducedMotion} />
-      {(floor.footprintRegions ?? [floor.footprint]).map((polygon, index) => (
+      {(floor.rooms.length || !floor.outdoorPlatforms?.length ? floor.footprintRegions ?? [floor.footprint] : []).map((polygon, index) => (
         <PolygonSurface
           key={`floor-footprint-${index}`}
           polygon={polygon}

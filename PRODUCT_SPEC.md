@@ -14,7 +14,7 @@ When implementation changes, update the relevant focused spec with it.
 | Ownership | Web shell, reusable engine/catalog, owner home package | [Architecture](docs/product/architecture.md) |
 | User journey | Workspace library, per-home dashboard and editor routes | [Startup and setup](docs/product/journey.md) |
 | Workspace | Multiple browser-local homes, independent connections, drafts, atomic Apply and recovery | [Data and persistence](docs/product/workspace.md) |
-| Construct | 2D wall/room/opening editing, floor finishes, pools, measuring and diagnostics | [Construction](docs/product/construct.md) |
+| Construct | 2D wall/room/opening editing, floor finishes, outdoor platforms, pools, measuring and diagnostics | [Construction](docs/product/construct.md) |
 | Arrange | Catalog browsing, supported placement, item editing and duplication | [Arrangement](docs/product/arrange.md) |
 | Connect | Room/area and device/slot mapping, automatic matching, imports and backups | [Connections](docs/product/connect.md) |
 | Runtime | Browser OAuth/WebSocket integration, guarded controls, private browser data | [Runtime and privacy](docs/product/runtime-and-privacy.md) |

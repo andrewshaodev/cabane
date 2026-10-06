@@ -258,6 +258,9 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
         />,
       ] : []
     )}
+    {(floor.outdoorPlatforms ?? []).filter(platform=>isFloorZoneOutline(platform.polygon)).map(platform=><FinishSurface
+      key={platform.id} floor={floor} polygon={platform.polygon} finish={platform.finish} variant={variant}
+      textureSet={textureSet} layer={0} elevation={variant === "scene" ? .002 : .001} name={`platform-finish-${platform.id}`} />)}
     {floor.rooms.flatMap((room) => {
       const onSelect = onSelectRoom
         ? () => onSelectRoom(room.id)

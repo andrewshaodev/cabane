@@ -2,7 +2,7 @@ import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
 import { collectProjectIds, createBrowserUuid } from "@cabane/engine";
-import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
+import { deriveFloorLevels, useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
 import { useHomeEditorShortcuts } from "./useHomeEditorShortcuts";
@@ -439,6 +439,9 @@ export function useHomeEditorController({
     () => composeHomeProjectPreview(editorProject, ownerProjectManifest.extensions).manifest,
     [editorProject],
   );
+  const placementFloor = useMemo(() => ({ ...constructEditor.previewFloor,
+    elevationMeters: deriveFloorLevels(snapshot.project.floors).find(level=>level.floorId===activeFloorId)?.elevationMeters ?? 0,
+  }), [constructEditor.previewFloor, snapshot.project.floors, activeFloorId]);
   const connectManifest = useMemo(() => composeHomeBindingManifest(snapshot.project, ownerProjectManifest.extensions), [snapshot.project]);
   const connectFloor = connectManifest.floors.find(f => f.id === activeFloorId) ?? connectManifest.floors[0];
   const connect = useConnectEditor({
@@ -492,7 +495,7 @@ export function useHomeEditorController({
     ? editedManifest : { ...editedManifest, sceneItems: [...editedManifest.sceneItems.filter((item) => item.floorId !== activeFloorId), ...visualSceneItems] }, [editedManifest, visualSceneItems]);
   const addCatalogItem = (entry: CatalogEntry) => {
     if (editingLocked || unsettled) return;
-    const candidate = catalogStartPlacement(entry, constructEditor.previewFloor,
+    const candidate = catalogStartPlacement(entry, placementFloor,
       arrangeTarget.current ?? polygonCentroid(constructEditor.previewFloor.footprint),
       { items: visualSceneItems, furnishingModels, deviceModels }, arrangeVisibility.current);
     setCatalogError(candidate.error);
@@ -581,7 +584,7 @@ export function useHomeEditorController({
       setCameraFocusPoint(roomAnchorForPolygon(room.polygon));
       setCameraResetKey(key => key + 1);
     },
-    selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, showFloorBelow, setShowFloorBelow, lowerFloor, startStairs, connectFloor,
+    placementFloor, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, showFloorBelow, setShowFloorBelow, lowerFloor, startStairs, connectFloor,
     mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
     clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
     handleCameraTargetChange, savedCamera, previewSceneItems, displayedContextualIssues, activeIssueKey,

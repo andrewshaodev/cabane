@@ -80,3 +80,5 @@ export { HomeAssistantHostSessionProvider, useHomeAssistantHostSession, type Hom
 export { CabaneDomProvider, useCabaneDom, useCabaneAssetUrl, type CabaneDomEnvironment } from "./CabaneDom";
 
 export { connectedCanvasEvents } from "./connected-canvas-events";
+
+export * from "./outdoor-platforms";

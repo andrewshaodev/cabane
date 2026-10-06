@@ -245,3 +245,21 @@ U-shaped stairs use two adjacent parallel flights and a flat 180° landing. They
 the L-shaped stair controls: lower/upper flight lengths, width, and left/right turn.
 Place the bottom, lower-flight landing center, then the returning upper endpoint.
 The landing depth equals the flight width; curved half-turn stairs remain unsupported.
+
+Floor also offers Outdoor platform for same-level terraces and balconies. Close an
+independent polygon using the ordinary snapping, measurements, local drawing
+undo/redo and cancel gestures. Choose Railing (1 m), Low wall (0.3 m), or Open
+from procedural thumbnail cards before drawing; exposed edges inherit that
+configuration. Select the finished platform to move it, edit or insert/remove
+corners, repaint its finish, or delete it. Select an edge on the plan or in the
+inspector to override its style and height, or restore the platform default.
+Corner movement preserves edge IDs and overrides. Inserting a corner retains
+the leading edge and downstream identities; the new edge inherits the platform
+default. House-facade runs suppress platform barriers, including doorway spans.
+
+Platforms do not create rooms, ceilings, roof sections, or house walls. A top
+floor can consist of platforms without enclosed rooms. Same-level room/platform
+and platform/platform interior overlaps are errors; shared boundaries are valid.
+These edits use ordinary workspace history, autosave, export/import and Save.
+Basements, split-level decks, supports, pergolas and converting rooms to platforms
+remain outside this tool.

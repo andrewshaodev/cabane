@@ -177,7 +177,7 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
         walls={drawingWalls} primary={{ from: segmentStart, to: segmentPreview }} junctions={[segmentStart, segmentPreview]}
         coordinates={coordinates} planMode={planMode}
         defaultThicknessMeters={tool === "wall" ? draft.interiorWallThicknessMeters : .055}
-        labelKind={tool === "hedge" ? "Hedge" : tool === "wall" ? "Wall" : tool === "pool" ? "Pool edge" : "Floor edge"}
+        labelKind={tool === "hedge" ? "Hedge" : tool === "wall" ? "Wall" : tool === "platform" ? "Platform edge" : tool === "pool" ? "Pool edge" : "Floor edge"}
       />}
       {resizedWall && draggingEndpoint && tool === "select" && <ConstructionWallMeasurements
         walls={displayedDraft.walls} primary={resizedWall} junctions={[draggingEndpoint.point]}

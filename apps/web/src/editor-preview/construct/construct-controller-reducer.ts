@@ -28,6 +28,7 @@ export const topologyForDraft = (draft: FloorEditorHistory["present"]) => {
     junctions: draft.junctions,
     hedges: draft.hedges,
     pools: draft.pools,
+    outdoorPlatforms: draft.outdoorPlatforms,
     groundZones: draft.groundZones,
     defaultWallHeightMeters: draft.defaultWallHeightMeters,
     defaultCeilingHeightMeters: draft.defaultCeilingHeightMeters,

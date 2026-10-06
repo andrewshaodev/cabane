@@ -362,6 +362,22 @@ export interface PoolSpec {
   polygon: Polygon;
 }
 
+export type OutdoorPlatformEdgeConfiguration =
+  | { kind: "railing" | "low-wall"; heightMeters: number }
+  | { kind: "open" };
+export interface OutdoorPlatformEdgeSpec {
+  id: string;
+  configuration?: OutdoorPlatformEdgeConfiguration;
+}
+export interface OutdoorPlatformSpec {
+  id: string;
+  polygon: Polygon;
+  finish: FloorFinishSpec;
+  defaultEdge: OutdoorPlatformEdgeConfiguration;
+  /** One stable edge identity per polygon corner, in the same order. */
+  edges: readonly OutdoorPlatformEdgeSpec[];
+}
+
 export interface FloorSpec {
   id: string;
   name: string;
@@ -378,6 +394,7 @@ export interface FloorSpec {
   ceilings?: readonly CeilingSpec[];
   hedges?: readonly HedgeSpec[];
   pools?: readonly PoolSpec[];
+  outdoorPlatforms?: readonly OutdoorPlatformSpec[];
   /** Ordered outdoor surface patches such as paths, gravel, or sand. */
   groundZones?: readonly FloorFinishZoneSpec[];
 }

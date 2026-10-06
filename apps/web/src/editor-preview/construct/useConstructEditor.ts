@@ -28,7 +28,7 @@ import { resolveConstructionDeletionTargets } from "./selection-geometry";
 
 import { ConstructEditorController } from "./construct-controller-contract";
 import { constructEditorHistoryReducer, topologyForDraft, topologyIssueKey } from "./construct-controller-reducer";
-import { usePoolDrawing } from "./usePoolDrawing";
+import { useClosedOutlineDrawing } from "./useClosedOutlineDrawing";
 import { closesWallLoop } from "./wall-loop-closure";
 
 export const useConstructEditor = (
@@ -62,7 +62,14 @@ export const useConstructEditor = (
   const [exteriorWallColor, setExteriorWallColor] = useState(
     defaultExteriorWallColor,
   );
-  const poolDrawing = usePoolDrawing((polygon) => dispatch({ type: "add-pool", polygon }));
+  const [platformSettings, setPlatformSettings] = useState<ConstructEditorController["platformSettings"]>({
+    finish: { kind: "solid", color: "#c8b79b" }, defaultEdge: { kind: "railing", heightMeters: 1 },
+  });
+  const [selectedPlatformEdgeId, setSelectedPlatformEdgeId] = useState<string | null>(null);
+  const drawingTool = useRef(history.present.tool); drawingTool.current = history.present.tool;
+  const poolDrawing = useClosedOutlineDrawing((polygon) => dispatch(drawingTool.current === "platform"
+    ? { type: "add-outdoor-platform", polygon, ...platformSettings }
+    : { type: "add-pool", polygon }), history.present.tool === "platform" ? "platform" : "pool");
   const [drawPreview, setDrawPreview] = useState<PlanPoint | null>(null);
   const [drawAngleReferenceRadians, setDrawAngleReferenceRadians] = useState<number | null>(null);
   const drawStartRef = useRef<PlanPoint | null>(null);
@@ -115,6 +122,7 @@ export const useConstructEditor = (
     draft.openings,
     draft.hedges,
     draft.pools,
+    draft.outdoorPlatforms,
     draft.groundZones,
     draft.rooms,
     draft.walls,
@@ -303,6 +311,10 @@ export const useConstructEditor = (
     history,
     doorConfiguration, setDoorConfiguration, openingError,
     hedgeSettings, setHedgeSettings,
+    platformSettings, setPlatformSettings, selectedPlatformEdgeId,
+    selectPlatform: (id) => { setSelectedPlatformEdgeId(null); select({ kind: "outdoor-platform", id }); },
+    selectPlatformEdge: (id, edgeId) => { setSelectedPlatformEdgeId(edgeId); select({ kind: "outdoor-platform", id }); },
+    updatePlatform: (id, changes) => dispatch({ type: "update-outdoor-platform", id, changes }),
     poolDrawing,
     selectPool: (id) => select({ kind: "pool", id }),
     selectFloorZone: (id) => select({ kind: "floor-zone", id }),

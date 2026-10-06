@@ -1,3 +1,4 @@
+import { validateOutdoorPlatforms } from "./platform-rules";
 import { validateHedges } from "./hedge-rules";
 import {
   pointInsidePolygon,
@@ -215,6 +216,7 @@ const validateFloor = (
     context,
   ));
   issues.push(...validateHedges(rawFloor, floorPath, context));
+  issues.push(...validateOutdoorPlatforms(rawFloor, floorPath, context));
   issues.push(...validatePools(rawFloor, floorPath, context));
   return issues;
 };

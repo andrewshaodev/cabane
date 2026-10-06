@@ -184,8 +184,8 @@ export function useConstructionPointerController({
   useEffect(() => setOpeningPreview(null), [tool]);
   const drawingFloorZone = tool === "floor"
     && floorPaintTarget === "custom-area";
-  const drawing = tool === "wall" || tool === "hedge" || tool === "pool" || drawingFloorZone;
-  const outlinePoints = tool === "pool" ? poolPoints : drawingFloorZone ? floorZonePoints : [];
+  const drawing = tool === "wall" || tool === "hedge" || tool === "pool" || tool === "platform" || drawingFloorZone;
+  const outlinePoints = (tool === "pool" || tool === "platform") ? poolPoints : drawingFloorZone ? floorZonePoints : [];
   const segmentStart = drawingFloorZone ? floorZonePoints.at(-1) ?? null : drawStart;
   const segmentPreview = drawingFloorZone ? floorZonePreview : drawPreview;
   const beginSegment = drawingFloorZone ? onPlaceFloorZonePoint : onBeginWall;
@@ -203,11 +203,11 @@ export function useConstructionPointerController({
     : drawAngleReferenceRadians ?? undefined;
   const floorSpan = useMemo(() => {
     const coordinatesList = [...draft.walls.flatMap((wall) => [wall.from, wall.to]),
-    ...(draft.pools ?? []).flatMap((pool) => pool.polygon), ...poolPoints,
+    ...(draft.pools ?? []).flatMap((pool) => pool.polygon), ...(draft.outdoorPlatforms ?? []).flatMap(p=>p.polygon), ...poolPoints,
     ...floorZonePoints];
     const extent = Math.max(20, ...coordinatesList.flatMap((point) => point.map(Math.abs))) * 4;
     return extent * coordinates.metersPerPlanUnit;
-  }, [coordinates.metersPerPlanUnit, draft.walls, draft.pools, poolPoints, floorZonePoints]);
+  }, [coordinates.metersPerPlanUnit, draft.walls, draft.pools, draft.outdoorPlatforms, poolPoints, floorZonePoints]);
   const marqueeDistancePixels = marquee ? Math.hypot(
     marquee.clientTo[0] - marquee.clientFrom[0],
     marquee.clientTo[1] - marquee.clientFrom[1],

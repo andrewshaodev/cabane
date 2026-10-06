@@ -49,6 +49,12 @@ export interface ConstructEditorController extends ConstructEditorState {
   openingError: string | null;
   hedgeSettings: Pick<import("@cabane/engine").HedgeSpec, "style" | "heightMeters" | "widthMeters">;
   setHedgeSettings: (settings: ConstructEditorController["hedgeSettings"]) => void;
+  platformSettings: { finish: FloorFinishSpec; defaultEdge: import("@cabane/engine").OutdoorPlatformEdgeConfiguration };
+  setPlatformSettings: (settings: ConstructEditorController["platformSettings"]) => void;
+  selectedPlatformEdgeId: string | null;
+  selectPlatformEdge: (platformId: string, edgeId: string) => void;
+  selectPlatform: (id: string) => void;
+  updatePlatform: (id: string, changes: Partial<Omit<import("@cabane/engine").OutdoorPlatformSpec, "id">>) => void;
   poolDrawing: ReturnType<typeof usePoolDrawing>;
   selectPool: (id: string) => void;
   selectFloorZone: (id: string) => void;

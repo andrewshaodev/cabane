@@ -143,3 +143,8 @@ Stair intersections and unsupported landings are warning-only project diagnostic
 Warnings retain their severity through validation, draft reload, import/export, and
 Save review; only errors make a project invalid. Existing stair JSON and IDs are
 unchanged, and no data migration is required.
+
+Outdoor platforms and their edge IDs/configurations belong to each floor's project
+slice. Schema-shaped intermediate polygon errors can autosave and reload; geometry
+validation blocks Save until repaired. Portable exports, imports, project
+history, duplication and Apply retain platform finishes and per-edge overrides.

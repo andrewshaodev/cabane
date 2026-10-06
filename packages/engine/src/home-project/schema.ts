@@ -300,7 +300,7 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
 const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy: boolean) => {
   const candidate = record(value, path, issues);
   if (!candidate) return;
-  keys(candidate, ["id", "name", "floorToFloorHeightMeters", "coordinates", "defaultWallHeightMeters", "defaultCeilingHeightMeters", "footprint", "footprintRegions", "rooms", "walls", "wallJunctions", "openings", "ceilings", "hedges", "pools", "groundZones"], path, issues);
+  keys(candidate, ["id", "name", "floorToFloorHeightMeters", "coordinates", "defaultWallHeightMeters", "defaultCeilingHeightMeters", "footprint", "footprintRegions", "rooms", "walls", "wallJunctions", "openings", "ceilings", "hedges", "pools", "outdoorPlatforms", "groundZones"], path, issues);
   if (candidate.groundZones !== undefined) array(candidate.groundZones, `${path}.groundZones`, issues)?.forEach((entry, index) => floorZone(entry, `${path}.groundZones[${index}]`, issues));
   if (candidate.hedges !== undefined) array(candidate.hedges, `${path}.hedges`, issues)?.forEach((entry, index) => {
     const hedgePath = `${path}.hedges[${index}]`;
@@ -310,6 +310,25 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
     string(hedge.id, `${hedgePath}.id`, issues);
     point(hedge.from, `${hedgePath}.from`, issues); point(hedge.to, `${hedgePath}.to`, issues);
     if (!validHedge(hedge as unknown as HedgeSpec, (candidate.coordinates as { metersPerPlanUnit?: number } | undefined)?.metersPerPlanUnit ?? 1)) addProjectIssue(issues, "project.hedge", hedgePath, "Hedges need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.");
+  });
+  const edgeConfiguration = (value: unknown, edgePath: string) => {
+    const c = record(value, edgePath, issues); if (!c) return;
+    keys(c, ["kind", "heightMeters"], edgePath, issues);
+    if (!["railing", "low-wall", "open"].includes(String(c.kind))) addProjectIssue(issues, "project.platform-edge", edgePath, "Unknown platform edge style.");
+    if (c.kind !== "open") finite(c.heightMeters, `${edgePath}.heightMeters`, issues);
+    else if (c.heightMeters !== undefined) addProjectIssue(issues, "project.platform-edge", edgePath, "Open edges do not have a barrier height.");
+  };
+  if (candidate.outdoorPlatforms !== undefined) array(candidate.outdoorPlatforms, `${path}.outdoorPlatforms`, issues)?.forEach((entry, index) => {
+    const p = `${path}.outdoorPlatforms[${index}]`; const platform = record(entry, p, issues); if (!platform) return;
+    keys(platform, ["id", "polygon", "finish", "defaultEdge", "edges"], p, issues);
+    string(platform.id, `${p}.id`, issues); polygon(platform.polygon, `${p}.polygon`, issues);
+    floorFinish(platform.finish, `${p}.finish`, issues);
+    edgeConfiguration(platform.defaultEdge, `${p}.defaultEdge`);
+    array(platform.edges, `${p}.edges`, issues)?.forEach((entry, i) => {
+      const edgePath = `${p}.edges[${i}]`; const edge = record(entry, edgePath, issues); if (!edge) return;
+      keys(edge, ["id", "configuration"], edgePath, issues); string(edge.id, `${edgePath}.id`, issues);
+      if (edge.configuration !== undefined) edgeConfiguration(edge.configuration, `${edgePath}.configuration`);
+    });
   });
   if (candidate.pools !== undefined) array(candidate.pools, `${path}.pools`, issues)?.forEach((entry, index) => {
     const poolPath = `${path}.pools[${index}]`;

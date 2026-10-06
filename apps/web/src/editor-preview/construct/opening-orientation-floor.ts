@@ -10,6 +10,7 @@ const withoutOrientation = (opening: EditorOpening) => {
 
 /** Surface, pool, and opening-orientation edits must not reconstruct accepted rooms or walls. */
 export function floorWithOpeningOrientations(before: FloorEditorDraft, after: FloorEditorDraft, floor: FloorSpec): FloorSpec | null {
+  if (!floor.rooms.length && before.outdoorPlatforms !== after.outdoorPlatforms) return null;
   const architectureKeys = ["walls", "rooms", "junctions", "coordinates", "floorId", "floorName",
     "defaultWallHeightMeters", "defaultCeilingHeightMeters", "exteriorWallThicknessMeters", "interiorWallThicknessMeters"] as const;
   if (architectureKeys.some((key) => before[key] !== after[key]) || before.openings.length !== after.openings.length) return null;
@@ -17,6 +18,7 @@ export function floorWithOpeningOrientations(before: FloorEditorDraft, after: Fl
     && JSON.stringify(withoutOrientation(opening)) !== JSON.stringify(withoutOrientation(after.openings[index])))) return null;
   const changed = new Map(after.openings.filter((opening, index) => opening !== before.openings[index]).map((opening) => [opening.id, opening]));
   let nextFloor = before.pools === after.pools ? floor : { ...floor, pools: after.pools };
+  if (before.outdoorPlatforms !== after.outdoorPlatforms) nextFloor = { ...nextFloor, outdoorPlatforms: after.outdoorPlatforms };
   if (before.hedges !== after.hedges) nextFloor = { ...nextFloor, hedges: after.hedges };
   if (before.groundZones !== after.groundZones) {
     nextFloor = { ...nextFloor, groundZones: after.groundZones };

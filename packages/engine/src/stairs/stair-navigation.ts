@@ -1,3 +1,4 @@
+import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { prepareWalkColliders } from "../navigation/prepared-walk-colliders";
 import { resolveItemTransform } from "../home-project/placements";
 import { deriveFloorLevels } from "../building/floor-levels";
@@ -62,7 +63,7 @@ export const moveBuildingWalker = (building: BuildingGeometry, pose: BuildingWal
     if (exitingBelow || exitingAbove) {
       const destinationId = exitingBelow ? flight.lowerFloorId : flight.upperFloorId;
       const destination = building.floors.find(f => f.id === destinationId);
-      if (!destination || !(destination.footprintRegions ?? [destination.footprint]).some(region => pointInsidePolygon(plan, region))) return pose;
+      if (!destination || !pointOnFloorSupport(plan, destination)) return pose;
       if (hasUnsupportedStairAperture(flights, destinationId, plan, flight.id)) return pose;
       const items = landingItemColliders(building, destination, registries);
       const colliders = prepared?.colliders.get(destinationId)?.(openIds, items) ?? deriveWalkColliders(destination, openIds, items);
@@ -95,7 +96,7 @@ export const moveBuildingWalker = (building: BuildingGeometry, pose: BuildingWal
   }
   if (entrance) return { ...candidate, ...entrance };
   if (blockedByFootprint || hasUnsupportedStairAperture(flights, floor.id, plan)) return pose;
-  if (floor.id !== building.floors[0].id && !(floor.footprintRegions ?? [floor.footprint]).some(region => pointInsidePolygon(plan, region))) return pose;
+  if (floor.id !== building.floors[0].id && !pointOnFloorSupport(plan, floor)) return pose;
   return candidate;
 };
 export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, start?: import("../types").PlanPoint) => {
@@ -113,10 +114,13 @@ export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, s
   const elevation = deriveFloorLevels(building.floors).find(f => f.floorId === floorId)!.elevationMeters;
   if (start) {
     const [x, z] = planPointToWorld(start, building.coordinates);
-    return pointInsidePolygon(start, floor.footprint) && isWalkPointClear({ x, z }, colliders)
+    return pointOnFloorSupport(start, floor) && isWalkPointClear({ x, z }, colliders)
       ? { x, z, yaw: Math.PI, pitch: 0, floorId, elevation } : null;
   }
-  for (const room of floor.rooms) {
+  const spawnRegions = [...floor.rooms, ...(floor.outdoorPlatforms ?? []).map(platform=>({
+    id: platform.id, name: "Outdoor platform", polygon: platform.polygon, accent: "#c8b79b", devices: [], dashboardSlots: [],
+  }))];
+  for (const room of spawnRegions) {
     const pose = safeSpawnPoseForRoom(room, floor, colliders, WALK_PLAYER_RADIUS);
     if (!pose || !isWalkPointClear(pose, colliders)) continue;
     const point = worldPointToPlan(pose, building.coordinates);

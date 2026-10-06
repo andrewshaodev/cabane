@@ -1,3 +1,4 @@
+import { isOutdoorPlatformOutline } from "../../outdoor-platforms/platform-geometry";
 /*
  * Planar face traversal follows the conventional directed half-edge walk used
  * by OpenPlan3D and ai_room_planner (MIT). The implementation is original to
@@ -20,6 +21,19 @@ import { normalizeWallRuns } from "./topology-wall-runs";
 
 export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyResult => {
   const issues: ManifestIssue[] = [];
+  if (input.walls.length === 0 && input.outdoorPlatforms?.some(p=>isOutdoorPlatformOutline(p.polygon))) {
+    const polygons = input.outdoorPlatforms.filter(p=>isOutdoorPlatformOutline(p.polygon)).map(p=>p.polygon);
+    const bounds = footprintForFaces(polygons, issues);
+    if (bounds) return { issues, faces: [], classifications: {}, wallRuns: [], floor: {
+      id: input.floorId, name: input.floorName, floorToFloorHeightMeters: input.floorToFloorHeightMeters ?? 2.8,
+      coordinates: input.coordinates ?? { origin: [0,0], metersPerPlanUnit: 1, scaleBasis: "inferred" },
+      defaultWallHeightMeters: input.defaultWallHeightMeters ?? 2.5, defaultCeilingHeightMeters: input.defaultCeilingHeightMeters ?? 2.5,
+      footprint: bounds.footprint, ...(bounds.regions.length>1 ? { footprintRegions: bounds.regions } : {}),
+      walls: [], rooms: [], openings: [], wallJunctions: [], ceilings: [], outdoorPlatforms: input.outdoorPlatforms,
+      ...(input.hedges ? { hedges: input.hedges } : {}), ...(input.pools ? { pools: input.pools } : {}),
+      ...(input.groundZones ? { groundZones: input.groundZones } : {}),
+    } };
+  }
   if (input.walls.length < 3) {
     issues.push(issue("topology.walls-required", "walls", "Draw at least three walls around one closed room."));
     return { issues, faces: [], classifications: {}, wallRuns: [] };
@@ -183,6 +197,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
     id: input.floorId,
     name: input.floorName,
     ...(input.hedges ? { hedges: input.hedges } : {}),
+    ...(input.outdoorPlatforms ? { outdoorPlatforms: input.outdoorPlatforms } : {}),
     ...(input.pools ? { pools: input.pools } : {}),
     ...(input.groundZones ? {
       groundZones: input.groundZones.map((zone) => ({

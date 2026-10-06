@@ -1,3 +1,4 @@
+import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
@@ -46,7 +47,8 @@ const validatePlacementBounds = (
   const path = `sceneItems[${index}].placement`;
   const placement = item.placement;
   if (placement.kind === "absolute") {
-    const onOutdoorGround = floor.id === project.floors[0]?.id &&
+    if (floor.id !== project.floors[0]?.id && !pointOnFloorSupport(placement.at, floor)) addProjectIssue(issues, "project.item-support", path, "Place the item on a room floor or outdoor platform.");
+    const onOutdoorGround = !floor.outdoorPlatforms?.some(p=>pointInsidePolygon(placement.at,p.polygon)) && floor.id === project.floors[0]?.id &&
       pointStrictlyOutsideFloorFootprint(placement.at, floor);
     const minimumElevation = onOutdoorGround ? GROUND_ELEVATION_METERS : 0;
     if (placement.elevationMeters < minimumElevation) {
@@ -129,7 +131,7 @@ export const validateSceneItemsAndSupports = (
           z: transform.position[2],
         }, floor.coordinates);
     if (item.placement.kind !== "absolute"
-      || !pointStrictlyOutsideFloorFootprint(at, floor)) {
+      || (!floor.outdoorPlatforms?.some(p=>pointInsidePolygon(at,p.polygon)) && !pointStrictlyOutsideFloorFootprint(at, floor))) {
       addProjectIssue(
         issues,
         "project.outdoor-placement",

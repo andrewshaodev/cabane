@@ -18,6 +18,7 @@ export function incompleteFloorPreview(draft: FloorEditorDraft, previous: FloorS
       ...opening, offsetFromWallStartPlanUnits: offsetPlanUnits,
     })),
     ...(draft.hedges ? { hedges: draft.hedges } : {}),
+    ...(draft.outdoorPlatforms ? { outdoorPlatforms: draft.outdoorPlatforms } : {}),
     ...(draft.pools ? { pools: draft.pools } : {}),
     ...(draft.groundZones ? { groundZones: draft.groundZones } : {}),
   };

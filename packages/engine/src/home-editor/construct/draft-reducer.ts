@@ -1,3 +1,5 @@
+import { isOutdoorPlatformOutline, platformWithPolygon } from "../../outdoor-platforms/platform-geometry";
+import { validPlatformEdgeConfiguration } from "../../outdoor-platforms/platform-barriers";
 import { DEFAULT_DOOR_CONFIGURATION, doorFromConfiguration } from "../../door-configuration";
 import { deleteWallSpans } from "./delete-wall-spans";
 import { validHedge } from "../../hedges/hedge-validity";
@@ -41,6 +43,7 @@ const occupiedElementIds = (draft: FloorEditorDraft) => new Set([
   ]),
   ...draft.junctions.map((junction) => junction.id),
   ...(draft.hedges ?? []).map((hedge) => hedge.id),
+  ...(draft.outdoorPlatforms ?? []).flatMap(platform => [platform.id, ...platform.edges.map(edge => edge.id)]),
   ...(draft.pools ?? []).map((pool) => pool.id),
   ...(draft.groundZones ?? []).map((zone) => zone.id),
 ]);
@@ -78,6 +81,7 @@ const deleteElements = (
       ) } : {}),
     }));
   const hedges = (draft.hedges ?? []).filter((hedge) => !targets.some((target) => target.kind === "hedge" && target.id === hedge.id));
+  const outdoorPlatforms = (draft.outdoorPlatforms ?? []).filter(platform => !targets.some(target => target.kind === "outdoor-platform" && target.id === platform.id));
   const pools = (draft.pools ?? []).filter((pool) => !poolIds.has(pool.id));
   const groundZones = (draft.groundZones ?? []).filter((zone) =>
     !floorZoneIds.has(zone.id)
@@ -86,7 +90,7 @@ const deleteElements = (
     (room.floorZones?.length ?? 0) !==
     (draft.rooms.find((candidate) => candidate.id === room.id)?.floorZones?.length ?? 0)
   );
-  const changed = hedges.length !== (draft.hedges ?? []).length || walls.length !== draft.walls.length
+  const changed = outdoorPlatforms.length !== (draft.outdoorPlatforms ?? []).length || hedges.length !== (draft.hedges ?? []).length || walls.length !== draft.walls.length
     || walls.some((wall, index) => wall !== draft.walls[index])
     || openings.length !== draft.openings.length
     || rooms.length !== draft.rooms.length
@@ -100,6 +104,7 @@ const deleteElements = (
     rooms,
     junctions,
     ...(draft.hedges ? { hedges } : {}),
+    ...(draft.outdoorPlatforms ? { outdoorPlatforms } : {}),
     ...(draft.pools ? { pools } : {}),
     ...(draft.groundZones ? { groundZones } : {}),
     selection: null,
@@ -153,6 +158,25 @@ const reduceDraftAction = (
       const hedge = draft.hedges?.find((entry) => entry.id === action.id);
       if (!hedge || !validHedge({ ...hedge, ...action.changes }, draft.coordinates.metersPerPlanUnit)) return draft;
       return { ...draft, hedges: draft.hedges!.map((entry) => entry.id === action.id ? { ...entry, ...action.changes } : entry) };
+    }
+    case "add-outdoor-platform": {
+      if (!isOutdoorPlatformOutline(action.polygon) || !validPlatformEdgeConfiguration(action.defaultEdge)) return draft;
+      const serial = unusedElementSerial(draft, "platform");
+      const id = `${draft.floorId}:platform-${serial}`;
+      const platform = { id, polygon: action.polygon, finish: action.finish, defaultEdge: action.defaultEdge,
+        edges: action.polygon.map((_, index) => ({ id: unusedElementId(draft, `${id}:edge-${index+1}`) })) };
+      return { ...draft, outdoorPlatforms: [...(draft.outdoorPlatforms ?? []), platform], nextSerial: serial+1,
+        tool: "select", selection: { kind: "outdoor-platform", id } };
+    }
+    case "update-outdoor-platform": {
+      const current = draft.outdoorPlatforms?.find(platform => platform.id === action.id);
+      if (!current || (action.changes.defaultEdge && !validPlatformEdgeConfiguration(action.changes.defaultEdge))) return draft;
+      const polygon = action.changes.polygon ?? current.polygon;
+      if (!Array.isArray(polygon) || polygon.length < 3 || !polygon.every(point=>point.length===2 && point.every(Number.isFinite))) return draft;
+      const next = { ...platformWithPolygon(current, polygon), ...action.changes };
+      if (action.changes.polygon && !action.changes.edges) next.edges = platformWithPolygon(current, polygon).edges;
+      if (JSON.stringify(next) === JSON.stringify(current)) return draft;
+      return { ...draft, outdoorPlatforms: draft.outdoorPlatforms!.map(platform => platform.id === action.id ? next : platform) };
     }
     case "add-pool": {
       if (!isPoolOutline(action.polygon)) return draft;

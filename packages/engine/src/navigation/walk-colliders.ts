@@ -1,3 +1,4 @@
+import { deriveOutdoorPlatformBarriers } from "../outdoor-platforms/platform-barriers";
 import { rollUpDoorGeometry } from "../roll-up-door-geometry";
 import { validHedge } from "../hedges/hedge-validity";
 import {
@@ -73,6 +74,10 @@ export const deriveWalkColliders = (
   openOpeningIds: ReadonlySet<string> = new Set(),
   furniture: readonly BoxWalkCollider[] = [],
 ): WalkCollider[] => [
+    ...deriveOutdoorPlatformBarriers(floor).map((barrier, index): SegmentWalkCollider => ({
+      kind: "segment", id: `${barrier.edgeId}:walk-${index}`, from: { x: barrier.from[0], z: barrier.from[1] },
+      to: { x: barrier.to[0], z: barrier.to[1] }, halfThickness: barrier.configuration.kind === "low-wall" ? .075 : .035,
+    })),
     ...(floor.hedges ?? []).filter((hedge) => validHedge(hedge, floor.coordinates.metersPerPlanUnit)).map((hedge): SegmentWalkCollider => {
       const [x, z] = planPointToWorld(hedge.from, floor.coordinates);
       const [tx, tz] = planPointToWorld(hedge.to, floor.coordinates);

@@ -71,7 +71,7 @@ export const poolRimFootprint = (polygon: Polygon, coordinates: FloorCoordinates
 /** Scene framing only: never enlarge the architectural floor footprint. */
 export const worldBoundsForFloorScene = (floor: FloorSpec) => {
   const bounds = worldBoundsForPolygon(floor.footprint, floor.coordinates);
-  for (const zone of floor.groundZones ?? []) {
+  for (const zone of [...(floor.groundZones ?? []), ...(floor.outdoorPlatforms ?? [])]) {
     if (!Array.isArray(zone.polygon) || zone.polygon.length < 3
       || !zone.polygon.every((point) => Array.isArray(point)
         && point.length === 2 && point.every(Number.isFinite))) continue;

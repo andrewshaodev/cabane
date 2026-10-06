@@ -23,7 +23,7 @@ export const validateWalls = (
   const issues: ManifestIssue[] = [];
   const wallIds = new Set<string>();
   const walls = Array.isArray(rawFloor.walls) ? rawFloor.walls : [];
-  if (!Array.isArray(rawFloor.walls) || rawFloor.walls.length === 0) {
+  if (!Array.isArray(rawFloor.walls) || (rawFloor.walls.length === 0 && !(Array.isArray(rawFloor.outdoorPlatforms) && rawFloor.outdoorPlatforms.length))) {
     issues.push(issue(
       "walls.required",
       `${floorPath}.walls`,

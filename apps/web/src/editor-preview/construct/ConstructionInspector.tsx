@@ -1,3 +1,4 @@
+import { PlatformDrawingProperties, PlatformProperties } from "./PlatformProperties";
 import { DoorPresetPalette } from "./DoorPresetPalette";
 import { DoorDesignFields } from "./DoorDesignFields";
 import { HedgeProperties } from "./HedgeProperties";
@@ -119,7 +120,7 @@ export function ConstructionInspector({
     ?? editor.draft.exteriorWallThicknessMeters;
   const multipleSelection = editor.selection?.kind === "multiple";
   const deletionCounts = useMemo(() => {
-    const counts = { hedge: 0, wall: 0, opening: 0, room: 0, pool: 0, "floor-zone": 0 };
+    const counts = { "outdoor-platform": 0, hedge: 0, wall: 0, opening: 0, room: 0, pool: 0, "floor-zone": 0 };
     const seen = new Set<string>();
     for (const target of editor.deletionTargets ?? []) {
       const key = `${target.kind}:${target.id}`;
@@ -144,6 +145,7 @@ export function ConstructionInspector({
     if (issue.target.kind === "wall") editor.selectWall(issue.target.id);
     if (issue.target.kind === "opening") editor.selectOpening(issue.target.id);
     if (issue.target.kind === "room") editor.selectRoom(issue.target.id);
+    if (issue.target.kind === "outdoor-platform") editor.selectPlatform(issue.target.id);
     if (issue.target.kind === "pool") editor.selectPool(issue.target.id);
     if (issue.target.kind === "floor-zone") editor.selectFloorZone(issue.target.id);
   };
@@ -151,6 +153,17 @@ export function ConstructionInspector({
     <section className="construction-inspector" aria-label="Construction inspector">
       <div className="construction-inspector__context" inert={inert}>
       <HedgeProperties editor={editor} />
+      {editor.tool === "platform" && floorPainting && <>
+        <div className="floor-finish-palette__targets" role="group" aria-label="Paint target">
+          {(["room", "custom-area", "outdoor-platform"] as const).map(target=><button type="button" key={target}
+            aria-label={target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
+            aria-pressed={target === "outdoor-platform"} onClick={()=>{editor.setTool(target === "outdoor-platform" ? "platform" : "floor");floorPainting.onTargetChange(target);}}>
+            {target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
+          </button>)}
+        </div>
+        <PlatformDrawingProperties editor={editor} />
+      </>}
+      {editor.tool === "select" && editor.selection?.kind === "outdoor-platform" && editor.draft.outdoorPlatforms?.filter(p=>p.id===(editor.selection as {id:string}).id).map(platform=><PlatformProperties key={platform.id} platform={platform} editor={editor} />)}
       {editor.tool === "wall" && (
         <div className="construction-inspector__selection">
           <header>
@@ -189,7 +202,7 @@ export function ConstructionInspector({
             value={floorPainting.finish}
             onChange={floorPainting.onFinishChange}
             target={floorPainting.target}
-            onTargetChange={floorPainting.onTargetChange}
+            onTargetChange={target=>{floorPainting.onTargetChange(target);if(target === "outdoor-platform") {editor.setPlatformSettings({...editor.platformSettings,finish:floorPainting.finish});editor.setTool("platform");}}}
           />
           {floorPainting.target === "custom-area" && <p role="status">
             Start inside a room for an inset, or outside the building for a path or ground patch. Return to the first point to close it.

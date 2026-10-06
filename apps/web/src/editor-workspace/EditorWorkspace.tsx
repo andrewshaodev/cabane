@@ -61,7 +61,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     editorProject, setActionBarItems, cameraFocusRoomId, focusRoom, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, showFloorBelow, setShowFloorBelow, lowerFloor, startStairs, connectFloor,
     mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
     clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
-    handleCameraTargetChange, savedCamera, previewSceneItems, displayedContextualIssues, activeIssueKey,
+    handleCameraTargetChange, savedCamera, placementFloor, previewSceneItems, displayedContextualIssues, activeIssueKey,
     issueFocusVersion, poolDrawing, floorZoneDrawing, focusIssue, furnishingModels, deviceModels,
     visualManifest, selectedRoomId, editorResolvedBindings, marqueeSelecting, floorPaintTarget,
     requestRoomPaint, setDragging, constructMeasure, setSelectedRoomId, setMarqueeSelecting,
@@ -170,7 +170,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         mode, editingLocked, publishOpen, previewOpen, connectManifest, connect,
         clearConstructionSelection, clearFurnishingSelection, cameraView, cameraResetKey,
         constructEditor, dragging, cameraFocusPoint, handleCameraTargetChange, savedCamera,
-        previewSceneItems, displayedContextualIssues, activeIssueKey, issueFocusVersion, poolDrawing,
+        placementFloor, previewSceneItems, displayedContextualIssues, activeIssueKey, issueFocusVersion, poolDrawing,
         floorZoneDrawing, focusIssue, furnishingModels, deviceModels, visualManifest, selectedRoomId,
         editorResolvedBindings, marqueeSelecting, floorPaintTarget, requestRoomPaint, setDragging,
         constructMeasure, setSelectedRoomId, setMarqueeSelecting, selectedOpening, detailsOpeningId,
@@ -307,7 +307,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       {mode === "furnish" && selectedItem && detailsItemId === selectedItem.id && <div inert={editingLocked || publishOpen || previewOpen}>
         <FurnishingInspector items={visualSceneItems} selectedId={furnishingEditor.selectedId}
-          floor={constructEditor.previewFloor}
+          floor={placementFloor}
           onWindowFit={(id, placement, size, definition) => {
             furnishingEditor.beginTransaction();
             furnishingEditor.updatePlacement(id, placement);

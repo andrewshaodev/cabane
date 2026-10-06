@@ -37,7 +37,7 @@ export function EditorActionBar({
       aria-label={constructing ? "Construction actions" : "Edit history"}>
       {constructing && <>
         {constructionTools.flatMap((action) => [<EditorActionButton key={action.tool}
-          icon={action.tool} label={action.label} showLabel pressed={!stairsActive && tool === action.tool}
+          icon={action.tool} label={action.label} showLabel pressed={!stairsActive && (tool === action.tool || (tool === "platform" && action.tool === "floor"))}
           shortcut={action.key} keyShortcuts={action.key} onClick={() => onToolChange(action.tool)} />,
           ...(action.tool === "wall" && onStairs ? [<EditorActionButton key="stairs" icon="stairs" label="Stairs" showLabel
             pressed={stairsActive} disabled={Boolean(stairsDisabledReason)} disabledReason={stairsDisabledReason} onClick={onStairs} />] : []),
