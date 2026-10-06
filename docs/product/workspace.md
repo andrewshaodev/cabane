@@ -169,3 +169,7 @@ its versioned contents and validation; the engine only exposes the injected
 slices through the existing revision-checked repository, preserving unrelated
 draft edits. They survive reload, duplication, portable exports and private
 backups, and use the same workspace sync path. No separate browser store is used.
+
+Optional `home.northAngleDegrees` is finite and in [0, 360), measured clockwise
+from plan up. Omission means zero for existing V1/V2 projects; no migration or
+architecture rotation is needed. All floors share it.

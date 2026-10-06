@@ -1,3 +1,5 @@
+import { EditorConnectionMap } from "./EditorConnectionMap";
+import { NorthOrientationOverlay } from "../editor-preview/construct/NorthOrientationOverlay";
 import { editorCanvasEvents } from "./editor-canvas-events";
 import { ConstructionPlatformLayer } from "../editor-preview/construct/ConstructionPlatformLayer";
 import { useReferenceCanvas } from "../editor-reference-plan/ReferenceCanvasLayers";
@@ -20,7 +22,6 @@ import {
   deriveFloorLevels,
   StylizedScene,
   ArchitectureScene,
-  HomePlanMapping,
 } from "@cabane/engine";
 
 import { Suspense, useMemo } from "react";
@@ -54,6 +55,7 @@ type Props = {
   onWalkStartPlaced: () => void;
 } & Pick<
   ReturnType<typeof useHomeEditorController>,
+  | "northOrientation"
   | "placementFloor"
   | "selectSceneItem"
   | "stairDialog"
@@ -117,6 +119,7 @@ type Props = {
 >;
 export function HomeEditorScene({
   reference,
+  northOrientation,
   onStairIssuesChange,
   onNameFocusHandled,
   cameraFocusRoomId,
@@ -217,46 +220,10 @@ export function HomeEditorScene({
       }
       inert={editingLocked || publishOpen || previewOpen}
     >
-      {mode === "connect" && (
-        <HomePlanMapping
-          floor={connectFloor}
-          selectedRoomId={connect.roomId}
-          roomDeviceSummaries={connect.roomDeviceSummaries}
-          inspectorOpen={false}
-          showFitControl={false}
-          onActivateRoom={connect.selectRoom}
-          connectedRoomIds={
-            new Set(
-              connectFloor.rooms
-                .filter((room) =>
-                  connect.displayRuntime.areas.some(
-                    (area) => area.area_id === connect.profile.roomAreaIds[room.id],
-                  ),
-                )
-                .map((room) => room.id),
-            )
-          }
-          relationshipLabels={Object.fromEntries(
-            connectFloor.rooms.map((room) => [
-              room.id,
-              connect.displayRuntime.areas.find(
-                (area) => area.area_id === connect.profile.roomAreaIds[room.id],
-              )?.name ??
-                (connect.profile.roomAreaIds[room.id] ? "Saved area unavailable" : "Not connected"),
-            ]),
-          )}
-          roomIcons={Object.fromEntries(
-            connectFloor.rooms.map((room) => [
-              room.id,
-              connect.displayRuntime.areas.find(
-                (area) => area.area_id === connect.profile.roomAreaIds[room.id],
-              )?.icon ?? null,
-            ]),
-          )}
-        />
-      )}
+      {mode === "connect" && <EditorConnectionMap connectFloor={connectFloor} connect={connect} />}
       {referenceCanvas.background}
       <div
+        inert={northOrientation.active}
         hidden={mode === "connect"}
         style={{ width: "100%", height: "100%", position: "relative" }}
       >
@@ -317,11 +284,12 @@ export function HomeEditorScene({
               )}
               {mode === "construct" && !referenceCanvas.visible && <ConstructionGrid />}
               <PreviewCamera
+                northOrientation={northOrientation.active}
                 planWheelNavigation={mode === "construct" || mode === "furnish"}
                 view={mode === "construct" ? "top" : cameraView}
                 resetKey={cameraResetKey}
                 floor={constructEditor.previewFloor}
-                controlsEnabled={!dragging && !placingWalkStart}
+                controlsEnabled={!dragging && !placingWalkStart && !northOrientation.active}
                 focusPoint={cameraFocusPoint}
                 focusRoomId={cameraFocusRoomId}
                 onTargetChange={handleCameraTargetChange}
@@ -736,6 +704,14 @@ export function HomeEditorScene({
           </Suspense>
         </Canvas>
       </div>
+      {northOrientation.active && (
+        <NorthOrientationOverlay
+          angle={northOrientation.angle}
+          onRotate={northOrientation.rotate}
+          onCancel={northOrientation.cancel}
+          onConfirm={northOrientation.confirm}
+        />
+      )}
       {referenceCanvas.controls}
       {referenceCanvas.assetError && mode === "construct" && (
         <p className="reference-asset-error" role="alert">

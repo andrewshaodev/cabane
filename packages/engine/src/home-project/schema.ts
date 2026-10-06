@@ -1,4 +1,4 @@
-import { keys, record, array, string } from "./schema-json-values";
+import { keys, record, array, string, finite, point, polygon } from "./schema-json-values";
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
@@ -29,35 +29,6 @@ const DEVICE_DOMAINS = new Set<DeviceDomain>([
   "binary_sensor",
 ]);
 const FLOOR_PRESETS = new Set<string>(FLOOR_PATTERN_PRESET_IDS);
-
-const finite = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  if (typeof value === "number" && Number.isFinite(value)) return;
-  addProjectIssue(issues, "project.number", path, "Expected a finite number.");
-};
-
-const point = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = array(value, path, issues);
-  if (!candidate) return;
-  if (candidate.length !== 2) {
-    addProjectIssue(
-      issues,
-      "project.plan-point",
-      path,
-      "A plan point requires exactly two numbers.",
-    );
-    return;
-  }
-  candidate.forEach((entry, index) => finite(entry, `${path}[${index}]`, issues));
-};
-
-const polygon = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = array(value, path, issues);
-  if (!candidate) return;
-  if (candidate.length < 3) {
-    addProjectIssue(issues, "project.polygon", path, "A polygon requires at least three points.");
-  }
-  candidate.forEach((entry, index) => point(entry, `${path}[${index}]`, issues));
-};
 
 const floorFinish = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   const candidate = record(value, path, issues);
@@ -762,7 +733,25 @@ export const validateHomeProjectSchemaShape = (
   string(project.seedRevision, "seedRevision", issues);
   const home = record(project.home, "home", issues);
   if (home) {
-    keys(home, ["id", "name", "locale", "palette", "roof", "walkStart"], "home", issues);
+    keys(
+      home,
+      ["id", "name", "locale", "palette", "roof", "walkStart", "northAngleDegrees"],
+      "home",
+      issues,
+    );
+    if (home.northAngleDegrees !== undefined) {
+      finite(home.northAngleDegrees, "home.northAngleDegrees", issues);
+      if (
+        typeof home.northAngleDegrees === "number" &&
+        (home.northAngleDegrees < 0 || home.northAngleDegrees >= 360)
+      )
+        addProjectIssue(
+          issues,
+          "project.north-angle",
+          "home.northAngleDegrees",
+          "North angle must be at least 0 and less than 360 degrees.",
+        );
+    }
     if (home.walkStart !== undefined) {
       const start = record(home.walkStart, "home.walkStart", issues);
       if (start) {

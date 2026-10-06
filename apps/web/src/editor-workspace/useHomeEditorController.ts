@@ -1,3 +1,4 @@
+import { useNorthOrientation } from "./useNorthOrientation";
 import { isEmptyPublishedHome, useFloorNavigation } from "@cabane/engine";
 import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorReferences";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
@@ -210,17 +211,21 @@ export function useHomeEditorController({
     floorZoneDrawingActive ||
     pendingRoomPaintId !== null;
   const editingLocked = workspaceBusy || closing || connectionBusy;
+  const constructionSessionBlocked =
+    editingLocked || constructionUnsettled || publishOpen || previewOpen;
   const reference = useReferencePlan(
     workspace,
     activeFloorId,
     mode === "construct",
-    editingLocked ||
-      constructionUnsettled ||
-      Boolean(constructEditorDrawStart) ||
-      publishOpen ||
-      previewOpen,
+    constructionSessionBlocked || Boolean(constructEditorDrawStart),
   );
-  const unsettled = constructionUnsettled || reference.adjusting;
+  const northOrientation = useNorthOrientation({
+    scope: `${mode}:${activeFloorId}`,
+    enabled: mode === "construct" && !constructionSessionBlocked && !reference.adjusting,
+    snapshot,
+    commit,
+  });
+  const unsettled = constructionUnsettled || reference.adjusting || northOrientation.active;
   const closeAddedItemDetails = useCallback(() => setDetailsItemId(null), [setDetailsItemId]);
   const {
     catalogBrowsing,
@@ -306,7 +311,7 @@ export function useHomeEditorController({
     dragging,
     duplicateArrangeItem,
     duplicateConstructionOpening,
-    editingLocked: editingLocked || reference.adjusting,
+    editingLocked: editingLocked || reference.adjusting || northOrientation.active,
     floorZoneDrawing,
     furnishingEditor,
     marqueeSelecting,
@@ -410,6 +415,7 @@ export function useHomeEditorController({
     await applyDraft(bindingIssues);
   }, [publishErrors.length, editingLocked, unsettled, applyDraft, bindingIssues]);
   return {
+    northOrientation,
     ...constructionTools,
     editorProject,
     setActionBarItems,

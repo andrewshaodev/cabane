@@ -29,7 +29,7 @@ export function WalkSky({
     const sun = sunRef.current;
     const hemisphere = hemisphereRef.current;
     if (!sun || !hemisphere) return;
-    if (sun.position.lengthSq() > 1e-8) uniforms.sunDirection.value.copy(sun.position).normalize();
+    uniforms.sunDirection.value.copy(sun.position).sub(sun.target.position).normalize();
     uniforms.sunColor.value.copy(sun.color);
     uniforms.daylight.value = Math.min(1, Math.max(0, (hemisphere.intensity - 0.78) / 0.27));
   }, -0.5);

@@ -209,3 +209,13 @@ exterior walls retain their height when another floor exists, while full-height
 facades continue across the real inter-floor slab.
 
 Stair `railings` optionally selects `both`, `left`, `right`, or `none`, relative to ascent; omission preserves both sides. Spiral stairs retain their central support and apply side selection to the outer rail and exit bridge. Upper-opening guards are clipped to actual floor/platform support outside the opening, including partial and disconnected floor regions; exterior flights never acquire floating opening guards. All stair shapes share this guard geometry.
+
+Solar lighting reads Home Assistant's available, fresh `sun.sun` azimuth and elevation.
+Geographic azimuth is clockwise from north; home-wide `northAngleDegrees` rotates
+north clockwise from plan up (−Z), defaulting to zero. Sun shadows and the Walk sky
+share this direction. No GPS or local astronomical calculation is used. Auto falls
+back to browser-local time (night from 18:00 to 06:00) if the state or angles are
+unusable; preferences identify the active Auto source. Forced day/night remain
+exterior-lighting previews, independent of lamp state. Solar shadow framing encloses
+the building's floor scene bounds, walls, storey elevations and roof allowance,
+including translated and scaled plans. Luminaires remain unshadowed.

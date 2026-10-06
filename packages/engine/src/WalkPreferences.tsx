@@ -62,12 +62,14 @@ export function WalkPreferences({
   inverted,
   onChange,
   lightingMode,
+  lightingSource,
   onLightingModeChange,
   onClose,
 }: {
   inverted: boolean;
   onChange: (value: boolean) => void;
   lightingMode: SolarLightingMode;
+  lightingSource: string;
   onLightingModeChange: (mode: SolarLightingMode) => void;
   onClose: () => void;
 }) {
@@ -173,7 +175,8 @@ export function WalkPreferences({
             ))}
           </fieldset>
           <p className="walk-preferences__hint">
-            Auto follows the sun when available, then your local time.
+            Exterior lighting. Auto follows Home Assistant, then your local time.
+            {lightingMode === "live" && <> Source: {lightingSource}.</>}
           </p>
         </div>
       </section>

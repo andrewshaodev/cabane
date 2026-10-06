@@ -23,7 +23,8 @@
     "owners": [
       "packages/engine/src/home-project/schema.ts",
       "packages/engine/src/home-project/workspace-repository.ts",
-      "apps/web/src/workspaces/workspace-sync-coordinator.ts"
+      "apps/web/src/workspaces/workspace-sync-coordinator.ts",
+      "packages/engine/src/home-project/schema-json-values.ts"
     ],
     "interfaces": [
       {
@@ -43,7 +44,8 @@
       "apps/web/src/editor-workspace/useEditorProjectHistory.ts",
       "apps/web/src/editor-workspace/useEditorSession.ts",
       "apps/web/src/editor-workspace/useEditorSceneProjection.ts",
-      "apps/web/src/editor-preview/useEditorWorkspace.ts"
+      "apps/web/src/editor-preview/useEditorWorkspace.ts",
+      "apps/web/src/editor-workspace/useNorthOrientation.ts"
     ],
     "interfaces": [
       {
@@ -60,7 +62,10 @@
     "owners": [
       "apps/web/src/editor-preview/construct/useConstructEditor.ts",
       "packages/engine/src/home-editor/construct",
-      "apps/web/src/editor-floors"
+      "apps/web/src/editor-floors",
+      "apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx",
+      "apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx",
+      "apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx"
     ],
     "interfaces": [
       {
@@ -68,7 +73,7 @@
         "symbols": ["FloorSpec"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. North orientation previews around the plan; only confirmation commits the shared building angle.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {
@@ -94,7 +99,8 @@
     "owners": [
       "apps/web/src/editor-connect/useConnectEditor.ts",
       "packages/engine/src/home-assistant-mapping",
-      "packages/engine/src/runtime-binding-profile.ts"
+      "packages/engine/src/runtime-binding-profile.ts",
+      "apps/web/src/editor-workspace/EditorConnectionMap.tsx"
     ],
     "interfaces": [
       {
@@ -157,15 +163,23 @@
       "packages/engine/src/rendering.tsx",
       "packages/engine/src/HomeAssistantSceneLighting.tsx",
       "packages/engine/src/building",
-      "packages/engine/src/stairs"
+      "packages/engine/src/stairs",
+      "packages/engine/src/SceneLighting.tsx",
+      "packages/engine/src/lighting.ts",
+      "packages/engine/src/solar-shadow-frame.ts"
     ],
     "interfaces": [
       {
         "module": "packages/engine/src/index.ts",
-        "symbols": ["ArchitectureScene", "StylizedScene"]
+        "symbols": [
+          "ArchitectureScene",
+          "StylizedScene",
+          "deriveSolarLighting",
+          "resolveSolarLighting"
+        ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights.",
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.",
     "checks": [
       "test:unit",
       "verify:policy",

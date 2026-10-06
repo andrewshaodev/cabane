@@ -38,6 +38,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const controller = useHomeEditorController(props);
   const {
     editorProject,
+    northOrientation,
     setActionBarItems,
     focusRoom,
     floorNavigation,
@@ -238,7 +239,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
   const floorControlsDisabled =
-    editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+    editingLocked ||
+    northOrientation.active ||
+    (unsettled && !reference.adjusting) ||
+    Boolean(floorDialog);
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
   const addFloorBelow = () => {
     const next = addBottomFloor(snapshot, `floor-${createBrowserUuid()}`);
@@ -256,7 +260,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   };
   return (
     <main
-      className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
+      className={`direction-preview${northOrientation.active ? " is-orienting-north" : ""}${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
       data-editor-mode={shortcutsMode ? "shortcuts" : mode}
     >
       {!shortcutsMode && (
@@ -270,7 +274,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         />
       )}
 
-      <div className="editor-floor-controls" inert={publishOpen || previewOpen}>
+      <div
+        className="editor-floor-controls"
+        inert={publishOpen || previewOpen || northOrientation.active}
+      >
         <FloorPicker
           floors={snapshot.project.floors}
           selectedId={activeFloorId}
@@ -352,6 +359,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       <HomeEditorHeader
         referenceAdjusting={reference.adjusting}
         {...controller}
+        editingLocked={editingLocked || northOrientation.active}
         shortcutsMode={shortcutsMode}
         onModeTabChange={onModeTabChange}
       />

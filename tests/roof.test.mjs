@@ -22,6 +22,27 @@ await withModules(async (load) => {
   const { makeThreeFloorProject, emptyExtensions } = await load(
     "/tests/fixtures/multiple-floors.ts",
   );
+  test("north angle persists through import, runtime composition and history with old-project defaults", () => {
+    const project = makeThreeFloorProject();
+    assert.equal(project.home.northAngleDegrees, undefined);
+    const next = { ...project, home: { ...project.home, northAngleDegrees: 90 } };
+    const parsed = parseHomeProject(serializeHomeProject(next));
+    assert.equal(parsed.project.home.northAngleDegrees, 90);
+    assert.equal(composeHomeManifest(parsed.project, emptyExtensions).home.northAngleDegrees, 90);
+    const history = createWorkspaceHistory({ project, bindings: {} });
+    const changed = commitWorkspaceSnapshot(history, { project: next, bindings: {} });
+    assert.equal(undoWorkspaceHistory(changed).present.project.home.northAngleDegrees, undefined);
+    assert.equal(
+      redoWorkspaceHistory(undoWorkspaceHistory(changed)).present.project.home.northAngleDegrees,
+      90,
+    );
+    for (const value of [-1, 360, "90", null]) {
+      const invalid = parseHomeProject(
+        serializeHomeProject({ ...next, home: { ...next.home, northAngleDegrees: value } }),
+      );
+      assert.ok(invalid.issues.some((issue) => issue.path === "home.northAngleDegrees"));
+    }
+  });
   const rectangle = (x, z, width, depth) => [
     [x, z],
     [x + width, z],

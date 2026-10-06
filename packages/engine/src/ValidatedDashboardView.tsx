@@ -79,6 +79,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     lightingMode,
     chooseLightingMode,
     sunState,
+    solarLighting,
     nightLighting,
     floor,
     poseRef,
@@ -248,17 +249,9 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     <ScenePreview enabled={!walkMode && !selectedRoomId} />
                     <SolarLighting
                       walkMode={walkMode}
-                      mode={
-                        lightingMode === "live" &&
-                        (sunState?.available === false ||
-                          sunState?.stale ||
-                          (sunState?.state !== "above_horizon" &&
-                            sunState?.state !== "below_horizon"))
-                          ? nightLighting
-                            ? "night"
-                            : "day"
-                          : lightingMode
-                      }
+                      mode={solarLighting.mode}
+                      northAngleDegrees={manifest.home.northAngleDegrees ?? 0}
+                      floors={manifest.floors}
                       shadowMapSize={quality.shadowMapSize}
                       sunState={sunState}
                     />
@@ -512,6 +505,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           {preferencesOpen && (
             <WalkPreferences
               inverted={invertYAxis}
+              lightingSource={solarLighting.source}
               lightingMode={lightingMode}
               onLightingModeChange={chooseLightingMode}
               onChange={(value) => {

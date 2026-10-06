@@ -104,6 +104,8 @@ export interface HomeProject {
   home: {
     walkStart?: { floorId: string; at: PlanPoint };
     roof?: RoofSettings;
+    /** Clockwise from plan up (−Z); omitted means 0°. */
+    northAngleDegrees?: number;
     id: string;
     name: string;
     locale: "en";
