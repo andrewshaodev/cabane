@@ -190,7 +190,10 @@ for (const file of files) {
       relativePath === "packages/engine/src/ValidatedDashboardView.tsx"
     ) {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
-      inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
+      inspectedSource = inspectedSource.replace(
+        "https://github.com/cabane-app/cabane-home-assistant/issues",
+        "feedback-navigation",
+      );
     }
     if (
       rule.reason === "external visual asset reference" &&

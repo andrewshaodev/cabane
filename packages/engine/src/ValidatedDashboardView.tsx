@@ -470,7 +470,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     )}
                     {preferencesMenuItem}
                     <a
-                      href="https://tally.so/r/QK6dMA"
+                      href="https://github.com/cabane-app/cabane-home-assistant/issues"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="Send feedback (opens in a new tab)"
