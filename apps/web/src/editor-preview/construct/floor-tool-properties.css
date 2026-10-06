@@ -6,3 +6,12 @@
 .floor-tool-targets > button:hover { border-color: #78937b; }
 .floor-tool-targets > button:focus-visible { outline: 2px solid #496d50; outline-offset: 2px; }
 .platform-edge-fields { display: grid; gap: 12px; }
+
+.platform-corner-row { display: grid; grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 36px; align-items: end; gap: 8px; }
+.platform-corner-number { align-self: center; color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); font-variant-numeric: tabular-nums; }
+.construction-inspector .platform-corner-row label { min-width: 0; grid-template-columns: minmax(0, 1fr); gap: 4px; font-size: var(--editor-text-caption, .75rem); }
+.direction-preview button.platform-corner-remove { padding-inline: 8px; }
+.platform-corner-remove svg { width: 16px; height: 16px; }
+@media (pointer: coarse) {
+  .platform-corner-row { grid-template-columns: 18px minmax(0, 1fr) minmax(0, 1fr) 44px; }
+}

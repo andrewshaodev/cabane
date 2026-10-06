@@ -1,3 +1,4 @@
+import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import {
   mapPoolOutline,
@@ -64,8 +65,10 @@ export function PlatformProperties({ platform, editor }: {
       <legend>Floor finish</legend>
       <FloorFinishPalette value={platform.finish} onChange={finish => editor.updatePlatform(platform.id, { finish })} />
     </fieldset>
-    {platform.polygon.map((point, index) => <fieldset key={index}>
-      <legend>Corner {index + 1} · plan units</legend>
+    <fieldset className="platform-corners">
+      <legend>Corners · plan units</legend>
+      {platform.polygon.map((point, index) => <div key={index} className="platform-corner-row">
+      <span className="platform-corner-number" aria-label={`Corner ${index + 1}`}>{index + 1}</span>
       {([0, 1] as const).map(axis => <label key={axis}>
         {axis === 0 ? "X" : "Y"}
         <CommittedNumberInput label={`Platform corner ${index + 1} ${axis === 0 ? "X" : "Y"}`}
@@ -75,11 +78,13 @@ export function PlatformProperties({ platform, editor }: {
               : candidate),
           })} />
       </label>)}
-      {platform.polygon.length > 3 && <EditorButton variant="text" type="button"
+      {platform.polygon.length > 3 && <EditorButton variant="text" type="button" className="platform-corner-remove"
+        aria-label={`Remove corner ${index + 1}`} title={`Remove corner ${index + 1}`}
         onClick={() => updateOutline(platform.polygon.filter((_, cornerIndex) => cornerIndex !== index))}>
-        Remove corner {index + 1}
+        <EditorIcon name="delete" />
       </EditorButton>}
-    </fieldset>)}
+    </div>)}
+    </fieldset>
     <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>Delete platform</EditorButton>
   </div>;
 }
