@@ -53,6 +53,7 @@ await withModules(async load => {
 
   test("unnamed rooms can autosave and reload but cannot publish", async () => {
     const project = roomProject();
+    project.floors[0].rooms[0].name = "";
     assert.equal(parseHomeProjectSchema(project).valid, true);
     const validation = engine.validateHomeProject(project, ownerProjectRegistries);
     assert.equal(validation.valid, false);
@@ -83,7 +84,8 @@ await withModules(async load => {
     state = reconcileBuildTutorial(state, addOpening(project, "door"), "construct");
     assert.equal(state.step, "window");
     state = reconcileBuildTutorial(state, addOpening(project, "window"), "construct");
-    assert.equal(state.step, "name");
+    assert.equal(project.floors[0].rooms[0].name, "Unnamed room 1");
+    assert.equal(state.step, "arrange", "the default name satisfies the naming objective");
     project.floors[0].rooms[0].name = "  Studio  ";
     state = reconcileBuildTutorial(state, project, "furnish");
     assert.equal(state.step, "arrange");

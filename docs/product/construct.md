@@ -175,6 +175,9 @@ nonblocking warnings; malformed dimensions and invalid floor connections still b
 Apply. Spiral diameter must exceed its 0.2 m core diameter and turn remains in (0, 360].
 Numeric fields show local correction messages while retaining the last renderable geometry.
 
+Selected outline handles take pointer priority over overlapping plan objects. Outside
+the handle hit targets, ordinary scene picking keeps its distance order.
+
 The canvas shows measurements, never paragraphs of stair errors. Placement warnings
 are collapsed behind a count in the sidebar; selected-stair warnings appear in its
 properties rather than duplicated in the general diagnostics. Warning-only stairs
@@ -198,7 +201,9 @@ instead of the expected empty-floor/walls-required diagnostics. Only presentatio
 is deferred: Apply continues to reject an empty layout and retains the complete
 validation list.
 
-Room names are editable directly on the plan, including an explicit “Name room”
+Newly enclosed rooms receive the first available “Unnamed room N” name, avoiding
+existing room names across all floors (ignoring case and surrounding whitespace).
+Existing room names are preserved. Room names are editable directly on the plan, including an explicit “Name room”
 control for unnamed rooms. Enter or blur commits a nonempty trimmed name; Escape
 cancels. Naming uses ordinary undo/redo and autosave and is disabled during active
 gestures. Unnamed rooms are valid saved drafts; they still require names to Apply.

@@ -36,7 +36,11 @@ export const useConstructEditor = (
   acceptedFloor = initialFloor,
   defaultExteriorWallColor = "#c97370",
   initialTool: import("@cabane/engine").FloorEditorTool = "select",
+  otherFloorRoomNames: readonly string[] = [],
 ): ConstructEditorController => {
+  const reservedNamesKey = JSON.stringify(otherFloorRoomNames);
+  const deriveTopology = useCallback((draft: FloorEditorHistory["present"]) =>
+    topologyForDraft(draft, JSON.parse(reservedNamesKey) as string[]), [reservedNamesKey]);
   const [history, dispatch] = useReducer(
     constructEditorHistoryReducer,
     initialFloor,
@@ -45,10 +49,10 @@ export const useConstructEditor = (
   // Only the accepted seed can establish existing diagnostics. A recovered draft
   // must not silently accept its own errors as the new baseline.
   const [baselineTopologyIssueKeys] = useState(() => new Set(
-    topologyForDraft(createFloorEditorDraft(acceptedFloor)).issues.map(topologyIssueKey),
+    deriveTopology(createFloorEditorDraft(acceptedFloor)).issues.map(topologyIssueKey),
   ));
   const [initialTopology] = useState(() => {
-    const initialTopology = topologyForDraft(createFloorEditorDraft(initialFloor));
+    const initialTopology = deriveTopology(createFloorEditorDraft(initialFloor));
     return {
       previewFloor: initialFloor,
       topologyIssues: initialTopology.issues.filter((issue) => !baselineTopologyIssueKeys.has(topologyIssueKey(issue))),
@@ -88,7 +92,7 @@ export const useConstructEditor = (
     if (restored && (restored.draft === null || restored.draft === draft)) {
       restored.draft = draft;
       lastValidFloor.current = restored.floor;
-      const topology = topologyForDraft(draft);
+      const topology = deriveTopology(draft);
       return remember({
         previewFloor: restored.floor,
         topologyIssues: topology.issues.filter((issue) => !baselineTopologyIssueKeys.has(topologyIssueKey(issue))),
@@ -103,7 +107,7 @@ export const useConstructEditor = (
       lastValidFloor.current = orientedFloor;
       return remember({ ...previous.value, previewFloor: orientedFloor });
     }
-    const topology = topologyForDraft(draft);
+    const topology = deriveTopology(draft);
     if (topology.floor) lastValidFloor.current = topology.floor;
     return remember({
       previewFloor: topology.floor ?? (topology.faces.length === 0 ? incompleteFloorPreview(draft, lastValidFloor.current) : lastValidFloor.current),
@@ -129,6 +133,7 @@ export const useConstructEditor = (
     draft.rooms,
     draft.walls,
     baselineTopologyIssueKeys,
+    deriveTopology,
   ]);
   const setTool = useCallback((tool: FloorEditorTool) => {
     poolDrawing.cancel();

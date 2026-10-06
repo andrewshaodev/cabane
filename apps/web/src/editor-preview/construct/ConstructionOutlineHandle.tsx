@@ -25,7 +25,7 @@ export function ConstructionOutlineHandle({ at, name, handlers }: { at: [number,
   useLayoutEffect(syncTarget);
   useFrame(syncTarget);
   return <group ref={ref} position={at}>
-    <mesh name={name} raycast={raycastHandle} {...handlers}>
+    <mesh name={name} userData={{ constructionEditHandle: true }} raycast={raycastHandle} {...handlers}>
       <sphereGeometry args={[22, 12, 8]} /><PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} />
     </mesh>
     <mesh raycast={noPlanRaycast} renderOrder={32}>

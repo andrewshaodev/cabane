@@ -59,6 +59,12 @@
       "id": "open-plan-living-device-slots",
       "subjectId": "open-plan-living",
       "summary": "Kitchen lighting, four pendants, wall television, speaker, floor lamp, and indoor AC use local typed slots only. The television and speaker map to separate simulated media players in the demo; household mapping remains manual. The single climate device may use unique-compatible mapping after the room is explicitly connected in the browser."
+    },
+    {
+      "basis": "user",
+      "id": "villa-wraparound-balcony",
+      "subjectId": "first-floor:platform-27",
+      "summary": "The default home includes the first-floor wraparound balcony from the supplied project export, with travertine finish and 1 m railings. Balcony access uses double white French doors at the existing south-facing window and the west-facing primary bedroom and bedroom four windows. Opening IDs and widths are retained; the 2.3 m door height is inferred."
     }
   ],
   "home": {
@@ -150,7 +156,7 @@
     }
   },
   "schemaVersion": 2,
-  "seedRevision": "south-garden-villa-architectural-garage-v3",
+  "seedRevision": "south-garden-villa-wraparound-balcony-v4",
   "shortcuts": [
     {
       "action": "construct-mode",

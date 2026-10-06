@@ -75,7 +75,19 @@ await withModules(async (load) => {
     assert.equal(result.faces.length, 2);
     assert.equal(result.classifications.divider, "interior");
     assert.ok(result.floor.rooms.some((room) => room.id === "living"));
-    assert.ok(result.issues.some((issue) => issue.code === "topology.room-name"));
+    assert.equal(result.floor.rooms.find((room) => room.id !== "living").name, "Unnamed room 1");
+    assert.ok(!result.issues.some((issue) => issue.code === "topology.room-name"));
+  });
+
+  test("new room names skip existing names across floors and reserve each generated name", () => {
+    const result = deriveFloorTopology({
+      floorId: "floor", floorName: "Ground floor", openings: [],
+      walls: [...rectangleWalls, { id: "divider", from: [2, 0], to: [2, 3] }],
+      rooms: [], reservedRoomNames: [" unnamed ROOM 1 ", "Unnamed room 3"],
+    });
+    assert.deepEqual(result.floor.rooms.map(room => room.name), ["Unnamed room 2", "Unnamed room 4"]);
+    const existing = derive(rectangleWalls, [{ id: "existing", name: "Unnamed room 1", accent: "#c98164", anchor: [1, 1] }]);
+    assert.equal(existing.floor.rooms[0].name, "Unnamed room 1");
   });
 
   test("deleting a wall prunes openings and junction memberships in the draft, with undo", () => {

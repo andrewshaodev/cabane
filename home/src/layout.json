@@ -453,17 +453,17 @@
           "widthPlanUnits": 2.4
         },
         {
+          "finish": "white",
           "id": "garage-motorized-vehicle-door",
           "kind": "door",
-          "operation": "roll-up",
-          "variant": "slatted",
-          "finish": "white",
-          "openingSide": "right",
-          "wallId": "ground-north-wall",
           "offsetFromWallStartPlanUnits": 1.0,
-          "widthPlanUnits": 4.6,
           "openingHeightMeters": 2.4,
-          "sillHeightMeters": 0
+          "openingSide": "right",
+          "operation": "roll-up",
+          "sillHeightMeters": 0,
+          "variant": "slatted",
+          "wallId": "ground-north-wall",
+          "widthPlanUnits": 4.6
         }
       ],
       "pools": [
@@ -991,15 +991,15 @@
           "widthPlanUnits": 2
         },
         {
-          "glazing": "clear",
+          "finish": "white",
           "id": "bedroom-four-west-window",
-          "kind": "window",
+          "kind": "door",
+          "leafCount": 2,
           "offsetFromWallStartPlanUnits": 1.2,
-          "openingHeightMeters": 1.5,
-          "operation": "casement",
-          "panelCount": 2,
-          "sillHeightMeters": 0.75,
-          "variant": "plain",
+          "openingHeightMeters": 2.3,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "french",
           "wallId": "first-west-wall",
           "widthPlanUnits": 2.4
         },
@@ -1017,15 +1017,15 @@
           "widthPlanUnits": 1.8
         },
         {
-          "glazing": "clear",
+          "finish": "white",
           "id": "primary-west-window",
-          "kind": "window",
+          "kind": "door",
+          "leafCount": 2,
           "offsetFromWallStartPlanUnits": 10.2,
-          "openingHeightMeters": 1.5,
-          "operation": "casement",
-          "panelCount": 2,
-          "sillHeightMeters": 0.75,
-          "variant": "plain",
+          "openingHeightMeters": 2.3,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "french",
           "wallId": "first-west-wall",
           "widthPlanUnits": 3
         },
@@ -1108,21 +1108,76 @@
           "widthPlanUnits": 1
         },
         {
-          "glazing": "clear",
+          "finish": "white",
           "id": "first-floor:window-26",
-          "kind": "window",
-          "muntins": {
-            "columns": 2,
-            "rows": 2
-          },
+          "kind": "door",
+          "leafCount": 2,
           "offsetFromWallStartPlanUnits": 8.9,
-          "openingHeightMeters": 1.2,
-          "operation": "casement",
-          "panelCount": 2,
-          "sillHeightMeters": 0.9,
-          "variant": "muntined",
+          "openingHeightMeters": 2.3,
+          "operation": "hinged",
+          "sillHeightMeters": 0,
+          "variant": "french",
           "wallId": "first-floor:wall-28",
           "widthPlanUnits": 2
+        }
+      ],
+      "outdoorPlatforms": [
+        {
+          "defaultEdge": {
+            "heightMeters": 1,
+            "kind": "railing"
+          },
+          "edges": [
+            {
+              "id": "first-floor:platform-27:edge-1"
+            },
+            {
+              "id": "first-floor:platform-27:edge-2"
+            },
+            {
+              "id": "first-floor:platform-27:edge-3"
+            },
+            {
+              "id": "first-floor:platform-27:edge-4"
+            },
+            {
+              "id": "first-floor:platform-27:edge-5"
+            },
+            {
+              "id": "first-floor:platform-27:edge-6"
+            }
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "id": "first-floor:platform-27",
+          "polygon": [
+            [
+              14,
+              16
+            ],
+            [
+              14,
+              17.9
+            ],
+            [
+              0,
+              18
+            ],
+            [
+              0,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              2,
+              16
+            ]
+          ]
         }
       ],
       "rooms": [
