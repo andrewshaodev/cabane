@@ -1,3 +1,4 @@
+import { ApplicationErrorBoundary, ApplicationRouteError } from "../ApplicationErrorBoundary";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createMemoryRouter, RouterProvider } from "react-router";
@@ -14,12 +15,12 @@ if (!customElements.get("cabane-panel")) {
     mount({ container, portalContainer, root: shadow, session }) {
       const root = createRoot(container);
       // '/' applies normal last-workspace restoration and validates its existence.
-      const router = createMemoryRouter([{ path: "*", element: <WorkspaceApplication /> }], { initialEntries: ["/"] });
+      const router = createMemoryRouter([{ path: "*", errorElement: <ApplicationRouteError />, element: <WorkspaceApplication /> }], { initialEntries: ["/"] });
       const environment = { root: shadow, container, portalContainer, eventTarget: shadow, assetBaseUrl };
       const render = (current: HomeAssistantHostSession) => root.render(
-        <StrictMode><CabaneDomProvider environment={environment}>
+        <StrictMode><ApplicationErrorBoundary><CabaneDomProvider environment={environment}>
           <HomeAssistantHostSessionProvider session={current}><RouterProvider router={router} /></HomeAssistantHostSessionProvider>
-        </CabaneDomProvider></StrictMode>,
+        </CabaneDomProvider></ApplicationErrorBoundary></StrictMode>,
       );
       render(session);
       return { update: render, dispose() { root.unmount(); router.dispose(); } };

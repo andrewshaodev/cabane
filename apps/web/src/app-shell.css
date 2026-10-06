@@ -48,3 +48,14 @@
 @media (prefers-reduced-motion: reduce) {
   .direction-project-loading > span:first-child { animation: none; }
 }
+
+.application-error {
+  box-sizing: border-box;
+  padding: 24px;
+  overflow: auto;
+  text-align: center;
+}
+.application-error h1 { margin: 0; font: 500 28px Georgia, serif; }
+.application-error p { font-size: 16px; }
+.application-error > button { min-height: 44px; font-size: 14px; }
+.application-error > button:hover { background: #ddd2c2; }

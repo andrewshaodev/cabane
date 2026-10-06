@@ -4,6 +4,10 @@ The browser initializes a local workspace library, adopting existing saved home
 data once. On a fresh installation the furnished demo is an ordinary workspace.
 Deleting it, including deleting the last workspace, does not recreate it.
 Loading failures are actionable; corrupt homes offer recovery independently.
+Unexpected render and route failures in both the standalone app and embedded
+panel show a generic reload page instead of error messages or stack traces.
+The original errors remain logged in the browser console; reloading can lose
+unsaved changes. A top-level boundary also covers failures outside the router.
 
 Each workspace owns its draft, published home, mappings, and HA connection.
 Home renders published data; the editor reads the draft. Routes are:
