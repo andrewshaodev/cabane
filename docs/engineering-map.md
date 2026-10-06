@@ -99,9 +99,9 @@ Contract: [Personal GLB models and asset transfer](../docs/product/personal-mode
 
 Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-privacy.md).
 
-- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts), [`packages/engine/src/home-assistant-storage-session.ts`](../packages/engine/src/home-assistant-storage-session.ts), [`packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx`](../packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx).
+- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts), [`packages/engine/src/home-assistant-storage-session.ts`](../packages/engine/src/home-assistant-storage-session.ts), [`packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx`](../packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx), [`packages/engine/src/onboarding/demo`](../packages/engine/src/onboarding/demo).
 - Interface: `HomeAssistantRuntimeProvider`, `useHomeAssistantRuntime` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session.
+- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable.
 - Checks: `verify:runtime`.
 
 ### Dashboard, navigation and cameras

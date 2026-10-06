@@ -1,16 +1,31 @@
 [
   {
+    "entitySlots": [
+      {
+        "autoMap": "manual",
+        "compatibleDomains": ["light"],
+        "deviceRole": "primary",
+        "id": "villa-garden-dining-pergola-light-entity",
+        "presentation": {
+          "dashboardRole": "secondary",
+          "label": "Pergola string lights"
+        },
+        "required": true
+      }
+    ],
     "floorId": "ground-floor",
     "id": "villa-garden-dining-pergola",
-    "kind": "furnishing",
-    "modelId": "wrought-iron-pergola",
+    "kind": "device",
+    "lightState": "night-only",
+    "modelId": "pergola-string-lights",
     "placement": {
       "at": [10, 19.8],
       "elevationMeters": -0.043,
       "kind": "absolute",
       "rotationYRadians": 0
     },
-    "size": [5, 2.7, 3]
+    "size": [5, 2.7, 3],
+    "variant": "string-lights"
   },
   {
     "floorId": "ground-floor",

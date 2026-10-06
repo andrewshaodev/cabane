@@ -166,7 +166,8 @@
       "packages/engine/src/home-assistant-controls.ts",
       "packages/engine/src/command-scheduler.ts",
       "packages/engine/src/home-assistant-storage-session.ts",
-      "packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx"
+      "packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx",
+      "packages/engine/src/onboarding/demo"
     ],
     "interfaces": [
       {
@@ -174,7 +175,7 @@
         "symbols": ["HomeAssistantRuntimeProvider", "useHomeAssistantRuntime"]
       }
     ],
-    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session.",
+    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable.",
     "checks": ["verify:runtime"]
   },
   {

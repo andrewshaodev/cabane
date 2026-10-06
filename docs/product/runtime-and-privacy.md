@@ -68,7 +68,10 @@ the existing `DemoHomeAssistantSession` entry point and runtime value interface.
 It derives synthetic IDs from local slots, handles supported commands only in
 memory, including media-player play/pause and volume for the simulated demo
 speaker and television, lock/unlock, and alarm home/away/disarm. Classless status
-sensors start idle, and outdoor devices receive bindings without an area. It resets when remounted or given a different manifest. It never writes
+sensors start idle, and simulated lights start on when the demo opens in night
+lighting, following the saved preview mode or local time. Visitors can still turn
+them off independently.
+Outdoor devices receive bindings without an area. It resets when remounted or given a different manifest. It never writes
 projects/authentication or opens a network connection. Import checks restrict
 access to its internals and its dependencies. Dashboard controls and real HA
 networking contain no new simulation logic.

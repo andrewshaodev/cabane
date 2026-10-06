@@ -19,7 +19,10 @@ export interface DemoSessionDefinition {
 const encode = (id: string) =>
   Array.from(id, (character) => character.codePointAt(0)!.toString(16)).join("_");
 
-export function deriveDemoSessionDefinition(manifest: HomeManifest): DemoSessionDefinition {
+export function deriveDemoSessionDefinition(
+  manifest: HomeManifest,
+  night = false,
+): DemoSessionDefinition {
   const rooms = manifest.floors.flatMap((floor) => floor.rooms);
   const doorIds = new Set(
     manifest.floors.flatMap((floor) =>
@@ -99,7 +102,7 @@ export function deriveDemoSessionDefinition(manifest: HomeManifest): DemoSession
       entityStates: Object.fromEntries(
         slots.map(({ entityId, domain, descriptor }) => [
           entityId,
-          createDemoDeviceState(entityId, domain, descriptor.spec),
+          createDemoDeviceState(entityId, domain, descriptor.spec, night),
         ]),
       ),
     },
