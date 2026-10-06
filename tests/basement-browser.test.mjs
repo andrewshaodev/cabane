@@ -1,3 +1,4 @@
+import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { waitForSceneCamera } from "../scripts/browser-scene-settle.mjs";
@@ -6,7 +7,7 @@ import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-e
 test(
   "basements use existing floor controls on desktop and mobile, with persistence and undo",
   { timeout: 120_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -139,13 +140,13 @@ test(
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );
 
 test(
   "imported basements render in the normal dashboard and Walk",
   { timeout: 60_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -202,5 +203,5 @@ test(
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );

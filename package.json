@@ -17,7 +17,7 @@
     "dev": "npm run dev --workspace=@cabane/web",
     "build": "npm run build --workspace=@cabane/web",
     "typecheck": "node node_modules/typescript-native/bin/tsc --noEmit -p tsconfig.json",
-    "test": "CABANE_TEST_SHARED_MODULES=1 node --test --test-concurrency=4 --test-reporter=./scripts/agent-test-reporter.mjs tests/shards/*.test.mjs",
+    "test": "node scripts/run-tests.mjs",
     "verify:scene-contours": "node scripts/verify-scene-contours.mjs",
     "measure:scene": "node scripts/measure-scene-performance.mjs",
     "verify:furnishing-surfaces": "node scripts/verify-furnishing-surfaces.mjs",
