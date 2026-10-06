@@ -1,9 +1,17 @@
 # Verification, delivery, and known limits
 
+The persisted contract is tracked by `docs/ha-contract.json` and checked by
+`verify:ha-contract` inside `verify:fast`. Contract changes require a revision and
+compatibility notes. The GitHub `Home Assistant contract release` workflow checks
+PRs and publishes a verified matching integration patch release after a push to
+main, using its scoped deploy key. See [contract releases](../ha-contract-releases.md)
+for the source coverage, Codex reminder hook, credential and retry behavior.
+
 The root package defines the executable checks. Run `npm run verify:fast` for
 Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
 package-boundary/source-policy checks. `npm run verify` also runs all tests,
-furnishing-surface checks, and the production build. No hosted CI is configured.
+furnishing-surface checks, and the production build. The contract-release workflow
+runs full producer verification when it needs to publish a matching panel.
 
 For the smallest sufficient iteration check, run `npm run verify:help`. Its
 selection guidance comes from the maintained test inventory, rather than a second
