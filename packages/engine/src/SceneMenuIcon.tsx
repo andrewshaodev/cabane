@@ -6,7 +6,7 @@ type SceneMenuIconName = "workspaces" | "setup" | "shortcuts" | "editor" | "conn
 
 export function SceneMenuIcon({ name }: { name: SceneMenuIconName }) {
   const paths: Record<SceneMenuIconName, ReactNode> = {
-    preferences: <><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1m0-12.8-2.1 2.1M7.7 16.3l-2.1 2.1" /><circle cx="12" cy="12" r="4" /></>,
+    preferences: <><path d="M10.3 3.2h3.4l.5 2.1a7.2 7.2 0 0 1 1.5.9l2-.7 1.7 2.9-1.5 1.5a7.7 7.7 0 0 1 0 1.8l1.5 1.5-1.7 2.9-2-.7a7.2 7.2 0 0 1-1.5.9l-.5 2.1h-3.4l-.5-2.1a7.2 7.2 0 0 1-1.5-.9l-2 .7-1.7-2.9 1.5-1.5a7.7 7.7 0 0 1 0-1.8L4.6 8.4l1.7-2.9 2 .7a7.2 7.2 0 0 1 1.5-.9z" transform="translate(0 1)" /><circle cx="12" cy="12" r="2.5" /></>,
     shortcuts: <><rect x="2" y="7" width="20" height="10" rx="3" /><path d="M7 10v4M12 10v4M17 10v4" /></>,
     editor: <><path d="m4 16-1 5 5-1L21 7l-4-4Z" /><path d="m14 6 4 4M4 16l4 4" /></>,
     feedback: <><path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" /><path d="M7 9h10M7 13h6" /></>,

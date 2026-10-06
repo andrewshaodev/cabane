@@ -81,6 +81,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     sceneActionError, setSceneActionError
   } = useDashboardController(props);
   const actionBarItems = resolvePublishedActionBarItems(manifest.actionBar);
+  const preferencesMenuItem = walkMode && <button type="button" onClick={event => {
+    event.currentTarget.closest("details")?.removeAttribute("open");
+    if (document.pointerLockElement) document.exitPointerLock();
+    setPreferencesOpen(true);
+  }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>;
   const actionBarTargets = Object.fromEntries(actionBarItems.flatMap(item => {
     if (item.target.kind === "built-in") return [];
     const destination = resolveActionBarDestination(manifest, item.target);
@@ -240,11 +245,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                 {setupAction?.attention && <i className="scene-menu__attention-dot" aria-hidden="true" />}
               </summary>
               <div>
-                {walkMode && <button type="button" onClick={event => {
-                  event.currentTarget.closest("details")?.removeAttribute("open");
-                  if (document.pointerLockElement) document.exitPointerLock();
-                  setPreferencesOpen(true);
-                }}><SceneMenuIcon name="preferences" /><span>Preferences</span></button>}
+                {walkthrough && preferencesMenuItem}
                 {!walkthrough && <>
                 <p>{sessionPresentation?.menuDescription ?? runtime.error ?? (runtime.configured
                   ? "Your home stays local."
@@ -298,6 +299,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     <span>Retry connection</span>
                   </button>
                 )}
+                {preferencesMenuItem}
                 <a href="https://tally.so/r/QK6dMA" target="_blank" rel="noopener noreferrer"
                   aria-label="Send feedback (opens in a new tab)"
                   onClick={event => event.currentTarget.closest("details")?.removeAttribute("open")}>
