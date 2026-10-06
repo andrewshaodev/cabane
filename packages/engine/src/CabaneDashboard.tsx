@@ -35,6 +35,7 @@ export function CabaneDashboard({
   onCustomizeActionBar,
   onExportBrowserData,
   onWorkspaces,
+  onHomeAssistantSettings,
   onOpenConnect,
   walkthrough,
 }: CabaneDashboardProps) {
@@ -70,6 +71,7 @@ export function CabaneDashboard({
       onCustomizeActionBar={onCustomizeActionBar}
       onExportBrowserData={onExportBrowserData}
       onWorkspaces={onWorkspaces}
+      onHomeAssistantSettings={onHomeAssistantSettings}
       onOpenConnect={onOpenConnect}
       walkthrough={walkthrough}
     />
@@ -90,6 +92,7 @@ export function CabaneDashboard({
       onCustomizeActionBar={onCustomizeActionBar}
       onExportBrowserData={onExportBrowserData}
       onWorkspaces={onWorkspaces}
+      onHomeAssistantSettings={onHomeAssistantSettings}
       onOpenConnect={onOpenConnect}
       walkthrough={walkthrough}
     />

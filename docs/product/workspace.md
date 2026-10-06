@@ -23,10 +23,11 @@ after an explicit first upload; local IndexedDB saves remain immediate and
 offline edits remain local until HA reconnects. Remote version checks stop
 concurrent browsers from silently overwriting each other. All signed-in HA
 users share the instance's Cabane library. Browser deletion leaves the HA copy;
-remote deletion is a separate confirmed action. Installation is documented in
-[`ha_custom_components/README.md`](../../ha_custom_components/README.md).
-Storage controls are in Connect's Home Assistant connection settings; remote-only
-workspace restore is available from the workspace library.
+remote deletion is a separate confirmed action. Installation and the integration source are maintained in
+[the dedicated repository](https://github.com/cabane-app/cabane-home-assistant).
+Storage controls live on the workspace-specific Home Assistant page. The library
+shows saved/sync indicators on ordinary workspace cards; remote import is available
+through Import → From Home Assistant. There is no separate HA library section.
 IndexedDB uses the `cabane-projects-v2` database with project records, workspace
 metadata, and persistent initialization state. Metadata contains the name, HA
 origin, creation time, and applied status. Related writes share a transaction. The

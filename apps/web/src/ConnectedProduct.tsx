@@ -1,3 +1,4 @@
+import { HomeAssistantPage } from "./workspaces/HomeAssistantPage";
 import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -66,6 +67,7 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
       void Promise.resolve().then(() => onHomeAssistantUrlChange(url, record)).then((next) => { if (next) setRecord(next); })
         .catch((error) => setConnectionError(error instanceof Error ? error.message : "Connection settings could not be saved."));
     }}
+    onHomeAssistantSettings={() => void navigate(`${workspaceHomePath(record.homeId)}/home-assistant`)}
     onWorkspaces={() => void navigate("/workspaces")}
     renderActionBarDeviceIcon={modelId => <ShortcutDeviceIcon modelId={modelId} models={ownerDeviceModels} />}
     bindingManager={manager} constructionApplied={constructionApplied} onEditHome={(mode = "construct") => openEditor({ mode })}
@@ -76,6 +78,10 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
     {connectionError && <div className="workspace-connection-error" role="alert">{connectionError}<button type="button" onClick={() => setConnectionError(null)}>Dismiss</button></div>}
     <Routes>
     <Route path="/workspaces/:workspaceId" element={home} />
+    <Route path="/workspaces/:workspaceId/home-assistant" element={<HomeAssistantPage record={record} lifecycle={lifecycle}
+      origin={homeAssistantUrl} onChangeOrigin={async url => {
+        const next = await onHomeAssistantUrlChange(url, record); if (next) setRecord(next);
+      }} onRecordChange={setRecord} isDemo={onboarding?.isDemo ?? false} onCreatePersonal={() => onboarding?.start("connect")} />} />
     <Route path="/workspaces/:workspaceId/mobile-editor" element={<MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />} />
     {editorRoutes.map(({ path, handle }) => <Route key={path} path={path} element={
       (handle.mode === "construct" || handle.mode === "furnish") && !handle.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()

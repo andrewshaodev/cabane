@@ -50,19 +50,11 @@
 .workspace-card:has(.workspace-preview) summary { background: #fcf8ef; }
 .workspace-server { display: flex; align-items: center; gap: 6px; }
 .workspace-server svg { flex-shrink: 0; }
-.workspace-ha-storage { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--editor-line, #d5cdbc); font: 14px/1.4 "Roboto", sans-serif; color: #35433a; }
-.workspace-ha-storage > button { display: block; width: 100%; min-height: 44px; padding: 10px 0; border: 0; background: transparent; color: inherit; text-align: left; font: inherit; font-weight: 600; cursor: pointer; }
-.workspace-ha-storage-panel { box-sizing: border-box; padding: 8px 0 18px; }
-.workspace-ha-storage-panel h2 { font: 500 15px/1.3 "Roboto", sans-serif; margin: 0 0 12px; }
-.workspace-ha-library h2 { font: 400 24px/1.2 Georgia, serif; margin: 0 0 12px; }
-.workspace-ha-storage-panel p, .workspace-ha-library p { line-height: 1.5; }
-.workspace-ha-storage-actions { display: grid; gap: 8px; }
-.workspace-ha-storage-actions button, .workspace-ha-storage-panel > button { min-height: 44px; padding: 9px 12px; border: 1px solid #d5cdbc; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; text-align: left; }
-.workspace-ha-storage-actions label { display: flex; align-items: center; gap: 8px; min-height: 44px; }
-.workspace-ha-storage-actions button:disabled { opacity: .5; }
-.workspace-ha-library { box-sizing: border-box; margin-top: 36px; padding: 28px 0 48px; color: #35433a; font-family: "Roboto", sans-serif; border-top: 1px solid #ddd4c3; }
-.workspace-ha-library label { display: grid; gap: 8px; max-width: 420px; }
-.workspace-ha-library input { min-height: 44px; box-sizing: border-box; padding: 8px 12px; border: 1px solid #d5cdbc; border-radius: 8px; font: inherit; }
-.workspace-ha-library button { min-height: 44px; padding: 8px 14px; border: 1px solid #d5cdbc; border-radius: 8px; background: #fcf8ef; color: inherit; cursor: pointer; }
-.workspace-ha-library-content { display: grid; gap: 10px; margin-top: 16px; }
-.workspace-ha-library-content > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px; border: 1px solid #d5cdbc; border-radius: 8px; }
+ .workspace-sync { display: inline-flex; align-items: center; align-self: flex-start; gap: 6px; color: #506447; font-size: 12px; margin: 2px 0 10px; }
+.workspace-sync .editor-icon { width: 15px; height: 15px; }
+.workspace-import-sources { display: flex; gap: 8px; margin: 0 0 20px; }
+.workspace-import-sources button { flex: 1; }
+.workspace-import-sources [aria-pressed="true"] { background: #e2e6d8; border-color: #71845d; }
+.workspace-ha-library { padding-bottom: 16px; }
+.workspace-ha-library-content { display: grid; gap: 12px; margin-top: 16px; }
+.workspace-ha-library-content > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 12px; border-top: 1px solid #d5cdbc; }

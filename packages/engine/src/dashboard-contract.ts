@@ -46,6 +46,7 @@ export interface CabaneDashboardProps {
   onEditHome?: (mode?: EditorMode) => void;
   onCustomizeActionBar?: () => void;
   onExportBrowserData?: () => void;
+  onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onOpenConnect?: (view: "rooms" | "devices", roomId?: string | null) => void;
   /** Open an isolated draft walkthrough and return to its editor when walking ends. */

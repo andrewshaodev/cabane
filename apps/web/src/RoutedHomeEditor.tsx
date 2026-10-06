@@ -20,6 +20,7 @@ export function RoutedHomeEditor({ onClose, ...props }: ComponentProps<typeof Ho
   };
   return <Suspense fallback={<main className="direction-project-loading">Opening the editor…</main>}>
     <HomeEditor {...props} initialRequest={request} onWorkspaces={() => void navigate("/workspaces")}
+      onHomeAssistantSettings={() => void navigate(`${workspaceHomePath(props.initialRecord.homeId)}/home-assistant`)}
       onRecoveryWorkspaces={() => { allowExit.current = true; void navigate("/workspaces"); }}
       navigation={{ request, go, exitRequested: blocker.state === "blocked" }}
       onClose={(record, reason) => {

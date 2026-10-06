@@ -29,6 +29,7 @@ export function workspaceIdForPath(pathname: string): string | null {
 
 export function editorPath(request: EditorOpenRequest, workspaceId: string): string {
   const base = workspaceHomePath(workspaceId);
+  if (request.panel === "home-assistant") return `${base}/home-assistant`;
   if (request.panel === "action-bar") return `${base}/shortcuts`;
   if (request.mode === "construct") return `${base}/construct`;
   if (request.mode === "furnish") return `${base}/arrange`;

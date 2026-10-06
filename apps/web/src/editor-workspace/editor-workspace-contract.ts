@@ -2,6 +2,7 @@ import type { HomeProjectRecord } from "@cabane/engine";
 import type { EditorOpenRequest } from "../editor-connect/useConnectEditor";
 
 export interface ConnectWorkspaceProps {
+  onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onRecoveryWorkspaces?: () => void;
   initialRequest?: EditorOpenRequest;

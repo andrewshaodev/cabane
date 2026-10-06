@@ -4,6 +4,7 @@ import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
   const { editorPath, editorRequestForPath, workspaceHomePath, workspaceIdForPath, shouldFlushEditorExit } = await load("/apps/web/src/editor-routes.ts");
+  const { parseEditorReturn } = await load("/apps/web/src/editor-connect/connect-navigation.ts");
   test("workspace editor routes preserve identity across every editor mode", () => {
     for (const request of [{ mode: "construct" }, { mode: "furnish" }, { mode: "connect" }, { mode: "connect", view: "rooms" }, { mode: "connect", view: "devices" }]) {
       const path = editorPath(request, "home-a");
@@ -18,9 +19,15 @@ await withModules(async (load) => {
   test("leaving the editor saves when switching workspace even between matching modes", () => {
     assert.equal(shouldFlushEditorExit("home-a", "/workspaces/home-a/arrange"), false);
     assert.equal(shouldFlushEditorExit("home-a", "/workspaces/home-a/connect/devices"), false);
-    for (const path of ["/workspaces/home-b/construct", "/workspaces/home-b/connect", "/workspaces/home-a", "/workspaces", "/"]) {
+    for (const path of ["/workspaces/home-a/home-assistant", "/workspaces/home-b/construct", "/workspaces/home-b/connect", "/workspaces/home-a", "/workspaces", "/"]) {
       assert.equal(shouldFlushEditorExit("home-a", path), true);
     }
+  });
+  test("Home Assistant OAuth returns to its settings page outside the editor", () => {
+    const request = parseEditorReturn(JSON.stringify({ workspaceId: "home-a", mode: "connect", panel: "home-assistant" }));
+    assert.equal(editorPath(request, request.workspaceId), "/workspaces/home-a/home-assistant");
+    assert.equal(editorRequestForPath("/workspaces/home-a/home-assistant"), null);
+    assert.equal(workspaceIdForPath("/workspaces/home-a/home-assistant"), "home-a");
   });
   test("action bar customization is a refreshable editor panel route", () => {
     const path = editorPath({ mode: "construct", panel: "action-bar" }, "home-a");

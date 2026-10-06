@@ -250,6 +250,10 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                   <SceneMenuIcon name="editor" />
                   <span>Edit the home</span>
                 </button>}
+                {props.onHomeAssistantSettings && <button type="button" onClick={event => {
+                  event.currentTarget.closest("details")?.removeAttribute("open");
+                  props.onHomeAssistantSettings?.();
+                }}><SceneMenuIcon name="connect" /><span>Home Assistant</span></button>}
                 {props.onCustomizeActionBar && <CustomizeActionBarMenuItem onClick={props.onCustomizeActionBar} />}
                 {setupAction && (
                   <button

@@ -1,10 +1,11 @@
 # Connect and binding profiles
 
-Home Assistant connection forms include optional, collapsed camera/CORS help.
-The copyable Cabane origin comes from the current browser URL, including its
-scheme and port, never a hardcoded deployment domain. Guidance covers HTTP
-server settings, restart confirmation, and the legacy YAML configuration;
-CORS is not presented as a prerequisite for sign-in or device controls.
+Home Assistant connection settings and full workspace file backups live on
+`/workspaces/:workspaceId/home-assistant`. The Connect sidebar only handles
+room/device mapping, with a Connection settings button linking to that page.
+The settings page supports changing the URL, disconnecting, full backup export,
+and importing a same-home backup into the draft for review. Connection-only
+profile imports/exports are no longer exposed in the UI.
 
 Connect separates room-to-HA-area mapping from device/entity-slot mapping. A
 plan view exposes room connection status, area names/icons, and device summaries;

@@ -24,7 +24,7 @@ export interface OnboardingOptions {
 
 export function CabaneAppExperience({ manifest, architectureModels, deviceModels, homeAssistantUrl, onHomeAssistantUrlChange,
   renderActionBarDeviceIcon,
-  onEditHome, onCustomizeActionBar, onWorkspaces, onImportBrowserData, onExportBrowserData = () => undefined, bindingManager, onOpenConnect,
+  onEditHome, onCustomizeActionBar, onHomeAssistantSettings, onWorkspaces, onImportBrowserData, onExportBrowserData = () => undefined, bindingManager, onOpenConnect,
   constructionApplied = false, onboarding,
 }: {
   manifest: HomeManifest; architectureModels: ArchitectureModelRegistry; deviceModels: DeviceModelRegistry;
@@ -32,6 +32,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   homeAssistantUrl: string | null; onHomeAssistantUrlChange: (url: string | null) => void;
   onEditHome?: (mode?: "construct" | "furnish" | "connect") => void;
   onCustomizeActionBar?: () => void;
+  onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onImportBrowserData?: (json: string) => BrowserDataImportResult; onExportBrowserData?: () => void;
   bindingManager?: RuntimeBindingProfileManager;
@@ -77,7 +78,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
     sessionPresentation={isDemo ? { mode: "demo", label: "Demo", detail: "Simulated devices", menuDescription: "Explore freely. These controls only change simulated devices in this browser." } : undefined}
     setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => setSurface("intro") }
       : personalSetup && !setupState.record.activated ? { label: "Continue setup", detail: "Connect a device in this home", attention: false, onOpen: connect } : undefined}
-    setupOpen={surface !== null} onWorkspaces={onWorkspaces}
+    setupOpen={surface !== null} onWorkspaces={onWorkspaces} onHomeAssistantSettings={onHomeAssistantSettings}
     focusRoomId={personalSetup && targetEntityId && !setupState.record.activated ? target?.roomId : undefined}
     onEditHome={onEditHome}
     onCustomizeActionBar={onCustomizeActionBar}

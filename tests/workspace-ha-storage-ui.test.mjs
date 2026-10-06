@@ -26,10 +26,15 @@ test("personal workspace offers HA storage while demo does not", async () => {
     assert.equal(await page.getByRole("button", { name: "Workspace storage" }).count(), 0);
     await page.getByRole("button", { name: "Connect", exact: true }).click();
     await page.getByRole("button", { name: "Connection settings" }).click();
-    await page.getByRole("button", { name: "Workspace storage" }).click();
-    await page.getByText("Set a Home Assistant address in Connect before saving this workspace.").waitFor();
+    await page.waitForURL("**/home-assistant");
+    await page.getByRole("heading", { name: "Home Assistant", exact: true }).waitFor();
+    await page.getByLabel("Home Assistant URL").waitFor();
+    await page.getByText("Connect Home Assistant first").waitFor();
+    assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
-    await page.getByRole("heading", { name: "Restore from Home Assistant" }).waitFor();
+    assert.equal(await page.getByRole("heading", { name: "Restore from Home Assistant" }).count(), 0);
+    await page.getByRole("button", { name: "Import", exact: true }).click();
+    await page.getByRole("button", { name: "From Home Assistant" }).click();
     await page.getByLabel("Home Assistant address").fill("https://ha.example");
     await page.reload();
     assert.equal(await page.getByLabel("Home Assistant address").inputValue(), "https://ha.example");

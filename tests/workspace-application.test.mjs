@@ -25,7 +25,7 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     assert.notEqual(personalUrl.split("/")[4], demoUrl.split("/")[4]);
     await page.getByRole("navigation", { name: "Editor mode" }).waitFor();
     await page.getByRole("button", { name: "Connect", exact: true }).click();
-    await page.getByRole("heading", { name: "Sign in to Home Assistant", exact: true }).waitFor();
+    await page.getByRole("heading", { name: "Connect your home", exact: true }).waitFor();
     await page.goto(`${demoUrl}/connect/devices`);
     await page.waitForURL(`${demoUrl}/connect/devices`);
     assert.equal(page.url(), `${demoUrl}/connect/devices`);

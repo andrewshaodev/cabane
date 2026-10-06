@@ -81,7 +81,7 @@ export function WorkspaceApplication() {
   };
   const open = async (id: string) => { await navigate(workspaceHomePath(id)); };
   return <>{migrationError && <p role="alert" className="workspace-error">{migrationError} Your saved source data has been retained.</p>}
-    <WorkspaceLibrary entries={entries} onOpen={open} onRecover={open}
+    <WorkspaceLibrary onSettings={async id => { await navigate(`${workspaceHomePath(id)}/home-assistant`); }} entries={entries} onOpen={open} onRecover={open}
       onCreate={async name => { const entry = await repository.createBlank(name); enrollBuildTutorial(entry.metadata.id); await refresh(); await open(entry.metadata.id); }}
       onRename={async (id, name) => { await repository.rename(id, record(id).revision, name); await refresh(); }}
       onDuplicate={async (id, name) => { await repository.duplicate(id, record(id).revision, name); await refresh(); }}
@@ -105,6 +105,6 @@ export function WorkspaceApplication() {
         downloadConnectData(privateBackup ? exportWorkspaceBackup(entry.metadata, saved) : serializeCanonicalJson(saved.draft), `${id}-${privateBackup ? "backup" : "project"}.json`);
       }}
       onExportRaw={async id => { const raw = await repository.readRaw(id); if (raw === null) throw new Error("No saved record exists."); downloadConnectData(raw, `${id}-recovery.json`); }}
-      footer={<WorkspaceHaLibrary repository={repository} onRestored={refresh} initialOrigin={entries.find(entry => entry.metadata.homeAssistantUrl)?.metadata.homeAssistantUrl ?? null} />} />
+      remoteImport={<WorkspaceHaLibrary repository={repository} onRestored={async id => { await refresh(); await open(id); }} initialOrigin={entries.find(entry => entry.metadata.homeAssistantUrl)?.metadata.homeAssistantUrl ?? null} />} />
   </>;
 }

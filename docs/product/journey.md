@@ -13,6 +13,7 @@ Home renders published data; the editor reads the draft. Routes are:
 | `/` | Opens the last successfully opened workspace on this browser; falls back to the sole workspace or library |
 | `/workspaces` | Library: New, Import, Open, Rename, Duplicate, Export, Delete |
 | `/workspaces/:workspaceId` | Published Home; unapplied homes open Construct |
+| `/workspaces/:workspaceId/home-assistant` | HA connection, cross-device storage, full workspace backups |
 | `/workspaces/:workspaceId/construct` | 2D architecture editing |
 | `/workspaces/:workspaceId/arrange` | Furniture and device placement |
 | `/workspaces/:workspaceId/mobile-editor?mode=construct` or `?mode=arrange` | Phone editor guidance before Construct or Arrange |
@@ -104,3 +105,7 @@ On desktop, active build tutorial guidance floats at the editor canvas’s top r
 below the toolbar; on compact screens it stays in the properties panel. The
 2D/3D and Explore controls sit at the canvas’s bottom left, above the properties
 panel on portrait mobile layouts.
+
+Home Assistant settings are linked from each workspace menu, below Edit the home
+in the dashboard menu, and from Connection settings in the Connect footer. Leaving
+the editor for this page uses the same guarded draft flush as other exits.
