@@ -22,6 +22,7 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
   const [address, setAddress] = useState(origin ?? "");
   const [editing, setEditing] = useState(!origin);
   const [busy, setBusy] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const connecting = ["authenticating", "connecting", "reconnecting"].includes(runtime.status);
@@ -44,6 +45,13 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
     window.sessionStorage.setItem(CONNECT_RETURN_KEY, JSON.stringify({ workspaceId: record.homeId, mode: "connect", panel: "home-assistant", destination: workspaceDestination(window.location.search) }));
     setEditing(false);
   });
+  const connect = async (next: string) => {
+    if (busy || connecting) return;
+    setBusy(true); setConnectionError(null);
+    try { await signIn(next); }
+    catch (cause) { setConnectionError(cause instanceof Error ? cause.message : "Could not start sign-in. Please try again."); }
+    finally { setBusy(false); }
+  };
   const latest = async () => (await storage?.repository.read(record.homeId))?.record ?? record;
   const exportBackup = async () => {
     const current = await latest();
@@ -71,18 +79,19 @@ export function HomeAssistantPage({ record, lifecycle, origin, onChangeOrigin, o
       {isDemo ? <section className="ha-section"><h2>Make this home yours</h2><p>The demo uses simulated devices. Create your own workspace to connect Home Assistant and save across devices.</p>
         <button className="ha-primary" onClick={onCreatePersonal}>Create my workspace<EditorIcon name="chevron" /></button></section> : <>
       <section className="ha-section" aria-labelledby="ha-connection-title">
-        <div className="ha-section__heading"><h2 id="ha-connection-title">Connection</h2><span className={`ha-status${connected ? " is-connected" : ""}`}><i />{connected ? "Connected" : connecting ? "Connecting…" : origin ? "Disconnected" : "Not connected"}</span></div>
-        {editing ? <form onSubmit={event => { event.preventDefault(); const result = validateHomeAssistantUrlInput(address); if (result.error) setError(result.error); else if (result.normalized) void run(() => signIn(result.normalized!)); }}>
+        <div className="ha-section__heading"><h2 id="ha-connection-title">Connection</h2><span role="status" className={`ha-status${connected ? " is-connected" : ""}`}><i />{connected ? "Connected" : connecting ? "Connecting…" : origin ? "Disconnected" : "Not connected"}</span></div>
+        {editing ? <form noValidate onSubmit={event => { event.preventDefault(); if (busy || connecting) return; const result = validateHomeAssistantUrlInput(address); setConnectionError(result.error); if (result.normalized) void connect(result.normalized); }}>
           <label htmlFor="ha-address">Home Assistant URL</label>
-          <div className="ha-address-form"><input id="ha-address" type="url" required placeholder="https://home.example.com" autoCapitalize="none" spellCheck={false} value={address} disabled={busy || connecting} onChange={event => setAddress(event.target.value)} />
-            <button className="ha-primary" disabled={busy || connecting}>{connecting ? "Connecting…" : "Connect"}<EditorIcon name="external" /></button>
-            {origin && <button type="button" disabled={busy} onClick={() => { setEditing(false); setAddress(origin); }}>Cancel</button>}
-          </div><p className="ha-help">Sign in securely on Home Assistant. You’ll return to this page.</p>
+          <div className="ha-address-form"><input id="ha-address" type="url" inputMode="url" required aria-invalid={Boolean(connectionError)} aria-describedby={`ha-address-help${connectionError ? " ha-connection-error" : ""}`} placeholder="https://home.example.com" autoCapitalize="none" spellCheck={false} value={address} disabled={busy || connecting} onChange={event => { setAddress(event.target.value); setConnectionError(null); }} />
+            <button className="ha-primary" disabled={busy || connecting}>{busy ? "Preparing sign-in…" : connecting ? "Connecting…" : "Connect"}<EditorIcon name="external" /></button>
+            {origin && <button type="button" disabled={busy} onClick={() => { setEditing(false); setAddress(origin); setConnectionError(null); }}>Cancel</button>}
+          </div><p id="ha-address-help" className="ha-help">Enter the full HTTPS address, including https:// and a port if needed, with no path. Use an address with a certificate trusted by this browser. Home Assistant handles sign-in, then returns you here.</p>
         </form> : <div className="ha-connection-row"><p className="ha-address">{origin}</p><div className="ha-actions">
-          <button disabled={busy || connecting} onClick={() => setEditing(true)}>Change URL</button>
+          <button disabled={busy || connecting} onClick={() => { setEditing(true); setConnectionError(null); }}>Change URL</button>
           {connected ? <button disabled={busy} onClick={() => void run(async () => { await runtime.disconnect(); await onChangeOrigin(null); setAddress(""); setEditing(true); })}>Disconnect</button>
-            : <button className="ha-primary" disabled={busy || connecting} onClick={() => void run(() => signIn(origin!))}>Reconnect</button>}
+            : <button className="ha-primary" disabled={busy || connecting} onClick={() => void connect(origin!)}>{busy ? "Preparing sign-in…" : connecting ? "Connecting…" : "Reconnect"}</button>}
         </div></div>}
+        {connectionError && <p id="ha-connection-error" role="alert" className="ha-error">{connectionError}</p>}
         {runtime.error && <p role="alert" className="ha-error">{runtime.error}</p>}
       </section>
       <WorkspaceHaStorageInConnect />
