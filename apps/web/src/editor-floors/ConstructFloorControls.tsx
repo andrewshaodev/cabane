@@ -4,12 +4,13 @@ import { EditorIcon } from "../editor-chrome/EditorIcon";
 import "./construct-floor-controls.css";
 
 /** Persistent floor context, separate from the active construction tool. */
-export function ConstructFloorControls({ floors, selectedId, disabled, onSelect, onAdd, onSettings }: {
+export function ConstructFloorControls({ floors, selectedId, disabled, onSelect, onAdd, onAddBelow, onSettings }: {
   floors: readonly { id: string; name: string }[];
   selectedId: string;
   disabled: boolean;
   onSelect: (id: string) => void;
   onAdd: () => void;
+  onAddBelow?: () => void;
   onSettings: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -64,6 +65,9 @@ export function ConstructFloorControls({ floors, selectedId, disabled, onSelect,
       <button type="button" role="menuitem" tabIndex={-1} onClick={() => { close(true); onAdd(); }}>
         <EditorIcon name="plus" /><span>Add floor above</span>
       </button>
+      {onAddBelow && <button type="button" role="menuitem" tabIndex={-1} onClick={() => { close(true); onAddBelow(); }}>
+        <EditorIcon name="plus" /><span>Add floor below</span>
+      </button>}
     </div>}
   </div>;
 }

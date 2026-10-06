@@ -117,6 +117,7 @@ export const useConstructEditor = (
     draft.exteriorWallThicknessMeters,
     draft.floorId,
     draft.floorToFloorHeightMeters,
+    draft.belowGround,
     draft.floorName,
     draft.interiorWallThicknessMeters,
     draft.junctions,

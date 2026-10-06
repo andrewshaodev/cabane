@@ -112,7 +112,14 @@ test("reference plans trace through the normal Construct UI and remain browser-l
     await panel.getByRole("slider").press("End");
     await panel.getByRole("button", { name: "Retry", exact: true }).waitFor();
     assert.equal(await page.locator(".reference-image").count(), 1);
-    await page.evaluate(() => { IDBObjectStore.prototype.put = window.referenceOriginalPut; });
+    // Keep every queued autosave failing until the actual Retry click. Restoring
+    // put before Playwright finishes its actionability checks lets an older save
+    // succeed and remove the button before the click is dispatched.
+    await panel.getByRole("button", { name: "Retry", exact: true }).evaluate(button => {
+      button.addEventListener("click", () => {
+        IDBObjectStore.prototype.put = window.referenceOriginalPut;
+      }, { capture: true, once: true });
+    });
     await panel.getByRole("button", { name: "Retry", exact: true }).click();
     await panel.getByRole("button", { name: "Retry", exact: true }).waitFor({ state: "detached" });
     await panel.getByRole("slider").press("Home");
@@ -147,15 +154,15 @@ test("reference plans trace through the normal Construct UI and remain browser-l
     // Floor references remain independent, survive deletion/undo, and cancel unfinished adjustments on switching.
     await page.locator(".floor-picker").hover();
     await page.getByRole("button", { name: "Manage floors", exact: true }).click();
-    await page.getByRole("button", { name: "Add floor", exact: true }).click();
+    await page.getByRole("button", { name: "Add floor above", exact: true }).click();
     await page.locator(".reference-image").waitFor({ state: "detached" });
     const upperName = await page.locator('.floor-picker__level[aria-pressed="true"]').getAttribute("aria-label");
     await page.locator('.reference-plan input[type="file"]').setInputFiles(file("upper-floor.svg"));
     await page.getByRole("button", { name: "Done", exact: true }).click();
     await page.locator(".floor-picker").hover();
     await page.getByRole("button", { name: "Manage floors", exact: true }).click();
-    await page.getByRole("button", { name: "Remove top floor", exact: true }).click();
-    await page.getByRole("dialog").getByRole("button", { name: "Remove top floor", exact: true }).click();
+    await page.getByRole("button", { name: "Remove floor", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Remove floor", exact: true }).click();
     await page.getByRole("button", { name: /^Undo/ }).click();
     await page.locator(".floor-picker").hover();
     await page.getByRole("button", { name: upperName, exact: true }).click();

@@ -82,8 +82,14 @@ const validateHeader: ValidationRule<RawObject> = (input) => {
       issues.push(issue("building.coordinates", "coordinates", "A building requires a valid shared plan transform."));
     }
     if (!Array.isArray(input.stairs)) issues.push(issue("building.stairs", "stairs", "Stairs must be an array."));
+    let groundSeen = false;
     if (Array.isArray(input.floors)) input.floors.forEach((floor, index) => {
       if (!isObject(floor)) return;
+      if (floor.belowGround !== undefined && typeof floor.belowGround !== "boolean")
+        issues.push(issue("floor.basement", `floors[${index}].belowGround`, "Basement classification must be a boolean."));
+      if (floor.belowGround === true && groundSeen)
+        issues.push(issue("floor.order", `floors[${index}].belowGround`, "Basements must precede the ground floor."));
+      if (floor.belowGround !== true) groundSeen = true;
       if (!isFiniteNumber(floor.floorToFloorHeightMeters) || floor.floorToFloorHeightMeters <= 0)
         issues.push(issue("floor.level-height", `floors[${index}].floorToFloorHeightMeters`, "Floor height must be positive finite metres."));
       const transform = floor.coordinates;
@@ -92,6 +98,9 @@ const validateHeader: ValidationRule<RawObject> = (input) => {
         || coordinates.metersPerPlanUnit !== transform.metersPerPlanUnit || coordinates.scaleBasis !== transform.scaleBasis
       )) issues.push(issue("floor.transform", `floors[${index}].coordinates`, "All floors must use the building coordinates."));
     });
+    if (Array.isArray(input.floors) && input.floors.length && !groundSeen &&
+      !input.floors.every(floor => isObject(floor) && isFiniteNumber(floor.elevationMeters)))
+      issues.push(issue("floor.ground-missing", "floors", "A building requires a ground floor."));
   }
   return issues;
 };

@@ -25,6 +25,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
     const polygons = input.outdoorPlatforms.filter(p=>isOutdoorPlatformOutline(p.polygon)).map(p=>p.polygon);
     const bounds = footprintForFaces(polygons, issues);
     if (bounds) return { issues, faces: [], classifications: {}, wallRuns: [], floor: {
+      ...(input.belowGround !== undefined ? { belowGround: input.belowGround } : {}),
       id: input.floorId, name: input.floorName, floorToFloorHeightMeters: input.floorToFloorHeightMeters ?? 2.8,
       coordinates: input.coordinates ?? { origin: [0,0], metersPerPlanUnit: 1, scaleBasis: "inferred" },
       defaultWallHeightMeters: input.defaultWallHeightMeters ?? 2.5, defaultCeilingHeightMeters: input.defaultCeilingHeightMeters ?? 2.5,
@@ -193,6 +194,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
     ceilings.push(ceiling);
   }
   const floor: FloorSpec = {
+    ...(input.belowGround !== undefined ? { belowGround: input.belowGround } : {}),
     floorToFloorHeightMeters: input.floorToFloorHeightMeters ?? Math.max(wallHeight, ceilingHeight),
     id: input.floorId,
     name: input.floorName,

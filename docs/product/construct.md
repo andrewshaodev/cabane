@@ -105,25 +105,30 @@ Implementation: [construction controller](../../apps/web/src/editor-preview/cons
 [Back to product overview](../../PRODUCT_SPEC.md).
 
 The shared floor picker supports Construct, Arrange, Connect, Walk, and Orbit.
-Construct and 2D Arrange show the selected floor. Construct can show a faint guide
-from below. 3D Arrange and Orbit show floors through the selected level; Orbit
+Construct and 2D Arrange show the selected floor. Construct can independently show faint guides from the immediately adjacent floors
+above and below. Both default on when a neighbor exists, including basement levels.
+Enabled guides supply wall alignment snaps; hidden guides do not. The same
+reference list drives toggles, drawing, and snapping. 3D Arrange and Orbit show floors through the selected level; Orbit
 also offers Show roof for an exterior view of the complete building. Connect retains bindings for every floor.
 
-Construct supports adding above, renaming, changing floor height, and removing
-only the top floor with confirmation and undo. Ground cannot be removed.
-Reordering, duplication, and basements remain excluded.
+Construct supports adding above and below, renaming, and changing floor height.
+“Add floor below” creates an empty lowest basement, named Floor −1, Floor −2,
+and so on. Only the top above-ground floor or lowest basement can be removed,
+with confirmation and undo. Ground cannot be removed. Reordering and duplication
+remain excluded.
 
 A compact row above the Construct sidebar introduction keeps the current floor
 visible independently of the active tool. Its styled menu lists floors from top to
-bottom, marks the current floor, and ends with “Add floor above”, which creates and selects an empty top
-floor. The adjacent Floor settings icon opens the existing name and floor-height
+bottom, marks the current floor, and ends with “Add floor above” and “Add floor below”,
+which create and select an empty top floor or lowest basement. The adjacent Floor settings icon opens the existing name and floor-height
 dialog. The row shares navigation, edit locks, and undo history with the retained
 corner floor picker; adding or switching does not copy rooms or furnishings.
 The menu supports arrow keys, Home/End, Escape, and outside-click dismissal.
 Settings use labeled editor fields and neutral Cancel / primary Save actions.
 Settings also expose Delete floor, which opens the existing removal confirmation
 and remains undoable. The action is disabled with an explanation for the ground
-floor and any floor with another floor above it.
+floor, above-ground floors with another floor above, and basements with another
+basement below. Removal includes connecting stairs, items, and private draft mappings.
 
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 

@@ -1,3 +1,5 @@
+import { cutStairGroundOpenings } from "../stairs/ground-apertures";
+import { useStairSurfaceApertures } from "../stairs/surface-apertures";
 import {
   Shape
 } from "three";
@@ -51,13 +53,14 @@ export const DioramaGround = memo(function DioramaGround({
   color: string;
   floor: FloorSpec;
 }) {
+  const apertures = useStairSurfaceApertures("floor");
   const baseShape = useMemo(
-    () => cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size, 0.42), floor),
-    [centerX, centerZ, size, floor],
+    () => cutStairGroundOpenings(cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size, 0.42), floor), floor.coordinates, apertures),
+    [centerX, centerZ, size, floor, apertures],
   );
   const grassShape = useMemo(
-    () => cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size - 0.1, 0.36), floor),
-    [centerX, centerZ, size, floor],
+    () => cutStairGroundOpenings(cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size - 0.1, 0.36), floor), floor.coordinates, apertures),
+    [centerX, centerZ, size, floor, apertures],
   );
   const topY = GROUND_ELEVATION_METERS;
   const grassThickness = 0.1;

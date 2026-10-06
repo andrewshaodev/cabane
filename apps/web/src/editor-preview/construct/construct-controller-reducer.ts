@@ -19,6 +19,7 @@ import { ConstructEditorAction, ConstructEditorState } from "./construct-control
 export const topologyForDraft = (draft: FloorEditorHistory["present"]) => {
   return deriveFloorTopology({
     floorToFloorHeightMeters: draft.floorToFloorHeightMeters,
+    belowGround: draft.belowGround,
     floorId: draft.floorId,
     floorName: draft.floorName,
     coordinates: draft.coordinates,

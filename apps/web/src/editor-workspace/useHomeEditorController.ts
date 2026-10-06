@@ -1,8 +1,9 @@
+import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorReferences";
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
 import { collectProjectIds, createBrowserUuid } from "@cabane/engine";
-import { deriveFloorLevels, useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
+import { reconcileFloorSelection, deriveFloorLevels, useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
 import { useHomeEditorShortcuts } from "./useHomeEditorShortcuts";
@@ -116,8 +117,7 @@ export function useHomeEditorController({
     setStairDialog(current => mode !== "construct" || (current && ![current.lowerFloorId, current.upperFloorId].includes(activeFloorId)) ? null : current);
   }, [activeFloorId, mode]);
   const [floorDialog, setFloorDialog] = useState<"rename" | "remove" | null>(null);
-  const [showFloorBelow, setShowFloorBelow] = useState(true);
-  const lowerFloor = snapshot.project.floors[snapshot.project.floors.findIndex((floor) => floor.id === activeFloorId) - 1];
+  const floorReferences = useAdjacentFloorReferences(snapshot.project.floors, activeFloorId);
   const runtime = useHomeAssistantRuntime();
   const [connectionBusy, setConnectionBusy] = useState(false);
   const [cameraView, setCameraView] = useState<CameraView>(initialRequest?.arrange?.camera?.view ?? "3d");
@@ -218,7 +218,8 @@ export function useHomeEditorController({
   const replaceEditorsFromProject = useCallback((project: HomeProject) => {
     const previous = snapshot.project;
     const restoration = projectEditorRestoration(previous, project, furnishingEditor.selectedId, activeFloorId);
-    const floor = project.floors.find((entry) => entry.id === activeFloorId) ?? project.floors.at(-1)!;
+    const restoredId = reconcileFloorSelection({ activeFloorId, wholeBuilding: false }, previous.floors.map(floor => floor.id), project.floors.map(floor => floor.id)).activeFloorId;
+    const floor = project.floors.find((entry) => entry.id === restoredId)!;
     restoration.floorChanged ||= floor.id !== constructEditor.draft.floorId;
     editorSyncTarget.current = { draft: constructEditor.draft, items: furnishingEditor.items, floorChanged: restoration.floorChanged };
     if (restoration.floorChanged) constructEditor.replaceFloor(floor);
@@ -582,7 +583,7 @@ export function useHomeEditorController({
       setCameraFocusPoint(roomAnchorForPolygon(room.polygon));
       setCameraResetKey(key => key + 1);
     },
-    placementFloor, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, showFloorBelow, setShowFloorBelow, lowerFloor, startStairs, connectFloor,
+    placementFloor, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, floorReferences, startStairs, connectFloor,
     mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
     clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
     handleCameraTargetChange, savedCamera, previewSceneItems, displayedContextualIssues, activeIssueKey,

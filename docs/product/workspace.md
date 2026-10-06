@@ -148,3 +148,8 @@ Outdoor platforms and their edge IDs/configurations belong to each floor's proje
 slice. Schema-shaped intermediate polygon errors can autosave and reload; geometry
 validation blocks Save until repaired. Portable exports, imports, project
 history, duplication and Apply retain platform finishes and per-edge overrides.
+
+Basement floors persist optional `belowGround: true` in the existing V2 floor records.
+They must form a contiguous prefix with at least one non-basement (ground) floor.
+Omitted classification preserves existing projects. Import/export, drafts, and
+undo/redo retain this flag; derived negative preview elevations are not persisted.

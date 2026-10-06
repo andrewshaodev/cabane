@@ -317,4 +317,4 @@ export const openingWorldPlacement = (
 
 export const defineFloorPolygon = <T extends Polygon>(polygon: T) => polygon;
 
-export const floorForManifest = (floors: readonly FloorSpec[]) => floors[0];
+export const floorForManifest = (floors: readonly FloorSpec[]) => floors.find(floor => !floor.belowGround) ?? floors[0];
