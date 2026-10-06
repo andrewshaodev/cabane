@@ -11,9 +11,7 @@ const existingFileLineLimits = {
   "apps/web/src/editor-preview/construct/ConstructionInspector.tsx": 605,
   "apps/web/src/editor-preview/construct/useConstructEditor.ts": 598,
   "apps/web/src/editor-preview/construct/useConstructionPointerController.ts": 701,
-  "apps/web/src/editor-workspace/EditorWorkspace.tsx": 936,
   "apps/web/src/editor-workspace/HomeEditorScene.tsx": 734,
-  "apps/web/src/editor-workspace/useHomeEditorController.ts": 989,
   "packages/catalog/src/device/registry.ts": 1210,
   "packages/catalog/src/furnishing/registry.tsx": 1396,
   "packages/engine/src/HomeAssistantRuntime.tsx": 584,
@@ -23,7 +21,6 @@ const existingFileLineLimits = {
   "packages/engine/src/home-editor/construct/draft-reducer.ts": 639,
   "packages/engine/src/home-project/schema.ts": 1133,
   "packages/engine/src/types.ts": 739,
-  "packages/engine/src/useDashboardController.ts": 801,
 };
 const fileLineLimit = (max) => ["error", { max, skipBlankLines: true, skipComments: true }];
 

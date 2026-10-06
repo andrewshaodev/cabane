@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import test from "node:test";
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
@@ -16,11 +16,9 @@ async function readEditorSource() {
     await Promise.all(
       [
         "apps/web/src/HomeEditor.tsx",
-        "apps/web/src/editor-workspace/EditorWorkspace.tsx",
-        "apps/web/src/editor-workspace/HomeEditorScene.tsx",
-        "apps/web/src/editor-workspace/HomeEditorHeader.tsx",
-        "apps/web/src/editor-workspace/useHomeEditorController.ts",
-        "apps/web/src/editor-workspace/useHomeEditorShortcuts.ts",
+        ...(await readdir("apps/web/src/editor-workspace"))
+          .filter((name) => /\.tsx?$/.test(name))
+          .map((name) => `apps/web/src/editor-workspace/${name}`),
       ].map((path) => readFile(path, "utf8")),
     )
   ).join("\n");
