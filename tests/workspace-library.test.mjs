@@ -23,6 +23,16 @@ await withModules(async load => {
     return { dom, calls, async click(text) { const button = [...dom.window.document.querySelectorAll("button")].find(node => node.textContent.trim() === text); assert.ok(button, text); await act(async () => button.click()); },
       async close() { await act(async () => root.unmount()); dom.window.close(); for (const name of names) { if (previous[name]) Object.defineProperty(globalThis, name, previous[name]); else delete globalThis[name]; } } };
   }
+  test("library setup targets the chosen home and never opens it as an editor", async () => {
+    const intents = [];
+    const h = await mount({ onSettings: async (...args) => intents.push(args), entries: [entry, { ...entry, metadata: { ...entry.metadata, id: "b", name: "City flat" } }] });
+    try {
+      await h.click("Add Cabane to Home Assistant");
+      await h.click("City flat");
+      assert.deepEqual(intents, [["b", "dashboard"]]);
+      assert.deepEqual(h.calls, []);
+    } finally { await h.close(); }
+  });
   test("the card opens its home while management actions remain independent", async () => {
     const h = await mount();
     try {
@@ -67,10 +77,11 @@ await withModules(async load => {
     try {
       assert.match(h.dom.window.document.querySelector(".workspace-availability").textContent, /ConnectionHA not connectedStorageLocal only/);
       assert.equal(h.dom.window.document.querySelector(".workspace-availability button"), null);
-      await h.click("Add to HA dashboard");
+      await h.click("Add Cabane to Home Assistant");
       assert.deepEqual(intents, [["a", "dashboard"]]);
-      await h.click("Open from Home Assistant");
-      assert.match(h.dom.window.document.querySelector("dialog").textContent, /Open from Home Assistant/);
+      assert.equal([...h.dom.window.document.querySelectorAll(".workspace-library-actions button")].some(button => button.textContent.includes("Home Assistant")), false);
+      await h.click("Import workspace");
+      await h.click("From Home Assistant");
       assert.match(h.dom.window.document.querySelector("dialog").textContent, /Remote homes/);
     } finally { await h.close(); }
   });

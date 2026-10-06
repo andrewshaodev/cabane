@@ -64,12 +64,13 @@ test("storage setup explains a missing integration and never offers unavailable 
       const harness = await import("/tests/fixtures/ha-storage-harness.tsx");
       await harness.mountHaStorageHarness({ missing: true });
     });
-    await page.getByText("Install the Cabane integration", { exact: true }).waitFor();
-    assert.equal(await page.getByRole("link", { name: /Setup guide/ }).getAttribute("href"), "https://github.com/cabane-app/cabane-home-assistant#installation");
+    await page.getByRole("heading", { name: "Install Cabane", exact: true }).waitFor();
+    await page.getByText("Install manually or get help", { exact: true }).click();
+    assert.equal(await page.getByRole("link", { name: /Setup guide/ }).getAttribute("href"), "https://github.com/cabane-app/cabane-home-assistant#install");
     assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
     assert.equal(await page.getByRole("switch").count(), 0);
     await page.getByRole("button", { name: "Check again" }).click();
-    await page.getByText("Install the Cabane integration", { exact: true }).waitFor();
+    await page.getByRole("heading", { name: "Install Cabane", exact: true }).waitFor();
   } finally { await browser?.close(); await server.close(); }
 });
 
@@ -146,5 +147,48 @@ test("a first manual backup remains available without enabling sync", async () =
     await page.getByText("Saved to HA · sync off", { exact: true }).waitFor();
     const enabled = await page.evaluate(async () => { const {readSyncCursor} = await import("/apps/web/src/workspaces/workspace-sync-state.ts"); return (await readSyncCursor(indexedDB, "https://ha.test", window.haHarness.id)).enabled; });
     assert.equal(enabled, false);
+  } finally { await browser?.close(); await server.close(); }
+});
+
+
+test("sidebar setup waits for saved sync, opens the actual HA panel, and keeps mobile optional", async () => {
+  const server = await createServer({ root: process.cwd(), configFile: false, appType: "custom", server: { host: "127.0.0.1", port: 0, hmr: false } });
+  let browser;
+  try {
+    server.middlewares.use((req, res, next) => req.url === "/" ? (res.setHeader("Content-Type", "text/html"), res.end("<!doctype html>")) : next());
+    await server.listen(); browser = await chromium.launch({ channel: "chrome", headless: true });
+    const page = await browser.newPage(); await page.goto(server.resolvedUrls.local[0]);
+    await page.evaluate(async () => { const h = await import("/tests/fixtures/ha-storage-harness.tsx"); window.haHarness = await h.mountHaStorageHarness(); });
+    await page.getByRole("button", { name: "Enable sync", exact: true }).waitFor();
+    assert.equal(await page.getByRole("link", { name: "Open in Home Assistant", exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), null);
+    await page.getByRole("button", { name: "Enable sync", exact: true }).click();
+    const open = page.getByRole("link", { name: "Open in Home Assistant", exact: true });
+    await open.waitFor({ timeout: 2500 });
+    assert.equal(await open.getAttribute("href"), "https://ha.test/cabane");
+    const mobile = page.locator("details").filter({ has: page.getByText("Using the mobile app?", { exact: true }) });
+    assert.equal(await mobile.getAttribute("open"), null);
+    await mobile.locator("summary").click();
+    assert.equal(await mobile.getByText(/same Home Assistant instance/).isVisible(), true);
+  } finally { await browser?.close(); await server.close(); }
+});
+
+test("storage-only integrations do not imply the sidebar is installed", async () => {
+  const server = await createServer({ root: process.cwd(), configFile: false, appType: "custom", server: { host: "127.0.0.1", port: 0, hmr: false } });
+  let browser;
+  try {
+    server.middlewares.use((req, res, next) => req.url === "/" ? (res.setHeader("Content-Type", "text/html"), res.end("<!doctype html>")) : next());
+    await server.listen(); browser = await chromium.launch({ channel: "chrome", headless: true });
+    const page = await browser.newPage(); await page.goto(server.resolvedUrls.local[0]);
+    await page.evaluate(async () => { const h = await import("/tests/fixtures/ha-storage-harness.tsx"); window.haHarness = await h.mountHaStorageHarness({ panelMissing: true }); });
+    await page.getByRole("link", { name: "Install with HACS", exact: true }).waitFor({ timeout: 2500 });
+    assert.equal(await page.getByRole("link", { name: "Open in Home Assistant", exact: true }).count(), 0);
+    await page.getByRole("button", { name: "Check again", exact: true }).click();
+    assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), null);
+    await page.evaluate(() => window.haHarness.setIntegrationInstalled());
+    await page.getByRole("button", { name: "Check again", exact: true }).click();
+    await page.getByRole("button", { name: "Enable sync", exact: true }).waitFor();
+    assert.equal(await page.getByRole("link", { name: "Install with HACS", exact: true }).count(), 0);
+    assert.equal(await page.evaluate(() => window.haHarness.getRemoteVersion()), null);
   } finally { await browser?.close(); await server.close(); }
 });

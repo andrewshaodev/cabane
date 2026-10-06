@@ -31,7 +31,7 @@ export * from "./RuntimeBindingSetup";
 export { HomeAssistantRuntimeProvider, HomeAssistantRuntimeValueProvider, useHomeAssistantRuntime, type HomeAssistantRuntimeValue } from "./HomeAssistantRuntime";
 export { HomeAssistantConnectionFlow } from "./HomeAssistantConnectionFlow";
 export { HomeAssistantCorsHelp } from "./HomeAssistantCorsHelp";
-export { loadStoredHomeAssistantUrl, saveStoredHomeAssistantUrl, loadStoredAuthData, saveStoredAuthData, homeAssistantAuthStorageKey, normalizeHomeAssistantUrl } from "./home-assistant-auth";
+export { loadStoredHomeAssistantUrl, saveStoredHomeAssistantUrl, loadStoredAuthData, saveStoredAuthData, homeAssistantAuthStorageKey, normalizeHomeAssistantUrl, homeAssistantTransportError } from "./home-assistant-auth";
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
 export { DeviceMappingInspector } from "./home-assistant-mapping/DeviceMappingInspector";

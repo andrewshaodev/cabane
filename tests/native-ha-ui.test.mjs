@@ -21,7 +21,7 @@ await withModules(async load => {
       await act(async () => root.render(React.createElement(MemoryRouter, { initialEntries: ["/workspaces?import=home-assistant"] },
         React.createElement(WorkspaceTransferDialog, { mode: "import", busy: false, error: null, remoteImport: React.createElement("p", null, "Host workspace library"), onImport() {}, onExport() {}, onCancel() {} }))));
       assert.match(document.body.textContent, /Host workspace library/);
-      await act(async () => [...document.querySelectorAll("button")].find(button => button.textContent === "From a file").click());
+      await act(async () => [...document.querySelectorAll("button")].find(button => button.textContent === "From file").click());
       assert.doesNotMatch(document.body.textContent, /Host workspace library/);
       assert.equal(window.location.href, "https://host.test/cabane?auth_callback=host-owned");
       await act(async () => [...document.querySelectorAll("button")].find(button => button.textContent === "From Home Assistant").click());

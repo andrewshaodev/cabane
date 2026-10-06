@@ -30,14 +30,15 @@ page.on("response",response=>{if(response.status()>=400)errors.push(`${response.
 try {
   await page.goto(`${origin}/cabane?host=kept`);
   await page.getByRole("button",{name:"Build my home"}).waitFor({timeout:60000});
-  assert.equal(await page.evaluate(()=>window.__hostFixture.stats.requests.length),0,"demo must not read host registries");
+  assert.ok(await page.evaluate(()=>window.__hostFixture.stats.requests.every(type => type === "cabane/workspaces/list")), "first launch may list saved homes but must not read host registries");
   await page.getByRole("button",{name:"Open Home Assistant menu"}).click();
   assert.equal(await page.evaluate(()=>window.__hostFixture.stats.menus),1);
   await page.getByRole("button",{name:"Build my home"}).click();
   await page.getByRole("button",{name:/Workspaces:/}).waitFor({timeout:60000});
   await page.getByRole("button",{name:/Workspaces:/}).click();
   await page.getByRole("heading",{name:"Your workspaces"}).waitFor();
-  await page.getByRole("button",{name:"Open from Home Assistant",exact:true}).click();
+  await page.getByRole("button",{name:"Import workspace",exact:true}).click();
+  await page.getByRole("button",{name:"From Home Assistant",exact:true}).click();
   await page.getByText("No Cabane workspaces saved on this HA instance.").waitFor();
   assert.equal(await page.getByRole("button",{name:"Sign in to Home Assistant"}).count(),0);
   await page.getByRole("button",{name:"Cancel",exact:true}).click();
