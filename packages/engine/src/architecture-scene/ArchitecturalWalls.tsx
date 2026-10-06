@@ -4,6 +4,7 @@ import { BufferGeometry, Color, Float32BufferAttribute } from "three";
 
 import { useEffect, useMemo } from "react";
 import { useWallRoomSelection } from "./useWallRoomSelection";
+import { RoomWallEmphasis } from "../room-navigation/RoomWallEmphasis";
 
 import {
   buildArchitecturalWallGeometries,
@@ -151,6 +152,12 @@ export function ArchitecturalWalls({
         const wall = (
           <mesh key={`mesh-${index}`} geometry={geometry} castShadow {...selectionHandlers}>
             <ToonMaterial color="white" vertexColors />
+            <RoomWallEmphasis
+              geometry={geometry}
+              floor={floor}
+              enabled={Boolean(onSelectRoom)}
+              reducedMotion={reducedMotion}
+            />
           </mesh>
         );
         const normals = fadeNormals.length ? fadeNormals : outwardNormal ? [outwardNormal] : [];

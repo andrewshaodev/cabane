@@ -6,6 +6,7 @@ export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitC
   const zoom = (factor: number) => {
     const controls = controlsRef.current;
     if (!controls) return;
+    controls.dispatchEvent({ type: "start", target: controls });
     const camera = controls.object as OrthographicCamera;
     if (!camera.isOrthographicCamera) return;
     camera.zoom = Math.min(controls.maxZoom, Math.max(controls.minZoom, camera.zoom * factor));
@@ -15,9 +16,11 @@ export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitC
   };
   const rotate = () => {
     const controls = controlsRef.current;
+    controls?.dispatchEvent({ type: "start", target: controls });
     if (controls) controls.setAzimuthalAngle(controls.getAzimuthalAngle() + Math.PI / 2);
   };
   const topView = () => {
+    controlsRef.current?.dispatchEvent({ type: "start", target: controlsRef.current });
     controlsRef.current?.setPolarAngle(0);
   };
   return (

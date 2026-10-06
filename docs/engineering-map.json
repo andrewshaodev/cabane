@@ -131,7 +131,13 @@
       "packages/engine/src/useDashboardDeviceInteraction.ts",
       "packages/engine/src/CabaneDashboard.tsx",
       "packages/engine/src/LiveCameraSurface.tsx",
-      "packages/engine/src/navigation"
+      "packages/engine/src/navigation",
+      "packages/engine/src/OrbitCamera.tsx",
+      "packages/engine/src/room-navigation",
+      "packages/engine/src/action-bar/dashboard-action-targets.ts",
+      "packages/engine/src/WalkPreferences.tsx",
+      "packages/engine/src/home-assistant-dashboard",
+      "packages/engine/src/styles.css"
     ],
     "interfaces": [
       {
@@ -139,7 +145,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Keep overview, room and walk state coherent; missing runtime data must leave a usable scene and actionable feedback.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {
@@ -159,7 +165,7 @@
         "symbols": ["ArchitectureScene", "StylizedScene"]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation.",
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights.",
     "checks": [
       "test:unit",
       "verify:policy",
