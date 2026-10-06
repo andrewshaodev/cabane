@@ -78,7 +78,11 @@ Door presets are public architecture catalog configuration records. Hinged,
 sliding, and roll-up designs share the wall-owned door family, with motion-specific
 fields enforced by the canonical types and schema. The garage door is a roll-up
 architectural model, not an Arrange device. Its frame and moving slats are focused
-model modules. Opening previews use the same geometry and cached rendering queue
+model modules. Roll-up slats smoothly track resolved cover positions in both
+directions, retracting behind the fixed header. Mid-travel updates continue from
+the current pose; initial mounting and reduced motion use the reported position
+immediately. Animation reuses mounted geometry and requests frames only until
+settled. Opening previews use the same geometry and cached rendering queue
 as Arrange. The bundled garage uses an opening and an opening cover profile;
 there is no compatibility registration for the retired garage device.
 

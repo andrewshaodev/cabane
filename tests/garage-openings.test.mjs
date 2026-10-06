@@ -191,7 +191,10 @@ await withModules(async (load) => {
         });
       const renderer = await create(render(0));
       const frame = () => renderer.scene.findByProps({ name: "roll-up-door-frame" });
-      const slats = () => renderer.scene.findByProps({ name: "roll-up-door-slats" }).children;
+      const slats = () =>
+        renderer.scene
+          .findByProps({ name: "roll-up-door-slats" })
+          .children.filter((node) => node.instance.visible);
       const bounds = new Box3().setFromObject(frame().instance);
       assert.ok(slats().length > 4);
       await renderer.update(render(0.5));
@@ -203,6 +206,50 @@ await withModules(async (load) => {
       assert.ok(new Box3().setFromObject(frame().instance).equals(bounds));
       for (const mesh of renderer.scene.findAll((node) => node.type === "Mesh"))
         assert.equal(mesh.instance.material.type, "MeshToonMaterial");
+      await renderer.unmount();
+    }
+  });
+
+  test("garage slats animate both ways, reverse continuously, and settle at partial positions", async () => {
+    const render = (position, reducedMotion = false) =>
+      createElement(DoorModel, { wall, floor, opening: garage, position, reducedMotion });
+    const renderer = await create(render(0));
+    try {
+      const group = renderer.scene.findByProps({ name: "roll-up-door-slats" }).instance;
+      const panel = group.children[0];
+      const geometry = panel.geometry;
+      const bottom = () => panel.position.y - (geometry.parameters.height * panel.scale.y) / 2;
+      const clearHeight = engine.rollUpDoorGeometry(
+        garage.widthPlanUnits,
+        garage.openingHeightMeters,
+        1,
+      ).clearHeight;
+      assert.equal(bottom(), 0);
+      await renderer.update(render(1));
+      assert.equal(bottom(), 0, "a new target must not jump the panels");
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.ok(bottom() > 0 && bottom() < clearHeight / 5);
+      await renderer.advanceFrames(12, 1 / 60);
+      const midOpening = bottom();
+      await renderer.update(render(0));
+      assert.equal(bottom(), midOpening, "reversing preserves the current pose");
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.ok(bottom() > 0 && bottom() < midOpening);
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.equal(bottom(), 0);
+      await renderer.update(render(0.5));
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.equal(bottom(), clearHeight / 2);
+      await renderer.update(render(1));
+      await renderer.advanceFrames(150, 1 / 60);
+      assert.ok(group.children.every((part) => !part.visible));
+      await renderer.update(render(0));
+      await renderer.advanceFrames(1, 5);
+      assert.ok(panel.visible && bottom() > clearHeight * 0.5, "idle frames must not snap shut");
+      await renderer.update(render(0.25, true));
+      assert.equal(bottom(), clearHeight / 4, "reduced motion settles immediately");
+      assert.equal(panel.geometry, geometry, "frames reuse the existing geometry");
+    } finally {
       await renderer.unmount();
     }
   });
