@@ -246,7 +246,7 @@ export function useDashboardWalk({
         }
       }
     })();
-  }, [setSceneActionError, walkthrough, dom.root.fullscreenElement]);
+  }, [setSceneActionError, walkthrough, dom]);
 
   useEffect(() => {
     if (!onExitWalkthrough || walkthroughStarted.current) return;

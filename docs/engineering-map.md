@@ -54,7 +54,7 @@ Contract: [Project schema and persistence](../docs/product/workspace.md).
 
 Contract: [Editor coordination](../docs/product/workspace.md).
 
-- Owners: [`apps/web/src/editor-workspace/useHomeEditorController.ts`](../apps/web/src/editor-workspace/useHomeEditorController.ts), [`apps/web/src/editor-workspace/EditorWorkspace.tsx`](../apps/web/src/editor-workspace/EditorWorkspace.tsx), [`apps/web/src/editor-preview/useEditorWorkspace.ts`](../apps/web/src/editor-preview/useEditorWorkspace.ts).
+- Owners: [`apps/web/src/editor-workspace/useHomeEditorController.ts`](../apps/web/src/editor-workspace/useHomeEditorController.ts), [`apps/web/src/editor-workspace/EditorWorkspace.tsx`](../apps/web/src/editor-workspace/EditorWorkspace.tsx), [`apps/web/src/editor-workspace/useEditorProjectHistory.ts`](../apps/web/src/editor-workspace/useEditorProjectHistory.ts), [`apps/web/src/editor-workspace/useEditorSession.ts`](../apps/web/src/editor-workspace/useEditorSession.ts), [`apps/web/src/editor-workspace/useEditorSceneProjection.ts`](../apps/web/src/editor-workspace/useEditorSceneProjection.ts), [`apps/web/src/editor-preview/useEditorWorkspace.ts`](../apps/web/src/editor-preview/useEditorWorkspace.ts).
 - Interface: `ConnectWorkspaceProps`, `HomeEditorExitReason` via [`apps/web/src/editor-workspace/editor-workspace-contract.ts`](../apps/web/src/editor-workspace/editor-workspace-contract.ts).
 - Review invariant: Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary.
 - Checks: `test:unit`, `test:browser`.
@@ -99,7 +99,7 @@ Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-priv
 
 Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-cameras.md).
 
-- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation).
+- Owners: [`packages/engine/src/useDashboardController.ts`](../packages/engine/src/useDashboardController.ts), [`packages/engine/src/useDashboardWalk.ts`](../packages/engine/src/useDashboardWalk.ts), [`packages/engine/src/useDashboardDeviceInteraction.ts`](../packages/engine/src/useDashboardDeviceInteraction.ts), [`packages/engine/src/CabaneDashboard.tsx`](../packages/engine/src/CabaneDashboard.tsx), [`packages/engine/src/LiveCameraSurface.tsx`](../packages/engine/src/LiveCameraSurface.tsx), [`packages/engine/src/navigation`](../packages/engine/src/navigation).
 - Interface: `CabaneDashboard`, `LiveCameraSurface` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Keep overview, room and walk state coherent; missing runtime data must leave a usable scene and actionable feedback.
 - Checks: `test:unit`, `test:browser`, `measure:scene`.

@@ -40,6 +40,9 @@
     "owners": [
       "apps/web/src/editor-workspace/useHomeEditorController.ts",
       "apps/web/src/editor-workspace/EditorWorkspace.tsx",
+      "apps/web/src/editor-workspace/useEditorProjectHistory.ts",
+      "apps/web/src/editor-workspace/useEditorSession.ts",
+      "apps/web/src/editor-workspace/useEditorSceneProjection.ts",
       "apps/web/src/editor-preview/useEditorWorkspace.ts"
     ],
     "interfaces": [
@@ -124,6 +127,8 @@
     "spec": "docs/product/dashboard-and-cameras.md",
     "owners": [
       "packages/engine/src/useDashboardController.ts",
+      "packages/engine/src/useDashboardWalk.ts",
+      "packages/engine/src/useDashboardDeviceInteraction.ts",
       "packages/engine/src/CabaneDashboard.tsx",
       "packages/engine/src/LiveCameraSurface.tsx",
       "packages/engine/src/navigation"

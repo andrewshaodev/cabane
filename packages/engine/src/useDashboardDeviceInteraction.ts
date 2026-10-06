@@ -165,7 +165,7 @@ export function useDashboardDeviceInteraction({
       lookDeltaRef,
       walkDevicePanelOpenRef,
       walkPointerLockPendingRef,
-      dom.root.pointerLockElement,
+      dom,
       shellRef,
     ],
   );
@@ -243,7 +243,7 @@ export function useDashboardDeviceInteraction({
     setWalkDeviceTarget,
     openDevicePanel,
     handleExtensionInteraction,
-    dom.root.pointerLockElement,
+    dom,
   ]);
 
   useEffect(() => {
