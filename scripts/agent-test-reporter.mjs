@@ -19,6 +19,10 @@ export default async function* agentTestReporter(source) {
   let dots = 0;
   const output = new Map();
   for await (const { type, data } of source) {
+    if (type === "test:dequeue" && process.env.CABANE_TEST_PROGRESS === "1") {
+      yield `\nRUN ${data.name}\n`;
+      dots = 0;
+    }
     // complete is emitted on completion; fail/pass can wait for earlier siblings.
     if (type === "test:complete") {
       const error = data.details?.error;

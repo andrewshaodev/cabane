@@ -61,7 +61,17 @@ export async function createBrowserTestSession() {
     capture: (name, error) => captureBrowserFailure(name, error, contexts, messages),
     dispose,
   });
-  browserPromise ??= chromium.launch({ channel: "chromium", headless: true });
+  browserPromise ??= chromium.launch({
+    channel: "chromium",
+    headless: true,
+    // Hosted Linux runners have no native GPU. Match the production-panel
+    // verifier's explicit software renderer instead of probing unavailable GPU
+    // backends while loading WebGL scenes.
+    args:
+      process.env.GITHUB_ACTIONS === "true"
+        ? ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"]
+        : [],
+  });
   const browser = await browserPromise;
   const newContext = async (options) => {
     const context = await browser.newContext(options);
