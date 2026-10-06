@@ -1,5 +1,10 @@
 # Workspaces, persistence, and Apply
 
+Unsupported fields and newer schema versions remain blocked to protect saved
+data from older editors. Errors explain the possible newer-client mismatch and
+the HACS update, HA restart and browser/Companion reload steps; raw diagnostics
+remain available. Failed parsing leaves existing local and HA copies unchanged.
+
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
 palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
 assumptions, and an optional `customModels` catalog. Layout rooms carry empty device/dashboard arrays; runtime bindings

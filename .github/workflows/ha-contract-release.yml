@@ -1,0 +1,108 @@
+name: Home Assistant contract release
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ha-contract-release-${{ github.event_name == 'pull_request' && github.ref || 'main' }}
+  cancel-in-progress: false
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.contract.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+      - run: npm install --global npm@11.6.2
+      - run: npm ci
+      - name: Validate contract and compatibility notes
+        run: npm run verify:ha-contract
+      - name: Compare the currently published integration contract
+        id: contract
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(gh release view --repo cabane-app/cabane-home-assistant --json tagName --jq .tagName)
+          curl --fail --retry 3 --location "https://raw.githubusercontent.com/cabane-app/cabane-home-assistant/$tag/custom_components/cabane/frontend/manifest.json" --output /tmp/ha-panel-manifest.json
+          node --input-type=module <<'JS' >> "$GITHUB_OUTPUT"
+          import { readFileSync } from 'node:fs';
+          const current = JSON.parse(readFileSync('docs/ha-contract.json'));
+          const shipped = JSON.parse(readFileSync('/tmp/ha-panel-manifest.json'));
+          if (current.fingerprint !== shipped.workspace_contract?.fingerprint && current.revision <= (shipped.workspace_contract?.revision ?? 0)) throw new Error('Bump the contract revision and describe the compatibility change.');
+          console.log(`changed=${current.fingerprint !== shipped.workspace_contract?.fingerprint}`);
+          JS
+  release:
+    needs: contract
+    if: github.event_name != 'pull_request' && needs.contract.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      CABANE_TEST_CONCURRENCY: "1"
+      CABANE_TEST_PROGRESS: "1"
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.11.1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: npm install --global npm@11.6.2
+      - run: npm ci
+      - run: npm run browser:install -- --with-deps
+      - run: npm run verify
+        timeout-minutes: 40
+      - run: npm run build:panel
+      - run: node scripts/verify-panel.mjs
+      - run: npm run fixture:verify:scale
+      - name: Check release credential
+        env:
+          RELEASE_KEY: ${{ secrets.CABANE_INTEGRATION_DEPLOY_KEY }}
+        run: test -n "$RELEASE_KEY" || { echo 'Configure the scoped CABANE_INTEGRATION_DEPLOY_KEY repository secret.'; exit 1; }
+      - uses: actions/checkout@v4
+        with:
+          repository: cabane-app/cabane-home-assistant
+          ref: main
+          fetch-depth: 0
+          path: integration-release
+          ssh-key: ${{ secrets.CABANE_INTEGRATION_DEPLOY_KEY }}
+      - name: Build, validate and push the integration patch release
+        id: publish
+        run: |
+          git -C integration-release config user.name 'cabane-release[bot]'
+          git -C integration-release config user.email 'cabane-release[bot]@users.noreply.github.com'
+          npm run release:ha-contract -- integration-release --push
+      - name: Confirm the integration release is published
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.publish.outputs.tag }}
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            published=$(gh release view "$RELEASE_TAG" --repo cabane-app/cabane-home-assistant --json isDraft --jq '.isDraft == false' 2>/dev/null || true)
+            if [ "$published" = true ]; then
+              gh release download "$RELEASE_TAG" --repo cabane-app/cabane-home-assistant --pattern cabane.zip --dir /tmp/published-ha-release
+              python3 - <<'PY'
+          import json, zipfile
+          with zipfile.ZipFile('/tmp/published-ha-release/cabane.zip') as release:
+              actual = json.loads(release.read('frontend/manifest.json'))['workspace_contract']
+          with open('docs/ha-contract.json') as source:
+              expected = json.load(source)
+          assert actual['fingerprint'] == expected['fingerprint'], 'Published contract differs from tested producer'
+          PY
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'The integration tag was pushed, but publication failed or timed out. Check and rerun its Package release workflow.'
+          exit 1

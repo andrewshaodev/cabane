@@ -1,5 +1,6 @@
 import { isEmptyPublishedHome } from "./empty-project";
 import { repairDraftFloorIds } from "./repair-draft-floor-ids";
+import { projectSchemaVersionMessage } from "./project-format-errors";
 import type { HomeExtensionRegistry, ProjectModelRegistries } from "../types";
 
 import { composeHomeBindingManifest } from "./runtime";
@@ -96,7 +97,7 @@ export const parseHomeProjectRecord = (
     candidate.schemaVersion === 1 || candidate.schemaVersion === 2,
     "project-record.schema-version",
     "schemaVersion",
-    "Supported record versions are 1 and 2.",
+    projectSchemaVersionMessage(candidate.schemaVersion, "record"),
   );
   recordIssue(
     issues,

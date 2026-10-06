@@ -1,4 +1,5 @@
 import { entitySlot } from "./schema-entity-slot";
+import { projectSchemaVersionMessage } from "./project-format-errors";
 import { sceneItem } from "./schema-scene-item";
 import { validateCustomModels } from "../imported-models/model-schema";
 import { keys, record, array, string, finite, point, polygon } from "./schema-json-values";
@@ -504,7 +505,7 @@ export const validateHomeProjectSchemaShape = (
       issues,
       "project.schema-version",
       "schemaVersion",
-      "Supported project versions are 1 and 2.",
+      projectSchemaVersionMessage(project.schemaVersion, "project"),
     );
   if (project.toolState !== undefined) record(project.toolState, "toolState", issues);
   string(project.seedRevision, "seedRevision", issues);

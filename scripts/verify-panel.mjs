@@ -104,6 +104,52 @@ try {
   await page.getByRole("button", { name: "Create workspace", exact: true }).click();
   await page.getByRole("button", { name: /Workspaces: Native fixture home/ }).waitFor();
   await page.getByRole("button", { name: /Workspaces: Native fixture home/ }).click();
+  // Exercise the installed panel's real error UI with a newer synthetic copy.
+  await page.evaluate(async () => {
+    const records = await new Promise((done, reject) => {
+      const open = indexedDB.open("cabane-projects-v2");
+      open.onerror = () => reject(open.error);
+      open.onsuccess = () => {
+        const db = open.result;
+        const request = db.transaction("home-projects").objectStore("home-projects").getAll();
+        request.onerror = () => {
+          db.close();
+          reject(request.error);
+        };
+        request.onsuccess = () => {
+          db.close();
+          done(request.result.map((raw) => JSON.parse(raw)));
+        };
+      };
+    });
+    const record = records.find((entry) => entry.draft.home.name === "Native fixture home");
+    record.homeId = "future-format-home";
+    record.draft.home.id = record.homeId;
+    record.published.home.id = record.homeId;
+    record.draft.floors[0].futureArchitecture = { enabled: true };
+    await window.__hostFixture.connection.sendMessagePromise({
+      type: "cabane/workspaces/put",
+      home_id: record.homeId,
+      document: JSON.stringify({
+        format: "cabane-workspace",
+        version: 1,
+        workspace: { name: "Future home", homeAssistantUrl: location.origin, hasPublished: false },
+        record,
+      }),
+    });
+  });
+  await page.getByRole("button", { name: "Import workspace", exact: true }).click();
+  await page.getByRole("button", { name: "From Home Assistant", exact: true }).click();
+  await page
+    .locator(".workspace-ha-library")
+    .getByRole("button", { name: "Open", exact: true })
+    .click();
+  const upgrade = page.locator(".workspace-ha-library [role=alert]");
+  await upgrade.waitFor();
+  assert.match(await upgrade.innerText(), /newer version of Cabane/);
+  assert.match(await upgrade.innerText(), /HACS, restart Home Assistant/);
+  assert.match(await upgrade.innerText(), /reload your browser or Companion app/);
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
   const card = page
     .locator(".workspace-card")
     .filter({ has: page.getByRole("button", { name: "Open Native fixture home", exact: true }) });
