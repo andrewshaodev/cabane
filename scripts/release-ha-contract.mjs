@@ -8,7 +8,9 @@ import { contractFingerprint, validateContractRelease } from "./ha-contract/sour
 const root = fileURLToPath(new URL("../", import.meta.url));
 const integration = resolve(process.argv[2] ?? "");
 if (!process.argv[2])
-  throw new Error("Usage: node scripts/release-ha-contract.mjs INTEGRATION_CHECKOUT [--push]");
+  throw new Error(
+    "Usage: node scripts/release-ha-contract.mjs INTEGRATION_CHECKOUT [--push] [--skip-tests]",
+  );
 const run = (command, args, cwd = integration) =>
   execFileSync(command, args, { cwd, stdio: "inherit" });
 const git = (...args) => execFileSync("git", args, { cwd: integration, encoding: "utf8" }).trim();
@@ -51,8 +53,10 @@ run("python3", ["scripts/vendor_frontend.py", resolve(root, "apps/web/dist-panel
 writeFileSync(manifestPath, JSON.stringify({ ...manifest, version: plan.version }, null, 2) + "\n");
 mkdirSync(resolve(integration, "docs/releases"), { recursive: true });
 writeFileSync(resolve(integration, `docs/releases/${plan.tag}.md`), plan.notes);
-run("python3", ["-m", "unittest", "discover", "-s", "tests", "-v"]);
-run("node", ["scripts/verify_workspace_import.mjs", root]);
+if (!process.argv.includes("--skip-tests")) {
+  run("python3", ["-m", "unittest", "discover", "-s", "tests", "-v"]);
+  run("node", ["scripts/verify_workspace_import.mjs", root]);
+}
 run("python3", ["scripts/package_release.py", "--version", plan.tag]);
 if (!process.argv.includes("--push")) {
   console.log(
@@ -70,6 +74,4 @@ run("git", ["commit", "-m", `Release ${plan.tag} for workspace contract ${releas
 run("git", ["tag", "-a", plan.tag, "-m", `Cabane workspace contract ${release.revision}`]);
 // A concurrent maintainer push rejects atomically. Rerun from a fresh checkout.
 run("git", ["push", "--atomic", "origin", "HEAD:main", `refs/tags/${plan.tag}`]);
-console.log(
-  `Pushed ${plan.tag}; the integration release workflow tests, packages and publishes it.`,
-);
+console.log(`Pushed ${plan.tag}; the integration release workflow packages and publishes it.`);

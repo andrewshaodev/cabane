@@ -19,11 +19,11 @@ manifest with the implementation. A PR validates the fingerprint and notes;
 publication only runs after a push to `main` or a manual workflow dispatch.
 Keep incompatible imports blocked. Never strip unknown data to make them load.
 
-The `Home Assistant contract release` workflow builds and tests the clean native
+Full producer, panel and integration tests run locally before pushing a contract
+change. GitHub Actions only validates the contract, builds and packages the clean native
 panel, adds the contract revision to its artifact metadata, and checks out the
 integration with a repository-scoped SSH deploy key. It advances the integration
-patch version, vendors the complete bundle, runs integration and browser import
-checks, commits upgrade notes under `docs/releases/`, and pushes the commit and
+patch version, vendors the complete bundle, commits upgrade notes under `docs/releases/`, and pushes the commit and
 tag atomically. The integration's release workflow publishes releases carrying
 these reviewed notes; ordinary manual tags retain their draft-release flow.
 The producer then checks the public ZIP contains the expected contract.
@@ -49,7 +49,9 @@ npm run release:ha-contract -- /path/to/clean/cabane-home-assistant
 
 This prepares and tests the integration diff without committing or pushing it.
 After the required producer checks, `--push` also commits and pushes the main
-update/tag, which starts the integration release workflow.
+update/tag, which starts the integration release workflow. Actions uses
+`--skip-tests` because tests are a local delivery gate; it retains contract, clean
+source provenance, package integrity and published ZIP checks.
 
 `.codex/hooks.json` adds a Stop hook that continues the agent once when the
 contract manifest is stale. Codex requires the user to review and trust the hook
