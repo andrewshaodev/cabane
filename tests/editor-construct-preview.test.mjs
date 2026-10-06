@@ -535,15 +535,13 @@ await withModules(async (load) => {
       metersPerPlanUnit: 1,
     }), null);
     assert.equal(openingPlacementIsValid({
-      walls: floor.walls,
-      openings: createConstructEditorState(floor).history.present.openings,
+      draft: createConstructEditorState(floor).history.present,
       wallId: "north-wall",
       offsetPlanUnits: 1.5,
       widthPlanUnits: .9,
     }), false);
     assert.equal(openingPlacementIsValid({
-      walls: floor.walls,
-      openings: createConstructEditorState(floor).history.present.openings,
+      draft: createConstructEditorState(floor).history.present,
       wallId: "north-wall",
       offsetPlanUnits: .1,
       widthPlanUnits: .9,

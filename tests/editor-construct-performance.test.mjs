@@ -448,6 +448,7 @@ await withModules(async (load) => {
     const renderer = await create(createElement(ConstructionEditLayer, {
       draft: {
         version: 1,
+        coordinates: floor.coordinates,
         floorId: floor.id,
         floorName: floor.name,
         walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
@@ -519,6 +520,11 @@ await withModules(async (load) => {
       assert.equal(preview.props.userData.validPlacement, false);
       await renderer.fireEvent(surface, "pointerDown", pointerAt(5.5));
       assert.equal(placements.length, 1, "colliding previews never commit");
+      await renderer.fireEvent(surface, "pointerMove", pointerAt(.45));
+      preview = renderer.scene.findByProps({ name: "construction-opening-placement-preview-door" });
+      assert.equal(preview.props.userData.validPlacement, false, "corner clearance is shown in the preview");
+      await renderer.fireEvent(surface, "pointerDown", pointerAt(.45));
+      assert.equal(placements.length, 1, "junction collisions never commit");
     } finally {
       await renderer.unmount();
     }

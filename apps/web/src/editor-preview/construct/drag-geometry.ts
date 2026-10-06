@@ -1,5 +1,7 @@
 import {
   snapPlanPoint,
+  availableOpeningOffsetRanges,
+  type FloorEditorDraft,
   wallOpeningOffsetAtPoint,
   type SnapTarget,
   type EditorOpening,
@@ -217,33 +219,21 @@ export const openingPlacementForPlanPoint = ({
   .sort((left, right) => left.distanceMeters - right.distanceMeters)[0] ?? null;
 
 export const openingPlacementIsValid = ({
-  walls,
-  openings,
+  draft,
   wallId,
   offsetPlanUnits,
   widthPlanUnits,
+  sillHeightMeters = 0,
   excludeOpeningId,
-  clearancePlanUnits = .08,
 }: {
-  walls: readonly EditorWall[];
-  openings: readonly EditorOpening[];
+  draft: FloorEditorDraft;
   wallId: string;
   offsetPlanUnits: number;
   widthPlanUnits: number;
+  sillHeightMeters?: number;
   excludeOpeningId?: string;
-  clearancePlanUnits?: number;
-}) => {
-  const wall = walls.find((candidate) => candidate.id === wallId);
-  if (!wall) return false;
-  const wallLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
-  if (offsetPlanUnits < 0 || offsetPlanUnits + widthPlanUnits > wallLength) return false;
-  return !openings.some((opening) =>
-    opening.id !== excludeOpeningId
-    && opening.wallId === wallId
-    && offsetPlanUnits < opening.offsetPlanUnits + opening.widthPlanUnits + clearancePlanUnits
-    && offsetPlanUnits + widthPlanUnits + clearancePlanUnits > opening.offsetPlanUnits
-  );
-};
+}) => availableOpeningOffsetRanges({ draft, wallId, widthPlanUnits, sillHeightMeters, excludeOpeningId })
+  .some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max);
 
 export const resizeOpeningSpan = ({
   offsetPlanUnits,
