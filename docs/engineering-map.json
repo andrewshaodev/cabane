@@ -14,7 +14,7 @@
         "symbols": ["CabaneApp", "CabaneDomProvider", "HomeAssistantHostSessionProvider"]
       }
     ],
-    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA\u2019s auto-height wrapper while preserving sidebar flow and safe-area padding.",
+    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.",
     "checks": ["test:browser", "build", "build:panel"]
   },
   {
@@ -259,7 +259,8 @@
       "packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx",
       "packages/catalog/src/device/visuals",
       "packages/catalog/src/furnishing/presets/living-room/rug.tsx",
-      "packages/catalog/src/furnishing/presets/living-room/rug-patterns.ts"
+      "packages/catalog/src/furnishing/presets/living-room/rug-patterns.ts",
+      "packages/catalog/src/device/presets/lighting/rattan-bell-pendant"
     ],
     "interfaces": [
       {
@@ -267,7 +268,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Roll-up slats own smooth, reversible position tracking with retained geometry and immediate reduced-motion poses. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue.",
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Roll-up slats own smooth, reversible position tracking with retained geometry and immediate reduced-motion poses. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue. Rattan bell pendants are light devices; their retired furnishing entry remains hidden for saved-project compatibility.",
     "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {

@@ -1,9 +1,9 @@
 {
-  "revision": 4,
-  "fingerprint": "60e1bdf8ffdae9b1d0a9c01f66a12800d05a9e4a8639451ea1977c7f90566170",
-  "summary": "Add the woven rattan bell pendant catalog preset",
+  "revision": 5,
+  "fingerprint": "36eddbb266baf8a361716e230d42eee21a0d0427a1bb44c560ae28f11cda8e42",
+  "summary": "Make rattan bell pendants bindable light devices",
   "breakingChanges": [
-    "Existing homes remain compatible. Homes using rattan-bell-pendant require the matching panel release; older panels must update before loading this new model."
+    "Existing furnishing pendants remain readable as hidden legacy items. New rattan-bell-pendant instances are light devices and require the matching panel release."
   ],
   "history": [
     {
@@ -25,6 +25,13 @@
       "summary": "Animate garage door opening and closing smoothly",
       "breakingChanges": [
         "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
+      ]
+    },
+    {
+      "revision": 4,
+      "summary": "Add the woven rattan bell pendant catalog preset",
+      "breakingChanges": [
+        "Existing homes remain compatible. Homes using rattan-bell-pendant require the matching panel release; older panels must update before loading this new model."
       ]
     }
   ]

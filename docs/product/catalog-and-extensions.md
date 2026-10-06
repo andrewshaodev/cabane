@@ -41,6 +41,9 @@ Implementation: [catalog guide](../../packages/catalog/README.md),
 
 Retired furnishing lights remain registered with `legacyOnly` for saved-project
 compatibility. Arrange offers their current device replacements for new items.
+This includes `rattan-bell-pendant`, with a primary light slot, dimming-aware
+bulb emission and an engine-owned scene light. Inactive, unavailable and
+disconnected states leave its bulb emission at zero.
 
 The deciduous tree uses a layered, irregular procedural crown with a graduated
 green palette and curved, tapered wood branches and root flares. Wood and foliage

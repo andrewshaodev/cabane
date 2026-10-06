@@ -1,3 +1,4 @@
+import { rattanBellPendantDeviceDefinition } from "./definitions/rattan-bell-pendant";
 import {
   compactWallTelevisionDefinition,
   wallTelevisionDefinition,
@@ -287,6 +288,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     interaction,
     complexity: { visibleMeshes: 5, triangles: 420 },
   }),
+  "rattan-bell-pendant": rattanBellPendantDeviceDefinition,
   "terracotta-pendant": defineDeviceModel({
     defaultRoomType: "dining-room",
     component: TerracottaPendantModel,

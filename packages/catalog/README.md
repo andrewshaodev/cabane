@@ -760,7 +760,8 @@ below its track. Existing paired and motorized curtains remain unchanged.
 ## Rattan bell pendant
 
 `rattan-bell-pendant` is available in Arrange → Dining room → Lighting and All
-items. Public exports are `RattanBellPendant` and `RATTAN_BELL_PENDANT_SIZE`.
+items. Device exports are `RattanBellPendantModel` and `RATTAN_BELL_PENDANT_SIZE`
+from `@cabane/catalog/device`.
 Based on the supplied lamp photo, it has an open woven natural-rattan bell,
 a narrow bottle neck, white suspension cord, ceiling rose and recessed opal bulb.
 The woven shell uses actual curved cane strands and binding hoops, batched into
@@ -769,5 +770,8 @@ three closely related warm tones; there is no opaque cone behind the weave.
 Dimensions are inferred, not manufacturer specifications: 50 cm diameter,
 48 cm shade height and 120 cm overall drop. Proportional resizing is supported.
 The centered X/Z origin is at the shade's lower rim, with the ceiling contact at
-Y=1.2 m. This is a static furnishing with no invented smart capability or light
-binding. No home placement is added, and the source photo is not stored in Git.
+Y=1.2 m. New instances are light devices with a primary light binding, dimming-aware bulb
+glow and engine-managed scene illumination. Inactive, unavailable and disconnected
+bulbs do not glow. The former furnishing is hidden from Arrange but retained for
+saved-project compatibility. No home placement is added, and the source photo is
+not stored in Git.

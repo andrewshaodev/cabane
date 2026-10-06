@@ -147,6 +147,7 @@ await withModules(async (load) => {
     "low-garden-lantern",
     "garden-lantern-pole",
     "table-lamp",
+    "rattan-bell-pendant",
     "woven-pendant",
     "children-pendant",
   ];
@@ -351,6 +352,7 @@ await withModules(async (load) => {
       "connected-frame-oak",
       "connected-frame-black",
       "floor-lamp",
+      "rattan-bell-pendant",
       "terracotta-pendant",
       "low-garden-lantern",
       "pergola-string-lights",
@@ -425,9 +427,11 @@ await withModules(async (load) => {
         definition.complexity.triangles <=
           (["compact-car", "electric-sedan", "pickup-truck"].includes(id)
             ? 34_000
-            : id === "pergola-string-lights"
-              ? 28_000
-              : 5_000),
+            : id === "rattan-bell-pendant"
+              ? 40_000
+              : id === "pergola-string-lights"
+                ? 28_000
+                : 5_000),
       );
       assert.ok(definition.bounds.min.every(Number.isFinite));
       assert.ok(definition.bounds.max.every(Number.isFinite));
@@ -561,6 +565,13 @@ await withModules(async (load) => {
         "absolute",
       ],
       "table-lamp": ["Table lamp", "Lighting", [0.32, 0.52, 0.32], { kind: "uniform" }, "absolute"],
+      "rattan-bell-pendant": [
+        "Rattan bell pendant",
+        "Lighting",
+        [0.5, 1.2, 0.5],
+        { kind: "uniform" },
+        "ceiling",
+      ],
       "woven-pendant": [
         "Woven pendant",
         "Lighting",
@@ -1088,9 +1099,10 @@ await withModules(async (load) => {
     const cases = [
       ["floor-lamp", "floor-lamp-emitter", 0.65],
       ["terracotta-pendant", "terracotta-pendant-emitter", 0.9],
+      ["rattan-bell-pendant", "opal-bulb", 0.72, "terracotta-pendant"],
     ];
-    for (const [model, emitterName, maximumIntensity] of cases) {
-      const binding = room.devices.find((device) => device.model === model);
+    for (const [model, emitterName, maximumIntensity, fixtureModel = model] of cases) {
+      const binding = room.devices.find((device) => device.model === fixtureModel);
       const definition = catalog.stableDeviceRegistry[model];
       const baseState =
         fixtures.fixtureCatalogStates[
@@ -1102,12 +1114,20 @@ await withModules(async (load) => {
           expected: (maximumIntensity * 128) / 255,
         },
         { state: { ...baseState, state: "off" }, expected: 0 },
+        ...(model === "rattan-bell-pendant"
+          ? [
+              { state: baseState, visualState: "unavailable", expected: 0 },
+              { state: baseState, visualState: "disconnected", expected: 0 },
+            ]
+          : []),
       ]) {
         const renderer = await create(
           createElement(definition.component, {
             slot: binding,
             state: scenario.state,
-            visualState: scenario.state.state === "on" ? "connected-active" : "connected-inactive",
+            visualState:
+              scenario.visualState ??
+              (scenario.state.state === "on" ? "connected-active" : "connected-inactive"),
             reducedMotion: true,
             walkMode: false,
             onInteract: () => undefined,

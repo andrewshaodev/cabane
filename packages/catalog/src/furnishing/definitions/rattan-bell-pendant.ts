@@ -2,6 +2,7 @@ import { defineFurnishingModel } from "@cabane/engine";
 import { RattanBellPendant, RATTAN_BELL_PENDANT_SIZE } from "../presets/rattan-bell-pendant";
 
 export const rattanBellPendantDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: RattanBellPendant,
   label: "Rattan bell pendant",
   category: "Lighting",

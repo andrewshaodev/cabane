@@ -5,7 +5,13 @@ import { createWovenBellGeometry } from "./woven-bell-geometry";
 export const RATTAN_BELL_PENDANT_SIZE = [0.5, 1.2, 0.5] as const;
 const CANE_COLORS = ["#bc9461", "#cba574", "#c29c69"] as const;
 
-export function RattanBellPendant({ size = RATTAN_BELL_PENDANT_SIZE }: { size?: SceneItemSize }) {
+export function RattanBellPendant({
+  size = RATTAN_BELL_PENDANT_SIZE,
+  brightness = 0,
+}: {
+  size?: SceneItemSize;
+  brightness?: number;
+}) {
   const weave = useMemo(createWovenBellGeometry, []);
   useEffect(() => () => weave.forEach((geometry) => geometry.dispose()), [weave]);
   return (
@@ -30,7 +36,7 @@ export function RattanBellPendant({ size = RATTAN_BELL_PENDANT_SIZE }: { size?: 
       </mesh>
       <mesh name="opal-bulb" position={[0, 0.355, 0]} scale={[1, 1.25, 1]}>
         <sphereGeometry args={[0.034, 20, 12]} />
-        <ToonMaterial color="#f4ead4" />
+        <ToonMaterial color="#f4ead4" emissive="#ffe1a3" emissiveIntensity={brightness} />
       </mesh>
       {[0, 1, 2].map((index) => (
         <mesh

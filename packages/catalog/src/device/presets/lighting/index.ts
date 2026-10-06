@@ -13,3 +13,8 @@ export {
 export { GardenLanternPoleModel, GARDEN_LANTERN_POLE_SIZE } from "./garden-lantern-pole";
 export { LowGardenLanternModel, LOW_GARDEN_LANTERN_SIZE } from "./low-garden-lantern";
 export { PergolaStringLightsModel } from "./pergola-string-lights";
+export {
+  RattanBellPendantModel,
+  RattanBellPendant,
+  RATTAN_BELL_PENDANT_SIZE,
+} from "./rattan-bell-pendant";
