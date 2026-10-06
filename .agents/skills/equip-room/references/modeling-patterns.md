@@ -35,9 +35,9 @@ mounting-plane center for wall objects.
 
 - Stable catalog: common supported smart-device form with a stable domain and
   dashboard behavior.
-- `home/extensions/`: bespoke or household-specific object that is reused,
+- `home/src/extensions/`: bespoke or household-specific object that is reused,
   visually important, or needs its own device adapter.
-- `home/rooms/`: one-off room composition and tiny local details.
+- `home/src/items.json`: declarative room placements and instances; do not recreate retired room composition files.
 
 Do not duplicate a shared component to make a placement correction. Fix its
 props or transform.

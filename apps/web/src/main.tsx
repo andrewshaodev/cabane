@@ -1,3 +1,4 @@
+import { ApplicationErrorBoundary, ApplicationRouteError } from "./ApplicationErrorBoundary";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router";
@@ -22,10 +23,10 @@ document.addEventListener("gesturechange", preventNativeZoom, { passive: false }
 const root = document.getElementById("root");
 if (!root) throw new Error("The application root element is missing.");
 
-const router = createBrowserRouter([{ path: "*", element: <><PublicSiteAnalytics /><WorkspaceApplication /></> }]);
+const router = createBrowserRouter([{ path: "*", errorElement: <ApplicationRouteError />, element: <><PublicSiteAnalytics /><WorkspaceApplication /></> }]);
 
 createRoot(root).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <ApplicationErrorBoundary><RouterProvider router={router} /></ApplicationErrorBoundary>
   </StrictMode>,
 );

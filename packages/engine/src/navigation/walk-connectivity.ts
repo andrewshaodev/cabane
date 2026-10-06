@@ -209,16 +209,6 @@ export const evaluateDerivedWalkNavigation = (
     const connectedRoomIds = floor.rooms
       .filter((candidate) => connected.has(candidate.id))
       .map((candidate) => candidate.id);
-    if (!spawnPose) {
-      diagnostics.push({
-        code: "navigation.room-no-safe-spawn",
-        severity: "error",
-        path: `rooms[${index}].polygon`,
-        message: `${room.name} has no collision-free walk spawn point.`,
-        suggestion: "Enlarge the room or move blocking geometry away from its walkable area.",
-        roomId: room.id,
-      });
-    }
     if (disconnectedRoomIds.has(room.id)) {
       diagnostics.push({
         code: "navigation.room-no-walkable-connection",

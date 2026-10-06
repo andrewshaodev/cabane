@@ -168,6 +168,15 @@ suspended in the room. Its muzzle flash follows the gun and its impact burst
 expands and fades at the collision point. The generated toolbar icon matches
 the blaster and the existing sculpted action icons; it is never a scene texture.
 
+Each accepted zap or portal shot also pops a short, ink-outlined **PEW!**, **ZAP!**, or **POW!** above
+the moving muzzle. Procedural vector lettering, jagged cel-color bursts, and
+outward speed marks vary in color, silhouette, tilt, size, and drift between
+shots, with no adjacent palette repeat for primary fire. Portal bursts match the
+blue or gold portal being fired. The compact effect is 30% smaller than its initial
+size. Feedback replaces the previous pop on
+rapid fire and never intercepts input. Reduced motion keeps a stationary,
+briefly fading PEW without the pop, drift, or speed marks.
+
 The blaster includes a matching padded glove. Idle breathing and speed-driven walk/sprint sway move the hand and weapon together; reduced motion disables these offsets. A text-free four-tick crosshair becomes cyan corner brackets only over an eligible light, using the same host-owned authorization guards as firing.
 
 Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.

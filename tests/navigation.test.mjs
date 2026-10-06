@@ -224,7 +224,7 @@ await withModules(async (load) => {
     assert.equal(navigation.roomAtWorldPoint(spawn, concaveFloor)?.id, "concave-room");
   });
 
-  test("reports blocking spawn failures as errors and disconnected room groups as non-blocking warnings", () => {
+  test("allows rooms without safe spawns and warns about disconnected room groups", () => {
     const singleRoom = navigation.evaluateDerivedWalkNavigation(floor);
     assert.equal(singleRoom.valid, true);
     assert.equal(singleRoom.diagnostics.length, 0);
@@ -261,13 +261,22 @@ await withModules(async (load) => {
         maxZ: 3.6,
       }],
     });
-    assert.equal(blocked.valid, false);
+    assert.equal(blocked.valid, true);
     assert.equal(blocked.rooms[0].spawnPose, null);
-    assert.equal(blocked.diagnostics.some((diagnostic) =>
-      diagnostic.code === "navigation.room-no-safe-spawn" &&
-      diagnostic.severity === "error" &&
-      diagnostic.path === "rooms[0].polygon"
-    ), true);
+    assert.deepEqual(blocked.diagnostics, []);
+  });
+
+  test("accepts a cupboard too narrow for a walk spawn", () => {
+    const cupboardFloor = structuredClone(floor);
+    cupboardFloor.rooms = [{
+      ...floor.rooms[0],
+      name: "Cupboard",
+      polygon: [[0, 0], [0.15, 0], [0.15, 1], [0, 1]],
+    }];
+    const result = navigation.evaluateDerivedWalkNavigation(cupboardFloor);
+    assert.equal(result.rooms[0].spawnPose, null);
+    assert.equal(result.valid, true);
+    assert.deepEqual(result.diagnostics, []);
   });
 
   test("restores valid scene state and ignores broken storage", () => {
