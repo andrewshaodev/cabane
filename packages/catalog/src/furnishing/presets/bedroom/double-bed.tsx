@@ -1,10 +1,18 @@
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../construction";
+import { CozyBedHeadboard, CozyWhiteBlueBedding } from "./cozy-white-blue-bed";
 
 export const DOUBLE_BED_SIZE = [1.7, 1.1, 2.15] as const;
 
 /** A 160 × 200 cm mattress in a freestanding oak and upholstered frame. */
-export function DoubleBed({ size = DOUBLE_BED_SIZE }: { size?: SceneItemSize }) {
+export function DoubleBed({
+  size = DOUBLE_BED_SIZE,
+  variant = "default",
+}: {
+  size?: SceneItemSize;
+  variant?: string | undefined;
+}) {
+  const cozy = variant === "cozy-white-blue";
   return (
     <group
       name="double-bed"
@@ -25,20 +33,26 @@ export function DoubleBed({ size = DOUBLE_BED_SIZE }: { size?: SceneItemSize }) 
         color="#cfaa76"
         radius={0.014}
       />
-      <RoundedFurniturePanel
-        name="double-bed-headboard"
-        size={[1.7, 0.88, 0.08]}
-        position={[0, 0.66, -1.03]}
-        color="#c9a571"
-        radius={0.022}
-      />
-      <RoundedFurniturePanel
-        name="double-bed-padded-headboard"
-        size={[1.56, 0.62, 0.07]}
-        position={[0, 0.74, -0.985]}
-        color="#d4c6af"
-        radius={0.035}
-      />
+      {cozy ? (
+        <CozyBedHeadboard />
+      ) : (
+        <>
+          <RoundedFurniturePanel
+            name="double-bed-headboard"
+            size={[1.7, 0.88, 0.08]}
+            position={[0, 0.66, -1.03]}
+            color="#c9a571"
+            radius={0.022}
+          />
+          <RoundedFurniturePanel
+            name="double-bed-padded-headboard"
+            size={[1.56, 0.62, 0.07]}
+            position={[0, 0.74, -0.985]}
+            color="#d4c6af"
+            radius={0.035}
+          />
+        </>
+      )}
       <RoundedFurniturePanel
         name="double-bed-160x200-mattress"
         size={[1.6, 0.2, 2]}
@@ -47,25 +61,31 @@ export function DoubleBed({ size = DOUBLE_BED_SIZE }: { size?: SceneItemSize }) 
         radius={0.04}
         outlineColor="#aaa18f"
       />
-      <RoundedFurniturePanel
-        name="double-bed-duvet"
-        size={[1.64, 0.1, 1.48]}
-        position={[0, 0.57, 0.27]}
-        color="#ded3c1"
-        radius={0.045}
-        outlineColor="#a79b87"
-      />
-      {[-0.4, 0.4].map((x) => (
-        <RoundedFurniturePanel
-          key={x}
-          name="double-bed-pillow"
-          size={[0.68, 0.11, 0.39]}
-          position={[x, 0.6, -0.68]}
-          color="#f4f0e6"
-          radius={0.05}
-          outlineColor="#b6ad9c"
-        />
-      ))}
+      {cozy ? (
+        <CozyWhiteBlueBedding />
+      ) : (
+        <>
+          <RoundedFurniturePanel
+            name="double-bed-duvet"
+            size={[1.64, 0.1, 1.48]}
+            position={[0, 0.57, 0.27]}
+            color="#ded3c1"
+            radius={0.045}
+            outlineColor="#a79b87"
+          />
+          {[-0.4, 0.4].map((x) => (
+            <RoundedFurniturePanel
+              key={x}
+              name="double-bed-pillow"
+              size={[0.68, 0.11, 0.39]}
+              position={[x, 0.6, -0.68]}
+              color="#f4f0e6"
+              radius={0.05}
+              outlineColor="#b6ad9c"
+            />
+          ))}
+        </>
+      )}
     </group>
   );
 }

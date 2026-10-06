@@ -632,6 +632,10 @@ await withModules(async (load) => {
       "floating-wall-shelf",
     );
     assert.equal(
+      filterCatalog(entries, "bedroom", "oak floating shelf")[0].modelId,
+      "oak-floating-shelf",
+    );
+    assert.equal(
       filterCatalog(entries, "hallway", "console table")[0].modelId,
       "hallway-console-table",
     );

@@ -498,6 +498,25 @@ choices; the first is the default. Models without metadata implicitly have one
 `default` choice and show no selector. Components receive the resolved `variant`
 prop. Variants share the model's bounds, dimensions, resizing and entity slots.
 
+## Cozy white and blue bed and oak shelf
+
+The existing `double-bed` (160 × 200 cm mattress) offers **Classic** (`default`)
+and **Cozy white a blue** (`cozy-white-blue`) in Arrange → Bedroom → Beds →
+Details → Variant. The new variant follows a supplied photo: four horizontal
+timber headboard planks, ivory bedding, layered cream and navy cushions, a navy
+foot throw and a softly rippled white blanket. Both retain the existing
+**170 × 110 × 215 cm [width, height, depth]** placement envelope and independent
+axis resizing. The reference supplies appearance, not measured dimensions.
+
+**Oak floating shelf** (`oak-floating-shelf`, public `OakFloatingShelf` and
+`OAK_FLOATING_SHELF_SIZE`) appears in Arrange → Bedroom → Storage. It is one
+plain oak board with concealed fixings, without a back lip, visible brackets or
+decorations. Its inferred default is **110 × 3.5 × 24 cm [width, height, depth]**.
+Each wall-supported instance has independent elevation and dimensions, so two
+instances can reproduce the reference's two heights. The origin is centered on
+X, at the underside Y=0, with its wall-facing back at Z=0 and front toward +Z.
+The photo is not bundled as an asset; all geometry and materials are procedural.
+
 ## Connected vehicles
 
 Three independently placeable devices appear in **Arrange → Outdoor → Vehicles**.
