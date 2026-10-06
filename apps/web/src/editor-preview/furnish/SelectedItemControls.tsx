@@ -8,6 +8,7 @@ import {
   type FloorSpec,
   type ItemPlacement,
   type SceneItemSpec,
+  type SceneItemSize,
   type SceneModelEditorDescriptor,
 } from "@cabane/engine";
 import { EditorActionButton } from "../../editor-chrome/EditorActionButton";
@@ -20,6 +21,8 @@ import {
   selectionToolbarPosition,
 } from "./selection-geometry";
 import { SelectedItemActionBar, type SelectedItemActions } from "./SelectedItemActionBar";
+
+import { SelectedItemResizeButton } from "./SelectedItemResizeButton";
 
 interface RotationSession {
   kind: "rotation";
@@ -55,6 +58,7 @@ export function SelectedItemControls({
   busy,
   onRotate,
   onMovePlacement,
+  onResize,
   onSelect,
   onBegin,
   onCommit,
@@ -67,6 +71,7 @@ export function SelectedItemControls({
   busy: boolean;
   onRotate: (id: string, radians: number) => void;
   onMovePlacement: (id: string, placement: ItemPlacement) => void;
+  onResize: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
   onSelect: (id: string) => void;
   onBegin: () => void;
   onCommit: () => void;
@@ -81,6 +86,7 @@ export function SelectedItemControls({
   const centerHandle = useRef<HTMLDivElement>(null);
   const right = useRef<HTMLDivElement>(null);
   const elevationHandle = useRef<HTMLDivElement>(null);
+  const resizeHandle = useRef<HTMLDivElement>(null);
   const readout = useRef<HTMLOutputElement>(null);
   const session = useRef<RotationSession | MoveSession | ElevationSession | null>(null);
   const [rotating, setRotating] = useState(false);
@@ -207,6 +213,7 @@ export function SelectedItemControls({
     placeHandle(centerHandle.current, center);
     placeHandle(right.current, rightPoint);
     placeHandle(elevationHandle.current, { x: rightPoint.x, y: rightPoint.y - 52 });
+    placeHandle(resizeHandle.current, { x: leftPoint.x, y: leftPoint.y + 52 });
     const corners = [];
     const c = Math.cos(transform.rotationYRadians),
       s = Math.sin(transform.rotationYRadians);
@@ -437,6 +444,16 @@ export function SelectedItemControls({
             onClick={() => onSelect(item.id)}
           />
         </div>
+        <SelectedItemResizeButton
+          ref={resizeHandle}
+          item={item}
+          definition={definition}
+          busy={busy}
+          onResize={onResize}
+          onBegin={onBegin}
+          onCommit={onCommit}
+          onCancel={onCancel}
+        />
         <output ref={readout} className="selected-item-angle" aria-label="Rotation angle">
           {Number(((normalizeRotation(rotation) * 180) / Math.PI).toFixed(1))}°
         </output>

@@ -648,6 +648,7 @@ export function HomeEditorScene({
                   floor={placementFloor}
                   busy={dragging || Boolean(furnishingEditor.transaction)}
                   onRotate={furnishingEditor.rotate}
+                  onResize={furnishingEditor.updateSize}
                   onMovePlacement={furnishingEditor.updatePlacement}
                   onSelect={furnishingEditor.select}
                   onBegin={() => {

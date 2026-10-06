@@ -184,9 +184,9 @@ test(
           }
           assert.fail("Elevation did not reach the expected persisted placement");
         };
-        const dragElevation = async (dy, cancel = false) => {
+        const dragControl = async (label, dy, cancel = false) => {
           const handle = page.getByRole("button", {
-            name: "Drag to change elevation",
+            name: label,
             exact: true,
           });
           const bounds = await handle.boundingBox();
@@ -199,6 +199,8 @@ test(
           if (cancel) await page.keyboard.press("Escape");
           await page.mouse.up();
         };
+        const dragElevation = (dy, cancel = false) =>
+          dragControl("Drag to change elevation", dy, cancel);
         await dragElevation(-40);
         const raised = await waitPlacement(
           (p) => elevationValue(p) > elevationValue(beforeElevation),
@@ -219,6 +221,39 @@ test(
         await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(raised));
         await page.getByRole("button", { name: "Undo", exact: true }).click();
         await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(beforeElevation));
+        const initialSize = (await read()).draft.sceneItems[index].size;
+        const waitSize = async (check) => {
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const item = (await read()).draft.sceneItems[index];
+            if (check(item.size)) {
+              assert.deepEqual(item.placement, beforeElevation);
+              return item.size;
+            }
+            await page.waitForTimeout(50);
+          }
+          assert.fail("Resize did not reach the expected persisted dimensions");
+        };
+        const dragResize = (dy, cancel = false) =>
+          dragControl("Drag to resize proportionally", dy, cancel);
+        await dragResize(-40);
+        const enlarged = await waitSize((size) => size[0] > initialSize[0]);
+        const ratio = enlarged[0] / initialSize[0];
+        enlarged.forEach((value, axis) =>
+          assert.ok(Math.abs(value / initialSize[axis] - ratio) < 1e-8),
+        );
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitSize((size) => JSON.stringify(size) === JSON.stringify(initialSize));
+        await page.getByRole("button", { name: "Redo", exact: true }).click();
+        await waitSize((size) => JSON.stringify(size) === JSON.stringify(enlarged));
+        await dragResize(40, true);
+        await waitSize((size) => JSON.stringify(size) === JSON.stringify(enlarged));
+        await dragResize(40);
+        const shrunk = await waitSize((size) => size[0] < enlarged[0]);
+        shrunk.forEach((value, axis) => assert.ok(Math.abs(value - initialSize[axis]) < 1e-8));
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitSize((size) => JSON.stringify(size) === JSON.stringify(enlarged));
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitSize((size) => JSON.stringify(size) === JSON.stringify(initialSize));
         if (index === 0) {
           await mkdir("test-results/elevation", { recursive: true });
           await page.screenshot({ path: "test-results/elevation/controls.png" });
