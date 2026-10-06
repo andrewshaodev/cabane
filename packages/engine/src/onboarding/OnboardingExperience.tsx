@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { CabaneDashboard } from "../CabaneDashboard";
 import { DemoHomeAssistantSession } from "../DemoHomeAssistantSession";
 import { HomeAssistantConnectionFlow } from "../HomeAssistantConnectionFlow";
@@ -8,6 +8,7 @@ import { useSetupRecord } from "../useSetupRecord";
 import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "../types";
 import type { BrowserDataImportResult } from "../browser-data-transfer";
 import { createLaunchOnboardingState } from "./onboarding-state";
+import { demoLightVisualManifest } from "./demo/demo-light-visuals";
 import { OnboardingIntroduction, type OnboardingLinks } from "./OnboardingIntroduction";
 import { useFirstControlConfirmation } from "./useFirstControlConfirmation";
 import "./onboarding.css";
@@ -44,6 +45,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   const { setupState, updateSetupRecord } = useSetupRecord(manifest.home.id, constructionApplied);
   const launch = setupState.record.launch ?? createLaunchOnboardingState();
   const isDemo = onboarding?.isDemo ?? false;
+  const dashboardManifest = useMemo(() => isDemo ? demoLightVisualManifest(manifest) : manifest, [isDemo, manifest]);
   const [surface, setSurface] = useState<"intro" | "connection" | null>(() => onboarding?.welcome ? "intro" : null);
   const [interacted, setInteracted] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -71,7 +73,7 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
     requestAnimationFrame(() => shell.current?.querySelector<HTMLElement>('summary[aria-label="Open scene menu"]')?.focus());
   };
   const dashboard = (bindingManager: RuntimeBindingProfileManager) => <CabaneDashboard
-    manifest={manifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
+    manifest={dashboardManifest} architectureModels={architectureModels} deviceModels={deviceModels} bindingManager={bindingManager}
     renderActionBarDeviceIcon={renderActionBarDeviceIcon}
     sessionPresentation={isDemo ? { mode: "demo", label: "Demo", detail: "Simulated devices", menuDescription: "Explore freely. These controls only change simulated devices in this browser." } : undefined}
     setupAction={isDemo ? { label: "Getting started", detail: "Explore the demo or build your home", attention: false, onOpen: () => setSurface("intro") }
