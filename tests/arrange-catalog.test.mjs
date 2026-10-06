@@ -19,6 +19,33 @@ await withModules(async (load) => {
   const floor = engine.neutralDemoManifest.floors[0];
   const { windowPlacements } = await load("/apps/web/src/editor-preview/furnish/placement/window-placement.ts");
 
+  const { createSceneItemId } = await load("/apps/web/src/editor-preview/furnish/scene-item-identity.ts");
+  test("UUID allocation retries an occupied identity without changing existing IDs", t => {
+    const occupied = "00000000-0000-4000-8000-000000000001";
+    const fresh = "00000000-0000-4000-8000-000000000002";
+    const reserved = [occupied, "legacy-item"];
+    let calls = 0;
+    t.mock.method(globalThis.crypto, "randomUUID", () => ++calls === 1 ? occupied : fresh);
+    assert.equal(createSceneItemId(reserved), fresh);
+    assert.equal(calls, 2);
+    assert.deepEqual(reserved, [occupied, "legacy-item"]);
+  });
+
+  test("new catalog instances and slots use UUIDs without knowledge of other items", () => {
+    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const ids = [];
+    const placement = { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 };
+    for (const modelId of ["concealed-cistern-toilet", "table-lamp"]) {
+      for (let i = 0; i < 3; i++) {
+        const item = createCatalogItem(get(modelId), placement, []);
+        assert.equal(item.modelId, modelId);
+        ids.push(item.id, ...(item.kind === "device" ? item.entitySlots.map(slot => slot.id) : []));
+      }
+    }
+    ids.forEach(id => assert.match(id, uuid));
+    assert.equal(new Set(ids).size, ids.length);
+  });
+
   test("catalog starts near the camera target and never falls back outside its view", () => {
     const entry = get("floor-lamp");
     const at = [2, 2];

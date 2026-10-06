@@ -1,12 +1,6 @@
 import { pointInsidePolygon, resolveItemTransform, type FloorSpec, type ItemPlacement, type SceneItemSpec } from "@cabane/engine";
 
-export const uniqueItemId = (preferred: string, ids: Iterable<string>) => {
-  const occupied = new Set(ids);
-  if (!occupied.has(preferred)) return preferred;
-  let suffix = 2;
-  while (occupied.has(`${preferred}-${suffix}`)) suffix += 1;
-  return `${preferred}-${suffix}`;
-};
+import { createSceneItemId } from "./scene-item-identity";
 
 const nearbyPlacement = (source: SceneItemSpec, floor?: FloorSpec): ItemPlacement => {
   const placement = source.placement;
@@ -41,7 +35,7 @@ export const duplicateSceneItem = (
 ): SceneItemSpec => {
   const occupied = new Set([...items.map((item) => item.id), ...reservedSlotIds,
     ...items.flatMap((item) => item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [])]);
-  const id = uniqueItemId(`${source.id}-copy`, occupied);
+  const id = createSceneItemId(occupied);
   occupied.add(id);
   let placement = nearbyPlacement(source, floor);
   if (floor && placement.kind === "wall") {
@@ -55,7 +49,7 @@ export const duplicateSceneItem = (
     ...common,
     kind: "device",
     entitySlots: source.entitySlots.map((slot) => {
-      const slotId = uniqueItemId(`${slot.id}-copy`, occupied);
+      const slotId = createSceneItemId(occupied);
       occupied.add(slotId);
       return { ...structuredClone(slot), id: slotId };
     }),

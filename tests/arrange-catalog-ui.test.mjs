@@ -267,8 +267,8 @@ await withModules(async (load) => {
       for (const modelId of ["concealed-cistern-toilet", "counter-stool", "table-lamp"]) {
         const item = createCatalogItem(entries.find(entry => entry.modelId === modelId),
           { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 }, [], [], "second");
-        item.id += "-copy";
-        if (item.kind === "device") item.entitySlots[0].id += "-copy";
+        item.id = `${modelId}-copy`;
+        if (item.kind === "device") item.entitySlots[0].id = `${modelId}-primary-copy`;
         project.sceneItems.push(item);
       }
       const record = createSeedProjectRecord(project, 1);
@@ -302,6 +302,9 @@ await withModules(async (load) => {
       }
       const draft = controller.snapshot.project;
       assert.equal(draft.sceneItems.length, 30);
+      for (const original of project.sceneItems) {
+        assert.deepEqual(draft.sceneItems.find(item => item.id === original.id), original);
+      }
       const result = validateHomeProject(draft, ownerProjectRegistries);
       assert.deepEqual(result.issues, [], JSON.stringify(result.issues));
       assert.equal(new Set(draft.sceneItems.map(item => item.id)).size, 30);
