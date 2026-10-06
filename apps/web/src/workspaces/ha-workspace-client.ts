@@ -7,7 +7,7 @@ export class HaWorkspaceUnavailableError extends Error {
 }
 
 export interface HaWorkspaceSummary { home_id: string; name: string; version: number }
-export interface HaWorkspaceDocument { version: number; document: string }
+export interface HaWorkspaceDocument { version: number; document: string | null }
 export type StorageMessage = { type: string; [key: string]: unknown };
 export type StorageSender = <T>(message: StorageMessage) => Promise<T>;
 

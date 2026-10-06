@@ -79,7 +79,8 @@ class WorkspaceStore:
             data = await self._load()
             document = data["documents"].get(home_id)
             if document is None:
-                return None
+                version = data["versions"].get(home_id)
+                return None if version is None else {"version": version, "document": None}
             try:
                 validate_document(home_id, document)
                 return {"version": data["versions"][home_id], "document": document}
@@ -91,7 +92,7 @@ class WorkspaceStore:
         async with self._lock:
             data = await self._load()
             current = data["versions"].get(home_id)
-            if current != expected_version or (current is not None and home_id not in data["documents"]):
+            if current != expected_version:
                 raise ConflictError()
             version = (current or 0) + 1
             data["versions"][home_id] = version

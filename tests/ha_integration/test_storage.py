@@ -47,9 +47,10 @@ class WorkspaceStoreTests(unittest.IsolatedAsyncioTestCase):
         store = WorkspaceStore(MemoryStore())
         await store.put("home-1", document(), None)
         await store.delete("home-1", 1)
-        self.assertIsNone(await store.get("home-1"))
+        self.assertEqual(await store.get("home-1"), {"version": 2, "document": None})
         with self.assertRaises(ConflictError):
             await store.put("home-1", document(), None)
+        self.assertEqual(await store.put("home-1", document(), 2), 3)
 
     async def test_bad_document_is_rejected(self):
         store = WorkspaceStore(MemoryStore())

@@ -159,7 +159,7 @@ test("workspace repository uses atomic real IndexedDB operations and never resee
       } finally { IDBObjectStore.prototype.add = originalAdd; }
       check((await repository.list()).length === countBeforeCreateFailure, "failed creation leaves no library card");
       const db = await new Promise((resolve, reject) => {
-        const request = indexedDB.open("cabane-projects-v2", 2);
+        const request = indexedDB.open("cabane-projects-v2");
         request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
       });
       const rawCount = await new Promise((resolve, reject) => {
@@ -231,7 +231,7 @@ test("workspace repository uses atomic real IndexedDB operations and never resee
       check(Boolean(entries.find(item => item.metadata.id === "damaged").error), "corruption is isolated to a recovery entry");
       check(await repository.readRaw("damaged") === "{broken", "corrupt source remains available");
       const recoveryDb = await new Promise((resolve, reject) => {
-        const request = indexedDB.open("cabane-projects-v2", 2);
+        const request = indexedDB.open("cabane-projects-v2");
         request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
       });
       await new Promise((resolve, reject) => {
