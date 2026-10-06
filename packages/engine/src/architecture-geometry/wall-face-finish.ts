@@ -16,6 +16,6 @@ export function wallEdgeFinish(wall: WallSpec, fallback: string): string {
     wall.edgeColor ??
     (wall.faceColors?.left && wall.faceColors.left === wall.faceColors.right
       ? wall.faceColors.left
-      : (wall.exteriorColor ?? fallback))
+      : ((wall.classification === "exterior" ? wall.exteriorColor : undefined) ?? fallback))
   );
 }

@@ -382,7 +382,7 @@ export function ConstructionInspector({
             <WallFinishFields
               editor={editor}
               wall={selectedWall}
-              isExterior={editor.tool !== "wall" && !!selectedWallIsExterior}
+              isExterior={!!selectedWallIsExterior}
             />
             <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
               Delete wall
