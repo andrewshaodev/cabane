@@ -121,12 +121,60 @@ await withModules(async (load) => {
             .querySelector('.editor-floor-controls [aria-pressed="true"]')
             ?.getAttribute("aria-label");
         assert.equal(selectedEditorFloor(), "first floor");
-        const beforeExplore = (await repository.load(seed.home.id)).draft;
-        await act(async () =>
-          [...document.querySelectorAll("button")]
-            .find((button) => button.textContent === "Explore")
-            .click(),
+        const cameraButtons = [...document.querySelectorAll(".direction-camera button")];
+        assert.deepEqual(
+          cameraButtons.map((button) => button.getAttribute("aria-label")),
+          ["3D", "2D", "Explore"],
         );
+        assert.deepEqual(
+          cameraButtons.map((button) => button.getAttribute("aria-keyshortcuts")),
+          ["Shift+1", "Shift+2", "Shift+3"],
+        );
+        assert.equal(cameraButtons[0].disabled, mode === "construct");
+        const shortcut = async (digit, options = {}, target = window) => {
+          const event = new window.KeyboardEvent("keydown", {
+            key: ["!", "@", "#"][digit - 1],
+            code: `Digit${digit}`,
+            shiftKey: true,
+            bubbles: true,
+            cancelable: true,
+            ...options,
+          });
+          await act(async () => target.dispatchEvent(event));
+          return event.defaultPrevented;
+        };
+        if (mode === "furnish") {
+          for (const options of [
+            { shiftKey: false },
+            { ctrlKey: true },
+            { altKey: true },
+            { metaKey: true },
+            { repeat: true },
+            { isComposing: true },
+          ]) {
+            assert.equal(await shortcut(2, options), false);
+            assert.equal(cameraButtons[0].getAttribute("aria-pressed"), "true");
+          }
+          const input = document.createElement("input");
+          document.body.append(input);
+          assert.equal(await shortcut(2, {}, input), false);
+          input.remove();
+          const modal = document.createElement("section");
+          modal.setAttribute("role", "dialog");
+          modal.setAttribute("aria-modal", "true");
+          document.body.append(modal);
+          assert.equal(await shortcut(2), false, "view shortcuts stay behind modal dialogs");
+          modal.remove();
+          assert.equal(await shortcut(2), true);
+          assert.equal(cameraButtons[1].getAttribute("aria-pressed"), "true");
+          assert.equal(await shortcut(1), true);
+          assert.equal(cameraButtons[0].getAttribute("aria-pressed"), "true");
+        } else {
+          assert.equal(await shortcut(1), false, "3D is unavailable in Construct");
+          assert.equal(cameraButtons[1].getAttribute("aria-pressed"), "true");
+        }
+        const beforeExplore = (await repository.load(seed.home.id)).draft;
+        assert.equal(await shortcut(3), true);
         const dialog = document.querySelector('[aria-label="Explore draft"]');
         assert.ok(dialog);
         assert.ok(dialog.querySelector(".mode-walk"), "Explore uses the shared walking dashboard");
@@ -148,12 +196,16 @@ await withModules(async (load) => {
             "Explore must not switch the hidden editor",
           );
         }
-        await act(async () =>
-          [...dialog.querySelectorAll("button")]
-            .find((button) => button.textContent.startsWith("Back to editor"))
-            .click(),
-        );
+        assert.equal(await shortcut(2), true, "Shift+2 returns from Explore to the plan");
         assert.equal(document.querySelector('[aria-label="Explore draft"]'), null);
+        assert.equal(cameraButtons[1].getAttribute("aria-pressed"), "true");
+        if (mode === "furnish") {
+          await shortcut(3);
+          assert.ok(document.querySelector('[aria-label="Explore draft"]'));
+          await shortcut(1);
+          assert.equal(document.querySelector('[aria-label="Explore draft"]'), null);
+          assert.equal(cameraButtons[0].getAttribute("aria-pressed"), "true");
+        }
         assert.equal(selectedEditorFloor(), "first floor");
         assert.deepEqual(
           (await repository.load(seed.home.id)).draft,

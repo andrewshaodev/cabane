@@ -1,5 +1,5 @@
 import { useCabaneDom } from "@cabane/engine";
-import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
 import type { EditorMode } from "../editor-chrome/EditorModeNav";
 import type {
   useConstructEditor,
@@ -11,6 +11,7 @@ import type { useFurnishingEditor } from "../editor-preview/furnish";
 interface ShortcutContext {
   clearConstructionSelection: () => void;
   clearFurnishingSelection: () => void;
+  closeWalk: () => void;
   constructEditor: ReturnType<typeof useConstructEditor>;
   constructMeasure: ReturnType<typeof useConstructMeasure>;
   dragging: boolean;
@@ -27,6 +28,9 @@ interface ShortcutContext {
   redoProject: () => void;
   selectedOpening: import("@cabane/engine").EditorWallAttachment | undefined;
   undoProject: () => void;
+  unsettled: boolean;
+  setCameraView: (view: "3d" | "top") => void;
+  walkButton: RefObject<HTMLButtonElement | null>;
   setPendingRoomPaintId: Dispatch<SetStateAction<string | null>>;
   setDragging: Dispatch<SetStateAction<boolean>>;
 }
@@ -34,6 +38,7 @@ interface ShortcutContext {
 export function useHomeEditorShortcuts({
   clearConstructionSelection,
   clearFurnishingSelection,
+  closeWalk,
   constructEditor,
   constructMeasure,
   dragging,
@@ -50,13 +55,16 @@ export function useHomeEditorShortcuts({
   redoProject,
   selectedOpening,
   undoProject,
+  unsettled,
+  setCameraView,
+  walkButton,
   setPendingRoomPaintId,
   setDragging,
 }: ShortcutContext) {
   const dom = useCabaneDom();
   const copiedEditorElement = useRef<{ mode: "construct" | "furnish"; id: string } | null>(null);
   useEffect(() => {
-    if (editingLocked || previewOpen || publishOpen) return;
+    if (editingLocked || publishOpen) return;
     const handleConstructShortcut = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.isComposing) return;
       // A furnishing drag is committed on release; don't delete its target or
@@ -77,6 +85,34 @@ export function useHomeEditorShortcuts({
         !event.ctrlKey
       )
         return;
+      if (
+        event.shiftKey &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.altKey &&
+        !event.repeat &&
+        ["Digit1", "Digit2", "Digit3"].includes(event.code)
+      ) {
+        if (
+          mode === "connect" ||
+          unsettled ||
+          dom.root.querySelector(
+            '.shortcuts-workspace, dialog[open], [aria-modal="true"]:not(.direction-preview-dialog)',
+          )
+        )
+          return;
+        if (event.code === "Digit1" && mode === "construct") return;
+        event.preventDefault();
+        if (event.code === "Digit3") {
+          // Keep pointer lock and its error handling on the same user-activation path.
+          if (!previewOpen) walkButton.current?.click();
+        } else {
+          if (previewOpen) closeWalk();
+          if (mode === "furnish") setCameraView(event.code === "Digit1" ? "3d" : "top");
+        }
+        return;
+      }
+      if (previewOpen) return;
       const key = event.key.toLowerCase();
       const historyModifier = (event.metaKey || event.ctrlKey) && !event.altKey;
       if (historyModifier && key === "z") {
@@ -173,6 +209,7 @@ export function useHomeEditorShortcuts({
   }, [
     clearConstructionSelection,
     clearFurnishingSelection,
+    closeWalk,
     constructEditor,
     constructMeasure,
     dragging,
@@ -189,6 +226,9 @@ export function useHomeEditorShortcuts({
     redoProject,
     selectedOpening,
     undoProject,
+    unsettled,
+    setCameraView,
+    walkButton,
     dom,
     setPendingRoomPaintId,
     setDragging,
