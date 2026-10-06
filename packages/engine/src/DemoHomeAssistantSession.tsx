@@ -5,3 +5,4 @@ export {
   deriveDemoSessionDefinition,
   type DemoSessionDefinition,
 } from "./onboarding/demo/DemoHomeAssistantSession";
+export { demoLightVisualManifest } from "./onboarding/demo/demo-light-visuals";

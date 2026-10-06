@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { CabaneDashboard } from "../CabaneDashboard";
-import { DemoHomeAssistantSession } from "../DemoHomeAssistantSession";
+import { DemoHomeAssistantSession, demoLightVisualManifest } from "../DemoHomeAssistantSession";
 import { HomeAssistantConnectionFlow } from "../HomeAssistantConnectionFlow";
 import { HomeAssistantRuntimeValueProvider, useHomeAssistantRuntime } from "../HomeAssistantRuntime";
 import { useRuntimeBindingProfile, type RuntimeBindingProfileManager } from "../RuntimeBindingSetup";
@@ -8,7 +8,6 @@ import { useSetupRecord } from "../useSetupRecord";
 import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "../types";
 import type { BrowserDataImportResult } from "../browser-data-transfer";
 import { createLaunchOnboardingState } from "./onboarding-state";
-import { demoLightVisualManifest } from "./demo/demo-light-visuals";
 import { OnboardingIntroduction, type OnboardingLinks } from "./OnboardingIntroduction";
 import { useFirstControlConfirmation } from "./useFirstControlConfirmation";
 import "./onboarding.css";
