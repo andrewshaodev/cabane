@@ -351,9 +351,6 @@ export function ConstructionInspector({
           <button type="button" onClick={editor.deleteSelected}>Delete opening</button>
         </div>
       )}
-      </div>
-      {referencePlanControls}
-      <div className="construction-inspector__context" inert={inert}>
       {validationIssues.length > 0 && (
         <section
           className="construction-inspector__validation"
@@ -414,6 +411,9 @@ export function ConstructionInspector({
           </ul>
         </section>
       )}
+      </div>
+      {referencePlanControls}
+      <div className="construction-inspector__context" inert={inert}>
       {planImportControls}
       {onRoofChange && <details className="construction-inspector__floor-disclosure">
         <SidebarSectionSummary icon="roof" title="Roof" description="Set roof direction and colors." />

@@ -164,7 +164,7 @@ side but no hinge, slide direction, or leaf count.
 ## Reference plans
 
 Construct offers a persistent Reference plan disclosure below the Edit the plan
-introduction or active tool/selection properties, and above diagnostics.
+introduction or active tool/selection properties and contextual diagnostics.
 Its expanded contents include a Show reference plan checkbox and opacity slider. Roof, Spawn area, Scale & heights, and Tutorial remain below those properties. The
 active tutorial retains its floating desktop placement. New or restarted
 tutorials begin with an optional Add a reference plan step; Skip proceeds to
