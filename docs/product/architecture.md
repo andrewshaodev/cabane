@@ -78,6 +78,11 @@ with the existing renderer and scene supplied by the canvas. No portal rendering
 contract or dependency is added to the engine, catalog, or home.
 
 The first gun equip shows a compact introduction styled like the editor tutorial.
-It explains light toggling and paired portal shortcuts with mouse or touch controls.
+It explains device toggling and paired portal shortcuts with mouse or touch controls.
 Users dismiss it with Got it (or Enter while the pointer is captured); dismissal
 stays in browser-local storage, with a session fallback if storage is unavailable.
+
+Gun targeting supports lights, fans, AC climate modes, televisions/media players,
+and sprinkler switches or valves. One unambiguous, available binding is required;
+explicit slot targets remain scoped to that slot. Shots switch power on/off or
+open/close valves through the existing guarded runtime commands.

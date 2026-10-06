@@ -64,7 +64,7 @@ export function LaserTutorial({ coarsePointer }: { coarsePointer: boolean }) {
         </div>
       </div>
       <p>
-        <strong>Toggle lights.</strong> Aim at a connected light, then{" "}
+        <strong>Toggle devices.</strong> Aim at a connected light, fan, AC, sprinkler, or TV, then{" "}
         {coarsePointer ? "tap the lightning button" : "left-click or press F"} to turn it on or off.
       </p>
       <p>

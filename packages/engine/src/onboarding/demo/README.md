@@ -21,7 +21,7 @@ Changing the manifest or remounting the provider resets the memory-only state.
 | lock                | Lock/unlock in memory                                                                                 |
 | alarm_control_panel | Arm home/away and disarm without a code                                                               |
 | binary_sensor       | Fixed closed/off or occupied/connected state based on device class                                    |
-| media_player        | Starts playing the demo playlist; play/pause and volume controls update in memory                     |
+| media_player        | Starts playing the demo playlist; power, play/pause and volume controls update in memory              |
 
 Classless status sensors start idle; unknown sensor classes show unknown; unsupported domains remain unmapped. The
 adapter prefers fan and valve domains over a switch fallback, so sprinklers use
@@ -40,3 +40,5 @@ No transport, credentials, persistence, global singleton, or imports from `home/
 The only runtime value imported from `HomeAssistantRuntime` is its context value
 provider; the real client and hook are forbidden by the import check. Add future
 simulation behavior here, never as `isDemo` branches in controls or models.
+
+Fan power and valve open/close commands also update only in memory.

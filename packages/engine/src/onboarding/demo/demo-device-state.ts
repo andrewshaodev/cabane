@@ -6,6 +6,8 @@ const supportedDomains = [
   "fan",
   "valve",
   "switch",
+  "fan",
+  "valve",
   "climate",
   "cover",
   "sensor",
@@ -58,6 +60,10 @@ export function createDemoDeviceState(
         rgb_color: [255, 211, 160],
       });
       break;
+    case "valve":
+      state = "closed";
+      Object.assign(attributes, { current_position: 0, supported_features: 3 });
+      break;
     case "cover":
       state = "open";
       Object.assign(attributes, { current_position: 65, supported_features: 7 });
@@ -95,7 +101,7 @@ export function createDemoDeviceState(
     case "media_player":
       state = "playing";
       Object.assign(attributes, {
-        supported_features: 16389,
+        supported_features: 16773,
         volume_level: 0.45,
         media_title: "Demo playlist",
       });
@@ -150,6 +156,7 @@ export function applyDemoServiceCall(
     }
     case "light":
     case "switch":
+    case "fan":
       if (!["turn_on", "turn_off"].includes(call.service)) return invalid();
       next = call.service === "turn_on" ? "on" : "off";
       if (call.domain === "light" && call.service === "turn_on") {
@@ -173,6 +180,11 @@ export function applyDemoServiceCall(
           attributes.color_mode = "rgb";
         }
       }
+      break;
+    case "valve":
+      if (!["open_valve", "close_valve"].includes(call.service)) return invalid();
+      next = call.service === "open_valve" ? "open" : "closed";
+      attributes.current_position = next === "open" ? 100 : 0;
       break;
     case "cover": {
       let position: number;
@@ -210,7 +222,9 @@ export function applyDemoServiceCall(
               : "idle";
       break;
     case "media_player":
-      if (call.service === "media_play") next = "playing";
+      if (call.service === "turn_on") next = "on";
+      else if (call.service === "turn_off") next = "off";
+      else if (call.service === "media_play") next = "playing";
       else if (call.service === "media_pause") next = "paused";
       else if (call.service === "volume_set") {
         allowed = ["volume_level"];
