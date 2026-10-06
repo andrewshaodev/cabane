@@ -40,7 +40,7 @@
       "basis": "inferred",
       "id": "villa-surface-colors",
       "subjectId": "south-garden-villa",
-      "summary": "Room floor colors are restrained solid toon cues: warm wood tones for living and bedrooms, pale stone for circulation and bathrooms, and gray for the garage. They are not physical materials or textures."
+      "summary": "The accepted demo export uses light oak in the main stair hall, open-plan living room and gallery, horizontal light oak in bedroom four, dark walnut in the primary bedroom and dressing room, square tile in the primary bathroom, and terrazzo in the central stair hall. The front driveway and entry path use limestone; terrace finishes are retained."
     },
     {
       "basis": "user",
@@ -65,12 +65,24 @@
       "id": "villa-wraparound-balcony",
       "subjectId": "first-floor:platform-27",
       "summary": "The default home includes the first-floor wraparound balcony from the supplied project export, with travertine finish and 1 m railings. Balcony access uses double white French doors at the existing south-facing window and the west-facing primary bedroom and bedroom four windows. Opening IDs and widths are retained; the 2.3 m door height is inferred."
+    },
+    {
+      "basis": "user",
+      "id": "demo-home-export-v5",
+      "subjectId": "a9654d69-cdb3-4f98-9ac1-39159767dbd6",
+      "summary": "The accepted Demo home export replaces the central stair with a 1 m wide left-turning L-shaped stair and left railing, removes the east-wall guest-bathroom window, updates room finishes and furnishings, and adds a ceiling fan, front-garden rotating sprinkler and primary-bedroom camera. Exported dimensions and positions are retained. The replacement coat rack and reading chair retain their previous repository IDs. Fan and sprinkler use local typed slots; demo simulation starts the fan at 50% speed and the sprinkler open. The camera has no simulated feed."
+    },
+    {
+      "id": "demo-living-comfort-v6",
+      "basis": "user",
+      "subjectId": "open-plan-living",
+      "summary": "The requested first floor is interpreted as the ground-floor living/dining level matching the supplied coordinates and television. Added a west-wall AC between the TV and window at offset 5.3177 m, elevation 1.8898 m and depth offset 0.004 m; a pedestal fan at [13.5207, 17.5304] rotated -128.0852 degrees; and a connected floor lamp at [0.5129, 17.5525]. Catalog default dimensions and 1 mm floor support gaps are inferred. Local slots use existing demo simulation: AC starts heating, fan starts at 50%, and lamp starts on at night."
     }
   ],
   "home": {
     "id": "a9654d69-cdb3-4f98-9ac1-39159767dbd6",
     "locale": "en",
-    "name": "South Garden Villa",
+    "name": "Demo home",
     "palette": {
       "accent": "#d58b5d",
       "exterior": "#d6c3aa",
@@ -91,10 +103,15 @@
     "first-floor:window-26": {},
     "front-entry-door": {},
     "garage-kitchen-door": {},
+    "garage-motorized-vehicle-door": {
+      "coverSlot": {
+        "autoMap": "unique-compatible",
+        "id": "garage-motorized-vehicle-door-entity"
+      }
+    },
     "garage-pantry-door": {},
     "garage-utility-door": {},
     "garage-west-window": {},
-    "guest-bathroom-east-window": {},
     "guest-east-window": {},
     "kitchen-stair-passage": {},
     "landing-north-window": {},
@@ -112,13 +129,7 @@
     "primary-west-window": {},
     "stair-hall-south-passage": {},
     "utility-foyer-door": {},
-    "utility-pantry-door": {},
-    "garage-motorized-vehicle-door": {
-      "coverSlot": {
-        "id": "garage-motorized-vehicle-door-entity",
-        "autoMap": "unique-compatible"
-      }
-    }
+    "utility-pantry-door": {}
   },
   "roomProfiles": {
     "bedroom-four": {
@@ -153,7 +164,7 @@
     }
   },
   "schemaVersion": 2,
-  "seedRevision": "south-garden-villa-wraparound-balcony-v4",
+  "seedRevision": "demo-home-living-comfort-v6",
   "shortcuts": [
     {
       "action": "construct-mode",

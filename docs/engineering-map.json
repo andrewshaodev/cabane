@@ -14,7 +14,7 @@
         "symbols": ["CabaneApp", "CabaneDomProvider", "HomeAssistantHostSessionProvider"]
       }
     ],
-    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA\u2019s auto-height wrapper while preserving sidebar flow and safe-area padding.",
+    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.",
     "checks": ["test:browser", "build", "build:panel"]
   },
   {
@@ -175,7 +175,7 @@
         "symbols": ["HomeAssistantRuntimeProvider", "useHomeAssistantRuntime"]
       }
     ],
-    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable.",
+    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable. Demo fans start at 50% speed and valves start open; normal controls update their in-memory state and existing catalog animations respect reduced motion.",
     "checks": ["verify:runtime"]
   },
   {
@@ -262,7 +262,8 @@
       "packages/catalog/src/furnishing/presets/living-room/rug-patterns.ts",
       "packages/catalog/src/device/presets/media/television-picture.tsx",
       "packages/catalog/src/device/presets/media/television-superman.tsx",
-      "packages/catalog/src/device/presets/media/television-comic-patch.tsx"
+      "packages/catalog/src/device/presets/media/television-comic-patch.tsx",
+      "packages/catalog/src/device/presets/lighting/rattan-bell-pendant"
     ],
     "interfaces": [
       {
@@ -270,7 +271,7 @@
         "symbols": ["stableFurnishingRegistry"]
       }
     ],
-    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Roll-up slats own smooth, reversible position tracking with retained geometry and immediate reduced-motion poses. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue. TV comic artwork uses ordered depth bias with depth testing retained; active wall TVs omit glass reflections and reduced motion freezes the flight.",
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry. Single-window curtains reuse independent window-fit placement and variant metadata. Framed hinged leaves fit their jamb aperture and retain rear-corner sweep clearance. Flush and concealed styles expose explicit finish-plane controls. Roll-up slats own smooth, reversible position tracking with retained geometry and immediate reduced-motion poses. Catalog activity follows resolved state; decorative holograms preserve depth occlusion and physical bounds, and reduced motion retains a static active cue. TV comic artwork uses ordered depth bias with depth testing retained; active wall TVs omit glass reflections and reduced motion freezes the flight. Rattan bell pendants are light devices; their retired furnishing entry remains hidden for saved-project compatibility.",
     "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
   },
   {
@@ -287,7 +288,7 @@
         "symbols": ["WalkToolDefinition", "WalkToolProps", "WalkToolNavigation", "WalkToolStorage"]
       }
     ],
-    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.",
+    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal. Engine targeting toggles one available light, fan, climate, media-player, switch or valve binding, preserving explicit slot scope and rejecting ambiguous targets.",
     "checks": ["test:unit", "test:browser", "verify:boundaries", "build"]
   },
   {

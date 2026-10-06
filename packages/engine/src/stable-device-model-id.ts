@@ -18,6 +18,7 @@ export type StableDeviceModelId =
   | "connected-frame-oak"
   | "connected-frame-black"
   | "floor-lamp"
+  | "rattan-bell-pendant"
   | "terracotta-pendant"
   | "low-garden-lantern"
   | "garden-lantern-pole"

@@ -37,6 +37,18 @@ await withModules(async (load) => {
   const { createSceneItemId } = await load(
     "/apps/web/src/editor-preview/furnish/scene-item-identity.ts",
   );
+  test("rattan pendants are offered only as bindable light devices", () => {
+    const matches = entries.filter((entry) => entry.modelId === "rattan-bell-pendant");
+    assert.equal(matches.length, 1);
+    const entry = get("rattan-bell-pendant");
+    const placement = catalogStartPlacement(entry, floor, [2, 2]).placement;
+    const item = createCatalogItem(entry, placement, []);
+    assert.equal(item.kind, "device");
+    assert.equal(item.entitySlots.length, 1);
+    assert.deepEqual(item.entitySlots[0].compatibleDomains, ["light"]);
+    assert.equal(ownerProjectRegistries.furnishingModels["rattan-bell-pendant"].legacyOnly, true);
+  });
+
   test("UUID allocation retries an occupied identity without changing existing IDs", (t) => {
     const occupied = "00000000-0000-4000-8000-000000000001";
     const fresh = "00000000-0000-4000-8000-000000000002";
@@ -738,6 +750,7 @@ await withModules(async (load) => {
     for (const modelId of [
       "three-seat-sofa",
       "arched-mirror",
+      "rattan-bell-pendant",
       "woven-pendant",
       "washing-machine",
       "wall-switch",

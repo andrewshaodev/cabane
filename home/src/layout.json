@@ -72,7 +72,7 @@
         {
           "finish": {
             "kind": "preset",
-            "preset": "travertine"
+            "preset": "limestone"
           },
           "id": "front-driveway",
           "polygon": [
@@ -85,7 +85,7 @@
         {
           "finish": {
             "kind": "preset",
-            "preset": "travertine"
+            "preset": "limestone"
           },
           "id": "front-entry-path",
           "polygon": [
@@ -158,19 +158,6 @@
           "variant": "plain",
           "wallId": "ground-east-wall",
           "widthPlanUnits": 2.2
-        },
-        {
-          "glazing": "privacy",
-          "id": "guest-bathroom-east-window",
-          "kind": "window",
-          "offsetFromWallStartPlanUnits": 6.05,
-          "openingHeightMeters": 1.1,
-          "operation": "fixed",
-          "panelCount": 1,
-          "sillHeightMeters": 1.2,
-          "variant": "plain",
-          "wallId": "ground-east-wall",
-          "widthPlanUnits": 1.4
         },
         {
           "glazing": "clear",
@@ -352,7 +339,7 @@
           "finish": "white",
           "id": "garage-motorized-vehicle-door",
           "kind": "door",
-          "offsetFromWallStartPlanUnits": 1.0,
+          "offsetFromWallStartPlanUnits": 1,
           "openingHeightMeters": 2.4,
           "openingSide": "right",
           "operation": "roll-up",
@@ -393,8 +380,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#c9b79d",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "terrazzo"
           },
           "id": "stair-hall",
           "name": "Central stair hall",
@@ -409,6 +396,10 @@
           "accent": "#c9a477",
           "dashboardSlots": [],
           "devices": [],
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
           "id": "ground-floor:room-2",
           "name": "Stair hall",
           "polygon": [
@@ -425,8 +416,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#c8b697",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "light-oak"
           },
           "id": "open-plan-living",
           "name": "Open kitchen, dining and living room",
@@ -827,8 +818,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#ad8d68",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "dark-walnut"
           },
           "id": "primary-bedroom",
           "name": "Primary bedroom",
@@ -845,8 +836,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#c9b79d",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "light-oak"
           },
           "id": "upper-landing",
           "name": "Gallery landing",
@@ -865,8 +856,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#b4936e",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "light-oak-horizontal"
           },
           "id": "bedroom-four",
           "name": "Bedroom four",
@@ -883,8 +874,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#d2cec4",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "square-tile"
           },
           "id": "primary-bathroom",
           "name": "Primary bathroom",
@@ -900,8 +891,8 @@
           "dashboardSlots": [],
           "devices": [],
           "floorFinish": {
-            "color": "#b79a78",
-            "kind": "solid"
+            "kind": "preset",
+            "preset": "dark-walnut"
           },
           "id": "primary-dressing",
           "name": "Primary dressing room",
@@ -1050,13 +1041,17 @@
   ],
   "stairs": [
     {
-      "at": [12, 6],
+      "at": [13.3, 5.099999999999999],
       "id": "central-stair",
       "lowerFloorId": "ground-floor",
+      "lowerRunMeters": 2.7,
+      "railings": "left",
       "rotationYRadians": 0,
-      "runMeters": 4.2,
+      "shape": "l-shaped",
+      "turn": "left",
       "upperFloorId": "first-floor",
-      "widthMeters": 1.4
+      "upperRunMeters": 1.2,
+      "widthMeters": 1
     }
   ]
 }

@@ -66,11 +66,14 @@ and editor walkthrough contexts prevent real service mutation.
 Demo simulation is isolated under `packages/engine/src/onboarding/demo/`, behind
 the existing `DemoHomeAssistantSession` entry point and runtime value interface.
 It derives synthetic IDs from local slots, handles supported commands only in
-memory, including media-player play/pause and volume for the simulated demo
+memory, including fan power, valve open/close, media-player power, play/pause and volume for the simulated demo
 speaker and television, lock/unlock, and alarm home/away/disarm. Classless status
 sensors start idle, and simulated lights start on when the demo opens in night
 lighting, following the saved preview mode or local time. Visitors can still turn
 them off independently.
+Fans start on at 50% speed and valves start fully open, activating the existing
+fan and sprinkler animations. Their normal power, speed and valve controls update
+only the in-memory demo state; reduced motion still suppresses animation.
 Outdoor devices receive bindings without an area. It resets when remounted or given a different manifest. It never writes
 projects/authentication or opens a network connection. Import checks restrict
 access to its internals and its dependencies. Dashboard controls and real HA

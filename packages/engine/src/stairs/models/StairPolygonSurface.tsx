@@ -19,12 +19,15 @@ export function StairPolygonSurface({
   color?: string;
   emissive?: string;
 } & Omit<ThreeElements["mesh"], "position" | "rotation">) {
+  const polygonKey = JSON.stringify(polygon);
   const shape = useMemo(() => {
     const result = new Shape();
-    polygon.forEach(([x, z], i) => (i ? result.lineTo(x, -z) : result.moveTo(x, -z)));
+    const points = JSON.parse(polygonKey) as typeof polygon;
+    points.forEach(([x, z], i) => (i ? result.lineTo(x, -z) : result.moveTo(x, -z)));
     result.closePath();
     return result;
-  }, [polygon]);
+  }, [polygonKey]);
+  const extrusionOptions = useMemo(() => ({ depth: thickness, bevelEnabled: false }), [thickness]);
   return (
     <mesh
       {...props}
@@ -33,7 +36,7 @@ export function StairPolygonSurface({
       castShadow
       receiveShadow
     >
-      <extrudeGeometry args={[shape, { depth: thickness, bevelEnabled: false }]} />
+      <extrudeGeometry args={[shape, extrusionOptions]} />
       <ToonMaterial
         color={emissive ? "#000000" : color}
         {...omitUndefinedProperties({ emissive: emissive })}

@@ -1,9 +1,9 @@
 {
-  "revision": 4,
-  "fingerprint": "50e99988c05e0a9e6b5e75c99d5d320f5a365c14679d43c4f529f79962598b5f",
+  "revision": 7,
+  "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
   "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
   "breakingChanges": [
-    "No persisted fields or model IDs change. Existing homes remain compatible; update the panel to receive stable toon lighting during camera movement and the TV rendering fix and animation."
+    "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
   ],
   "history": [
     {
@@ -25,6 +25,27 @@
       "summary": "Animate garage door opening and closing smoothly",
       "breakingChanges": [
         "No persisted data or model IDs change. Existing homes remain compatible; update the panel to receive smooth garage-door motion."
+      ]
+    },
+    {
+      "revision": 4,
+      "summary": "Add the woven rattan bell pendant catalog preset",
+      "breakingChanges": [
+        "Existing homes remain compatible. Homes using rattan-bell-pendant require the matching panel release; older panels must update before loading this new model."
+      ]
+    },
+    {
+      "revision": 5,
+      "summary": "Make rattan bell pendants bindable light devices",
+      "breakingChanges": [
+        "Existing furnishing pendants remain readable as hidden legacy items. New rattan-bell-pendant instances are light devices and require the matching panel release."
+      ]
+    },
+    {
+      "revision": 6,
+      "summary": "Soften rattan pendant lighting and lower its bulb into the shade chamber",
+      "breakingChanges": [
+        "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
       ]
     }
   ]

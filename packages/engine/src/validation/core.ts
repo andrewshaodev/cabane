@@ -112,6 +112,7 @@ export const STABLE_MODELS = new Set([
   "connected-frame-oak",
   "connected-frame-black",
   "floor-lamp",
+  "rattan-bell-pendant",
   "terracotta-pendant",
   "low-garden-lantern",
   "pergola-string-lights",

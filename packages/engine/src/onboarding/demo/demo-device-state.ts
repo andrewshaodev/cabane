@@ -3,6 +3,8 @@ import type { EntityBindingSlotSpec, EntityId, EntityStateSnapshot } from "../..
 
 const supportedDomains = [
   "light",
+  "fan",
+  "valve",
   "switch",
   "climate",
   "cover",
@@ -39,6 +41,14 @@ export function createDemoDeviceState(
   };
   let state = "off";
   switch (domain) {
+    case "fan":
+      state = "on";
+      Object.assign(attributes, { percentage: 50, supported_features: 49 });
+      break;
+    case "valve":
+      state = "open";
+      Object.assign(attributes, { current_position: 100, supported_features: 7 });
+      break;
     case "light":
       state = night ? "on" : "off";
       Object.assign(attributes, {
@@ -85,7 +95,7 @@ export function createDemoDeviceState(
     case "media_player":
       state = "playing";
       Object.assign(attributes, {
-        supported_features: 16389,
+        supported_features: 16773,
         volume_level: 0.45,
         media_title: "Demo playlist",
       });
@@ -115,6 +125,29 @@ export function applyDemoServiceCall(
   let next = state.state;
   let allowed: readonly string[] = [];
   switch (call.domain) {
+    case "fan":
+      if (call.service === "turn_off") next = "off";
+      else if (call.service === "turn_on") {
+        next = "on";
+        if (attributes.percentage === 0) attributes.percentage = 50;
+      } else if (call.service === "set_percentage") {
+        allowed = ["percentage"];
+        attributes.percentage = Math.round(number(data.percentage, 0, 100));
+        next = attributes.percentage === 0 ? "off" : "on";
+      } else return invalid();
+      break;
+    case "valve": {
+      let position: number;
+      if (call.service === "open_valve") position = 100;
+      else if (call.service === "close_valve") position = 0;
+      else if (call.service === "set_valve_position") {
+        allowed = ["position"];
+        position = Math.round(number(data.position, 0, 100));
+      } else return invalid();
+      attributes.current_position = position;
+      next = position === 0 ? "closed" : "open";
+      break;
+    }
     case "light":
     case "switch":
       if (!["turn_on", "turn_off"].includes(call.service)) return invalid();
@@ -177,7 +210,9 @@ export function applyDemoServiceCall(
               : "idle";
       break;
     case "media_player":
-      if (call.service === "media_play") next = "playing";
+      if (call.service === "turn_on") next = "on";
+      else if (call.service === "turn_off") next = "off";
+      else if (call.service === "media_play") next = "playing";
       else if (call.service === "media_pause") next = "paused";
       else if (call.service === "volume_set") {
         allowed = ["volume_level"];

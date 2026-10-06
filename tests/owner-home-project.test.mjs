@@ -31,7 +31,7 @@ await withModules(async (load) => {
     );
     assert.deepEqual(ownerHomeProject, { ...metadata, ...layout, sceneItems });
     assert.equal(ownerHomeProject.floors.length, 2);
-    assert.equal(ownerHomeProject.sceneItems.length, 154);
+    assert.equal(ownerHomeProject.sceneItems.length, 165);
     assert.deepEqual(engine.validateHomeProject(ownerHomeProject, registries).issues, []);
     assert.deepEqual(homeExtensions.roomFurnishings, {});
     const files = await readdir("home/src");
