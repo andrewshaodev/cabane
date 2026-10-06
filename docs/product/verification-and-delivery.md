@@ -24,12 +24,15 @@ Keep those entry points explicit when adding runtime-loaded modules. The engine'
 Roboto font dependency is retained because CSS imports are outside this analysis.
 
 The test command runs four cost-balanced shards with shared harness modules and a
-compact agent reporter. `npm test` always includes both Node and Chromium coverage.
+compact agent reporter per worker. The launcher keeps four independent worker
+processes so Node cannot buffer a later shard's failures behind an earlier shard. `npm test` always includes both Node and Chromium coverage.
 `npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
 through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.
 The flag lets older JSDOM fixtures install their own navigator, as the shard
-runner does. Set `TEST_PROFILE=1` to report slow tests.
+runner does. Set `TEST_PROFILE=1` to report slow tests. Failures are printed as soon
+as Node emits completion, including the original test/file, error and a shell-safe
+focused rerun command; successful tests remain dots.
 
 Storage, migration, restore, native startup states, and HA settings/sync cases run against the real
 repository and React components in Node, with an isolated `fake-indexeddb` factory
@@ -44,6 +47,16 @@ owns a temporary dependency cache; it cannot race another shard or the developme
 server over optimized modules. File watchers are disabled in test servers. New
 browser tests should use `tests/browser-test-environment.mjs`; the runner detects
 that import (or a direct Playwright import) when selecting `test:browser`.
+Wrap browser test callbacks in `withBrowserDiagnostics` from
+`tests/browser-test-diagnostics.mjs`. It retains session contexts until the callback
+finishes, captures failures before teardown, and always closes contexts. Keep the
+original `node:test` registration so failures identify the correct source file.
+Failure artifacts are saved under ignored `test-results/browser/<test>-<unique>/`:
+per-page screenshots, per-context Playwright traces, and `errors.json` with recent
+console warnings/errors and uncaught page errors. The reporter prints the absolute
+artifact directory. Successful traces are discarded; failure evidence stays local
+until removed. A manually closed page/context cannot be captured afterward. Open a
+trace with `npx playwright-core show-trace <path-to-trace.zip>`.
 
 Home-specific commands include `home:validate-floor`, `home:verify`, and layout,
 room, and scale fixture verification. Fixtures exercise a representative target

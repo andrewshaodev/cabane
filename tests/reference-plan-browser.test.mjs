@@ -1,3 +1,4 @@
+import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
@@ -13,7 +14,7 @@ const file = (name = "ground-floor.svg", content = svg) => ({
 test(
   "reference plans trace through the normal Construct UI and remain browser-local",
   { timeout: 120_000 },
-  async () => {
+  withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
     try {
@@ -326,5 +327,5 @@ test(
     } finally {
       await browser?.close();
     }
-  },
+  }),
 );
