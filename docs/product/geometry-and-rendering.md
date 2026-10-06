@@ -1,5 +1,11 @@
 # Geometry, rendering, and navigation
 
+Orbit room focus animates floor material colors and existing wall vertex colors.
+Merged wall triangles are associated once with the room on their visible side;
+selection does not regenerate their geometry, add draw calls or change live lights.
+Walk and editor finishes retain their authored colors. See
+[room navigation](dashboard-and-cameras.md) for framing and interaction behavior.
+
 Runtime `HomeManifest` carries ordered floors. The building shares one origin and
 meters-per-plan-unit scale; positive floor-to-floor heights determine elevations.
 Floors marked `belowGround: true` form a bottom-to-top prefix before ground.

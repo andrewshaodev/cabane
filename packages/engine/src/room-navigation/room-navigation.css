@@ -1,0 +1,280 @@
+.room-navigation {
+  position: absolute;
+  z-index: 15;
+  top: max(20px, calc(env(safe-area-inset-top) + 12px));
+  left: max(22px, env(safe-area-inset-left));
+  right: max(112px, calc(env(safe-area-inset-right) + 98px));
+  pointer-events: auto;
+}
+.room-navigation__rooms,
+.room-navigation__floors {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 18px;
+  margin: -18px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #7c8879 transparent;
+  scroll-padding-inline: 18px;
+}
+.room-navigation__rooms {
+  position: relative;
+}
+.room-navigation__floors {
+  margin-top: -6px;
+  width: fit-content;
+  max-width: calc(100% + 36px);
+  animation: room-floors-enter 180ms ease-out;
+}
+@keyframes room-floors-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.scene-hud > .scene-menu {
+  grid-column: 2;
+}
+.room-navigation button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-height: 44px;
+  max-width: min(300px, 75cqw);
+  padding: 9px 17px;
+  border: 0;
+  border-radius: 24px;
+  background: #f2eee4;
+  color: #425043;
+  box-shadow: 0 2px 6px rgb(27 41 31 / 12%);
+  font-size: 0.84rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    color 160ms,
+    background-color 160ms,
+    box-shadow 160ms;
+}
+.room-navigation button:hover {
+  background: #fffaf0;
+  color: #263b2a;
+}
+.room-navigation button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.room-navigation button[aria-pressed="true"] {
+  color: #fffaf0;
+  background: #465f45;
+  box-shadow: 0 3px 8px rgb(27 41 31 / 16%);
+}
+.room-navigation button:active {
+  background: #d6dfce;
+  color: #263b2a;
+}
+.room-navigation button:focus-visible {
+  outline: 2px solid #9b5939;
+  outline-offset: 2px;
+}
+.room-navigation svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.room-focus-frame {
+  position: absolute;
+  top: 108px;
+  left: 22px;
+  right: calc(clamp(320px, 34cqw, 480px) + 40px);
+  bottom: 124px;
+  pointer-events: none;
+  visibility: hidden;
+}
+.cabane-shell.mode-room > .room-control-sheet[data-device-overlay="false"] {
+  top: 108px;
+  width: clamp(320px, 34cqw, 480px);
+}
+.cabane-shell.mode-room
+  > .room-control-sheet[data-device-overlay="false"]
+  .room-control-sheet__hero {
+  height: clamp(160px, 24dvh, 230px);
+}
+.cabane-shell.mode-room
+  > .room-control-sheet[data-device-overlay="false"]
+  .room-control-sheet__title
+  h1 {
+  font-size: clamp(1.7rem, 2.8cqw, 2.6rem);
+}
+
+@container (max-width: 899px) {
+  .room-navigation {
+    top: max(12px, env(safe-area-inset-top));
+    left: 12px;
+    right: 94px;
+  }
+  .room-focus-frame {
+    top: 104px;
+    left: 12px;
+    right: 12px;
+    bottom: calc(46dvh + 12px);
+  }
+  .cabane-shell.mode-room > .room-control-sheet[data-device-overlay="false"] {
+    inset: auto 0 0;
+    width: 100%;
+    height: 46dvh;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -8px 40px rgb(27 41 31 / 16%);
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__hero {
+    height: 160px;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__foreground {
+    bottom: 14px;
+    padding: 0 20px;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__title
+    h1 {
+    font-size: 1.7rem;
+  }
+  .cabane-shell.mode-room:not(.device-overlay-open) .scene-hud {
+    grid-template-columns: 1fr auto;
+  }
+  .cabane-shell.mode-room:not(.device-overlay-open) .scene-hud > :not(.scene-menu) {
+    visibility: visible;
+  }
+  .cabane-shell.mode-room:not(.device-overlay-open) .scene-menu {
+    grid-column: 2;
+    justify-self: end;
+  }
+  .cabane-shell.mode-room:not(.device-overlay-open) .scene-menu > div {
+    left: auto;
+    right: 0;
+    translate: none;
+  }
+  .cabane-shell.mode-room .building-floor-controls {
+    bottom: calc(46dvh + 16px);
+  }
+  .cabane-shell.mode-room .orbit-navigation {
+    display: none;
+  }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .room-navigation {
+    top: 12px;
+  }
+  .room-focus-frame {
+    top: 96px;
+    right: calc(40cqw + 20px);
+    bottom: 18px;
+  }
+  .cabane-shell.mode-room > .room-control-sheet[data-device-overlay="false"] {
+    inset: 96px 12px 12px auto;
+    width: 40cqw;
+    height: auto;
+    border-radius: 20px;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__hero {
+    height: 170px;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__scroll {
+    display: block;
+    overflow-y: auto;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__content {
+    height: auto;
+    min-height: 100%;
+    padding: 14px 12px 20px;
+    overflow: visible;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__foreground {
+    bottom: 10px;
+    padding: 0 16px;
+  }
+  .cabane-shell.mode-room
+    > .room-control-sheet[data-device-overlay="false"]
+    .room-control-sheet__title
+    h1 {
+    font-size: 1.45rem;
+  }
+  .cabane-shell.mode-room:not(.device-overlay-open) .scene-action-dock {
+    display: none;
+  }
+  .cabane-shell.mode-room .building-floor-controls {
+    bottom: 16px;
+    right: calc(40cqw + 28px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-navigation button {
+    transition: none;
+  }
+}
+
+.room-navigation button.room-navigation__floor {
+  min-height: 44px;
+  max-width: min(230px, 44cqw);
+  padding: 6px 13px;
+  text-align: left;
+}
+.room-navigation__floor-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.15;
+}
+.room-navigation__floor-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+.room-navigation__floor-copy small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.6rem;
+  font-weight: 450;
+}
+.room-navigation__floor > .connection-dot {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+}
+.room-navigation__floor > svg {
+  width: 13px;
+  height: 13px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-navigation__floors {
+    animation: none;
+  }
+}

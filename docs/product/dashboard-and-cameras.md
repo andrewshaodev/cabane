@@ -1,7 +1,41 @@
 # Home dashboard, controls, and cameras
 
-Home presents an orbital overview, room details, and walk mode. Opening or closing room
-details (including Escape and Back) preserves the current camera position, angle, and zoom.
+Home presents an orbital overview, room details, and walk mode. In Orbit, selecting
+a room smoothly centers its projected floor and wall bounds in the visible space
+beside the controls, with fitted zoom and the same three-quarter angle for every
+room. A critically damped transition retains velocity when another room is chosen
+mid-flight. Dragging, pinching, scrolling or using camera buttons interrupts it;
+selecting the same room again refocuses it. Reduced motion applies the destination
+immediately. Returning to Overview, including Escape or Back, smoothly restores
+the default floor framing at the current viewport size. It never uses an arbitrary
+saved zoom; pressing the floor summary also resets a manually moved camera.
+The top floor pills explicitly frame the selected floor; the existing diamond
+floor picker retains its camera-preserving behavior.
+
+The Orbit header combines the floor summary and room navigation in one top row.
+The leading button uses the current floor name, connection indicator, session
+information and home-presence summary. It replaces the separate heading and the
+Overview label, scrolls in the same row as the rooms, and returns to the
+default floor view when clicked. It also toggles a second row of floor pills.
+Choosing a floor closes that row, clears the room selection, frames the new floor
+and updates the room list. Escape, an outside pointer press or selecting a room
+closes the floor choices; Escape restores focus to the floor button. Empty floors
+remain navigable. Scroll gutters leave room for pill shadows and focus outlines.
+
+Room pills list only the active floor's rooms with their resolved HA names.
+Pills, room surfaces, status labels and room shortcuts share selection behavior.
+The selected pill is exposed to assistive technology and stays visible after
+selection or resize. The strip is absent in Walk, roof view and device overlays,
+which retain their contextual heading. Room details stay on the right on desktop;
+narrow portrait layouts use a bottom panel. Compact landscape keeps a side panel.
+Dedicated device controls retain their existing modal layout.
+
+Interactive Orbit floors and wall faces use gently subdued base colors. Selecting
+a room lifts its finishes and softens the others, without altering device lighting,
+rebuilding geometry or adding render passes. Wall faces are associated with rooms
+on their visible side, so the two sides of a shared wall can differ. Room changes
+reset the panel's scroll position while retaining the panel itself.
+
 Clicking a room floor or an inward-facing wall surface opens that room in orbit mode;
 dragging to orbit does not select a room. Shared walls select the room on the clicked side. Room floors, interior wall faces,
 and status overlays share a pointer cursor, floor highlight, and overlay hover effect. Room selection,
@@ -39,7 +73,7 @@ click targets. Escape and outside taps dismiss the stack. Existing floor shortcu
 and unavailable walking-entry guards still apply. Show roof / Hide roof is available
 in the action bar’s View group (R), and is disabled while walking. Roof view shows all floors, keeps walls solid,
 hides room status overlays, and preserves the current camera position, angle, target, and zoom.
-Changing floors also preserves the camera in Orbit, Construct, and Arrange. Selecting a floor restores the
+The diamond floor picker preserves the camera in Orbit, Construct, and Arrange. Selecting a floor restores the
 cutaway; entering Walk exits roof view, while retaining roofs and ceilings in the walking scene. Stair traversal preserves the physical camera
 elevation while the active floor selection updates, including frames before that update commits. Construct exposes its existing floor actions
 through Manage floors. Mobile placement clears the editor inspector, and reduced
@@ -115,7 +149,7 @@ and stair elevation and preserves existing horizontal obstacle collisions; it do
 not enable jumping onto furniture. Mobile controls remain unchanged.
 Escape or Back to editor exits the draft walkthrough.
 
-Room selection updates the floor highlight independently of procedural architecture
+Room selection updates finish emphasis independently of procedural architecture
 and furnishing models. Opening or closing room details does not change lighting or
 shadows; room and device point lights retain the overview shadow behavior. Scene callbacks, per-floor
 manifests, and derived open-opening sets retain identity when their inputs are

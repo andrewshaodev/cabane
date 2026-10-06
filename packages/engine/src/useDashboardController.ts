@@ -120,6 +120,7 @@ export function useDashboardController({
     return () => window.clearInterval(timer);
   }, []);
   const [cameraResetKey, setCameraResetKey] = useState(0);
+  const [roomFocusKey, setRoomFocusKey] = useState(0);
   const [automaticOpeningIds, setAutomaticOpeningIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -219,6 +220,7 @@ export function useDashboardController({
   const selectRoom = useCallback(
     (roomId: string) => {
       if (walkthrough) return;
+      setRoomFocusKey((key) => key + 1);
       setSelectedRoomId(roomId);
       setSelectedDeviceId(null);
       setDevicePanelRoomId(null);
@@ -228,6 +230,7 @@ export function useDashboardController({
     [walkDevicePanelOpenRef, walkthrough],
   );
   const goHome = useCallback(() => {
+    setRoomFocusKey((key) => key + 1);
     movementInputRef.current = { x: 0, y: 0 };
     lookInputRef.current = { x: 0, y: 0 };
     lookDeltaRef.current = { x: 0, y: 0 };
@@ -457,6 +460,7 @@ export function useDashboardController({
     setWalkRoomId,
     selectedRoom,
     cameraResetKey,
+    roomFocusKey,
     architectureModels,
     selectedRoomId,
     wallFadeEnabled,

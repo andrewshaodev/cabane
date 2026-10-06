@@ -1684,7 +1684,7 @@ await withModules(async (load) => {
     assert.equal(
       selected.scene.findByProps({ name: "room-fixture-studio-interaction" }).instance.material
         .opacity,
-      0.36,
+      0.055,
     );
     assert.equal(
       selected.scene.findAllByProps({ name: "room-selection-fixture-studio" }).length,
