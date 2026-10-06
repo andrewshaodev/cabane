@@ -55,6 +55,7 @@
     "verify:ha-contract": "node scripts/ha-contract.mjs",
     "contract:record": "node scripts/ha-contract.mjs --record",
     "release:ha-contract": "node scripts/release-ha-contract.mjs",
+    "test:profile": "node scripts/profile-tests.mjs",
     "prepare": "node scripts/install-git-hooks.mjs"
   },
   "devDependencies": {

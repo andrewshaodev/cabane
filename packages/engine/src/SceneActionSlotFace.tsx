@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import weatherIcon from "./assets/scene-actions/weather.png";
 import buildIcon from "./assets/scene-actions/build.png";
 import viewIcon from "./assets/scene-actions/view.png";
 import walkIcon from "./assets/scene-actions/walk-mode.png";
@@ -6,7 +7,8 @@ import nightIcon from "./assets/scene-actions/day-night.png";
 import lightsIcon from "./assets/scene-actions/all-lights.png";
 import type { ActionBarBuiltIn } from "./action-bar/action-bar-config";
 
-const illustrations: Record<ActionBarBuiltIn, string> = {
+const illustrations: Partial<Record<ActionBarBuiltIn, string>> = {
+  weather: weatherIcon,
   build: buildIcon,
   walk: walkIcon,
   night: nightIcon,
@@ -15,6 +17,7 @@ const illustrations: Record<ActionBarBuiltIn, string> = {
 };
 
 export const actionBarBuiltInLabels: Record<ActionBarBuiltIn, string> = {
+  weather: "Weather",
   build: "Build",
   walk: "Walk",
   night: "Night",

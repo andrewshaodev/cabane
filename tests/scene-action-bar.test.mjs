@@ -356,7 +356,7 @@ await withModules(async (load) => {
     assert.match(html, /aria-label="Build actions" hidden=""/);
     assert.match(html, /aria-label="View actions" hidden=""/);
     for (const key of ["B", "V", "R"]) assert.ok(html.includes(`aria-keyshortcuts="${key}"`));
-    assert.equal((html.match(/<img /g) ?? []).length, 9);
+    assert.equal((html.match(/<img /g) ?? []).length, 16);
     for (const filename of [
       "construct-mode.png",
       "arrange-mode.png",
@@ -442,6 +442,13 @@ await withModules(async (load) => {
           "Open Connect",
           mode === "walk" ? "Exit walk mode" : "Walk mode",
           "Use night lighting",
+          "Weather",
+          "Live",
+          "Sunny",
+          "Cloudy",
+          "Rain",
+          "Thunderstorm",
+          "Snowy",
           "View",
           "Keep walls solid",
           "Show roof",

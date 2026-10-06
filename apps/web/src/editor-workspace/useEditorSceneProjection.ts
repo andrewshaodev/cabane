@@ -18,6 +18,7 @@ import { projectFromEditorState } from "../editor-preview/project-sync";
 import { editorBindingsForManifest, ownerProjectRegistries } from "../project-runtime";
 
 import type { HomeProject } from "@cabane/engine";
+import { missingModelEditorDescriptor } from "../editor-preview/furnish/missing-model";
 type Options = {
   project: HomeProject;
   constructEditor: ReturnType<typeof useConstructEditor>;
@@ -51,7 +52,8 @@ export function useEditorSceneProjection({
   const selectedItem = visualSceneItems.find((item) => item.id === furnishingEditorSelectedId);
   const selectedDefinition =
     selectedItem &&
-    (selectedItem.kind === "device" ? deviceModels : furnishingModels)[selectedItem.modelId];
+    ((selectedItem.kind === "device" ? deviceModels : furnishingModels)[selectedItem.modelId] ??
+      missingModelEditorDescriptor(selectedItem));
   const walkNavigation = useMemo(
     () => evaluateDerivedWalkNavigation(constructEditorPreviewFloor),
     [constructEditorPreviewFloor],

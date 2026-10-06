@@ -52,10 +52,9 @@ Import `ToonMaterial` and `Outlines` from `@cabane/engine`. Never create
 a local `DataTexture` or gradient map, use Drei's outline wrapper directly,
 add scene lights, or modify renderer/shadow settings in `home/`.
 
-Visible materials must not use realistic standard/physical/Phong/Lambert
-surfaces, image textures, environment-mapped realism, or downloaded files. A
-small procedurally generated toon gradient owned by the stable engine is the
-only permitted texture-like input.
+Hosted and bundled textures and models follow the repository visual asset
+contract. Authored geometry keeps the toon vocabulary; loaded models may retain
+their original materials. Shared lighting remains engine-owned.
 
 Use outlines selectively to clarify silhouette and interactive parts. Avoid
 heavy internal edge noise, doubled outlines at coplanar contacts, and outlines

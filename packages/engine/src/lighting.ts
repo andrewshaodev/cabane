@@ -4,6 +4,7 @@ export interface SunEntityState {
 }
 
 export interface SolarLightingState {
+  daylight: number;
   valid: boolean;
   sunPosition: readonly [x: number, y: number, z: number];
   sunIntensity: number;
@@ -62,6 +63,7 @@ const finiteNumber = (value: unknown) => {
 };
 
 const FALLBACK_LIGHTING: SolarLightingState = {
+  daylight: 0.63,
   valid: false,
   sunPosition: [-8, 14, 10],
   sunIntensity: 2.25,
@@ -98,6 +100,7 @@ export const deriveSolarLighting = (
   const sunlightProgress =
     clampedElevation <= 0 ? 0 : smoothstep(clampedElevation / FULL_DAY_ELEVATION);
   return {
+    daylight: dayProgress,
     valid: true,
     sunPosition: [
       horizontalDistance * Math.sin(azimuthRadians),

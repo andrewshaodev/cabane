@@ -31,7 +31,9 @@
       "packages/engine/src/imported-models/asset-storage.ts",
       "packages/engine/src/sha256-digest.ts",
       "packages/engine/src/home-project/schema-floor-finish.ts",
-      "packages/engine/src/home-project/project-format-errors.ts"
+      "packages/engine/src/home-project/project-format-errors.ts",
+      "packages/engine/src/home-project/schema-action-bar.ts",
+      "apps/web/src/workspaces/workspace-weather-source.ts"
     ],
     "interfaces": [
       {
@@ -39,7 +41,7 @@
         "symbols": ["HomeProject", "parseHomeProject", "createWorkspaceRepository", "sha256Hex"]
       }
     ],
-    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path.",
+    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path. Weather source preferences are private and origin-scoped; their revision-checked save updates only that field in draft and published profiles.",
     "checks": ["verify:workspace"]
   },
   {
@@ -145,7 +147,9 @@
           "createModelAssetRepository",
           "openGlbPreview",
           "createCabaneArchive",
-          "readCabaneFile"
+          "readCabaneFile",
+          "createCabaneModelPack",
+          "readCabaneModelPack"
         ]
       }
     ],
@@ -194,7 +198,9 @@
       "packages/engine/src/WalkPreferences.tsx",
       "packages/engine/src/home-assistant-dashboard",
       "packages/engine/src/styles.css",
-      "packages/engine/src/room-status"
+      "packages/engine/src/room-status",
+      "packages/engine/src/action-bar/SceneActionGroup.tsx",
+      "packages/engine/src/action-bar/SceneActionButton.tsx"
     ],
     "interfaces": [
       {
@@ -202,7 +208,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets. Overlay preferences persist locally and filter only overview summaries. Area temperature/humidity readings take precedence over usable mapped room sensor fallbacks. RoomControlSheet and useRoomModuleOrder own browser-local per-home/room module order; RoomModuleReorder provides pointer, touch, and keyboard reordering without HA commands.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets. Sheet navigation overlays an edge-to-edge sticky parallax hero with reserved title clearance; mobile room sheets use a border and shadow with 54dvh height, coordinated with scene framing. Overlay preferences persist locally and filter only overview summaries. Area temperature/humidity readings take precedence over usable mapped room sensor fallbacks. RoomControlSheet and useRoomModuleOrder own browser-local per-home/room module order; RoomModuleReorder provides pointer, touch, and keyboard reordering without HA commands. Weather shares the Build/View tray and SceneActionButton rendering, uses matching sculpted icons and six preview choices (Live, Sunny, Cloudy, Rain, Thunderstorm, Snowy), defaults to Sunny with Live disabled when no HA weather entity exists, and applies only a visit-local scene override; it never changes HA state or the saved weather source.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {
@@ -224,7 +230,9 @@
       "packages/engine/src/architecture-geometry/wall-face-finish.ts",
       "packages/engine/src/architecture-geometry/wall-cap-finishes.ts",
       "packages/engine/src/wall-colors.ts",
-      "packages/engine/src/floor-finishes/wood-planks.ts"
+      "packages/engine/src/floor-finishes/wood-planks.ts",
+      "packages/engine/src/weather",
+      "packages/engine/src/roof/roof-region-surface.ts"
     ],
     "interfaces": [
       {
@@ -238,7 +246,7 @@
         ]
       }
     ],
-    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Native content remains procedural/toon; personal GLBs use their dedicated import owner.",
+    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -328,12 +336,24 @@
       ".github/workflows/ha-contract-release.yml",
       ".codex/hooks.json",
       "docs/ha-contract.json",
+      "docs/ha-compatibility.json",
+      "scripts/ha-contract/compatibility-manifest.mjs",
+      "scripts/profile-tests.mjs",
+      "scripts/test-profile-report.mjs",
+      "tests/test-costs.json",
       ".githooks",
       "CODING_STANDARDS.md"
     ],
     "interfaces": [],
     "invariant": "The delivery contract defines local verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery requires the full gate.",
-    "checks": ["verify:help", "verify:fast", "verify", "browser:install", "verify:ha-contract"]
+    "checks": [
+      "verify:help",
+      "verify:fast",
+      "verify",
+      "browser:install",
+      "verify:ha-contract",
+      "test:profile"
+    ]
   },
   {
     "title": "Shortcuts and private HA actions",

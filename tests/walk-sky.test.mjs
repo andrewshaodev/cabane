@@ -185,6 +185,10 @@ await withModules(async (load) => {
           ) < 0.01,
         );
         assert.ok(sky.material.uniforms.sunColor.value.equals(sun.color));
+        assert.ok(
+          Math.abs(sky.material.uniforms.daylight.value - expected.daylight) < 0.04,
+          "GPU daylight must follow the solar transition",
+        );
       }
       await renderer.update(createElement(SolarLighting, { ...props, walkMode: false }));
       assert.equal(renderer.scene.findAllByProps({ name: "walk-sky" }).length, 0);

@@ -16,8 +16,11 @@ Extensions are referenced by stable keys and resolved separately from the JSON
 project. The engine still supports legacy room furnishings components, but the bundled
 home registers none.
 Scene-item rendering avoids drawing both declarative items and legacy room
-composition for the same declarative project. Missing model definitions surface
-validation/recovery issues.
+composition for the same declarative project. Missing furnishing and device
+definitions remain warning-level project issues and render editable generic
+placeholders; structural validation errors still block publication. Arrange's
+My models model-pack import resolves those IDs without changing the stable
+catalog registries.
 
 A new native model should use the public engine material/geometry vocabulary, expose
 only its supported entry points through a local barrel, and preserve catalog

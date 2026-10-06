@@ -1,9 +1,11 @@
+import { readFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import { withModules } from "./test-server.mjs";
 import { testGlb } from "./fixtures/personal-glb.mjs";
 import { createHash } from "node:crypto";
+import { strToU8, unzipSync, zipSync } from "fflate";
 
 await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
@@ -37,6 +39,86 @@ await withModules(async (load) => {
     customModels: models,
     sceneItems: [],
   });
+
+  test("Blender and Three.js skill exports decode with their authored physical dimensions", async () => {
+    for (const source of ["blender", "three"]) {
+      const fixture = JSON.parse(
+        await readFile(`tests/fixtures/personal-${source}-model.json`, "utf8"),
+      );
+      const preview = await api.openGlbPreview(Buffer.from(fixture.base64, "base64"));
+      try {
+        const normalized = api.normalizeGlb(preview.root, "floor");
+        assert.ok(Math.abs(normalized.size[0] - 1.2) < 0.001, source);
+        assert.ok(Math.abs(normalized.size[1] - 0.75) < 0.001, source);
+      } finally {
+        preview.release();
+      }
+    }
+  });
+  const { createFurnishingEditorState, furnishingEditorReducer } = await load(
+    "/apps/web/src/editor-preview/furnish/editor-state.ts",
+  );
+  for (const placement of [
+    { kind: "absolute", at: [2, 2], elevationMeters: 0.2, rotationYRadians: 0.4 },
+    { kind: "wall", wallId: "wall", offsetPlanUnits: 1, elevationMeters: 0.2, facing: "front" },
+    { kind: "ceiling", at: [2, 2], dropMeters: 0.2, rotationYRadians: 0.4 },
+  ])
+    test(`personal model ${placement.kind} elevation/resize transactions preserve support and exact history`, () => {
+      const item = {
+        id: "model",
+        kind: "furnishing",
+        modelId: model().id,
+        floorId: "ground",
+        size: [0.7, 1, 0.4],
+        placement,
+      };
+      const definition = api.resolveProjectModels(project(), native).furnishingModels[item.modelId];
+      let state = createFurnishingEditorState([item]);
+      const dispatch = (action) => {
+        state = furnishingEditorReducer(state, action);
+      };
+      for (const change of [
+        {
+          type: "update-placement",
+          id: item.id,
+          placement:
+            placement.kind === "ceiling"
+              ? { ...placement, dropMeters: -0.3 }
+              : { ...placement, elevationMeters: 0.7 },
+        },
+        {
+          type: "update-size",
+          id: item.id,
+          size: item.size.map((value) => value * 1.5),
+          definition,
+        },
+      ]) {
+        const before = structuredClone(state.items);
+        const historyLength = state.past.length;
+        dispatch({ type: "begin-transaction" });
+        dispatch(change);
+        dispatch(change);
+        assert.equal(state.past.length, historyLength, "pointer moves do not create undo entries");
+        dispatch({ type: "commit-transaction" });
+        assert.equal(state.past.length, historyLength + 1);
+        const after = structuredClone(state.items);
+        assert.notDeepEqual(after, before);
+        if (change.type === "update-size")
+          assert.deepEqual(after[0].placement, before[0].placement);
+        else assert.deepEqual(after[0].size, before[0].size);
+        dispatch({ type: "undo" });
+        assert.deepEqual(state.items, before);
+        dispatch({ type: "redo" });
+        assert.deepEqual(state.items, after);
+        dispatch({ type: "undo" });
+        dispatch({ type: "begin-transaction" });
+        dispatch(change);
+        dispatch({ type: "cancel-transaction" });
+        assert.deepEqual(state.items, before);
+        assert.equal(state.past.length, historyLength);
+        assert.equal(state.transaction, null);
+      }
+    });
 
   test("GLB validation rejects external resources, unsupported required extensions and resource limits", () => {
     assert.equal(api.inspectGlb(bytes).complexity.triangles, 12);
@@ -271,5 +353,30 @@ await withModules(async (load) => {
         .length,
       0,
     );
+  });
+  test("model packs preserve custom IDs and reject unreferenced files", async () => {
+    const models = [
+      model(),
+      model("wall", "furniture", "custom:22222222-3333-4444-5555-666666666666"),
+    ];
+    const pack = api.createCabaneModelPack(models, [asset]);
+    const restored = await api.readCabaneModelPack(pack);
+    assert.deepEqual(
+      restored.models.map((entry) => entry.id),
+      models.map((entry) => entry.id),
+    );
+    assert.deepEqual(restored.assets[0].bytes, bytes);
+    const files = unzipSync(pack);
+    files[`assets/${"a".repeat(64)}.glb`] = bytes;
+    await assert.rejects(api.readCabaneModelPack(zipSync(files, { level: 0 })), /unreferenced/);
+    const manifestOnly = zipSync(
+      {
+        "manifest.json": strToU8(
+          JSON.stringify({ format: "cabane-model-pack", version: 1, models }),
+        ),
+      },
+      { level: 0 },
+    );
+    await assert.rejects(api.readCabaneModelPack(manifestOnly), /missing GLB/);
   });
 });

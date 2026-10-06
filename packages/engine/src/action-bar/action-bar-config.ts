@@ -1,6 +1,6 @@
 import type { WalkToolDefinition } from "../walk-tools/types";
 
-export type ActionBarBuiltIn = "build" | "walk" | "night" | "view" | "all-lights";
+export type ActionBarBuiltIn = "build" | "walk" | "night" | "weather" | "view" | "all-lights";
 
 export type ActionBarTarget =
   | { kind: "built-in"; action: ActionBarBuiltIn }
@@ -23,6 +23,7 @@ export const defaultActionBarItems: readonly ActionBarItem[] = [
   { id: "default-build", target: { kind: "built-in", action: "build" } },
   { id: "default-walk", target: { kind: "built-in", action: "walk" } },
   { id: "default-night", target: { kind: "built-in", action: "night" } },
+  { id: "default-weather", target: { kind: "built-in", action: "weather" } },
   { id: "default-view", target: { kind: "built-in", action: "view" } },
 ];
 
@@ -45,7 +46,17 @@ export function resolveActionBarItems(
     : defaultActionBarItems;
 }
 
-const builtInActions = new Set<ActionBarBuiltIn>(["build", "walk", "night", "view", "all-lights"]);
+const builtInActions = new Set<ActionBarBuiltIn>([
+  "build",
+  "walk",
+  "night",
+  "weather",
+  "view",
+  "all-lights",
+]);
+
+export const isActionBarBuiltIn = (value: unknown): value is ActionBarBuiltIn =>
+  typeof value === "string" && builtInActions.has(value as ActionBarBuiltIn);
 
 /** Published records can be corrupt even when normal project imports are validated. */
 export function resolvePublishedActionBarItems(
@@ -86,7 +97,7 @@ export function resolvePublishedActionBarItems(
       deviceId?: unknown;
       toolId?: unknown;
     };
-    if (target.kind === "built-in" && builtInActions.has(target.action as ActionBarBuiltIn))
+    if (target.kind === "built-in" && isActionBarBuiltIn(target.action))
       return {
         id: item.id,
         target: { kind: "built-in", action: target.action as ActionBarBuiltIn },

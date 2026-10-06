@@ -27,7 +27,11 @@ Pills, room surfaces, status labels and room shortcuts share selection behavior.
 The selected pill is exposed to assistive technology and stays visible after
 selection or resize. The strip is absent in Walk, roof view and device overlays,
 which retain their contextual heading. Room details stay on the right on desktop;
-narrow portrait layouts use a bottom panel. Compact landscape keeps a side panel.
+narrow portrait layouts use a bottom sheet with a visible border and shadow.
+The hero fills the sheet edge-to-edge and retains its sticky photo parallax.
+Back, Reorder and the labeled Walk inside icon overlay the hero, with reserved
+space above wrapping room titles and status badges. The mobile room sheet occupies 54% of the
+viewport, leaving the scene visible above it. Compact landscape keeps a side panel.
 Dedicated device controls retain their existing modal layout.
 
 Interactive Orbit floors and wall faces use gently subdued base colors. Selecting
@@ -41,7 +45,7 @@ dragging to orbit does not select a room. Shared walls select the room on the cl
 and status overlays share a pointer cursor, floor highlight, and overlay hover effect. Room selection,
 status overlays, device interaction targets, and application-owned controls
 connect the scene to room/device control sheets. Scene session preferences retain
-mode, selected room, and wall fading. The per-home action bar starts with Build, Walk, Night, and View,
+mode, selected room, and wall fading. The per-home action bar starts with Build, Walk, Night, Weather, and View,
 in that order. Owners can remove, reorder, or replace every item and add direct links to current rooms
 and modeled devices that have a room sheet, or the All lights off action. Room and device
 icons share the built-in slot dimensions; rooms use Home Assistant photos or initials, and
@@ -57,7 +61,7 @@ users can open Build with B and View with V, use Arrow Up to enter a tray, and
 dismiss with Escape. R toggles the roof; C, A, Shift+C, W, N, S, and L retain
 the direct editor, walk, lighting, walls, and all-lights actions.
 Saved legacy shortcut arrays are retained for file compatibility but never configure
-the bar. An absent action-bar configuration gets the four starting items without a
+the bar. An absent action-bar configuration gets the five starting items without a
 storage reset; an explicit empty list stays empty. The existing direct keyboard
 shortcuts remain available after an item is removed from the bar. Keyboard shortcuts also work in room view; walking keeps
 its movement keys. Draft walkthroughs retain their dedicated exit controls and use the same dashboard
@@ -288,3 +292,16 @@ Unknown, unavailable, and stale readings are skipped; unbound area sensors are n
 fallback candidates. This does not create bindings or change HA configuration.
 
 Room panels offer Reorder devices beside Walk inside when at least two modules are visible. Reorder mode displays a compact list with pointer/touch drag handles and keyboard-accessible up/down buttons. Done or Escape returns to controls. Each move saves browser-local order per home and room using local module IDs; new modules append in default order and missing modules are ignored. Ordering does not change bindings or call Home Assistant services. The normal grid follows the saved sequence without dense gap filling.
+
+Weather shares the Build/View tray interaction: desktop hover or click, touch tap,
+Arrow Up to enter, arrow-key navigation, and Escape to dismiss with focus restored.
+The action and six submenu choices use sculpted illustrations matching the existing dock.
+Build and Weather reuse the same SceneActionButton component, slot face, tray layout, and styling.
+Live (the default with an available weather entity) restores the configured HA source.
+Without weather entities, Sunny is selected by default and Live is disabled. Sunny, Cloudy, Rain,
+Thunderstorm (with rain), and Snowy are scene-only previews, available without HA.
+HA continues to resolve every supported condition, including the finer weather variants
+not exposed in the compact preview menu. The active
+selection lasts through camera/floor changes but resets when leaving or reloading
+the home. Sunny uses clear weather and never changes time of day. Weather is removable/reorderable; saved
+custom bars, including empty bars, retain their layout. There is no weather hotkey.

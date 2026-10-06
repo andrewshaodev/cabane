@@ -16,12 +16,10 @@ test("focused groups retain shared publication and repository coverage", () => {
     const selection = selectVerificationTests(files, group);
     assert.ok(selection.files.length < files.length, `${group} should remain focused`);
     for (const file of groups.common.tests) assert.ok(selection.files.includes(file));
-    assert.ok(selection.files.includes("workspace-application.test.mjs"));
+    assert.ok(selection.files.includes("workspace-repository.test.mjs"));
     assert.ok(selection.files.includes("home-project-repository.test.mjs"));
   }
-  assert.ok(
-    selectVerificationTests(files, "construct").files.includes("reference-plan-browser.test.mjs"),
-  );
+  assert.ok(selectVerificationTests(files, "construct").files.includes("reference-plan.test.mjs"));
   assert.ok(
     selectVerificationTests(files, "runtime").files.includes("home-assistant-controls.test.mjs"),
   );
@@ -43,7 +41,7 @@ test("renamed or removed inventory entries and invalid group names fail visibly"
   assert.throws(
     () =>
       selectVerificationTests(
-        files.filter((file) => file !== "workspace-application.test.mjs"),
+        files.filter((file) => file !== "workspace-repository.test.mjs"),
         "workspace",
       ),
     /Stale verification inventory/,

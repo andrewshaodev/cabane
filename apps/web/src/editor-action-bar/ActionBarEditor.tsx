@@ -188,9 +188,14 @@ export function ActionBarEditor({
         label={label(item)}
         shortcut={
           item.target.kind === "built-in"
-            ? { build: "B", walk: "W", night: "N", view: "V", "all-lights": "L" }[
-                item.target.action
-              ]
+            ? {
+                build: "B",
+                walk: "W",
+                night: "N",
+                weather: undefined,
+                view: "V",
+                "all-lights": "L",
+              }[item.target.action]
             : item.target.kind === "walk-tool"
               ? walkTools.find(
                   (tool) => item.target.kind === "walk-tool" && tool.id === item.target.toolId,
@@ -199,7 +204,9 @@ export function ActionBarEditor({
         }
         chevron={
           item.target.kind === "built-in" &&
-          (item.target.action === "build" || item.target.action === "view")
+          (item.target.action === "build" ||
+            item.target.action === "view" ||
+            item.target.action === "weather")
         }
       />
     </button>

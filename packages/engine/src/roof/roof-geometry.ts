@@ -1,14 +1,10 @@
+import { roofRegionSurface } from "./roof-region-surface";
 import { DEFAULT_WALL_COLORS } from "../wall-colors";
 import polygonClipping, { type Polygon as ClipPolygon } from "polygon-clipping";
 import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils, Vector2 } from "three";
 import type { FloorSpec } from "../types";
 import { deriveRoofRegions, type RoofRegion } from "./roof-coverage";
-import {
-  DEFAULT_ROOF_SETTINGS,
-  ROOF_PITCH_RADIANS,
-  ROOF_THICKNESS_METERS,
-  type RoofSettings,
-} from "./roof-settings";
+import { DEFAULT_ROOF_SETTINGS, ROOF_THICKNESS_METERS, type RoofSettings } from "./roof-settings";
 import { roofWallBreaks, createRoofWallFinish } from "./roof-wall-finish";
 
 type Point = [number, number];
@@ -55,20 +51,7 @@ function appendRegion(
 ) {
   const roofWallFinish = createRoofWallFinish(floor);
   const points = region.polygon[0];
-  const axis = settings.direction === "left-right" ? 1 : 0;
-  const lo = Math.min(...points.map((point) => point[axis]));
-  const hi = Math.max(...points.map((point) => point[axis]));
-  const ridge = (lo + hi) / 2;
-  const halfSpan = (hi - lo) / 2;
-  const rise =
-    settings.direction === "flat"
-      ? 0
-      : Math.min(region.maxRise, halfSpan * Math.tan(ROOF_PITCH_RADIANS));
-  const heightAt =
-    region.heightAt ??
-    ((point: Point) =>
-      region.baseHeight +
-      (halfSpan > 1e-8 ? rise * Math.max(0, 1 - Math.abs(point[axis] - ridge) / halfSpan) : 0));
+  const { axis, ridge, heightAt } = roofRegionSurface(region, settings);
   const topHeight = (point: Point) => heightAt(point) + ROOF_THICKNESS_METERS;
   const minX = Math.min(...points.map((point) => point[0])) - 1,
     maxX = Math.max(...points.map((point) => point[0])) + 1;

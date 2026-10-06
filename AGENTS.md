@@ -15,9 +15,10 @@ or checks change.
   engine, and catalog changes require an explicit product-development request.
 - **Product development:** Use the engineering map, not the home-building skills.
   Preserve the English UI and Construct, Arrange, and Connect modes. Native
-  geometry follows the procedural/toon contract; personal GLB imports use their
-  dedicated engine owner.
+  geometry and hosted assets follow the visual-asset contract; personal GLB
+  imports use their dedicated validated engine owner.
 - **Review or model decomposition:** Read [coding standards](CODING_STANDARDS.md).
+- **Tests or verification tooling:** Read [test guidelines](docs/test-guidelines.md).
 - **Verification or delivery:** Read [verification and delivery](docs/product/verification-and-delivery.md)
   for commands, prerequisites, execution permissions, and evidence requirements.
 
@@ -31,14 +32,19 @@ automatic mapping/rescans remain read-only.
 
 Keep credentials, tokens, OAuth data, browser storage, HA histories, camera images,
 source plans/photos, registry exports, and household HA IDs out of Git. Private
-configuration and binding profiles stay outside generated code.
+configuration and binding profiles stay outside generated code. Keep verification
+screenshots in ignored `screenshots/` or outside the repository; inspect staging
+before committing or opening a PR and summarize visual evidence in the PR.
 
 ## Execution and handoff
 
 Use the pinned Node/npm baseline and `npm ci`; install the pinned browser before
-browser checks. Run `npm run format` after edits and `npm run verify:fast` before
-handoff. Shared product changes require `npm run verify` plus the mapped surface
-checks. Fix failures without weakening the checks.
+browser checks. Run `npm run format` after edits. Iterate with focused checks;
+finish shared product changes with one `npm run verify` (including `verify:fast`).
+Other code changes need `verify:fast` and applicable surface checks. Run checks
+sequentially and reuse passing results until relevant inputs change. After a
+failure, rerun affected checks and complete skipped stages; report retries.
+Fix failures without weakening checks.
 
 In restricted Codex sessions, run browser/full verification and pushes through
 approved execution with localhost and browser-process access from the outset.

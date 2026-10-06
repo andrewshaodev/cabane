@@ -1,3 +1,5 @@
+import { WeatherPreferences } from "./weather/WeatherPreferences";
+import type { WeatherController } from "./weather/useWeatherController";
 import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
 import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
@@ -60,6 +62,7 @@ export function saveLightingMode(mode: SolarLightingMode): void {
 }
 
 export function WalkPreferences({
+  weather,
   overlayPreferences,
   onOverlayPreferencesChange,
   inverted,
@@ -69,6 +72,7 @@ export function WalkPreferences({
   onLightingModeChange,
   onClose,
 }: {
+  weather?: WeatherController | undefined;
   overlayPreferences: OverlayPreferences;
   onOverlayPreferencesChange: (value: OverlayPreferences) => void;
   inverted: boolean;
@@ -93,7 +97,7 @@ export function WalkPreferences({
       if (event.key === "Tab") {
         const focusable = Array.from(
           dom.root.querySelectorAll<HTMLElement>(
-            ".walk-preferences button, .walk-preferences input",
+            ".walk-preferences button, .walk-preferences input, .walk-preferences select",
           ),
         );
         const first = focusable[0];
@@ -205,6 +209,7 @@ export function WalkPreferences({
             {lightingMode === "live" && <> Source: {lightingSource}.</>}
           </p>
         </div>
+        {weather && <WeatherPreferences weather={weather} />}
       </section>
     </div>
   );

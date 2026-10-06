@@ -1,3 +1,6 @@
+import { useWeatherController } from "./weather/useWeatherController";
+import { WeatherScene } from "./weather/WeatherScene";
+import { deriveSolarLighting } from "./lighting";
 import {
   filterOverlayStatuses,
   loadOverlayPreferences,
@@ -74,6 +77,12 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
   const closePreferences = useCallback(() => setPreferencesOpen(false), []);
   const dashboard = useDashboardController(props);
+  const weather = useWeatherController(
+    dashboard.runtime,
+    dashboard.bindingManager,
+    props.manifest.home.northAngleDegrees ?? 0,
+    Boolean(props.walkthrough),
+  );
   const {
     equippedToolId,
     floorNavigation,
@@ -264,6 +273,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                   <StylizedScene antialias={quality.antialias}>
                     <ScenePreview enabled={!walkMode && !selectedRoomId} />
                     <SolarLighting
+                      weather={weather.appearance}
+                      reducedMotion={reducedMotion}
                       walkMode={walkMode}
                       mode={solarLighting.mode}
                       northAngleDegrees={manifest.home.northAngleDegrees ?? 0}
@@ -271,6 +282,17 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                       shadowMapSize={quality.shadowMapSize}
                       sunState={sunState}
                     />
+                    {!walkthrough && (
+                      <WeatherScene
+                        appearance={weather.appearance}
+                        floors={manifest.floors}
+                        roof={manifest.home.roof}
+                        walkMode={walkMode}
+                        reducedMotion={reducedMotion}
+                        daylight={deriveSolarLighting(sunState, solarLighting.mode).daylight}
+                        quality={quality.dpr[1]}
+                      />
+                    )}
                     {walkMode ? (
                       <WalkCameraController
                         building={manifest}
@@ -520,6 +542,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           </header>
           {preferencesOpen && (
             <WalkPreferences
+              weather={weather}
               overlayPreferences={overlayPreferences}
               onOverlayPreferencesChange={(value) => {
                 setOverlayPreferences(value);
@@ -645,6 +668,12 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
 
           {!walkthrough && (
             <SceneActionBar
+              weather={{
+                preview: weather.preview,
+                status: weather.live.status,
+                liveAvailable: weather.liveAvailable,
+                onSelect: weather.setPreview,
+              }}
               items={actionBarItems}
               walkTools={props.walkTools}
               activeWalkToolId={walkMode ? equippedToolId : null}

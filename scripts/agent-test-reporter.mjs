@@ -1,5 +1,6 @@
+import { writeFile } from "node:fs/promises";
+import { join, relative } from "node:path";
 import { inspect } from "node:util";
-import { relative } from "node:path";
 
 const quote = (value) => `'${value.replaceAll("'", "'\"'\"'")}'`;
 const escapePattern = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -58,7 +59,18 @@ export default async function* agentTestReporter(source) {
     else if (type === "test:pass") summary.passed += 1;
     else summary.failed += 1;
     if (typeof data.details?.duration_ms === "number")
-      summary.durations.push({ duration: data.details.duration_ms, name: data.name });
+      summary.durations.push({
+        duration: data.details.duration_ms,
+        name: data.name,
+        file: data.file ? relative(process.cwd(), data.file) : null,
+        status: data.todo
+          ? "todo"
+          : data.skip
+            ? "skipped"
+            : type === "test:pass"
+              ? "passed"
+              : "failed",
+      });
     if (type === "test:pass" || data.todo || data.skip) {
       yield data.todo ? "T" : data.skip ? "-" : ".";
       if (++dots === 80) {
@@ -67,6 +79,11 @@ export default async function* agentTestReporter(source) {
       }
     }
   }
+  if (process.env.CABANE_TEST_REPORT_DIRECTORY)
+    await writeFile(
+      join(process.env.CABANE_TEST_REPORT_DIRECTORY, `${process.pid}.json`),
+      JSON.stringify({ ...summary, elapsedMs: performance.now() - startedAt }),
+    );
   const durationSeconds = ((performance.now() - startedAt) / 1_000).toFixed(2);
   const details = [
     `${summary.passed} passed`,

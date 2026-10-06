@@ -265,7 +265,7 @@ await withModules(async (load) => {
       );
       assert.deepEqual(
         changes.at(-1).map((item) => item.target.action),
-        ["build", "walk", "night", "view"],
+        ["build", "walk", "night", "weather", "view"],
       );
     } finally {
       await act(async () => root.unmount());

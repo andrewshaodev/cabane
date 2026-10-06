@@ -669,7 +669,7 @@ await withModules(async (load) => {
         liveMediaByEntityId: {},
       }),
     );
-    const fallback = renderer.scene.findByProps({ name: "missing-furnishing-model-retired-lamp" });
+    const fallback = renderer.scene.findByProps({ name: "missing-model-retired-lamp" });
     assert.equal(fallback.instance.material.type, "MeshToonMaterial");
     assert.equal(fallback.props.userData.missingModelId, "retired-lamp");
     new Box3()

@@ -1,3 +1,6 @@
+import { SceneActionButton } from "./action-bar/SceneActionButton";
+import { SceneActionGroup } from "./action-bar/SceneActionGroup";
+import { WeatherMenu, type WeatherMenuProps } from "./weather/WeatherMenu";
 import { SceneActionTargetSlot } from "./action-bar/SceneActionTargetSlot";
 import type { ResolvedActionBarTarget } from "./action-bar/dashboard-action-targets";
 import { useCabaneDom } from "./CabaneDom";
@@ -24,7 +27,7 @@ import { type SolarLightingMode } from "./lighting";
 
 import type { BuiltInShortcutId, SceneMode, ShortcutSpec } from "./types";
 import { resolveActionBarItems, type ActionBarItem } from "./action-bar/action-bar-config";
-import { ActionBarBuiltInIcon, SceneActionSlotFace } from "./SceneActionSlotFace";
+import { SceneActionSlotFace } from "./SceneActionSlotFace";
 
 const sceneActions: readonly ShortcutSpec[] = [
   { id: "construct", action: "construct-mode", context: "both", order: 0 },
@@ -217,7 +220,9 @@ export function SceneActionBar({
   roofVisible = false,
   onToggleRoof,
   keyboardEnabled = true,
+  weather,
 }: {
+  weather?: WeatherMenuProps | undefined;
   items?: readonly ActionBarItem[];
   walkTools?: readonly import("./walk-tools").WalkToolDefinition[] | undefined;
   activeWalkToolId?: string | null;
@@ -235,7 +240,7 @@ export function SceneActionBar({
   onChildAction?: (action: BuiltInShortcutId) => void;
 }) {
   const dom = useCabaneDom();
-  const [open, setOpen] = useState<"Build" | "View" | null>(null);
+  const [open, setOpen] = useState<"Build" | "View" | "Weather" | null>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
   const [visibleCapacity, setVisibleCapacity] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
@@ -371,58 +376,14 @@ export function SceneActionBar({
       tray.style.removeProperty("transform");
     };
   }, [open, items, visibleCapacity]);
-  const group = (name: "Build" | "View", children: ReactNode) => (
-    <div
-      className="scene-action-group"
-      data-open={open === name}
-      onPointerEnter={(event) => {
-        if (event.pointerType === "mouse") setOpen(name);
-      }}
-      onPointerLeave={(event) => {
-        if (event.pointerType === "mouse") setOpen(null);
-      }}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(null);
-      }}
+  const group = (name: "Build" | "View" | "Weather", children: ReactNode) => (
+    <SceneActionGroup
+      name={name}
+      open={open === name}
+      onOpen={(value) => setOpen(value ? name : null)}
     >
-      <button
-        type="button"
-        className="scene-action-slot is-filled"
-        data-group={name}
-        aria-label={name}
-        aria-expanded={open === name}
-        aria-controls={`scene-group-${name}`}
-        aria-keyshortcuts={name === "Build" ? "B" : "V"}
-        onKeyDown={(event) => {
-          if (event.key === "ArrowUp") {
-            event.preventDefault();
-            setOpen(name);
-            requestAnimationFrame(() =>
-              root.current
-                ?.querySelector<HTMLButtonElement>(`#scene-group-${name} button`)
-                ?.focus(),
-            );
-          }
-        }}
-        onClick={() => setOpen(open === name ? null : name)}
-      >
-        <SceneActionSlotFace
-          icon={<ActionBarBuiltInIcon action={name === "Build" ? "build" : "view"} />}
-          label={name}
-          shortcut={name === "Build" ? "B" : "V"}
-          chevron
-        />
-      </button>
-      <div
-        id={`scene-group-${name}`}
-        className="scene-action-group__tray"
-        role="group"
-        aria-label={`${name} actions`}
-        hidden={open !== name}
-      >
-        {children}
-      </div>
-    </div>
+      {children}
+    </SceneActionGroup>
   );
   const renderAction = (shortcut: ShortcutSpec, item?: ActionBarItem) => {
     const disabled = shortcut.action === "all-lights" && !allLightsEnabled;
@@ -435,36 +396,28 @@ export function SceneActionBar({
     const keyboardShortcut = actionKeyboardShortcut[shortcut.action];
     const label = actionLabel(shortcut, mode, lighting, wallFade);
     return (
-      <button
+      <SceneActionButton
         key={item?.id ?? shortcut.id}
-        type="button"
-        className={`scene-action-slot is-filled ${active ? "is-active" : ""} ${busy ? "is-busy" : ""}`}
-        aria-label={label}
-        aria-keyshortcuts={keyboardShortcut?.aria}
-        aria-pressed={active}
-        aria-busy={busy}
-        title={keyboardShortcut ? `${label} (${keyboardShortcut.label})` : label}
-        disabled={disabled || busy}
+        active={active}
+        busy={busy}
+        disabled={disabled}
+        accessibleLabel={label}
+        label={actionCaption(shortcut, mode, lighting, wallFade)}
+        shortcut={keyboardShortcut}
+        icon={
+          actionIllustration[shortcut.action] ? (
+            <img src={actionIllustration[shortcut.action]} alt="" draggable={false} />
+          ) : (
+            <ActionIcon action={shortcut.action} />
+          )
+        }
         onClick={() => {
           setOpen(null);
           setOverflowOpen(false);
           if (item) onAction(item);
           else onChildAction(shortcut.action);
         }}
-      >
-        <SceneActionSlotFace
-          icon={
-            actionIllustration[shortcut.action] ? (
-              <img src={actionIllustration[shortcut.action]} alt="" draggable={false} />
-            ) : (
-              <ActionIcon action={shortcut.action} />
-            )
-          }
-          label={actionCaption(shortcut, mode, lighting, wallFade)}
-          shortcut={keyboardShortcut?.label}
-        />
-        {busy && <i className="scene-action-spinner" aria-hidden="true" />}
-      </button>
+      />
     );
   };
   const renderItem = (item: ActionBarItem) => {
@@ -518,6 +471,25 @@ export function SceneActionBar({
             {group(
               "Build",
               sceneActions.slice(0, 3).map((shortcut) => renderAction(shortcut)),
+            )}
+          </Fragment>
+        );
+      case "weather":
+        return (
+          <Fragment key={item.id}>
+            {group(
+              "Weather",
+              <WeatherMenu
+                preview={weather?.preview ?? "clear"}
+                liveAvailable={weather?.liveAvailable ?? false}
+                status={weather?.status ?? "Weather preview is unavailable here."}
+                onSelect={(value) => {
+                  weather?.onSelect(value);
+                  root.current?.querySelector<HTMLButtonElement>('[data-group="Weather"]')?.focus();
+                  setOpen(null);
+                  setOverflowOpen(false);
+                }}
+              />,
             )}
           </Fragment>
         );

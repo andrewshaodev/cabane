@@ -26,7 +26,7 @@ Native procedural models retain their materials, batching, LOD, and outlines.
 Animations remain in their initial pose; embedded cameras and lights are ignored
 with preview notices. Visual variants driven by HA state are outside this version.
 Only the import owner may load personal GLB resources; catalog/home generation
-continues to obey the procedural source policy.
+follows the [visual asset contract](geometry-and-rendering.md#visual-assets).
 
 Only self-contained GLB 2.0 files are accepted. Images must be embedded; external
 and data-URI references are rejected. Unsupported required extensions produce an
@@ -66,6 +66,21 @@ Portable projects and private backups download as ZIP `.cabane` archives:
 retain draft/published boundaries and mappings but exclude credentials. Legacy
 JSON remains readable. Imports verify all hashes, sizes, GLB resources, and
 references before atomically making the home available; missing files are errors.
+
+Arrange → My models also imports and exports a model-only ZIP pack. A pack has a
+`manifest.json` with format, version, and the complete `customModels` definitions,
+plus the referenced `assets/<sha256>.glb` files. Model IDs are retained, so a
+pack can be imported after a JSON project and resolve its placeholders without
+editing scene-item records. The editor can also import one GLB and replace all
+scene items that currently point at a selected missing model ID. Pack imports
+reject unknown files, unreferenced assets, hash/size mismatches, and conflicting
+IDs; a same-ID model is accepted only when it points to the same asset.
+
+JSON projects and workspace imports preserve unknown furnishing and device model
+IDs as warnings. The scene shows an editable generic cube with the saved size
+and placement until the model is imported or replaced. Structural errors still
+block the import, and missing assets in a complete `.cabane` archive remain
+errors because that archive promises a self-contained workspace.
 
 The companion HA integration advertises asset protocol version 1 and 256 KiB
 blocks through authenticated `cabane/assets/capabilities`. Presence, upload

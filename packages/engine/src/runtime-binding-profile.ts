@@ -1,3 +1,4 @@
+import { isWeatherSource } from "./weather/weather-state";
 import { omitUndefinedProperties } from "./defined-properties";
 import { bindingDomainMatchRank } from "./binding-slot-compatibility";
 import { entityAreaId } from "./binding-entity-candidates";
@@ -185,10 +186,13 @@ export const validateRuntimeBindingProfile = (
           );
       }
   }
+  if (input.weatherSource !== undefined && !isWeatherSource(input.weatherSource))
+    add("profile.weather", "weatherSource", "Choose Automatic, Off, or a weather entity.");
   const valid = issues.length === 0;
   return omitUndefinedProperties({
     profile: valid
       ? {
+          ...(isWeatherSource(input.weatherSource) ? { weatherSource: input.weatherSource } : {}),
           schemaVersion: 1 as const,
           homeId: input.homeId as string,
           roomAreaIds: { ...(input.roomAreaIds as Record<string, string>) },
@@ -210,6 +214,7 @@ export const validateRuntimeBindingProfile = (
 export const exportRuntimeBindingProfile = (profile: RuntimeBindingProfile) =>
   JSON.stringify(
     {
+      weatherSource: profile.weatherSource,
       schemaVersion: profile.schemaVersion,
       homeId: profile.homeId,
       roomAreaIds: profile.roomAreaIds,

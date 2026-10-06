@@ -36,10 +36,12 @@ jobs:
           curl --fail --retry 3 --location "https://raw.githubusercontent.com/cabane-app/cabane-home-assistant/$tag/custom_components/cabane/frontend/manifest.json" --output /tmp/ha-panel-manifest.json
           node --input-type=module <<'JS' >> "$GITHUB_OUTPUT"
           import { readFileSync } from 'node:fs';
+          import { contractRequiresRelease } from './scripts/ha-contract/release-plan.mjs';
           const current = JSON.parse(readFileSync('docs/ha-contract.json'));
           const shipped = JSON.parse(readFileSync('/tmp/ha-panel-manifest.json'));
-          if (current.fingerprint !== shipped.workspace_contract?.fingerprint && current.revision <= (shipped.workspace_contract?.revision ?? 0)) throw new Error('Bump the contract revision and describe the compatibility change.');
-          console.log(`changed=${current.fingerprint !== shipped.workspace_contract?.fingerprint}`);
+          const changed = contractRequiresRelease(shipped.workspace_contract, current);
+          if (changed && current.revision <= (shipped.workspace_contract?.revision ?? 0)) throw new Error('Bump the contract revision and describe the compatibility change.');
+          console.log(`changed=${changed}`);
           JS
   release:
     needs: contract

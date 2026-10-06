@@ -126,10 +126,10 @@ Analytics requires a production build with `VITE_PUBLIC_ANALYTICS_ORIGIN` exactl
 matching the HTTPS origin. `vercel.json` sets it to `https://cabane.my`; local
 builds, previews, and self-hosted installations are disabled by default.
 Network reachability and HA authorization
-remain deployment concerns. Source policy distinguishes approved bundled assets
-and authenticated camera media from generated procedural home content. Personal
-GLB decoding and embedded images are allowed only through the dedicated import
-owner, with no external asset fetches or user-script execution.
+remain deployment concerns. Hosted visual assets follow the [visual asset contract](geometry-and-rendering.md#visual-assets),
+separately from authenticated camera media; requests never include HA credentials
+or household data. Personal GLB decoding remains in the dedicated import owner
+with self-contained validation and no user-script execution.
 
 Implementation: [runtime provider](../../packages/engine/src/HomeAssistantRuntime.tsx),
 [auth storage](../../packages/engine/src/home-assistant-auth.ts),
@@ -180,3 +180,20 @@ Implementation: [action resolution](../../packages/engine/src/action-bar/ha-acti
 [private profile](../../packages/engine/src/runtime-binding-profile.ts).
 HA contracts: [scenes](https://www.home-assistant.io/integrations/scene/),
 [scripts](https://www.home-assistant.io/integrations/script/).
+
+Weather reads current weather entity snapshots through the existing subscription,
+without new connections, polling, forecast requests or HA service calls. Automatic
+uses exactly one non-disabled weather entity; unavailable candidates still count.
+Multiple candidates require a Preferences selection. Missing, disconnected, stale,
+unknown or unavailable readings return to neutral atmosphere; explicit selections
+remain stored and are never silently replaced. Unknown/exceptional conditions are
+reported without inventing effects. Optional wind/cloud/visibility attributes are
+validated and normalized; precipitation density is an artistic condition preset.
+
+Preferences offers Automatic, Off, and named HA weather sources. `weatherSource`
+is an optional private binding-profile field (absent means Automatic), scoped to
+home and HA origin and included in existing private backup and synchronization.
+Its revision-checked write changes only that field in draft and published profiles,
+not other unpublished work. Public projects omit the entity identifier. Save failures
+retain the previous committed source. Action-bar weather previews are local React
+state and never saved to HA or the binding profile.
