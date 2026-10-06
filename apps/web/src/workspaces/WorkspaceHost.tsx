@@ -21,7 +21,7 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
     void repository.read(id).then(async entry => {
       const result = entry?.record ? { status: "ready" as const, record: entry.record } : await lifecycle.load();
       if (!active) return;
-      if (!entry) { setError("This workspace no longer exists."); return; }
+      if (!entry) { setError("This workspace is not saved in this browser."); return; }
       rememberWorkspace(id);
       setLoaded({ record: result.record, metadata: entry.metadata,
         ...(result.status === "recovery" ? { recoveryMessage: result.reason, recoveryRaw: result.raw } : {}) });
@@ -39,7 +39,7 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
     window.addEventListener("focus", check);
     return () => { active = false; window.removeEventListener("focus", check); };
   }, [id, repository, loaded?.metadata.homeAssistantUrl]);
-  if (error) return <main className="direction-project-loading is-error"><strong>Could not open this workspace.</strong><p>{error}</p><Link to="/workspaces">Workspaces</Link></main>;
+  if (error) return <main className="direction-project-loading is-error"><strong>Could not open this workspace.</strong><p>{error}</p><Link to="/workspaces?import=home-assistant">Open from Home Assistant</Link><Link to="/workspaces">Workspaces</Link></main>;
   if (!loaded) return <main className="direction-project-loading">Loading your home…</main>;
   return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider hostSession={isDemo ? null : undefined} homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
     <WorkspaceHaStorageProvider id={id} origin={loaded.metadata.homeAssistantUrl} repository={repository} hidden={isDemo}>

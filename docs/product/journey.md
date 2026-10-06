@@ -15,6 +15,7 @@ Home renders published data; the editor reads the draft. Routes are:
 | `/demo` | Published demo with simulated controls and the introduction closed |
 | `/build` | Construct for the browser's Build destination; creates that destination on a first direct visit, or shows mobile editor guidance on phones |
 | `/workspaces` | Library: New, Import, Open, Rename, Duplicate, Export, Delete |
+| `/open/:workspaceId?ha=<origin>` | Authenticate, open the exact HA-saved home, and enable sync in this browser; optional `view=dashboard` identifies a dashboard link |
 | `/workspaces/:workspaceId` | Published Home; unapplied homes open Construct |
 | `/workspaces/:workspaceId/home-assistant` | HA connection, cross-device storage, full workspace backups |
 | `/workspaces/:workspaceId/construct` | 2D architecture editing |
@@ -24,14 +25,13 @@ Home renders published data; the editor reads the draft. Routes are:
 | `/workspaces/:workspaceId/connect/rooms` | Room-to-area mapping |
 | `/workspaces/:workspaceId/connect/devices` | Device and entity-slot mapping |
 
-Old unscoped editor paths are not aliases. Missing workspace IDs offer a library
-link. Refresh retains the workspace URL. Mode changes retain edit history within
+Old unscoped editor paths are not aliases. Missing local workspace IDs offer Open from Home Assistant and the library; absence in this browser is not described as remote deletion. Refresh retains the workspace URL. Mode changes retain edit history within
 a home. Leaving for Home, the library, or another workspace flushes the draft;
 a failed save keeps the editor open. Home offers Workspaces in its three-dot
 scene menu. In Construct, Arrange, Connect, and Shortcuts, the current workspace name beneath
 Cabane links back to the library, using the same guarded save-on-exit flow.
 In the library, the whole home card opens its workspace; its three-dot menu keeps
-management actions separate. Only draft or recovery states need a status label.
+management actions separate. Each card has separate, non-clickable Connection and Storage rows. The library reports “HA configured” for a stored URL, never a live connection. Storage distinguishes Local only, Saved to HA · sync off, Sync enabled, and Changes pending; the library does not contact HA. Draft and recovery labels remain independent.
 
 In the standalone app, OAuth return state includes the workspace ID, mapping
 target, selected item, and Arrange camera. Callback identity is validated before
@@ -135,3 +135,20 @@ panel on portrait mobile layouts.
 Home Assistant settings are linked from each workspace menu, below Edit the home
 in the dashboard menu, and from Connection settings in the Connect footer. Leaving
 the editor for this page uses the same guarded draft flush as other exits.
+
+
+The library exposes Open from Home Assistant beside Import and New workspace.
+The existing three-dot menu includes Home Assistant settings, Sync with Home
+Assistant, Add to HA dashboard, and Open on another device. These destinations
+open the same per-home settings page with a preserved action intent, including
+across OAuth. Demo settings continue to offer creation of a personal home.
+
+Workspace storage checks integration availability after sign-in without uploading.
+Enable sync performs the first save and enables ongoing sync in one explicit
+action. Missing integrations show installation and Check again. Dashboard setup
+provides a selectable URL for an HA Webpage card; other-device setup provides an
+opening link. Both require successful synchronization before copying. Receiving
+sessions authenticate normally (popup OAuth inside iframes), restore the exact
+home, enable sync, and navigate to it. Conflicts offer Review copies and Open
+browser copy; invalid links offer the HA library. No public account or public
+sharing is implied.

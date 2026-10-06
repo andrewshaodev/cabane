@@ -90,8 +90,6 @@
 .direction-modes [data-mode="connect"] { color: #647b83; }
 .direction-camera button, .direction-project-actions button { padding-inline: 10px; font-size: var(--editor-text-control, .875rem); }
 .direction-camera [aria-pressed="true"] { color: #35483c; background: #dedfce; }
-.direction-project-actions button.is-primary { color: #fff9ef; background: var(--preview-accent); }
-.direction-project-actions button.is-primary:hover { color: #fff9ef; background: #a7603d; }
 .editor-action-bar {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -229,7 +227,13 @@
 }
 .construction-inspector__floor-disclosure > summary::-webkit-details-marker { display: none; }
 .construction-inspector__floor-disclosure .editor-icon, .construction-inspector__expert-toggle .editor-icon { width: 14px; height: 14px; color: var(--preview-muted); }
-.construction-inspector__floor-disclosure[open] > summary .editor-icon, .construction-inspector__expert-toggle[aria-expanded="true"] .editor-icon { transform: rotate(90deg); }
+.construction-inspector__floor-disclosure > .sidebar-section-summary { justify-content: flex-start; align-items: flex-start; gap: 12px; padding: 15px 0; }
+.sidebar-section-summary__copy { display: grid; flex: 1; min-width: 0; gap: 3px; }
+.sidebar-section-summary__copy small { color: #59645d; font-size: var(--editor-text-caption, .75rem); font-weight: 400; line-height: 1.5; letter-spacing: normal; }
+.construction-inspector__floor-disclosure > .sidebar-section-summary > .editor-icon { width: 20px; height: 20px; flex: none; margin-top: 1px; color: var(--preview-ink); }
+.sidebar-section-summary__chevron { display: flex; flex: none; padding-top: 3px; }
+.construction-inspector__floor-disclosure[open] > summary .sidebar-section-summary__chevron .editor-icon { transform: rotate(90deg); }
+.sidebar-section-summary:focus-visible { outline: 2px solid var(--preview-ink); outline-offset: 3px; }
 .construction-inspector__expert { padding: 8px 0 12px; }
 .construction-inspector__expert > header { display: flex; align-items: end; justify-content: space-between; gap: 10px; }
 .construction-inspector__expert > header div { display: grid; gap: 5px; }
@@ -244,13 +248,14 @@
 .construction-inspector__technical-list strong, .construction-inspector__technical-list small { overflow-wrap: anywhere; }
 .construction-inspector__technical-list strong { font-size: var(--editor-text-control, .875rem); font-weight: 500; }
 .construction-inspector__technical-list small { color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); font-variant-numeric: tabular-nums; }
-.construction-inspector__floor-settings { padding: 10px 0 18px; }
-.construction-inspector__floor-settings > header { display: flex; align-items: end; justify-content: space-between; gap: 8px; }
-.construction-inspector__floor-settings > header div { display: grid; gap: 5px; }
-.construction-inspector__floor-settings > header small, .construction-inspector__floor-settings > header > span { color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); }
-.construction-inspector__floor-settings > header strong { font: var(--editor-text-subheading, 1.25rem) Georgia, serif; }
-.construction-inspector__floor-settings > p { color: var(--preview-muted); font-size: var(--editor-text-control, .875rem); line-height: 1.5; }
-.construction-inspector__floor-settings > button { width: 100%; min-height: 38px; padding: 8px; border: 1px solid #d1c7b8; border-radius: 7px; color: var(--preview-ink); background: #ebe2d4; font-size: var(--editor-text-control, .875rem); cursor: pointer; }
+/* All accordion bodies share the same control rhythm and quiet helper text. */
+.construction-inspector__floor-disclosure .sidebar-section-content { display: grid; gap: 12px; margin: 0; padding: 0 0 18px; }
+.construction-inspector__floor-disclosure .sidebar-section-content > fieldset { gap: 10px; margin: 0; padding: 0; border: 0; }
+.construction-inspector__floor-disclosure .sidebar-section-content > fieldset + fieldset { margin-top: 4px; }
+.construction-inspector__floor-disclosure .sidebar-section-content legend { padding: 0 0 8px; color: var(--preview-ink); font-size: var(--editor-text-caption, .75rem); font-weight: 500; }
+.construction-inspector__floor-disclosure .sidebar-section-content > p { margin: 0; color: #59645d; font-size: var(--editor-text-caption, .75rem); line-height: 1.5; }
+.construction-inspector__floor-disclosure .sidebar-section-content > .editor-button { justify-self: start; }
+.construction-inspector__floor-disclosure .sidebar-section-content label { margin-bottom: 0; }
 .construction-inspector__floor-settings .construction-inspector__scale-warning { padding: 9px; border-radius: 6px; color: #7f3e2d; background: #f2d5c8; }
 
 
@@ -523,7 +528,6 @@
 .editor-header .editor-close { pointer-events: auto; border: 1px solid var(--editor-line); background: rgba(247, 242, 233, .94); min-height: 47px; }
 .direction-project-actions button.editor-reset-changes { font-weight: 400; }
 .direction-project-actions button:disabled, .editor-close:disabled { opacity: .45; cursor: not-allowed; }
-.direction-project-actions button.is-primary:hover:not(:disabled) { color: #fff9ef; background: #a7603d; }
 @media (max-width: 1240px) {
   .editor-navigation { grid-row: 3; }
   .direction-preview.is-shortcuts .editor-navigation { grid-row: 2; }
@@ -542,3 +546,5 @@
 .stair-placement-instructions select { min-height: 36px; padding: 7px 10px; border: 1px solid var(--editor-line); border-radius: 7px; color: var(--preview-ink); background: #faf7ef; font: inherit; }
 .stair-placement-instructions select:focus-visible { outline: 2px solid #9c6b53; outline-offset: 2px; }
 @media (pointer: coarse) { .stair-placement-instructions select { min-height: 44px; } }
+.construction-inspector__context { display: contents; }
+.construction-inspector__context > * { flex-shrink: 0; }

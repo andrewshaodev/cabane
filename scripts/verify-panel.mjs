@@ -37,8 +37,7 @@ try {
   await page.getByRole("button",{name:/Workspaces:/}).waitFor({timeout:60000});
   await page.getByRole("button",{name:/Workspaces:/}).click();
   await page.getByRole("heading",{name:"Your workspaces"}).waitFor();
-  await page.getByRole("button",{name:"Import",exact:true}).click();
-  await page.getByRole("button",{name:"From Home Assistant",exact:true}).click();
+  await page.getByRole("button",{name:"Open from Home Assistant",exact:true}).click();
   await page.getByText("No Cabane workspaces saved on this HA instance.").waitFor();
   assert.equal(await page.getByRole("button",{name:"Sign in to Home Assistant"}).count(),0);
   await page.getByRole("button",{name:"Cancel",exact:true}).click();
@@ -50,12 +49,12 @@ try {
   await page.getByRole("button",{name:/Workspaces: Native fixture home/}).click();
   const card=page.locator('.workspace-card').filter({has:page.getByRole('button',{name:'Open Native fixture home',exact:true})});
   await card.locator('summary').click();
-  await card.getByRole('button',{name:'Home Assistant',exact:true}).click();
+  await card.getByRole('button',{name:'Home Assistant settings',exact:true}).click();
   await page.getByRole('button',{name:'Use this Home Assistant',exact:true}).click();
   await page.getByText('Connected',{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Enable HA storage',exact:true}).click();
-  await page.getByRole('button',{name:'Save',exact:true}).click();
-  await page.getByText('Workspace saved on Home Assistant.').waitFor();
+  await page.getByRole('button',{name:'Enable sync',exact:true}).click();
+  await page.getByText('Synced with HA',{exact:true}).waitFor();
+  await page.getByText('Open Cabane in your Home Assistant sidebar', {exact:false}).waitFor();
   const before=await page.evaluate(()=>window.__hostFixture.stats.activeRegistrySubscriptions);
   await page.evaluate(()=>{for(let i=0;i<10;i++)window.__hostFixture.repeat();});
   assert.equal(await page.evaluate(()=>window.__hostFixture.stats.activeRegistrySubscriptions),before);

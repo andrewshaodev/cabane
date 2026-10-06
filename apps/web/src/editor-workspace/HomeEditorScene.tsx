@@ -1,3 +1,5 @@
+import { useReferenceCanvas } from "../editor-reference-plan/ReferenceCanvasLayers";
+import type { ReferencePlanController } from "../editor-reference-plan/useReferencePlan";
 import { ConstructionGrid } from "../editor-preview/construct/ConstructionGrid";
 import { WalkStartPointer } from "../editor-preview/construct/WalkStartPointer";
 import { EditableStair } from "../editor-floors/EditableStair";
@@ -44,9 +46,9 @@ import type { useHomeEditorController } from "./useHomeEditorController";
 
 
 const NO_INTERACTION = () => undefined;
-type Props = { onNameFocusHandled?: () => void; cameraFocusRoomId?: string | null; nameFocusRequest?: { roomId: string; serial: number } | null; placingWalkStart: boolean; onWalkStartPlaced: () => void } & Pick<ReturnType<typeof useHomeEditorController>, "selectSceneItem" | "stairDialog" | "floorNavigation" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "setStairDialog" | "showFloorBelow" | "lowerFloor" | "commit" | "snapshot" | "connectFloor" | "mode" | "editingLocked" | "publishOpen" | "previewOpen" | "connectManifest" | "connect" | "clearConstructionSelection" | "clearFurnishingSelection" | "cameraView" | "cameraResetKey" | "constructEditor" | "dragging" | "cameraFocusPoint" | "handleCameraTargetChange" | "savedCamera" | "previewSceneItems" | "displayedContextualIssues" | "activeIssueKey" | "issueFocusVersion" | "poolDrawing" | "floorZoneDrawing" | "focusIssue" | "furnishingModels" | "deviceModels" | "visualManifest" | "selectedRoomId" | "editorResolvedBindings" | "marqueeSelecting" | "floorPaintTarget" | "requestRoomPaint" | "setDragging" | "constructMeasure" | "setSelectedRoomId" | "setMarqueeSelecting" | "selectedOpening" | "detailsOpeningId" | "setDetailsOpeningId" | "duplicateConstructionOpening" | "visualSceneItems" | "furnishingEditor" | "selectedItem" | "selectedDefinition" | "detailsItemId" | "setDetailsItemId" | "unsettled" | "selectMode" | "duplicateArrangeItem" | "deleteSceneItem">;
+type Props = { reference: ReferencePlanController; onNameFocusHandled?: () => void; cameraFocusRoomId?: string | null; nameFocusRequest?: { roomId: string; serial: number } | null; placingWalkStart: boolean; onWalkStartPlaced: () => void } & Pick<ReturnType<typeof useHomeEditorController>, "selectSceneItem" | "stairDialog" | "floorNavigation" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "setStairDialog" | "showFloorBelow" | "lowerFloor" | "commit" | "snapshot" | "connectFloor" | "mode" | "editingLocked" | "publishOpen" | "previewOpen" | "connectManifest" | "connect" | "clearConstructionSelection" | "clearFurnishingSelection" | "cameraView" | "cameraResetKey" | "constructEditor" | "dragging" | "cameraFocusPoint" | "handleCameraTargetChange" | "savedCamera" | "previewSceneItems" | "displayedContextualIssues" | "activeIssueKey" | "issueFocusVersion" | "poolDrawing" | "floorZoneDrawing" | "focusIssue" | "furnishingModels" | "deviceModels" | "visualManifest" | "selectedRoomId" | "editorResolvedBindings" | "marqueeSelecting" | "floorPaintTarget" | "requestRoomPaint" | "setDragging" | "constructMeasure" | "setSelectedRoomId" | "setMarqueeSelecting" | "selectedOpening" | "detailsOpeningId" | "setDetailsOpeningId" | "duplicateConstructionOpening" | "visualSceneItems" | "furnishingEditor" | "selectedItem" | "selectedDefinition" | "detailsItemId" | "setDetailsItemId" | "unsettled" | "selectMode" | "duplicateArrangeItem" | "deleteSceneItem">;
 export function HomeEditorScene({
-  onNameFocusHandled, cameraFocusRoomId, nameFocusRequest, placingWalkStart, onWalkStartPlaced, selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
+  reference, onNameFocusHandled, cameraFocusRoomId, nameFocusRequest, placingWalkStart, onWalkStartPlaced, selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
   mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
   clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
   handleCameraTargetChange, savedCamera, previewSceneItems, displayedContextualIssues, activeIssueKey,
@@ -57,9 +59,13 @@ export function HomeEditorScene({
   visualSceneItems, furnishingEditor, selectedItem, selectedDefinition, detailsItemId, setDetailsItemId,
   unsettled, selectMode, duplicateArrangeItem, deleteSceneItem
 }: Props) {
+  const referenceCanvas = useReferenceCanvas(reference, constructEditor.previewFloor, mode === "construct");
   const levels = deriveFloorLevels(visualManifest.floors);
   const activeLevel = levels.find(level => level.floorId === activeFloorId)?.elevationMeters ?? 0;
-  return (<div className={`direction-preview__model${mode === "connect" ? " connect-map" : ""}`} aria-label={mode === "connect" ? "Home connection map" : mode === "construct" ? "2D construction plan" : "3D home editor"} inert={editingLocked || publishOpen || previewOpen}>
+  return (<div {...referenceCanvas.handlers} tabIndex={-1}
+    onDragOver={event => { if (mode === "construct" && event.dataTransfer.types.includes("Files")) event.preventDefault(); }}
+    onDrop={event => { if (mode !== "construct") return; event.preventDefault(); void reference.upload(event.dataTransfer.files); }}
+    className={`direction-preview__model${mode === "connect" ? " connect-map" : ""}`} aria-label={mode === "connect" ? "Home connection map" : mode === "construct" ? "2D construction plan" : "3D home editor"} inert={editingLocked || publishOpen || previewOpen}>
     {mode === "connect" && <HomePlanMapping floor={connectFloor} selectedRoomId={connect.roomId}
       roomDeviceSummaries={connect.roomDeviceSummaries}
       inspectorOpen={false} showFitControl={false} onActivateRoom={connect.selectRoom}
@@ -69,7 +75,8 @@ export function HomeEditorScene({
       ?? (connect.profile.roomAreaIds[room.id] ? "Saved area unavailable" : "Not connected")]))}
       roomIcons={Object.fromEntries(connectFloor.rooms.map((room) => [room.id, connect.displayRuntime.areas.find((area) => area.area_id === connect.profile.roomAreaIds[room.id])?.icon ?? null]))}
     />}
-    <div hidden={mode === "connect"} style={{ width: "100%", height: "100%" }}>
+    {referenceCanvas.background}
+    <div hidden={mode === "connect"} style={{ width: "100%", height: "100%", position: "relative" }}>
     <Canvas events={connectedCanvasEvents}
       tabIndex={0}
       aria-label="Home editor canvas"
@@ -91,6 +98,7 @@ export function HomeEditorScene({
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <Suspense fallback={null}>
+        {referenceCanvas.bridge}
         <StylizedScene active={mode === "furnish"}>
         {mode !== "construct" && <>
           <hemisphereLight args={["#ecf4ff", "#768b93", .95]} />
@@ -100,7 +108,7 @@ export function HomeEditorScene({
           start={snapshot.project.home.walkStart} placing={placingWalkStart}
           onPlace={at => { commit({ ...snapshot, project: { ...snapshot.project, home: { ...snapshot.project.home,
             walkStart: { floorId: activeFloorId, at } } } }); onWalkStartPlaced(); }} />}
-        {mode === "construct" && <ConstructionGrid />}
+        {mode === "construct" && !referenceCanvas.visible && <ConstructionGrid />}
         <PreviewCamera
           planWheelNavigation={mode === "construct" || mode === "furnish"}
           view={mode === "construct" ? "top" : cameraView}
@@ -139,9 +147,9 @@ export function HomeEditorScene({
               setStairDialog(null);
             }} />;
         })}
-        {mode === "construct" ? <ConstructionPlan
+        {mode === "construct" ? <ConstructionPlan showFinishes={!referenceCanvas.visible}
           nameFocusRequest={nameFocusRequest} onNameFocusHandled={onNameFocusHandled}
-          namingDisabled={editingLocked || publishOpen || previewOpen || unsettled || Boolean(constructEditor.drawStart) || placingWalkStart || marqueeSelecting}
+          namingDisabled={reference.adjusting || editingLocked || publishOpen || previewOpen || unsettled || Boolean(constructEditor.drawStart) || placingWalkStart || marqueeSelecting}
           onRoomNameChange={(id, name) => constructEditor.updateRoom(id, { name })}
           floor={constructEditor.previewFloor}
           items={previewSceneItems}
@@ -319,5 +327,7 @@ export function HomeEditorScene({
       </Suspense>
     </Canvas>
     </div>
+    {referenceCanvas.controls}
+    {referenceCanvas.assetError && mode === "construct" && <p className="reference-asset-error" role="alert">{referenceCanvas.assetError}</p>}
   </div>);
 }

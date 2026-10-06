@@ -18,16 +18,14 @@ A stored record contains draft and published projects, timestamps, revision, and
 origin-keyed draft/published binding slices with manual-mapping exclusions.
 An optional Cabane custom integration can hold a versioned copy of this full
 private workspace on the connected Home Assistant instance. Manual Save to HA
-and Restore from HA work with sync disabled. Sync is enabled per workspace only
-after an explicit first upload; local IndexedDB saves remain immediate and
+and Restore from HA work with sync disabled. Enable sync uploads and enables per-workspace synchronization in one explicit action; local IndexedDB saves remain immediate and
 offline edits remain local until HA reconnects. Remote version checks stop
 concurrent browsers from silently overwriting each other. All signed-in HA
 users share the instance's Cabane library. Browser deletion leaves the HA copy;
 remote deletion is a separate confirmed action. Installation and the integration source are maintained in
 [the dedicated repository](https://github.com/cabane-app/cabane-home-assistant).
 Storage controls live on the workspace-specific Home Assistant page. The library
-shows saved/sync indicators on ordinary workspace cards; remote import is available
-through Import → From Home Assistant. There is no separate HA library section.
+shows saved/sync indicators on ordinary workspace cards; Open from Home Assistant is a direct library action (the legacy Import → From Home Assistant route remains supported). Opening a saved home restores its exact identity and enables sync, while divergent local copies require explicit review. There is no separate HA library section.
 IndexedDB uses the `cabane-projects-v2` database with project records, workspace
 metadata, and persistent initialization state. Metadata contains the name, HA
 origin, creation time, and applied status. Related writes share a transaction. The
@@ -118,3 +116,25 @@ Home and preserves draft edits; it is disabled until the first successful Save.
 Reset asks for confirmation, restores the published project and connection
 bindings, and clears draft undo history. Before the first Save it restores the
 initial unpublished baseline. Reset is disabled when the draft matches that baseline.
+
+Reference plans are browser-only editor assets in the separate
+`cabane-reference-plans-v1` IndexedDB database. Image blobs are keyed by home and
+asset ID; per-floor records contain placement and image dimensions, with separate
+visibility/opacity preferences. Session history retains only metadata and asset
+IDs, never blob copies. Reference-only edits do not dirty or autosave the home
+project, trigger HA sync, or enter portable exports/private backups.
+
+Removing a floor hides its reference while session undo can restore it. Reset
+retains references for surviving floors; clearing history or leaving the editor
+cleans unused assets. Deleting a workspace removes its reference records and
+blobs. Duplicated and imported homes begin without references. Failed local writes
+retain in-memory changes and allow Retry; a rejected image replacement leaves the
+previous reference intact.
+
+
+Availability is independent of device connection. Cards use cached storage state
+and label enabled sync without claiming remote freshness. The open workspace
+reports verified Synced with HA, Changes pending, Sync interrupted, or Sync needs
+attention. Manual save/load and remote deletion remain under Manage saved copy.
+Opening remote copies checks both the requested home ID and authenticated HA
+origin; corrupt or divergent browser records cannot be silently overwritten.

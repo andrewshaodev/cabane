@@ -738,7 +738,7 @@ await withModules(async (load) => {
     }, {
       code: "project.item-id-duplicate",
       path: "sceneItems[1].id",
-      message: "Scene item id “chair” is already used at sceneItems[0].id.",
+      message: `Scene item “${project.sceneItems[1].modelId}” on “${project.floors[0].name}” has internal ID “chair”, already used by Scene item “missing-model” on “${project.floors[0].name}” (sceneItems[0].id). Catalog models may repeat; delete and re-add the conflicting item in Arrange, or assign distinct item and slot IDs in the project JSON.`,
       severity: "error",
     }, {
       code: "project.wall-support-missing",
@@ -766,6 +766,27 @@ await withModules(async (load) => {
         issue.code === "project.item-id-duplicate" && issue.path === "sceneItems[0].id"
       ), id);
     }
+  });
+
+  test("room identity errors identify both floors and distinguish IDs from names", () => {
+    const project = fixtureHomeProject();
+    project.floors.push({ ...structuredClone(project.floors[0]), id: "upper", name: "Upper floor" });
+    const result = validateHomeProject(project, fixtureHomeExtensions());
+    const conflict = result.issues.find(issue => issue.code === "project.id-duplicate"
+      && issue.path === "floors[1].rooms[0].id");
+    assert.ok(conflict);
+    assert.match(conflict.message, /Room “Room” on “Upper floor”/);
+    assert.match(conflict.message, /Room names may repeat/);
+    assert.match(conflict.message, /Renaming a room does not change its ID/);
+  });
+
+  test("public identity reservations include implicit opening slots and every validated namespace", () => {
+    const project = fixtureHomeProject();
+    const ids = engineApi.collectProjectIds(project);
+    for (const id of [project.floors[0].id, "room", "north", "door", "chair", "room-light"])
+      assert.ok(ids.includes(id), id);
+    project.openingProfiles = {};
+    assert.ok(engineApi.collectProjectIds(project).includes("door-contact"));
   });
 
   test("validates ceiling membership as missing, mismatched, or ambiguous", () => {

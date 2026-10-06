@@ -1,3 +1,5 @@
+import { WorkspaceOpenPage } from "./WorkspaceOpenPage";
+import { deleteReferenceHome } from "../editor-reference-plan/reference-storage";
 import { enrollBuildTutorial, forgetBuildTutorial } from "../editor-onboarding/build-tutorial-storage";
 import { lastOpenedWorkspace, forgetWorkspacePresentation } from "./workspace-presentation";
 import { useWorkspaceOnboarding } from "./useWorkspaceOnboarding";
@@ -7,7 +9,7 @@ import { serializeCanonicalJson, setupStorageKey, useHomeAssistantHostSession, t
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
 import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
-import { WorkspaceHaLibrary } from "./WorkspaceHaStorage";
+import { WorkspaceHaLibrary } from "./WorkspaceHaLibrary";
 import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
@@ -44,8 +46,10 @@ export function WorkspaceApplication() {
     update(); window.addEventListener("focus", update);
     return () => window.removeEventListener("focus", update);
   }, [refresh, location.pathname]);
+  const openedRemote = useCallback(async (id: string) => { await refresh(); await navigate(workspaceHomePath(id), { replace: true }); }, [refresh, navigate]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not load your workspaces.</strong><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></main>;
   if (!repository || !entries) return <main className="direction-project-loading">Loading your workspaces…</main>;
+  if (location.pathname.startsWith("/open/")) return <WorkspaceOpenPage repository={repository} onOpened={openedRemote} />;
   const isCallback = !hostSession && location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
   const callback = isCallback ? callbackRequest : null;
   if (isCallback) {
@@ -95,7 +99,7 @@ export function WorkspaceApplication() {
   };
   const open = async (id: string) => { await navigate(workspaceHomePath(id)); };
   return <>{migrationError && <p role="alert" className="workspace-error">{migrationError} Your saved source data has been retained.</p>}
-    <WorkspaceLibrary onSettings={async id => { await navigate(`${workspaceHomePath(id)}/home-assistant`); }} entries={entries} onOpen={open} onRecover={open}
+    <WorkspaceLibrary onSettings={async (id, intent) => { await navigate(`${workspaceHomePath(id)}/home-assistant${intent ? `?action=${intent}` : ""}`); }} entries={entries} onOpen={open} onRecover={open}
       onCreate={async name => { const entry = await repository.createBlank(name); enrollBuildTutorial(entry.metadata.id); await refresh(); await open(entry.metadata.id); }}
       onRename={async (id, name) => { await repository.rename(id, record(id).revision, name); await refresh(); }}
       onDuplicate={async (id, name) => { await repository.duplicate(id, record(id).revision, name); await refresh(); }}
@@ -107,6 +111,7 @@ export function WorkspaceApplication() {
           if (fresh?.record?.revision !== entry.record.revision) throw new Error("This workspace changed. Refresh before deleting it.");
         }
         await repository.delete(id, raw);
+        await deleteReferenceHome(id);
         forgetWorkspacePresentation(id);
         forgetBuildTutorial(id);
         try { window.localStorage.removeItem(setupStorageKey(id)); } catch { /* Non-authoritative onboarding only. */ }

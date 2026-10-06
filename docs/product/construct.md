@@ -6,7 +6,12 @@ Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, 
 Window, Passage, Floor, Pool, Hedge, Measure, and Pan. Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
-also controls default wall/ceiling settings.
+also controls default wall/ceiling settings. Select a door, window, or passage and
+open its on-canvas Details action to edit width and height. Passage Details also
+controls rectangular/arched shape and arch rise. Valid width and height edits update
+the scene immediately. Sizes that do not fit report an error; leaving the field
+restores the accepted value. These edits use the ordinary
+preview, undo/redo, autosave, and Apply flow.
 
 The “Have a floor plan?” sidebar block is temporarily disabled by
 `PLAN_IMPORT_ENABLED` in `EditorWorkspace.tsx`. Its implementation is retained for
@@ -108,6 +113,18 @@ Construct supports adding above, renaming, changing floor height, and removing
 only the top floor with confirmation and undo. Ground cannot be removed.
 Reordering, duplication, and basements remain excluded.
 
+A compact row above the Construct sidebar introduction keeps the current floor
+visible independently of the active tool. Its styled menu lists floors from top to
+bottom, marks the current floor, and ends with “Add floor above”, which creates and selects an empty top
+floor. The adjacent Floor settings icon opens the existing name and floor-height
+dialog. The row shares navigation, edit locks, and undo history with the retained
+corner floor picker; adding or switching does not copy rooms or furnishings.
+The menu supports arrow keys, Home/End, Escape, and outside-click dismissal.
+Settings use labeled editor fields and neutral Cancel / primary Save actions.
+Settings also expose Delete floor, which opens the existing removal confirmation
+and remains undoable. The action is disabled with an explanation for the ground
+floor and any floor with another floor above it.
+
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 
 
@@ -166,7 +183,7 @@ control for unnamed rooms. Enter or blur commits a nonempty trimmed name; Escape
 cancels. Naming uses ordinary undo/redo and autosave and is disabled during active
 gestures. Unnamed rooms are valid saved drafts; they still require names to Apply.
 
-The Walkthrough disclosure in the Construct sidebar groups the Explore starting-point controls with an explanation of their purpose. Floor settings, Roof, and Build tutorial remain separate disclosures.
+The Spawn area disclosure in the Construct sidebar groups the Explore starting-point controls. The sidebar sections appear in this order: Reference plan, Roof, Spawn area, Scale & heights, and Tutorial. Each has an outline icon and a short description visible while collapsed. Scale & heights contains the former Floor settings controls. The Advanced structure-data section is no longer shown.
 
 Door offers six catalog presets: Panel wood, Panel white, French, Full glass,
 Sliding wood, and Garage door. Its sidebar follows the Floor palette hierarchy,
@@ -178,3 +195,33 @@ configuration, and placement returns to Select. Selected-door properties use the
 same picker; replacements preserve identity and offset, reject sizes that do not
 fit, and commit through ordinary undo/redo. Roll-up doors have an installation
 side but no hinge, slide direction, or leaf count.
+
+## Reference plans
+
+Construct offers a persistent Reference plan disclosure below the Edit the plan
+introduction or active tool/selection properties and contextual diagnostics.
+Its expanded contents include a Show reference plan checkbox and opacity slider. Roof, Spawn area, Scale & heights, and Tutorial remain below those properties. The
+active tutorial retains its floating desktop placement. New or restarted
+tutorials begin with an optional Add a reference plan step; Skip proceeds to
+walls, which remains step 1 of 6. Accepting a reference, or beginning wall
+construction, advances this optional introduction. Existing tutorials do not
+rewind to it.
+
+One PNG, JPEG, WebP, or SVG reference can be selected or dropped onto each floor.
+Files are limited to 20 MB and 32 megapixels. SVGs are decoded as images, with
+scripts, external resources, and unsupported embedded content rejected. Importing
+an image does not generate architecture or activate the separate AI/JSON import.
+
+The reference starts centered at 80% of the current viewport with 50% opacity.
+Adjust offers canvas drag movement, proportional corner resizing, and rotation. Set scale uses two image
+points and a known positive distance in metres, holding the first point fixed.
+Done locks the reference and restores drawing interaction; Cancel restores the
+previous reference. Escape cancels a gesture before exiting adjustment. Switching
+floor or editor mode cancels unfinished adjustments. Pan and zoom remain usable.
+
+The browser image sits between a camera-synchronized grid/floor background and
+the architecture foreground; it remains readable after rooms close. It never
+becomes a home texture or appears in Arrange, Explore, or Home. Visibility and
+opacity are independent of the floor-below guide. Reference adjustments use the
+same session Undo/Redo timeline as architecture, without changing published home
+data. Storage errors appear in the section with Retry.

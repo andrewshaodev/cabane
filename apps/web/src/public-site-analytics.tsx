@@ -15,7 +15,7 @@ export function publicSiteAnalyticsEnabled(production: boolean, configuredOrigin
 }
 
 export function analyticsPath(url: URL) {
-  return url.pathname.replace(/^(\/workspaces)\/[^/]+/, "$1/:workspaceId");
+  return url.pathname.replace(/^(\/(?:workspaces|open))\/[^/]+/, "$1/:workspaceId");
 }
 
 export function publicPageView(event: BeforeSendEvent, currentUrl: string) {

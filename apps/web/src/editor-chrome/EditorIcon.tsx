@@ -1,6 +1,10 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  check: <path d="m5 12 4 4L19 6" />,
+  roof: <path d="m2 12 10-8 10 8M5 10v10h14V10M2 12h20" />,
+  spawn: <><path d="M18 9c0 5-6 11-6 11S6 14 6 9a6 6 0 1 1 12 0Z" /><circle cx="12" cy="9" r="2" /></>,
+  tutorial: <><path d="M12 5v16M12 5C9 3 5 3 2 4v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 1Z" /></>,
   stairs: <path d="M3 21v-6h6V9h6V3h6M3 21h18V3" />,
   cube: <path d="m12 3 9 5v8l-9 5-9-5V8Zm0 10 9-5M12 13 3 8m9 5v8" />,
   plan: <><rect x="3" y="3" width="18" height="18" rx="1" /><path d="M10 3v8H3m7 0h5m-5 5v5m5-10h6" /></>,

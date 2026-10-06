@@ -1,5 +1,5 @@
 /** Optional browser-local guidance; never part of an exported HomeProject. */
-export const BUILD_TUTORIAL_STEPS = ["walls", "door", "window", "name", "arrange", "connect"] as const;
+export const BUILD_TUTORIAL_STEPS = ["reference", "walls", "door", "window", "name", "arrange", "connect"] as const;
 export type BuildTutorialStep = typeof BUILD_TUTORIAL_STEPS[number];
 export interface BuildTutorialState {
   status: "active" | "dismissed" | "completed";
@@ -9,7 +9,7 @@ export interface BuildTutorialState {
   readyToConnect: boolean;
 }
 export const createBuildTutorialState = (): BuildTutorialState => ({
-  status: "active", step: "walls", skipped: [], readyToConnect: false,
+  status: "active", step: "reference", skipped: [], readyToConnect: false,
 });
 export function parseBuildTutorialState(value: unknown): BuildTutorialState | undefined {
   if (!value || typeof value !== "object") return undefined;

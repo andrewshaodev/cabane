@@ -8,6 +8,7 @@ import { Box3, Ray, Raycaster, Vector3 } from "three";
 import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 await withModules(async (load) => {
     const { useFurnishingEditor } = await load("/apps/web/src/editor-preview/furnish/useFurnishingEditor.ts");
@@ -20,7 +21,6 @@ await withModules(async (load) => {
     placementForWorldDrag,
     planPointForWorldDrag,
     selectionBoxGeometry,
-    uniqueItemId,
   } = await load("/apps/web/src/editor-preview/furnish/editor-state.ts");
   const { FurnishingEditLayer } = await load(
     "/apps/web/src/editor-preview/furnish/FurnishingEditLayer.tsx"
@@ -345,11 +345,6 @@ await withModules(async (load) => {
     assert.ok(Math.abs(box.center[2] - .1) < 1e-12);
   });
 
-  test("generates deterministic collision-free IDs", () => {
-    assert.equal(uniqueItemId("chair", ["chair", "chair-2", "chair-3"]), "chair-4");
-    assert.equal(uniqueItemId("table", ["chair"]), "table");
-  });
-
   test("outdoor lanterns remain visible without a room binding and reject mismatched bindings", async () => {
     for (const modelId of ["low-garden-lantern", "garden-lantern-pole"]) {
       const definition = stableDeviceRegistry[modelId];
@@ -581,22 +576,25 @@ await withModules(async (load) => {
 
     state = furnishingEditorReducer(state, { type: "duplicate", id: "cabinet" });
     assert.equal(state.items.length, 2);
-    assert.equal(state.selectedId, "cabinet-copy");
+    const copiedId = state.selectedId;
+    assert.match(copiedId, uuid);
     assert.deepEqual(state.items[1].placement.at, [3.45, 4.35]);
 
-    state = furnishingEditorReducer(state, { type: "delete", id: "cabinet-copy" });
+    state = furnishingEditorReducer(state, { type: "delete", id: copiedId });
     assert.deepEqual(state.items.map(({ id }) => id), ["cabinet"]);
     state = furnishingEditorReducer(state, {
       type: "add-preset", modelId: "cabinet", definition: definition(), planCenter: [8, 6],
     });
-    assert.equal(state.items[1].id, "cabinet-2");
+    const addedId = state.items[1].id;
+    assert.match(addedId, uuid);
+    assert.notEqual(addedId, copiedId);
     assert.deepEqual(state.items[1].placement.at, [8, 6]);
     assert.deepEqual(state.items[1].size, [2, 1, .5]);
 
     state = furnishingEditorReducer(state, { type: "undo" });
     assert.deepEqual(state.items.map(({ id }) => id), ["cabinet"]);
     state = furnishingEditorReducer(state, { type: "redo" });
-    assert.deepEqual(state.items.map(({ id }) => id), ["cabinet", "cabinet-2"]);
+    assert.deepEqual(state.items.map(({ id }) => id), ["cabinet", addedId]);
   });
 
   test("preserves wall and ceiling placement unions during numeric edits", () => {
@@ -740,6 +738,8 @@ await withModules(async (load) => {
     const duplicated = furnishingEditorReducer(state, { type: "duplicate", id: device.id });
     assert.equal(duplicated.items.length, 2);
     assert.notEqual(duplicated.items[1].id, device.id);
+    assert.match(duplicated.items[1].id, uuid);
+    assert.match(duplicated.items[1].entitySlots[0].id, uuid);
     assert.notEqual(duplicated.items[1].entitySlots[0].id, entitySlots[0].id);
     assert.deepEqual(duplicated.items[1].size, edited.size);
     assert.equal(duplicated.items[0], edited);

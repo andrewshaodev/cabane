@@ -29,7 +29,21 @@ await withModules(async load => {
       assert.equal(window.location.href, "https://host.test/cabane?auth_callback=host-owned");
     } finally { await act(async () => root.unmount()); dom.window.close(); Object.assign(globalThis, previous); }
   });
-  const { WorkspaceHaLibrary } = await load("/apps/web/src/workspaces/WorkspaceHaStorage.tsx");
+  const { WorkspaceDestinations } = await load("/apps/web/src/workspaces/WorkspaceDestinations.tsx");
+  test("native workspace destinations use the host panel instead of standalone URLs", async () => {
+    const dom = new JSDOM('<div id="root"></div>', { url: "https://host.test/cabane" });
+    const previous = { window: globalThis.window, document: globalThis.document, IS_REACT_ACT_ENVIRONMENT: globalThis.IS_REACT_ACT_ENVIRONMENT };
+    Object.assign(globalThis, { window: dom.window, document: dom.window.document, IS_REACT_ACT_ENVIRONMENT: true });
+    const root = createRoot(document.getElementById("root"));
+    try {
+      await act(async () => root.render(React.createElement(HomeAssistantHostSessionProvider, { session: { origin: "https://host.test", connection: {} } },
+        React.createElement(WorkspaceDestinations, { id: "home", origin: "https://host.test", intent: "dashboard", ready: true }))));
+      assert.match(document.body.textContent, /Home Assistant sidebar/);
+      assert.equal(document.querySelector("input"), null);
+      assert.doesNotMatch(document.body.textContent, /Webpage card/);
+    } finally { await act(async () => root.unmount()); dom.window.close(); Object.assign(globalThis, previous); }
+  });
+  const { WorkspaceHaLibrary } = await load("/apps/web/src/workspaces/WorkspaceHaLibrary.tsx");
   test("native import lists workspaces from the host instead of a remembered standalone server", async () => {
     const dom = new JSDOM('<div id="root"></div>', { url: "https://host.test/cabane" });
     const previous = { window: globalThis.window, document: globalThis.document, IS_REACT_ACT_ENVIRONMENT: globalThis.IS_REACT_ACT_ENVIRONMENT };

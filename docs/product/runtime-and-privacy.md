@@ -95,7 +95,7 @@ integration or HA is unavailable. The integration is not a Cabane-hosted
 service, and real owner-instance deployment acceptance remains pending.
 The public `https://cabane.my` deployment uses Vercel Web Analytics to count
 application page views through React Router, including personal-home and editor
-routes. Workspace IDs are replaced with `:workspaceId`; query strings and
+routes. Workspace IDs in `/workspaces/:id` and `/open/:id` are replaced with `:workspaceId`; query strings and
 fragments are stripped. No names, project contents, HA data, or custom events
 are sent. OAuth routes and URLs containing authentication parameters are excluded
 both before loading analytics and before sending a page view. Automatic SDK route
@@ -139,3 +139,12 @@ previews never send services. Valid cover percentage takes precedence, followed
 by explicit cover open/closed state and valid contact state. Unknown or stale
 state retains the last known pose for that binding during the session, or starts
 closed. Changing home, opening, or binding identity discards retained state.
+
+
+Cross-device and dashboard links contain a workspace ID and HA origin only;
+credentials, household mappings, and workspace documents never enter the URL.
+They require HA authentication before storage reads. HA dashboard iframes reuse
+the existing origin/source/state-checked popup OAuth handoff. A blocked popup
+reports the existing retry instruction; no HA authentication page is embedded in
+its own iframe. Storage operations do not call HA device services. Real household
+and cross-browser iframe acceptance still require testing on the owner's setup.

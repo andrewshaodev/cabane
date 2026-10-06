@@ -14,8 +14,8 @@ import { pointInsidePolygon, resolveItemTransform } from "@cabane/engine";
 import { windowPlacements } from "./placement/window-placement";
 import { placementNearWallsForWorldDrag } from "./placement/wall-drag-placement";
 
-import { duplicateSceneItem, uniqueItemId } from "./duplicate-item";
-export { uniqueItemId } from "./duplicate-item";
+import { duplicateSceneItem } from "./duplicate-item";
+import { createSceneItemId } from "./scene-item-identity";
 
 const MINIMUM_SIZE_METERS = .01;
 
@@ -308,7 +308,7 @@ export const furnishingEditorReducer = (
       return withChange(state, { items, selectedId });
     }
     case "add-preset": {
-      const id = uniqueItemId(action.modelId, state.items.map((item) => item.id));
+      const id = createSceneItemId(state.items.flatMap(item => [item.id, ...(item.kind === "device" ? item.entitySlots.map(slot => slot.id) : [])]));
       const item: FurnishingItemSpec = {
         id,
         kind: "furnishing",

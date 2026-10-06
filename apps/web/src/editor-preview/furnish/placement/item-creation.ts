@@ -1,16 +1,16 @@
 import { resolveModelVariant } from "@cabane/engine";
 import type { EntityBindingSlotSpec, ItemPlacement, SceneItemSpec } from "@cabane/engine";
 import type { CatalogEntry } from "../catalog/catalog";
-import { uniqueItemId } from "../editor-state";
+import { createSceneItemId } from "../scene-item-identity";
 
 export function createCatalogItem(entry: CatalogEntry, placement: ItemPlacement,
   items: readonly SceneItemSpec[], occupiedIds: readonly string[], floorId: string): SceneItemSpec {
-  const id = uniqueItemId(entry.modelId, [...occupiedIds, ...items.map((item) => item.id), ...items.flatMap((item) => item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [])]);
+  const id = createSceneItemId([...occupiedIds, ...items.map((item) => item.id), ...items.flatMap((item) => item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [])]);
   const common = { variant: resolveModelVariant(entry.definition).id, id, floorId, modelId: entry.modelId, placement, size: entry.definition.defaultSize };
   if (entry.kind === "furnishing") return { ...common, kind: "furnishing" };
   const domain = entry.definition.supportedDomains[0];
   if (!domain) throw new Error(`${entry.definition.label} has no supported device domain.`);
-  const slotId = uniqueItemId(`${id}-primary`, [
+  const slotId = createSceneItemId([
     ...occupiedIds, id, ...items.map((item) => item.id),
     ...items.flatMap((item) => item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : []),
   ]);

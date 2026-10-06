@@ -1,6 +1,7 @@
+import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { isEmptyPublishedHome, roomAnchorForPolygon } from "@cabane/engine";
-import { createBrowserUuid } from "@cabane/engine";
+import { collectProjectIds, createBrowserUuid } from "@cabane/engine";
 import { useFloorNavigation, composeHomeBindingManifest, composeHomeProjectPreview, type StairSpec } from "@cabane/engine";
 import type { ConnectWorkspaceProps, HomeEditorExitReason } from "./editor-workspace-contract";
 import { useEditorValidation } from "./useEditorValidation";
@@ -192,10 +193,12 @@ export function useHomeEditorController({
         ? constructEditor.addFloorZone(roomId, polygon, floorFinish)
         : constructEditor.addGroundZone(polygon, floorFinish),
   );
-  const unsettled = Boolean(stairPlacement) || dragging || constructEditor.isSettling
+  const constructionUnsettled = Boolean(stairPlacement) || dragging || constructEditor.isSettling
     || !!furnishingEditor.transaction || poolDrawing.active
     || floorZoneDrawing.active || pendingRoomPaintId !== null;
   const editingLocked = workspace.busy || closing || connectionBusy;
+  const reference = useReferencePlan(workspace, activeFloorId, mode === "construct", editingLocked || constructionUnsettled || Boolean(constructEditor.drawStart) || publishOpen || previewOpen);
+  const unsettled = constructionUnsettled || reference.adjusting;
   const editorSyncTarget = useRef<{
     draft: typeof constructEditor.draft;
     items: typeof furnishingEditor.items;
@@ -352,13 +355,9 @@ export function useHomeEditorController({
   const duplicateArrangeItem = useCallback((id: string) => {
     if (!furnishingEditor.items.some((item) => item.id === id)) return false;
     setDetailsItemId(null);
-    const slots = [
-      ...Object.values(editorProject.roomProfiles).flatMap((room) => room.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((opening) => [opening.contactSlot?.id, opening.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    furnishingEditor.duplicate(id, constructEditor.previewFloor, slots);
+    furnishingEditor.duplicate(id, constructEditor.previewFloor, collectProjectIds(editorProject));
     return true;
-  }, [constructEditor.previewFloor, editorProject.openingProfiles, editorProject.roomProfiles, furnishingEditor]);
+  }, [constructEditor.previewFloor, editorProject, furnishingEditor]);
   const duplicateConstructionOpening = useCallback((id: string) => {
     setDetailsOpeningId(null);
     return constructEditor.duplicateOpening(id);
@@ -366,7 +365,7 @@ export function useHomeEditorController({
 
   useHomeEditorShortcuts({
     clearConstructionSelection, clearFurnishingSelection, constructEditor, constructMeasure, dragging,
-    duplicateArrangeItem, duplicateConstructionOpening, editingLocked,
+    duplicateArrangeItem, duplicateConstructionOpening, editingLocked: editingLocked || reference.adjusting,
     floorZoneDrawing, furnishingEditor, marqueeSelecting, mode, pendingRoomPaintId, previewOpen,
     publishOpen, redoProject, selectedOpening, undoProject, setPendingRoomPaintId, setDragging
   });
@@ -497,16 +496,8 @@ export function useHomeEditorController({
       { items: visualSceneItems, furnishingModels, deviceModels }, arrangeVisibility.current);
     setCatalogError(candidate.error);
     if (!candidate.placement) return;
-    const occupiedSlots = [
-      ...editorProject.floors.flatMap((floor) => [floor.id,
-        ...floor.rooms.map((room) => room.id), ...floor.walls.map((wall) => wall.id),
-        ...floor.wallJunctions.map((junction) => junction.id), ...floor.openings.map((opening) => opening.id),
-        ...(floor.ceilings ?? []).map((ceiling) => ceiling.id), ...(floor.groundZones ?? []).map(zone => zone.id)]),
-      ...editorProject.shortcuts.map((shortcut) => shortcut.id),
-      ...Object.values(editorProject.roomProfiles).flatMap((profile) => profile.dashboardSlots.map((slot) => slot.id)),
-      ...Object.values(editorProject.openingProfiles).flatMap((profile) => [profile.contactSlot?.id, profile.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ];
-    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items, occupiedSlots, constructEditor.previewFloor.id);
+    const item = createCatalogItem(entry, candidate.placement, furnishingEditor.items,
+      collectProjectIds(editorProject), constructEditor.previewFloor.id);
     furnishingEditor.addItem(candidate.size ? { ...item, size: candidate.size } : item);
     setDetailsItemId(null);
     setArrangeAnnouncement(`${entry.definition.label} added. Drag to move it; use Undo to remove it.`);
@@ -600,7 +591,7 @@ export function useHomeEditorController({
     visualSceneItems, furnishingEditor, selectedItem, selectedDefinition, detailsItemId,
     setDetailsItemId, unsettled, selectMode, duplicateArrangeItem, deleteSceneItem, setCameraView,
     walkButton, setPreviewOpen, closeEditor, onWorkspaces, closing, setPublishMessage, setPublishOpen, runtime,
-    workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
+    reference, workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
     homeAssistantUrl, signIn, snapshot, flush, lifecycle, commit, replaceEditorsFromProject,
     catalogBrowsing, setCatalogBrowsing, catalogError, addCatalogItem, arrangeAnnouncement,
     pendingRoomPaintId, confirmRoomPaint, setPendingRoomPaintId, autosaveStatus, editedManifest,

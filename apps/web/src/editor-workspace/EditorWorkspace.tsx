@@ -1,6 +1,9 @@
 import { StairShapeSelect } from "../editor-floors/StairShapeSelect";
 import { convertStairShape } from "../editor-floors/stair-placement-geometry";
 import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
+import { EditorButton } from "../editor-chrome/EditorButton";
+import { SidebarSectionSummary } from "../editor-chrome/SidebarSectionSummary";
+import { ReferencePlanPanel } from "../editor-reference-plan/ReferencePlanPanel";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
 import { BuildTutorial } from "../editor-onboarding/BuildTutorial";
@@ -12,7 +15,7 @@ import { EditorModeIntroduction } from "../editor-chrome/EditorModeIntroduction"
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { FloorPicker, addTopFloor, renameFloor, removeTopFloor, setFloorHeight } from "@cabane/engine";
 import { StairDetails } from "../editor-floors/StairDetails";
-import { FloorManagementDialog } from "../editor-floors";
+import { FloorManagementDialog, ConstructFloorControls } from "../editor-floors";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
 
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -66,13 +69,13 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     visualSceneItems, furnishingEditor, selectedItem, selectedDefinition, detailsItemId,
     setDetailsItemId, unsettled, selectMode, duplicateArrangeItem, deleteSceneItem, setCameraView,
     walkButton, setPreviewOpen, closeEditor, onWorkspaces, closing, setPublishMessage, setPublishOpen, runtime,
-    workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
+    reference, workspace, undoProject, redoProject, floorFinish, setFloorFinish, setFloorPaintTarget,
     homeAssistantUrl, signIn, snapshot, flush, lifecycle, commit, replaceEditorsFromProject,
     catalogBrowsing, setCatalogBrowsing, catalogError, addCatalogItem, arrangeAnnouncement,
     pendingRoomPaintId, confirmRoomPaint, setPendingRoomPaintId, autosaveStatus, editedManifest,
     closeWalk, publishErrors, publishWarnings, publishIssues, publishMessage, publishing, publishProject
   } = useHomeEditorController(props);
-  const tutorial = useBuildTutorial(editorProject, mode);
+  const tutorial = useBuildTutorial(editorProject, mode, Object.keys(workspace.snapshot.references ?? {}).length > 0);
   const requestedActionBar = props.navigation?.request.panel === "action-bar" || props.initialRequest?.panel === "action-bar";
   const [actionBarPanelOpen, setActionBarPanelOpen] = useState(requestedActionBar);
   const dom = useCabaneDom();
@@ -82,6 +85,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const sidebar = useRef<HTMLElement>(null);
   useEffect(() => { if (sidebar.current) sidebar.current.scrollTop = 0; }, [mode, shortcutsMode]);
   const onModeTabChange = (next: EditorMode | "shortcuts") => {
+    reference.cancel();
     if (next === "shortcuts") {
       setActionBarPanelOpen(true);
       props.navigation?.go({ mode: "construct", panel: "action-bar" });
@@ -106,7 +110,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     room.devices.flatMap(device => device.displayName ? [[device.slot.id, device.displayName]] : [])));
   const [nameFocusRequest, setNameFocusRequest] = useState<{ roomId: string; serial: number } | null>(null);
   const [tutorialAction, setTutorialAction] = useState<{ step: BuildTutorialStep; target?: { floorId: string; roomId: string } } | null>(null);
-  const tutorialBusy = editingLocked || unsettled || Boolean(constructEditor.drawStart) || publishOpen || previewOpen;
+  const tutorialBusy = (tutorial.state?.step === "reference" && !reference.storage.ready) || editingLocked || unsettled || Boolean(constructEditor.drawStart) || publishOpen || previewOpen;
   const importWorkspace = (json: string) => {
     const next = stageImportedWorkspace({ ...workspace.getRecord(), draft: snapshot.project, bindings: snapshot.bindings }, json, ownerProjectRegistries);
     commit(next);
@@ -115,6 +119,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const activateTutorial = () => {
     const state = tutorial.state;
     if (!state || tutorialBusy) return;
+    if (state.step === "reference") { reference.openPicker(); return; }
     if (state.step === "arrange" && mode === "furnish") { tutorial.ready(); return; }
     const nextMode = state.step === "arrange" ? "furnish" : state.step === "connect" ? "connect" : "construct";
     if (state.target) floorNavigation.selectFloor(state.target.floorId);
@@ -137,7 +142,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     setTutorialAction(null);
   }, [tutorialAction, tutorialBusy, mode, activeFloorId, constructEditor.previewFloor.id]);
   const [walkStartFloor, setWalkStartFloor] = useState<string | null>(null);
-  useEffect(() => { setWalkStartFloor(null); }, [mode, activeFloorId]);
+  useEffect(() => { setWalkStartFloor(null); }, [mode, activeFloorId, reference.adjusting]);
   useEffect(() => {
     const cancel = (event: KeyboardEvent) => { if (event.key === "Escape") setWalkStartFloor(null); };
     dom.events.addEventListener("keydown", cancel);
@@ -145,9 +150,17 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   }, []);
   useEffect(() => { if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null); }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
+  const floorControlsDisabled = editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+  const addFloorAbove = () => {
+    const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
+    commit(next);
+    floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
+    constructEditor.replaceFloor(next.project.floors.at(-1)!);
+    furnishingEditor.replaceItems([]);
+  };
   return ((
     <main className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`} data-editor-mode={shortcutsMode ? "shortcuts" : mode}>
-      {!shortcutsMode && <HomeEditorScene onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
+      {!shortcutsMode && <HomeEditorScene reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
         mode, editingLocked, publishOpen, previewOpen, connectManifest, connect,
         clearConstructionSelection, clearFurnishingSelection, cameraView, cameraResetKey,
         constructEditor, dragging, cameraFocusPoint, handleCameraTargetChange, savedCamera,
@@ -162,14 +175,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
       <div className="editor-floor-controls" inert={publishOpen || previewOpen}>
         <FloorPicker floors={snapshot.project.floors} selectedId={activeFloorId}
-          disabled={editingLocked || unsettled || Boolean(floorDialog)} onSelect={(id) => floorNavigation.selectFloor(id)}
-          onAdd={mode === "construct" ? () => {
-            const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
-            commit(next);
-            floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
-            constructEditor.replaceFloor(next.project.floors.at(-1)!);
-            furnishingEditor.replaceItems([]);
-          } : undefined}
+          disabled={floorControlsDisabled} onSelect={(id) => floorNavigation.selectFloor(id)}
+          onAdd={mode === "construct" ? addFloorAbove : undefined}
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
           onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
             ? () => setFloorDialog("remove") : undefined} />
@@ -187,6 +194,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           commit({ ...snapshot, project: { ...snapshot.project, stairs: [...snapshot.project.stairs.filter(s => s.id !== stair.id), stair] } });
         }} />}
       {floorDialog && <FloorManagementDialog action={floorDialog}
+        onRemove={snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
+          ? () => setFloorDialog("remove") : undefined}
+        removeDisabledReason={activeFloorId === snapshot.project.floors[0]?.id ? "The ground floor cannot be deleted."
+          : activeFloorId !== snapshot.project.floors.at(-1)?.id ? "Only the top floor can be deleted. Delete the floors above first." : undefined}
         name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
         height={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.floorToFloorHeightMeters}
         itemCount={snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length}
@@ -195,7 +206,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           const next = floorDialog === "remove" ? removeTopFloor(snapshot) : setFloorHeight(renameFloor(snapshot, activeFloorId, name), activeFloorId, height);
           commit(next); replaceEditorsFromProject(next.project); setFloorDialog(null);
         }} />}
-      <HomeEditorHeader {...{ activeFloorId, stairPlacement, setStairPlacement, startStairs, snapshot,
+      <HomeEditorHeader referenceAdjusting={reference.adjusting} {...{ activeFloorId, stairPlacement, setStairPlacement, startStairs, snapshot,
         editingLocked, publishOpen, previewOpen, mode, cameraView, setCameraView, walkButton, unsettled,
         setPreviewOpen, selectMode, closeEditor, closing, setPublishMessage, setPublishOpen, connect, replaceEditorsFromProject,
         runtime, constructEditor, dragging, floorZoneDrawing, poolDrawing, workspace, undoProject,
@@ -219,6 +230,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             </button>}
           </div>
         </div>
+        {!shortcutsMode && mode === "construct" && <ConstructFloorControls
+          floors={snapshot.project.floors} selectedId={activeFloorId} disabled={floorControlsDisabled}
+          onSelect={id => floorNavigation.selectFloor(id)} onAdd={addFloorAbove}
+          onSettings={() => setFloorDialog("rename")} />}
         <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
         {shortcutsMode && <div className="shortcuts-guide">
           <h3>Add a shortcut</h3>
@@ -233,27 +248,26 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         {!shortcutsMode && mode === "construct" && tutorial.state?.status !== "active" && isPristineConstructionFloor(constructEditor.previewFloor) &&
           <p className="construction-empty-hint">Your plan starts here. Choose Wall, then click each corner to draw your first room.</p>}
         {!shortcutsMode && mode === "construct" && (
-          <ConstructionInspector
+          <ConstructionInspector inert={reference.adjusting}
+            referencePlanControls={<ReferencePlanPanel reference={reference} floorName={constructEditor.previewFloor.name} />}
             planImportControls={PLAN_IMPORT_ENABLED && <PlanImportActions homeId={snapshot.project.home.id}
               disabled={tutorialBusy} onImport={importWorkspace} />}
             tutorialControls={tutorial.state?.status !== "active" && <details className="construction-inspector__floor-disclosure">
-              <summary>Build tutorial<EditorIcon name="chevron" /></summary>
-              <p className="construction-inspector__tool-hint">A guided introduction to drawing and furnishing your first room.</p>
-              <button type="button" className="editor-tutorial-restart" disabled={tutorialBusy} onClick={tutorial.restart}>Restart tutorial</button>
+              <SidebarSectionSummary icon="tutorial" title="Tutorial" description="Learn to draw and furnish your first room." />
+              <div className="sidebar-section-content"><EditorButton disabled={tutorialBusy} onClick={tutorial.restart}>Restart tutorial</EditorButton></div>
             </details>}
             walkStartControls={<details className="construction-inspector__floor-disclosure">
-              <summary>Walkthrough<EditorIcon name="chevron" /></summary>
-              <div className="construction-walk-start" role="group" aria-label="Walk starting point">
-                <p>Choose where you enter your home when you select Explore.</p>
-                <button type="button" aria-pressed={placingWalkStart} disabled={unsettled && !placingWalkStart}
+              <SidebarSectionSummary icon="spawn" title="Spawn area" description="Choose where you start in Explore." />
+              <div className="construction-walk-start sidebar-section-content" role="group" aria-label="Walk starting point">
+                <EditorButton aria-pressed={placingWalkStart} disabled={unsettled && !placingWalkStart}
                   onClick={() => { clearConstructionSelection(); constructEditor.setTool("select"); setWalkStartFloor(placingWalkStart ? null : activeFloorId); }}>
                   {placingWalkStart ? "Cancel" : snapshot.project.home.walkStart ? "Move starting point" : "Set starting point"}
-                </button>
+                </EditorButton>
                 {placingWalkStart && <p role="status">Click inside the floor to set your starting point. Escape cancels.</p>}
-                {snapshot.project.home.walkStart && <button type="button" onClick={() => {
+                {snapshot.project.home.walkStart && <EditorButton variant="text" onClick={() => {
                   const { walkStart, ...home } = snapshot.project.home;
                   commit({ ...snapshot, project: { ...snapshot.project, home } }); setWalkStartFloor(null);
-                }}>Use automatic start</button>}
+                }}>Use automatic start</EditorButton>}
               </div>
             </details>}
             roof={snapshot.project.home.roof}
@@ -300,7 +314,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           onPlacementChange={furnishingEditor.updatePlacement} onSizeChange={furnishingEditor.updateSize} onLightStateChange={furnishingEditor.updateLightState} onVariantChange={furnishingEditor.updateVariant}
           onClose={() => setDetailsItemId(null)} />
       </div>}
-      {mode === "construct" && !marqueeSelecting && selectedOpening && selectedOpening.kind !== "passage" && detailsOpeningId === selectedOpening.id && (
+      {mode === "construct" && !marqueeSelecting && selectedOpening && detailsOpeningId === selectedOpening.id && (
         <div inert={editingLocked || publishOpen || previewOpen}>
           <OpeningDetails key={selectedOpening.id} opening={selectedOpening} editor={constructEditor}
             disabled={dragging || editingLocked} onClose={() => setDetailsOpeningId(null)} />

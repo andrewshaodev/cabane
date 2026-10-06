@@ -6,7 +6,7 @@ import { openingPlanSymbol } from "./opening-plan-symbol";
 import type { ConstructEditorController } from "./useConstructEditor";
 
 export function OpeningDetails({ opening, editor, disabled, onClose }: {
-  opening: Exclude<EditorOpening, { kind: "passage" }>;
+  opening: EditorOpening;
   editor: ConstructEditorController;
   disabled: boolean;
   onClose: () => void;
@@ -19,8 +19,8 @@ export function OpeningDetails({ opening, editor, disabled, onClose }: {
   const minX = Math.min(0, ...points.map((point) => point[0])) - .2;
   const maxX = Math.max(width, ...points.map((point) => point[0])) + .2;
   const extentZ = Math.max(.3, ...points.map((point) => Math.abs(point[1]))) + .12;
-  const orientable = resolveOpeningOrientation(opening).canSwitchSide;
-  const name = opening.kind === "door" ? "Door" : "Window";
+  const orientable = opening.kind !== "passage" && resolveOpeningOrientation(opening).canSwitchSide;
+  const name = opening.kind === "door" ? "Door" : opening.kind === "window" ? "Window" : "Passage";
   return <SelectionDetailsPanel mode="construct" title={`${name} properties`} subtitle="Selected opening"
     label={`${name} properties`} onClose={onClose}>
     <div inert={disabled}>

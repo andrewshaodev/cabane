@@ -6,20 +6,20 @@ export interface EditorWorkspaceSnapshot {
   bindings: WorkspaceBindings;
 }
 
-export interface EditorWorkspaceHistory {
-  present: EditorWorkspaceSnapshot;
-  past: readonly EditorWorkspaceSnapshot[];
-  future: readonly EditorWorkspaceSnapshot[];
+export interface EditorWorkspaceHistory<T extends EditorWorkspaceSnapshot = EditorWorkspaceSnapshot> {
+  present: T;
+  past: readonly T[];
+  future: readonly T[];
 }
 
-export const createWorkspaceHistory = (snapshot: EditorWorkspaceSnapshot): EditorWorkspaceHistory => ({
+export const createWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(snapshot: T): EditorWorkspaceHistory<T> => ({
   present: structuredClone(snapshot), past: [], future: [],
 });
 
-export const commitWorkspaceSnapshot = (
-  history: EditorWorkspaceHistory,
-  next: EditorWorkspaceSnapshot,
-): EditorWorkspaceHistory => {
+export const commitWorkspaceSnapshot = <T extends EditorWorkspaceSnapshot>(
+  history: EditorWorkspaceHistory<T>,
+  next: T,
+): EditorWorkspaceHistory<T> => {
   if (serializeCanonicalJson(history.present) === serializeCanonicalJson(next)) return history;
   return {
     present: structuredClone(next),
@@ -28,7 +28,7 @@ export const commitWorkspaceSnapshot = (
   };
 };
 
-export const undoWorkspaceHistory = (history: EditorWorkspaceHistory): EditorWorkspaceHistory => {
+export const undoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(history: EditorWorkspaceHistory<T>): EditorWorkspaceHistory<T> => {
   const previous = history.past.at(-1);
   return previous ? {
     present: structuredClone(previous),
@@ -37,7 +37,7 @@ export const undoWorkspaceHistory = (history: EditorWorkspaceHistory): EditorWor
   } : history;
 };
 
-export const redoWorkspaceHistory = (history: EditorWorkspaceHistory): EditorWorkspaceHistory => {
+export const redoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(history: EditorWorkspaceHistory<T>): EditorWorkspaceHistory<T> => {
   const next = history.future[0];
   return next ? {
     present: structuredClone(next),

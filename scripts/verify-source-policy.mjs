@@ -66,7 +66,13 @@ for (const file of files) {
       inspectedSource = inspectedSource.replace("https://github.com/cabane-app/cabane-home-assistant#installation", "integration-setup-navigation");
     }
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/workspaces/HomeAssistantPage.tsx") {
-      inspectedSource = inspectedSource.replace("https://home.example.com", "example-address-placeholder");
+      // Form guidance is display text, not a network request.
+      inspectedSource = inspectedSource.replace("https://home.example.com", "example-address-placeholder")
+        .replace("including https:// and a port if needed", "including the HTTPS scheme and optional port");
+    }
+    if (rule.reason === "runtime remote URL" && relativePath === "packages/engine/src/HomeAssistantConnectionFlow.tsx") {
+      // Only the literal validation example is exempt; actual remote requests stay prohibited.
+      inspectedSource = inspectedSource.replace("including https:// and a port if needed (for example, https://homeassistant.local:8123)", "including the HTTPS scheme and optional port example");
     }
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/onboarding-config.ts") {
       inspectedSource = inspectedSource.replace(/https:\/\/github\.com\/cabane-app\/cabane(?:#readme)?/g, "public-source-navigation");

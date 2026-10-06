@@ -1,3 +1,4 @@
+import { EditorButton } from "../editor-chrome/EditorButton";
 import { requestWalkPointerLock } from "@cabane/engine";
 import { useMemo, useState } from "react";
 import { EditorActionBar } from "../editor-chrome/EditorActionBar";
@@ -10,9 +11,9 @@ import { ConnectActionBar } from "../editor-connect/ConnectActionBar";
 
 import type { useHomeEditorController } from "./useHomeEditorController";
 
-type Props = Pick<ReturnType<typeof useHomeEditorController>, "editingLocked" | "publishOpen" | "previewOpen" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "startStairs" | "snapshot" | "mode" | "cameraView" | "setCameraView" | "walkButton" | "unsettled" | "setPreviewOpen" | "selectMode" | "closeEditor" | "closing" | "setPublishMessage" | "setPublishOpen" | "connect" | "runtime" | "constructEditor" | "dragging" | "floorZoneDrawing" | "poolDrawing" | "workspace" | "undoProject" | "redoProject" | "replaceEditorsFromProject"> & { shortcutsMode: boolean; onModeTabChange: (mode: EditorMode | "shortcuts") => void };
+type Props = Pick<ReturnType<typeof useHomeEditorController>, "editingLocked" | "publishOpen" | "previewOpen" | "activeFloorId" | "stairPlacement" | "setStairPlacement" | "startStairs" | "snapshot" | "mode" | "cameraView" | "setCameraView" | "walkButton" | "unsettled" | "setPreviewOpen" | "selectMode" | "closeEditor" | "closing" | "setPublishMessage" | "setPublishOpen" | "connect" | "runtime" | "constructEditor" | "dragging" | "floorZoneDrawing" | "poolDrawing" | "workspace" | "undoProject" | "redoProject" | "replaceEditorsFromProject"> & { referenceAdjusting?: boolean; shortcutsMode: boolean; onModeTabChange: (mode: EditorMode | "shortcuts") => void };
 export function HomeEditorHeader({
-  activeFloorId, stairPlacement, setStairPlacement, startStairs, snapshot,
+  referenceAdjusting, activeFloorId, stairPlacement, setStairPlacement, startStairs, snapshot,
   editingLocked, publishOpen, previewOpen, mode, cameraView, setCameraView, walkButton, unsettled,
   setPreviewOpen, selectMode, closeEditor, closing, setPublishMessage, setPublishOpen, connect, runtime,
   constructEditor, dragging, floorZoneDrawing, poolDrawing, workspace, undoProject, redoProject, shortcutsMode, onModeTabChange, replaceEditorsFromProject
@@ -55,14 +56,14 @@ export function HomeEditorHeader({
           const result = await workspace.resetDraftToPublished();
           if (result.status === "saved") replaceEditorsFromProject(result.record.draft);
         }}><EditorIcon name="reset" />Reset</button>
-      <button type="button" className="is-primary" disabled={editingLocked || unsettled} onClick={() => {
+      <EditorButton variant="primary" disabled={editingLocked || unsettled} onClick={() => {
         setPublishMessage(null);
         setPublishOpen(true);
-      }}><EditorIcon name="save" />Save</button>
+      }}><EditorIcon name="save" />Save</EditorButton>
     </div>
     {mode === "connect" ? <ConnectActionBar view={connect.view} onViewChange={connect.setView}
       hasUnmappedRooms={connect.hasUnmappedRooms}
-      refreshing={runtime.refreshing} disconnected={connect.disconnected} onRefresh={() => void connect.refresh()} /> : <EditorActionBar mode={mode} tool={constructEditor.tool}
+      refreshing={runtime.refreshing} disconnected={connect.disconnected} onRefresh={() => void connect.refresh()} /> : <EditorActionBar inert={referenceAdjusting} mode={mode} tool={constructEditor.tool}
         onToolChange={tool => { setStairPlacement(null); constructEditor.setTool(tool); }}
           onStairs={startStairs} stairsActive={Boolean(stairPlacement)}
           stairsDisabledReason={snapshot.project.floors.at(-1)?.id === activeFloorId ? "Add a floor above first, then place stairs from this floor." : editingLocked || unsettled ? "Finish the current edit first." : undefined}

@@ -58,3 +58,17 @@
 .workspace-ha-library { padding-bottom: 16px; }
 .workspace-ha-library-content { display: grid; gap: 12px; margin-top: 16px; }
 .workspace-ha-library-content > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 12px; border-top: 1px solid #d5cdbc; }
+
+.workspace-availability { display: grid; gap: 9px; margin: 12px 0 20px; }
+.workspace-availability > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: baseline; gap: 12px; }
+.workspace-availability dt { color: #626b5f; font-size: 12px; }
+.workspace-availability dd { display: flex; align-items: center; gap: 7px; margin: 0; font-size: 13px; color: #35433a; }
+.workspace-availability .editor-icon { width: 16px; height: 16px; flex-shrink: 0; color: #627353; }
+.workspace-menu { min-width: 242px; max-width: calc(100vw - 64px); }
+.workspace-menu button { font-size: 13px; }
+.workspace-library-actions { flex-wrap: wrap; }
+.workspace-library ::selection { background: #d4ddca; }
+@media (max-width: 600px) {
+  .workspace-library-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .workspace-library-actions .workspace-open-ha { grid-column: 1 / -1; }
+}

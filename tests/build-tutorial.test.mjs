@@ -72,7 +72,10 @@ await withModules(async load => {
 
   test("objectives follow real architecture and remember the first room", () => {
     let state = engine.createBuildTutorialState();
-    assert.equal(reconcileBuildTutorial(state, blank(), "construct").step, "walls");
+    assert.equal(reconcileBuildTutorial(state, blank(), "construct").step, "reference");
+    assert.equal(reconcileBuildTutorial(state, blank(), "construct", true).step, "walls");
+    assert.equal(reconcileBuildTutorial({ ...state, skipped: ["reference"] }, blank(), "construct").step, "walls");
+    assert.equal(reconcileBuildTutorial({ ...state, step: "walls" }, blank(), "construct").step, "walls", "existing tutorials do not rewind to the optional step");
     const project = roomProject();
     state = reconcileBuildTutorial(state, project, "construct");
     assert.equal(state.step, "door");

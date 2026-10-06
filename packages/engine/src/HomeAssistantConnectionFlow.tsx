@@ -7,7 +7,7 @@ import { homeAssistantTransportError, normalizeHomeAssistantUrl } from "./home-a
 
 export const validateHomeAssistantUrlInput = (value: string) => {
   const normalized = normalizeHomeAssistantUrl(value);
-  if (!normalized) return { normalized: null, error: "Enter a valid Home Assistant web address without credentials." };
+  if (!normalized) return { normalized: null, error: "Enter the full Home Assistant address, including https:// and a port if needed (for example, https://homeassistant.local:8123). Do not include credentials." };
   const parsed = new URL(value.trim());
   if ((parsed.pathname && parsed.pathname !== "/") || parsed.search || parsed.hash) {
     return { normalized: null, error: "Use only the Home Assistant origin—remove any path, query, or fragment." };

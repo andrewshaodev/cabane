@@ -33,14 +33,14 @@ export async function mountHaStorageHarness(options: { missing?: boolean; fullPa
   document.body.append(container);
   function Settings() {
     const [record, setRecord] = useState(entry.record!);
-    return <MemoryRouter><WorkspaceHaStorageProvider id={entry.metadata.id} origin="https://ha.test" repository={repository}>
+    return <WorkspaceHaStorageProvider id={entry.metadata.id} origin="https://ha.test" repository={repository}>
       <HomeAssistantPage record={record} lifecycle={createBrowserHomeProjectLifecycle(indexedDB, entry.metadata.id)} origin="https://ha.test"
         onRecordChange={setRecord} onChangeOrigin={async () => {}} isDemo={false} onCreatePersonal={() => {}} />
-    </WorkspaceHaStorageProvider></MemoryRouter>;
+    </WorkspaceHaStorageProvider>;
   }
-  createRoot(container).render(<HomeAssistantRuntimeValueProvider value={runtime as never}>
+  createRoot(container).render(<MemoryRouter initialEntries={[window.location.pathname + window.location.search]}><HomeAssistantRuntimeValueProvider value={runtime as never}>
     {options.fullPage ? <Settings /> : <WorkspaceHaStorage id={entry.metadata.id} origin="https://ha.test" repository={repository} />}
-  </HomeAssistantRuntimeValueProvider>);
+  </HomeAssistantRuntimeValueProvider></MemoryRouter>);
   return { id: entry.metadata.id, getRemoteVersion: () => remote?.version ?? null, repository };
 }
 
@@ -69,4 +69,32 @@ export async function mountHaStorageBackgroundHarness() {
     </WorkspaceHaStorageProvider>
   </HomeAssistantRuntimeValueProvider>);
   return { id: entry.metadata.id, repository, getRemoteVersion: () => remote.version };
+}
+
+export async function mountHaOpenHarness(options: { divergent?: boolean; wrongOrigin?: boolean; missing?: boolean } = {}) {
+  const { WorkspaceOpenContent } = await import("../../apps/web/src/workspaces/WorkspaceOpenPage");
+  const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
+  const blank = await repository.createBlank("Remote cottage");
+  const entry = await repository.setConnection(blank.metadata.id, blank.record!.revision, options.wrongOrigin ? "https://other.test" : "https://ha.test");
+  const document = exportWorkspaceBackup(entry.metadata, entry.record!);
+  if (options.divergent) {
+    await writeSyncCursor(indexedDB, { origin: "https://ha.test", homeId: entry.metadata.id, enabled: false, remoteVersion: 1,
+      acknowledgedFingerprint: await fingerprintWorkspace(entry.metadata, entry.record!) });
+    await repository.rename(entry.metadata.id, entry.record!.revision, "My local changes");
+  } else await repository.delete(entry.metadata.id, await repository.readRaw(entry.metadata.id));
+  let opened: string | null = null;
+  const calls: string[] = [];
+  const runtime = { status: "connected", origin: "https://ha.test", configured: true,
+    sendStorageMessage: async (message: Record<string, unknown>) => {
+      calls.push(String(message.type));
+      if (message.type === "cabane/workspaces/get") return options.missing ? null : { version: 2, document };
+      throw new Error("Opening must never upload or control devices");
+    },
+  };
+  const container = window.document.createElement("div"); window.document.body.append(container);
+  const onOpened = async (id: string) => { opened = id; };
+  createRoot(container).render(<MemoryRouter><HomeAssistantRuntimeValueProvider value={runtime as never}>
+    <WorkspaceOpenContent repository={repository} target={{ homeId: entry.metadata.id, origin: "https://ha.test", dashboard: true }} onOpened={onOpened} />
+  </HomeAssistantRuntimeValueProvider></MemoryRouter>);
+  return { id: entry.metadata.id, repository, getOpened: () => opened, getCalls: () => calls };
 }

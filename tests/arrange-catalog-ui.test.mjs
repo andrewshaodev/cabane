@@ -53,13 +53,13 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       const select = document.querySelector("select");
-      assert.deepEqual([...select.options].map(option => option.textContent), ["Classic", "Cozy"]);
+      assert.deepEqual([...select.options].map(option => option.textContent), ["Classic — left chaise (front view)", "Cozy — left chaise (front view)", "Classic — right chaise (front view)", "Cozy — right chaise (front view)"]);
       assert.equal(select.value, "default");
       await act(async () => {
-        select.value = "cozy";
+        select.value = "cozy-right";
         select.dispatchEvent(new window.Event("change", { bubbles: true }));
       });
-      assert.equal(editor.items[0].variant, "cozy");
+      assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
       assert.equal(document.querySelector("select"), null);
     });
@@ -252,6 +252,64 @@ await withModules(async (load) => {
       await act(async () => button("Undo").click());
       await settle();
       assert.equal(saved.at(-1).sceneItems.length, ownerHomeProject.sceneItems.length + 2);
+    });
+  });
+
+  const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
+  const { catalogEntries } = await load("/apps/web/src/editor-preview/furnish/catalog/catalog.ts");
+  const { validateHomeProject } = await load("/packages/engine/src/index.ts");
+  const { createCatalogItem } = await load("/apps/web/src/editor-preview/furnish/placement/item-creation.ts");
+  test("catalog placement and duplication reserve identities across floors", async () => {
+    await withDom(async ({ root }) => {
+      const project = makeThreeFloorProject();
+      const entries = catalogEntries(ownerProjectRegistries.furnishingModels, ownerProjectRegistries.deviceModels);
+      // Existing copies on another floor must reserve both item and slot IDs.
+      for (const modelId of ["concealed-cistern-toilet", "counter-stool", "table-lamp"]) {
+        const item = createCatalogItem(entries.find(entry => entry.modelId === modelId),
+          { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 }, [], [], "second");
+        item.id = `${modelId}-copy`;
+        if (item.kind === "device") item.entitySlots[0].id = `${modelId}-primary-copy`;
+        project.sceneItems.push(item);
+      }
+      const record = createSeedProjectRecord(project, 1);
+      const lifecycle = { autosave: async (current, draft, _now, bindings) => ({
+        status: "saved", record: { ...current, draft, bindings, revision: current.revision + 1 },
+      }) };
+      let controller;
+      function Harness() {
+        controller = useHomeEditorController({ initialRecord: record, lifecycle, autosaveDelayMs: 5,
+          onClose() {}, initialRequest: { mode: "furnish" } });
+        return null;
+      }
+      const settle = () => act(async () => new Promise(resolve => setTimeout(resolve, 20)));
+      await act(async () => root.render(React.createElement(Harness)));
+      for (const floor of project.floors) {
+        await act(async () => controller.floorNavigation.selectFloor(floor.id));
+        await settle();
+        controller.handleCameraTargetChange([2, 2], () => true);
+        for (const modelId of ["concealed-cistern-toilet", "counter-stool", "table-lamp"]) {
+          for (let repeat = 0; repeat < 2; repeat++) {
+            await act(async () => controller.addCatalogItem(entries.find(entry => entry.modelId === modelId)));
+            await settle();
+            assert.equal(controller.catalogError, null);
+            if (repeat === 0) {
+              const source = controller.furnishingEditor.items.at(-1);
+              await act(async () => controller.duplicateArrangeItem(source.id));
+              await settle();
+            }
+          }
+        }
+      }
+      const draft = controller.snapshot.project;
+      assert.equal(draft.sceneItems.length, 30);
+      for (const original of project.sceneItems) {
+        assert.deepEqual(draft.sceneItems.find(item => item.id === original.id), original);
+      }
+      const result = validateHomeProject(draft, ownerProjectRegistries);
+      assert.deepEqual(result.issues, [], JSON.stringify(result.issues));
+      assert.equal(new Set(draft.sceneItems.map(item => item.id)).size, 30);
+      // Room display names deliberately repeat across the fixture's floors.
+      assert.equal(draft.floors[0].rooms[0].name, draft.floors[1].rooms[0].name);
     });
   });
 

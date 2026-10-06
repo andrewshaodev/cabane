@@ -1,3 +1,4 @@
+import { EditorButton } from "../../editor-chrome/EditorButton";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
 import {
@@ -60,15 +61,10 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
   };
 
   return (
-    <section className="construction-inspector__floor-settings" aria-label="Floor settings">
-      <header>
-        <div><small>Whole floor</small><strong>Scale & defaults</strong></div>
-        <span>{editor.draft.coordinates.scaleBasis}</span>
-      </header>
-      <p>Scale changes resize the complete house while keeping its plan geometry intact.</p>
+    <section className="construction-inspector__floor-settings sidebar-section-content" aria-label="Floor settings">
       <fieldset>
-        <legend>Coordinate system</legend>
-        <label>Scale<CommittedNumberInput label="Meters per plan unit" min={.001} step={.01} value={scale} onCommit={stage(setScale)} /></label>
+        <legend>Plan coordinates</legend>
+        <label>Scale (m/unit)<CommittedNumberInput label="Meters per plan unit" min={.001} step={.01} value={scale} onCommit={stage(setScale)} /></label>
         <label>Basis<select aria-label="Floor scale basis" value={scaleBasis} onChange={(event) => {
           setScaleBasis(event.target.value as typeof scaleBasis);
           setConfirmingScale(false);
@@ -78,17 +74,18 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
       </fieldset>
       <fieldset>
         <legend>Default heights</legend>
-        <label>Wall<CommittedNumberInput label="Default wall height" min={.3} step={.05} value={wallHeight} onCommit={stage(setWallHeight)} /></label>
-        <label>Ceiling<CommittedNumberInput label="Default ceiling height" min={.3} step={.05} value={ceilingHeight} onCommit={stage(setCeilingHeight)} /></label>
+        <label>Wall (m)<CommittedNumberInput label="Default wall height" min={.3} step={.05} value={wallHeight} onCommit={stage(setWallHeight)} /></label>
+        <label>Ceiling (m)<CommittedNumberInput label="Default ceiling height" min={.3} step={.05} value={ceilingHeight} onCommit={stage(setCeilingHeight)} /></label>
       </fieldset>
+      <p className="sidebar-section-note">Changing scale resizes the whole house.</p>
       {confirmingScale && (
         <p className="construction-inspector__scale-warning" role="alert">
           This will rescale the architecture and reposition plan-authored items. Click again to confirm.
         </p>
       )}
-      <button type="button" disabled={!changes || !valid} onClick={apply}>
-        {confirmingScale ? "Confirm whole-floor rescale" : "Apply floor settings"}
-      </button>
+      <EditorButton disabled={!changes || !valid} onClick={apply}>
+        {confirmingScale ? "Confirm whole-floor rescale" : "Apply changes"}
+      </EditorButton>
     </section>
   );
 }

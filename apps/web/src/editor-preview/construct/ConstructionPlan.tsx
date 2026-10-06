@@ -47,8 +47,8 @@ const PlanRoom = memo(function PlanRoom({ room, coordinates, namingDisabled, nam
 });
 
 /** Project metadata only: never instantiate a furnishing or device component. */
-export const ConstructionPlan = memo(function ConstructionPlan({ floor, items, furnishingModels, deviceModels, ...naming }: NamingProps & {
-  floor: FloorSpec; items: readonly SceneItemSpec[];
+export const ConstructionPlan = memo(function ConstructionPlan({ floor, items, furnishingModels, deviceModels, showFinishes = true, ...naming }: NamingProps & {
+  showFinishes?: boolean; floor: FloorSpec; items: readonly SceneItemSpec[];
   furnishingModels: FurnishingModelRegistry; deviceModels: DeviceModelRegistry;
 }) {
   const footprints = useMemo(() => {
@@ -74,7 +74,7 @@ export const ConstructionPlan = memo(function ConstructionPlan({ floor, items, f
     return strokes;
   }, [items, floor, furnishingModels, deviceModels]);
   return <group name="construction-plan">
-    <FloorFinishSurfaces floor={floor} variant="plan" />
+    {showFinishes && <FloorFinishSurfaces floor={floor} variant="plan" />}
     {floor.rooms.map((room) => <PlanRoom key={room.id} room={room} coordinates={floor.coordinates} {...naming} />)}
     <PlanStrokeBatch name="plan-footprints" strokes={footprints} />
   </group>;

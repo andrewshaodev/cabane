@@ -72,27 +72,33 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
       return classify(error);
     }
   });
-  const manualSave = (homeId: string, origin: string) => run(homeId, async (): Promise<SyncStatus> => {
+  const save = async (homeId: string, origin: string, enable = false): Promise<SyncStatus> => {
     const entry = await local(homeId);
     const cursor = await deps.cursors.read(origin, homeId);
     const remote = await deps.client.get(homeId);
     if (remote?.corrupt) return { kind: "conflict", detail: "The HA copy is damaged." };
     if (remote?.document && (!cursor || remote.version !== cursor.remoteVersion)) return { kind: "conflict" };
     const version = await deps.client.put(homeId, deps.serialize(entry), remote?.version ?? null);
-    await acknowledge(origin, entry, version, cursor?.enabled ?? false);
-    return { kind: cursor?.enabled ? "synced" : "off" };
-  });
-  const manualRestore = (homeId: string, origin: string) => run(homeId, async (): Promise<SyncStatus> => {
+    await acknowledge(origin, entry, version, enable || (cursor?.enabled ?? false));
+    const latest = await local(homeId);
+    return { kind: enable || cursor?.enabled ? (await deps.fingerprint(latest)) === (await deps.fingerprint(entry)) ? "synced" : "pending" : "off" };
+  };
+  const manualSave = (homeId: string, origin: string) => run(homeId, () => save(homeId, origin));
+  const enableSync = (homeId: string, origin: string) => run(homeId, () => save(homeId, origin, true));
+  const restore = async (homeId: string, origin: string, enable = false): Promise<SyncStatus> => {
     const remote = await deps.client.get(homeId);
     if (!remote?.document) throw new Error("No HA copy of this workspace exists.");
     if (remote.corrupt) throw new Error("The HA copy is damaged. Download its raw data for recovery.");
     const existing = await deps.repository.read(homeId);
     const cursor = await deps.cursors.read(origin, homeId);
+    if (existing && !existing.record) return { kind: "conflict", detail: "The browser copy needs recovery. Download it before replacing it." };
     if (existing?.record && (!cursor || await deps.fingerprint(existing) !== cursor.acknowledgedFingerprint)) return { kind: "conflict", detail: "This browser's copy has changes. Choose which copy to keep." };
     const restored = await deps.restore(remote.document, existing?.record?.revision, homeId);
-    await acknowledge(origin, restored, remote.version, cursor?.enabled ?? false);
-    return { kind: cursor?.enabled ? "synced" : "off" };
-  });
+    await acknowledge(origin, restored, remote.version, enable || (cursor?.enabled ?? false));
+    return { kind: enable || cursor?.enabled ? "synced" : "off" };
+  };
+  const manualRestore = (homeId: string, origin: string) => run(homeId, () => restore(homeId, origin));
+  const openRemote = (homeId: string, origin: string) => run(homeId, () => restore(homeId, origin, true));
   const setEnabled = (homeId: string, origin: string, enabled: boolean) => run(homeId, async () => {
     const cursor = await deps.cursors.read(origin, homeId);
     if (!cursor) throw new Error("Save this workspace to Home Assistant before enabling sync.");
@@ -123,5 +129,5 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
     await deps.cursors.remove(origin, homeId);
     return { kind: "off" } as SyncStatus;
   });
-  return { reconcile, manualSave, manualRestore, setEnabled, resolveConflict, deleteRemote };
+  return { reconcile, manualSave, enableSync, manualRestore, openRemote, setEnabled, resolveConflict, deleteRemote };
 }

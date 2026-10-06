@@ -5,7 +5,6 @@ import { RoofSettingsEditor } from "./RoofSettingsEditor";
 import type { RoofSettings } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
-import { OpeningProperties } from "./OpeningProperties";
 
 import { PoolProperties } from "./PoolProperties";
 
@@ -17,15 +16,11 @@ import {
   type ManifestIssue,
 } from "@cabane/engine";
 
-import {
-  useId,
-  useMemo,
-  useState
-} from "react";
+import { useMemo } from "react";
 
 import type { ConstructEditorController } from "./useConstructEditor";
 
-import { EditorIcon } from "../../editor-chrome/EditorIcon";
+import { SidebarSectionSummary } from "../../editor-chrome/SidebarSectionSummary";
 
 import type { ConstructContextualIssue } from "./contextual-validation";
 
@@ -40,9 +35,10 @@ import {
   type FloorPaintingInspector,
 } from "./FloorFinishPalette";
 import { FloorSettingsEditor } from "./FloorSettingsEditor";
-import { formatPlanValue } from "./inspector-number-format";
 
 export interface ConstructionInspectorProps {
+  inert?: boolean;
+  referencePlanControls?: import("react").ReactNode;
   planImportControls?: import("react").ReactNode;
   tutorialControls?: import("react").ReactNode;
   walkStartControls?: import("react").ReactNode;
@@ -60,6 +56,8 @@ type InspectorValidationIssue = ManifestIssue & Pick<ConstructContextualIssue, "
 };
 
 export function ConstructionInspector({
+  inert,
+  referencePlanControls,
   planImportControls,
   tutorialControls,
   walkStartControls,
@@ -71,11 +69,8 @@ export function ConstructionInspector({
   onIssueFocus,
   floorPainting,
 }: ConstructionInspectorProps) {
-  const [expertMode, setExpertMode] = useState(false);
-  const expertPanelId = useId();
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
   const selectedPoolId = editor.selection?.kind === "pool" ? editor.selection.id : null;
-  const selectedOpeningId = editor.selection?.kind === "opening" ? editor.selection.id : null;
   const selectedRoomId = editor.selection?.kind === "room" ? editor.selection.id : null;
   const selectedFloorZoneId = editor.selection?.kind === "floor-zone"
     ? editor.selection.id
@@ -85,9 +80,6 @@ export function ConstructionInspector({
     : undefined;
   const selectedPool = selectedPoolId
     ? editor.draft.pools?.find((pool) => pool.id === selectedPoolId) : undefined;
-  const selectedOpening = selectedOpeningId
-    ? editor.draft.openings.find((opening) => opening.id === selectedOpeningId)
-    : undefined;
   const selectedRoom = selectedRoomId
     ? editor.previewFloor.rooms.find((room) => room.id === selectedRoomId)
     : undefined;
@@ -157,6 +149,7 @@ export function ConstructionInspector({
   };
   return (
     <section className="construction-inspector" aria-label="Construction inspector">
+      <div className="construction-inspector__context" inert={inert}>
       <HedgeProperties editor={editor} />
       {editor.tool === "wall" && (
         <div className="construction-inspector__selection">
@@ -296,22 +289,6 @@ export function ConstructionInspector({
               /></label>
             </fieldset>
           )}
-          {expertMode && (["from", "to"] as const).map((endpoint) => (
-            <fieldset key={endpoint}>
-              <legend>{endpoint === "from" ? "Start point" : "End point"}</legend>
-              <label>X<CommittedNumberInput label={`${endpoint} X coordinate`} value={selectedWall[endpoint][0]} onCommit={(value) => editor.updateWallEndpoint(selectedWall.id, endpoint, [value, selectedWall[endpoint][1]])} /></label>
-              <label>Y<CommittedNumberInput label={`${endpoint} Y coordinate`} value={selectedWall[endpoint][1]} onCommit={(value) => editor.updateWallEndpoint(selectedWall.id, endpoint, [selectedWall[endpoint][0], value])} /></label>
-            </fieldset>
-          ))}
-          {expertMode && (
-            <>
-              <fieldset className="construction-inspector__face-colors">
-                <legend>Directed faces</legend>
-                <label>Left<DebouncedColorInput label="Left wall face color" value={selectedWall.faceColors?.left ?? "#e8ded0"} onCommit={(left) => editor.updateSelectedWallMetadata({ faceColors: { ...selectedWall.faceColors, left } })} /></label>
-                <label>Right<DebouncedColorInput label="Right wall face color" value={selectedWall.faceColors?.right ?? "#e8ded0"} onCommit={(right) => editor.updateSelectedWallMetadata({ faceColors: { ...selectedWall.faceColors, right } })} /></label>
-              </fieldset>
-            </>
-          )}
           <button type="button" onClick={editor.deleteSelected}>Delete wall</button>
         </div>
       )}
@@ -358,22 +335,8 @@ export function ConstructionInspector({
             </button>
             <label>Ceiling<CommittedNumberInput label="Room ceiling height" min={.3} step={.05} value={roomCeilingHeight} onCommit={(ceilingHeightMeters) => editor.updateSelectedRoom({ ceilingHeightMeters })} /></label>
           </fieldset>
-          {expertMode && (
-            <fieldset>
-              <legend>Room identity</legend>
-              <label>ID<input aria-label="Room identifier" type="text" value={selectedRoom.id} readOnly /></label>
-              <label>Anchor<input aria-label="Room identity anchor" type="text" value={selectedRoomIdentity?.anchor.map(formatPlanValue).join(", ") ?? "Generated"} readOnly /></label>
-            </fieldset>
-          )}
           {editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false && <p role="status">All enclosing walls are shared. Edit the walls to remove this room.</p>}
           <button type="button" disabled={editor.deletionTargets?.some(target => target.kind === "room" && target.id === selectedRoom.id) === false} onClick={editor.deleteSelected}>Delete room</button>
-        </div>
-      )}
-      {selectedOpening?.kind === "passage" && (
-        <div className="construction-inspector__selection">
-          <header><div><small>Selected opening</small><strong>Passage properties</strong></div></header>
-          <OpeningProperties opening={selectedOpening} editor={editor} advanced={expertMode} />
-          <button type="button" onClick={editor.deleteSelected}>Delete opening</button>
         </div>
       )}
       {validationIssues.length > 0 && (
@@ -436,66 +399,21 @@ export function ConstructionInspector({
           </ul>
         </section>
       )}
+      </div>
+      {referencePlanControls}
+      <div className="construction-inspector__context" inert={inert}>
       {planImportControls}
-      <details className="construction-inspector__floor-disclosure">
-        <summary>Floor settings<EditorIcon name="chevron" /></summary>
-        <FloorSettingsEditor editor={editor} />
-      </details>
       {onRoofChange && <details className="construction-inspector__floor-disclosure">
-        <summary>Roof<EditorIcon name="chevron" /></summary>
+        <SidebarSectionSummary icon="roof" title="Roof" description="Set roof direction and colors." />
         <RoofSettingsEditor value={roof} onChange={onRoofChange} />
       </details>}
       {walkStartControls}
+      <details className="construction-inspector__floor-disclosure">
+        <SidebarSectionSummary icon="measure" title="Scale & heights" description="Set plan scale and wall and ceiling heights." />
+        <FloorSettingsEditor editor={editor} />
+      </details>
       {tutorialControls}
-      <button
-        type="button"
-        className="construction-inspector__expert-toggle"
-        aria-expanded={expertMode}
-        aria-controls={expertPanelId}
-        onClick={() => setExpertMode((active) => !active)}
-      >
-        <span>Advanced</span>
-        <EditorIcon name="chevron" />
-      </button>
-      {expertMode && (
-        <section id={expertPanelId} className="construction-inspector__expert" aria-label="Expert construction data">
-          <header>
-            <div>
-              <small>Structure data</small>
-              <strong>Walls & openings</strong>
-            </div>
-            <span>plan units</span>
-          </header>
-          <div className="construction-inspector__expert-group">
-            <h3>Walls</h3>
-            <div className="construction-inspector__technical-list">
-              {editor.draft.walls.map((wall) => (
-                <button key={wall.id} type="button" aria-pressed={selectedWall?.id === wall.id} onClick={() => editor.selectWall(wall.id)}>
-                  <strong>{wall.id}</strong>
-                  <small>{formatPlanValue(wall.from[0])}, {formatPlanValue(wall.from[1])} → {formatPlanValue(wall.to[0])}, {formatPlanValue(wall.to[1])}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="construction-inspector__expert-group">
-            <h3>Openings</h3>
-            <div className="construction-inspector__technical-list">
-              {editor.draft.openings.map((opening) => (
-                <button key={opening.id} type="button" aria-pressed={selectedOpening?.id === opening.id} onClick={() => editor.selectOpening(opening.id)}>
-                  <strong>{opening.kind} · {opening.id}</strong>
-                  <small>{opening.wallId} · offset {formatPlanValue(opening.offsetPlanUnits)} · width {formatPlanValue(opening.widthPlanUnits)}</small>
-                </button>
-              ))}
-            </div>
-          </div>
-          {!!editor.draft.pools?.length && <div className="construction-inspector__expert-group">
-            <h3>Pools</h3>
-            <div className="construction-inspector__technical-list">{editor.draft.pools.map((pool) =>
-              <button key={pool.id} type="button" aria-pressed={selectedPool?.id === pool.id} onClick={() => editor.selectPool(pool.id)}>{pool.id}</button>
-            )}</div>
-          </div>}
-        </section>
-      )}
+      </div>
     </section>
   );
 }

@@ -36,7 +36,9 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   useEffect(() => {
     if (entryRequest) {
       // Preserve OAuth query parameters until the runtime has consumed them.
-      void navigate(`${editorPath(entryRequest, record.homeId)}${location.search}`, { replace: true, state: { editorRequest: entryRequest } });
+      const search = new URLSearchParams(location.search);
+      if (entryRequest.destination) search.set("action", entryRequest.destination);
+      void navigate(`${editorPath(entryRequest, record.homeId)}${search.size ? `?${search}` : ""}`, { replace: true, state: { editorRequest: entryRequest } });
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
     }
   }, []);
