@@ -27,6 +27,7 @@ import {
 import { deriveHomePresence } from "./home-presence/model";
 
 import { isNightLighting, type SolarLightingMode } from "./lighting";
+import { loadLightingMode, saveLightingMode } from "./WalkPreferences";
 
 import {
   readSceneSession,
@@ -114,7 +115,11 @@ export function useDashboardController({
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(validInitialRoom);
   const [walkRoomId, setWalkRoomId] = useState<string | null>(validInitialRoom);
   const [wallFadeEnabled, setWallFadeEnabled] = useState(initialSession.current.wallFadeEnabled);
-  const [lightingMode, setLightingMode] = useState<SolarLightingMode>("live");
+  const [lightingMode, setLightingMode] = useState<SolarLightingMode>(loadLightingMode);
+  const chooseLightingMode = (mode: SolarLightingMode) => {
+    setLightingMode(mode);
+    saveLightingMode(mode);
+  };
   const [localTime, setLocalTime] = useState(() => new Date());
   useEffect(() => {
     const timer = window.setInterval(() => setLocalTime(new Date()), 60_000);
@@ -394,7 +399,7 @@ export function useDashboardController({
         } else enterWalkMode();
         break;
       case "lighting-mode":
-        setLightingMode((current) => current === "night" ? "day" : "night");
+        chooseLightingMode(nightLighting ? "day" : "night");
         break;
       case "wall-fade": setWallFadeEnabled((current) => !current); break;
       case "all-lights":
@@ -583,7 +588,7 @@ export function useDashboardController({
   return {
     floorNavigation, elevation, setCameraResetKey, requestWalkPointerLock,
     cameraStreamRequirements, runtime, documentVisible, shellRef, mode, mappingOpen, setupOpen,
-    manifest, canvasDpr, walkMode, quality, lightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,
+    manifest, canvasDpr, walkMode, quality, lightingMode, chooseLightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,
     lookInputRef, lookDeltaRef, reducedMotion, openingPositions, boundOpeningIds, resolvedBindings,
     handleAutomaticOpeningsChange, setWalkRoomId, selectedRoom, cameraResetKey, architectureModels,
     selectedRoomId, wallFadeEnabled, deviceModels, selectRoom, handleExtensionInteraction, walkthrough,

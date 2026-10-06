@@ -67,7 +67,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const {
     floorNavigation, elevation, requestWalkPointerLock,
     cameraStreamRequirements, runtime, documentVisible, shellRef, mode, mappingOpen, setupOpen,
-    manifest, canvasDpr, walkMode, quality, lightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,
+    manifest, canvasDpr, walkMode, quality, lightingMode, chooseLightingMode, sunState, nightLighting, floor, poseRef, movementInputRef, sprintInputRef, jumpRequestRef,
     lookInputRef, lookDeltaRef, reducedMotion, openingPositions, boundOpeningIds, resolvedBindings,
     handleAutomaticOpeningsChange, setWalkRoomId, cameraResetKey, architectureModels,
     selectedRoomId, wallFadeEnabled, deviceModels, selectRoom, handleExtensionInteraction, walkthrough,
@@ -148,7 +148,9 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                   <ScenePreview enabled={!walkMode && !selectedRoomId} />
                   <SolarLighting
                     walkMode={walkMode}
-                    mode={lightingMode}
+                    mode={lightingMode === "live" && (sunState?.available === false || sunState?.stale
+                      || (sunState?.state !== "above_horizon" && sunState?.state !== "below_horizon"))
+                      ? (nightLighting ? "night" : "day") : lightingMode}
                     shadowMapSize={quality.shadowMapSize}
                     sunState={sunState}
                   />
@@ -316,7 +318,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
               </div>
             </details>
           </header>
-          {preferencesOpen && <WalkPreferences inverted={invertYAxis} onChange={value => {
+          {preferencesOpen && <WalkPreferences inverted={invertYAxis} lightingMode={lightingMode}
+            onLightingModeChange={chooseLightingMode} onChange={value => {
             setInvertYAxis(value); saveInvertYAxis(value);
           }} onClose={closePreferences} />}
 
@@ -427,7 +430,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
               floorNavigation.setWholeBuilding(!floorNavigation.wholeBuilding);
               setSelectedRoomId(null); setSelectedDeviceId(null); setMode("overview");
             }}
-            lighting={lightingMode}
+            lighting={nightLighting ? "night" : "day"}
             wallFade={wallFadeEnabled}
             allLightsEnabled={runtime.canMutate && Boolean(allLightsCall) && !allLightsBusy}
             allLightsBusy={allLightsBusy}

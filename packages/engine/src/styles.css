@@ -229,7 +229,14 @@ button:focus-visible, summary:focus-visible, select:focus-visible, input:focus-v
 .walk-preferences__row input:checked + .walk-preferences__switch { background: #285141; }
 .walk-preferences__row input:checked + .walk-preferences__switch::after { transform: translateX(17px); }
 .walk-preferences__row:focus-within, .walk-preferences__close:focus-visible { outline: 2px solid #285141; outline-offset: 3px; }
-.walk-preferences__footnote { margin: 0; padding: 13px 26px; border-top: 1px solid #e2e7df; color: #627467; font-size: .73rem; }
+.walk-preferences__choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; border: 0; }
+.walk-preferences__choices legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.walk-preferences__choices label { position: relative; cursor: pointer; }
+.walk-preferences__choices input { position: absolute; opacity: 0; }
+.walk-preferences__choices span { display: grid; place-items: center; min-height: 46px; padding: 8px; border: 1px solid #dce4d8; border-radius: 10px; color: #395447; background: #fffdf8; font-size: .78rem; font-weight: 650; text-align: center; }
+.walk-preferences__choices input:checked + span { color: #fffaf2; border-color: #285141; background: #285141; }
+.walk-preferences__choices input:focus-visible + span { outline: 2px solid #285141; outline-offset: 3px; }
+.walk-preferences__hint { margin: 10px 0 0; color: #596d60; font-size: .74rem; line-height: 1.4; }
 .scene-menu__copy strong { font-size: inherit; font-weight: inherit; line-height: 1.35; }
 .scene-menu__copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(242,248,244,.68); font-size: .72rem; line-height: 1.4; }
 .scene-menu button.scene-menu__review {

@@ -127,6 +127,9 @@ clicking the scene resumes mouse control. Explicit walk-mode exit remains availa
 Walk and draft Explore show Preferences in the top-right More options menu. The
 Preferences dialog offers Invert Y axis for mouse and touch look controls; the
 choice is saved locally in the browser and applies to both walking contexts.
+It also offers Always day, Always night, and Auto lighting. Auto uses the available
+sun state or local time. The smart bar lighting action remains available and
+updates the same local preference.
 
 The More options menu uses aligned action rows for Switch workspace, Send feedback,
 and contextual connection actions. Disconnect identifies Home Assistant in secondary

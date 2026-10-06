@@ -1,20 +1,42 @@
 import { useEffect, useRef } from "react";
+import type { SolarLightingMode } from "./lighting";
 
 export const WALK_PREFERENCES_KEY = "cabane.walk.preferences.v1";
 
+function loadPreferences(): Record<string, unknown> {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(WALK_PREFERENCES_KEY) ?? "{}");
+    return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  } catch { return {}; }
+}
+
+function savePreferences(next: Record<string, unknown>): void {
+  try { window.localStorage.setItem(WALK_PREFERENCES_KEY, JSON.stringify(next)); }
+  catch { /* Keep the current session setting when storage is unavailable. */ }
+}
+
 export function loadInvertYAxis(): boolean {
-  try { return JSON.parse(window.localStorage.getItem(WALK_PREFERENCES_KEY) ?? "{}").invertYAxis === true; }
-  catch { return false; }
+  return loadPreferences().invertYAxis === true;
 }
 
 export function saveInvertYAxis(value: boolean): void {
-  try { window.localStorage.setItem(WALK_PREFERENCES_KEY, JSON.stringify({ invertYAxis: value })); }
-  catch { /* The preference remains usable for this session. */ }
+  savePreferences({ ...loadPreferences(), invertYAxis: value });
 }
 
-export function WalkPreferences({ inverted, onChange, onClose }: {
+export function loadLightingMode(): SolarLightingMode {
+  const mode = loadPreferences().lightingMode;
+  return mode === "day" || mode === "night" ? mode : "live";
+}
+
+export function saveLightingMode(mode: SolarLightingMode): void {
+  savePreferences({ ...loadPreferences(), lightingMode: mode });
+}
+
+export function WalkPreferences({ inverted, onChange, lightingMode, onLightingModeChange, onClose }: {
   inverted: boolean;
   onChange: (value: boolean) => void;
+  lightingMode: SolarLightingMode;
+  onLightingModeChange: (mode: SolarLightingMode) => void;
   onClose: () => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -50,7 +72,19 @@ export function WalkPreferences({ inverted, onChange, onClose }: {
           <span className="walk-preferences__switch" aria-hidden="true" />
         </label>
       </div>
-      <p className="walk-preferences__footnote">Saved in this browser.</p>
+      <div className="walk-preferences__group">
+        <h3>Lighting</h3>
+        <fieldset className="walk-preferences__choices">
+          <legend>Time of day</legend>
+          {([ ["day", "Always day"], ["night", "Always night"], ["live", "Auto"] ] as const).map(([mode, label]) =>
+            <label key={mode}>
+              <input type="radio" name="walk-lighting-mode" value={mode} checked={lightingMode === mode}
+                onChange={() => onLightingModeChange(mode)} />
+              <span>{label}</span>
+            </label>)}
+        </fieldset>
+        <p className="walk-preferences__hint">Auto follows the sun when available, then your local time.</p>
+      </div>
     </section>
   </div>;
 }
