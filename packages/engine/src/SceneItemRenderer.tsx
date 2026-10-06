@@ -232,11 +232,7 @@ const FurnishingContent = memo(function FurnishingContent({
   return <Component {...props} />;
 });
 
-function MissingFurnishingFallback({
-  item,
-}: {
-  item: Extract<SceneItemSpec, { kind: "furnishing" }>;
-}) {
+function MissingSceneItemFallback({ item }: { item: SceneItemSpec }) {
   const y =
     item.placement.kind === "ceiling"
       ? -item.size[1] / 2
@@ -245,7 +241,7 @@ function MissingFurnishingFallback({
         : item.size[1] / 2;
   return (
     <mesh
-      name={`missing-furnishing-model-${item.id}`}
+      name={`missing-model-${item.id}`}
       position={[0, y, 0]}
       userData={{ missingModelId: item.modelId }}
     >
@@ -306,7 +302,7 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
             onInteract={onInteract}
           />
         ) : (
-          <MissingFurnishingFallback item={item} />
+          <MissingSceneItemFallback item={item} />
         )}
       </group>
     );
@@ -315,7 +311,17 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
   const definition = Object.hasOwn(deviceModels, item.modelId)
     ? deviceModels[item.modelId]
     : undefined;
-  if (!definition) return null;
+  if (!definition)
+    return (
+      <group
+        name={`scene-item-${item.id}`}
+        position={transform.position}
+        rotation={[0, transform.rotationYRadians, 0]}
+        userData={{ missingModelId: item.modelId }}
+      >
+        <MissingSceneItemFallback item={item} />
+      </group>
+    );
   // Roomless items (for example outdoor lights) have no room-scoped binding.
   // Their geometry still exists; absence of live state means disconnected.
   const binding = resolvedDevice ?? {

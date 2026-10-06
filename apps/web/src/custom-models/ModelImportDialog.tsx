@@ -17,15 +17,18 @@ import { ModelImportPreview } from "./ModelImportPreview";
 import "./custom-models.css";
 
 type Loaded = Awaited<ReturnType<typeof openGlbPreview>>;
+type MissingModelOption = { key: string; id: string; kind: "furnishing" | "device"; count: number };
 
 export function ModelImportDialog({
   file,
   onImport,
   onCancel,
+  missingModelOptions,
 }: {
   file: File;
-  onImport: (model: CustomModel, asset: ModelAsset) => Promise<void>;
+  onImport: (model: CustomModel, asset: ModelAsset, replacementId: string | null) => Promise<void>;
   onCancel: () => void;
+  missingModelOptions: readonly MissingModelOption[];
 }) {
   const dom = useCabaneDom();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -43,6 +46,14 @@ export function ModelImportDialog({
   const [lightColor, setLightColor] = useState("#ffe3b4");
   const [intensity, setIntensity] = useState(2);
   const [distance, setDistance] = useState(5);
+  const [replacementId, setReplacementId] = useState("");
+  const replacementOptions = missingModelOptions.filter((option) =>
+    profile === "furniture" ? option.kind === "furnishing" : option.kind === "device",
+  );
+  useEffect(() => {
+    if (replacementId && !replacementOptions.some((option) => option.key === replacementId))
+      setReplacementId("");
+  }, [replacementId, replacementOptions]);
   useEffect(() => {
     const previous = dom.root.activeElement as HTMLElement | null;
     dialog.current?.showModal?.();
@@ -109,6 +120,7 @@ export function ModelImportDialog({
               ...(light ? { light } : {}),
             },
             loaded.asset,
+            replacementId || null,
           )
             .catch((error: unknown) =>
               setError(
@@ -276,6 +288,25 @@ export function ModelImportDialog({
             Geometry stays static. Connect uses the existing{" "}
             {CUSTOM_MODEL_PROFILES.find(([id]) => id === profile)?.[1]} controls.
           </p>
+        )}
+        {replacementOptions.length > 0 && (
+          <fieldset disabled={busy} className="model-import-fields model-import-replacement">
+            <label>
+              Replace missing model (optional)
+              <select
+                aria-label="Replace missing model (optional)"
+                value={replacementId}
+                onChange={(event) => setReplacementId(event.target.value)}
+              >
+                <option value="">Add as a new model</option>
+                {replacementOptions.map((option) => (
+                  <option key={option.key} value={option.key}>
+                    {option.id} · {option.count} scene item{option.count === 1 ? "" : "s"}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </fieldset>
         )}
         {error && (
           <p role="alert" className="catalog-add-error">

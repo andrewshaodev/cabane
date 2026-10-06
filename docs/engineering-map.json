@@ -147,7 +147,9 @@
           "createModelAssetRepository",
           "openGlbPreview",
           "createCabaneArchive",
-          "readCabaneFile"
+          "readCabaneFile",
+          "createCabaneModelPack",
+          "readCabaneModelPack"
         ]
       }
     ],

@@ -8,6 +8,7 @@ import type {
   SceneModelEditorDescriptor,
 } from "@cabane/engine";
 import { FurnishingProperties } from "./FurnishingProperties";
+import { missingModelEditorDescriptor } from "./missing-model";
 
 export interface FurnishingInspectorProps {
   floor?: FloorSpec;
@@ -51,8 +52,10 @@ export function FurnishingInspector({
   onClose,
 }: FurnishingInspectorProps) {
   const selected = items.find((item) => item.id === selectedId);
-  const definition =
-    selected && (selected.kind === "device" ? deviceModels : furnishingModels)[selected.modelId];
+  const definition = selected
+    ? ((selected.kind === "device" ? deviceModels : furnishingModels)[selected.modelId] ??
+      missingModelEditorDescriptor(selected))
+    : undefined;
   return selected && definition ? (
     <FurnishingProperties
       selected={selected}

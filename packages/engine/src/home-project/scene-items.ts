@@ -7,7 +7,7 @@ import type { ProjectModelRegistries, SceneModelEditorDescriptor } from "../type
 import { resolveItemTransform } from "./placements";
 import { validateDeviceSlotsAgainstModel } from "./profiles";
 import type { HomeProject, SceneItemSpec } from "./types";
-import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
+import { addProjectIssue, addProjectWarning, type HomeProjectIssue } from "./validation-types";
 
 const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly string[] => {
   const floor = project.floors.find((candidate) => candidate.id === item.floorId);
@@ -129,11 +129,11 @@ export const validateSceneItemsAndSupports = (
     const registry = item.kind === "device" ? registries.deviceModels : registries.furnishingModels;
     const definition = Object.hasOwn(registry, item.modelId) ? registry[item.modelId] : undefined;
     if (!definition) {
-      addProjectIssue(
+      addProjectWarning(
         issues,
         "project.model-missing",
         `${itemPath}.modelId`,
-        `Model “${item.modelId}” is not registered.`,
+        `Model “${item.modelId}” is not registered; a generic placeholder will be shown until it is imported.`,
       );
     } else {
       if (

@@ -29,6 +29,13 @@ export const addProjectIssue = (
   message: string,
 ) => issues.push({ code, path, message, severity: "error" });
 
+export const addProjectWarning = (
+  issues: HomeProjectIssue[],
+  code: string,
+  path: string,
+  message: string,
+) => issues.push({ code, path, message, severity: "warning" });
+
 export const sortProjectIssues = (issues: HomeProjectIssue[]) =>
   issues.sort(
     (left, right) =>
