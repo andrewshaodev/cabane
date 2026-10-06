@@ -31,21 +31,25 @@ const SEAT_PROFILE = [
   [0.166, 0.426],
 ].map(([radius, height]) => new Vector2(radius, height));
 
-export function ConcealedToiletBowl() {
+export function ConcealedToiletBowl({
+  ceramicColor = "#e9e7e0",
+  seatColor = "#faf9f4",
+  supportColor = "#d8d6cf",
+}: { ceramicColor?: string; seatColor?: string; supportColor?: string } = {}) {
   return (
     <group position={[0.438, 0, 0]} scale={[1.4, 1, 1]}>
       <mesh name="hollow-ceramic-bowl" castShadow receiveShadow>
         <latheGeometry args={[BOWL_PROFILE, 32]} />
-        <ToonMaterial color="#e9e7e0" />
+        <ToonMaterial color={ceramicColor} />
       </mesh>
       <mesh name="open-toilet-seat" castShadow receiveShadow>
         <latheGeometry args={[SEAT_PROFILE, 32]} />
-        <ToonMaterial color="#faf9f4" />
+        <ToonMaterial color={seatColor} />
       </mesh>
       {[-0.11, 0.11].map((z) => (
         <mesh key={z} name="seat-support" position={[-0.145, 0.425, z]}>
           <boxGeometry args={[0.025, 0.012, 0.025]} />
-          <ToonMaterial color="#d8d6cf" />
+          <ToonMaterial color={supportColor} />
         </mesh>
       ))}
     </group>

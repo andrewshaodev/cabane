@@ -9,3 +9,4 @@ export { TwoStepStool, TWO_STEP_STOOL_SIZE } from "./two-step-stool";
 export { KitchenTrolley, KITCHEN_TROLLEY_SIZE } from "./kitchen-trolley";
 export { BreadBin, BREAD_BIN_SIZE } from "./bread-bin";
 export { DishDryingRack, DISH_DRYING_RACK_SIZE } from "./dish-drying-rack";
+export { InductionCooktop, INDUCTION_COOKTOP_SIZE } from "./induction-cooktop";

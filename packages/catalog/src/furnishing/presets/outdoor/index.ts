@@ -21,3 +21,11 @@ export { OutdoorFirePit, OUTDOOR_FIRE_PIT_SIZE } from "./outdoor-fire-pit";
 export { GardenCompostBin, GARDEN_COMPOST_BIN_SIZE } from "./garden-compost-bin";
 export { WheelieBin, WHEELIE_BIN_SIZE } from "./wheelie-bin";
 export { GardenTrellis, GARDEN_TRELLIS_SIZE } from "./garden-trellis";
+
+export {
+  SlattedFoldingTable,
+  SLATTED_FOLDING_TABLE_SIZE,
+  SlattedFoldingChair,
+  SLATTED_FOLDING_CHAIR_SIZE,
+} from "./bistro";
+export { RetractableAwning, RETRACTABLE_AWNING_SIZE } from "./retractable-awning";

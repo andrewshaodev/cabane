@@ -778,3 +778,27 @@ reach, and bulb emission tops out at 0.18. Inactive, unavailable and disconnecte
 bulbs do not glow. The former furnishing is hidden from Arrange but retained for
 saved-project compatibility. No home placement is added, and the source photo is
 not stored in Git.
+
+## Reusable catalog additions
+
+This catalog split keeps generic, independently placeable models public. The
+new entries cover:
+
+- bedroom furniture: `slatted-single-bed`, `wood-bunk-bed`,
+  `split-door-wardrobe`, `student-storage-desk`, `two-cube-bedside`,
+  `open-cube-bookcase`, `four-cube-storage`, `piano-bench`,
+  `portable-digital-piano`, `child-swivel-chair`, `children-wall-poster`,
+  `round-banded-rug`, and `clip-reading-lamp`;
+- bathroom, laundry, and countertop accessories: the `compact-sanitary`,
+  `bathroom-toiletries`, `laundry-cleaning`, `laundry-ventilation`, and
+  `countertop-appliances` families, plus the silver `round-towel-ring`
+  variant;
+- generic furniture and decor: `oak-slab-bench`, `balcony` furnishings,
+  `potted-cactus`, `potted-plant`, wall art, and the Astro Parallel wall light;
+- connected devices: `built-in-microwave`, `white-dome-pendant`,
+  `under-cabinet-led-strip`, and dense white/black heated-towel-rail variants.
+
+Fitted kitchen joinery, exact entryway cabinetry, and apartment-specific
+rounded furniture remain outside this shared registry. They belong in the
+active home's personal model collection, where their assets and placements do
+not become a dependency for other Cabane users.

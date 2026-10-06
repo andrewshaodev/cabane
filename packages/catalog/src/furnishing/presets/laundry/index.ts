@@ -1,3 +1,13 @@
 export { DryingRack, DRYING_RACK_SIZE } from "./drying-rack";
 export { IroningBoard, IRONING_BOARD_SIZE } from "./ironing-board";
 export { LaundryCarryBasket, LAUNDRY_CARRY_BASKET_SIZE } from "./laundry-carry-basket";
+export { WallLiftingDryingRack, WALL_LIFTING_DRYING_RACK_SIZE } from "./wall-lifting-drying-rack";
+export { GuardedPlatformFan, GUARDED_PLATFORM_FAN_SIZE } from "./guarded-platform-fan";
+export { RoundPlatformVent, ROUND_PLATFORM_VENT_SIZE } from "./round-platform-vent";
+export { VentedLaundryPlatform, VENTED_LAUNDRY_PLATFORM_SIZE } from "./vented-laundry-platform";
+export { WringerBucket, WRINGER_BUCKET_SIZE } from "./wringer-bucket";
+export { UprightSteamIron, UPRIGHT_STEAM_IRON_SIZE } from "./upright-steam-iron";
+export { FoldedIroningBoard, FOLDED_IRONING_BOARD_SIZE } from "./folded-ironing-board";
+export { WallCleaningToolRack, WALL_CLEANING_TOOL_RACK_SIZE } from "./wall-cleaning-tool-rack";
+export { RoundWallVent, ROUND_WALL_VENT_SIZE } from "./round-wall-vent";
+export { InlineDuctFan, INLINE_DUCT_FAN_SIZE } from "./inline-duct-fan";

@@ -1,10 +1,17 @@
+import { DenseWhiteTowelRail } from "./dense-white-towel-rail";
 import { HeatExchangerBars } from "./heat-exchanger-bars";
 import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
-export function HeatedTowelRailModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
+export function HeatedTowelRailModel({
+  visualState,
+  reducedMotion,
+  variant,
+}: HomeDeviceModelProps) {
+  if (variant === "dense-white" || variant === "dense-black")
+    return <DenseWhiteTowelRail visualState={visualState} variant={variant} />;
   return (
     <group name="catalog-heated-towel-rail">
       {[-0.24, 0.24].map((x) => (

@@ -13,7 +13,6 @@ import { LaundryCarryBasket, LAUNDRY_CARRY_BASKET_SIZE } from "./presets/laundry
 import { KitchenTrolley, KITCHEN_TROLLEY_SIZE } from "./presets/kitchen";
 import { BreadBin, BREAD_BIN_SIZE } from "./presets/kitchen";
 import { DishDryingRack, DISH_DRYING_RACK_SIZE } from "./presets/kitchen";
-import { ToiletPaperHolder, TOILET_PAPER_HOLDER_SIZE } from "./presets/bathroom";
 import { MedicineCabinet, MEDICINE_CABINET_SIZE } from "./presets/bathroom";
 import {
   TwoSeatLoveseat,
@@ -324,18 +323,6 @@ const stableFurnishingDefinitions = {
     preferredPlacement: "absolute",
     outlineContact: true,
     complexity: { visibleMeshes: 27, triangles: 11000 },
-  }),
-  "toilet-paper-holder": defineFurnishingModel({
-    component: ToiletPaperHolder,
-    label: "Toilet paper holder",
-    category: "Bathroom",
-    defaultRoomType: "bathroom",
-    defaultSize: TOILET_PAPER_HOLDER_SIZE,
-    bounds: { min: [-0.09, 0, 0], max: [0.09, 0.12, 0.14] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "wall",
-    outlineContact: true,
-    complexity: { visibleMeshes: 5, triangles: 1500 },
   }),
   "medicine-cabinet": defineFurnishingModel({
     component: MedicineCabinet,
@@ -687,6 +674,10 @@ const stableFurnishingDefinitions = {
     label: "Rectangular dining table",
     category: "Tables",
     defaultRoomType: "dining-room",
+    variants: [
+      { id: "default", label: "Oak" },
+      { id: "pale-stone", label: "Pale stone" },
+    ],
     defaultSize: RECTANGULAR_DINING_TABLE_SIZE,
     bounds: { min: [-0.9, 0, -0.45], max: [0.9, 0.75, 0.45] },
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },

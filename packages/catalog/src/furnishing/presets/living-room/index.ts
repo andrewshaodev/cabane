@@ -34,3 +34,8 @@ export {
 export { TuftedDiamondRug, TUFTED_DIAMOND_RUG_SIZE } from "./tufted-diamond-rug";
 
 export { WhiteDisplayColumn, WHITE_DISPLAY_COLUMN_SIZE } from "./white-display-column";
+
+export {
+  AstroParallelWallLight,
+  ASTRO_PARALLEL_WALL_LIGHT_SIZE,
+} from "./astro-parallel-wall-light";

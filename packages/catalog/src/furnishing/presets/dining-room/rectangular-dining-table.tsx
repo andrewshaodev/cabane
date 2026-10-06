@@ -5,8 +5,10 @@ export const RECTANGULAR_DINING_TABLE_SIZE = [1.8, 0.75, 0.9] as const;
 
 export function RectangularDiningTable({
   size = RECTANGULAR_DINING_TABLE_SIZE,
+  variant = "default",
 }: {
   size?: SceneItemSize;
+  variant?: string;
 }) {
   return (
     <group
@@ -15,6 +17,7 @@ export function RectangularDiningTable({
       userData={{ walkCollider: true }}
     >
       <FourLegOakTable
+        topColor={variant === "pale-stone" ? "#eceae5" : "#d9b987"}
         width={1.8}
         height={0.75}
         depth={0.9}
