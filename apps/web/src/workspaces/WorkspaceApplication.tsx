@@ -6,6 +6,7 @@ import { Navigate, useLocation, useNavigate } from "react-router";
 import { serializeCanonicalJson, setupStorageKey, type WorkspaceEntry, type WorkspaceRepository } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
 import { WorkspaceHost } from "./WorkspaceHost";
+import { WorkspaceHaLibrary } from "./WorkspaceHaStorage";
 import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
@@ -43,7 +44,7 @@ export function WorkspaceApplication() {
   }, [refresh, location.pathname]);
   if (error) return <main className="direction-project-loading is-error"><strong>Could not load your workspaces.</strong><p>{error}</p><button onClick={() => window.location.reload()}>Try again</button></main>;
   if (!repository || !entries) return <main className="direction-project-loading">Loading your workspaces…</main>;
-  const isCallback = new URLSearchParams(location.search).has("auth_callback");
+  const isCallback = location.pathname !== "/workspaces" && new URLSearchParams(location.search).has("auth_callback");
   const callback = isCallback ? callbackRequest : null;
   if (isCallback) {
     if (!callback || !entries.some(entry => entry.metadata.id === callback.workspaceId)) {
@@ -103,6 +104,7 @@ export function WorkspaceApplication() {
         const entry = selected(id); const saved = record(id);
         downloadConnectData(privateBackup ? exportWorkspaceBackup(entry.metadata, saved) : serializeCanonicalJson(saved.draft), `${id}-${privateBackup ? "backup" : "project"}.json`);
       }}
-      onExportRaw={async id => { const raw = await repository.readRaw(id); if (raw === null) throw new Error("No saved record exists."); downloadConnectData(raw, `${id}-recovery.json`); }} />
+      onExportRaw={async id => { const raw = await repository.readRaw(id); if (raw === null) throw new Error("No saved record exists."); downloadConnectData(raw, `${id}-recovery.json`); }}
+      footer={<WorkspaceHaLibrary repository={repository} onRestored={refresh} initialOrigin={entries.find(entry => entry.metadata.homeAssistantUrl)?.metadata.homeAssistantUrl ?? null} />} />
   </>;
 }

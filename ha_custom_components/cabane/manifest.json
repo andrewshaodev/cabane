@@ -1,1 +1,1 @@
-{"domain":"cabane","name":"Cabane workspace storage","version":"0.1.0","integration_type":"helper","dependencies":[],"codeowners":[]}
+{"domain":"cabane","name":"Cabane workspace storage","version":"0.1.0","integration_type":"service","dependencies":[],"codeowners":[]}

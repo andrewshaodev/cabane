@@ -68,3 +68,15 @@ class WorkspaceStoreTests(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(OSError):
             await store.put("home-1", document(), 1)
         self.assertEqual(saved["versions"]["home-1"], 1)
+
+    async def test_corrupt_saved_document_can_be_downloaded_but_not_overwritten(self):
+        backend = MemoryStore()
+        backend.value = {"documents": {"home-1": "{broken"}, "versions": {"home-1": 7}}
+        store = WorkspaceStore(backend)
+        self.assertEqual(await store.get("home-1"), {"version": 7, "document": "{broken", "corrupt": True})
+        self.assertTrue((await store.list())[0]["corrupt"])
+        with self.assertRaises(InvalidDocumentError):
+            await store.put("home-1", document()[:-1] + ',"oauth_token":"secret"}', 7)
+        with self.assertRaises(Exception):
+            await store.put("home-1", document(), 7)
+        self.assertEqual(backend.value["documents"]["home-1"], "{broken")

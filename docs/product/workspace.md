@@ -16,6 +16,17 @@ IDs produce actionable validation errors.
 
 A stored record contains draft and published projects, timestamps, revision, and
 origin-keyed draft/published binding slices with manual-mapping exclusions.
+An optional Cabane custom integration can hold a versioned copy of this full
+private workspace on the connected Home Assistant instance. Manual Save to HA
+and Restore from HA work with sync disabled. Sync is enabled per workspace only
+after an explicit first upload; local IndexedDB saves remain immediate and
+offline edits remain local until HA reconnects. Remote version checks stop
+concurrent browsers from silently overwriting each other. All signed-in HA
+users share the instance's Cabane library. Browser deletion leaves the HA copy;
+remote deletion is a separate confirmed action. Installation is documented in
+[`ha_custom_components/README.md`](../../ha_custom_components/README.md).
+Storage controls are in Connect's Home Assistant connection settings; remote-only
+workspace restore is available from the workspace library.
 IndexedDB uses the `cabane-projects-v2` database with project records, workspace
 metadata, and persistent initialization state. Metadata contains the name, HA
 origin, creation time, and applied status. Related writes share a transaction. The

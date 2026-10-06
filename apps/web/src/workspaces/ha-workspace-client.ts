@@ -6,8 +6,8 @@ export class HaWorkspaceUnavailableError extends Error {
   constructor() { super("Cabane workspace storage is not installed on this Home Assistant instance."); this.name = "HaWorkspaceUnavailableError"; }
 }
 
-export interface HaWorkspaceSummary { home_id: string; name: string; version: number }
-export interface HaWorkspaceDocument { version: number; document: string | null }
+export interface HaWorkspaceSummary { home_id: string; name: string; version: number; corrupt?: boolean }
+export interface HaWorkspaceDocument { version: number; document: string | null; corrupt?: boolean }
 export type StorageMessage = { type: string; [key: string]: unknown };
 export type StorageSender = <T>(message: StorageMessage) => Promise<T>;
 

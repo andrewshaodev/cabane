@@ -22,7 +22,7 @@ class CorruptStorageError(Exception):
 
 
 def validate_document(home_id: str, document: str) -> None:
-    if not HOME_ID.fullmatch(home_id) or not isinstance(document, str):
+    if not isinstance(home_id, str) or not HOME_ID.fullmatch(home_id) or not isinstance(document, str):
         raise InvalidDocumentError()
     if len(document.encode("utf-8")) > MAX_DOCUMENT_BYTES:
         raise InvalidDocumentError()
@@ -32,8 +32,14 @@ def validate_document(home_id: str, document: str) -> None:
         raise InvalidDocumentError() from exc
     if not isinstance(value, dict) or value.get("format") != "cabane-workspace" or value.get("version") != 1:
         raise InvalidDocumentError()
+    if set(value) != {"format", "version", "workspace", "record"}:
+        raise InvalidDocumentError()
     metadata, record = value.get("workspace"), value.get("record")
     if not isinstance(metadata, dict) or not isinstance(record, dict) or record.get("homeId") != home_id:
+        raise InvalidDocumentError()
+    if set(metadata) != {"name", "homeAssistantUrl", "hasPublished"}:
+        raise InvalidDocumentError()
+    if not set(record) <= {"schemaVersion", "homeId", "seedRevision", "revision", "draft", "published", "bindings", "draftUpdatedAt", "publishedAt"}:
         raise InvalidDocumentError()
     if not isinstance(metadata.get("name"), str) or not metadata["name"].strip():
         raise InvalidDocumentError()
@@ -67,13 +73,14 @@ class WorkspaceStore:
                     validate_document(home_id, document)
                     metadata = json.loads(document)["workspace"]
                     version = data["versions"][home_id]
-                except (KeyError, TypeError, InvalidDocumentError, ValueError) as exc:
-                    raise CorruptStorageError() from exc
+                except (KeyError, TypeError, InvalidDocumentError, ValueError):
+                    result.append({"home_id": home_id, "name": "Damaged workspace", "version": data["versions"].get(home_id), "corrupt": True})
+                    continue
                 result.append({"home_id": home_id, "name": metadata["name"], "version": version})
             return sorted(result, key=lambda item: item["name"].lower())
 
     async def get(self, home_id: str) -> dict | None:
-        if not HOME_ID.fullmatch(home_id):
+        if not isinstance(home_id, str) or not HOME_ID.fullmatch(home_id):
             raise InvalidDocumentError()
         async with self._lock:
             data = await self._load()
@@ -81,11 +88,14 @@ class WorkspaceStore:
             if document is None:
                 version = data["versions"].get(home_id)
                 return None if version is None else {"version": version, "document": None}
+            version = data["versions"].get(home_id)
+            if not isinstance(version, int):
+                raise CorruptStorageError()
             try:
                 validate_document(home_id, document)
-                return {"version": data["versions"][home_id], "document": document}
-            except (KeyError, TypeError, InvalidDocumentError) as exc:
-                raise CorruptStorageError() from exc
+            except InvalidDocumentError:
+                return {"version": version, "document": document, "corrupt": True}
+            return {"version": version, "document": document}
 
     async def put(self, home_id: str, document: str, expected_version: int | None) -> int:
         validate_document(home_id, document)
@@ -94,6 +104,11 @@ class WorkspaceStore:
             current = data["versions"].get(home_id)
             if current != expected_version:
                 raise ConflictError()
+            if home_id in data["documents"]:
+                try:
+                    validate_document(home_id, data["documents"][home_id])
+                except InvalidDocumentError as exc:
+                    raise CorruptStorageError() from exc
             version = (current or 0) + 1
             data["versions"][home_id] = version
             data["documents"][home_id] = document
@@ -101,7 +116,7 @@ class WorkspaceStore:
             return version
 
     async def delete(self, home_id: str, expected_version: int) -> None:
-        if not HOME_ID.fullmatch(home_id):
+        if not isinstance(home_id, str) or not HOME_ID.fullmatch(home_id):
             raise InvalidDocumentError()
         async with self._lock:
             data = await self._load()

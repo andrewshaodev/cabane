@@ -68,6 +68,13 @@ callback data; they are not a general browser-storage dump. Private mapping
 exports remain private household data even without credentials.
 
 No hosted account backend or cloud workspace synchronization is implemented.
+An optional owner-installed HA custom integration provides instance-local
+workspace storage. Any authenticated user of that HA instance can read or
+change its shared Cabane copies. Those copies can contain private area/entity
+IDs and draft layouts but omit OAuth tokens, callback data, preview caches,
+camera media, and onboarding state. A browser keeps working when this optional
+integration or HA is unavailable. The integration is not a Cabane-hosted
+service, and real owner-instance deployment acceptance remains pending.
 The public `https://cabane.my` deployment uses Vercel Web Analytics to count
 application page views through React Router, including personal-home and editor
 routes. Workspace IDs are replaced with `:workspaceId`; query strings and

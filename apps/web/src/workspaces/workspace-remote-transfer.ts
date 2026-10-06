@@ -8,6 +8,11 @@ export function restoreRemoteWorkspace(
   document: string,
   expectedLocalRevision?: number,
 ): Promise<WorkspaceEntry> {
+  let envelope: unknown;
+  try { envelope = JSON.parse(document); } catch { throw new Error("The HA workspace copy is not valid JSON."); }
+  if (!envelope || typeof envelope !== "object" || !("format" in envelope) || envelope.format !== "cabane-workspace") {
+    throw new Error("The HA workspace copy is not a private Cabane backup.");
+  }
   const imported = parseWorkspaceImport(document, ownerProjectRegistries);
   const metadata = {
     id: imported.record.homeId,

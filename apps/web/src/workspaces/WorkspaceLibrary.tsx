@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { WorkspaceCard, type WorkspaceCardAction, type WorkspaceLibraryEntry } from "./WorkspaceCard";
 import { WorkspaceNameDialog } from "./WorkspaceNameDialog";
 import { WorkspaceDeleteDialog } from "./WorkspaceDeleteDialog";
@@ -17,6 +17,7 @@ export interface WorkspaceLibraryProps {
   onExport: (id: string, privateBackup: boolean) => Promise<void>;
   onRecover: (id: string) => Promise<void>;
   onExportRaw: (id: string) => Promise<void>;
+  footer?: ReactNode;
 }
 export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
   const [dialog, setDialog] = useState<Dialog | null>(null);
@@ -46,5 +47,6 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
       onDelete={() => void run(() => props.onDelete(dialog.entry!.metadata.id))} />}
     {(dialog?.action === "import" || dialog?.action === "export") && <WorkspaceTransferDialog mode={dialog.action} busy={busy} error={error} onCancel={cancel}
       onImport={json => void run(() => props.onImport(json))} onExport={privateBackup => void run(() => props.onExport(dialog.entry!.metadata.id, privateBackup))} />}
+    {props.footer}
   </main>;
 }

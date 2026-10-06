@@ -57,7 +57,7 @@ export function createWorkspaceSyncCoordinator(deps: WorkspaceSyncDependencies) 
       try {
         const restored = await deps.restore(remote.document, entry.record!.revision);
         await acknowledge(origin, restored, remote.version, true);
-        return { kind: "synced" };
+        return { kind: "synced", detail: "restored" };
       } catch (error) { return { kind: "conflict", detail: error instanceof Error ? error.message : undefined }; }
     }
     if (!localChanged) return { kind: "synced" };

@@ -1,5 +1,6 @@
 import { useId, type ReactNode } from "react";
 import { EditorIcon, type EditorIconName } from "../editor-chrome/EditorIcon";
+import { WorkspaceHaStorageInConnect } from "../workspaces/WorkspaceHaStorage";
 
 export function ConnectSettingAction({ icon, children, onClick, disabled, danger }: {
   icon: EditorIconName; children: ReactNode; onClick: () => void; disabled?: boolean; danger?: boolean;
@@ -42,6 +43,7 @@ export function ConnectSettings({ origin, disconnected, busy, backup, onBack, on
       <div className="connect-origin"><EditorIcon name="connect" /><div><strong>Home Assistant</strong><span>{origin ?? "No address configured"}</span></div><i className={disconnected ? "" : "is-connected"} /></div>
       <ConnectSettingAction icon="settings" disabled={busy} onClick={onChangeAddress}>Change address</ConnectSettingAction>
       <ConnectSettingAction icon="connect" disabled={busy || !origin} onClick={disconnected ? onReconnect : onDisconnect}>{disconnected ? "Reconnect" : "Disconnect"}</ConnectSettingAction>
+      <WorkspaceHaStorageInConnect />
       <h3>Connection profile</h3>
       <ConnectImportAction disabled={busy || !origin} onImport={onImportProfile}>Import connections</ConnectImportAction>
       <ConnectSettingAction icon="export" disabled={busy || !origin} onClick={onExportProfile}>Export connections<small>Applied connections only</small></ConnectSettingAction>

@@ -6,6 +6,7 @@ import { Link } from "react-router";
 import { ScenePreviewContext, HomeAssistantRuntimeProvider, type HomeProjectRecord, type WorkspaceRepository, type WorkspaceMetadata } from "@cabane/engine";
 import { ConnectedProduct } from "../ConnectedProduct";
 import { createBrowserHomeProjectLifecycle } from "../project-runtime";
+import { WorkspaceHaStorageProvider } from "./WorkspaceHaStorage";
 
 export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: { id: string; repository: WorkspaceRepository; onboarding: ReturnType<typeof useWorkspaceOnboarding>; demoWorkspaceId: string | null }) {
   const capturePreview = useCallback((canvas: HTMLCanvasElement) => saveWorkspacePreview(id, canvas), [id]);
@@ -39,6 +40,7 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
   if (error) return <main className="direction-project-loading is-error"><strong>Could not open this workspace.</strong><p>{error}</p><Link to="/workspaces">Workspaces</Link></main>;
   if (!loaded) return <main className="direction-project-loading">Loading your home…</main>;
   return <ScenePreviewContext.Provider value={capturePreview}><HomeAssistantRuntimeProvider homeAssistantUrl={isDemo ? null : loaded.metadata.homeAssistantUrl}>
+    <WorkspaceHaStorageProvider id={id} origin={loaded.metadata.homeAssistantUrl} repository={repository} hidden={isDemo}>
     <ConnectedProduct demoWorkspaceId={demoWorkspaceId} onboarding={{ isDemo, welcome: Boolean(isDemo && !onboarding.state?.welcomeDismissed),
       nudgeDismissed: onboarding.state?.nudgeDismissed ?? true, busy: onboarding.busy,
       start: onboarding.start, dismiss: onboarding.dismiss, links: onboardingLinks }} record={loaded.record} lifecycle={lifecycle}
@@ -50,5 +52,6 @@ export function WorkspaceHost({ id, repository, onboarding, demoWorkspaceId }: {
         setLoaded(previous => previous ? { ...previous, metadata: entry.metadata, record: entry.record! } : previous);
         return entry.record;
       }} />
+    </WorkspaceHaStorageProvider>
   </HomeAssistantRuntimeProvider></ScenePreviewContext.Provider>;
 }

@@ -69,7 +69,7 @@ await withModules(async (load) => {
     return {
       open: (name, version) => {
         assert.equal(name, "cabane-projects-v2");
-        assert.equal(version, 2);
+        assert.equal(version, 3);
         const request = { result: database, error: null };
         queueMicrotask(() => {
           if (!created.size) request.onupgradeneeded?.();
