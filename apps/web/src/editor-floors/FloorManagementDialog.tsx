@@ -3,13 +3,15 @@ import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import "./floor-management-dialog.css";
 
-export function FloorManagementDialog({ action, name, itemCount, stairCount, height, onSave, onCancel }: {
+export function FloorManagementDialog({ action, name, itemCount, stairCount, height, onSave, onCancel, onRemove, removeDisabledReason }: {
   action: "rename" | "remove"; name: string; itemCount: number; stairCount: number; height: number;
   onSave: (name: string, height: number) => void; onCancel: () => void;
+  onRemove?: () => void; removeDisabledReason?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const heightHintId = useId();
+  const removeHintId = useId();
   const [value, setValue] = useState(name);
   const [floorHeight, setFloorHeight] = useState(String(height));
   const invalid = action === "rename" && (!value.trim() || !Number.isFinite(Number(floorHeight)) || Number(floorHeight) <= 0);
@@ -32,12 +34,15 @@ export function FloorManagementDialog({ action, name, itemCount, stairCount, hei
         <p id={heightHintId} className="floor-management-dialog__hint">Distance from this floor to the floor above.</p>
       </div>}
       <footer>
+        {action === "rename" && <EditorButton className="floor-management-dialog__delete" disabled={!onRemove}
+          aria-describedby={removeDisabledReason ? removeHintId : undefined} onClick={onRemove}>Delete floor</EditorButton>}
         <EditorButton onClick={onCancel}>Cancel</EditorButton>
         <EditorButton type="submit" variant="primary" disabled={invalid}
           className={action === "remove" ? "floor-management-dialog__remove" : undefined}>
           {action === "remove" ? "Remove top floor" : "Save floor"}
         </EditorButton>
       </footer>
+      {action === "rename" && removeDisabledReason && <p id={removeHintId} className="floor-management-dialog__delete-hint">{removeDisabledReason}</p>}
     </form>
   </dialog>;
 }

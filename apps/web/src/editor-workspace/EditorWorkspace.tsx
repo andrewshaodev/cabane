@@ -185,6 +185,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           commit({ ...snapshot, project: { ...snapshot.project, stairs: [...snapshot.project.stairs.filter(s => s.id !== stair.id), stair] } });
         }} />}
       {floorDialog && <FloorManagementDialog action={floorDialog}
+        onRemove={snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
+          ? () => setFloorDialog("remove") : undefined}
+        removeDisabledReason={activeFloorId === snapshot.project.floors[0]?.id ? "The ground floor cannot be deleted."
+          : activeFloorId !== snapshot.project.floors.at(-1)?.id ? "Only the top floor can be deleted. Delete the floors above first." : undefined}
         name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
         height={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.floorToFloorHeightMeters}
         itemCount={snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length}

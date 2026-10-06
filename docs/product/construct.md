@@ -121,6 +121,9 @@ dialog. The row shares navigation, edit locks, and undo history with the retaine
 corner floor picker; adding or switching does not copy rooms or furnishings.
 The menu supports arrow keys, Home/End, Escape, and outside-click dismissal.
 Settings use labeled editor fields and neutral Cancel / primary Save actions.
+Settings also expose Delete floor, which opens the existing removal confirmation
+and remains undoable. The action is disabled with an explanation for the ground
+floor and any floor with another floor above it.
 
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 

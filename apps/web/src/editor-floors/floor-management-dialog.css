@@ -18,4 +18,7 @@
 .floor-management-dialog .floor-management-dialog__hint { margin: -9px 0 0; color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); }
 .floor-management-dialog footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 24px; }
 .direction-preview .floor-management-dialog__remove[data-variant="primary"] { background: #963f32; }
+.direction-preview button.editor-button.floor-management-dialog__delete { margin-right: auto; color: #963f32; border-color: transparent; background: transparent; padding-inline: 0; }
+.direction-preview button.editor-button.floor-management-dialog__delete:hover:not(:disabled) { color: #7d3027; background: #fae9e4; }
+.floor-management-dialog__delete-hint { margin: 10px 0 0; color: var(--preview-muted); font-size: var(--editor-text-caption, .75rem); }
 @media (pointer: coarse) { .floor-management-dialog :is(input, button.editor-button) { min-height: 44px; } }

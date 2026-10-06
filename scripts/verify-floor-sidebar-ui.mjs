@@ -70,6 +70,27 @@ try {
   await page.getByRole('textbox', { name: 'Floor name' }).fill('');
   assert.equal(await page.getByRole('button', { name: 'Save floor', exact: true }).isDisabled(), true);
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Floor settings', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'Delete floor', exact: true }).isDisabled(), true, 'ground floor is protected');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await select.click();
+  await page.getByRole('menuitemradio', { name: 'Upstairs', exact: true }).click();
+  await page.getByRole('button', { name: 'Floor settings', exact: true }).click();
+  assert.equal(await page.getByRole('button', { name: 'Delete floor', exact: true }).isDisabled(), true, 'middle floors are protected');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await select.click();
+  await page.getByRole('menuitemradio', { name: initial.floors.at(-1).name, exact: true }).click();
+  await page.getByRole('button', { name: 'Floor settings', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Floor settings', exact: true }).screenshot({ path: '/tmp/cabane-floor-delete-settings.png' });
+  await page.getByRole('button', { name: 'Delete floor', exact: true }).click();
+  assert.equal((await page.evaluate(() => window.readFixtureProject())).floors.length, 3, 'deletion needs confirmation');
+  await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Floor settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete floor', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove top floor', exact: true }).click();
+  await page.waitForFunction(async () => (await window.readFixtureProject()).floors.length === 2);
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await page.waitForFunction(async () => (await window.readFixtureProject()).floors.length === 3);
   assert.deepEqual(errors, []);
   console.log('Floor sidebar: switching, settings, adding, undo, and compact layout passed.');
 } finally { await browser?.close(); await server.close(); }
