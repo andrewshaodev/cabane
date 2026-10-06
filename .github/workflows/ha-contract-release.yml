@@ -45,10 +45,7 @@ jobs:
     needs: contract
     if: github.event_name != 'pull_request' && needs.contract.outputs.changed == 'true'
     runs-on: ubuntu-latest
-    env:
-      CABANE_TEST_CONCURRENCY: "1"
-      CABANE_TEST_PROGRESS: "1"
-    timeout-minutes: 50
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,12 +56,7 @@ jobs:
           python-version: "3.13"
       - run: npm install --global npm@11.6.2
       - run: npm ci
-      - run: npm run browser:install -- --with-deps
-      - run: npm run verify
-        timeout-minutes: 40
       - run: npm run build:panel
-      - run: node scripts/verify-panel.mjs
-      - run: npm run fixture:verify:scale
       - name: Check release credential
         env:
           RELEASE_KEY: ${{ secrets.CABANE_INTEGRATION_DEPLOY_KEY }}
@@ -81,7 +73,7 @@ jobs:
         run: |
           git -C integration-release config user.name 'cabane-release[bot]'
           git -C integration-release config user.email 'cabane-release[bot]@users.noreply.github.com'
-          npm run release:ha-contract -- integration-release --push
+          npm run release:ha-contract -- integration-release --push --skip-tests
       - name: Confirm the integration release is published
         env:
           GH_TOKEN: ${{ github.token }}

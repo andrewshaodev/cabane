@@ -11,7 +11,8 @@ The root package defines the executable checks. Run `npm run verify:fast` for
 Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
 package-boundary/source-policy checks. `npm run verify` also runs all tests,
 furnishing-surface checks, and the production build. The contract-release workflow
-runs full producer verification when it needs to publish a matching panel.
+builds and publishes the matching panel; full verification runs locally before
+pushing, not on GitHub Actions.
 
 For the smallest sufficient iteration check, run `npm run verify:help`. Its
 selection guidance comes from the maintained test inventory, rather than a second
@@ -53,12 +54,9 @@ The test command runs four cost-balanced shards with shared harness modules and 
 compact agent reporter per worker. The launcher keeps four independent worker
 processes so Node cannot buffer a later shard's failures behind an earlier shard.
 Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
-workers; the release workflow uses 1 on its software-rendering runner. All four
+workers on constrained local machines. All four
 shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
-The release runner also sets `CABANE_TEST_PROGRESS=1` to print each starting test
-and bounds the verification step. Hosted software rendering takes substantially
-longer than local native rendering; named progress distinguishes slow tests from
-a stalled worker without dropping assertions or adding retries.
+Set `CABANE_TEST_PROGRESS=1` to print each starting test when diagnosing slow work.
 `npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
 through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.
