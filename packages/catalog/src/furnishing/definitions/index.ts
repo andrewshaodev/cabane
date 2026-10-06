@@ -1,3 +1,12 @@
+import { openLaptopDefinition } from "./open-laptop";
+import { roundGlobeWallLampDefinition } from "./round-globe-wall-lamp";
+import { knobDoorWardrobeDefinition } from "./knob-door-wardrobe";
+import { overbedBridgeCabinetDefinition } from "./overbed-bridge-cabinet";
+import { shelfHeadboardDefinition } from "./shelf-headboard";
+import { headboardFreeDoubleBedDefinition } from "./headboard-free-double-bed";
+import { drawerPedestalDeskDefinition } from "./drawer-pedestal-desk";
+import { whiteFoldingChairDefinition } from "./white-folding-chair";
+import { desktopMonitorDefinition } from "./desktop-monitor";
 import { louveredClosetDefinition } from "./louvered-closet";
 import { familyBathtubDefinition } from "./family-bathtub";
 import { bathScreenDefinition } from "./bath-screen";
@@ -20,6 +29,16 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  "open-laptop": openLaptopDefinition,
+  "round-globe-wall-lamp": roundGlobeWallLampDefinition,
+  "knob-door-wardrobe": knobDoorWardrobeDefinition,
+  "overbed-bridge-cabinet": overbedBridgeCabinetDefinition,
+  "shelf-headboard": shelfHeadboardDefinition,
+  "headboard-free-double-bed": headboardFreeDoubleBedDefinition,
+  "drawer-pedestal-desk": drawerPedestalDeskDefinition,
+  "white-folding-chair": whiteFoldingChairDefinition,
+  "desktop-monitor": desktopMonitorDefinition,
+
   "louvered-closet": louveredClosetDefinition,
   "family-bathtub": familyBathtubDefinition,
   "bath-screen": bathScreenDefinition,
