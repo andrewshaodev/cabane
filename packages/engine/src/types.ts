@@ -382,6 +382,8 @@ export interface FloorSpec {
   id: string;
   name: string;
   floorToFloorHeightMeters: number;
+  /** Basement floors precede ground in bottom-to-top order. */
+  belowGround?: boolean;
   coordinates: FloorCoordinates;
   defaultWallHeightMeters: number;
   defaultCeilingHeightMeters: number;

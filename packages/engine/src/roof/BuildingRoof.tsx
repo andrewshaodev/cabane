@@ -7,7 +7,7 @@ import { DEFAULT_ROOF_SETTINGS } from "./roof-settings";
 
 export function BuildingRoof({ manifest }: { manifest: HomeManifest }) {
   const settings = manifest.home.roof ?? DEFAULT_ROOF_SETTINGS;
-  const geometry = useMemo(() => buildRoofGeometries(manifest.floors, settings, manifest.home.palette.exterior),
+  const geometry = useMemo(() => buildRoofGeometries(manifest.floors.filter(floor => !floor.belowGround), settings, manifest.home.palette.exterior),
     [manifest.floors, settings.direction, manifest.home.palette.exterior]);
   useEffect(() => () => { geometry.top.dispose(); geometry.edges.dispose(); geometry.infill.dispose(); }, [geometry]);
   return <group name="building-roof">

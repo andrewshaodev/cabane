@@ -2,6 +2,12 @@
 
 Runtime `HomeManifest` carries ordered floors. The building shares one origin and
 meters-per-plan-unit scale; positive floor-to-floor heights determine elevations.
+Floors marked `belowGround: true` form a bottom-to-top prefix before ground.
+Ground remains at zero; basement elevations accumulate downward. Changing a
+basement height moves that floor and deeper floors without moving ground.
+Basements are hidden in the whole-building view and visible when selected in
+cutaway or entered in Walk. Basement cutaways hide terrain and floors above.
+Ground terrain stays at ground level, with stair apertures through every layer.
 Footprint/room polygons, straight walls, explicit wall junctions, and wall-owned
 openings define architecture. Junction/opening clearance uses the finite spans of
 adjoining walls: a shallow-angle continuation extending away from an opening

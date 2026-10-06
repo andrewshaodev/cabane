@@ -113,7 +113,7 @@ await withModules(async load => {
     await act(async () => editor.updateRoom(roomId, { name: "Studio" }));
     assert.equal(editor.previewFloor.rooms[0].name, "Studio");
     await act(async () => editor.undo());
-    assert.equal(editor.previewFloor.rooms[0].name, "");
+    assert.equal(editor.previewFloor.rooms[0].name, "Unnamed room 1");
     await act(async () => editor.redo());
     assert.equal(editor.previewFloor.rooms[0].name, "Studio");
   }));

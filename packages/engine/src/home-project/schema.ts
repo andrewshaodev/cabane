@@ -300,7 +300,7 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
 const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy: boolean) => {
   const candidate = record(value, path, issues);
   if (!candidate) return;
-  keys(candidate, ["id", "name", "floorToFloorHeightMeters", "coordinates", "defaultWallHeightMeters", "defaultCeilingHeightMeters", "footprint", "footprintRegions", "rooms", "walls", "wallJunctions", "openings", "ceilings", "hedges", "pools", "outdoorPlatforms", "groundZones"], path, issues);
+  keys(candidate, ["id", "name", "floorToFloorHeightMeters", "belowGround", "coordinates", "defaultWallHeightMeters", "defaultCeilingHeightMeters", "footprint", "footprintRegions", "rooms", "walls", "wallJunctions", "openings", "ceilings", "hedges", "pools", "outdoorPlatforms", "groundZones"], path, issues);
   if (candidate.groundZones !== undefined) array(candidate.groundZones, `${path}.groundZones`, issues)?.forEach((entry, index) => floorZone(entry, `${path}.groundZones[${index}]`, issues));
   if (candidate.hedges !== undefined) array(candidate.hedges, `${path}.hedges`, issues)?.forEach((entry, index) => {
     const hedgePath = `${path}.hedges[${index}]`;
@@ -487,10 +487,16 @@ export const validateHomeProjectSchemaShape = (
     const floors = array(project.floors, "floors", issues);
     if (floors?.length === 0) addProjectIssue(issues, "project.floors-empty", "floors", "A building requires a ground floor.");
     const floorIds = new Set<string>();
+    let groundSeen = false;
     floors?.forEach((entry, index) => {
       const path = `floors[${index}]`;
       floor(entry, path, issues, false);
       if (!isPlainRecord(entry)) return;
+      if (entry.belowGround !== undefined && typeof entry.belowGround !== "boolean")
+        addProjectIssue(issues, "project.floor-basement", `${path}.belowGround`, "Basement classification must be a boolean.");
+      if (entry.belowGround === true && groundSeen)
+        addProjectIssue(issues, "project.floor-order", `${path}.belowGround`, "Basements must precede the ground floor.");
+      if (entry.belowGround !== true) groundSeen = true;
       if (typeof entry.id === "string") {
         if (floorIds.has(entry.id)) addProjectIssue(issues, "project.floor-id-duplicate", `${path}.id`, "Floor IDs must be unique.");
         floorIds.add(entry.id);
@@ -501,6 +507,7 @@ export const validateHomeProjectSchemaShape = (
         transform.metersPerPlanUnit !== coordinates.metersPerPlanUnit || transform.scaleBasis !== coordinates.scaleBasis
       )) addProjectIssue(issues, "project.floor-transform", `${path}.coordinates`, "All floors must use the building coordinates.");
     });
+    if (floors?.length && !groundSeen) addProjectIssue(issues, "project.ground-missing", "floors", "A building requires a ground floor.");
     array(project.stairs, "stairs", issues)?.forEach((entry, index) => {
       const path = `stairs[${index}]`;
       const stair = record(entry, path, issues);

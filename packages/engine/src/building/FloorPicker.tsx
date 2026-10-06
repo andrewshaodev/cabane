@@ -9,11 +9,12 @@ export interface FloorPickerProps {
   disabled?: boolean;
   unavailable?: Readonly<Record<string, string>>;
   onAdd?: () => void;
+  onAddBelow?: () => void;
   onRename?: () => void;
   onRemove?: () => void;
 }
 
-export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailable = {}, onAdd, onRename, onRemove }: FloorPickerProps) {
+export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailable = {}, onAdd, onAddBelow, onRename, onRemove }: FloorPickerProps) {
   const dom = useCabaneDom();
   const [expanded, setExpanded] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -71,12 +72,13 @@ export function FloorPicker({ floors, selectedId, onSelect, disabled, unavailabl
       else if (event.key === "Tab") setExpanded(true);
     }}>
     {expanded && <div className="floor-picker__secondary">
-      {(onAdd || onRename || onRemove) && <button type="button" disabled={disabled}
+      {(onAdd || onAddBelow || onRename || onRemove) && <button type="button" disabled={disabled}
         aria-expanded={actionsOpen} onClick={() => setActionsOpen(!actionsOpen)}>Manage floors</button>}
       {actionsOpen && <div className="floor-picker__actions">
-        {onAdd && <button type="button" disabled={disabled} onClick={() => runAction(onAdd)}>Add floor</button>}
+        {onAdd && <button type="button" disabled={disabled} onClick={() => runAction(onAdd)}>Add floor above</button>}
+        {onAddBelow && <button type="button" disabled={disabled} onClick={() => runAction(onAddBelow)}>Add floor below</button>}
         {onRename && <button type="button" disabled={disabled} onClick={() => runAction(onRename)}>Rename floor</button>}
-        {onRemove && <button type="button" disabled={disabled} onClick={() => runAction(onRemove)}>Remove top floor</button>}
+        {onRemove && <button type="button" disabled={disabled} onClick={() => runAction(onRemove)}>Remove floor</button>}
       </div>}
     </div>}
     <div className="floor-picker__levels" role="group" aria-label="Floors">

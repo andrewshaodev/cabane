@@ -7,6 +7,7 @@ export function incompleteFloorPreview(draft: FloorEditorDraft, previous: FloorS
     id: draft.floorId,
     name: draft.floorName,
     floorToFloorHeightMeters: draft.floorToFloorHeightMeters ?? previous.floorToFloorHeightMeters,
+    ...(draft.belowGround !== undefined ? { belowGround: draft.belowGround } : {}),
     coordinates: draft.coordinates,
     defaultWallHeightMeters: draft.defaultWallHeightMeters,
     defaultCeilingHeightMeters: draft.defaultCeilingHeightMeters,

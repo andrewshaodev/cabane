@@ -104,6 +104,9 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
       ?? (device ? deviceModels[device.modelId]?.label ?? device.modelId.replaceAll("-", " ") : "Device"),
       modelId: device?.modelId, available: true }]];
   }));
+  const floorLevels = deriveFloorLevels(manifest.floors);
+  const cameraFloors = manifest.floors.map((floor, index) => ({ ...floor, elevationMeters: floorLevels[index].elevationMeters }))
+    .filter((candidate, index) => floorNavigation.wholeBuilding ? !candidate.belowGround : index <= manifest.floors.indexOf(floor));
   useEffect(() => {
     if (walkMode && floorNavigation.wholeBuilding) floorNavigation.setWholeBuilding(false);
   }, [walkMode, floorNavigation.wholeBuilding, floorNavigation.setWholeBuilding]);
@@ -182,7 +185,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                 showRoof={floorNavigation.wholeBuilding}
                       controlsRef={orbitControls}
                 elevation={elevation}
-                buildingFloors={floorNavigation.wholeBuilding ? manifest.floors : manifest.floors.slice(0, manifest.floors.indexOf(floor) + 1)}
+                buildingFloors={cameraFloors}
 
                       floor={floor}
                       resetKey={cameraResetKey}

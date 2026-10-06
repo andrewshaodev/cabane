@@ -55,6 +55,7 @@ export interface FloorEditorDraft {
   version: typeof FLOOR_EDITOR_DRAFT_VERSION;
   floorId: string;
   floorToFloorHeightMeters?: number;
+  belowGround?: boolean;
   floorName: string;
   coordinates: FloorCoordinates;
   walls: EditorWall[];

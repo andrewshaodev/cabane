@@ -8,13 +8,36 @@ export const addTopFloor = (snapshot: EditorWorkspaceSnapshot, id: string): Edit
   const top = project.floors.at(-1);
   if (!top) throw new Error("A building requires a ground floor.");
   const floor: DraftLayoutFloorSpec = {
-    id, name: `Floor ${project.floors.length}`, coordinates: project.coordinates,
+    id, name: `Floor ${project.floors.filter(floor => !floor.belowGround).length}`, coordinates: project.coordinates,
     floorToFloorHeightMeters: top.floorToFloorHeightMeters,
     defaultWallHeightMeters: top.defaultWallHeightMeters,
     defaultCeilingHeightMeters: top.defaultCeilingHeightMeters,
     footprint: [], rooms: [], walls: [], wallJunctions: [], openings: [], ceilings: [],
   };
   return { ...snapshot, project: { ...project, floors: [...project.floors, floor] } };
+};
+
+/** Add an empty basement beneath the current lowest level. */
+export const addBottomFloor = (snapshot: EditorWorkspaceSnapshot, id: string): EditorWorkspaceSnapshot => {
+  const added = addTopFloor(snapshot, id);
+  const lowest = snapshot.project.floors[0];
+  const floor: DraftLayoutFloorSpec = {
+    ...added.project.floors.at(-1)!, belowGround: true,
+    name: `Floor −${snapshot.project.floors.filter(floor => floor.belowGround).length + 1}`,
+    floorToFloorHeightMeters: lowest.floorToFloorHeightMeters,
+    defaultWallHeightMeters: lowest.defaultWallHeightMeters,
+    defaultCeilingHeightMeters: lowest.defaultCeilingHeightMeters,
+  };
+  return { ...snapshot, project: { ...snapshot.project, floors: [floor, ...snapshot.project.floors] } };
+};
+
+export const floorRemovalDisabledReason = (floors: readonly DraftLayoutFloorSpec[], floorId: string): string | undefined => {
+  const floor = floors.find(floor => floor.id === floorId);
+  if (!floor) return "The floor no longer exists.";
+  if (floor === floors.find(floor => !floor.belowGround)) return "The ground floor cannot be deleted.";
+  if (floor.belowGround && floor !== floors[0]) return "Only the lowest basement can be deleted. Delete the floors below first.";
+  if (!floor.belowGround && floor !== floors.at(-1)) return "Only the top floor can be deleted. Delete the floors above first.";
+  return undefined;
 };
 
 const updateFloor = (snapshot: EditorWorkspaceSnapshot, floorId: string,
@@ -35,25 +58,30 @@ export const setFloorHeight = (snapshot: EditorWorkspaceSnapshot, floorId: strin
 };
 
 export const removeTopFloor = (snapshot: EditorWorkspaceSnapshot): EditorWorkspaceSnapshot => {
+  return removeFloor(snapshot, snapshot.project.floors.at(-1)?.id ?? "");
+};
+
+export const removeFloor = (snapshot: EditorWorkspaceSnapshot, floorId: string): EditorWorkspaceSnapshot => {
   const { project } = snapshot;
-  if (project.floors.length <= 1) throw new Error("The ground floor cannot be removed.");
-  const top = project.floors.at(-1)!;
-  const roomIds = new Set(top.rooms.map((room) => room.id));
-  const openingIds = new Set(top.openings.map((opening) => opening.id));
+  const reason = floorRemovalDisabledReason(project.floors, floorId);
+  if (reason) throw new Error(reason);
+  const removedFloor = project.floors.find(floor => floor.id === floorId)!;
+  const roomIds = new Set(removedFloor.rooms.map((room) => room.id));
+  const openingIds = new Set(removedFloor.openings.map((opening) => opening.id));
   const slotIds = [
-    ...top.rooms.flatMap((room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? []),
-    ...top.openings.flatMap((opening) => [project.openingProfiles[opening.id]?.contactSlot?.id, project.openingProfiles[opening.id]?.coverSlot?.id].filter((id): id is string => Boolean(id))),
-    ...project.sceneItems.flatMap((item) => item.floorId === top.id && item.kind === "device"
+    ...removedFloor.rooms.flatMap((room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? []),
+    ...removedFloor.openings.flatMap((opening) => [project.openingProfiles[opening.id]?.contactSlot?.id, project.openingProfiles[opening.id]?.coverSlot?.id].filter((id): id is string => Boolean(id))),
+    ...project.sceneItems.flatMap((item) => item.floorId === removedFloor.id && item.kind === "device"
       ? item.entitySlots.map((slot) => slot.id) : []),
   ];
   const bindings = removeWorkspaceSlotReferences(snapshot.bindings, slotIds);
   return {
     project: {
-      ...project, floors: project.floors.slice(0, -1),
-      home: project.home.walkStart?.floorId === top.id
+      ...project, floors: project.floors.filter(floor => floor.id !== floorId),
+      home: project.home.walkStart?.floorId === removedFloor.id
         ? (({ walkStart, ...home }) => home)(project.home) : project.home,
-      sceneItems: project.sceneItems.filter((item) => item.floorId !== top.id),
-      stairs: project.stairs.filter((stair) => stair.lowerFloorId !== top.id && stair.upperFloorId !== top.id),
+      sceneItems: project.sceneItems.filter((item) => item.floorId !== removedFloor.id),
+      stairs: project.stairs.filter((stair) => stair.lowerFloorId !== removedFloor.id && stair.upperFloorId !== removedFloor.id),
       roomProfiles: Object.fromEntries(Object.entries(project.roomProfiles).filter(([id]) => !roomIds.has(id))),
       openingProfiles: Object.fromEntries(Object.entries(project.openingProfiles).filter(([id]) => !openingIds.has(id))),
     },

@@ -1,3 +1,4 @@
+import { deriveFloorLevels } from "./building/floor-levels";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import {
   MapControls,
@@ -137,7 +138,7 @@ interface OrbitCameraProps {
   floor: FloorSpec;
   showRoof?: boolean;
   elevation?: number;
-  buildingFloors?: readonly FloorSpec[];
+  buildingFloors?: readonly (FloorSpec & { elevationMeters?: number })[];
   room?: RoomSpec;
   resetKey: number;
 }
@@ -163,11 +164,13 @@ function OrbitCameraRig({
       bounds.width = bounds.maxX - bounds.minX; bounds.depth = bounds.maxZ - bounds.minZ;
       bounds.centerX = (bounds.minX + bounds.maxX) / 2; bounds.centerZ = (bounds.minZ + bounds.maxZ) / 2;
     }
-    const buildingHeight = (buildingFloors?.reduce((height, floor) => height + floor.floorToFloorHeightMeters, 0) ?? 0)
+    const levels = deriveFloorLevels(buildingFloors ?? []);
+    const buildingBase = levels[0]?.elevationMeters ?? 0;
+    const buildingHeight = (levels.length ? levels.at(-1)!.elevationMeters + buildingFloors!.at(-1)!.floorToFloorHeightMeters - buildingBase : 0)
       + (showRoof ? ROOF_MAX_RISE_METERS + ROOF_THICKNESS_METERS + 0.16 : 0);
     const span = Math.max(bounds.width, bounds.depth, buildingHeight, 2);
     const stacked = !room && (showRoof || (buildingFloors?.length ?? 0) > 1);
-    const targetHeight = stacked ? buildingHeight / 2 : (room ? 0.55 : 0.2) + elevation;
+    const targetHeight = stacked ? buildingBase + buildingHeight / 2 : (room ? 0.55 : 0.2) + elevation;
     const zoom = cameraZoomForViewport(width, height,
       stacked ? { width: bounds.width, depth: bounds.depth + buildingHeight * 0.75 } : bounds, Boolean(room));
     return {

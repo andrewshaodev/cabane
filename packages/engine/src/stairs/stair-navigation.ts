@@ -96,7 +96,7 @@ export const moveBuildingWalker = (building: BuildingGeometry, pose: BuildingWal
   }
   if (entrance) return { ...candidate, ...entrance };
   if (blockedByFootprint || hasUnsupportedStairAperture(flights, floor.id, plan)) return pose;
-  if (floor.id !== building.floors[0].id && !pointOnFloorSupport(plan, floor)) return pose;
+  if (floor.id !== building.floors.find(floor => !floor.belowGround)?.id && !pointOnFloorSupport(plan, floor)) return pose;
   return candidate;
 };
 export const safeBuildingSpawn = (building: BuildingGeometry, floorId: string, start?: import("../types").PlanPoint) => {

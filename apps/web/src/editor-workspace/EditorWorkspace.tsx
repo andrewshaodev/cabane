@@ -13,7 +13,7 @@ import { createBrowserUuid, normalizeWorkspaceBindingOrigin, resolveHomeAssistan
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EditorModeIntroduction } from "../editor-chrome/EditorModeIntroduction";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
-import { FloorPicker, addTopFloor, renameFloor, removeTopFloor, setFloorHeight } from "@cabane/engine";
+import { FloorPicker, addTopFloor, addBottomFloor, floorRemovalDisabledReason, renameFloor, removeFloor, setFloorHeight } from "@cabane/engine";
 import { StairDetails } from "../editor-floors/StairDetails";
 import { FloorManagementDialog, ConstructFloorControls } from "../editor-floors";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
@@ -58,7 +58,7 @@ const PLAN_IMPORT_ENABLED = false;
 
 export function EditorWorkspace(props: Parameters<typeof useHomeEditorController>[0]) {
   const {
-    editorProject, setActionBarItems, cameraFocusRoomId, focusRoom, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, showFloorBelow, setShowFloorBelow, lowerFloor, startStairs, connectFloor,
+    editorProject, setActionBarItems, cameraFocusRoomId, focusRoom, selectSceneItem, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, stairDialog, setStairDialog, floorDialog, setFloorDialog, floorReferences, startStairs, connectFloor,
     mode, editingLocked, publishOpen, previewOpen, connectManifest, connect, clearConstructionSelection,
     clearFurnishingSelection, cameraView, cameraResetKey, constructEditor, dragging, cameraFocusPoint,
     handleCameraTargetChange, savedCamera, placementFloor, previewSceneItems, displayedContextualIssues, activeIssueKey,
@@ -157,6 +157,14 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   useEffect(() => { if (constructEditor.tool !== "select" || stairPlacement) setWalkStartFloor(null); }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
   const floorControlsDisabled = editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+  const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
+  const addFloorBelow = () => {
+    const next = addBottomFloor(snapshot, `floor-${createBrowserUuid()}`);
+    commit(next);
+    floorNavigation.selectFloor(next.project.floors[0].id);
+    constructEditor.replaceFloor(next.project.floors[0]);
+    furnishingEditor.replaceItems([]);
+  };
   const addFloorAbove = () => {
     const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
     commit(next);
@@ -166,7 +174,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   };
   return ((
     <main className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`} data-editor-mode={shortcutsMode ? "shortcuts" : mode}>
-      {!shortcutsMode && <HomeEditorScene onStairIssuesChange={setStairLiveIssues} reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, showFloorBelow, lowerFloor, commit, snapshot, connectFloor,
+      {!shortcutsMode && <HomeEditorScene onStairIssuesChange={setStairLiveIssues} reference={reference} onNameFocusHandled={() => setNameFocusRequest(null)} cameraFocusRoomId={cameraFocusRoomId} nameFocusRequest={nameFocusRequest} placingWalkStart={placingWalkStart} onWalkStartPlaced={() => setWalkStartFloor(null)} {...{ selectSceneItem, stairDialog, floorNavigation, activeFloorId, stairPlacement, setStairPlacement, setStairDialog, floorReferences, commit, snapshot, connectFloor,
         mode, editingLocked, publishOpen, previewOpen, connectManifest, connect,
         clearConstructionSelection, clearFurnishingSelection, cameraView, cameraResetKey,
         constructEditor, dragging, cameraFocusPoint, handleCameraTargetChange, savedCamera,
@@ -183,27 +191,29 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         <FloorPicker floors={snapshot.project.floors} selectedId={activeFloorId}
           disabled={floorControlsDisabled} onSelect={(id) => floorNavigation.selectFloor(id)}
           onAdd={mode === "construct" ? addFloorAbove : undefined}
+          onAddBelow={mode === "construct" ? addFloorBelow : undefined}
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
-          onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
+          onRemove={mode === "construct" && !removeDisabledReason
             ? () => setFloorDialog("remove") : undefined} />
-        {mode === "construct" && lowerFloor && <label><input type="checkbox" checked={showFloorBelow}
-          onChange={(event) => setShowFloorBelow(event.target.checked)} />Show floor below</label>}
+        {mode === "construct" && floorReferences.references.map(({ direction, floor, visible }) => <label key={direction} title={floor.name}>
+          <input type="checkbox" checked={visible} onChange={event => floorReferences.setVisible(direction, event.target.checked)} />
+          Show floor {direction}
+        </label>)}
       </div>
       {mode === "construct" && stairDialog && <StairDetails key={`${activeFloorId}:${stairDialog.id}`} registries={stairRegistries} liveIssues={stairLiveIssues} project={snapshot.project} stair={snapshot.project.stairs.find(stair => stair.id === stairDialog.id) ?? stairDialog} onCancel={() => setStairDialog(null)}
         onSave={stair => {
           commit({ ...snapshot, project: { ...snapshot.project, stairs: [...snapshot.project.stairs.filter(s => s.id !== stair.id), stair] } });
         }} />}
       {floorDialog && <FloorManagementDialog action={floorDialog}
-        onRemove={snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
+        onRemove={!removeDisabledReason
           ? () => setFloorDialog("remove") : undefined}
-        removeDisabledReason={activeFloorId === snapshot.project.floors[0]?.id ? "The ground floor cannot be deleted."
-          : activeFloorId !== snapshot.project.floors.at(-1)?.id ? "Only the top floor can be deleted. Delete the floors above first." : undefined}
+        removeDisabledReason={removeDisabledReason}
         name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
         height={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.floorToFloorHeightMeters}
         itemCount={snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length}
-        stairCount={snapshot.project.stairs.filter((stair) => stair.upperFloorId === activeFloorId).length}
+        stairCount={snapshot.project.stairs.filter((stair) => stair.upperFloorId === activeFloorId || stair.lowerFloorId === activeFloorId).length}
         onCancel={() => setFloorDialog(null)} onSave={(name, height) => {
-          const next = floorDialog === "remove" ? removeTopFloor(snapshot) : setFloorHeight(renameFloor(snapshot, activeFloorId, name), activeFloorId, height);
+          const next = floorDialog === "remove" ? removeFloor(snapshot, activeFloorId) : setFloorHeight(renameFloor(snapshot, activeFloorId, name), activeFloorId, height);
           commit(next); replaceEditorsFromProject(next.project); setFloorDialog(null);
         }} />}
       <HomeEditorHeader referenceAdjusting={reference.adjusting} {...{ activeFloorId, stairPlacement, setStairPlacement, startStairs, snapshot,
@@ -232,7 +242,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
         </div>
         {!shortcutsMode && mode === "construct" && <ConstructFloorControls
           floors={snapshot.project.floors} selectedId={activeFloorId} disabled={floorControlsDisabled}
-          onSelect={id => floorNavigation.selectFloor(id)} onAdd={addFloorAbove}
+          onSelect={id => floorNavigation.selectFloor(id)} onAdd={addFloorAbove} onAddBelow={addFloorBelow}
           onSettings={() => setFloorDialog("rename")} />}
         <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
         {shortcutsMode && <div className="shortcuts-guide">

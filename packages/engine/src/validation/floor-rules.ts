@@ -89,6 +89,8 @@ const validateFloor = (
   const issues: ManifestIssue[] = [
     ...registerId(context, rawFloor.id, `${floorPath}.id`),
   ];
+  if (rawFloor.belowGround !== undefined && typeof rawFloor.belowGround !== "boolean")
+    issues.push(issue("floor.basement", `${floorPath}.belowGround`, "Basement classification must be a boolean."));
   if (!isNonEmptyString(rawFloor.name)) {
     issues.push(issue("floor.name", `${floorPath}.name`, "Floor name is required."));
   }

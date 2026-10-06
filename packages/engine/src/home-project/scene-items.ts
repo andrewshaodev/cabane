@@ -47,8 +47,8 @@ const validatePlacementBounds = (
   const path = `sceneItems[${index}].placement`;
   const placement = item.placement;
   if (placement.kind === "absolute") {
-    if (floor.id !== project.floors[0]?.id && !pointOnFloorSupport(placement.at, floor)) addProjectIssue(issues, "project.item-support", path, "Place the item on a room floor or outdoor platform.");
-    const onOutdoorGround = !floor.outdoorPlatforms?.some(p=>pointInsidePolygon(placement.at,p.polygon)) && floor.id === project.floors[0]?.id &&
+    if (floor.id !== project.floors.find(floor => !floor.belowGround)?.id && !pointOnFloorSupport(placement.at, floor)) addProjectIssue(issues, "project.item-support", path, "Place the item on a room floor or outdoor platform.");
+    const onOutdoorGround = !floor.outdoorPlatforms?.some(p=>pointInsidePolygon(placement.at,p.polygon)) && floor.id === project.floors.find(floor => !floor.belowGround)?.id &&
       pointStrictlyOutsideFloorFootprint(placement.at, floor);
     const minimumElevation = onOutdoorGround ? GROUND_ELEVATION_METERS : 0;
     if (placement.elevationMeters < minimumElevation) {

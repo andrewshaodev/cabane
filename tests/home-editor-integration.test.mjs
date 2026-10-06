@@ -115,10 +115,10 @@ await withModules(async (load) => {
     try {
       await act(async () => root.render(createElement(HomeEditor, { initialRecord: record, lifecycle, onClose: () => {}, initialRequest: { mode: "construct" } })));
       const expand = async label => { await act(async () => { button(label).blur(); button(label).focus(); }); };
-      await expand("Ground floor"); await click("Manage floors"); await click("Add floor");
+      await expand("Ground floor"); await click("Manage floors"); await click("Add floor above");
       assert.equal(button("Floor 2").getAttribute("aria-pressed"), "true");
-      await expand("Floor 2"); await click("Manage floors"); await click("Remove top floor");
-      await click("Remove top floor");
+      await expand("Floor 2"); await click("Manage floors"); await click("Remove floor");
+      await click("Remove floor");
       assert.equal(button("Floor 2"), undefined);
       await click("Undo"); assert.ok(button("Floor 2"));
       await click("Redo"); assert.equal(button("Floor 2"), undefined);

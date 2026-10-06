@@ -51,6 +51,7 @@ export interface EditorRoomIdentity {
 export interface FloorTopologyInput {
   floorId: string;
   floorToFloorHeightMeters?: number;
+  belowGround?: boolean;
   floorName: string;
   coordinates?: FloorCoordinates;
   walls: readonly EditorWall[];

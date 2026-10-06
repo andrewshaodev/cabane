@@ -95,7 +95,8 @@ await withModules(async (load) => {
   test("keeps the fixture scene renderable for a near-coincident exterior corner edit", () => {
     const topology = editedFloor("fixture-north", "from", [11.29, 0.17]);
 
-    assert.ok(topology.issues.length > 0, "the invalid intermediate edit remains reported");
+    assert.ok(topology.floor.rooms.every(room => room.name.trim()), "new faces receive default room names during the corner edit");
+    assert.ok(!topology.issues.some(issue => issue.code === "topology.room-name"));
     assertRenderable(topology);
   });
 });

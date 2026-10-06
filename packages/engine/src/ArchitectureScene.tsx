@@ -18,9 +18,11 @@ type ArchitectureSceneProps = Omit<FloorSceneProps, "sourceFloor" | "showGround"
 };
 export const ArchitectureScene = memo(function ArchitectureScene({ activeFloorId, floorView, selectedRoomId, ...props }: ArchitectureSceneProps) {
   const { manifest, walkMode } = props;
-  const active = activeFloorId ?? manifest.floors[0]?.id;
+  const active = activeFloorId ?? manifest.floors.find(floor => !floor.belowGround)?.id ?? manifest.floors[0]?.id;
   const view = walkMode ? "walk" : floorView ?? "cutaway";
   const visible = new Set(visibleFloorIds(manifest.floors.map((floor) => floor.id), active ?? "", view));
+  if (view === "whole") manifest.floors.filter(floor => floor.belowGround).forEach(floor => visible.delete(floor.id));
+  const ground = manifest.floors.find(floor => !floor.belowGround && (floor.elevationMeters === undefined || floor.elevationMeters === 0));
   const apertureKey = JSON.stringify(deriveStairApertures(manifest));
   const aperturesByFloor = useMemo(() => {
     const apertures: ReturnType<typeof deriveStairApertures> = JSON.parse(apertureKey);
@@ -46,7 +48,7 @@ export const ArchitectureScene = memo(function ArchitectureScene({ activeFloorId
         platformBelow={manifest.floors[index-1]}
         sceneLightingEnabled={floor.id === active}
         below={visible.has(manifest.floors[index - 1]?.id) ? manifest.floors[index - 1] : undefined}
-        above={visible.has(manifest.floors[index + 1]?.id) ? manifest.floors[index + 1] : undefined} showGround={index === 0 && view !== "plan"}
+        above={visible.has(manifest.floors[index + 1]?.id) ? manifest.floors[index + 1] : undefined} showGround={floor === ground && view !== "plan"}
         showCeiling={view === "walk" || (view === "cutaway" && floor.id !== active)}
         manifest={floorManifests.get(floor.id)!}
         interactionMode={floor.id === active ? props.interactionMode : "editor"}

@@ -21,13 +21,13 @@ export function FloorNavigationProvider({ children, initialFloorId }: { children
 }
 
 /** Standalone fixtures have local state; routed product shares the provider above routes. */
-export function useFloorNavigation(floors: readonly { id: string }[]) {
+export function useFloorNavigation(floors: readonly { id: string; belowGround?: boolean }[]) {
   const shared = useContext(FloorNavigationContext);
   const local = useNavigationState();
   const { state, setState, views } = shared ?? local;
   const order = floors.map((floor) => floor.id);
   const previousOrder = useRef(order);
-  const selected = reconcileFloorSelection(state, previousOrder.current, order);
+  const selected = reconcileFloorSelection(state.activeFloorId ? state : { ...state, activeFloorId: floors.find(floor => !floor.belowGround)?.id ?? "" }, previousOrder.current, order);
   useEffect(() => {
     previousOrder.current = order;
     if (selected.activeFloorId !== state.activeFloorId) setState((value) => ({ ...value, ...selected }));

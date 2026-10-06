@@ -24,6 +24,10 @@ test("workspace host routes zero, one, multiple, missing and OAuth target homes"
     assert.equal(await page.getByRole("button", { name: /^Connect my Home Assistant/ }).count(), 0);
     await page.getByRole("button", { name: /^Explore the demo/ }).click();
     await page.waitForURL("**/demo");
+    // The router updates history before React commits the destination. Exercise
+    // the demo's menu before Back so it cannot interrupt that pending transition.
+    await page.getByLabel("More options", { exact: true }).click();
+    await page.getByRole("button", { name: /^Getting started/ }).waitFor();
     await page.goBack();
     await page.getByRole("heading", { name: "Your home. In 3D. Under your control.", exact: true }).waitFor();
     await page.goForward();
