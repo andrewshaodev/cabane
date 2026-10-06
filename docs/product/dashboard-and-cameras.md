@@ -91,6 +91,12 @@ Room names use the mapped HA area name, falling back to the local modeled name w
 the area is unmapped or unavailable. Those rooms show a broken-chain Connect icon
 in overview labels and the room/walk heading, and a “Not connected” status pill
 alongside temperature and humidity in room heroes.
+On mobile, hide the room selection pills and keep the current floor pill and its
+expandable floor choices. Rooms remain selectable in the scene.
+
+Room and device controls use content-sized cards with wrapping titles and compact
+sliders, toggles, and thermostat dials. Shared spacing stays compact across all
+module domains while action targets remain at least 44px high.
 Room controls derive from resolved typed slots. Implemented domains include
 lights, switches/input booleans, climate (including Versatile Thermostat
 presentation), covers, fans, media players, humidifiers, water heaters, vacuums,

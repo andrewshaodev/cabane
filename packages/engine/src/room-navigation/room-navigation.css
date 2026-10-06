@@ -123,6 +123,9 @@
 }
 
 @container (max-width: 899px) {
+  .room-navigation__rooms > button:not(.room-navigation__floor) {
+    display: none;
+  }
   .room-navigation {
     top: max(12px, env(safe-area-inset-top));
     left: 12px;

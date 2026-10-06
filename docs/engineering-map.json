@@ -135,7 +135,9 @@
       "packages/engine/src/OrbitCamera.tsx",
       "packages/engine/src/room-navigation",
       "packages/engine/src/action-bar/dashboard-action-targets.ts",
-      "packages/engine/src/WalkPreferences.tsx"
+      "packages/engine/src/WalkPreferences.tsx",
+      "packages/engine/src/home-assistant-dashboard",
+      "packages/engine/src/styles.css"
     ],
     "interfaces": [
       {
@@ -143,7 +145,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {
