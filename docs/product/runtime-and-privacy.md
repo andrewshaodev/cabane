@@ -66,7 +66,7 @@ and editor walkthrough contexts prevent real service mutation.
 Demo simulation is isolated under `packages/engine/src/onboarding/demo/`, behind
 the existing `DemoHomeAssistantSession` entry point and runtime value interface.
 It derives synthetic IDs from local slots, handles supported commands only in
-memory, including media-player play/pause and volume for the simulated demo
+memory, including fan power, valve open/close, media-player power, play/pause and volume for the simulated demo
 speaker and television, lock/unlock, and alarm home/away/disarm. Classless status
 sensors start idle, and simulated lights start on when the demo opens in night
 lighting, following the saved preview mode or local time. Visitors can still turn

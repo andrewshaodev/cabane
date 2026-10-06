@@ -284,7 +284,7 @@
         "symbols": ["WalkToolDefinition", "WalkToolProps", "WalkToolNavigation", "WalkToolStorage"]
       }
     ],
-    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal.",
+    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation. The gun owns its first-use tutorial and browser-local dismissal. Engine targeting toggles one available light, fan, climate, media-player, switch or valve binding, preserving explicit slot scope and rejecting ambiguous targets.",
     "checks": ["test:unit", "test:browser", "verify:boundaries", "build"]
   },
   {

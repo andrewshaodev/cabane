@@ -16,6 +16,9 @@ await withModules(async (load) => {
   const { resolvePublishedActionBarItems } = await load(
     "/packages/engine/src/action-bar/action-bar-config.ts",
   );
+  const { applyDemoServiceCall, createDemoDeviceState } = await load(
+    "/packages/engine/src/onboarding/demo/demo-device-state.ts",
+  );
   const target = { id: "lamp", label: "Desk lamp" };
   const makeBindings = () => ({
     rooms: {
@@ -75,7 +78,7 @@ await withModules(async (load) => {
     assert.equal(result.status, "unavailable");
   });
 
-  test("no commands for disconnected, missing, stale, invalid, unknown, ambiguous or non-light targets", async () => {
+  test("no commands for disconnected, missing, stale, invalid, unknown, ambiguous or unsupported targets", async () => {
     let calls = 0;
     const runtime = { canMutate: true, callService: async () => calls++ };
     const variants = [
@@ -96,6 +99,64 @@ await withModules(async (load) => {
     }
     await activateWalkTarget(target, makeBindings(), { ...runtime, canMutate: false });
     assert.equal(calls, 0);
+  });
+
+  test("gun toggles fan, AC, sprinkler and TV bindings through their domain commands", async () => {
+    for (const [domain, onState, onService, offService] of [
+      ["fan", "on", "turn_on", "turn_off"],
+      ["climate", "cool", "turn_on", "turn_off"],
+      ["switch", "on", "turn_on", "turn_off"],
+      ["valve", "open", "open_valve", "close_valve"],
+      ["media_player", "playing", "turn_on", "turn_off"],
+    ]) {
+      const bindings = makeBindings();
+      const entity = bindings.rooms.room.devices[0].entities[0];
+      entity.domain = domain;
+      entity.state = createDemoDeviceState(`${domain}.demo`, domain, {
+        presentation: { label: "Device" },
+      });
+      entity.state.state = domain === "valve" ? "closed" : "off";
+      const calls = [];
+      const runtime = {
+        canMutate: true,
+        callService: async (call) => {
+          calls.push(call);
+          entity.state = applyDemoServiceCall(entity.state, call);
+        },
+      };
+      assert.equal(canActivateWalkTarget(target, bindings, true), true, domain);
+      assert.equal((await activateWalkTarget(target, bindings, runtime)).status, "activated");
+      assert.equal(calls[0].domain, domain);
+      assert.equal(calls[0].service, onService);
+      entity.state.state = onState;
+      assert.equal((await activateWalkTarget(target, bindings, runtime)).status, "activated");
+      assert.equal(calls[1].service, offService);
+      assert.equal(entity.state.state, domain === "valve" ? "closed" : "off");
+      entity.state.state = "unknown";
+      assert.equal(canActivateWalkTarget(target, bindings, true), false);
+    }
+  });
+
+  test("gun rejects mixed power bindings unless the target names one slot", async () => {
+    const bindings = makeBindings();
+    bindings.rooms.room.devices[0].entities.push({
+      domain: "fan",
+      slotId: "fan-power",
+      issues: [],
+      state: { entityId: "fan.demo", available: true, stale: false, state: "off" },
+    });
+    const calls = [];
+    const runtime = { canMutate: true, callService: async (call) => calls.push(call) };
+    assert.equal(canActivateWalkTarget(target, bindings, true), false);
+    assert.equal((await activateWalkTarget(target, bindings, runtime)).status, "unavailable");
+    const scoped = { ...target, slotId: "fan-power" };
+    assert.equal(canActivateWalkTarget(scoped, bindings, true), true);
+    await activateWalkTarget(scoped, bindings, runtime);
+    assert.deepEqual(
+      calls.map((call) => call.target.entity_id),
+      ["fan.demo"],
+    );
+    assert.equal(canActivateWalkTarget({ ...target, slotId: "missing" }, bindings, true), false);
   });
 
   test("raycast hits the first surface, ignores hidden geometry and the tool, and resolves device parents", () => {
