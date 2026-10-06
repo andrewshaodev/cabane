@@ -51,7 +51,10 @@ Roboto font dependency is retained because CSS imports are outside this analysis
 
 The test command runs four cost-balanced shards with shared harness modules and a
 compact agent reporter per worker. The launcher keeps four independent worker
-processes so Node cannot buffer a later shard's failures behind an earlier shard. `npm test` always includes both Node and Chromium coverage.
+processes so Node cannot buffer a later shard's failures behind an earlier shard.
+Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
+workers; the release workflow uses 1 on its software-rendering runner. All four
+shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
 `npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
 through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.

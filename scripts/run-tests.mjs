@@ -1,7 +1,11 @@
 import { spawn } from "node:child_process";
 
 // Node buffers cross-file reporter events in file order. Give each existing
-// shard its own streaming reporter while keeping the same four worker processes.
+// shard its own streaming reporter. Small software-rendering CI runners can
+// serialize shards without changing their coverage or browser assertions.
+const concurrency = Number(process.env.CABANE_TEST_CONCURRENCY ?? 4);
+if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 4)
+  throw new Error("CABANE_TEST_CONCURRENCY must be an integer from 1 to 4.");
 const files = process.argv.slice(2);
 const shards = files.length
   ? files
@@ -27,7 +31,7 @@ let failed = false;
 try {
   const queue = [...shards];
   await Promise.all(
-    Array.from({ length: Math.min(4, queue.length) }, async () => {
+    Array.from({ length: Math.min(concurrency, queue.length) }, async () => {
       while (queue.length && !interrupted) {
         const file = queue.shift();
         const status = await new Promise((resolve) => {
