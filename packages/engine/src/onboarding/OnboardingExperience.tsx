@@ -9,6 +9,8 @@ import {
 } from "react";
 import { CabaneDashboard } from "../CabaneDashboard";
 import { DemoHomeAssistantSession, demoLightVisualManifest } from "../DemoHomeAssistantSession";
+import { isNightLighting } from "../lighting";
+import { loadLightingMode } from "../WalkPreferences";
 import { HomeAssistantConnectionFlow } from "../HomeAssistantConnectionFlow";
 import {
   HomeAssistantRuntimeValueProvider,
@@ -80,6 +82,7 @@ export function CabaneAppExperience({
   const { setupState, updateSetupRecord } = useSetupRecord(manifest.home.id, constructionApplied);
   const launch = setupState.record.launch ?? createLaunchOnboardingState();
   const isDemo = onboarding?.isDemo ?? false;
+  const [demoNight] = useState(() => isNightLighting(loadLightingMode(), undefined, new Date()));
   const dashboardManifest = useMemo(
     () => (isDemo ? demoLightVisualManifest(manifest) : manifest),
     [isDemo, manifest],
@@ -208,7 +211,11 @@ export function CabaneAppExperience({
     >
       <div className="setup-shell__scene">
         {isDemo ? (
-          <DemoHomeAssistantSession manifest={manifest} onInteraction={() => setInteracted(true)}>
+          <DemoHomeAssistantSession
+            manifest={manifest}
+            night={demoNight}
+            onInteraction={() => setInteracted(true)}
+          >
             {({ manager }) => dashboard(manager)}
           </DemoHomeAssistantSession>
         ) : (

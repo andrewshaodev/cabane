@@ -4,7 +4,7 @@
       "basis": "user",
       "id": "villa-mediterranean-refinement",
       "subjectId": "south-garden-villa",
-      "summary": "The requested premium villa styling uses terracotta and sage rugs, a west reading lounge, dining storage, four pool loungers, a six-seat terrace table under the existing pergola, four olive trees and perimeter hedges. Dimensions and finishes are inferred generic designs. Lawn contact is -49 mm and paved terrace contact -43 mm relative to the indoor datum, each allowing a 1 mm support gap."
+      "summary": "The requested premium villa styling uses terracotta and sage rugs, a west reading lounge, dining storage, four pool loungers, a six-seat terrace table under the existing pergola, four olive trees and perimeter hedges. The pergola now uses the catalog string-lights device with a manual light slot and night-only scene state, retaining its existing placement and dimensions. Dimensions and finishes are inferred generic designs. Lawn contact is -49 mm and paved terrace contact -43 mm relative to the indoor datum, each allowing a 1 mm support gap."
     },
     {
       "basis": "inferred",

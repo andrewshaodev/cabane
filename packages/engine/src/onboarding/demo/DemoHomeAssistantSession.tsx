@@ -14,18 +14,20 @@ export { applyDemoServiceCall } from "./demo-device-state";
 
 export function DemoHomeAssistantSession({
   manifest,
+  night,
   children,
   onInteraction,
 }: {
   onInteraction?: () => void;
   manifest: HomeManifest;
+  night: boolean;
   children: (session: {
     manager: RuntimeBindingProfileManager;
     sampleAvailable: boolean;
     sampleLabel: string | null;
   }) => ReactNode;
 }) {
-  const definition = useMemo(() => deriveDemoSessionDefinition(manifest), [manifest]);
+  const definition = useMemo(() => deriveDemoSessionDefinition(manifest, night), [manifest, night]);
   const [snapshot, setSnapshot] = useState(() => ({
     definition,
     profile: definition.profile,

@@ -30,6 +30,7 @@ export function createDemoDeviceState(
   entityId: EntityId,
   domain: DemoDomain,
   slot: EntityBindingSlotSpec,
+  night = false,
 ): EntityStateSnapshot {
   const deviceClass = slot.compatibleDeviceClasses?.[0];
   const attributes: Record<string, unknown> = {
@@ -39,6 +40,7 @@ export function createDemoDeviceState(
   let state = "off";
   switch (domain) {
     case "light":
+      state = night ? "on" : "off";
       Object.assign(attributes, {
         supported_color_modes: ["rgb"],
         color_mode: "rgb",

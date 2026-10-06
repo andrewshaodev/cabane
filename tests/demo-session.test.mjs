@@ -18,6 +18,22 @@ await withModules(async (load) => {
     "/packages/engine/src/onboarding/demo/demo-light-visuals.ts",
   );
   const { sceneLightState } = await load("/packages/engine/src/scene-light-state.ts");
+  test("demo lights start on at night and remain individually controllable", () => {
+    const night = deriveDemoSessionDefinition(homeManifest, true);
+    const day = deriveDemoSessionDefinition(homeManifest, false);
+    const lights = Object.keys(night.runtime.entityStates).filter((id) => id.startsWith("light."));
+    assert.ok(lights.length > 0);
+    for (const id of lights) {
+      assert.equal(night.runtime.entityStates[id].state, "on");
+      assert.equal(day.runtime.entityStates[id].state, "off");
+      const switchedOff = applyDemoServiceCall(night.runtime.entityStates[id], {
+        domain: "light",
+        service: "turn_off",
+        target: { entity_id: id },
+      });
+      assert.equal(switchedOff.state, "off");
+    }
+  });
   test("demo light controls determine fixture visuals even for night-only home lights", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
     const fixture = homeManifest.sceneItems.find(
