@@ -114,6 +114,45 @@ await withModules(async (load) => {
     }
   });
 
+  test("dashboard light updates retain emitters for off, unavailable and stale states", async () => {
+    const floor = homeManifest.floors[0];
+    const room = floor.rooms[0];
+    const render = (state) =>
+      createElement(engine.HomeAssistantSceneLighting, {
+        floor,
+        resolvedBindings: {
+          rooms: {
+            [room.id]: {
+              devices: [],
+              sections: { primary: [{ slotId: "test-light", domain: "light", state }] },
+            },
+          },
+          openings: {},
+          issues: [],
+        },
+        deviceModels: {},
+        extensionDeviceModels: {},
+      });
+    const on = { state: "on", available: true, stale: false, attributes: {} };
+    const renderer = await create(render(on));
+    try {
+      const emitter = renderer.scene.findByProps({ name: "ha-room-light-test-light" }).instance;
+      for (const state of [
+        { ...on, state: "off" },
+        { ...on, available: false },
+        { ...on, stale: true },
+        on,
+      ]) {
+        await renderer.update(render(state));
+        const current = renderer.scene.findByProps({ name: "ha-room-light-test-light" }).instance;
+        assert.equal(current, emitter);
+        assert.equal(current.intensity, state === on ? 5 : 0);
+      }
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("outdoor always-on lanterns illuminate without rooms or HA bindings", async () => {
     const floor = { ...homeManifest.floors[0], rooms: [] };
     for (const modelId of ["low-garden-lantern", "garden-lantern-pole"]) {
@@ -173,7 +212,8 @@ await withModules(async (load) => {
           }),
         );
         assert.equal(
-          renderer.scene.findAllByProps({ name: "ha-device-light-outdoor-lantern" }).length,
+          renderer.scene.findByProps({ name: "ha-device-light-outdoor-lantern" }).instance
+            .intensity,
           0,
         );
       }
@@ -587,8 +627,9 @@ await withModules(async (load) => {
       const lights = renderer.scene.findAllByProps({
         name: "ha-device-light-fixture-scaled-light",
       });
-      assert.equal(lights.length, expected ? 1 : 0, mode);
-      if (expected) assert.equal(lights[0].props.intensity, expected);
+      assert.equal(lights.length, 1, mode);
+      assert.equal(lights[0].instance, light.instance, "toggles retain the physical emitter");
+      assert.equal(lights[0].props.intensity, expected);
       let observedState;
       const modelRenderer = await create(
         createElement(engine.SceneItemRenderer, {

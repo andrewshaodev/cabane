@@ -202,7 +202,7 @@ export function HomeAssistantSceneLighting({
             )
               return [];
             const brightness = lightBrightnessRatio(entity.state);
-            if (brightness <= 0) return [];
+            // Keep light counts stable: toggles update uniforms instead of recompiling shaders.
             const configured = slot?.sceneLight;
             const fallback = defaultRoomLight(room, floor);
             const configuredPosition = configured
@@ -257,7 +257,7 @@ export function HomeAssistantSceneLighting({
           : deviceWorldTransform(resolved.slot, floor.coordinates);
         const state = sceneLightState(sceneItem?.lightState, entity?.state, nightLighting);
         const brightness = lightBrightnessRatio(state);
-        if (brightness <= 0) return [];
+        // Zero-intensity emitters retain the shader layout while devices are off.
         const sceneItemScale = sceneItem
           ? uniformDeviceScaleForSize(sceneItem.size, definition)
           : null;

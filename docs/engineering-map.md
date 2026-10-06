@@ -108,9 +108,9 @@ Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-came
 
 Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.md).
 
-- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs).
+- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs).
 - Interface: `ArchitectureScene`, `StylizedScene` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering.
+- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation.
 - Checks: `test:unit`, `verify:policy`, `verify:scene-contours`, `fixture:verify:scale`, `measure:scene`.
 
 ### Catalog and model extensions
@@ -128,7 +128,7 @@ Contract: [Optional walk tools](../docs/product/architecture.md).
 
 - Owners: [`apps/web/src/walk-tools.ts`](../apps/web/src/walk-tools.ts), [`packages/walk-laser/src`](../packages/walk-laser/src), [`packages/engine/src/walk-tools`](../packages/engine/src/walk-tools).
 - Interface: `WalkToolDefinition`, `WalkToolProps`, `WalkToolNavigation`, `WalkToolStorage` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine.
+- Review invariant: Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.
 - Checks: `test:unit`, `test:browser`, `verify:boundaries`, `build`.
 
 ### Bundled home and agent generation

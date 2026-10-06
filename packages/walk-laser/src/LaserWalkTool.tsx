@@ -10,6 +10,7 @@ import type { PortalColor } from "./portals/portal-contract";
 import { LaserGun } from "./LaserGun";
 import { useLaserShots } from "./useLaserShots";
 import { LaserShot } from "./LaserShot";
+import { LaserShotWarmup } from "./LaserShotWarmup";
 import { createShotGate } from "./shot-gate";
 import { ComicPew, useMuzzleAnchor } from "./comic-pew";
 import "./laser.css";
@@ -23,12 +24,15 @@ export function LaserWalkTool({
   canActivateTarget,
   activateTarget,
 }: WalkToolProps) {
-  const { camera, scene } = useThree();
+  const { camera, scene, gl } = useThree();
   const dom = useCabaneDom();
   const gun = useRef<Group>(null);
   const muzzle = useRef<Group>(null);
   const portalControls = useRef<PortalControls>(null);
   const weaponScene = useMemo(() => new Scene(), []);
+  useEffect(() => {
+    void gl.compileAsync(weaponScene, camera);
+  }, [gl, weaponScene, camera]);
   const { shots, triggerId, triggerColor, recoil, emitShot } = useLaserShots(
     muzzle,
     camera,
@@ -194,6 +198,7 @@ export function LaserWalkTool({
         </>,
         weaponScene,
       )}
+      {!reducedMotion && <LaserShotWarmup />}
       {shots.map((item) => (
         <LaserShot key={item.id} shot={item} />
       ))}

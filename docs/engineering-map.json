@@ -149,6 +149,7 @@
       "packages/engine/src/ArchitectureScene.tsx",
       "packages/engine/src/architecture-scene",
       "packages/engine/src/rendering.tsx",
+      "packages/engine/src/HomeAssistantSceneLighting.tsx",
       "packages/engine/src/building",
       "packages/engine/src/stairs"
     ],
@@ -158,7 +159,7 @@
         "symbols": ["ArchitectureScene", "StylizedScene"]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering.",
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -199,7 +200,7 @@
         "symbols": ["WalkToolDefinition", "WalkToolProps", "WalkToolNavigation", "WalkToolStorage"]
       }
     ],
-    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine.",
+    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine. Prepare and retain shot shader programs on equip to avoid trigger-time compilation.",
     "checks": ["test:unit", "test:browser", "verify:boundaries", "build"]
   },
   {

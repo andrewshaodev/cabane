@@ -50,7 +50,9 @@ the engine. Tools receive no HA client, credentials, or household entity IDs.
 
 `packages/walk-laser` is an optional experiment, installed only in
 `apps/web/src/walk-tools.ts`. Its scene, model, effects, input, and CSS load when
-first equipped. The engine, catalog, and home never import it. Removing that
+first equipped. Equipping prepares and retains the weapon and shot-effect shader
+programs, including the host’s offscreen render variant, before trigger input.
+The engine, catalog, and home never import it. Removing that
 registration and dependency removes the feature; stored `walk-tool` shortcuts
 remain readable and render as unavailable. The generic shortcut schema retains
 unknown tool IDs to preserve portable projects between hosts with different tools.

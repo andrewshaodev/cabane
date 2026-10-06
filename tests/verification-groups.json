@@ -224,6 +224,7 @@
       "gun-portals-browser.test.mjs",
       "gun-portals.test.mjs",
       "laser-visuals.test.mjs",
+      "laser-device-performance.test.mjs",
       "portal-transition.test.mjs",
       "portal-view.test.mjs",
       "public-site-analytics.test.mjs",

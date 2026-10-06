@@ -61,7 +61,10 @@ compose finishes; implementation belongs to the engine finish modules.
 Visible home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable
 product. Shared lighting, fading, and outline behavior stay engine-owned.
-Physical lights render only on the active floor. Device emitters, including
+Physical lights render only on the active floor. On that floor, supported emitters
+stay mounted at zero intensity while off or unavailable. Device and dashboard
+light updates change uniforms without changing shader light counts, avoiding
+synchronous scene shader compilation during interaction. Device emitters, including
 fallbacks from resolved bindings, are scoped to their owning floor so stair
 transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
 opaque wall emit into their room through an unshadowed spotlight; sources at

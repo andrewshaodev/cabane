@@ -1021,7 +1021,7 @@ await withModules(async (load) => {
     }
   });
 
-  test("keeps physical HA light sources engine-owned and omits powered-off sources", async () => {
+  test("keeps physical HA light sources engine-owned and powered-off sources at zero intensity", async () => {
     const runtime = {
       ...fixtures.connectedCatalogRuntime,
       entityStates: {
@@ -1058,9 +1058,9 @@ await withModules(async (load) => {
     assert.equal(floorLamp.instance.color.getHexString(), "ff4020");
     assert.equal(floorLamp.instance.castShadow, false);
     assert.equal(
-      renderer.scene.findAllByProps({
+      renderer.scene.findByProps({
         name: "ha-device-light-fixture-terracotta-pendant",
-      }).length,
+      }).instance.intensity,
       0,
     );
     await renderer.unmount();
