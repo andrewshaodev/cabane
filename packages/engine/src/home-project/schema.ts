@@ -111,6 +111,7 @@ const wall = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
       "thicknessMeters",
       "heightMeters",
       "exteriorColor",
+      "edgeColor",
       "faceColors",
     ],
     path,
@@ -132,6 +133,7 @@ const wall = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
     finite(candidate.heightMeters, `${path}.heightMeters`, issues);
   if (candidate.exteriorColor !== undefined)
     string(candidate.exteriorColor, `${path}.exteriorColor`, issues);
+  if (candidate.edgeColor !== undefined) string(candidate.edgeColor, `${path}.edgeColor`, issues);
   if (candidate.faceColors !== undefined) {
     const colors = record(candidate.faceColors, `${path}.faceColors`, issues);
     if (colors) {

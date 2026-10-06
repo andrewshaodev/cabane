@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "./wall-colors";
 import { defineHomeManifest } from "./validation";
 
 export const neutralDemoManifest = defineHomeManifest({
@@ -9,8 +10,8 @@ export const neutralDemoManifest = defineHomeManifest({
     palette: {
       accent: "#e6764e",
       secondary: "#7ca39a",
-      exterior: "#c97370",
-      interior: "#e4e0d8",
+      exterior: DEFAULT_WALL_COLORS.exterior,
+      interior: DEFAULT_WALL_COLORS.interior,
       ground: "#91a06a",
     },
   },

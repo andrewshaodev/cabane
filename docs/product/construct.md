@@ -284,6 +284,13 @@ controls and shortcuts are suspended during the session. The plan temporarily
 fits inside the dial and restores its previous camera pose on exit. The setting
 uses ordinary autosave, import/export and Save; only Save publishes it to Home.
 
+Wall Finish includes Edge color: Auto (the default, omitted in JSON) or Custom.
+Custom persists `WallSpec.edgeColor` and applies to end caps, top/bottom caps
+and opening reveals. Auto inherits the two authored face colors when they match;
+otherwise it inherits an authored exterior color, falling back to the general interior wall finish. Different face colors remain unchanged.
+Shared horizontal junction caps retain the general finish when owner edge finishes
+disagree. The setting participates in undo/redo, autosave and workspace import/export.
+
 Construct’s floor palette includes Square tile, Rectangular tile (staggered), and
 Checkerboard tile. Their Tile color picker changes the ceramic color while keeping
 neutral grout (and the checkerboard’s cream alternate tiles). Reset color restores
@@ -297,3 +304,7 @@ override paints the door leaf and frame or window frame/muntins; glass and
 hardware retain their original finishes. Reset color removes the override and
 restores the original multi-tone palette. Color follows ordinary opening
 history, autosave, Apply, and import/export. Passages have no color picker.
+
+Horizontal caps are partitioned by finish ownership before triangulation so adjacent
+wall colors do not bleed across their boundary. Overlapping junction ownership
+with different edge finishes retains the general interior finish.

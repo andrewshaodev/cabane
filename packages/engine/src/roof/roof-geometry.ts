@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "../wall-colors";
 import polygonClipping, { type Polygon as ClipPolygon } from "polygon-clipping";
 import { BufferGeometry, Color, Float32BufferAttribute, ShapeUtils, Vector2 } from "three";
 import type { FloorSpec } from "../types";
@@ -159,7 +160,7 @@ function appendRegion(
 export function buildRoofGeometries(
   floors: readonly FloorSpec[],
   settings: RoofSettings = DEFAULT_ROOF_SETTINGS,
-  exteriorColor = "#c97370",
+  exteriorColor: string = DEFAULT_WALL_COLORS.exterior,
 ) {
   const top: number[] = [],
     edges: number[] = [],

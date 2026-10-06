@@ -226,6 +226,13 @@ exterior-lighting previews, independent of lamp state. Solar shadow framing encl
 the building's floor scene bounds, walls, storey elevations and roof allowance,
 including translated and scaled plans. Luminaires remain unshadowed.
 
+Wall caps and opening reveals use the optional `WallSpec.edgeColor` override.
+When absent, matching authored left/right colors extend onto these surfaces;
+otherwise an authored exterior color is used, falling back to the general interior wall finish. Standalone and batched wall
+rendering share this rule. Shared horizontal junction surfaces use the general
+finish when their participating walls disagree, without changing geometry,
+collision, shadows or fade ownership.
+
 Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
 
 Construct’s floor palette includes Square tile, Rectangular tile (staggered), and
@@ -234,3 +241,11 @@ neutral grout (and the checkerboard’s cream alternate tiles). Reset color rest
 the preset default. Optional six-digit hex `color` on these preset finishes survives
 history, draft reload, Save, duplication, and import/export; omitted color preserves
 existing projects. Patterns are generated in memory and rendered with toon materials.
+
+Horizontal caps are partitioned by finish ownership before triangulation so adjacent
+wall colors do not bleed across their boundary. Overlapping junction ownership
+with different edge finishes retains the general interior finish.
+
+`DEFAULT_WALL_COLORS` is the public engine source for default exterior and interior
+wall colors. New homes, previews, geometry, roof infill and generation prompts
+reuse it; renderers honor the project palette and authored wall finishes.

@@ -153,6 +153,7 @@ export interface WallSpec {
   thicknessMeters: number;
   heightMeters?: number;
   exteriorColor?: string;
+  edgeColor?: string;
   faceColors?: {
     left?: string;
     right?: string;

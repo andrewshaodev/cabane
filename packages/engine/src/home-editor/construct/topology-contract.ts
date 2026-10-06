@@ -29,6 +29,7 @@ export interface EditorWall {
   thicknessMeters?: number;
   heightMeters?: number;
   exteriorColor?: string;
+  edgeColor?: string | undefined;
   faceColors?: WallSpec["faceColors"];
 }
 

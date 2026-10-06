@@ -439,6 +439,42 @@ await withModules(async (load) => {
     });
   });
 
+  test("wall inspector switches edge color between Auto and Custom", async () => {
+    await withDom(async ({ dom, root }) => {
+      const changes = [],
+        controller = editor(
+          { kind: "wall", id: wall.id },
+          { updateSelectedWallMetadata: (change) => changes.push(change) },
+        );
+      controller.draft.walls[0].faceColors = { left: "#bcb99b", right: "#bcb99b" };
+      await act(async () =>
+        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+      );
+      let mode = dom.window.document.querySelector('[aria-label="Wall edge color mode"]');
+      assert.equal(mode.value, "auto");
+      assert.equal(dom.window.document.querySelector('[aria-label="Wall edge color"]'), null);
+      await act(async () => {
+        mode.value = "custom";
+        mode.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      assert.deepEqual(changes.pop(), { edgeColor: "#bcb99b" });
+      controller.draft.walls[0].edgeColor = "#bcb99b";
+      await act(async () =>
+        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+      );
+      assert.equal(
+        dom.window.document.querySelector('[aria-label="Wall edge color"]').value,
+        "#bcb99b",
+      );
+      mode = dom.window.document.querySelector('[aria-label="Wall edge color mode"]');
+      await act(async () => {
+        mode.value = "auto";
+        mode.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      assert.deepEqual(changes.pop(), { edgeColor: undefined });
+    });
+  });
+
   test("keeps scale and heights available without the removed Advanced controls", async () => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>

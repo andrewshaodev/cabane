@@ -47,7 +47,7 @@ export function architecturalOpeningPreview(
     opening.kind === "door" && opening.operation === "sliding" && opening.variant === "plank";
   const depth = wall.thicknessMeters / 2 + 0.18;
   return {
-    key: `opening:${JSON.stringify([opening, wall.thicknessMeters, wall.exteriorColor, wall.faceColors])}`,
+    key: `opening:${JSON.stringify([opening, wall.thicknessMeters, wall.exteriorColor, wall.faceColors, wall.edgeColor])}`,
     kind: "procedural",
     definition: {
       bounds: {

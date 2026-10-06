@@ -9,3 +9,13 @@ export function wallFaceFinish(
 ): string {
   return wall.faceColors?.[side] ?? (outside ? wall.exteriorColor : undefined) ?? fallback;
 }
+
+/** Auto caps follow matching authored faces, then exterior paint, then the general finish. */
+export function wallEdgeFinish(wall: WallSpec, fallback: string): string {
+  return (
+    wall.edgeColor ??
+    (wall.faceColors?.left && wall.faceColors.left === wall.faceColors.right
+      ? wall.faceColors.left
+      : (wall.exteriorColor ?? fallback))
+  );
+}

@@ -1,5 +1,5 @@
 import { wallFrame } from "../architecture-geometry/wall-coordinate-frame";
-import { wallFaceFinish } from "../architecture-geometry/wall-face-finish";
+import { wallFaceFinish, wallEdgeFinish } from "../architecture-geometry/wall-face-finish";
 import { BufferGeometry, Color, Float32BufferAttribute } from "three";
 
 import { useEffect, useMemo } from "react";
@@ -75,12 +75,11 @@ export function ArchitecturalWall({
         const alignment =
           normals.getX(index) * frame.normal[0] + normals.getZ(index) * frame.normal[1];
         const fallback = outside ? exteriorColor : interiorColor;
-        // Caps and opening reveals keep their existing finish; only the two
-        // longitudinal faces inherit authored left/right overrides.
+        // Longitudinal faces and edge/reveal surfaces have separate finish rules.
         const color = new Color(
           Math.abs(alignment) > 0.999
             ? wallFaceFinish(wall, alignment >= 0 ? "left" : "right", outside, fallback)
-            : fallback,
+            : wallEdgeFinish(wall, interiorColor),
         );
         colors.push(color.r, color.g, color.b);
       }

@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "../wall-colors";
 import type { HomeProject } from "./types";
 
 export function createEmptyHomeProject(id: string, name: string): HomeProject {
@@ -11,8 +12,8 @@ export function createEmptyHomeProject(id: string, name: string): HomeProject {
       palette: {
         accent: "#d48a54",
         secondary: "#758f83",
-        exterior: "#c97370",
-        interior: "#e4e0d8",
+        exterior: DEFAULT_WALL_COLORS.exterior,
+        interior: DEFAULT_WALL_COLORS.interior,
         ground: "#91a06a",
       },
     },

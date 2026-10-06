@@ -234,6 +234,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
       ? { heightMeters: wall.heightMeters }
       : {}),
     ...(wall.exteriorColor ? { exteriorColor: wall.exteriorColor } : {}),
+    ...(wall.edgeColor ? { edgeColor: wall.edgeColor } : {}),
     ...(wall.faceColors ? { faceColors: { ...wall.faceColors } } : {}),
   }));
   const openings: OpeningSpec[] = input.openings.flatMap((opening, index): OpeningSpec[] => {

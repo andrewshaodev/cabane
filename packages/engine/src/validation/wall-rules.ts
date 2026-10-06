@@ -72,6 +72,15 @@ export const validateWalls = (
         ),
       );
     }
+    if (rawWall.edgeColor !== undefined && !isNonEmptyString(rawWall.edgeColor)) {
+      issues.push(
+        issue(
+          "wall.edge-color",
+          `${wallPath}.edgeColor`,
+          "Wall edge color must be a non-empty CSS color when supplied.",
+        ),
+      );
+    }
     if (rawWall.faceColors !== undefined) {
       if (!isObject(rawWall.faceColors)) {
         issues.push(

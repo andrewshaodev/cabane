@@ -1,5 +1,5 @@
+import { DEFAULT_WALL_COLORS, useCabaneDom } from "@cabane/engine";
 import { omitUndefinedProperties } from "@cabane/engine";
-import { useCabaneDom } from "@cabane/engine";
 import { useThree } from "@react-three/fiber";
 
 import {
@@ -68,7 +68,7 @@ export function useConstructionPointerController({
   drawStart = null,
   drawPreview = null,
   drawAngleReferenceRadians = null,
-  wallExteriorColor = "#c97370",
+  wallExteriorColor = DEFAULT_WALL_COLORS.exterior,
   poolPoints = [],
   floorPaintTarget = "room",
   floorZonePoints = [],
