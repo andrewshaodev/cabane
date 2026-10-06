@@ -6,8 +6,6 @@ const supportedDomains = [
   "fan",
   "valve",
   "switch",
-  "fan",
-  "valve",
   "climate",
   "cover",
   "sensor",
@@ -59,10 +57,6 @@ export function createDemoDeviceState(
         brightness: 180,
         rgb_color: [255, 211, 160],
       });
-      break;
-    case "valve":
-      state = "closed";
-      Object.assign(attributes, { current_position: 0, supported_features: 3 });
       break;
     case "cover":
       state = "open";
@@ -156,7 +150,6 @@ export function applyDemoServiceCall(
     }
     case "light":
     case "switch":
-    case "fan":
       if (!["turn_on", "turn_off"].includes(call.service)) return invalid();
       next = call.service === "turn_on" ? "on" : "off";
       if (call.domain === "light" && call.service === "turn_on") {
@@ -180,11 +173,6 @@ export function applyDemoServiceCall(
           attributes.color_mode = "rgb";
         }
       }
-      break;
-    case "valve":
-      if (!["open_valve", "close_valve"].includes(call.service)) return invalid();
-      next = call.service === "open_valve" ? "open" : "closed";
-      attributes.current_position = next === "open" ? 100 : 0;
       break;
     case "cover": {
       let position: number;
