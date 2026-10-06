@@ -1,3 +1,4 @@
+import { NumericField } from "./NumericField";
 import { modelVariants, resolveModelVariant } from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import type {
@@ -9,32 +10,6 @@ import type {
 } from "@cabane/engine";
 import { windowPlacements } from "./placement/window-placement";
 const AXES = ["width", "height", "depth"] as const;
-const NumericField = ({
-  label,
-  value,
-  disabled,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  disabled?: boolean;
-  onChange: (value: number) => void;
-}) => (
-  <label>
-    <span>{label}</span>
-    <input
-      type="number"
-      step="0.01"
-      value={Number(value.toFixed(4))}
-      disabled={disabled}
-      onChange={(event) => {
-        const next = event.currentTarget.valueAsNumber;
-        if (Number.isFinite(next)) onChange(next);
-      }}
-    />
-  </label>
-);
-
 const rotationFor = (placement: ItemPlacement) =>
   placement.kind === "wall" ? placement.rotationOffsetRadians : placement.rotationYRadians;
 
@@ -86,6 +61,7 @@ export function FurnishingProperties({
       : [];
   return (
     <SelectionDetailsPanel
+      key={selected.id}
       label={selected.kind === "device" ? "Selected device" : "Selected furnishing"}
       title={definition.label}
       subtitle={definition.category}
@@ -159,6 +135,7 @@ export function FurnishingProperties({
         <fieldset>
           <legend>Position</legend>
           <NumericField
+            unit="plan units"
             label="X"
             value={selected.placement.at[0]}
             onChange={(value) =>
@@ -168,6 +145,7 @@ export function FurnishingProperties({
             }
           />
           <NumericField
+            unit="plan units"
             label="Z"
             value={selected.placement.at[1]}
             onChange={(value) =>
@@ -177,6 +155,7 @@ export function FurnishingProperties({
             }
           />
           <NumericField
+            unit="m"
             label="Elevation"
             value={selected.placement.elevationMeters}
             onChange={(elevationMeters) => updatePlacement({ elevationMeters })}
@@ -189,6 +168,7 @@ export function FurnishingProperties({
             Wall support · {selected.placement.wallId} · {selected.placement.face}
           </legend>
           <NumericField
+            unit="plan units"
             label="Offset"
             value={selected.placement.offsetFromWallStartPlanUnits}
             onChange={(offsetFromWallStartPlanUnits) =>
@@ -196,11 +176,13 @@ export function FurnishingProperties({
             }
           />
           <NumericField
+            unit="m"
             label="Elevation"
             value={selected.placement.elevationMeters}
             onChange={(elevationMeters) => updatePlacement({ elevationMeters })}
           />
           <NumericField
+            unit="m"
             label="Depth offset"
             value={selected.placement.depthOffsetMeters}
             onChange={(depthOffsetMeters) => updatePlacement({ depthOffsetMeters })}
@@ -211,6 +193,7 @@ export function FurnishingProperties({
         <fieldset>
           <legend>Ceiling support · {selected.placement.roomId}</legend>
           <NumericField
+            unit="plan units"
             label="X"
             value={selected.placement.at[0]}
             onChange={(value) =>
@@ -220,6 +203,7 @@ export function FurnishingProperties({
             }
           />
           <NumericField
+            unit="plan units"
             label="Z"
             value={selected.placement.at[1]}
             onChange={(value) =>
@@ -229,6 +213,7 @@ export function FurnishingProperties({
             }
           />
           <NumericField
+            unit="m"
             label="Drop"
             value={selected.placement.dropMeters}
             onChange={(dropMeters) => updatePlacement({ dropMeters })}
@@ -267,6 +252,8 @@ export function FurnishingProperties({
       <fieldset>
         <legend>Rotation</legend>
         <NumericField
+          unit="°"
+          step={1}
           label="Degrees"
           value={(rotationFor(selected.placement) * 180) / Math.PI}
           onChange={(degrees) => {
@@ -284,6 +271,8 @@ export function FurnishingProperties({
         <legend>Size · {definition.resizePolicy.kind}</legend>
         {definition.resizePolicy.kind === "uniform" ? (
           <NumericField
+            unit="×"
+            min={Math.max(...definition.defaultSize.map((value) => 0.01 / value))}
             label="Scale"
             value={selected.size[0] / definition.defaultSize[0]}
             onChange={(scale) =>
@@ -304,7 +293,9 @@ export function FurnishingProperties({
                   : definition.resizePolicy.kind === "custom";
             return (
               <NumericField
+                unit="m"
                 key={axis}
+                min={0.01}
                 label={axis}
                 value={selected.size[index]}
                 disabled={!editable}

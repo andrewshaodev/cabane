@@ -94,3 +94,5 @@ survives undo/redo, duplication, Apply, and project import/export. Omission
 preserves each model's original multi-tone palette. Overrides recolor fabric;
 tracks, wood, motor housings, and decorative throw cushions retain their finishes.
 Only descriptors declaring `defaultColor` offer this control.
+
+Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.

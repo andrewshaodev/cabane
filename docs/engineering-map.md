@@ -72,7 +72,7 @@ Contract: [Construct and floor topology](../docs/product/construct.md).
 
 Contract: [Arrange and placement](../docs/product/arrange.md).
 
-- Owners: [`apps/web/src/editor-preview/furnish/useFurnishingEditor.ts`](../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts), [`apps/web/src/editor-preview/furnish/placement`](../apps/web/src/editor-preview/furnish/placement), [`packages/engine/src/home-project/placements.ts`](../packages/engine/src/home-project/placements.ts).
+- Owners: [`apps/web/src/editor-preview/furnish/useFurnishingEditor.ts`](../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts), [`apps/web/src/editor-preview/furnish/placement`](../apps/web/src/editor-preview/furnish/placement), [`packages/engine/src/home-project/placements.ts`](../packages/engine/src/home-project/placements.ts), [`apps/web/src/editor-preview/furnish/FurnishingProperties.tsx`](../apps/web/src/editor-preview/furnish/FurnishingProperties.tsx), [`apps/web/src/editor-preview/furnish/NumericField.tsx`](../apps/web/src/editor-preview/furnish/NumericField.tsx).
 - Interface: `useFurnishingEditor` via [`apps/web/src/editor-preview/furnish/useFurnishingEditor.ts`](../apps/web/src/editor-preview/furnish/useFurnishingEditor.ts).
 - Review invariant: Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Optional fabric colors follow item history and persistence; model defaultColor enables the picker.
 - Checks: `test:unit`, `test:browser`, `verify:furnishing-surfaces`, `fixture:verify:room`.

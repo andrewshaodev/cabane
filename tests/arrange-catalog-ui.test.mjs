@@ -370,7 +370,10 @@ await withModules(async (load) => {
       assert.notDeepEqual(editor.items[0].size, item.size);
       assert.notDeepEqual(editor.items[0].placement, item.placement);
       assert.equal(editor.past.length, 1);
-      assert.equal(document.querySelector("input[disabled]").closest("label").textContent, "depth");
+      assert.equal(
+        document.querySelector("input[disabled]").closest("label").textContent,
+        "depth · m",
+      );
       await act(async () => editor.undo());
       assert.deepEqual(editor.items[0], item);
     });

@@ -93,7 +93,9 @@
     "owners": [
       "apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
       "apps/web/src/editor-preview/furnish/placement",
-      "packages/engine/src/home-project/placements.ts"
+      "packages/engine/src/home-project/placements.ts",
+      "apps/web/src/editor-preview/furnish/FurnishingProperties.tsx",
+      "apps/web/src/editor-preview/furnish/NumericField.tsx"
     ],
     "interfaces": [
       {

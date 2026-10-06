@@ -310,7 +310,7 @@ await withModules(async (load) => {
       await act(async () => root.render(React.createElement(Harness, { detailsOpen: true })));
       assert.ok(document.querySelector('[aria-label="Selected furnishing"]'));
       assert.equal(document.querySelector('[aria-label="Add Chair"]').closest("[hidden]"), null);
-      assert.equal(document.querySelectorAll('input[type="number"]').length, 7);
+      assert.equal(document.querySelectorAll('input[inputmode="decimal"]').length, 7);
       await act(async () => document.querySelector('[aria-label="Close details"]').click());
       assert.equal(closed, 1);
       await act(async () => root.render(React.createElement(Harness, { detailsOpen: false })));

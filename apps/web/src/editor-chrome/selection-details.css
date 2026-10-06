@@ -157,3 +157,51 @@
     min-height: 44px;
   }
 }
+
+.selection-details .arrange-numeric-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: end;
+}
+.selection-details .arrange-numeric-field label {
+  grid-template-columns: minmax(0, 1fr) 76px;
+}
+.arrange-numeric-field input {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.arrange-numeric-field [role="group"] {
+  display: flex;
+  gap: 2px;
+}
+.selection-details .arrange-numeric-field button {
+  min-width: 28px;
+  min-height: 34px;
+  padding: 4px;
+  border: 1px solid #d8d4c8;
+  border-radius: 6px;
+  background: #fffaf1;
+  color: var(--preview-ink);
+  font: inherit;
+  cursor: pointer;
+}
+.arrange-numeric-field small {
+  grid-column: 1 / -1;
+  color: #9a342a;
+}
+.arrange-numeric-field input[aria-invalid="true"] {
+  border-color: #9a342a;
+}
+
+.arrange-numeric-field button:hover:not(:disabled) {
+  background: #e9e4d8;
+}
+.arrange-numeric-field button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.arrange-numeric-field button:focus-visible {
+  outline: 2px solid #9c6b53;
+  outline-offset: 2px;
+}
