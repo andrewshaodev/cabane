@@ -55,6 +55,10 @@ processes so Node cannot buffer a later shard's failures behind an earlier shard
 Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
 workers; the release workflow uses 1 on its software-rendering runner. All four
 shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
+The release runner also sets `CABANE_TEST_PROGRESS=1` to print each starting test
+and bounds the verification step. Hosted software rendering takes substantially
+longer than local native rendering; named progress distinguishes slow tests from
+a stalled worker without dropping assertions or adding retries.
 `npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
 through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.

@@ -319,7 +319,7 @@
       "docs/ha-contract.json"
     ],
     "interfaces": [],
-    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance. Release runners serialize the four test shards to bound browser resource contention without reducing coverage. A changed persisted contract requires a new fingerprint, revision and compatibility notes; a main push publishes the tested matching integration through the scoped release workflow.",
+    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance. Release runners serialize the four test shards and log named progress within a bounded verification step without reducing coverage. A changed persisted contract requires a new fingerprint, revision and compatibility notes; a main push publishes the tested matching integration through the scoped release workflow.",
     "checks": ["verify:help", "verify:fast", "verify", "browser:install", "verify:ha-contract"]
   },
   {
