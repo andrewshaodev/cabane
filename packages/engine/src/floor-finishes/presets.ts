@@ -36,7 +36,7 @@ export const FLOOR_FINISH_PRESETS: readonly FloorFinishPreset[] = [
     representativeColor: "#c29a67",
     repeatMeters: 0.8,
   },
-  { id: "travertine", label: "Travertine", representativeColor: "#d9c7aa", repeatMeters: 1.2 },
+  { id: "travertine", label: "Travertine", representativeColor: "#e0d2b9", repeatMeters: 1.2 },
   { id: "terracotta-tile", label: "Terracotta", representativeColor: "#bd7756", repeatMeters: 0.8 },
   { id: "terrazzo", label: "Terrazzo", representativeColor: "#cabfa9", repeatMeters: 0.7 },
   { id: "dark-walnut", label: "Dark walnut", representativeColor: "#765139", repeatMeters: 1.2 },
@@ -148,43 +148,54 @@ const planks = (
 
 const travertine = (context: CanvasRenderingContext2D, quiet: boolean) => {
   const size = context.canvas.width;
-  context.fillStyle = quiet ? "#ded3c0" : "#dcc9ac";
-  context.fillRect(0, 0, size, size);
-
-  // Short, scattered mineral pores avoid continuous bands across repeats.
+  // Periodic, smoothly blended mineral clouds keep the repeat seamless without
+  // the long scratches or regular oval spots of the previous finish.
+  const hash = (x: number, y: number, cells: number) => {
+    const value = Math.sin((x % cells) * 127.1 + (y % cells) * 311.7 + 72.3) * 43758.5453;
+    return value - Math.floor(value);
+  };
+  const cloud = (x: number, y: number, cells: number) => {
+    const px = (x / size) * cells;
+    const py = (y / size) * cells;
+    const ix = Math.floor(px);
+    const iy = Math.floor(py);
+    const fx = px - ix;
+    const fy = py - iy;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    const top = hash(ix, iy, cells) * (1 - sx) + hash(ix + 1, iy, cells) * sx;
+    const bottom = hash(ix, iy + 1, cells) * (1 - sx) + hash(ix + 1, iy + 1, cells) * sx;
+    return top * (1 - sy) + bottom * sy;
+  };
   let seed = 72341;
   const random = () => {
     seed = (seed * 48271) % 2147483647;
     return seed / 2147483647;
   };
-  for (let index = 0; index < 85; index += 1) {
-    const x = random() * size;
-    const y = random() * size;
-    const radius = size * (0.004 + random() * 0.012);
-    context.fillStyle = index % 3 === 0 ? "rgba(245, 231, 208, 0.22)" : "rgba(156, 128, 94, 0.12)";
-    context.beginPath();
-    context.ellipse(x, y, radius * 1.8, radius * 0.5, 0, 0, Math.PI * 2);
-    context.fill();
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const mineral =
+        (cloud(x, y, 5) - 0.5) * 26 + (cloud(x, y, 13) - 0.5) * 14 + (cloud(x, y, 31) - 0.5) * 8;
+      const grain = random();
+      // Fine pale calcite flecks and sparse darker pores, never black pits.
+      const pore = grain < 0.035 ? -12 : grain > 0.82 ? 9 : (grain - 0.5) * 4;
+      const tile = Math.floor(x / (size / 2)) + Math.floor(y / (size / 2)) * 2;
+      const variation = [0, -4, 3, -1][tile];
+      const tone = (mineral + pore + variation) * (quiet ? 0.55 : 1);
+      context.fillStyle = `rgb(${Math.round(224 + tone)}, ${Math.round(210 + tone)}, ${Math.round(185 + tone)})`;
+      context.fillRect(x, y, 1, 1);
+    }
   }
 
-  context.fillStyle = quiet ? "rgba(171, 151, 124, 0.2)" : "rgba(156, 128, 94, 0.24)";
-  for (const [x, y, width] of [
-    [0.12, 0.38, 0.08],
-    [0.37, 0.12, 0.05],
-    [0.57, 0.43, 0.1],
-    [0.76, 0.27, 0.06],
-    [0.2, 0.74, 0.1],
-    [0.62, 0.92, 0.07],
-    [0.86, 0.58, 0.05],
-  ])
-    context.fillRect(x * size, y * size, width * size, quiet ? 1 : 2);
-
-  const joint = quiet ? "rgba(143, 128, 108, 0.15)" : "rgba(132, 112, 86, 0.18)";
-  line(context, joint, 1, 0, size / 3, size, size / 3);
-  line(context, joint, 1, 0, (size * 2) / 3, size, (size * 2) / 3);
-  for (let row = 0; row < 3; row += 1) {
-    const x = row % 2 === 0 ? size / 2 : size / 4;
-    line(context, joint, 1, x, (row * size) / 3, x, ((row + 1) * size) / 3);
+  // Four 60 cm stones per repeat, with narrow ivory grout. Drawing both
+  // boundary halves keeps joints the same width across neighboring repeats.
+  const jointWidth = size * 0.006;
+  for (let joint = 0; joint <= 2; joint += 1) {
+    const position = (joint * size) / 2;
+    line(context, "rgba(247, 241, 222, 0.55)", jointWidth * 2.2, position, 0, position, size);
+    line(context, "rgba(247, 241, 222, 0.55)", jointWidth * 2.2, 0, position, size, position);
+    line(context, "#f1ead8", jointWidth, position, 0, position, size);
+    line(context, "#f1ead8", jointWidth, 0, position, size, position);
   }
 };
 
