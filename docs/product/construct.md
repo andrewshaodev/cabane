@@ -170,6 +170,9 @@ nonblocking warnings; malformed dimensions and invalid floor connections still b
 Apply. Spiral diameter must exceed its 0.2 m core diameter and turn remains in (0, 360].
 Numeric fields show local correction messages while retaining the last renderable geometry.
 
+Selected outline handles take pointer priority over overlapping plan objects. Outside
+the handle hit targets, ordinary scene picking keeps its distance order.
+
 The canvas shows measurements, never paragraphs of stair errors. Placement warnings
 are collapsed behind a count in the sidebar; selected-stair warnings appear in its
 properties rather than duplicated in the general diagnostics. Warning-only stairs
