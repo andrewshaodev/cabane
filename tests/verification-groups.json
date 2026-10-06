@@ -47,7 +47,9 @@
       "room-status-model.test.mjs",
       "room-status-overlays.test.mjs",
       "runtime-binding-profile.test.mjs",
-      "setup-progress.test.mjs"
+      "setup-progress.test.mjs",
+      "weather.test.mjs",
+      "weather-browser.test.mjs"
     ]
   },
   "construct": {
@@ -171,7 +173,9 @@
       "runtime-binding-profile.test.mjs",
       "scene-action-bar.test.mjs",
       "scene-systems.test.mjs",
-      "setup-progress.test.mjs"
+      "setup-progress.test.mjs",
+      "weather.test.mjs",
+      "weather-browser.test.mjs"
     ]
   },
   "common": {

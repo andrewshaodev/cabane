@@ -1,3 +1,5 @@
+import { updateWorkspaceWeatherSource } from "./workspace-weather-source";
+import type { WeatherSource } from "@cabane/engine";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import {
   createHomeProjectRepository,
@@ -53,6 +55,24 @@ export function useWorkspaceToolStorage(
         return operation;
       },
     };
-    return { storage, flush: () => pending };
+    return {
+      storage,
+      flush: () => pending,
+      saveWeatherSource: (origin: string, source: WeatherSource) => {
+        const homeId = current.current.homeId;
+        const operation = pending.then(async () => {
+          const previous = current.current;
+          if (previous.homeId !== homeId) throw new Error("This home is no longer active.");
+          const saved = await repository.replace(
+            updateWorkspaceWeatherSource(previous, origin, source),
+            previous.revision,
+          );
+          current.current = saved;
+          callbacks.current.onSaved(saved);
+        });
+        pending = operation.catch(() => undefined);
+        return operation;
+      },
+    };
   }, [repository]);
 }

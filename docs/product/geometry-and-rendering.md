@@ -260,3 +260,25 @@ home interior palette. Explicit edgeColor continues to take precedence.
 Dark walnut and both light-oak directions use a 3.6 m repeating procedural pattern with 22.5 cm boards,
 staggered end joints, restrained species-specific tone variation and fine lengthwise grain.
 Each 512 px in-memory canvas retains the existing toon lighting and shadow behavior.
+
+Weather in Home adds procedural rounded toon clouds and instanced shader-driven
+rain, snow, hail, exterior mist and wind wisps. It applies after solar resolution:
+sun direction, explicit day/night overrides, source labels and night-only devices
+remain unchanged. Walk sky reads an explicit solar daylight factor instead of
+inferring time from hemisphere brightness. Clouds dim direct light while retaining
+diffuse indoor fill. Conditions blend over approximately four seconds. Storms use
+slow, low-contrast cloud emission pulses at least twenty seconds apart, not bolts,
+scene lights, screen flashes or sound. No accumulation, wet materials or forecasts
+are modeled. Editor previews remain weather-neutral.
+
+Weather shelter derives from all floors' roof surfaces and slabs independently of
+cutaway visibility. The roof renderer and shelter share the same height function;
+a cached conservative height field keeps particles out of covered space while
+retaining courtyards. Particle fragments are depth-tested, do not write depth and
+do not receive contour ink. Cloud geometry stays out of static batching and casts
+no shadows. Effects use shared instanced buffers and frame uniforms, no image
+textures or downloaded assets. Quality tiers bound detail and particle counts;
+clear/off weather returns to demand rendering and hidden pages suspend animation.
+Reduced motion retains static clouds and lighting without precipitation or pulses.
+Real mobile performance and complete cross-browser weather acceptance require
+measurements on those devices; fixture success does not establish them.

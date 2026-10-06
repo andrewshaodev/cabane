@@ -14,7 +14,7 @@
         "symbols": ["CabaneApp", "CabaneDomProvider", "HomeAssistantHostSessionProvider"]
       }
     ],
-    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.",
+    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA\u2019s auto-height wrapper while preserving sidebar flow and safe-area padding.",
     "checks": ["test:browser", "build", "build:panel"]
   },
   {
@@ -31,7 +31,9 @@
       "packages/engine/src/imported-models/asset-storage.ts",
       "packages/engine/src/sha256-digest.ts",
       "packages/engine/src/home-project/schema-floor-finish.ts",
-      "packages/engine/src/home-project/project-format-errors.ts"
+      "packages/engine/src/home-project/project-format-errors.ts",
+      "packages/engine/src/home-project/schema-action-bar.ts",
+      "apps/web/src/workspaces/workspace-weather-source.ts"
     ],
     "interfaces": [
       {
@@ -39,7 +41,7 @@
         "symbols": ["HomeProject", "parseHomeProject", "createWorkspaceRepository", "sha256Hex"]
       }
     ],
-    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path.",
+    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path. Weather source preferences are private and origin-scoped; their revision-checked save updates only that field in draft and published profiles.",
     "checks": ["verify:workspace"]
   },
   {
@@ -194,7 +196,8 @@
       "packages/engine/src/WalkPreferences.tsx",
       "packages/engine/src/home-assistant-dashboard",
       "packages/engine/src/styles.css",
-      "packages/engine/src/room-status"
+      "packages/engine/src/room-status",
+      "packages/engine/src/action-bar/SceneActionGroup.tsx"
     ],
     "interfaces": [
       {
@@ -202,7 +205,7 @@
         "symbols": ["CabaneDashboard", "LiveCameraSurface"]
       }
     ],
-    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets. Overlay preferences persist locally and filter only overview summaries. Area temperature/humidity readings take precedence over usable mapped room sensor fallbacks. RoomControlSheet and useRoomModuleOrder own browser-local per-home/room module order; RoomModuleReorder provides pointer, touch, and keyboard reordering without HA commands.",
+    "invariant": "Room selection glides to a consistent angle fitted beside controls; manual navigation interrupts and retains active pointer listeners across dashboard re-renders, reduced motion settles immediately, and overview restores the default floor framing. The combined floor summary expands floor pills that update the active floor and room list; mobile keeps the floor pill and hides room pills. Keep floor switching and walk state coherent; missing runtime data must leave a usable scene. Room and device modules use content-sized cards and wrapping titles, with compact controls that preserve usable action targets. Overlay preferences persist locally and filter only overview summaries. Area temperature/humidity readings take precedence over usable mapped room sensor fallbacks. RoomControlSheet and useRoomModuleOrder own browser-local per-home/room module order; RoomModuleReorder provides pointer, touch, and keyboard reordering without HA commands. Weather shares the Build/View tray behavior, has no icon yet, and applies only a visit-local scene override; it never changes HA state or the saved weather source.",
     "checks": ["test:unit", "test:browser", "measure:scene"]
   },
   {
@@ -224,7 +227,9 @@
       "packages/engine/src/architecture-geometry/wall-face-finish.ts",
       "packages/engine/src/architecture-geometry/wall-cap-finishes.ts",
       "packages/engine/src/wall-colors.ts",
-      "packages/engine/src/floor-finishes/wood-planks.ts"
+      "packages/engine/src/floor-finishes/wood-planks.ts",
+      "packages/engine/src/weather",
+      "packages/engine/src/roof/roof-region-surface.ts"
     ],
     "interfaces": [
       {
@@ -238,7 +243,7 @@
         ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout. Standalone and batched wall caps and opening reveals share edge-finish precedence; shared horizontal junction surfaces retain the general finish when owners disagree. Horizontal caps are partitioned by finish before triangulation to prevent color bleeding across adjacent walls. DEFAULT_WALL_COLORS is the single source of production wall palette defaults; authored finishes take precedence. Interior Auto edges ignore stale exterior paint metadata. Dark walnut and both light-oak directions use deterministic fine grain and staggered boards in an engine-owned repeating canvas texture. The shared toon gradient retains four flat bands with narrow filtered boundaries so orbital camera motion cannot flip whole-wall brightness at a light threshold.",
+    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout. Standalone and batched wall caps and opening reveals share edge-finish precedence; shared horizontal junction surfaces retain the general finish when owners disagree. Horizontal caps are partitioned by finish before triangulation to prevent color bleeding across adjacent walls. DEFAULT_WALL_COLORS is the single source of production wall palette defaults; authored finishes take precedence. Interior Auto edges ignore stale exterior paint metadata. Dark walnut and both light-oak directions use deterministic fine grain and staggered boards in an engine-owned repeating canvas texture. The shared toon gradient retains four flat bands with narrow filtered boundaries so orbital camera motion cannot flip whole-wall brightness at a light threshold. Weather modifies appearance after solar resolution; the explicit daylight factor remains solar-owned. Procedural precipitation uses visibility-independent roof shelter, and weather frames stop when clear, reduced-motion or hidden.",
     "checks": [
       "test:unit",
       "verify:policy",

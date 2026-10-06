@@ -110,12 +110,16 @@ export function ConnectedProduct({
       profile:
         (origin ? record.bindings[origin]?.published : undefined) ??
         createEmptyRuntimeBindingProfile(record.homeId),
+      saveWeatherSource: origin
+        ? (source: import("@cabane/engine").WeatherSource) =>
+            toolStorage.saveWeatherSource(origin, source)
+        : undefined,
       loaded: true,
       hasStoredProfile: Boolean(origin && record.bindings[origin]),
       // The controlled real dashboard can never activate independent mappings.
       save: () => undefined,
     }),
-    [origin, record],
+    [origin, record, toolStorage],
   );
   const editor = (
     <RoutedHomeEditor

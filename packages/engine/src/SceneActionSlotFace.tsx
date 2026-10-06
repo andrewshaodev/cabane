@@ -6,7 +6,7 @@ import nightIcon from "./assets/scene-actions/day-night.png";
 import lightsIcon from "./assets/scene-actions/all-lights.png";
 import type { ActionBarBuiltIn } from "./action-bar/action-bar-config";
 
-const illustrations: Record<ActionBarBuiltIn, string> = {
+const illustrations: Partial<Record<ActionBarBuiltIn, string>> = {
   build: buildIcon,
   walk: walkIcon,
   night: nightIcon,
@@ -15,6 +15,7 @@ const illustrations: Record<ActionBarBuiltIn, string> = {
 };
 
 export const actionBarBuiltInLabels: Record<ActionBarBuiltIn, string> = {
+  weather: "Weather",
   build: "Build",
   walk: "Walk",
   night: "Night",
@@ -23,6 +24,7 @@ export const actionBarBuiltInLabels: Record<ActionBarBuiltIn, string> = {
 };
 
 export function ActionBarBuiltInIcon({ action }: { action: ActionBarBuiltIn }) {
+  if (action === "weather") return null;
   return <img src={illustrations[action]} alt="" draggable={false} />;
 }
 

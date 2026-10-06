@@ -15,11 +15,11 @@ const existingFileLineLimits = {
   "packages/catalog/src/device/registry.ts": 1210,
   "packages/catalog/src/furnishing/registry.tsx": 1396,
   "packages/engine/src/HomeAssistantRuntime.tsx": 552,
-  "packages/engine/src/SceneActionBar.tsx": 645,
+  "packages/engine/src/SceneActionBar.tsx": 618,
   "packages/engine/src/ValidatedDashboardView.tsx": 700,
   "packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx": 690,
   "packages/engine/src/home-editor/construct/draft-reducer.ts": 639,
-  "packages/engine/src/home-project/schema.ts": 874,
+  "packages/engine/src/home-project/schema.ts": 840,
   "packages/engine/src/types.ts": 739,
 };
 const fileLineLimit = (max) => ["error", { max, skipBlankLines: true, skipComments: true }];

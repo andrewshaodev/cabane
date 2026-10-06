@@ -15,7 +15,7 @@ import {
 } from "@cabane/engine";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { ShortcutDeviceIcon } from "./ShortcutDeviceIcon";
-const builtIns: ActionBarBuiltIn[] = ["build", "walk", "night", "view", "all-lights"];
+const builtIns: ActionBarBuiltIn[] = ["build", "walk", "night", "weather", "view", "all-lights"];
 type Props = {
   picker: { kind: "built-in" | "room" | "device" | "scene" | "script"; replacingId: string | null };
   project: HomeProject;

@@ -442,6 +442,7 @@ await withModules(async (load) => {
           "Open Connect",
           mode === "walk" ? "Exit walk mode" : "Walk mode",
           "Use night lighting",
+          "Weather",
           "View",
           "Keep walls solid",
           "Show roof",

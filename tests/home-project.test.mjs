@@ -287,18 +287,18 @@ await withModules(async (load) => {
     assert.equal(engineApi.defineHomeProject, defineHomeProject);
   });
 
-  test("resolves absent action bar to four defaults but honors an explicit empty bar", () => {
+  test("resolves absent action bar to five defaults but honors an explicit empty bar", () => {
     assert.equal(typeof engineApi.resolveActionBarItems, "function");
     assert.deepEqual(
       engineApi.resolveActionBarItems().map((item) => item.target.action),
-      ["build", "walk", "night", "view"],
+      ["build", "walk", "night", "weather", "view"],
     );
     assert.deepEqual(engineApi.resolveActionBarItems({ items: [] }), []);
     const legacy = fixtureHomeProject();
     legacy.shortcuts = [{ id: "old-light", action: "all-lights", context: "both", order: 0 }];
     assert.deepEqual(
       engineApi.resolveActionBarItems(legacy.actionBar).map((item) => item.target.action),
-      ["build", "walk", "night", "view"],
+      ["build", "walk", "night", "weather", "view"],
     );
   });
 
