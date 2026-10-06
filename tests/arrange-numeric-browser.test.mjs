@@ -25,8 +25,8 @@ test(
         return result.metadata.id;
       }, rootPath);
       await page.goto(`${url}workspaces/${id}/arrange`);
-      await page.getByRole("searchbox").fill("Neutral area rug");
-      await page.getByRole("button", { name: "Add Neutral area rug", exact: true }).click();
+      await page.getByRole("searchbox").fill("Rug");
+      await page.getByRole("button", { name: "Add Rug", exact: true }).click();
       await page.getByRole("button", { name: "Details", exact: true }).click();
       const width = page.getByRole("textbox", { name: "width · m", exact: true });
       await width.fill("0,");
