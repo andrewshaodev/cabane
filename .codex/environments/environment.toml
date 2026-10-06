@@ -5,24 +5,6 @@ name = "cabane"
 [setup]
 script = "npm ci --prefer-offline --no-audit --no-fund"
 
-[setup.darwin]
-script = '''
-source_tree_path=${CODEX_SOURCE_TREE_PATH:-}
-
-if [ -n "$source_tree_path" ] \
-  && [ ! -e node_modules ] \
-  && [ -d "$source_tree_path/node_modules" ] \
-  && [ -f "$source_tree_path/package-lock.json" ] \
-  && cmp -s package-lock.json "$source_tree_path/package-lock.json"; then
-  if cp -cR "$source_tree_path/node_modules" node_modules; then
-    echo "Reused source dependencies with an APFS clone."
-    exit 0
-  fi
-fi
-
-npm ci --prefer-offline --no-audit --no-fund
-'''
-
 [cleanup]
 script = "npm run clean --if-present"
 
