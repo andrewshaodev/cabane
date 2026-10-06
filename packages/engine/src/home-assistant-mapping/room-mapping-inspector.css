@@ -1,0 +1,175 @@
+.room-mapping-inspector {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+}
+.room-mapping-inspector__panel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  bottom: 18px;
+  width: clamp(340px, 32cqw, 420px);
+  padding: 30px 26px;
+  overflow: auto;
+  color: #20352d;
+  background: rgba(255, 250, 242, 0.98);
+  border: 1px solid #c8d3ca;
+  border-radius: 19px;
+  box-shadow: 0 24px 54px rgba(24, 48, 39, 0.22);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(calc(100% + 28px));
+  transition:
+    transform 0.28s var(--ease-out-quart),
+    opacity 0.2s var(--ease-out-quart),
+    visibility 0s linear 0.28s;
+}
+.room-mapping-inspector[data-state="open"] .room-mapping-inspector__panel {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+.room-mapping-inspector__collapse {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: #52685f;
+  background: #edf0e9;
+  border: 1px solid #d3dad3;
+  border-radius: 50%;
+  font: inherit;
+  font-size: 1rem;
+  touch-action: none;
+}
+.room-mapping-inspector__collapse span {
+  display: block;
+  transform: rotate(-90deg);
+}
+.room-mapping-inspector__eyebrow {
+  display: block;
+  padding-right: 50px;
+  color: #a35338;
+  font-size: 0.57rem;
+  font-weight: 820;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.room-mapping-inspector h2 {
+  margin: 7px 52px 32px 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 3.1cqw, 2.7rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.room-mapping-inspector label {
+  display: block;
+  margin-bottom: 8px;
+  color: #53685e;
+  font-size: 0.62rem;
+  font-weight: 780;
+}
+.room-mapping-inspector__select-wrap {
+  position: relative;
+}
+.room-mapping-inspector__select-wrap > span {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  color: #8c492f;
+  font-size: 1rem;
+  transform: translateY(-53%);
+  pointer-events: none;
+}
+.room-mapping-inspector select,
+.device-mapping-row select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 34px 0 11px;
+  color: #20352d;
+  background: #fffdf7;
+  border: 1px solid #c6d1c8;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.66rem;
+}
+.room-mapping-inspector select {
+  min-height: 60px;
+  padding: 0 46px 0 16px;
+  border-color: #9fb0a5;
+  border-radius: 13px;
+  appearance: none;
+  font-size: 0.78rem;
+  font-weight: 740;
+}
+.room-mapping-inspector select:disabled {
+  color: #77847d;
+  background: #eceee8;
+  opacity: 1;
+}
+.room-mapping-inspector select:focus-visible,
+.device-mapping-row select:focus-visible {
+  outline: 3px solid #e2a789;
+  outline-offset: 1px;
+}
+.room-mapping-inspector__panel > p {
+  margin: 13px 2px 0;
+  color: #718078;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+.room-mapping-inspector__summary {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(430px, calc(100% - 36px));
+  min-height: 50px;
+  padding: 0 16px;
+  overflow: hidden;
+  color: #f8f5ec;
+  background: #234b3d;
+  border: 1px solid #173a2e;
+  border-radius: 14px;
+  box-shadow: 0 14px 32px rgba(24, 48, 39, 0.22);
+  font: inherit;
+  font-size: 0.66rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition:
+    transform 0.22s var(--ease-out-quart),
+    opacity 0.18s var(--ease-out-quart),
+    visibility 0s linear 0.22s;
+  pointer-events: none;
+}
+.room-mapping-inspector[data-state="summary"] .room-mapping-inspector__summary {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+.room-mapping-inspector__summary strong,
+.room-mapping-inspector__summary span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.room-mapping-inspector__summary strong {
+  flex: 0 1 auto;
+}
+.room-mapping-inspector__summary span:last-child {
+  color: #cad8d1;
+}

@@ -209,6 +209,37 @@ export function RoomControlSheet({
     resetKey: `${resolved.room.id}:${resolved.pictureUrl ?? "fallback"}:${selectedModule?.id ?? "room"}`,
   });
 
+  const returnsToRoom = focused && !deviceOverlay;
+  const dismissLabel = returnsToRoom
+    ? "Back to room"
+    : deviceOverlay
+      ? "Close device controls"
+      : "Close room controls";
+  const navigationButton = (
+    <button
+      ref={backButtonRef}
+      type="button"
+      className="room-control-sheet__back"
+      aria-label={dismissLabel}
+      title={dismissLabel}
+      onClick={goBack}
+    >
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d={returnsToRoom ? "m12 5-7 7 7 7M5 12h14" : "m6 6 12 12M18 6 6 18"} />
+      </svg>
+    </button>
+  );
+
   return (
     <>
       {deviceOverlay && (
@@ -240,23 +271,7 @@ export function RoomControlSheet({
           className="room-control-sheet__nav"
           aria-label={focused ? "Device navigation" : "Room navigation"}
         >
-          <button
-            ref={backButtonRef}
-            type="button"
-            className="room-control-sheet__back"
-            aria-label={
-              focused
-                ? deviceOverlay
-                  ? "Close device controls"
-                  : "Back to room"
-                : deviceOverlay
-                  ? "Close device controls"
-                  : "Return to home overview"
-            }
-            onClick={goBack}
-          >
-            <span aria-hidden="true">←</span>
-          </button>
+          {returnsToRoom && navigationButton}
           <div className="room-control-sheet__actions">
             {!deviceOverlay && !focused && modules.length > 1 && (
               <button
@@ -295,6 +310,7 @@ export function RoomControlSheet({
               </button>
             )}
           </div>
+          {!returnsToRoom && navigationButton}
         </nav>
 
         <div

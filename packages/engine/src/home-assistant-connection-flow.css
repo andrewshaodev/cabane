@@ -1,0 +1,136 @@
+.ha-connection-flow__form {
+  margin-top: 25px;
+}
+.ha-connection-flow__form > label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4f665b;
+  font-size: 0.62rem;
+  font-weight: 780;
+}
+.ha-connection-flow__form > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 54px;
+  overflow: hidden;
+  background: #fffaf0;
+  border: 2px solid #aebdb4;
+  border-radius: 14px;
+}
+.ha-connection-flow__form > div:focus-within {
+  border-color: #416e59;
+  box-shadow: 0 0 0 4px rgba(65, 110, 89, 0.1);
+}
+.ha-connection-flow__form > div.has-error {
+  border-color: #aa5237;
+}
+.ha-connection-flow__form input {
+  min-width: 0;
+  padding: 0 13px;
+  color: #173129;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 0.74rem;
+  user-select: text;
+}
+.ha-connection-flow__form button {
+  margin: 6px;
+  padding: 0 13px;
+  color: #fff8ed;
+  background: #244b3c;
+  border: 0;
+  border-radius: 9px;
+  font-size: 0.63rem;
+  font-weight: 780;
+}
+.ha-connection-flow__form > span {
+  display: block;
+  margin: 8px 3px 0;
+  color: #687a71;
+  font-size: 0.59rem;
+  line-height: 1.4;
+}
+.ha-connection-flow__form > span[role="alert"] {
+  color: #8b3d29;
+}
+.ha-connection-flow__origin {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) 10px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  padding: 12px 14px 12px 12px;
+  background: #fff9ef;
+  border: 1px solid #cbd5cc;
+  border-radius: 14px;
+}
+.ha-connection-flow__origin > span {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: #fff8ec;
+  background: #e86f4d;
+  border-radius: 12px;
+  font-size: 0.65rem;
+  font-weight: 850;
+}
+.ha-connection-flow__origin > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.ha-connection-flow__origin small {
+  color: #76857e;
+  font-size: 0.56rem;
+  font-weight: 720;
+}
+.ha-connection-flow__origin strong {
+  overflow: hidden;
+  font-size: 0.69rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: text;
+}
+.ha-connection-flow__error,
+.ha-connection-flow__feedback {
+  margin: 11px 0 0;
+  padding: 10px 11px;
+  color: #7d3928;
+  background: #f3dfd2;
+  border-radius: 10px;
+  font-size: 0.61rem;
+  line-height: 1.45;
+}
+.ha-connection-flow__import {
+  display: grid;
+  gap: 5px;
+  margin-top: 27px;
+  padding-top: 18px;
+  border-top: 1px solid #d5dcd4;
+}
+.ha-connection-flow__import label {
+  width: max-content;
+  min-height: 44px;
+  color: #36584b;
+  font-size: 0.64rem;
+  font-weight: 750;
+  line-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.ha-connection-flow__import input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.ha-connection-flow__import span {
+  color: #718078;
+  font-size: 0.56rem;
+  line-height: 1.45;
+}

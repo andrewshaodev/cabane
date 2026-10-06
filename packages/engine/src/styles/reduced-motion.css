@@ -1,0 +1,32 @@
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .room-control-sheet__hero {
+    --room-photo-parallax-y: 0%;
+    --room-foreground-parallax-y: 0px;
+    --room-hero-visual-opacity: 1;
+    --room-foreground-opacity: 1;
+    position: relative;
+    top: auto;
+  }
+  .room-control-sheet__content {
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .room-control-sheet__hero-visual > img,
+  .room-control-sheet__placeholder {
+    animation: none !important;
+    transform: translate3d(0, 0, 0) scale(1.03);
+    will-change: auto;
+  }
+  .room-control-sheet__hero-visual,
+  .room-control-sheet__foreground {
+    will-change: auto;
+  }
+}

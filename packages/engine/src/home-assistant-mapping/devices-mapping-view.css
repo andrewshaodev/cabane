@@ -1,0 +1,198 @@
+.devices-mapping-view {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+.devices-mapping-view__content {
+  display: grid;
+  grid-template-columns: 228px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+.devices-mapping-view__rooms {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 18px 12px;
+  overflow: auto;
+  background: #e7ece5;
+  border-right: 1px solid #ccd6cd;
+}
+.devices-mapping-view__rooms button {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 8px 13px;
+  overflow: hidden;
+  color: #53665d;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  font: inherit;
+  text-align: left;
+}
+.devices-mapping-view__rooms button strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.67rem;
+  font-weight: 740;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.devices-mapping-view__room-icon {
+  flex: 0 0 auto;
+  font-size: 1rem;
+  line-height: 1;
+}
+.devices-mapping-view__rooms button[aria-selected="true"] {
+  color: #fff9ef;
+  background: #285143;
+}
+.devices-mapping-view__rooms button:focus-visible {
+  outline: 3px solid #db9c79;
+  outline-offset: 1px;
+}
+.devices-mapping-view__panel {
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #fbf8f0;
+}
+.devices-mapping-view__notice {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  margin: 0;
+  padding: 12px 20px;
+  color: #7d513f;
+  background: #f2e7dd;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+.devices-mapping-view__groups {
+  display: grid;
+  gap: 25px;
+  width: min(100%, 780px);
+  margin: 0 auto;
+  padding: 24px 24px 40px;
+}
+.device-mapping-group {
+  min-width: 0;
+}
+.device-mapping-group > header {
+  padding: 0 8px 7px;
+}
+.device-mapping-group h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: #718078;
+  font-size: 0.53rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.device-mapping-group h3 > span {
+  display: flex;
+  flex: none;
+}
+.device-mapping-group__rows {
+  display: grid;
+  gap: 2px;
+}
+.device-mapping-row {
+  min-width: 0;
+}
+.device-mapping-row__trigger {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 18px;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  min-height: 66px;
+  padding: 10px 8px;
+  color: #294239;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  transition:
+    background-color 0.16s var(--ease-out-quart),
+    transform 0.16s var(--ease-out-quart);
+}
+.device-mapping-row__trigger:hover:not(:disabled) {
+  background: #f0f1ea;
+}
+.device-mapping-row__trigger:active:not(:disabled) {
+  transform: scale(0.995);
+}
+.device-mapping-row__trigger:focus-visible {
+  outline: 3px solid #e2a789;
+  outline-offset: 0;
+}
+.device-mapping-row[data-selected="true"] .device-mapping-row__trigger {
+  background: #e8ece6;
+}
+.device-mapping-row__trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.device-mapping-row__identity,
+.device-mapping-row__target {
+  min-width: 0;
+}
+.device-mapping-row__icon {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+.device-mapping-row__identity,
+.device-mapping-row__target {
+  grid-column: 2;
+}
+.device-mapping-row__identity {
+  grid-row: 1;
+}
+.device-mapping-row__target {
+  grid-row: 2;
+  margin-top: 3px;
+}
+.device-mapping-row__identity strong,
+.device-mapping-row__target strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.device-mapping-row__identity strong {
+  color: #294239;
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+.device-mapping-row__target strong {
+  color: #567568;
+  font-size: 0.59rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+.device-mapping-row[data-connection-state="empty"] .device-mapping-row__target strong {
+  color: #78857f;
+  font-weight: 650;
+}
+.device-mapping-row__arrow {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: #718078;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

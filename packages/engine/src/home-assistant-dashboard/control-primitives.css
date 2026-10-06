@@ -1,0 +1,91 @@
+.command-toggle button,
+.room-module__playback button {
+  width: 100%;
+}
+.command-toggle button[aria-pressed="true"],
+.room-module__playback button[aria-pressed="true"] {
+  --room-button-color: #fff9f1;
+  --room-button-background: color-mix(in srgb, var(--home-accent) 76%, #664538);
+  --room-button-border-color: transparent;
+  --room-button-hover-color: #fff;
+  --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
+  --room-button-hover-border-color: transparent;
+}
+.command-range label,
+.option-control {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.7fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  color: #52665d;
+  font-size: 0.66rem;
+  font-weight: 680;
+}
+.command-range input[type="range"] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--home-accent);
+  cursor: pointer;
+}
+.room-module select {
+  width: 100%;
+  padding: 0 32px 0 11px;
+  color: #263a33;
+  background: #fbfaf3;
+  border: 1px solid #ccd6cc;
+  border-radius: 11px;
+  font: inherit;
+}
+.temperature-stepper {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+}
+.temperature-stepper output {
+  grid-column: 2;
+  grid-row: 1;
+  color: #1e3b32;
+  font-family: var(--font-family-numeric);
+  font-size: clamp(1.65rem, 4cqw, 2.25rem);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.temperature-stepper button {
+  grid-row: 1;
+  padding: 0;
+  font-size: 1.1rem;
+}
+.temperature-stepper button:first-of-type {
+  grid-column: 1;
+}
+.temperature-stepper button:last-of-type {
+  grid-column: 3;
+}
+.temperature-stepper [role="alert"] {
+  grid-column: 1 / -1;
+}
+.room-module__primary-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.85fr);
+  align-items: end;
+  gap: 12px;
+}
+.room-module__current-reading {
+  margin: 0;
+}
+.room-module__current-reading span {
+  display: block;
+  color: #6b7b73;
+  font-size: 0.61rem;
+  font-weight: 720;
+}
+.room-module__current-reading output {
+  display: block;
+  margin-top: 3px;
+  color: #254238;
+  font-family: var(--font-family-numeric);
+  font-size: 1.12rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+}

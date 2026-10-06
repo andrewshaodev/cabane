@@ -4,7 +4,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { renderToStaticMarkup } from "react-dom/server";
-import { readFileSync } from "node:fs";
+import { readCssSource } from "./css-source.mjs";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
@@ -310,7 +310,7 @@ await withModules(async (load) => {
   });
 
   test("mobile room controls remain above the full-screen sheet with scroll clearance", () => {
-    const css = readFileSync(new URL("../packages/engine/src/styles.css", import.meta.url), "utf8");
+    const css = readCssSource(new URL("../packages/engine/src/styles.css", import.meta.url));
     const rule = (selector) =>
       [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(([, header]) =>
         header.split(",").some((part) => part.trim() === selector),

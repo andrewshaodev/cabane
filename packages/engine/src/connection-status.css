@@ -1,0 +1,22 @@
+.connection-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #e9a568;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(233, 165, 104, 0.12);
+}
+.connection-dot.status-connected {
+  background: #8bc49e;
+  box-shadow: 0 0 0 4px rgba(139, 196, 158, 0.14);
+}
+.connection-dot.status-reconnecting,
+.connection-dot.status-connecting,
+.connection-dot.status-authenticating {
+  background: #e5bd72;
+}
+.connection-dot.status-error,
+.connection-dot.status-auth-expired {
+  background: #e58268;
+  box-shadow: 0 0 0 4px rgba(229, 130, 104, 0.14);
+}
