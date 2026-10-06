@@ -276,5 +276,7 @@ Basements, split-level decks, supports, pergolas and converting rooms to platfor
 remain outside this tool.
 
 The North disclosure sets a building-wide geographic north angle with a compass,
-rotation slider and numeric field. Zero points up the plan; positive angles turn
+direct click/drag rotation and a numeric field. Pointer release commits one
+undoable change; cancelled gestures retain the accepted angle. Arrow keys rotate
+15 degrees, or one degree with Shift. Zero points up the plan; positive angles turn
 clockwise. Changes use ordinary undo/redo, autosave, import/export and Save.

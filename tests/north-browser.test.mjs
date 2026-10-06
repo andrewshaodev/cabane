@@ -20,19 +20,44 @@ test(
       await page.waitForFunction(
         () => !document.querySelector(".construct-floor-controls__trigger")?.disabled,
       );
-      await page.locator("summary").filter({ hasText: "Orient sunlight" }).click();
+      await page.locator("summary").filter({ hasText: "Point the arrow" }).click();
       const angle = page.getByLabel("North angle (degrees)", { exact: true });
       assert.equal(await angle.inputValue(), "0");
-      await angle.fill("90");
-      await angle.press("Enter");
+      const compass = page.getByRole("button", { name: "Set north direction", exact: true });
+      const bounds = await compass.boundingBox();
+      await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + 15);
+      await page.mouse.down();
+      await page.mouse.move(bounds.x + bounds.width - 15, bounds.y + bounds.height / 2, {
+        steps: 8,
+      });
+      await page.mouse.up();
+      assert.equal(await page.getByRole("slider").count(), 0);
       await page
         .getByRole("img", { name: "North points 90 degrees clockwise from plan up" })
         .waitFor();
+      await page.getByRole("button", { name: "Undo", exact: true }).click();
+      await page
+        .getByRole("img", { name: "North points 0 degrees clockwise from plan up" })
+        .waitFor();
+      await page.getByRole("button", { name: "Redo", exact: true }).click();
+      await page
+        .getByRole("img", { name: "North points 90 degrees clockwise from plan up" })
+        .waitFor();
+      await compass.press("ArrowRight");
+      await page
+        .getByRole("img", { name: "North points 105 degrees clockwise from plan up" })
+        .waitFor();
+      await compass.press("Shift+ArrowLeft");
+      await page
+        .getByRole("img", { name: "North points 104 degrees clockwise from plan up" })
+        .waitFor();
+      await angle.fill("90");
+      await angle.press("Enter");
       await page.locator(".direction-status").waitFor({ state: "detached" });
       await page.screenshot({ path: "/tmp/cabane-north-desktop.png" });
       await page.reload();
       await page.getByRole("button", { name: "Current floor", exact: true }).waitFor();
-      await page.locator("summary").filter({ hasText: "Orient sunlight" }).click();
+      await page.locator("summary").filter({ hasText: "Point the arrow" }).click();
       assert.equal(await angle.inputValue(), "90");
       await page.setViewportSize({ width: 390, height: 844 });
       await angle.scrollIntoViewIfNeeded();
