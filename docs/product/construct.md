@@ -59,7 +59,9 @@ Incomplete shells and ambiguous room merges produce actionable diagnostics.
 
 Selection includes individual targets and Shift-drag marquee selection. Drag
 activation distinguishes a click from an actual move. Opening placement avoids
-occupied spans and enforces wall support. Copy/paste duplicates openings within
+occupied spans and enforces wall support. Placement previews, moves, resizing,
+and duplication share the validator’s junction clearance calculation, using
+current wall intersections and the opening sill height. Copy/paste duplicates openings within
 the current mode. Delete and history shortcuts ignore text inputs and unsettled
 gestures. Selected rooms also expose an on-canvas Delete action. Room deletion
 removes exclusive boundary spans and their openings, preserves walls shared with

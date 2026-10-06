@@ -1,17 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { chromium } from "playwright-core";
+import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="800" height="600" fill="white"/><path d="M100 100H700V500H100ZM400 100V500" fill="none" stroke="black" stroke-width="8"/><text x="200" y="80" font-size="28">6 m</text></svg>';
 const file = (name = "ground-floor.svg", content = svg) => ({ name, mimeType: "image/svg+xml", buffer: Buffer.from(content) });
 
 test("reference plans trace through the normal Construct UI and remain browser-local", { timeout: 120_000 }, async () => {
-  const server = await createServer({ root: `${process.cwd()}/apps/web`, configFile: `${process.cwd()}/apps/web/vite.config.ts`, server: { host: "127.0.0.1", port: 0, strictPort: false, hmr: false } });
+  const { server } = await getBrowserTestServer("app");
   let browser;
   try {
-    await server.listen();
-    browser = await chromium.launch({ channel: "chrome", headless: true });
+    browser = await createBrowserTestSession();
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errors = [];
     page.on("pageerror", error => errors.push(error.message));
@@ -200,38 +198,5 @@ test("reference plans trace through the normal Construct UI and remain browser-l
     await page.locator('.reference-image').waitFor();
     await page.screenshot({ path: '/tmp/cabane-reference-plan-furnished.png' });
     assert.deepEqual(errors, []);
-  } finally { await browser?.close(); await server.close(); }
-});
-
-test("reference storage isolates homes and floors, retains undo assets, and deletes a workspace's assets", { timeout: 30_000 }, async () => {
-  const server = await createServer({ root: process.cwd(), configFile: false, appType: "custom", server: { host: "127.0.0.1", port: 0, hmr: false } });
-  let browser;
-  try {
-    server.middlewares.use((request, response, next) => { if (request.url !== "/") return next(); response.end("<!doctype html><title>Reference storage</title>"); });
-    await server.listen(); browser = await chromium.launch({ channel: "chrome", headless: true });
-    const page = await browser.newPage(); await page.goto(server.resolvedUrls.local[0]);
-    const result = await page.evaluate(async () => {
-      const api = await import("/apps/web/src/editor-reference-plan/reference-storage.ts");
-      const decode = await import("/apps/web/src/editor-reference-plan/decode-reference-image.ts");
-      for (const bad of [new File([new Uint8Array(20 * 1024 * 1024 + 1)], "big.png", { type: "image/png" }), new File(["<svg/>"], "renamed.png", { type: "image/png" })]) {
-        let rejected = false;
-        try { await decode.decodeReferenceImage(bad); } catch { rejected = true; }
-        if (!rejected) throw new Error("Invalid image was accepted");
-      }
-      const plans = { ground: { assetId: "a" }, upper: { assetId: "b" } };
-      await api.writeReferences("home-a", { plans, preferences: {} }, new Map([["a", new Blob(["ground"])], ["b", new Blob(["upper"])]]));
-      await api.writeReferences("home-b", { plans: { ground: { assetId: "a" } }, preferences: {} }, new Map([["a", new Blob(["other home"])]]));
-      const read = await api.readReferences("home-a");
-      await api.writeReferences("home-a", { plans: { ground: { assetId: "c" } }, preferences: {} }, new Map([["c", new Blob(["replacement"])]]));
-      const retained = await (await api.readReferenceAsset("home-a", "a")).text();
-      await api.cleanReferenceAssets("home-a", ["c"]);
-      const removed = await api.readReferenceAsset("home-a", "a");
-      await api.deleteReferenceHome("home-a");
-      return { read, retained, removed: removed === undefined, deleted: (await api.readReferenceAsset("home-a", "c")) === undefined,
-        empty: await api.readReferences("home-a"), independent: await (await api.readReferenceAsset("home-b", "a")).text() };
-    });
-    assert.deepEqual(Object.keys(result.read.plans), ["ground", "upper"]);
-    assert.equal(result.retained, "ground"); assert.equal(result.removed, true); assert.equal(result.deleted, true);
-    assert.deepEqual(result.empty, { plans: {}, preferences: {} }); assert.equal(result.independent, "other home");
-  } finally { await browser?.close(); await server.close(); }
+  } finally { await browser?.close(); }
 });

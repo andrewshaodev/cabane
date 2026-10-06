@@ -1,6 +1,10 @@
 /* Interaction concepts were reviewed against ai_room_planner (MIT); this
  * reducer and metre-first state contract are original to Cabane. */
 
+import { junctionOccupiedIntervalsForWall } from "../../opening-junction-clearance";
+import { buildGraph, traverseFaces } from "./topology-graph";
+import { normalizeWallRuns } from "./topology-wall-runs";
+import { deriveJunctions } from "./topology-junctions";
 import { FloorEditorDraft } from "./draft-contract";
 
 export const availableOpeningOffsetRanges = ({
@@ -9,12 +13,14 @@ export const availableOpeningOffsetRanges = ({
   widthPlanUnits,
   excludeOpeningId,
   gapPlanUnits,
+  sillHeightMeters = 0,
 }: {
   draft: FloorEditorDraft;
   wallId: string;
   widthPlanUnits: number;
   excludeOpeningId?: string;
   gapPlanUnits?: number;
+  sillHeightMeters?: number;
 }) => {
   const resolvedGapPlanUnits = gapPlanUnits ?? .08 / draft.coordinates.metersPerPlanUnit;
   const wall = draft.walls.find((candidate) => candidate.id === wallId);
@@ -23,16 +29,40 @@ export const availableOpeningOffsetRanges = ({
   const occupied = draft.openings
     .filter((opening) => opening.wallId === wallId && opening.id !== excludeOpeningId)
     .map((opening) => ({
-      start: opening.offsetPlanUnits,
-      end: opening.offsetPlanUnits + opening.widthPlanUnits,
-    }))
-    .sort((left, right) => left.start - right.start);
+      start: opening.offsetPlanUnits - resolvedGapPlanUnits,
+      end: opening.offsetPlanUnits + opening.widthPlanUnits + resolvedGapPlanUnits,
+    }));
+  const { nodes, subsegments } = buildGraph(draft.walls, []);
+  const { edgeFace } = traverseFaces(nodes, subsegments);
+  const { runs } = normalizeWallRuns(draft.walls, subsegments, edgeFace);
+  const walls = runs.map(({ wall, classification }) => ({
+    ...wall,
+    thicknessMeters: wall.thicknessMeters ?? (classification === "interior"
+      ? draft.interiorWallThicknessMeters : draft.exteriorWallThicknessMeters),
+  }));
+  const junctions = deriveJunctions(walls, nodes, draft.junctions);
+  for (const run of runs.filter((run) => run.sourceWallId === wallId)) {
+    const owner = walls.find((wall) => wall.id === run.wallId)!;
+    const length = Math.hypot(owner.to[0] - owner.from[0], owner.to[1] - owner.from[1]);
+    for (const junction of junctions.filter((junction) => junction.wallIds.includes(owner.id))) {
+      const distance = ((junction.at[0] - owner.from[0]) * (owner.to[0] - owner.from[0]) +
+        (junction.at[1] - owner.from[1]) * (owner.to[1] - owner.from[1])) / length;
+      const intervals = junctionOccupiedIntervalsForWall(owner, junction,
+        walls.filter((wall) => junction.wallIds.includes(wall.id)),
+        draft.coordinates.metersPerPlanUnit, draft.defaultWallHeightMeters);
+      occupied.push(...intervals.filter(({ topMeters }) => topMeters > sillHeightMeters + 1e-6)
+        .map(({ start, end }) => ({ start: Math.max(0, start + distance + run.startOffsetPlanUnits),
+          end: Math.min(wallLength, end + distance + run.startOffsetPlanUnits) }))
+        .filter(({ start, end }) => end > start));
+    }
+  }
+  occupied.sort((left, right) => left.start - right.start);
   const ranges: Array<{ min: number; max: number }> = [];
   let cursor = 0;
   for (const interval of occupied) {
-    const max = interval.start - resolvedGapPlanUnits - widthPlanUnits;
+    const max = interval.start - widthPlanUnits;
     if (max >= cursor) ranges.push({ min: cursor, max });
-    cursor = Math.max(cursor, interval.end + resolvedGapPlanUnits);
+    cursor = Math.max(cursor, interval.end);
   }
   const finalMax = wallLength - widthPlanUnits;
   if (finalMax >= cursor) ranges.push({ min: cursor, max: finalMax });
@@ -55,6 +85,7 @@ export const duplicateOpeningOffset = (draft: FloorEditorDraft, openingId: strin
       draft,
       wallId: source.wallId,
       widthPlanUnits: source.widthPlanUnits,
+      sillHeightMeters: source.sillHeightMeters,
     }),
   );
 };

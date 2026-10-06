@@ -2,7 +2,10 @@ import { dot } from "node:test/reporters";
 
 async function* track(source, summary) {
   for await (const event of source) {
-    if (event.type === "test:pass" || event.type === "test:fail") {
+    const suite = event.data?.details?.type === "suite";
+    const hookFailure = suite && event.type === "test:fail"
+      && event.data.details.error?.failureType !== "subtestsFailed";
+    if ((event.type === "test:pass" || event.type === "test:fail") && (!suite || hookFailure)) {
       const skipped = Boolean(event.data.skip);
       const todo = Boolean(event.data.todo);
       if (todo) summary.todo += 1;

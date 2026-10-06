@@ -350,12 +350,11 @@ export function useConstructionPointerController({
       wallId: placement.wallId,
       offsetPlanUnits: placement.offsetPlanUnits,
       valid: (kind !== "door" || doorConfiguration.heightMeters <= (draft.walls.find((wall) => wall.id === placement.wallId)?.heightMeters ?? draft.defaultWallHeightMeters)) && openingPlacementIsValid({
-        walls: snapWalls,
-        openings: draft.openings,
+        draft,
+        sillHeightMeters: kind === "window" ? .9 : 0,
         wallId: placement.wallId,
         offsetPlanUnits: placement.offsetPlanUnits,
         widthPlanUnits,
-        clearancePlanUnits: .08 / coordinates.metersPerPlanUnit,
       }),
     } : null;
   };

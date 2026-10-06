@@ -1,14 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { chromium } from "playwright-core";
+import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 test('basements use existing floor controls on desktop and mobile, with persistence and undo', { timeout: 120_000 }, async () => {
-  const server = await createServer({ root: `${process.cwd()}/apps/web`, configFile: `${process.cwd()}/apps/web/vite.config.ts`, server: { host: '127.0.0.1', port: 0, hmr: false } });
+  const { server } = await getBrowserTestServer("app");
   let browser;
   try {
-    await server.listen();
-    browser = await chromium.launch({ channel: 'chrome', headless: true });
+    browser = await createBrowserTestSession();
     const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.goto(`${server.resolvedUrls.local[0]}build`);
@@ -74,21 +72,20 @@ test('basements use existing floor controls on desktop and mobile, with persiste
     assert.equal(await page.getByRole('button',{name:'Delete floor',exact:true}).isDisabled(),true);
     assert.match(await page.getByRole('dialog').innerText(),/ground floor cannot be deleted/);
     assert.deepEqual(errors,[]);
-  } finally {await browser?.close();await server.close();}
+  } finally {await browser?.close();}
 });
 
 test('imported basements render in the normal dashboard and Walk', { timeout: 60_000 }, async () => {
-  const server=await createServer({root:`${process.cwd()}/apps/web`,configFile:`${process.cwd()}/apps/web/vite.config.ts`,server:{host:'127.0.0.1',port:0,hmr:false}});
+  const { server } = await getBrowserTestServer("app");
   let browser;
   try {
-    await server.listen();
     const {makeStairProject}=await server.ssrLoadModule(`${process.cwd()}/tests/fixtures/multiple-floors.ts`);
     const {createSeedProjectRecord}=await server.ssrLoadModule(`${process.cwd()}/packages/engine/src/home-project/repository.ts`);
     const project=makeStairProject();
     project.floors=project.floors.map((floor,i)=>({...floor,name:['Floor −2','Floor −1','Ground floor'][i],...(i<2?{belowGround:true}:{})}));
     project.stairs.push({...project.stairs[0],id:'upper-stairs',lowerFloorId:'first',upperFloorId:'second',at:[2,1.5]});
     const record=createSeedProjectRecord(project);
-    browser=await chromium.launch({channel:'chrome',headless:true});
+    browser=await createBrowserTestSession();
     const page=await browser.newPage({viewport:{width:1280,height:900}});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
@@ -107,5 +104,5 @@ test('imported basements render in the normal dashboard and Walk', { timeout: 60
     await page.getByRole('button',{name:'Walk mode',exact:true}).click();
     await page.waitForTimeout(500);await page.screenshot({path:'/tmp/cabane-basement-walk.png'});
     assert.deepEqual(errors,[]);
-  } finally {await browser?.close();await server.close();}
+  } finally {await browser?.close();}
 });

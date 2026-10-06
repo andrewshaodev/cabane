@@ -207,6 +207,7 @@ export const useConstructEditor = (
         draft: history.present,
         wallId: wall.id,
         widthPlanUnits: width,
+        sillHeightMeters: kind === "window" ? .9 : 0,
       }),
     );
     if (offsetPlanUnits === undefined || (kind === "door" && doorConfiguration.heightMeters > (wall.heightMeters ?? history.present.defaultWallHeightMeters))) { setOpeningError("The door does not fit on this wall."); return; }
@@ -229,6 +230,7 @@ export const useConstructEditor = (
       draft: history.present,
       wallId,
       widthPlanUnits,
+      sillHeightMeters: kind === "window" ? .9 : 0,
     }).some((range) => offsetPlanUnits >= range.min && offsetPlanUnits <= range.max);
     const wall = history.present.walls.find((wall) => wall.id === wallId);
     if (!valid || (kind === "door" && doorConfiguration.heightMeters > (wall?.heightMeters ?? history.present.defaultWallHeightMeters))) { setOpeningError("The door does not fit on this wall."); return; }
@@ -399,7 +401,7 @@ export const useConstructEditor = (
       if (!opening) return;
       const updated = { ...opening, ...patch };
       const wall = draft.walls.find(candidate => candidate.id === updated.wallId);
-      const fits = availableOpeningOffsetRanges({ draft, wallId: updated.wallId, widthPlanUnits: updated.widthPlanUnits, excludeOpeningId: updated.id }).length > 0;
+      const fits = availableOpeningOffsetRanges({ draft, wallId: updated.wallId, widthPlanUnits: updated.widthPlanUnits, sillHeightMeters: updated.sillHeightMeters, excludeOpeningId: updated.id }).length > 0;
       if (!fits || !wall || updated.openingHeightMeters + updated.sillHeightMeters > (wall.heightMeters ?? draft.defaultWallHeightMeters)) {
         setOpeningError("This opening does not fit here. Choose a smaller size or another wall position.");
         return;
@@ -409,7 +411,7 @@ export const useConstructEditor = (
     },
     replaceSelectedOpening: (opening) => {
       const wall = draft.walls.find((wall) => wall.id === opening.wallId);
-      const fits = availableOpeningOffsetRanges({ draft, wallId: opening.wallId, widthPlanUnits: opening.widthPlanUnits, excludeOpeningId: opening.id })
+      const fits = availableOpeningOffsetRanges({ draft, wallId: opening.wallId, widthPlanUnits: opening.widthPlanUnits, sillHeightMeters: opening.sillHeightMeters, excludeOpeningId: opening.id })
         .some(({ min, max }) => opening.offsetPlanUnits >= min && opening.offsetPlanUnits <= max);
       if (!fits || !wall || opening.openingHeightMeters + opening.sillHeightMeters > (wall.heightMeters ?? draft.defaultWallHeightMeters)) {
         setOpeningError("This door does not fit here. Choose a smaller size or another wall position.");
@@ -431,6 +433,7 @@ export const useConstructEditor = (
           draft: history.present,
           wallId,
           widthPlanUnits: opening.widthPlanUnits,
+          sillHeightMeters: opening.sillHeightMeters,
           excludeOpeningId: openingId,
         }),
       );

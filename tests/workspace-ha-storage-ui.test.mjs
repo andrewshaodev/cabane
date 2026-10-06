@@ -1,15 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { chromium } from "playwright-core";
+import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 test("personal workspace offers HA storage while demo does not", async () => {
-  const server = await createServer({ root: `${process.cwd()}/apps/web`, configFile: `${process.cwd()}/apps/web/vite.config.ts`,
-    server: { host: "127.0.0.1", port: 0, hmr: false, watch: null } });
+  const { server } = await getBrowserTestServer("app");
   let browser;
   try {
-    await server.listen();
-    browser = await chromium.launch({ channel: "chrome", headless: true });
+    browser = await createBrowserTestSession();
     const page = await browser.newPage();
     await page.goto(server.resolvedUrls.local[0]);
     await page.getByRole("button", { name: /^Explore the demo/ }).click();
@@ -48,5 +45,5 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.getByLabel("Home Assistant address").fill("https://ha.example");
     await page.reload();
     assert.equal(await page.getByLabel("Home Assistant address").inputValue(), "https://ha.example");
-  } finally { await browser?.close(); await server.close(); }
+  } finally { await browser?.close(); }
 });
