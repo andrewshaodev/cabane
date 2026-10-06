@@ -1,3 +1,5 @@
+import type { StableDeviceModelId } from "./stable-device-model-id";
+export type { StableDeviceModelId } from "./stable-device-model-id";
 import type { ComponentType } from "react";
 import type { RoomType } from "./room-types";
 import type { HomeProject, SceneItemSpec } from "./home-project/types";
@@ -30,77 +32,6 @@ export type DeviceDomain =
   | "binary_sensor";
 
 export type ControllableDeviceDomain = Exclude<DeviceDomain, "camera" | "sensor" | "binary_sensor">;
-
-export type StableDeviceModelId =
-  | "indoor-ac"
-  | "washing-machine"
-  | "tumble-dryer"
-  | "dishwasher"
-  | "oven"
-  | "microwave"
-  | "coffee-maker"
-  | "electric-kettle"
-  | "freezer"
-  | "pet-feeder"
-  | "water-heater"
-  | "speaker"
-  | "television"
-  | "wall-television"
-  | "camera-screen"
-  | "connected-frame-oak"
-  | "connected-frame-black"
-  | "floor-lamp"
-  | "terracotta-pendant"
-  | "low-garden-lantern"
-  | "garden-lantern-pole"
-  | "pergola-string-lights"
-  | "table-lamp"
-  | "woven-pendant"
-  | "children-pendant"
-  | "wall-switch"
-  | "opening-contact"
-  | "thermometer"
-  | "compact-car"
-  | "electric-sedan"
-  | "pickup-truck"
-  | "weather-station"
-  | "motion-sensor"
-  | "motorized-blind"
-  | "leak-sensor"
-  | "ceiling-fan"
-  | "table-fan"
-  | "pedestal-fan"
-  | "heated-towel-rail"
-  | "smart-panel-radiator"
-  | "smart-thermostat"
-  | "smart-plug"
-  | "ceiling-light"
-  | "recessed-downlight"
-  | "wall-sconce"
-  | "illuminated-round-mirror"
-  | "motorized-curtain"
-  | "video-doorbell"
-  | "indoor-security-camera"
-  | "smoke-alarm"
-  | "carbon-monoxide-alarm"
-  | "humidity-sensor"
-  | "air-quality-monitor"
-  | "energy-monitor"
-  | "air-purifier"
-  | "bathroom-extractor-fan"
-  | "refrigerator"
-  | "smart-power-strip"
-  | "humidifier-dehumidifier"
-  | "robot-vacuum"
-  | "smart-lock"
-  | "alarm-keypad"
-  | "rotating-sprinkler"
-  | "smart-hose-timer"
-  | "soil-moisture-sensor"
-  | "pop-up-sprinkler"
-  | "motorized-valve"
-  | "siren"
-  | "smart-button";
 
 export interface Assumption {
   id: string;

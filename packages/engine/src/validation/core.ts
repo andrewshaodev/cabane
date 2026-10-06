@@ -106,6 +106,7 @@ export const STABLE_MODELS = new Set([
   "water-heater",
   "speaker",
   "television",
+  "compact-wall-television",
   "wall-television",
   "camera-screen",
   "connected-frame-oak",

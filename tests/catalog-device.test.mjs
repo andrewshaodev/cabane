@@ -253,6 +253,7 @@ await withModules(async (load) => {
       "water-heater",
       "speaker",
       "television",
+      "compact-wall-television",
       "wall-television",
       "camera-screen",
       "connected-frame-oak",
@@ -481,6 +482,13 @@ await withModules(async (load) => {
         [0.58, 0.479, 0.58],
         { kind: "uniform" },
         "ceiling",
+      ],
+      "compact-wall-television": [
+        "Compact wall television",
+        "Media",
+        [1.58, 0.9, 0.07],
+        { kind: "axes", axes: ["width", "height"] },
+        "wall",
       ],
       "wall-switch": ["Wall switch", "Controls", [0.122, 0.152, 0.048], { kind: "fixed" }, "wall"],
       "opening-contact": [

@@ -1,3 +1,7 @@
+import {
+  compactWallTelevisionDefinition,
+  wallTelevisionDefinition,
+} from "./definitions/wall-television";
 import { KITCHEN_FINISH_VARIANTS } from "../furnishing/presets/kitchen/kitchen-finish";
 import {
   CompactCarModel,
@@ -23,8 +27,6 @@ import {
   OpeningContactModel,
   SpeakerModel,
   TelevisionModel,
-  WallTelevisionModel,
-  WALL_TELEVISION_SIZE,
   TerracottaPendantModel,
   LowGardenLanternModel,
   LOW_GARDEN_LANTERN_SIZE,
@@ -214,21 +216,8 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     interaction: { target: "camera-viewer", tapTolerancePixels: 10 },
     complexity: { visibleMeshes: 15, triangles: 4_200 },
   }),
-  "wall-television": defineDeviceModel({
-    defaultRoomType: "living-room",
-    component: WallTelevisionModel,
-    label: "Wall television · 110 inch",
-    category: "Media",
-    defaultSize: WALL_TELEVISION_SIZE,
-    resizePolicy: { kind: "fixed" },
-    preferredPlacement: "wall",
-    supportedDomains: ["media_player"],
-    mountKind: "wall",
-    bounds: { min: [-1.2, 0, 0], max: [1.2, 1.36, 0.07] },
-    outlineContact: true,
-    interaction,
-    complexity: { visibleMeshes: 5, triangles: 100 },
-  }),
+  "compact-wall-television": compactWallTelevisionDefinition,
+  "wall-television": wallTelevisionDefinition,
   "camera-screen": defineDeviceModel({
     defaultRoomType: "entryway",
     component: CameraScreenModel,
