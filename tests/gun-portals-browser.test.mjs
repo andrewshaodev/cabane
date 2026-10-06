@@ -2,6 +2,20 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createBrowserTestSession, getBrowserTestServer } from './browser-test-environment.mjs';
 
+// Inspect the authored reading beat deterministically instead of screenshotting
+// an arbitrary frame of a sub-second animation. Resume to verify real expiry.
+async function capturePew(page, path) {
+  const opacity = await page.locator('.comic-pew').evaluate(element => {
+    for (const animation of element.getAnimations({subtree:true})) { animation.pause(); animation.currentTime=220; }
+    return Number(getComputedStyle(element).opacity);
+  });
+  assert.ok(opacity>.95,'PEW stays readable at its middle frame, including reduced motion');
+  await page.screenshot({path});
+  await page.locator('.comic-pew').evaluate(element => {
+    for (const animation of element.getAnimations({subtree:true})) animation.play();
+  });
+}
+
 const fixture = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Portal walk fixture</title></head><body><div id="root"></div><script type="module">
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -74,6 +88,12 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome paired port
     await page.waitForFunction(()=>Math.abs(window.portalObservation.yaw-Math.PI)<.001);
     await page.mouse.down({button:'right'}); await page.mouse.up({button:'right'});
     await page.waitForFunction(()=>window.portalObservation.portals.length===1);
+    const pew = page.locator('.comic-pew');
+    await pew.waitFor({state:'visible'});
+    assert.equal(await pew.locator('title').textContent(),'PEW!');
+    assert.equal(await pew.getAttribute('data-reduced-motion'),String(reducedMotion==='reduce'));
+    const firstPewStyle = await pew.getAttribute('style');
+    await capturePew(page,`/tmp/cabane-pew-${reducedMotion}.png`);
     assert.equal((await page.evaluate(()=>window.portalObservation.portals[0].name)),'gun-portal-blue');
     await page.locator('[data-action=portal][data-next-portal=gold]').waitFor();
     // Turn 180 degrees using the same relative mouse input as desktop gameplay.
@@ -81,6 +101,8 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome paired port
     await page.waitForFunction(()=>Math.abs(Math.sin(window.portalObservation.yaw))<.02 && Math.cos(window.portalObservation.yaw)>.99);
     await page.mouse.down({button:'right'}); await page.mouse.up({button:'right'});
     await page.waitForFunction(()=>window.portalObservation.portals.length===2);
+    assert.notEqual(await pew.getAttribute('style'),firstPewStyle,'the next shot has a distinct tilt, size, and flight');
+    await pew.waitFor({state:'hidden'});
     await page.locator('[data-action=portal][data-next-portal=blue]').waitFor();
     if(reducedMotion==='no-preference') {
       await page.waitForFunction(()=>window.zapColors?.includes('efa632'));
@@ -153,6 +175,11 @@ for(const viewport of [{width:667,height:375},{width:844,height:390}]) test(`mob
     await page.getByRole('button',{name:'Equip Laser',exact:true}).tap();
     await page.getByRole('button',{name:'Fire zap',exact:true}).tap();
     await page.waitForFunction(()=>window.zapColors?.includes('51e8f3') || window.zapColors?.length>0);
+    const pew = page.locator('.comic-pew');
+    await pew.waitFor({state:'visible'});
+    const pewBounds = await pew.boundingBox();
+    assert.ok(pewBounds.x>=0 && pewBounds.x+pewBounds.width<=viewport.width,'comic feedback stays inside the touch viewport');
+    await capturePew(page,`/tmp/cabane-pew-mobile-${viewport.width}.png`);
     assert.equal(await page.evaluate(()=>Boolean(document.pointerLockElement)),false);
     await page.getByRole('button',{name:'Create blue portal'}).tap();
     await page.waitForFunction(()=>window.portalObservation.portals.length===1);

@@ -11,6 +11,7 @@ import { LaserGun } from "./LaserGun";
 import { useLaserShots } from "./useLaserShots";
 import { LaserShot } from "./LaserShot";
 import { createShotGate } from "./shot-gate";
+import { ComicPew, useMuzzleAnchor } from "./comic-pew";
 import "./laser.css";
 
 export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMotion, navigation, canActivateTarget, activateTarget }: WalkToolProps) {
@@ -20,7 +21,8 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
   const muzzle = useRef<Group>(null);
   const portalControls = useRef<PortalControls>(null);
   const weaponScene = useMemo(() => new Scene(), []);
-  const { shots, recoil, emitShot } = useLaserShots(muzzle, camera, reducedMotion);
+  const { shots, triggerId, triggerColor, recoil, emitShot } = useLaserShots(muzzle, camera, reducedMotion);
+  const comicAnchor = useMuzzleAnchor(muzzle);
   const shot = shots.at(-1);
   const [nextPortal, setNextPortal] = useState<PortalColor>("blue");
   const [aim, setAim] = useState<string | null>(null);
@@ -114,6 +116,7 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
     {/* Screen-space HUD remains visible regardless of the world origin behind the camera. */}
     <Html onOcclude={() => undefined} fullscreen calculatePosition={(_, __, size) => [size.width / 2, size.height / 2]} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
       {enabled && <div className="walk-laser" data-ready={ready}>
+        <ComicPew shotId={triggerId} shotColor={triggerColor} anchor={comicAnchor} reducedMotion={reducedMotion} />
         <LaserCrosshair target={Boolean(aim)} desktop={!coarsePointer} ready={ready} nextPortal={nextPortal} />
         {coarsePointer && <LaserTouchActions ready={ready} nextPortal={nextPortal} zap={fire} portal={() => portalControls.current?.place()} />}
       </div>}
