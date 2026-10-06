@@ -12,3 +12,5 @@ screenshots/
 .codex/config.toml
 .superpowers/
 .worktrees/
+__pycache__/
+*.pyc
