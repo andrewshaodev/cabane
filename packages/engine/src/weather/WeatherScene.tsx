@@ -7,6 +7,7 @@ import { CLEAR_WEATHER, type WeatherAppearance } from "./weather-appearance";
 import { createWeatherShelter } from "./weather-shelter";
 import { WeatherClouds } from "./WeatherClouds";
 import { WeatherParticles } from "./WeatherParticles";
+import { WeatherBackdrop } from "./WeatherBackdrop";
 export interface WeatherFrame {
   appearance: WeatherAppearance;
   time: number;
@@ -72,6 +73,7 @@ export function WeatherScene({
   const span = walkMode ? 30 : Math.max(24, bounds.radius * 2.5);
   return (
     <group name="weather-atmosphere">
+      <WeatherBackdrop frame={frame} reducedMotion={reducedMotion} />
       <WeatherClouds
         frame={frame}
         center={center}

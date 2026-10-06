@@ -671,6 +671,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
               weather={{
                 preview: weather.preview,
                 status: weather.live.status,
+                liveAvailable: weather.liveAvailable,
                 onSelect: weather.setPreview,
               }}
               items={actionBarItems}

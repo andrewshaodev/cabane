@@ -33,7 +33,7 @@ export function SceneActionGroup({
     >
       <button
         type="button"
-        className={`scene-action-slot is-filled ${name === "Weather" ? "scene-action-slot--text" : ""}`}
+        className="scene-action-slot is-filled"
         data-group={name}
         aria-label={name}
         aria-expanded={open}
@@ -45,7 +45,9 @@ export function SceneActionGroup({
             onOpen(true);
             requestAnimationFrame(() =>
               root.current
-                ?.querySelector<HTMLButtonElement>(".scene-action-group__tray button")
+                ?.querySelector<HTMLButtonElement>(
+                  ".scene-action-group__tray button:not(:disabled)",
+                )
                 ?.focus(),
             );
           }

@@ -15,15 +15,16 @@ local binding slots. Architecture corrections return to the layout review gate.
 Generation keeps stable IDs across revisions, records inferred dimensions and
 placements as assumptions, and uses one floor-coordinate transform. Plans and
 photos are task inputs rather than checked-in runtime assets. Home-local visual
-content remains code-native/procedural and uses the public toon vocabulary.
+content follows the [visual asset contract](geometry-and-rendering.md#visual-assets),
+which permits procedural geometry and hosted/bundled textures and models.
 Stable catalog models are preferred where they fit; bespoke reusable geometry
 belongs to domain-specific home extensions.
 
 The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) is a distinct standalone authoring
 route for users of hosted Cabane. It produces a standard GLB, recommends the
 Cabane aesthetic, and respects an explicitly requested alternative style. It
-requires no repository access or household HA information. Its import exception
-does not change the procedural policy for repository home generation; see
+requires no repository access or household HA information. Its self-contained upload validation remains separate from authored hosted
+assets; see
 [personal models](personal-models.md).
 
 Generation does not authenticate to or inspect HA. Household mapping is a later,

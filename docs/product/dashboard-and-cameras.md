@@ -291,10 +291,13 @@ Room panels offer Reorder devices beside Walk inside when at least two modules a
 
 Weather shares the Build/View tray interaction: desktop hover or click, touch tap,
 Arrow Up to enter, arrow-key navigation, and Escape to dismiss with focus restored.
-The action and its submenu are text-only pending a separately designed illustration.
-Live weather restores the configured HA source. Clear, Partly cloudy, Cloudy, Rain,
-Heavy rain, Snow, Sleet, Hail, Fog, Windy, Windy and cloudy, Thunderstorm, and
-Thunderstorm with rain are scene-only previews, available without HA. Their active
+The action and six submenu choices use sculpted illustrations matching the existing dock.
+Build and Weather reuse the same SceneActionButton component, slot face, tray layout, and styling.
+Live (the default with an available weather entity) restores the configured HA source.
+Without weather entities, Sunny is selected by default and Live is disabled. Sunny, Cloudy, Rain,
+Thunderstorm (with rain), and Snowy are scene-only previews, available without HA.
+HA continues to resolve every supported condition, including the finer weather variants
+not exposed in the compact preview menu. The active
 selection lasts through camera/floor changes but resets when leaving or reloading
-the home. Clear never changes time of day. Weather is removable/reorderable; saved
+the home. Sunny uses clear weather and never changes time of day. Weather is removable/reorderable; saved
 custom bars, including empty bars, retain their layout. There is no weather hotkey.

@@ -25,8 +25,8 @@ When implementation changes, update the relevant focused spec with it.
 | Generation   | Accepted layout followed by room equipment; local typed slots, explicit review gates              | [Agent workflow](docs/product/generation.md)                         |
 | Delivery     | Automated checks and static build; incomplete deployment/household acceptance called out          | [Verification and limits](docs/product/verification-and-delivery.md) |
 
-The important boundaries are English UI, procedural generated home
-content with an explicit personal-GLB import boundary, browser-local persistence, and explicit separation of draft from
+The important boundaries are English UI, procedural and externally sourced visual
+assets with an explicit personal-GLB import boundary, browser-local persistence, and explicit separation of draft from
 published state. Real HA credentials and household mappings belong to the browser
 runtime, not generated home code. Browser editing is an implemented feature.
 

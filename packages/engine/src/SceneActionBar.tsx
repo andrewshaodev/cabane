@@ -1,3 +1,4 @@
+import { SceneActionButton } from "./action-bar/SceneActionButton";
 import { SceneActionGroup } from "./action-bar/SceneActionGroup";
 import { WeatherMenu, type WeatherMenuProps } from "./weather/WeatherMenu";
 import { SceneActionTargetSlot } from "./action-bar/SceneActionTargetSlot";
@@ -395,36 +396,28 @@ export function SceneActionBar({
     const keyboardShortcut = actionKeyboardShortcut[shortcut.action];
     const label = actionLabel(shortcut, mode, lighting, wallFade);
     return (
-      <button
+      <SceneActionButton
         key={item?.id ?? shortcut.id}
-        type="button"
-        className={`scene-action-slot is-filled ${active ? "is-active" : ""} ${busy ? "is-busy" : ""}`}
-        aria-label={label}
-        aria-keyshortcuts={keyboardShortcut?.aria}
-        aria-pressed={active}
-        aria-busy={busy}
-        title={keyboardShortcut ? `${label} (${keyboardShortcut.label})` : label}
-        disabled={disabled || busy}
+        active={active}
+        busy={busy}
+        disabled={disabled}
+        accessibleLabel={label}
+        label={actionCaption(shortcut, mode, lighting, wallFade)}
+        shortcut={keyboardShortcut}
+        icon={
+          actionIllustration[shortcut.action] ? (
+            <img src={actionIllustration[shortcut.action]} alt="" draggable={false} />
+          ) : (
+            <ActionIcon action={shortcut.action} />
+          )
+        }
         onClick={() => {
           setOpen(null);
           setOverflowOpen(false);
           if (item) onAction(item);
           else onChildAction(shortcut.action);
         }}
-      >
-        <SceneActionSlotFace
-          icon={
-            actionIllustration[shortcut.action] ? (
-              <img src={actionIllustration[shortcut.action]} alt="" draggable={false} />
-            ) : (
-              <ActionIcon action={shortcut.action} />
-            )
-          }
-          label={actionCaption(shortcut, mode, lighting, wallFade)}
-          shortcut={keyboardShortcut?.label}
-        />
-        {busy && <i className="scene-action-spinner" aria-hidden="true" />}
-      </button>
+      />
     );
   };
   const renderItem = (item: ActionBarItem) => {
@@ -487,7 +480,8 @@ export function SceneActionBar({
             {group(
               "Weather",
               <WeatherMenu
-                preview={weather?.preview ?? "live"}
+                preview={weather?.preview ?? "clear"}
+                liveAvailable={weather?.liveAvailable ?? false}
                 status={weather?.status ?? "Weather preview is unavailable here."}
                 onSelect={(value) => {
                   weather?.onSelect(value);

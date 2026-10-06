@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react";
+import weatherIcon from "./assets/scene-actions/weather.png";
 import buildIcon from "./assets/scene-actions/build.png";
 import viewIcon from "./assets/scene-actions/view.png";
 import walkIcon from "./assets/scene-actions/walk-mode.png";
@@ -7,6 +8,7 @@ import lightsIcon from "./assets/scene-actions/all-lights.png";
 import type { ActionBarBuiltIn } from "./action-bar/action-bar-config";
 
 const illustrations: Partial<Record<ActionBarBuiltIn, string>> = {
+  weather: weatherIcon,
   build: buildIcon,
   walk: walkIcon,
   night: nightIcon,
@@ -24,7 +26,6 @@ export const actionBarBuiltInLabels: Record<ActionBarBuiltIn, string> = {
 };
 
 export function ActionBarBuiltInIcon({ action }: { action: ActionBarBuiltIn }) {
-  if (action === "weather") return null;
   return <img src={illustrations[action]} alt="" draggable={false} />;
 }
 

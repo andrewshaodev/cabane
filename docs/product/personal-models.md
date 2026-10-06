@@ -26,7 +26,7 @@ Native procedural models retain their materials, batching, LOD, and outlines.
 Animations remain in their initial pose; embedded cameras and lights are ignored
 with preview notices. Visual variants driven by HA state are outside this version.
 Only the import owner may load personal GLB resources; catalog/home generation
-continues to obey the procedural source policy.
+follows the [visual asset contract](geometry-and-rendering.md#visual-assets).
 
 Only self-contained GLB 2.0 files are accepted. Images must be embedded; external
 and data-URI references are rejected. Unsupported required extensions produce an

@@ -148,7 +148,7 @@ establish evidence for:
 - flat ceiling coverage and height validity;
 - deterministic pure-JSON formatting and successful
   `assertValidLayoutFloorSpec` loading;
-- procedural/toon-only rendering and absence of external assets;
+- visual asset contract and engine-owned lighting;
 - valid solid room-floor and directed wall-face colors, with palette fallback
   and no texture or PBR fields;
 - walk collision derived from architecture, including doors in relevant

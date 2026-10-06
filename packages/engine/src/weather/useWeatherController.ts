@@ -39,8 +39,11 @@ export function useWeatherController(
       setSaving(false);
     }
   };
+  const liveAvailable = live.candidates.length > 0;
   return {
-    preview,
+    preview: preview === "live" && !liveAvailable ? ("clear" as const) : preview,
+    liveAvailable,
+    isPreviewActive: preview !== "live",
     setPreview,
     source,
     live,

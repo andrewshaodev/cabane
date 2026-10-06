@@ -82,10 +82,9 @@ and ask only when the choice changes identity, control safety, or architecture.
 4. Build recognizable silhouettes from boxes, cylinders, planes, extrusions,
    and simple custom geometry. Favor proportions and landmark features over
    ornamental micro-detail.
-5. Use only the public engine `ToonMaterial` and `Outlines` vocabulary on
-   visible meshes. Never construct a local gradient, import another outline
-   implementation, add shared scene lights, change shadow-map settings, or
-   load a model, texture, image asset, or runtime visual dependency.
+5. Use the public engine `ToonMaterial` and `Outlines` for authored meshes.
+   Hosted/bundled models and textures follow the repository visual asset contract.
+   Keep shared gradients, scene lights and shadow settings engine-owned.
 6. Preserve accepted architecture. Furnishings may meet walls and floors but
    must never patch, replace, or disguise wall/opening geometry.
 
@@ -149,7 +148,7 @@ evidence for:
 
 - manifest schema and TypeScript validity;
 - stable-package import boundaries;
-- procedural/toon-only rendering and absence of external assets;
+- visual asset contract and engine-owned lighting;
 - typed slot IDs, domains/device classes, automatic-mapping policies, device
   model compatibility, and dashboard presentation roles;
 - graceful, actionable errors for fixture cases with missing, renamed,

@@ -37,9 +37,11 @@ export function WeatherPreferences({ weather }: { weather: WeatherController }) 
         The source follows this home across synced devices. Weather in the action bar previews a
         condition for this visit only.
       </p>
-      {weather.preview !== "live" && (
+      {weather.isPreviewActive && (
         <p className="walk-preferences__hint">
-          A weather preview is active. Choose Live weather in the action bar to use this source.
+          {weather.liveAvailable
+            ? "A weather preview is active. Choose Live in the action bar to use this source."
+            : "A weather preview is active. Choose Sunny to return to clear weather."}
         </p>
       )}
       {weather.error && <p role="alert">{weather.error}</p>}

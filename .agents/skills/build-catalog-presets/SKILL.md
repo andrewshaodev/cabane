@@ -49,8 +49,8 @@ geometry/metadata details that commonly cause rework.
   is an example, not a mandatory palette.
 - Use code-native primitives, the engine's public `ToonMaterial` and `Outlines`,
   and real low-segment bevels/curves where the silhouette needs them. Reuse the
-  catalog's narrowly named construction components when suitable. No downloaded
-  models, texture/image assets, realistic materials, or model-local scene lights.
+  catalog's narrowly named construction components when suitable. Hosted/bundled models and textures follow the repository visual asset contract.
+  Keep scene lights engine-owned.
 - Aim for clean, softly shaped forms with restrained, material-colored contours
   and quiet surface detail. Read the
   [cel-shaded modeling guidance](references/catalog-contract.md#cel-shaded-modeling-and-outlines)

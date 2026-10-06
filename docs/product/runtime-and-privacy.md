@@ -126,10 +126,10 @@ Analytics requires a production build with `VITE_PUBLIC_ANALYTICS_ORIGIN` exactl
 matching the HTTPS origin. `vercel.json` sets it to `https://cabane.my`; local
 builds, previews, and self-hosted installations are disabled by default.
 Network reachability and HA authorization
-remain deployment concerns. Source policy distinguishes approved bundled assets
-and authenticated camera media from generated procedural home content. Personal
-GLB decoding and embedded images are allowed only through the dedicated import
-owner, with no external asset fetches or user-script execution.
+remain deployment concerns. Hosted visual assets follow the [visual asset contract](geometry-and-rendering.md#visual-assets),
+separately from authenticated camera media; requests never include HA credentials
+or household data. Personal GLB decoding remains in the dedicated import owner
+with self-contained validation and no user-script execution.
 
 Implementation: [runtime provider](../../packages/engine/src/HomeAssistantRuntime.tsx),
 [auth storage](../../packages/engine/src/home-assistant-auth.ts),
