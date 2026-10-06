@@ -56,6 +56,7 @@ export interface FloorTopologyInput {
   walls: readonly EditorWall[];
   openings: readonly EditorOpening[];
   rooms: readonly EditorRoomIdentity[];
+  reservedRoomNames?: readonly string[];
   junctions?: readonly WallJunctionSpec[];
   hedges?: readonly HedgeSpec[];
   pools?: readonly PoolSpec[];

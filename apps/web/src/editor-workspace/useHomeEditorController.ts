@@ -148,6 +148,7 @@ export function useHomeEditorController({
     ownerProjectManifest.floors.find((floor) => floor.id === initialFloor.id) ?? initialFloor,
     initialRecord.draft.home.palette.exterior,
     isEmptyPublishedHome(initialRecord.draft) && initialRecord.draft.floors.every(isPristineConstructionFloor) ? "wall" : "select",
+    snapshot.project.floors.filter((floor) => floor.id !== activeFloorId).flatMap((floor) => floor.rooms.map((room) => room.name)),
   );
   const selectedOpeningId = constructEditor.selection?.kind === "opening" ? constructEditor.selection.id : null;
   const selectedOpening = selectedOpeningId

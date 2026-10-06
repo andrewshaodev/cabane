@@ -196,7 +196,9 @@ instead of the expected empty-floor/walls-required diagnostics. Only presentatio
 is deferred: Apply continues to reject an empty layout and retains the complete
 validation list.
 
-Room names are editable directly on the plan, including an explicit “Name room”
+Newly enclosed rooms receive the first available “Unnamed room N” name, avoiding
+existing room names across all floors (ignoring case and surrounding whitespace).
+Existing room names are preserved. Room names are editable directly on the plan, including an explicit “Name room”
 control for unnamed rooms. Enter or blur commits a nonempty trimmed name; Escape
 cancels. Naming uses ordinary undo/redo and autosave and is disabled during active
 gestures. Unnamed rooms are valid saved drafts; they still require names to Apply.
