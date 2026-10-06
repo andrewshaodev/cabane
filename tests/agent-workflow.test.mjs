@@ -276,7 +276,7 @@ test("boundary and source-policy commands reject generated-home violations", asy
   }
 });
 
-test("source policy allows only the bundled stable UI illustrations", async () => {
+test("source policy permits bundled and hosted visual assets", async () => {
   const root = await mkdtemp(join(tmpdir(), "cabane-stable-ui-assets-"));
   try {
     for (const directory of [
@@ -310,17 +310,16 @@ test("source policy allows only the bundled stable UI illustrations", async () =
     assert.equal(policy.status, 0, policy.stderr);
     await writeFile(
       join(root, "apps/web/src/editor-workspace/EditorWorkspace.tsx"),
-      'export const brand = <img src="/unapproved.png" alt="" />;\n',
+      'export const model = useGLTF("https://assets.example/tree.glb"); export const texture = useTexture("https://assets.example/cloud.png");\n',
     );
     const rejected = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
       cwd: root,
       encoding: "utf8",
     });
-    assert.equal(rejected.status, 1);
-    assert.match(rejected.stderr, /EditorWorkspace.tsx: external visual asset reference/);
+    assert.equal(rejected.status, 0, rejected.stderr);
     await writeFile(
       join(root, "apps/web/src/workspaces/WorkspaceLibrary.tsx"),
-      'export const brand = <img src="/unapproved.png" alt="" />;\n',
+      'export const model = useGLTF("https://assets.example/tree.glb"); export const texture = useTexture("https://assets.example/cloud.png");\n',
     );
     const rejectedLibrary = spawnSync(
       process.execPath,
@@ -330,8 +329,7 @@ test("source policy allows only the bundled stable UI illustrations", async () =
         encoding: "utf8",
       },
     );
-    assert.equal(rejectedLibrary.status, 1);
-    assert.match(rejectedLibrary.stderr, /WorkspaceLibrary.tsx: external visual asset reference/);
+    assert.equal(rejectedLibrary.status, 0, rejectedLibrary.stderr);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

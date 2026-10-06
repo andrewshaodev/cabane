@@ -1,3 +1,8 @@
+import {
+  CLEAR_WEATHER,
+  weatherSolarLighting,
+  type WeatherAppearance,
+} from "./weather/weather-appearance";
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Color, Object3D, Vector3, type DirectionalLight, type HemisphereLight } from "three";
@@ -15,6 +20,8 @@ const colorDifference = (left: Color, right: Color) =>
   Math.max(Math.abs(left.r - right.r), Math.abs(left.g - right.g), Math.abs(left.b - right.b));
 
 export function SolarLighting({
+  weather = CLEAR_WEATHER,
+  reducedMotion = false,
   mode,
   shadowMapSize,
   sunState,
@@ -22,6 +29,8 @@ export function SolarLighting({
   northAngleDegrees = 0,
   floors = EMPTY_FLOORS,
 }: {
+  weather?: WeatherAppearance;
+  reducedMotion?: boolean;
   mode: SolarLightingMode;
   shadowMapSize: 1024 | 2048;
   sunState?: SunEntityState;
@@ -29,10 +38,11 @@ export function SolarLighting({
   northAngleDegrees?: number;
   floors?: readonly RenderableFloorSpec[];
 }) {
-  const target = useMemo(
+  const solar = useMemo(
     () => deriveSolarLighting(sunState, mode, northAngleDegrees),
     [mode, sunState, northAngleDegrees],
   );
+  const target = useMemo(() => weatherSolarLighting(solar, weather), [solar, weather]);
   const frame = useMemo(() => solarShadowFrame(floors), [floors]);
   const lightTarget = useMemo(() => {
     const object = new Object3D();
@@ -72,7 +82,9 @@ export function SolarLighting({
     if (!transitioning.current || !sun || !hemisphere) return;
     const background = scene.background instanceof Color ? scene.background : new Color();
     if (!(scene.background instanceof Color)) scene.background = background;
-    const progress = 1 - Math.exp(-TRANSITION_RATE * delta);
+    const progress = reducedMotion
+      ? 1
+      : 1 - Math.exp(-(weather === CLEAR_WEATHER ? TRANSITION_RATE : 1.15) * delta);
     sun.position.sub(lightTarget.position);
     transitionSolarDirection(sun.position, targetPosition, progress);
     sun.position.add(lightTarget.position);
@@ -104,7 +116,14 @@ export function SolarLighting({
   }, -1);
   return (
     <>
-      {walkMode && <WalkSky sunRef={sunRef} hemisphereRef={hemisphereRef} />}
+      {walkMode && (
+        <WalkSky
+          sunRef={sunRef}
+          daylight={solar.daylight}
+          overcast={weather.darkness}
+          reducedMotion={reducedMotion}
+        />
+      )}
       <color attach="background" args={[initial.current.backgroundColor]} />
       <hemisphereLight
         ref={hemisphereRef}

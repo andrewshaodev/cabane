@@ -1,14 +1,16 @@
 // Read-only R3F observation for screenshots after normal UI navigation.
-export async function waitForSceneCamera(page, cameraType) {
-  await page.evaluate(async () => {
-    const url = performance
-      .getEntriesByType("resource")
-      .map((entry) => entry.name)
-      .find((name) => name.includes("/@react-three_fiber.js"));
+export async function waitForSceneCamera(page, cameraType, moduleUrl) {
+  await page.evaluate(async (providedUrl) => {
+    const url =
+      providedUrl ??
+      performance
+        .getEntriesByType("resource")
+        .map((entry) => entry.name)
+        .find((name) => name.includes("/@react-three_fiber.js"));
     if (!url) throw new Error("Scene R3F module was not loaded");
     const { _roots } = await import(url);
     window.sceneCameraProbe = { roots: _roots, previous: null, stable: 0 };
-  });
+  }, moduleUrl);
   await page.waitForFunction(
     (type) => {
       const probe = window.sceneCameraProbe;

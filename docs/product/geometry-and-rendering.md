@@ -1,5 +1,17 @@
 # Geometry, rendering, and navigation
 
+## Visual assets
+
+Hosted and bundled textures and 3D models are allowed in product, catalog and
+home-local renderers. Prefer version-pinned HTTPS asset URLs and retain required
+license attribution. Isolate loading failures so the home remains usable.
+Hosted assets require network availability and CORS support. Asset requests must
+never contain HA credentials or household data. Scene lighting stays engine-owned;
+authored geometry retains the toon vocabulary, while loaded models may retain
+original materials. Engine-owned atmosphere may use soft particle materials.
+Personal user-uploaded GLBs retain their self-contained validation; this asset
+policy does not broaden the accepted upload format or allow executable user code.
+
 Orbit room focus animates floor material colors and existing wall vertex colors.
 Merged wall triangles are associated once with the room on their visible side;
 selection does not regenerate their geometry, add draw calls or change live lights.
@@ -260,3 +272,29 @@ home interior palette. Explicit edgeColor continues to take precedence.
 Dark walnut and both light-oak directions use a 3.6 m repeating procedural pattern with 22.5 cm boards,
 staggered end joints, restrained species-specific tone variation and fine lengthwise grain.
 Each 512 px in-memory canvas retains the existing toon lighting and shadow behavior.
+
+Weather in Home adds Drei textured particle clouds and instanced shader-driven
+rain, snow, hail, exterior mist and wind wisps. It applies after solar resolution:
+sun direction, explicit day/night overrides, source labels and night-only devices
+remain unchanged. Walk sky reads an explicit solar daylight factor instead of
+inferring time from hemisphere brightness. Clouds dim direct light while retaining
+diffuse indoor fill. Conditions blend over approximately four seconds. Storms use
+slow, low-contrast cloud emission pulses at least twenty seconds apart, not bolts,
+scene lights, screen flashes or sound. No accumulation, wet materials or forecasts
+are modeled. Editor previews remain weather-neutral.
+
+Weather shelter derives from all floors' roof surfaces and slabs independently of
+cutaway visibility. The roof renderer and shelter share the same height function;
+a cached conservative height field keeps particles out of covered space while
+retaining courtyards. Particle fragments are depth-tested, do not write depth and
+do not receive contour ink. Cloud particles stay out of static batching, write no depth and cast
+no shadows. Drei Clouds uses a version-pinned hosted texture in one instanced draw,
+with isolated loading and error handling. Our weather clock controls drift and
+foreground fading. A single far-depth atmospheric backdrop adds layered cloud banks,
+peripheral shading and distant rain behind architecture in overview and Walk. Its
+palette follows solar daylight and weather darkness; it writes no depth or shadows,
+and reduced motion freezes its drift and removes distant rain. Precipitation uses shared instanced buffers and frame uniforms. Quality tiers bound detail and particle counts;
+clear/off weather returns to demand rendering and hidden pages suspend animation.
+Reduced motion retains static clouds and lighting without precipitation or pulses.
+Real mobile performance and complete cross-browser weather acceptance require
+measurements on those devices; fixture success does not establish them.

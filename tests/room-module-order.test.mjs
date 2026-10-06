@@ -74,6 +74,58 @@ test(
       );
       await page.getByRole("button", { name: "Done reordering devices" }).click();
       assert.deepEqual(await page.locator(".room-module__header h2").allTextContents(), titles);
+      for (const width of [320, 393, 430, 1440]) {
+        await page.setViewportSize({ width, height: 852 });
+        await page.locator(".room-control-sheet__title h1").evaluate((node) => {
+          node.textContent = "Salle de bain parentale";
+        });
+        await page.locator(".room-control-sheet__scroll").evaluate((node) => {
+          node.scrollTop = 0;
+        });
+        await page.waitForFunction(
+          () =>
+            Number(
+              document
+                .querySelector(".room-control-sheet__hero")
+                .style.getPropertyValue("--room-foreground-opacity"),
+            ) > 0.99,
+        );
+        const sheet = await page.locator(".room-control-sheet").boundingBox();
+        const hero = await page.locator(".room-control-sheet__hero").boundingBox();
+        assert.ok(Math.abs(hero.x - sheet.x) <= 1, "hero has no horizontal inset");
+        assert.ok(Math.abs(hero.y - sheet.y) <= 1, "hero starts at the sheet top");
+        const nav = await page.locator(".room-control-sheet__nav").boundingBox();
+        const title = await page.locator(".room-control-sheet__title h1").boundingBox();
+        assert.ok(title.y >= nav.y + nav.height, `title clears toolbar at ${width}px`);
+        const walk = page.getByRole("button", { name: "Walk inside", exact: true });
+        const target = await walk.boundingBox();
+        assert.ok(target.width >= 44 && target.height >= 44);
+        assert.equal(await walk.locator("svg").count(), 1);
+        assert.equal(
+          await page
+            .locator(".room-control-sheet")
+            .evaluate((node) => node.scrollWidth <= node.clientWidth),
+          true,
+        );
+        await page.screenshot({ path: `/tmp/cabane-room-sheet-${width}.png` });
+      }
+      await page.setViewportSize({ width: 393, height: 852 });
+      const hero = page.locator(".room-control-sheet__hero");
+      const initialParallax = await hero.evaluate((node) =>
+        node.style.getPropertyValue("--room-photo-parallax-y"),
+      );
+      await page.locator(".room-control-sheet__scroll").evaluate((node) => {
+        node.scrollTop = 100;
+      });
+      await page.waitForFunction(
+        (initial) =>
+          document
+            .querySelector(".room-control-sheet__hero")
+            .style.getPropertyValue("--room-photo-parallax-y") !== initial,
+        initialParallax,
+      );
+      assert.equal(await hero.evaluate((node) => getComputedStyle(node).position), "sticky");
+      await page.screenshot({ path: "/tmp/cabane-room-sheet-parallax.png" });
       await reorder.click();
       await page.keyboard.press("Escape");
       assert.equal(await reorder.isVisible(), true);

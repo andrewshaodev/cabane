@@ -278,11 +278,14 @@ test(
       const blenderFixture = JSON.parse(
         await readFile("tests/fixtures/personal-blender-model.json", "utf8"),
       );
-      await page.locator('.custom-model-library input[type="file"]').setInputFiles({
-        name: "Blender desk.glb",
-        mimeType: "model/gltf-binary",
-        buffer: Buffer.from(blenderFixture.base64, "base64"),
-      });
+      await page
+        .locator('.custom-model-library input[type="file"]')
+        .first()
+        .setInputFiles({
+          name: "Blender desk.glb",
+          mimeType: "model/gltf-binary",
+          buffer: Buffer.from(blenderFixture.base64, "base64"),
+        });
       const blender = page.getByRole("dialog", { name: "Import GLB", exact: true });
       await blender
         .getByText("Original materials and textures are preserved.", { exact: false })
@@ -306,20 +309,26 @@ test(
       await blenderCard.getByRole("button", { name: "Remove Blender desk", exact: true }).click();
       await waitCounts(3, 3);
       // A failed import keeps the scene and existing catalogue usable.
-      await page.locator('.custom-model-library input[type="file"]').setInputFiles({
-        name: "broken.glb",
-        mimeType: "model/gltf-binary",
-        buffer: Buffer.from("invalid"),
-      });
+      await page
+        .locator('.custom-model-library input[type="file"]')
+        .first()
+        .setInputFiles({
+          name: "broken.glb",
+          mimeType: "model/gltf-binary",
+          buffer: Buffer.from("invalid"),
+        });
       const failed = page.getByRole("dialog", { name: "Import GLB", exact: true });
       await failed.getByRole("alert").waitFor();
       await failed.getByRole("button", { name: "Cancel", exact: true }).click();
       assert.equal((await read()).draft.customModels.length, 3);
-      await page.locator('.custom-model-library input[type="file"]').setInputFiles({
-        name: "independent.glb",
-        mimeType: "model/gltf-binary",
-        buffer: Buffer.from(examples[0].bytes),
-      });
+      await page
+        .locator('.custom-model-library input[type="file"]')
+        .first()
+        .setInputFiles({
+          name: "independent.glb",
+          mimeType: "model/gltf-binary",
+          buffer: Buffer.from(examples[0].bytes),
+        });
       const independent = page.getByRole("dialog", { name: "Import GLB", exact: true });
       await independent.getByLabel("Name", { exact: true }).fill("Independent desk");
       await independent.getByRole("button", { name: "Add to My models", exact: true }).click();
@@ -417,11 +426,14 @@ test(
           .evaluate((element) => getComputedStyle(element).opacity),
         "1",
       );
-      await page.locator('.custom-model-library input[type="file"]').setInputFiles({
-        name: "mobile.glb",
-        mimeType: "model/gltf-binary",
-        buffer: Buffer.from(testGlb()),
-      });
+      await page
+        .locator('.custom-model-library input[type="file"]')
+        .first()
+        .setInputFiles({
+          name: "mobile.glb",
+          mimeType: "model/gltf-binary",
+          buffer: Buffer.from(testGlb()),
+        });
       const mobile = page.getByRole("dialog", { name: "Import GLB", exact: true });
       await mobile
         .getByText("Original materials and textures are preserved.", { exact: false })
@@ -525,6 +537,185 @@ test(
       );
       await other.screenshot({ path: "test-results/personal-models/missing-asset.png" });
       await other.close();
+      assert.deepEqual(errors, []);
+    } finally {
+      await browser?.close();
+    }
+  }),
+);
+
+test(
+  "unknown model JSON stays editable and a model pack resolves its placeholders",
+  { timeout: 120000 },
+  withBrowserDiagnostics(async () => {
+    const { server } = await getBrowserTestServer("app");
+    let browser;
+    try {
+      browser = await createBrowserTestSession();
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      const errors = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      const url = server.resolvedUrls.local[0];
+      const rootPath = process.cwd();
+      await page.goto(url);
+      const source = await page.evaluate(async (rootPath) => {
+        const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
+        const fixture = await import(`/@fs${rootPath}/tests/fixtures/multiple-floors.ts`);
+        const registry = await import("/src/project-runtime.ts");
+        const parsed = engine.parseHomeProjectSchema(fixture.makeLegacyProject());
+        if (!parsed.valid) throw new Error(parsed.issues[0].message);
+        const modelId = "retired-furniture";
+        const project = {
+          ...parsed.project,
+          sceneItems: [
+            {
+              id: "unresolved-item",
+              kind: "furnishing",
+              floorId: parsed.project.floors[0].id,
+              modelId,
+              placement: { kind: "absolute", at: [2, 1], elevationMeters: 0, rotationYRadians: 0 },
+              size: [0.8, 0.8, 0.8],
+            },
+          ],
+        };
+        const repository = engine.createWorkspaceRepository(
+          window.indexedDB,
+          registry.ownerProjectRegistries,
+        );
+        const entry = await repository.create(engine.createSeedProjectRecord(project), {
+          name: "Missing model test",
+        });
+        return { id: entry.metadata.id, modelId };
+      }, rootPath);
+      const read = () =>
+        page.evaluate(
+          async ({ rootPath, id }) => {
+            const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
+            const registry = await import("/src/project-runtime.ts");
+            const entry = await engine
+              .createWorkspaceRepository(window.indexedDB, registry.ownerProjectRegistries)
+              .read(id);
+            if (!entry.record) throw new Error(entry.error);
+            return entry.record;
+          },
+          { rootPath, id: source.id },
+        );
+      const waitForModel = async (predicate) => {
+        for (let attempt = 0; attempt < 100; attempt++) {
+          const record = await read();
+          if (predicate(record)) return record;
+          await page.waitForTimeout(50);
+        }
+        assert.fail("The model change was not persisted.");
+      };
+      await page.goto(`${url}workspaces/${source.id}/arrange`);
+      await page.locator("canvas").first().waitFor({ state: "visible" });
+      await mkdir("docs/evidence", { recursive: true });
+      await page.screenshot({ path: "docs/evidence/missing-model-fallback.png" });
+      await page.getByRole("button", { name: "My models", exact: true }).click();
+      const chooser = page.waitForEvent("filechooser");
+      await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).click();
+      await (
+        await chooser
+      ).setFiles({
+        name: "replacement.glb",
+        mimeType: "model/gltf-binary",
+        buffer: Buffer.from(testGlb()),
+      });
+      const dialog = page.getByRole("dialog", { name: "Import GLB", exact: true });
+      await dialog
+        .getByText("Original materials and textures are preserved.", { exact: false })
+        .waitFor();
+      const replacement = dialog.getByLabel("Replace missing model (optional)");
+      assert.equal(await replacement.count(), 1);
+      assert.match(await replacement.innerText(), new RegExp(source.modelId));
+      await replacement.selectOption(`furnishing:${source.modelId}`);
+      await mkdir("test-results/personal-models", { recursive: true });
+      await dialog.screenshot({
+        path: "test-results/personal-models/missing-model-replacement.png",
+      });
+      await dialog.getByRole("button", { name: "Add to My models", exact: true }).click();
+      await dialog.waitFor({ state: "hidden" });
+      const replaced = await waitForModel(
+        (record) =>
+          record.draft.customModels?.length === 1 &&
+          record.draft.sceneItems[0].modelId.startsWith("custom:"),
+      );
+      await page.screenshot({ path: "docs/evidence/model-pack-library.png" });
+      const customId = replaced.draft.sceneItems[0].modelId;
+      const packDownload = page.waitForEvent("download");
+      await page.getByRole("button", { name: "Export model pack (.zip)", exact: true }).click();
+      const pack = await packDownload;
+      assert.equal(pack.suggestedFilename(), "cabane-models.zip");
+      const packBytes = await readFile(await pack.path());
+      const packFiles = unzipSync(new Uint8Array(packBytes));
+      assert.ok(packFiles["manifest.json"]);
+      assert.equal(Object.keys(packFiles).filter((name) => name.endsWith(".glb")).length, 1);
+
+      const second = await page.evaluate(
+        async ({ rootPath, modelId }) => {
+          const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
+          const fixture = await import(`/@fs${rootPath}/tests/fixtures/multiple-floors.ts`);
+          const registry = await import("/src/project-runtime.ts");
+          const parsed = engine.parseHomeProjectSchema(fixture.makeLegacyProject());
+          if (!parsed.valid) throw new Error(parsed.issues[0].message);
+          const project = {
+            ...parsed.project,
+            sceneItems: [
+              {
+                id: "pack-placeholder",
+                kind: "furnishing",
+                floorId: parsed.project.floors[0].id,
+                modelId,
+                placement: {
+                  kind: "absolute",
+                  at: [2, 1],
+                  elevationMeters: 0,
+                  rotationYRadians: 0,
+                },
+                size: [0.8, 0.8, 0.8],
+              },
+            ],
+          };
+          const entry = await engine
+            .createWorkspaceRepository(window.indexedDB, registry.ownerProjectRegistries)
+            .create(engine.createSeedProjectRecord(project), { name: "Pack import test" });
+          return entry.metadata.id;
+        },
+        { rootPath, modelId: customId },
+      );
+      await page.goto(`${url}workspaces/${second}/arrange`);
+      await page.getByRole("button", { name: "My models", exact: true }).click();
+      const packChooser = page.waitForEvent("filechooser");
+      await page.getByRole("button", { name: "Import model pack (.zip)", exact: true }).click();
+      await (
+        await packChooser
+      ).setFiles({
+        name: "cabane-models.zip",
+        mimeType: "application/zip",
+        buffer: Buffer.from(packBytes),
+      });
+      const packDialog = page.getByRole("dialog", { name: "Import model pack", exact: true });
+      await packDialog.getByRole("button", { name: "Import pack", exact: true }).click();
+      await packDialog.waitFor({ state: "hidden" });
+      const imported = await page.evaluate(
+        async ({ rootPath, id, modelId }) => {
+          const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
+          const registry = await import("/src/project-runtime.ts");
+          const record = (
+            await engine
+              .createWorkspaceRepository(window.indexedDB, registry.ownerProjectRegistries)
+              .read(id)
+          ).record;
+          return {
+            modelCount: record.draft.customModels?.length ?? 0,
+            sceneModelId: record.draft.sceneItems[0].modelId,
+            modelId,
+          };
+        },
+        { rootPath, id: second, modelId: customId },
+      );
+      assert.deepEqual(imported, { modelCount: 1, sceneModelId: customId, modelId: customId });
       assert.deepEqual(errors, []);
     } finally {
       await browser?.close();

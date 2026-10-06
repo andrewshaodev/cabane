@@ -18,6 +18,7 @@ export interface WorkspaceBindingState {
 export type WorkspaceBindings = Readonly<Record<string, WorkspaceBindingState>>;
 
 const PROFILE_KEYS = new Set([
+  "weatherSource",
   "schemaVersion",
   "homeId",
   "roomAreaIds",
@@ -283,6 +284,9 @@ export const reconcileWorkspaceBindings = (
         origin,
         {
           draft: {
+            ...(state.draft.weatherSource !== undefined
+              ? { weatherSource: state.draft.weatherSource }
+              : {}),
             schemaVersion: state.draft.schemaVersion,
             homeId: state.draft.homeId,
             roomAreaIds: retainedRooms,

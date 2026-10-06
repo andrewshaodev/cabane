@@ -769,6 +769,7 @@ export type LegacyHomeManifest = Omit<
 };
 
 export interface RuntimeBindingProfile {
+  weatherSource?: import("./weather/weather-state").WeatherSource;
   schemaVersion: 1;
   homeId: string;
   roomAreaIds: Readonly<Record<string, string>>;

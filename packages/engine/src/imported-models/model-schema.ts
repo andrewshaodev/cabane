@@ -9,11 +9,15 @@ const vector = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   values?.forEach((n, i) => finite(n, `${path}[${i}]`, issues));
 };
 
-export function validateCustomModels(value: unknown, issues: HomeProjectIssue[]) {
+export function validateCustomModels(
+  value: unknown,
+  issues: HomeProjectIssue[],
+  pathRoot = "customModels",
+) {
   const ids = new Set<string>();
   const assets = new Map<string, number>();
-  array(value, "customModels", issues)?.forEach((input, i) => {
-    const path = `customModels[${i}]`;
+  array(value, pathRoot, issues)?.forEach((input, i) => {
+    const path = `${pathRoot}[${i}]`;
     const model = record(input, path, issues);
     if (!model) return;
     keys(
@@ -117,7 +121,7 @@ export function validateCustomModels(value: unknown, issues: HomeProjectIssue[])
     addProjectIssue(
       issues,
       "project.model-budget",
-      "customModels",
+      pathRoot,
       "A house may contain at most 100 MiB of distinct GLB assets.",
     );
 }

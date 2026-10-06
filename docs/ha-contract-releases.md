@@ -1,11 +1,21 @@
 # Home Assistant contract releases
 
-When a schema, serialized type, migration, binding format, archive format or
-catalog dependency changes, run `npm run verify:ha-contract`. Its source list
-starts at the parsers and catalogs and follows local TypeScript imports and
-exports. This intentionally includes some rendering dependencies: catalog
-changes can require a matching panel even when the JSON shape stays the same.
-Whitespace and comments are ignored; edits to validation or defaults are not.
+`docs/ha-compatibility.json` is the explicit compatibility manifest. It records
+portable project/record/binding field shapes, types and enums, supported format
+versions, archive paths, and semantic revisions for validation and migrations.
+Only this manifest is fingerprinted. The gate resolves the portable TypeScript
+interfaces and rejects stale field snapshots, without hashing runtime functions,
+rendering implementations, catalog registrations or model/variant IDs.
+
+Cosmetic edits (geometry, lighting, animations and UI) and catalog additions or
+deletions do not trigger automatic HA releases. Catalog lifecycle compatibility
+will be handled separately. Unknown saved fields remain blocked.
+
+For parser, migration or archive behavior changes that alter compatibility
+without changing a TypeScript field, explicitly bump the corresponding
+`semantics` revision. Review format-version/path changes in `formats` as well.
+The type snapshot guard checks field/type/enum changes; it does not infer arbitrary
+validation semantics or migration behavior from executable code.
 
 For a changed fingerprint, record the change before completing the task:
 
@@ -13,9 +23,11 @@ For a changed fingerprint, record the change before completing the task:
 npm run contract:record -- --summary "Describe the contract change" --breaking-change "Explain which older clients need an update and why"
 ```
 
-Review `docs/ha-contract.json`, including the cumulative compatibility notes.
-Run the affected checks and the full product verification gate. Commit the
-manifest with the implementation. A PR validates the fingerprint and notes;
+The record command refreshes portable field snapshots in `docs/ha-compatibility.json`
+and bumps the release revision in `docs/ha-contract.json`. Review both files and
+the cumulative compatibility notes.
+Run the affected checks and the full product verification gate locally. Commit both
+manifests with the implementation. A PR validates the fingerprint and notes;
 publication only runs after a push to `main` or a manual workflow dispatch.
 Keep incompatible imports blocked. Never strip unknown data to make them load.
 
@@ -27,6 +39,11 @@ patch version, vendors the complete bundle, commits upgrade notes under `docs/re
 tag atomically. The integration's release workflow publishes releases carrying
 these reviewed notes; ordinary manual tags retain their draft-release flow.
 The producer then checks the public ZIP contains the expected contract.
+
+The one-time baseline in the release manifest recognizes the previously shipped
+dependency-tree fingerprint at the same revision, so switching detectors does
+not itself publish a release. A subsequent compatibility revision cannot use that
+exception.
 
 The workflow serializes releases. A matching contract skips another bump. A
 newer integration contract blocks a downgrade. A rejected concurrent push fails

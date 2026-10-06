@@ -13,6 +13,7 @@ import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState }
 import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
 import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
 import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
+import { missingModelEditorDescriptor } from "./missing-model";
 
 interface DragSession {
   items: readonly SceneItemSpec[];
@@ -246,9 +247,9 @@ export function FurnishingEditLayer({
         </mesh>
       )}
       {items.map((item) => {
-        const definition =
+        const registeredDefinition =
           item.kind === "device" ? deviceModels[item.modelId] : furnishingModels[item.modelId];
-        if (!definition) return null;
+        const definition = registeredDefinition ?? missingModelEditorDescriptor(item);
         const transform = resolveItemTransform(item.placement, floor);
         const box = selectionBoxGeometry(item, definition, 0.035);
         const selected = selectedIds.includes(item.id);
@@ -324,10 +325,9 @@ export function FurnishingEditLayer({
                   const placements: Record<string, ItemPlacement> = {};
                   for (const member of session.items) {
                     const model =
-                      member.kind === "device"
+                      (member.kind === "device"
                         ? deviceModels[member.modelId]
-                        : furnishingModels[member.modelId];
-                    if (!model) continue;
+                        : furnishingModels[member.modelId]) ?? missingModelEditorDescriptor(member);
                     const [mx, , mz] = resolveItemTransform(member.placement, floor).position;
                     placements[member.id] = placementForWorldDrag({
                       world: { x: mx + x, z: mz + z },

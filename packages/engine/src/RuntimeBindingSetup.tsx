@@ -11,6 +11,8 @@ export interface RuntimeBindingProfileManager {
   profile: RuntimeBindingProfile;
   loaded: boolean;
   hasStoredProfile: boolean;
+  saveWeatherSource?:
+    ((source: import("./weather/weather-state").WeatherSource) => Promise<void>) | undefined;
   save: (next: RuntimeBindingProfile) => void;
 }
 

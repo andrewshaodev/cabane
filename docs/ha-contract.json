@@ -1,9 +1,9 @@
 {
   "revision": 8,
-  "fingerprint": "11b1b83d818d6905a602057831a7d9045695b5421930761ee25be133e42f9961",
-  "summary": "Publish reusable furnishing and device presets after main merge",
+  "fingerprint": "814743ec40b73a198f3284666095b63717394df329092bb557896d422eae63b2",
+  "summary": "Add live weather, private source selection and Weather action previews",
   "breakingChanges": [
-    "Homes using the new catalog model IDs require the matching integration release; existing model IDs remain compatible."
+    "Existing profiles default to automatic weather. Homes saving a weather source or Weather action require the matching updated panel; older panels retain the unsupported-field recovery path. Public exports omit HA weather identifiers."
   ],
   "history": [
     {
@@ -55,5 +55,10 @@
         "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
       ]
     }
-  ]
+  ],
+  "baseline": {
+    "revision": 7,
+    "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
+    "compatibilityFingerprint": "778ff13d5be0bd0d127ccc06d3544251c1d1b9b1251c6101bd2f020015313f4e"
+  }
 }

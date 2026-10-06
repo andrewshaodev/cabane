@@ -966,7 +966,9 @@ button.scene-action-slot:disabled {
   position: sticky;
   z-index: 0;
   top: 0;
-  height: clamp(220px, 32dvh, 300px);
+  min-height: clamp(180px, 24dvh, 240px);
+  display: flex;
+  align-items: flex-end;
   overflow: hidden;
   color: #fff;
   background: #8a776a;
@@ -1085,15 +1087,13 @@ button.scene-action-slot:disabled {
   transform: scale(0.96);
 }
 .room-control-sheet__foreground {
-  position: absolute;
+  position: relative;
   z-index: 3;
-  right: 0;
-  bottom: 20px;
-  left: 0;
+  width: 100%;
   display: grid;
   gap: 10px;
   min-width: 0;
-  padding: 0 20px;
+  padding: max(82px, calc(env(safe-area-inset-top) + 68px)) 20px 20px;
   opacity: var(--room-foreground-opacity);
   transform: translate3d(0, var(--room-foreground-parallax-y), 0);
   will-change: transform, opacity;
@@ -1111,11 +1111,11 @@ button.scene-action-slot:disabled {
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(2rem, 4cqw, 3rem);
   font-weight: 520;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.03em;
   line-height: 0.98;
   text-shadow: 0 3px 24px rgba(0, 0, 0, 0.34);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 .room-control-sheet__title p {
   margin: 0 0 6px;
@@ -5689,6 +5689,7 @@ button.scene-action-slot:disabled {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  width: max-content;
   max-width: calc(100cqw - 16px);
   padding: 8px;
   margin-bottom: 14px;
@@ -5716,7 +5717,7 @@ button.scene-action-slot:disabled {
   transform: none;
 }
 .scene-action-group__tray .scene-action-slot {
-  --action-size: max(var(--scene-action-size), 62px);
+  --action-size: max(var(--scene-action-size), 80px);
 }
 .scene-action-group__tray .scene-action-slot__label {
   font-size: 0.6rem;
@@ -5831,6 +5832,7 @@ details.device-mapping-inspector__option-group > details {
   cursor: pointer;
 }
 .room-control-sheet__actions button[aria-pressed="true"] {
+  color: #fff;
   background: #354a40;
 }
 .room-module-reorder > p {
@@ -5894,4 +5896,47 @@ details.device-mapping-inspector__option-group > details {
 .room-control-sheet__actions button:focus-visible {
   outline: 2px solid #354a40;
   outline-offset: 3px;
+}
+
+.weather-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: calc(6 * max(var(--scene-action-size), 80px) + 30px);
+  max-width: calc(100cqw - 34px);
+}
+.weather-menu__status {
+  flex-basis: 100%;
+  margin: 2px 4px 6px;
+  font-size: 12px;
+  color: #d2dbd5;
+  line-height: 1.4;
+}
+.weather-source-select:focus-visible {
+  outline: 2px solid #315d58;
+  outline-offset: 2px;
+}
+.weather-source-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.weather-source-select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid #a7b7bc;
+  border-radius: 8px;
+  background: #fff;
+  color: #263c46;
+  font: inherit;
+}
+
+.room-control-sheet__walk-entry {
+  width: 48px;
+  padding: 0;
+}
+.room-control-sheet__back:focus-visible {
+  outline: 2px solid #9b5939;
+  outline-offset: 2px;
 }

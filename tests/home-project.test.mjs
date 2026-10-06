@@ -287,18 +287,18 @@ await withModules(async (load) => {
     assert.equal(engineApi.defineHomeProject, defineHomeProject);
   });
 
-  test("resolves absent action bar to four defaults but honors an explicit empty bar", () => {
+  test("resolves absent action bar to five defaults but honors an explicit empty bar", () => {
     assert.equal(typeof engineApi.resolveActionBarItems, "function");
     assert.deepEqual(
       engineApi.resolveActionBarItems().map((item) => item.target.action),
-      ["build", "walk", "night", "view"],
+      ["build", "walk", "night", "weather", "view"],
     );
     assert.deepEqual(engineApi.resolveActionBarItems({ items: [] }), []);
     const legacy = fixtureHomeProject();
     legacy.shortcuts = [{ id: "old-light", action: "all-lights", context: "both", order: 0 }];
     assert.deepEqual(
       engineApi.resolveActionBarItems(legacy.actionBar).map((item) => item.target.action),
-      ["build", "walk", "night", "view"],
+      ["build", "walk", "night", "weather", "view"],
     );
   });
 
@@ -705,7 +705,7 @@ await withModules(async (load) => {
       const missing = fixtureHomeProject();
       missing.sceneItems[0].modelId = modelId;
       const missingResult = validateHomeProject(missing, fixtureHomeExtensions());
-      assert.equal(missingResult.valid, false);
+      assert.equal(missingResult.valid, true);
       assert.ok(
         missingResult.issues.some((issue) => issue.code === "project.model-missing"),
         modelId,
@@ -946,8 +946,9 @@ await withModules(async (load) => {
       {
         code: "project.model-missing",
         path: "sceneItems[0].modelId",
-        message: "Model “missing-model” is not registered.",
-        severity: "error",
+        message:
+          "Model “missing-model” is not registered; a generic placeholder will be shown until it is imported.",
+        severity: "warning",
       },
       {
         code: "project.item-id-duplicate",

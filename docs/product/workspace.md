@@ -17,7 +17,10 @@ typed entity slots with exactly one primary role. No React components or HA
 credentials belong in this serialized project. Runtime manifest composition
 resolves registered implementations separately. Omitted variants resolve to the model's
 first choice (or `default` for models without explicit choices); unknown variant
-IDs produce actionable validation errors.
+IDs produce actionable validation errors. An unknown furnishing or device model
+ID is retained as a warning and renders as an editable generic placeholder with
+the saved size and placement, so a JSON project can be imported before its
+personal model pack is available.
 
 A stored record contains draft and published projects, timestamps, revision, and
 origin-keyed draft/published binding slices with manual-mapping exclusions.
@@ -46,6 +49,8 @@ with the portable/private JSON document and deduplicated GLBs. Legacy JSON stays
 readable. Import restores and verifies assets before exposing the home. HA asset
 transfer precedes the revision-checked document write; see
 [personal models](personal-models.md) for limits and the companion protocol.
+Arrange → My models can exchange a model-only ZIP pack (`manifest.json` plus
+`assets/<sha256>.glb`) independently of a workspace JSON or `.cabane` backup.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
 can remain visible while editing. Workspace history spans construction,
@@ -83,7 +88,9 @@ removes the record and metadata atomically. Revision checks prevent stale tabs
 from overwriting changes or recreating a deleted workspace.
 
 Recovery can download rejected raw data, reset to an empty home, or remove items
-whose models are unavailable. Recovery compares the exact rejected record.
+whose models are unavailable. Recovery compares the exact rejected record. A
+valid project with unresolved model IDs does not enter recovery; its placeholders
+remain editable until a model pack or replacement GLB is imported.
 Portable exports omit private bindings and connection settings. Versioned private
 backups include both project slices, mappings, and configured server, never
 credentials. Library imports allocate a new home ID; portable imports start

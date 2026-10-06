@@ -271,8 +271,27 @@ export function RoomControlSheet({
               </button>
             )}
             {!deviceOverlay && (
-              <button type="button" className="room-control-sheet__walk" onClick={onWalk}>
-                Walk inside
+              <button
+                type="button"
+                className="room-control-sheet__walk room-control-sheet__walk-entry"
+                aria-label="Walk inside"
+                title="Walk inside"
+                onClick={onWalk}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="22"
+                  height="22"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="14" cy="4" r="2" />
+                  <path d="m7 21 3-6-2-3 3-5 4 4 4 1M11 7l-5 3-2 4m6 1 5 2 1 4m-3-11-1 5" />
+                </svg>
               </button>
             )}
           </div>

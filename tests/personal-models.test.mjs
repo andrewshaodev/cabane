@@ -4,6 +4,7 @@ import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import { withModules } from "./test-server.mjs";
 import { testGlb } from "./fixtures/personal-glb.mjs";
 import { createHash } from "node:crypto";
+import { strToU8, unzipSync, zipSync } from "fflate";
 
 await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
@@ -271,5 +272,30 @@ await withModules(async (load) => {
         .length,
       0,
     );
+  });
+  test("model packs preserve custom IDs and reject unreferenced files", async () => {
+    const models = [
+      model(),
+      model("wall", "furniture", "custom:22222222-3333-4444-5555-666666666666"),
+    ];
+    const pack = api.createCabaneModelPack(models, [asset]);
+    const restored = await api.readCabaneModelPack(pack);
+    assert.deepEqual(
+      restored.models.map((entry) => entry.id),
+      models.map((entry) => entry.id),
+    );
+    assert.deepEqual(restored.assets[0].bytes, bytes);
+    const files = unzipSync(pack);
+    files[`assets/${"a".repeat(64)}.glb`] = bytes;
+    await assert.rejects(api.readCabaneModelPack(zipSync(files, { level: 0 })), /unreferenced/);
+    const manifestOnly = zipSync(
+      {
+        "manifest.json": strToU8(
+          JSON.stringify({ format: "cabane-model-pack", version: 1, models }),
+        ),
+      },
+      { level: 0 },
+    );
+    await assert.rejects(api.readCabaneModelPack(manifestOnly), /missing GLB/);
   });
 });

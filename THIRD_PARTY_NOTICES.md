@@ -103,3 +103,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## React Three Drei Clouds
+
+Weather uses the installed MIT-licensed `@react-three/drei` Cloud/Clouds components.
+The hosted cloud sprite is the upstream default asset from
+[pmndrs/drei-assets](https://github.com/pmndrs/drei-assets/blob/9225a9f1fbd449d9411125c2f419b843d0308c9f/cloud.png),
+pinned to commit `9225a9f1fbd449d9411125c2f419b843d0308c9f` and served by rawcdn.githack.com.
+The asset repository does not separately identify a cloud-image license; the
+component's MIT license should not be read as a separate asset license claim.
