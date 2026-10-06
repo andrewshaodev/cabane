@@ -1,7 +1,7 @@
 export { ThreeSeatSofa, THREE_SEAT_SOFA_SIZE } from "./three-seat-sofa";
 export { RectangularCoffeeTable, RECTANGULAR_COFFEE_TABLE_SIZE } from "./rectangular-coffee-table";
 export { UpholsteredArmchair, UPHOLSTERED_ARMCHAIR_SIZE } from "./upholstered-armchair";
-export { NeutralAreaRug, NEUTRAL_AREA_RUG_SIZE } from "./neutral-area-rug";
+export { NeutralAreaRug, NEUTRAL_AREA_RUG_SIZE } from "./rug";
 export { LowMediaConsole, LOW_MEDIA_CONSOLE_SIZE } from "./low-media-console";
 export { UpholsteredOttoman, UPHOLSTERED_OTTOMAN_SIZE } from "./upholstered-ottoman";
 export { CustomSectionalSofa } from "./sectional-sofa";

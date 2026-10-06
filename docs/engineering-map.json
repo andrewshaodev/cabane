@@ -251,7 +251,9 @@
       "home/src/extensions",
       "packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts",
       "packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx",
-      "packages/catalog/src/device/visuals"
+      "packages/catalog/src/device/visuals",
+      "packages/catalog/src/furnishing/presets/living-room/rug.tsx",
+      "packages/catalog/src/furnishing/presets/living-room/rug-patterns.ts"
     ],
     "interfaces": [
       {

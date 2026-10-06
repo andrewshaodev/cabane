@@ -96,13 +96,16 @@ the floor origin is centered and the model requires outdoor placement.
 Numeric inspection: 13 toon meshes, 3,692 triangles. Dimensions are generic
 design assumptions, not manufacturer measurements.
 
-`neutral-area-rug` keeps its stable ID and 200 × 300 × 1.5 cm envelope.
+Rug (`neutral-area-rug`, implemented in `rug.tsx`) keeps its stable ID and 200 × 300 × 1.5 cm envelope.
 Its Details variants are Natural woven (`default`), Terracotta (`terracotta`),
-Sage (`sage`), Ocean blue (`ocean`), and Playful colors (`playful`). The original
+Sage (`sage`), Ocean blue (`ocean`), and Playful colors (`playful`), plus Jute rug (`jute`), Sisal (`sisal`),
+Persian (`persian`), Kilim (`kilim`), Moroccan (`moroccan`), Shag (`shag`),
+Braided (`braided`), Striped (`striped`), Checkered (`checkered`), and
+Scandinavian (`scandinavian`). The original
 neutral appearance remains the default. Colored variants use a 13 mm field
 and 2 mm thick non-overlapping motifs: field top = 13 mm, motif tops = 15 mm.
 Their visible faces are separated by 2 mm at every supported planar size.
-They use 10–12 toon meshes and 504–528 triangles, with no texture assets.
+All styles use procedural toon geometry with no texture assets.
 
 ## Garden olive tree
 
