@@ -9,3 +9,5 @@ export { OverbedBridgeCabinet, OVERBED_BRIDGE_CABINET_SIZE } from "./overbed-bri
 export { ShelfHeadboard, SHELF_HEADBOARD_SIZE } from "./shelf-headboard";
 export { HeadboardFreeDoubleBed, HEADBOARD_FREE_DOUBLE_BED_SIZE } from "./headboard-free-double-bed";
 export { RoundGlobeWallLamp, ROUND_GLOBE_WALL_LAMP_SIZE } from "./round-globe-wall-lamp";
+export { WallReadingSpot, WALL_READING_SPOT_SIZE } from "./wall-reading-spot";
+export { OakWallUplight, OAK_WALL_UPLIGHT_SIZE } from "./oak-wall-uplight";

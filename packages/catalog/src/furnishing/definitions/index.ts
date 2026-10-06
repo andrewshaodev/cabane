@@ -1,3 +1,5 @@
+import { oakWallUplightDefinition } from "./oak-wall-uplight";
+import { wallReadingSpotDefinition } from "./wall-reading-spot";
 import { openLaptopDefinition } from "./open-laptop";
 import { roundGlobeWallLampDefinition } from "./round-globe-wall-lamp";
 import { knobDoorWardrobeDefinition } from "./knob-door-wardrobe";
@@ -29,6 +31,8 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  "oak-wall-uplight": oakWallUplightDefinition,
+  "wall-reading-spot": wallReadingSpotDefinition,
   "open-laptop": openLaptopDefinition,
   "round-globe-wall-lamp": roundGlobeWallLampDefinition,
   "knob-door-wardrobe": knobDoorWardrobeDefinition,
