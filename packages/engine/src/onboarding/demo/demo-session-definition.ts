@@ -15,7 +15,13 @@ const encode = (id: string) => Array.from(id, (character) => character.codePoint
 
 export function deriveDemoSessionDefinition(manifest: HomeManifest): DemoSessionDefinition {
   const rooms = manifest.floors.flatMap((floor) => floor.rooms);
+  const doorIds = new Set(manifest.floors.flatMap((floor) => floor.openings
+    .filter((opening) => opening.kind === "door").map((opening) => opening.id)));
   const slots = collectBindingSlots(manifest).flatMap((descriptor) => {
+    // Simulated closed contacts/covers would override Walk's proximity opening.
+    // Leave demo doors unbound so visitors can explore every room.
+    if ((descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover")
+      && descriptor.openingId && doorIds.has(descriptor.openingId)) return [];
     const domain = demoDomain(descriptor.spec);
     const room = rooms.find((candidate) => candidate.id === descriptor.roomIds[0]);
     if (!domain) return [];

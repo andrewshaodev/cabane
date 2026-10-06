@@ -80,6 +80,10 @@ sheets, room sheets, and camera viewing share the normal dashboard surface.
 Visible scene lights respond to compatible light slots. Bound opening states
 control their visual state; unbound walkable doors can open automatically near
 the player. Missing HA data keeps the architectural scene usable.
+The demo leaves door contacts and door covers unbound so doors, including the
+garage door, open on approach and close on departure in Walk. Other supported
+device controls and window contacts retain their simulated bindings. Real HA
+opening bindings continue to take precedence over proximity.
 
 Televisions accept either a primary media-player binding for controls or a camera
 binding for scene video and the camera viewer. Only camera entity bindings request

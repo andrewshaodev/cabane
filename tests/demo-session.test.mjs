@@ -28,11 +28,17 @@ await withModules(async (load) => {
     assert.equal(sceneLightState(demoFixture.lightState, off, true).state, "off");
     assert.equal(sceneLightState(demoFixture.lightState, on, false).state, "on");
   });
-  test("bundled demo supplies available states for every non-camera slot, including outdoor lights", () => {
+  test("bundled demo supplies available device/window states and leaves doors available for walking", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
+    const doorIds = new Set(homeManifest.floors.flatMap(floor => floor.openings)
+      .filter(opening => opening.kind === "door").map(opening => opening.id));
     for (const slot of collectBindingSlots(homeManifest)) {
       if (slot.spec.compatibleDomains.includes("camera")) continue;
       const entityId = definition.profile.entityIdsBySlotId[slot.slotId];
+      if (doorIds.has(slot.openingId)) {
+        assert.equal(entityId, undefined, `${slot.slotId} must not override proximity opening`);
+        continue;
+      }
       assert.ok(definition.runtime.entityStates[entityId]?.available, slot.spec.presentation.label);
       assert.notEqual(definition.runtime.entityStates[entityId].state, "unknown");
     }
