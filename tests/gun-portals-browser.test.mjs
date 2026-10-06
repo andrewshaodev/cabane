@@ -293,8 +293,8 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome saved porta
  const shoot=async button=>{await page.mouse.down({button});await page.mouse.up({button});};
  const saved=()=>page.evaluate(()=>window.readSavedPortals());
  try {
-  await page.route('**/portal-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-fixture',persistedFixture)}));
-  await page.goto(server.resolvedUrls.local[0]+'portal-fixture');await equip();
+  await page.route('**/portal-persistence-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-persistence-fixture',persistedFixture)}));
+  await page.goto(server.resolvedUrls.local[0]+'portal-persistence-fixture');await equip();
   await turn(Math.PI);await shoot('right');
   await page.waitForFunction(()=>window.portalObservation.portals.length===1);
   await page.locator('[data-action=portal][data-next-portal=gold]').waitFor();
@@ -334,8 +334,8 @@ test('Chrome default shortcuts include the installed Laser without configuration
  const page=await browser.newPage({viewport:{width:1280,height:800}});
  try {
   const defaults=fixture.replace(/manifest.actionBar = .*?;\n/, 'delete manifest.actionBar;\n');
-  await page.route('**/portal-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-fixture',defaults)}));
-  await page.goto(server.resolvedUrls.local[0]+'portal-fixture');
+  await page.route('**/portal-defaults-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-defaults-fixture',defaults)}));
+  await page.goto(server.resolvedUrls.local[0]+'portal-defaults-fixture');
   await page.getByRole('button',{name:'Walk mode',exact:true}).click();
   await page.keyboard.press('g');
   await page.waitForFunction(()=>window.portalObservation && document.querySelector('.walk-laser'));
