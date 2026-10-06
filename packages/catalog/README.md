@@ -1,18 +1,5 @@
 # Cabane model catalog
 
-## Simple ceiling spot
-
-`recessed-downlight` reuses the existing `RecessedDownlightModel` public export
-and appears in Arrange → Hallway → Lighting as **Recessed downlight**.
-The reference-inspired single spot has a pale neutral trim and a flat warm-white
-diffuser, without a decorative status beacon. Its inferred diameter is 10 cm
-and total height is 1 cm; these are generic proportions, not measured product
-dimensions. The centered X/Z origin is at the diffuser underside (Y=0), with
-ceiling contact at Y=0.01 m. The trim underside is at Y=0.002 m and the diffuser
-top at Y=0.004 m, providing a concealed 2 mm overlap without coplanar faces.
-It retains uniform resizing and the existing light state/brightness behavior.
-No household placement is added and the reference photo is not stored here.
-
 ## Demo lounge media
 
 The existing `speaker` preset is a 26 × 39 × 26 cm media-player device. Its
@@ -341,7 +328,7 @@ standard proportions rather than verified manufacturer specifications.
 | `woven-pendant` | `WovenPendantModel` | 84.7 × 86 × 58 | `light` | Dining room, ceiling |
 | `children-pendant` | `ChildrenPendantModel` | 58 × 58 × 47.9 | `light` | Bedroom, ceiling |
 | `ceiling-light` | `CeilingLightModel` | 40 × 40 × 12 | `light` | Living room, ceiling |
-| `recessed-downlight` | `RecessedDownlightModel` | 10 × 10 × 1 | `light` | Hallway, ceiling |
+| `recessed-downlight` | `RecessedDownlightModel` | 10 × 10 × 4 | `light` | Hallway, ceiling |
 | `wall-sconce` | `WallSconceModel` | 22 × 16 × 32 | `light` | Bedroom, wall |
 | `illuminated-round-mirror` | `IlluminatedRoundMirrorModel` | 80 × 4.5 × 80 | `light` | Bathroom, wall |
 | `motorized-curtain` | `MotorizedCurtainModel` | 200 × 16 × 240 | `cover` / `curtain` | Living room, wall |

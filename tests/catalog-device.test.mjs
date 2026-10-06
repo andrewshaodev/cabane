@@ -271,7 +271,7 @@ await withModules(async (load) => {
       "smart-thermostat": ["Smart thermostat", "Climate", [.12, .12, .035], { kind: "fixed" }, "wall"],
       "smart-plug": ["Smart plug", "Power", [.07, .07, .055], { kind: "fixed" }, "wall"],
       "ceiling-light": ["Ceiling light", "Lighting", [.4, .12, .4], { kind: "uniform" }, "ceiling"],
-      "recessed-downlight": ["Recessed downlight", "Lighting", [.1, .01, .1], { kind: "uniform" }, "ceiling"],
+      "recessed-downlight": ["Recessed downlight", "Lighting", [.1, .04, .1], { kind: "uniform" }, "ceiling"],
       "wall-sconce": ["Wall sconce", "Lighting", [.22, .32, .16], { kind: "uniform" }, "wall"],
       "illuminated-round-mirror": ["Illuminated round mirror", "Lighting", [.8, .8, .045], { kind: "fixed" }, "wall"],
       "motorized-curtain": ["Motorized curtain", "Covers", [2, 2.4, .16], { kind: "axes", axes: ["width", "height"] }, "wall"],
