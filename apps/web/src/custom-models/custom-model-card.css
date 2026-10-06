@@ -1,0 +1,91 @@
+.custom-model-card {
+  cursor: default;
+}
+.custom-model-preview {
+  position: relative;
+}
+.custom-model-place {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+.custom-model-preview-actions {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+}
+.custom-model-preview:hover .custom-model-preview-actions,
+.custom-model-card:focus-within .custom-model-preview-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.custom-model-card .editor-button.custom-model-icon {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 5px;
+  background: #faf7ef;
+  border: 1px solid #c9cabc;
+}
+.custom-model-card .custom-model-icon .editor-icon {
+  width: 16px;
+  height: 16px;
+}
+.custom-model-name {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  overflow-wrap: anywhere;
+  font:
+    500 var(--editor-text-control, 0.875rem)/1.4 "Roboto",
+    sans-serif;
+  cursor: text;
+}
+.custom-model-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.custom-model-rename {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.custom-model-rename input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid #b8bcb0;
+  border-radius: 6px;
+  background: #fffdf7;
+  color: #354738;
+  font: inherit;
+}
+.custom-model-place:focus-visible,
+.custom-model-name:focus-visible,
+.custom-model-rename input:focus-visible {
+  outline: 2px solid #395a3d;
+  outline-offset: 2px;
+}
+@media (hover: none), (pointer: coarse) {
+  .custom-model-preview-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .custom-model-card .editor-button.custom-model-icon {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

@@ -25,7 +25,7 @@ test(
       });
       const backupDownload = page.waitForEvent("download");
       await page.getByRole("button", { name: "Export backup", exact: true }).click();
-      assert.match((await backupDownload).suggestedFilename(), /-backup\.json$/);
+      assert.match((await backupDownload).suggestedFilename(), /-backup\.cabane$/);
       await page.locator('input[type="file"]').setInputFiles({
         name: "backup.json",
         mimeType: "application/json",

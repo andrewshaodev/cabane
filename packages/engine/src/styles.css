@@ -1,4 +1,5 @@
 @import "./building/floor-picker.css";
+@import "./room-navigation/room-navigation.css";
 @import "@fontsource/roboto/latin-400.css";
 @import "@fontsource/roboto/latin-700.css";
 
@@ -426,7 +427,8 @@ input:focus-visible {
 }
 .walk-preferences {
   width: min(440px, 100%);
-  overflow: hidden;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   color: #263d32;
   background: #fffaf2;
   border-radius: 18px;
@@ -483,6 +485,11 @@ input:focus-visible {
   border: 1px solid #dce4d8;
   border-radius: 13px;
   cursor: pointer;
+}
+.walk-preferences__row--compact {
+  min-height: 48px;
+  padding: 10px 16px;
+  margin-top: 4px;
 }
 .walk-preferences__row > span:first-child {
   display: grid;
@@ -1238,19 +1245,19 @@ button.scene-action-slot:disabled {
 .room-control-sheet__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(128px, auto);
-  grid-auto-flow: dense;
+  grid-auto-rows: auto;
+  grid-auto-flow: row;
   gap: 12px;
 }
 .room-module[data-grid-size="2x1"] {
-  grid-row: span 2;
+  grid-row: auto;
 }
 .room-module[data-grid-size="1x2"] {
   grid-column: span 2;
 }
 .room-module[data-grid-size="2x2"] {
   grid-column: span 2;
-  grid-row: span 2;
+  grid-row: auto;
 }
 .room-control-sheet__grid.is-focused {
   grid-template-columns: minmax(0, 1fr);
@@ -1262,7 +1269,7 @@ button.scene-action-slot:disabled {
 }
 .room-module {
   min-width: 0;
-  padding: 16px;
+  padding: 12px;
   background: color-mix(in srgb, #e9eee7 84%, #fbf8ef);
   border: 1px solid rgba(70, 91, 82, 0.09);
   border-radius: 18px;
@@ -1276,17 +1283,17 @@ button.scene-action-slot:disabled {
   align-items: center;
   gap: 10px;
   min-width: 0;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 .room-module__header h2 {
   margin: 0;
-  overflow: hidden;
+  overflow-wrap: anywhere;
   color: #21342e;
   font-size: 0.86rem;
   font-weight: 790;
   letter-spacing: -0.018em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  white-space: normal;
 }
 .room-module__icon,
 .device-mapping-row__icon {
@@ -1300,6 +1307,12 @@ button.scene-action-slot:disabled {
   border-radius: 11px;
   font-size: 0.9rem;
   font-weight: 800;
+}
+.room-module__icon {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
 }
 .room-module__icon.is-light,
 .device-mapping-row__icon.is-light {
@@ -1363,7 +1376,7 @@ button.scene-action-slot:disabled {
 .room-module__controls,
 .room-module__entity {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
 }
 .room-module__entity h3 {
@@ -1448,7 +1461,7 @@ button.scene-action-slot:disabled {
 }
 .command-range input[type="range"] {
   width: 100%;
-  min-height: 32px;
+  min-height: 44px;
   accent-color: var(--home-accent);
   cursor: pointer;
 }
@@ -1517,7 +1530,7 @@ button.scene-action-slot:disabled {
 .physical-toggle {
   display: grid;
   place-items: center;
-  min-height: 190px;
+  min-height: 100px;
 }
 .physical-toggle button {
   --room-button-background: #d6dbd6;
@@ -1525,9 +1538,9 @@ button.scene-action-slot:disabled {
   --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
   --room-button-hover-border-color: transparent;
   position: relative;
-  width: 104px;
-  height: 174px;
-  min-height: 174px;
+  width: 64px;
+  height: 100px;
+  min-height: 100px;
   padding: 8px;
   overflow: hidden;
   border: 0;
@@ -1555,7 +1568,7 @@ button.scene-action-slot:disabled {
   left: 8px;
   display: grid;
   place-items: center;
-  height: 76px;
+  height: 38px;
   color: #fffaf0;
   background: #aeb6b0;
   border-radius: 29px;
@@ -1575,7 +1588,7 @@ button.scene-action-slot:disabled {
   box-shadow:
     inset 0 1px rgba(255, 255, 255, 0.2),
     0 4px 10px rgba(43, 55, 49, 0.08);
-  transform: translateY(82px);
+  transform: translateY(46px);
 }
 .physical-toggle[data-active="true"][data-tone="light"] button {
   --room-button-background: #9e7819;
@@ -1601,9 +1614,16 @@ button.scene-action-slot:disabled {
   display: grid;
   justify-items: center;
   gap: 12px;
-  min-height: 302px;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+  min-height: 100px;
+}
+.light-dimmer > [role="alert"] {
+  grid-column: 1 / -1;
 }
 .light-dimmer__reading {
+  grid-column: 2;
+  grid-row: 1;
   display: grid;
   justify-items: center;
   gap: 1px;
@@ -1611,7 +1631,7 @@ button.scene-action-slot:disabled {
 .light-dimmer__reading output {
   color: #253c34;
   font-family: var(--font-family-numeric);
-  font-size: 1.75rem;
+  font-size: 1.2rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
@@ -1621,9 +1641,11 @@ button.scene-action-slot:disabled {
   font-weight: 760;
 }
 .light-dimmer__well {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   position: relative;
-  width: 104px;
-  height: 184px;
+  width: 64px;
+  height: 100px;
   overflow: hidden;
   background: #9e7819;
   border-radius: 35px;
@@ -1648,9 +1670,9 @@ button.scene-action-slot:disabled {
 }
 .light-dimmer__thumb {
   position: absolute;
-  right: 23px;
-  bottom: calc(var(--light-level) - 2px);
-  left: 23px;
+  right: 16px;
+  bottom: clamp(3px, calc(var(--light-level) - 2px), 94px);
+  left: 16px;
   z-index: 2;
   height: 4px;
   background: #fffaf0;
@@ -1683,9 +1705,11 @@ button.scene-action-slot:disabled {
   --room-button-background: #dfe3de;
   --room-button-border-color: transparent;
   position: relative;
-  width: 50px;
-  height: 50px;
-  min-height: 50px;
+  grid-column: 2;
+  grid-row: 2;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
   border-radius: 50%;
   line-height: 1;
@@ -1721,13 +1745,11 @@ button.scene-action-slot:disabled {
   --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
 }
 .room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) {
-  padding: 17px 20px 20px;
+  padding: 12px;
   container: climate-module / inline-size;
 }
 .room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) .room-module__header {
-  justify-content: center;
-  margin-bottom: 12px;
-  text-align: center;
+  margin-bottom: 10px;
 }
 .room-module:is([data-module-kind="vtherm"], [data-module-kind="climate"]) .room-module__header h2 {
   font-size: 0.98rem;
@@ -1775,15 +1797,15 @@ button.scene-action-slot:disabled {
 .vtherm-main {
   position: relative;
   width: min(460px, 100%);
-  min-height: 300px;
+  min-height: 190px;
   margin: 0 auto;
 }
 .vtherm-dial {
   position: absolute;
   top: 0;
   left: 50%;
-  width: 280px;
-  height: 280px;
+  width: 180px;
+  height: 180px;
   transform: translateX(-50%);
 }
 .vtherm-dial svg {
@@ -1859,7 +1881,7 @@ button.scene-action-slot:disabled {
 .vtherm-action {
   position: absolute;
   z-index: 3;
-  top: 90px;
+  top: 52px;
   left: 50%;
   color: #596b62;
   font-size: 0.7rem;
@@ -1877,8 +1899,8 @@ button.scene-action-slot:disabled {
 .vtherm-temperature::after {
   content: attr(data-unit);
   position: absolute;
-  top: 142px;
-  left: calc(50% + 66px);
+  top: 95px;
+  left: calc(50% + 42px);
   color: #42554d;
   font-size: 0.82rem;
 }
@@ -1887,11 +1909,11 @@ button.scene-action-slot:disabled {
 }
 .vtherm-temperature .temperature-stepper output {
   position: absolute;
-  top: 118px;
+  top: 76px;
   left: 50%;
   color: #1e332c;
   font-family: var(--font-family-numeric);
-  font-size: clamp(3.15rem, 12cqw, 4.15rem);
+  font-size: 2.5rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   transform: translateX(-50%);
@@ -1901,10 +1923,10 @@ button.scene-action-slot:disabled {
   --room-button-background: transparent;
   --room-button-border-color: #9ea9a2;
   position: absolute;
-  top: 222px;
-  width: 56px;
-  height: 56px;
-  min-height: 56px;
+  top: 142px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
   pointer-events: auto;
   border-radius: 50%;
@@ -1919,7 +1941,7 @@ button.scene-action-slot:disabled {
 }
 .vtherm-temperature .temperature-stepper [role="alert"] {
   position: absolute;
-  top: 278px;
+  top: 190px;
   left: 50%;
   width: 220px;
   pointer-events: auto;
@@ -1944,24 +1966,28 @@ button.scene-action-slot:disabled {
   min-width: 0;
 }
 @media (min-width: 700px) {
-  @container climate-module (min-width: 440px) {
+  @container climate-module (min-width: 300px) {
     .vtherm-control:has(.vtherm-toolbar) {
-      grid-template-columns: minmax(280px, 1fr) minmax(140px, 0.6fr);
-      column-gap: 20px;
+      grid-template-columns: minmax(180px, 1fr) minmax(110px, 0.7fr);
+      column-gap: 10px;
       row-gap: 8px;
     }
     .vtherm-control:has(.vtherm-toolbar) .vtherm-readings {
-      grid-column: 1;
+      grid-column: 2;
       grid-row: 1;
-      gap: 20px;
+      align-self: end;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+      padding: 0;
     }
     .vtherm-control:has(.vtherm-toolbar) .vtherm-main {
       grid-column: 1;
-      grid-row: 2;
+      grid-row: 1 / span 2;
     }
     .vtherm-control .vtherm-toolbar {
       grid-column: 2;
-      grid-row: 1 / span 2;
+      grid-row: 2;
+      align-self: start;
       grid-template-columns: minmax(0, 1fr);
       align-content: center;
     }
@@ -1974,13 +2000,16 @@ button.scene-action-slot:disabled {
   }
 }
 .vtherm-control[data-direct-off="true"] .vtherm-main {
-  min-height: 312px;
+  min-height: 190px;
+}
+.vtherm-control .vtherm-main:has([role="alert"]) {
+  min-height: 235px;
 }
 .vtherm-control[data-direct-off="true"] .temperature-stepper button {
-  top: 234px;
+  top: 142px;
 }
 .vtherm-control[data-direct-off="true"] .temperature-stepper [role="alert"] {
-  top: 290px;
+  top: 190px;
 }
 /* Power shares the dial's action row; settings remain a single balanced row. */
 .vtherm-control[data-direct-off="true"] .temperature-stepper button:first-of-type {
@@ -1995,13 +2024,13 @@ button.scene-action-slot:disabled {
   --room-button-border-color: #9ea9a2;
   position: absolute;
   z-index: 4;
-  top: 234px;
-  left: calc(50% - 28px);
+  top: 142px;
+  left: calc(50% - 22px);
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  min-height: 56px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   padding: 0;
   border-radius: 50%;
 }
@@ -2028,7 +2057,7 @@ button.scene-action-slot:disabled {
   grid-template-columns: 34px minmax(0, 1fr);
   align-items: center;
   gap: 9px;
-  min-height: 66px;
+  min-height: 48px;
   padding: 9px 10px;
   color: #35483f;
   background: #f2f2eb;
@@ -2349,7 +2378,7 @@ button.scene-action-slot:disabled {
   --room-button-background: transparent;
   --room-button-border-color: transparent;
   justify-self: start;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0 11px;
 }
 .advanced-controls > button::after {
@@ -4975,13 +5004,13 @@ button.scene-action-slot:disabled {
     gap: 10px;
   }
   .room-module {
-    padding: 16px;
+    padding: 12px;
   }
   .room-module.is-focused {
     padding: 18px;
   }
   .room-module__header h2 {
-    font-size: 0.92rem;
+    font-size: 0.84rem;
   }
   .command-range label,
   .option-control {
@@ -5787,4 +5816,82 @@ details.device-mapping-inspector__option-group > details {
   .device-mapping-inspector__group-chevron {
     transition: none;
   }
+}
+
+.room-control-sheet__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-control-sheet__actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  cursor: pointer;
+}
+.room-control-sheet__actions button[aria-pressed="true"] {
+  background: #354a40;
+}
+.room-module-reorder > p {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: #42564b;
+}
+.room-module-reorder ol {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.room-module-reorder li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #e9eee7;
+}
+.room-module-reorder li > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.room-module-reorder button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  color: #354a40;
+  background: transparent;
+  cursor: pointer;
+}
+.room-module-reorder button:hover:not(:disabled) {
+  background: #d5dfd3;
+}
+.room-module-reorder button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.room-module-reorder .room-module-reorder__handle {
+  touch-action: none;
+  cursor: grab;
+}
+.room-module-reorder li[data-dragging="true"] {
+  opacity: 0.6;
+}
+.room-module-reorder li[data-drop-target="true"] {
+  outline: 2px solid #354a40;
+  outline-offset: 2px;
+}
+.room-module-reorder button:focus-visible,
+.room-control-sheet__actions button:focus-visible {
+  outline: 2px solid #354a40;
+  outline-offset: 3px;
 }

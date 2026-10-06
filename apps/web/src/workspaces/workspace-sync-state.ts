@@ -2,6 +2,7 @@ import {
   projectTransaction,
   SYNC_STORE,
   serializeCanonicalJson,
+  sha256Hex,
   type HomeProjectRecord,
   type WorkspaceMetadata,
 } from "@cabane/engine";
@@ -49,6 +50,5 @@ export async function fingerprintWorkspace(
   record: HomeProjectRecord,
 ): Promise<string> {
   const canonical = serializeCanonicalJson(JSON.parse(exportWorkspaceBackup(metadata, record)));
-  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
-  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return sha256Hex(new TextEncoder().encode(canonical));
 }

@@ -1,3 +1,4 @@
+import { modelAssetReferences } from "@cabane/engine";
 import {
   architectureChanged,
   commitWorkspaceSnapshot,
@@ -366,6 +367,12 @@ export function useEditorWorkspace({
 
   return {
     record,
+    modelAssetReferences: modelAssetReferences([
+      record.published,
+      ...history.past.map((s) => s.project),
+      history.present.project,
+      ...history.future.map((s) => s.project),
+    ]),
     snapshot: history.present,
     commit,
     undo,

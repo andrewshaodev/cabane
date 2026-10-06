@@ -1,10 +1,14 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Color, Vector3, type DirectionalLight, type HemisphereLight } from "three";
+import { Color, Object3D, Vector3, type DirectionalLight, type HemisphereLight } from "three";
 import { transitionSolarDirection } from "./solar-direction-transition";
 import { WalkSky } from "./WalkSky";
 import { deriveSolarLighting, type SolarLightingMode, type SunEntityState } from "./lighting";
 
+import { solarShadowFrame } from "./solar-shadow-frame";
+import type { RenderableFloorSpec } from "./types";
+
+const EMPTY_FLOORS: readonly RenderableFloorSpec[] = [];
 const TRANSITION_RATE = 4.5;
 const EPSILON = 0.002;
 const colorDifference = (left: Color, right: Color) =>
@@ -15,17 +19,33 @@ export function SolarLighting({
   shadowMapSize,
   sunState,
   walkMode = false,
+  northAngleDegrees = 0,
+  floors = EMPTY_FLOORS,
 }: {
   mode: SolarLightingMode;
   shadowMapSize: 1024 | 2048;
   sunState?: SunEntityState;
   walkMode?: boolean;
+  northAngleDegrees?: number;
+  floors?: readonly RenderableFloorSpec[];
 }) {
-  const target = useMemo(() => deriveSolarLighting(sunState, mode), [mode, sunState]);
+  const target = useMemo(
+    () => deriveSolarLighting(sunState, mode, northAngleDegrees),
+    [mode, sunState, northAngleDegrees],
+  );
+  const frame = useMemo(() => solarShadowFrame(floors), [floors]);
+  const lightTarget = useMemo(() => {
+    const object = new Object3D();
+    object.position.set(...frame.center);
+    return object;
+  }, [frame]);
   const initial = useRef(target);
   const sunRef = useRef<DirectionalLight>(null);
   const hemisphereRef = useRef<HemisphereLight>(null);
-  const targetPosition = useMemo(() => new Vector3(...target.sunPosition), [target.sunPosition]);
+  const targetPosition = useMemo(
+    () => new Vector3(...target.sunPosition).normalize().multiplyScalar(frame.distance),
+    [target.sunPosition, frame.distance],
+  );
   const targetSun = useMemo(() => new Color(target.sunColor), [target.sunColor]);
   const targetBackground = useMemo(
     () => new Color(target.backgroundColor),
@@ -45,7 +65,7 @@ export function SolarLighting({
   useEffect(() => {
     transitioning.current = true;
     invalidate();
-  }, [invalidate, target]);
+  }, [invalidate, target, lightTarget]);
   useFrame((_, delta) => {
     const sun = sunRef.current;
     const hemisphere = hemisphereRef.current;
@@ -53,7 +73,9 @@ export function SolarLighting({
     const background = scene.background instanceof Color ? scene.background : new Color();
     if (!(scene.background instanceof Color)) scene.background = background;
     const progress = 1 - Math.exp(-TRANSITION_RATE * delta);
+    sun.position.sub(lightTarget.position);
     transitionSolarDirection(sun.position, targetPosition, progress);
+    sun.position.add(lightTarget.position);
     sun.color.lerp(targetSun, progress);
     sun.intensity += (target.sunIntensity - sun.intensity) * progress;
     hemisphere.color.lerp(targetSky, progress);
@@ -61,7 +83,7 @@ export function SolarLighting({
     hemisphere.intensity += (target.hemisphereIntensity - hemisphere.intensity) * progress;
     background.lerp(targetBackground, progress);
     const remaining = Math.max(
-      sun.position.distanceTo(targetPosition) / 18,
+      sun.position.clone().sub(lightTarget.position).distanceTo(targetPosition) / frame.distance,
       colorDifference(sun.color, targetSun),
       Math.abs(sun.intensity - target.sunIntensity),
       colorDifference(hemisphere.color, targetSky),
@@ -70,7 +92,7 @@ export function SolarLighting({
       colorDifference(background, targetBackground),
     );
     if (remaining <= EPSILON) {
-      sun.position.copy(targetPosition);
+      sun.position.copy(targetPosition).add(lightTarget.position);
       sun.color.copy(targetSun);
       sun.intensity = target.sunIntensity;
       hemisphere.color.copy(targetSky);
@@ -92,23 +114,29 @@ export function SolarLighting({
           initial.current.hemisphereIntensity,
         ]}
       />
+      <primitive object={lightTarget} />
       <directionalLight
         key={shadowMapSize}
         ref={sunRef}
         castShadow
-        position={[...initial.current.sunPosition]}
+        target={lightTarget}
+        position={new Vector3(...initial.current.sunPosition)
+          .normalize()
+          .multiplyScalar(frame.distance)
+          .add(lightTarget.position)
+          .toArray()}
         color={initial.current.sunColor}
         intensity={initial.current.sunIntensity}
         shadow-intensity={0.62}
         shadow-radius={2}
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
-        shadow-camera-left={-18}
-        shadow-camera-right={18}
-        shadow-camera-top={12}
-        shadow-camera-bottom={-12}
+        shadow-camera-left={-frame.radius}
+        shadow-camera-right={frame.radius}
+        shadow-camera-top={frame.radius}
+        shadow-camera-bottom={-frame.radius}
         shadow-camera-near={1}
-        shadow-camera-far={40}
+        shadow-camera-far={frame.far}
         shadow-bias={-0.00005}
         shadow-normalBias={0.012}
       />

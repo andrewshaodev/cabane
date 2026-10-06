@@ -13,6 +13,7 @@ import {
 import { ConnectedProduct } from "../ConnectedProduct";
 import { createBrowserHomeProjectLifecycle } from "../project-runtime";
 import { WorkspaceHaStorageProvider } from "./WorkspaceHaStorage";
+import { WorkspaceModelAssetNotice } from "./WorkspaceModelAssetNotice";
 
 export function WorkspaceHost({
   id,
@@ -114,6 +115,7 @@ export function WorkspaceHost({
           repository={repository}
           hidden={isDemo}
         >
+          <WorkspaceModelAssetNotice record={loaded.record} id={id} />
           <ConnectedProduct
             demoWorkspaceId={demoWorkspaceId}
             onboarding={{

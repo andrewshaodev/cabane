@@ -6,6 +6,8 @@ import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { DoubleSide, type Mesh } from "three";
 import { ToonMaterial } from "../rendering";
+import { RoomFloorMaterial } from "../room-navigation/RoomFloorMaterial";
+import { roomSurfaceEmphasis } from "../room-navigation/room-surface-emphasis";
 import { POOL_GROUND_Y } from "../pools/pool-footprint";
 import type { FloorFinishSpec, FloorSpec, Polygon } from "../types";
 import { createFloorFinishGeometry, isFloorZoneOutline } from "./finish-geometry";
@@ -32,6 +34,7 @@ interface FinishSurfaceProps {
   onSelect?: (() => void) | undefined;
   elevation?: number;
   cutPools?: boolean;
+  emphasis?: number;
 }
 
 function FinishSurface({
@@ -49,6 +52,7 @@ function FinishSurface({
   onSelect,
   elevation: requestedElevation,
   cutPools = false,
+  emphasis = 1,
 }: FinishSurfaceProps) {
   const dom = useCabaneDom();
   const repeatMeters = finish.kind === "preset" ? floorFinishPreset(finish.preset).repeatMeters : 1;
@@ -65,7 +69,7 @@ function FinishSurface({
     [cutPools, floor, polygon, repeatMeters, apertures],
   );
   useEffect(() => () => geometry.dispose(), [geometry]);
-  const texture = finish.kind === "preset" ? textureSet.get(finish.preset) : null;
+  const texture = finish.kind === "preset" ? textureSet.get(finish.preset, finish.color) : null;
   const color = floorFinishRepresentativeColor(finish);
   const press = useRef<{
     pointerId: number;
@@ -79,13 +83,13 @@ function FinishSurface({
   const setRoomHover = useRoomHoverTarget();
   const [pressed, setPressed] = useState(false);
   const interactionOpacity = selected
-    ? 0.36
+    ? 0.055
     : pressed
       ? 0.28
       : hovered || (roomId !== undefined && hoveredRoom === roomId)
         ? 0.18
         : 0;
-  const opacityRef = useRef(selected ? 0.36 : 0);
+  const opacityRef = useRef(selected ? 0.055 : 0);
   const { invalidate } = useThree();
 
   useEffect(() => invalidate(), [interactionOpacity, invalidate]);
@@ -183,9 +187,11 @@ function FinishSurface({
         polygonOffsetUnits={-layer}
       />
     ) : (
-      <ToonMaterial
+      <RoomFloorMaterial
         key={texture ? "pattern" : "solid"}
         color={texture ? "#ffffff" : color}
+        emphasis={emphasis}
+        reducedMotion={reducedMotion}
         {...omitUndefinedProperties({ map: texture ?? undefined })}
         side={DoubleSide}
         polygonOffset={layer > 0}
@@ -290,6 +296,11 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
           textureSet,
           interactionColor: room.accent,
           selected: selectedRoomId === room.id,
+          emphasis: roomSurfaceEmphasis(
+            variant === "scene" && Boolean(onSelectRoom),
+            selectedRoomId,
+            room.id,
+          ),
           reducedMotion,
           onSelect,
         };

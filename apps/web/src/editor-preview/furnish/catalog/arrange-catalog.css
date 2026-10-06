@@ -292,7 +292,7 @@
   .direction-preview[data-editor-mode="furnish"] {
     --editor-rail-width: 0px;
   }
-  .arrange-catalog h2 {
+  .arrange-catalog > h2 {
     display: none;
   }
   .catalog-room-select {
@@ -309,7 +309,7 @@
   .direction-preview[data-editor-mode="furnish"] {
     --editor-rail-width: 250px;
   }
-  .arrange-catalog h2 {
+  .arrange-catalog > h2 {
     display: none;
   }
 }

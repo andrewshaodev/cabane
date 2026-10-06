@@ -4,6 +4,7 @@ import {
   type HomeProjectIssue,
   type JsonRecord,
 } from "./validation-types";
+
 export const keys = (
   value: JsonRecord,
   allowed: readonly string[],
@@ -38,4 +39,33 @@ export const array = (value: unknown, path: string, issues: HomeProjectIssue[]) 
 export const string = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   if (typeof value === "string" && value.trim().length > 0) return;
   addProjectIssue(issues, "project.string", path, "Expected a non-empty string.");
+};
+
+export const finite = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
+  if (typeof value === "number" && Number.isFinite(value)) return;
+  addProjectIssue(issues, "project.number", path, "Expected a finite number.");
+};
+
+export const point = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
+  const candidate = array(value, path, issues);
+  if (!candidate) return;
+  if (candidate.length !== 2) {
+    addProjectIssue(
+      issues,
+      "project.plan-point",
+      path,
+      "A plan point requires exactly two numbers.",
+    );
+    return;
+  }
+  candidate.forEach((entry, index) => finite(entry, `${path}[${index}]`, issues));
+};
+
+export const polygon = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
+  const candidate = array(value, path, issues);
+  if (!candidate) return;
+  if (candidate.length < 3) {
+    addProjectIssue(issues, "project.polygon", path, "A polygon requires at least three points.");
+  }
+  candidate.forEach((entry, index) => point(entry, `${path}[${index}]`, issues));
 };

@@ -23,6 +23,11 @@ export interface FurnishingInspectorProps {
   deviceModels: DeviceModelRegistry;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
   onSizeChange: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
+  onColorChange?: (
+    id: string,
+    color: string | null,
+    definition: SceneModelEditorDescriptor,
+  ) => void;
   onVariantChange?: (id: string, variant: string, definition: SceneModelEditorDescriptor) => void;
   onLightStateChange?: (
     id: string,
@@ -42,6 +47,7 @@ export function FurnishingInspector({
   onSizeChange,
   onLightStateChange,
   onVariantChange,
+  onColorChange,
   onClose,
 }: FurnishingInspectorProps) {
   const selected = items.find((item) => item.id === selectedId);
@@ -55,6 +61,7 @@ export function FurnishingInspector({
       onWindowFit={onWindowFit}
       onLightStateChange={onLightStateChange}
       onVariantChange={onVariantChange}
+      onColorChange={onColorChange}
       onPlacementChange={onPlacementChange}
       onSizeChange={onSizeChange}
       onClose={onClose}

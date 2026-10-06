@@ -1,3 +1,8 @@
+import { omitUndefinedProperties } from "@cabane/engine";
+import { WhiteLeverDoorHandles } from "./white-lever-door-handles";
+import { ConcealedDoorLeaf } from "./concealed-door-leaf";
+import { FlushDoorLeaf } from "./flush-door-leaf";
+import { ArchedSteelGlassPanel } from "../steel-glazing";
 import { RoundedBox } from "@cabane/engine";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { DoorSpec } from "@cabane/engine";
@@ -11,15 +16,49 @@ export function DoorLeaf({
   width,
   height,
   handleSide,
+  plankDepthScale = 1,
 }: {
   opening: DoorSpec;
   width: number;
   height: number;
   handleSide: -1 | 1;
+  plankDepthScale?: number;
 }) {
   const white = opening.finish === "white";
-  const frameColor = white ? "#d8d2c6" : "#9c6b49";
+  const frameColor = opening.color ?? (white ? "#d8d2c6" : "#9c6b49");
 
+  if (opening.variant === "concealed")
+    return (
+      <ConcealedDoorLeaf
+        width={width}
+        height={height}
+        finish={opening.finish}
+        {...omitUndefinedProperties({ color: opening.color })}
+        handleSide={handleSide}
+      />
+    );
+  if (opening.variant === "flush" || opening.variant === "flush-knob")
+    return (
+      <FlushDoorLeaf
+        width={width}
+        height={height}
+        finish={opening.finish}
+        {...omitUndefinedProperties({ color: opening.color })}
+        handleSide={handleSide}
+        knob={opening.variant === "flush-knob"}
+      />
+    );
+  if (opening.variant === "steel-arched")
+    return (
+      <group>
+        <ArchedSteelGlassPanel
+          width={width}
+          height={height}
+          {...omitUndefinedProperties({ frameColor: opening.color })}
+        />
+        <GlassDoorHandle width={width} side={handleSide} />
+      </group>
+    );
   if (opening.variant === "french" || opening.variant === "full-glass") {
     return (
       <group>
@@ -46,6 +85,9 @@ export function DoorLeaf({
         height={height}
         handleSide={handleSide}
         finish={opening.finish}
+        {...omitUndefinedProperties({ color: opening.color })}
+        depthScale={plankDepthScale}
+        railHangers={opening.operation === "sliding"}
       />
     );
   }
@@ -53,14 +95,18 @@ export function DoorLeaf({
   return (
     <group>
       <RoundedBox args={[width, height, 0.05]} radius={0.018} smoothness={3} castShadow>
-        <ToonMaterial color={white ? "#f1f0eb" : "#b89a73"} />
+        <ToonMaterial color={opening.color ?? (white ? "#f1f0eb" : "#b89a73")} />
         <Outlines
           color={white ? "#676965" : "#493c31"}
           thickness={white ? 0.008 : 0.01}
           screenspace={false}
         />
       </RoundedBox>
-      <PanelDoorHandles width={width} side={handleSide} />
+      {opening.variant === "panel-white-lever" ? (
+        <WhiteLeverDoorHandles width={width} side={handleSide} />
+      ) : (
+        <PanelDoorHandles width={width} side={handleSide} />
+      )}
     </group>
   );
 }

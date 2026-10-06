@@ -6,6 +6,9 @@ import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const {
     buildArchitecturalWallGeometries,
+    buildWallJunctionGeometries,
+    deriveWalkColliders,
+    isWalkPointClear,
     createFloorEditorDraft,
     createFloorEditorHistory,
     deriveFloorTopology,
@@ -67,6 +70,62 @@ await withModules(async (load) => {
       groups.forEach(({ geometry }) => geometry.dispose());
       material.dispose();
     }
+  });
+
+  test("interior right-angle corners fill the outside quadrant without filling the room", () => {
+    for (const reverse of [false, true])
+      for (const swap of [false, true]) {
+        const walls = [
+          {
+            id: "a",
+            from: [-2, 0],
+            to: [0, 0],
+            classification: "interior",
+            thicknessMeters: swap ? 0.07 : 0.15,
+          },
+          {
+            id: "b",
+            from: [0, 0],
+            to: [0, 2],
+            classification: "interior",
+            thicknessMeters: swap ? 0.15 : 0.07,
+          },
+        ].map((wall) => (reverse ? { ...wall, from: wall.to, to: wall.from } : wall));
+        const junction = { id: "corner", at: [0, 0], wallIds: ["a", "b"] };
+        const floor = {
+          ...interactionFloor,
+          coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+          walls,
+          wallJunctions: [junction],
+          openings: [],
+          pools: [],
+        };
+        const x = walls[1].thicknessMeters / 4,
+          z = -walls[0].thicknessMeters / 4;
+        for (const groups of [
+          buildArchitecturalWallGeometries(floor),
+          buildWallJunctionGeometries(junction, floor),
+        ]) {
+          const material = new MeshBasicMaterial({ side: DoubleSide });
+          const meshes = groups.map(({ geometry }) => new Mesh(geometry, material));
+          try {
+            assert.ok(
+              new Raycaster(new Vector3(x, 4, z), new Vector3(0, -1, 0)).intersectObjects(meshes)
+                .length > 0,
+            );
+            assert.equal(
+              new Raycaster(new Vector3(-0.1, 4, 0.1), new Vector3(0, -1, 0)).intersectObjects(
+                meshes,
+              ).length,
+              0,
+            );
+          } finally {
+            groups.forEach(({ geometry }) => geometry.dispose());
+            material.dispose();
+          }
+        }
+        assert.equal(isWalkPointClear({ x, z }, deriveWalkColliders(floor, new Set()), 0), false);
+      }
   });
 
   const editedFloor = (wallId, endpoint, to) => {

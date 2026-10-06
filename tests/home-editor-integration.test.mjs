@@ -865,6 +865,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
       [
         "apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
         "apps/web/src/editor-preview/construct/DebouncedColorInput.tsx",
+        "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
       ].map((path) => readFile(path, "utf8")),
     )
   ).join("\n");
@@ -874,7 +875,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
   assert.match(inspector, /CommittedNumberInput/);
   assert.match(inspector, /label="Wall thickness"/);
   assert.match(inspector, /DebouncedColorInput/);
-  assert.match(inspector, /label="Wall exterior color"/);
+  assert.match(inspector, /inputLabel="Wall exterior color"/);
   // Debounce timing is verified by the inspector behavior test with a controlled clock.
   assert.doesNotMatch(inspector, /construction-inspector__tools|construction-inspector__history/);
   const openingProperties = await readFile(

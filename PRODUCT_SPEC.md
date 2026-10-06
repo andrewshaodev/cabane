@@ -21,11 +21,12 @@ When implementation changes, update the relevant focused spec with it.
 | Dashboard    | Overview/room/walk interactions, domain controls and camera media                                 | [Dashboard and cameras](docs/product/dashboard-and-cameras.md)       |
 | Scene        | Procedural toon architecture, finishes, lighting, derived walk collision                          | [Geometry and rendering](docs/product/geometry-and-rendering.md)     |
 | Models       | Stable registries and code-defined owner extensions                                               | [Catalog contracts](docs/product/catalog-and-extensions.md)          |
+| My models    | Per-home GLB catalog, preserved materials, portable assets and HA synchronization                 | [Personal models](docs/product/personal-models.md)                   |
 | Generation   | Accepted layout followed by room equipment; local typed slots, explicit review gates              | [Agent workflow](docs/product/generation.md)                         |
 | Delivery     | Automated checks and static build; incomplete deployment/household acceptance called out          | [Verification and limits](docs/product/verification-and-delivery.md) |
 
 The important boundaries are English UI, procedural generated home
-content, browser-local persistence, and explicit separation of draft from
+content with an explicit personal-GLB import boundary, browser-local persistence, and explicit separation of draft from
 published state. Real HA credentials and household mappings belong to the browser
 runtime, not generated home code. Browser editing is an implemented feature.
 

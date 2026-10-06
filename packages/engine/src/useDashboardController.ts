@@ -1,4 +1,5 @@
 import { useHaActionShortcuts } from "./action-bar/useHaActionShortcuts";
+import { resolvedRoomDisplayNames } from "./home-assistant-mapping/room-display-name";
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { useCabaneDom } from "./CabaneDom";
 import { deriveFloorLevels, useFloorNavigation } from "./building";
@@ -17,7 +18,7 @@ import { resolveHomeAssistantBindings } from "./home-assistant-resolver";
 import { deriveHomePresence } from "./home-presence/model";
 
 import { loadLightingMode, saveLightingMode } from "./WalkPreferences";
-import { isNightLighting, type SolarLightingMode } from "./lighting";
+import { resolveSolarLighting, type SolarLightingMode } from "./lighting";
 
 import { readSceneSession, writeSceneSession } from "./navigation";
 
@@ -85,13 +86,7 @@ export function useDashboardController({
   );
   const homePresence = useMemo(() => deriveHomePresence(runtime), [runtime]);
   const roomDisplayNames = useMemo(
-    () =>
-      Object.fromEntries(
-        floor.rooms.map((room) => [
-          room.id,
-          resolvedBindings.rooms[room.id]?.displayName ?? room.name,
-        ]),
-      ),
+    () => resolvedRoomDisplayNames(floor.rooms, resolvedBindings.rooms),
     [floor.rooms, resolvedBindings.rooms],
   );
   const initialSession = useRef(
@@ -121,6 +116,7 @@ export function useDashboardController({
     return () => window.clearInterval(timer);
   }, []);
   const [cameraResetKey, setCameraResetKey] = useState(0);
+  const [roomFocusKey, setRoomFocusKey] = useState(0);
   const [automaticOpeningIds, setAutomaticOpeningIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
@@ -206,11 +202,8 @@ export function useDashboardController({
     [automaticOpeningIds, resolvedBindings.openings],
   );
   const sunState = runtime.entityStates["sun.sun"];
-  const nightLighting = isNightLighting(
-    lightingMode,
-    sunState?.available !== false && !sunState?.stale ? sunState : undefined,
-    localTime,
-  );
+  const solarLighting = resolveSolarLighting(lightingMode, sunState, localTime);
+  const nightLighting = solarLighting.night;
   const allLightsCall = allLightsOffCall(runtime.entityStates);
   useEffect(() => {
     if (walkthrough) return;
@@ -220,6 +213,7 @@ export function useDashboardController({
   const selectRoom = useCallback(
     (roomId: string) => {
       if (walkthrough) return;
+      setRoomFocusKey((key) => key + 1);
       setSelectedRoomId(roomId);
       setSelectedDeviceId(null);
       setDevicePanelRoomId(null);
@@ -229,6 +223,7 @@ export function useDashboardController({
     [walkDevicePanelOpenRef, walkthrough],
   );
   const goHome = useCallback(() => {
+    setRoomFocusKey((key) => key + 1);
     movementInputRef.current = { x: 0, y: 0 };
     lookInputRef.current = { x: 0, y: 0 };
     lookDeltaRef.current = { x: 0, y: 0 };
@@ -448,6 +443,7 @@ export function useDashboardController({
     lightingMode,
     chooseLightingMode,
     sunState,
+    solarLighting,
     nightLighting,
     floor,
     poseRef,
@@ -464,6 +460,7 @@ export function useDashboardController({
     setWalkRoomId,
     selectedRoom,
     cameraResetKey,
+    roomFocusKey,
     architectureModels,
     selectedRoomId,
     wallFadeEnabled,

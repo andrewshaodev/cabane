@@ -23,6 +23,12 @@ use modern headless Chromium rather than an independently updated system browser
 Linux environments without browser libraries can use
 `npm run browser:install -- --with-deps`. Reinstall the browser after Playwright upgrades.
 
+Dependency changes also require a clean `npm ci` with the managed host's npm version.
+Keep required peer dependencies of optional platform packages in the portable
+lockfile, even when the local platform does not install those packages. The
+lockfile regression check covers these references; a successful build against
+existing `node_modules` does not establish clean-install compatibility.
+
 The application checker uses native TypeScript 7 (`typescript-native` alias).
 Typed ESLint uses the TypeScript 6 compiler API, which typescript-eslint currently
 supports. Both versions are locked; remove the alias when the lint ecosystem
@@ -106,8 +112,12 @@ After building, `node scripts/verify-panel.mjs` serves the production artifact
 under a nested local asset path and opens a synthetic Home Assistant host in
 Chromium (`CHROME_PATH` can override the executable). It exercises the real
 workspace/editor UI, host-session selection, HA import/storage, reconnect and
-detach behavior, and local asset loading while retaining the host URL. Unit and
-browser regressions additionally cover origin mismatch, demo isolation, stale
+detach behavior, and local asset loading while retaining the host URL. The browser
+fixture uses HA's auto-height wrapper with safe-area padding and verifies
+content bounds beside the sidebar at desktop, portrait and landscape sizes.
+Set `CABANE_PANEL_BUNDLE` to verify an extracted release's frontend directory
+instead of the local build. Unit and browser regressions additionally cover
+origin mismatch, demo isolation, stale
 connection work, token-storage traps, and standalone migration compatibility.
 These fixtures use fake HA data and do not establish live household acceptance
 or deploy the artifact to Home Assistant.
@@ -118,9 +128,10 @@ Uncompleted acceptance/deployment concerns remain explicit:
   owner's authenticated runtime review.
 - Private deployment/network hardening and container delivery are not completed
   product features.
-- Multi-floor navigation, hosted workspace synchronization, and a shared account
+- Cabane-hosted workspace synchronization and a shared account
   backend are not implemented.
-- Browser-local authoring does not update Git or synchronize other browsers.
+- Browser-local authoring does not update Git. Optional HA synchronization can
+  transfer saved workspaces and personal assets between authenticated clients.
 
 Implementation: [commands](../../package.json),
 [test harness](../../tests/test-server.mjs),
@@ -141,3 +152,16 @@ choices, history, Save, pending and failed commands, disconnection, mobile
 overflow, and IndexedDB reload. It makes no household service calls. Screenshots
 are written to `/tmp/cabane-ha-shortcuts` by default (`CABANE_SHORTCUT_EVIDENCE`
 overrides the destination).
+
+Personal GLB coverage uses `tests/personal-models.test.mjs`,
+`tests/personal-models-browser.test.mjs`, and `tests/ha-model-assets.test.mjs`.
+The normal Arrange UI checks the public skill link and copyable install command,
+imports solid/PBR/textured files and actual Blender/Three.js skill example fixtures,
+and tests supports, history, Save/Reset, and complete archives. Installation and
+generation are verified independently in the public skill repository. Storage
+fixtures exercise missing/corrupt files, transaction failures, deduplication,
+interruptions, origin/session isolation, old integrations, and two-client revision
+conflicts. Companion integration tests cover authenticated blocks, integrity,
+reference checks, and delayed cleanup. These checks use synthetic data and do not
+contact household devices. Cabane and the integration must be delivered together;
+publishing and deployment remain separate actions.

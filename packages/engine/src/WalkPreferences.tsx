@@ -1,6 +1,25 @@
+import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
 import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
+import { SceneMenuIcon } from "./SceneMenuIcon";
+
+export function WalkPreferencesMenuItem({ onOpen }: { onOpen: () => void }) {
+  const dom = useCabaneDom();
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.currentTarget.closest("details")?.removeAttribute("open");
+        if (dom.root.pointerLockElement) document.exitPointerLock();
+        onOpen();
+      }}
+    >
+      <SceneMenuIcon name="preferences" />
+      <span>Preferences</span>
+    </button>
+  );
+}
 
 const WALK_PREFERENCES_KEY = "cabane.walk.preferences.v1";
 
@@ -41,15 +60,21 @@ export function saveLightingMode(mode: SolarLightingMode): void {
 }
 
 export function WalkPreferences({
+  overlayPreferences,
+  onOverlayPreferencesChange,
   inverted,
   onChange,
   lightingMode,
+  lightingSource,
   onLightingModeChange,
   onClose,
 }: {
+  overlayPreferences: OverlayPreferences;
+  onOverlayPreferencesChange: (value: OverlayPreferences) => void;
   inverted: boolean;
   onChange: (value: boolean) => void;
   lightingMode: SolarLightingMode;
+  lightingSource: string;
   onLightingModeChange: (mode: SolarLightingMode) => void;
   onClose: () => void;
 }) {
@@ -117,6 +142,27 @@ export function WalkPreferences({
           </button>
         </header>
         <div className="walk-preferences__group">
+          <h3>Room overlays</h3>
+          <p className="walk-preferences__hint">
+            Choose what appears below room names in overview. Available readings only.
+          </p>
+          {overlayOptions.map(([key, label]) => (
+            <label className="walk-preferences__row walk-preferences__row--compact" key={key}>
+              <span>
+                <strong>{label}</strong>
+              </span>
+              <input
+                type="checkbox"
+                checked={overlayPreferences[key]}
+                onChange={(event) =>
+                  onOverlayPreferencesChange({ ...overlayPreferences, [key]: event.target.checked })
+                }
+              />
+              <span className="walk-preferences__switch" aria-hidden="true" />
+            </label>
+          ))}
+        </div>
+        <div className="walk-preferences__group">
           <h3>Look controls</h3>
           <label className="walk-preferences__row">
             <span>
@@ -155,7 +201,8 @@ export function WalkPreferences({
             ))}
           </fieldset>
           <p className="walk-preferences__hint">
-            Auto follows the sun when available, then your local time.
+            Exterior lighting. Auto follows Home Assistant, then your local time.
+            {lightingMode === "live" && <> Source: {lightingSource}.</>}
           </p>
         </div>
       </section>

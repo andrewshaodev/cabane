@@ -76,3 +76,8 @@ and rendering remain private to `walk-laser/src/portals/`. Live destination view
 use package-private camera transforms, exit clipping, and bounded scene captures
 with the existing renderer and scene supplied by the canvas. No portal rendering
 contract or dependency is added to the engine, catalog, or home.
+
+The first gun equip shows a compact introduction styled like the editor tutorial.
+It explains light toggling and paired portal shortcuts with mouse or touch controls.
+Users dismiss it with Got it (or Enter while the pointer is captured); dismissal
+stays in browser-local storage, with a session fallback if storage is unavailable.

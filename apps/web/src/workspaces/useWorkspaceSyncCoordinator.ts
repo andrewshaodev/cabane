@@ -1,6 +1,10 @@
 import { useMemo } from "react";
-import { useHomeAssistantRuntime, type WorkspaceRepository } from "@cabane/engine";
-import { createHaWorkspaceClient } from "./ha-workspace-client";
+import {
+  useHomeAssistantRuntime,
+  createModelAssetRepository,
+  type WorkspaceRepository,
+} from "@cabane/engine";
+import { createAssetAwareHaWorkspaceClient } from "./ha-model-assets";
 import { createWorkspaceSyncCoordinator } from "./workspace-sync-coordinator";
 import {
   fingerprintWorkspace,
@@ -17,7 +21,11 @@ export function useWorkspaceSyncCoordinator(
 ) {
   const runtime = useHomeAssistantRuntime();
   const client = useMemo(
-    () => createHaWorkspaceClient(runtime.sendStorageMessage),
+    () =>
+      createAssetAwareHaWorkspaceClient(
+        runtime.sendStorageMessage,
+        createModelAssetRepository(window.indexedDB),
+      ),
     [runtime.sendStorageMessage],
   );
   const coordinator = useMemo(

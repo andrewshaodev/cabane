@@ -16,6 +16,7 @@ import {
 import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const { ShadowMapCache } = await load("/packages/engine/src/shadow-map-cache.ts");
+  const { applyCameraFadeToMesh } = await load("/packages/engine/src/rendering.tsx");
   const fixture = () => {
     const scene = new Scene(),
       camera = new PerspectiveCamera(),
@@ -35,6 +36,15 @@ await withModules(async (load) => {
     assert.equal(dirty(), false);
     return { scene, camera, caster, effect, light, cache, dirty };
   };
+  test("architectural cutaway fading retains shadow inputs through the opacity threshold", () => {
+    const f = fixture();
+    assert.equal(f.cache.needsUpdate(f.scene, f.camera, PCFShadowMap), false);
+    for (const opacity of [1, 0.998, 0.994, 0.5, 0.12, 0.5, 0.994, 0.998, 1]) {
+      applyCameraFadeToMesh(f.caster, opacity, true);
+      assert.equal(f.caster.castShadow, true);
+      assert.equal(f.cache.needsUpdate(f.scene, f.camera, PCFShadowMap), false);
+    }
+  });
   test("noncasting animation and opaque tint changes reuse shadows; moving casters and sun refresh immediately", () => {
     const f = fixture();
     f.effect.position.x++;

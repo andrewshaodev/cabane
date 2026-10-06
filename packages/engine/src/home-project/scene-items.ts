@@ -147,6 +147,22 @@ export const validateSceneItemsAndSupports = (
           `Variant “${item.variant}” is not available for this model.`,
         );
       }
+      if (
+        item.modelId.startsWith("custom:") &&
+        item.size.some(
+          (dimension, axis) =>
+            Math.abs(
+              dimension / definition.defaultSize[axis] - item.size[0] / definition.defaultSize[0],
+            ) > 0.000001,
+        )
+      ) {
+        addProjectIssue(
+          issues,
+          "project.custom-model-scale",
+          `${itemPath}.size`,
+          "Imported models use uniform scaling. Restore matching proportions.",
+        );
+      }
       if (item.kind === "device")
         validateDeviceSlotsAgainstModel(
           item,

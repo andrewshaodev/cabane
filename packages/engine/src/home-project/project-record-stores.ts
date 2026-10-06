@@ -1,10 +1,20 @@
 import {
+  publishModelAssetReferences,
+  referencedRecordAssets,
+  createModelAssetRepository,
+} from "../imported-models/asset-storage";
+import {
   MemoryProjectRecordStore,
   ProjectRecordStore,
   HomeProjectRecord,
 } from "./project-record-contract";
 
-import { projectTransaction, PROJECT_STORE, WORKSPACE_STORE } from "./project-database";
+import {
+  projectTransaction,
+  PROJECT_STORE,
+  WORKSPACE_STORE,
+  MODEL_ASSET_STORE,
+} from "./project-database";
 import type { WorkspaceMetadata } from "./workspace-contract";
 
 export const createMemoryProjectRecordStore = (
@@ -37,11 +47,22 @@ const storedString = (value: unknown): string | null => {
 };
 
 export const createIndexedDbProjectRecordStore = (indexedDB: IDBFactory): ProjectRecordStore => {
-  const write = (homeId: string, next: string | null, expected?: string | null) =>
-    projectTransaction<boolean>(
+  const write = async (homeId: string, next: string | null, expected?: string | null) => {
+    let references: ReturnType<typeof referencedRecordAssets> = [];
+    if (next !== null) {
+      let record: HomeProjectRecord | undefined;
+      try {
+        record = JSON.parse(next) as HomeProjectRecord;
+      } catch {
+        /* Preserve raw recovery records. */
+      }
+      if (record?.draft && record.published) references = referencedRecordAssets(record);
+    }
+    if (references.length) await createModelAssetRepository(indexedDB).verify(references);
+    return projectTransaction<boolean>(
       indexedDB,
       "readwrite",
-      [PROJECT_STORE, WORKSPACE_STORE],
+      [PROJECT_STORE, WORKSPACE_STORE, MODEL_ASSET_STORE],
       (tx, request, done) => {
         const store = tx.objectStore(PROJECT_STORE);
         const verify = () =>
@@ -79,14 +100,16 @@ export const createIndexedDbProjectRecordStore = (indexedDB: IDBFactory): Projec
               );
             });
         };
-        if (expected === undefined) replace();
+        const publish = () => publishModelAssetReferences(tx, request, references, replace);
+        if (expected === undefined) publish();
         else
           request(store.get(homeId), (value) => {
             if (storedString(value) !== expected) done(false);
-            else replace();
+            else publish();
           });
       },
     );
+  };
   return {
     read: (homeId) =>
       projectTransaction(indexedDB, "readonly", PROJECT_STORE, (tx, request, done) => {

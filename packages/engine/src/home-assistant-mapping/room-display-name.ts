@@ -1,4 +1,16 @@
-import type { FloorSpec, HomeAssistantAreaRegistryEntry, RuntimeBindingProfile } from "../types";
+import type {
+  FloorSpec,
+  HomeAssistantAreaRegistryEntry,
+  RuntimeBindingProfile,
+  ResolvedHomeBindings,
+  RoomSpec,
+} from "../types";
+
+export const resolvedRoomDisplayNames = (
+  rooms: readonly RoomSpec[],
+  bindings: ResolvedHomeBindings["rooms"],
+) =>
+  Object.fromEntries(rooms.map((room) => [room.id, bindings[room.id]?.displayName ?? room.name]));
 
 export const runtimeRoomDisplayName = ({
   floor,

@@ -3,7 +3,7 @@
 Construct is an implemented 2D plan editor. Two-finger trackpad scrolling pans
 the plan without clicking or changing tools, including during construction.
 Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, Wall, Door,
-Window, Passage, Floor, Pool, Hedge, Measure, and Pan. Users can edit wall endpoints and
+Window, Passage, Floor, Pool, Boundary, Measure, and Pan. Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
 also controls default wall/ceiling settings. Select a door, window, or passage and
@@ -85,13 +85,13 @@ issues are currently displayed. Explore opens an eye-level draft preview with
 non-operative HA controls. Editor changes remain browser-local until exported;
 Apply changes the browser's Home view.
 
-Hedge (H) draws connected segments with the shared drag and snapping controller.
+Boundary (H) draws connected segments with the shared drag and snapping controller.
 Choose Clipped box, Rounded, Bushy, Tall mixed hedge (oleander and evergreen
 laurel), or Ivy-covered wall from a thumbnail grid using Arrange’s shared preview
 renderer and cache. New styles use suitable default dimensions; restyling an
 existing hedge retains its height and width. Both dimensions remain editable. Select a
 hedge to move it or drag either endpoint; deletion, undo/redo, project export,
-and Apply preserve hedges. Procedural toon hedges participate in walk collision.
+and Apply preserve boundaries. The picker retains all five hedge styles and adds Picket fence, Privacy fence, Post and rail, Metal fence, and Low masonry wall. Existing `hedges` records, IDs, style IDs and dimensions remain unchanged; new styles use the same record and lifecycle. Restyling retains dimensions. All styles are procedural toon geometry and block walking across their continuous segment envelope, including gaps between rails or bars. Leave explicit segment gaps for entrances; garden and driveway gates are deferred.
 
 Wall, hedge, pool, and custom floor outlines share segment drawing gestures, snapping,
 angle references, and edge measurements. Pool and floor outline editing shares
@@ -274,3 +274,49 @@ and platform/platform interior overlaps are errors; shared boundaries are valid.
 These edits use ordinary workspace history, autosave, export/import and Save.
 Basements, split-level decks, supports, pergolas and converting rooms to platforms
 remain outside this tool.
+
+The North disclosure opens a compass dial around the active floor plan, with four
+cardinal directions, five-degree ticks and longer fifteen-degree marks. Dragging
+rotates the whole dial while architecture remains fixed. Arrow keys rotate five
+degrees (one with Shift); Home resets the preview to zero. Confirm direction makes
+one undoable home-wide edit; Cancel or Escape discards the preview. Other editor
+controls and shortcuts are suspended during the session. The plan temporarily
+fits inside the dial and restores its previous camera pose on exit. The setting
+uses ordinary autosave, import/export and Save; only Save publishes it to Home.
+
+Wall Finish includes Edge color: Auto (the default, omitted in JSON) or Custom.
+Custom persists `WallSpec.edgeColor` and applies to end caps, top/bottom caps
+and opening reveals. Auto inherits the two authored face colors when they match;
+otherwise it inherits an authored exterior color, falling back to the general interior wall finish. Different face colors remain unchanged.
+Shared horizontal junction caps retain the general finish when owner edge finishes
+disagree. The setting participates in undo/redo, autosave and workspace import/export.
+
+Construct’s floor palette includes Square tile, Rectangular tile (staggered), and
+Checkerboard tile. Their Tile color picker changes the ceramic color while keeping
+neutral grout (and the checkerboard’s cream alternate tiles). Reset color restores
+the preset default. Optional six-digit hex `color` on these preset finishes survives
+history, draft reload, Save, duplication, and import/export; omitted color preserves
+existing projects. Patterns are generated in memory and rendered with toon materials.
+
+Selected doors and windows expose Finish color in Details, including garage,
+sliding, glass, and steel-arched designs. The optional six-digit hex `color`
+override paints the door leaf and frame or window frame/muntins; glass and
+hardware retain their original finishes. Reset color removes the override and
+restores the original multi-tone palette. Color follows ordinary opening
+history, autosave, Apply, and import/export. Passages have no color picker.
+
+Horizontal caps are partitioned by finish ownership before triangulation so adjacent
+wall colors do not bleed across their boundary. Overlapping junction ownership
+with different edge finishes retains the general interior finish.
+
+Wall Finish exposes Exterior and Interior for exterior walls. Interior walls use
+one Wall color by default; Different colors on each side reveals independently
+editable faces. Side labels use adjacent room names when unambiguous, otherwise
+Side A / Side B. Hovering or focusing a color control highlights the corresponding
+wall face on the plan. Turning the toggle off copies Side A's color to both faces.
+Reset removes that face's override and restores the home's palette; resetting
+Exterior also removes a pre-existing override on its exterior face. These edits
+use the existing faceColors metadata, undo/redo, autosave and Save/import/export.
+The two-sided disclosure is editor state; differing stored face colors reopen it.
+Interior walls with differing faces use the general interior finish for Auto edges,
+even if an old exteriorColor value remains from their drawing history.

@@ -1,0 +1,139 @@
+.north-orientation {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #35483c;
+  background: transparent;
+  z-index: 15;
+  overflow: hidden;
+}
+.north-orientation__heading {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  font-size: var(--editor-text-control);
+}
+.north-orientation__heading strong {
+  font-size: var(--editor-text-body);
+}
+.north-orientation__heading span {
+  color: #687267;
+}
+.north-orientation__area {
+  position: absolute;
+  inset: 82px 24px 80px;
+  display: grid;
+  place-items: center;
+}
+.north-orientation__dial {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.north-orientation__dial:active {
+  cursor: grabbing;
+}
+.north-orientation__dial svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.north-orientation__ring {
+  fill: none;
+  stroke: #35483c;
+  stroke-width: 0.6;
+  opacity: 0.45;
+}
+.north-orientation__tick {
+  stroke: #35483c;
+  stroke-width: 0.7;
+  opacity: 0.45;
+}
+.north-orientation__major {
+  stroke: #35483c;
+  stroke-width: 1.5;
+}
+.north-orientation__cardinal {
+  fill: #35483c;
+  font-weight: 700;
+  font-size: 16px;
+}
+.north-orientation__north {
+  fill: var(--preview-accent);
+  font-weight: 700;
+  font-size: 18px;
+}
+.north-orientation__actions {
+  position: absolute;
+  bottom: 20px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.north-orientation__angle {
+  font-variant-numeric: tabular-nums;
+  min-width: 42px;
+  text-align: center;
+  color: #687267;
+}
+@media (max-width: 760px) {
+  .north-orientation__heading {
+    top: 0;
+    gap: 2px;
+  }
+  .north-orientation__heading span {
+    max-width: 310px;
+    font-size: 12px;
+  }
+  .north-orientation__area {
+    inset: 66px 12px 62px;
+  }
+  .north-orientation__actions {
+    bottom: 8px;
+    gap: 6px;
+  }
+  .north-orientation__actions .editor-button {
+    padding: 7px 10px;
+    min-height: 36px;
+  }
+}
+.direction-preview.is-orienting-north .editor-header,
+.direction-preview.is-orienting-north .editor-floor-controls {
+  visibility: hidden;
+}
+.direction-preview.is-orienting-north .direction-rail {
+  opacity: 0.5;
+}
+.direction-preview.is-orienting-north .build-tutorial {
+  visibility: hidden;
+}
+@media (max-width: 760px) {
+  .direction-preview.is-orienting-north .direction-preview__model {
+    top: 0;
+    bottom: 0;
+  }
+  .direction-preview.is-orienting-north .direction-rail {
+    display: none;
+  }
+}

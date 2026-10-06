@@ -1,3 +1,4 @@
+import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinishPreview";
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
   FloorPicker,
@@ -38,6 +39,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const controller = useHomeEditorController(props);
   const {
     editorProject,
+    northOrientation,
     setActionBarItems,
     focusRoom,
     floorNavigation,
@@ -238,7 +240,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   }, [constructEditor.tool, stairPlacement]);
   const placingWalkStart = mode === "construct" && walkStartFloor === activeFloorId;
   const floorControlsDisabled =
-    editingLocked || (unsettled && !reference.adjusting) || Boolean(floorDialog);
+    editingLocked ||
+    northOrientation.active ||
+    (unsettled && !reference.adjusting) ||
+    Boolean(floorDialog);
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
   const addFloorBelow = () => {
     const next = addBottomFloor(snapshot, `floor-${createBrowserUuid()}`);
@@ -255,156 +260,166 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     furnishingEditor.replaceItems([]);
   };
   return (
-    <main
-      className={`direction-preview${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
-      data-editor-mode={shortcutsMode ? "shortcuts" : mode}
-    >
-      {!shortcutsMode && (
-        <HomeEditorScene
-          onStairIssuesChange={setStairLiveIssues}
-          onNameFocusHandled={() => setNameFocusRequest(null)}
-          nameFocusRequest={nameFocusRequest}
-          placingWalkStart={placingWalkStart}
-          onWalkStartPlaced={() => setWalkStartFloor(null)}
-          {...controller}
-        />
-      )}
-
-      <div className="editor-floor-controls" inert={publishOpen || previewOpen}>
-        <FloorPicker
-          floors={snapshot.project.floors}
-          selectedId={activeFloorId}
-          disabled={floorControlsDisabled}
-          onSelect={(id) => floorNavigation.selectFloor(id)}
-          onAdd={mode === "construct" ? addFloorAbove : undefined}
-          onAddBelow={mode === "construct" ? addFloorBelow : undefined}
-          onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
-          onRemove={
-            mode === "construct" && !removeDisabledReason
-              ? () => setFloorDialog("remove")
-              : undefined
-          }
-        />
-        {mode === "construct" &&
-          floorReferences.references.map(({ direction, floor, visible }) => (
-            <label key={direction} title={floor.name}>
-              <input
-                type="checkbox"
-                checked={visible}
-                onChange={(event) => floorReferences.setVisible(direction, event.target.checked)}
-              />
-              Show floor {direction}
-            </label>
-          ))}
-      </div>
-      {mode === "construct" && stairDialog && (
-        <StairDetails
-          key={`${activeFloorId}:${stairDialog.id}`}
-          registries={stairRegistries}
-          liveIssues={stairLiveIssues}
-          project={snapshot.project}
-          stair={
-            snapshot.project.stairs.find((stair) => stair.id === stairDialog.id) ?? stairDialog
-          }
-          onCancel={() => setStairDialog(null)}
-          onSave={(stair) => {
-            commit({
-              ...snapshot,
-              project: {
-                ...snapshot.project,
-                stairs: [...snapshot.project.stairs.filter((s) => s.id !== stair.id), stair],
-              },
-            });
-          }}
-        />
-      )}
-      {floorDialog && (
-        <FloorManagementDialog
-          action={floorDialog}
-          onRemove={!removeDisabledReason ? () => setFloorDialog("remove") : undefined}
-          removeDisabledReason={removeDisabledReason}
-          name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
-          height={
-            snapshot.project.floors.find((floor) => floor.id === activeFloorId)!
-              .floorToFloorHeightMeters
-          }
-          itemCount={
-            snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length
-          }
-          stairCount={
-            snapshot.project.stairs.filter(
-              (stair) =>
-                stair.upperFloorId === activeFloorId || stair.lowerFloorId === activeFloorId,
-            ).length
-          }
-          onCancel={() => setFloorDialog(null)}
-          onSave={(name, height) => {
-            const next =
-              floorDialog === "remove"
-                ? removeFloor(snapshot, activeFloorId)
-                : setFloorHeight(renameFloor(snapshot, activeFloorId, name), activeFloorId, height);
-            commit(next);
-            replaceEditorsFromProject(next.project);
-            setFloorDialog(null);
-          }}
-        />
-      )}
-      <HomeEditorHeader
-        referenceAdjusting={reference.adjusting}
-        {...controller}
-        shortcutsMode={shortcutsMode}
-        onModeTabChange={onModeTabChange}
-      />
-      {shortcutsMode && (
-        <ShortcutThumbnailSurface>
-          <ActionBarEditor
-            walkTools={installedWalkTools}
-            project={editorProject}
-            runtime={runtime}
-            profile={connect.profile}
-            actionMappingEnabled={!!bindingOrigin && runtime.origin === bindingOrigin}
-            deviceModels={deviceModels}
-            roomPictures={roomPictures}
-            roomNames={roomNames}
-            deviceNames={deviceNames}
-            disabled={editingLocked || unsettled || publishOpen || previewOpen}
-            canUndo={workspace.canUndo && !unsettled}
-            canRedo={workspace.canRedo && !unsettled}
-            onUndo={undoProject}
-            onRedo={redoProject}
-            onChange={setActionBarItems}
+    <WallFinishPreviewProvider palette={editorProject.home.palette}>
+      <main
+        className={`direction-preview${northOrientation.active ? " is-orienting-north" : ""}${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
+        data-editor-mode={shortcutsMode ? "shortcuts" : mode}
+      >
+        {!shortcutsMode && (
+          <HomeEditorScene
+            onStairIssuesChange={setStairLiveIssues}
+            onNameFocusHandled={() => setNameFocusRequest(null)}
+            nameFocusRequest={nameFocusRequest}
+            placingWalkStart={placingWalkStart}
+            onWalkStartPlaced={() => setWalkStartFloor(null)}
+            {...controller}
           />
-        </ShortcutThumbnailSurface>
-      )}
+        )}
 
-      <EditorSidebar
-        {...controller}
-        sidebar={sidebar}
-        iconUrl={iconUrl}
-        shortcutsMode={shortcutsMode}
-        floorControlsDisabled={floorControlsDisabled}
-        addFloorAbove={addFloorAbove}
-        addFloorBelow={addFloorBelow}
-        tutorial={tutorial}
-        tutorialBusy={tutorialBusy}
-        activateTutorial={activateTutorial}
-        stairLiveIssues={stairLiveIssues}
-        importWorkspace={importWorkspace}
-        placingWalkStart={placingWalkStart}
-        setWalkStartFloor={setWalkStartFloor}
-        sidebarIssues={sidebarIssues}
-        onHomeAssistantSettings={props.onHomeAssistantSettings}
-      />
-      <EditorSelectionDetails {...controller} />
-      {autosaveStatus !== "saved" && (
-        <div className={`direction-status is-${autosaveStatus}`}>
-          <span />
-          {autosaveStatus === "saving" && "Saving draft…"}
-          {autosaveStatus === "error" && "Could not save · Changes kept in memory"}
+        <div
+          className="editor-floor-controls"
+          inert={publishOpen || previewOpen || northOrientation.active}
+        >
+          <FloorPicker
+            floors={snapshot.project.floors}
+            selectedId={activeFloorId}
+            disabled={floorControlsDisabled}
+            onSelect={(id) => floorNavigation.selectFloor(id)}
+            onAdd={mode === "construct" ? addFloorAbove : undefined}
+            onAddBelow={mode === "construct" ? addFloorBelow : undefined}
+            onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
+            onRemove={
+              mode === "construct" && !removeDisabledReason
+                ? () => setFloorDialog("remove")
+                : undefined
+            }
+          />
+          {mode === "construct" &&
+            floorReferences.references.map(({ direction, floor, visible }) => (
+              <label key={direction} title={floor.name}>
+                <input
+                  type="checkbox"
+                  checked={visible}
+                  onChange={(event) => floorReferences.setVisible(direction, event.target.checked)}
+                />
+                Show floor {direction}
+              </label>
+            ))}
         </div>
-      )}
+        {mode === "construct" && stairDialog && (
+          <StairDetails
+            key={`${activeFloorId}:${stairDialog.id}`}
+            registries={stairRegistries}
+            liveIssues={stairLiveIssues}
+            project={snapshot.project}
+            stair={
+              snapshot.project.stairs.find((stair) => stair.id === stairDialog.id) ?? stairDialog
+            }
+            onCancel={() => setStairDialog(null)}
+            onSave={(stair) => {
+              commit({
+                ...snapshot,
+                project: {
+                  ...snapshot.project,
+                  stairs: [...snapshot.project.stairs.filter((s) => s.id !== stair.id), stair],
+                },
+              });
+            }}
+          />
+        )}
+        {floorDialog && (
+          <FloorManagementDialog
+            action={floorDialog}
+            onRemove={!removeDisabledReason ? () => setFloorDialog("remove") : undefined}
+            removeDisabledReason={removeDisabledReason}
+            name={snapshot.project.floors.find((floor) => floor.id === activeFloorId)!.name}
+            height={
+              snapshot.project.floors.find((floor) => floor.id === activeFloorId)!
+                .floorToFloorHeightMeters
+            }
+            itemCount={
+              snapshot.project.sceneItems.filter((item) => item.floorId === activeFloorId).length
+            }
+            stairCount={
+              snapshot.project.stairs.filter(
+                (stair) =>
+                  stair.upperFloorId === activeFloorId || stair.lowerFloorId === activeFloorId,
+              ).length
+            }
+            onCancel={() => setFloorDialog(null)}
+            onSave={(name, height) => {
+              const next =
+                floorDialog === "remove"
+                  ? removeFloor(snapshot, activeFloorId)
+                  : setFloorHeight(
+                      renameFloor(snapshot, activeFloorId, name),
+                      activeFloorId,
+                      height,
+                    );
+              commit(next);
+              replaceEditorsFromProject(next.project);
+              setFloorDialog(null);
+            }}
+          />
+        )}
+        <HomeEditorHeader
+          referenceAdjusting={reference.adjusting}
+          {...controller}
+          editingLocked={editingLocked || northOrientation.active}
+          shortcutsMode={shortcutsMode}
+          onModeTabChange={onModeTabChange}
+        />
+        {shortcutsMode && (
+          <ShortcutThumbnailSurface>
+            <ActionBarEditor
+              walkTools={installedWalkTools}
+              project={editorProject}
+              runtime={runtime}
+              profile={connect.profile}
+              actionMappingEnabled={!!bindingOrigin && runtime.origin === bindingOrigin}
+              deviceModels={deviceModels}
+              roomPictures={roomPictures}
+              roomNames={roomNames}
+              deviceNames={deviceNames}
+              disabled={editingLocked || unsettled || publishOpen || previewOpen}
+              canUndo={workspace.canUndo && !unsettled}
+              canRedo={workspace.canRedo && !unsettled}
+              onUndo={undoProject}
+              onRedo={redoProject}
+              onChange={setActionBarItems}
+            />
+          </ShortcutThumbnailSurface>
+        )}
 
-      <EditorCompletionDialogs {...controller} />
-    </main>
+        <EditorSidebar
+          {...controller}
+          sidebar={sidebar}
+          iconUrl={iconUrl}
+          shortcutsMode={shortcutsMode}
+          floorControlsDisabled={floorControlsDisabled}
+          addFloorAbove={addFloorAbove}
+          addFloorBelow={addFloorBelow}
+          tutorial={tutorial}
+          tutorialBusy={tutorialBusy}
+          activateTutorial={activateTutorial}
+          stairLiveIssues={stairLiveIssues}
+          importWorkspace={importWorkspace}
+          placingWalkStart={placingWalkStart}
+          setWalkStartFloor={setWalkStartFloor}
+          sidebarIssues={sidebarIssues}
+          onHomeAssistantSettings={props.onHomeAssistantSettings}
+        />
+        <EditorSelectionDetails {...controller} />
+        {autosaveStatus !== "saved" && (
+          <div className={`direction-status is-${autosaveStatus}`}>
+            <span />
+            {autosaveStatus === "saving" && "Saving draft…"}
+            {autosaveStatus === "error" && "Could not save · Changes kept in memory"}
+          </div>
+        )}
+
+        <EditorCompletionDialogs {...controller} />
+      </main>
+    </WallFinishPreviewProvider>
   );
 }

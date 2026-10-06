@@ -11,13 +11,38 @@ export function doorDesignErrors(
         message,
       });
   };
+  if (door.frontOverlayMeters !== undefined) {
+    require((door.variant === "flush" ||
+      (door.variant === "flush-knob" && door.frontOverlayMeters === 0)) &&
+      typeof door.frontOverlayMeters === "number" &&
+      Number.isFinite(door.frontOverlayMeters) &&
+      door.frontOverlayMeters >= 0 &&
+      door.frontOverlayMeters <=
+        0.03, "frontOverlayMeters", "Flush-front overlay must be between 0 and 3 cm.");
+  }
+  if (door.frontSide !== undefined)
+    require(door.variant === "concealed" &&
+      (door.frontSide === "left" ||
+        door.frontSide ===
+          "right"), "frontSide", "Only concealed doors have a separate flush face.");
   const rollUp = door.operation === "roll-up";
   require(["hinged", "sliding", "roll-up"].includes(
     String(door.operation),
   ), "operation", "Door motion must be hinged, sliding, or roll-up.");
-  require((rollUp ? ["slatted"] : ["panel", "french", "full-glass", "plank"]).includes(
-    String(door.variant),
-  ), "variant", "Door style must match its motion.");
+  require((rollUp
+    ? ["slatted"]
+    : [
+        "panel",
+        "panel-white-lever",
+        "french",
+        "full-glass",
+        "steel-arched",
+        "concealed",
+        "flush-knob",
+        "flush",
+        "plank",
+      ]
+  ).includes(String(door.variant)), "variant", "Door style must match its motion.");
   require(["wood", "white"].includes(
     String(door.finish),
   ), "finish", "Door finish must be wood or white.");

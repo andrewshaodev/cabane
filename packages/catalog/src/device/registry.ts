@@ -693,6 +693,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     defaultRoomType: "living-room",
     component: MotorizedCurtainModel,
     label: "Motorized curtain",
+    defaultColor: "#d8c8ad",
     category: "Covers",
     defaultSize: [2, 2.4, 0.16],
     resizePolicy: { kind: "axes", axes: ["width", "height"] },

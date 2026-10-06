@@ -1,3 +1,4 @@
+import { WallFinishHighlight } from "./WallFinishHighlight";
 import { useEffect, useRef } from "react";
 import { beginSegmentPress, segmentPressAnchors, type SegmentPress } from "./segment-gesture";
 import { ConstructionAlignmentGuide } from "./ConstructionAlignmentGuide";
@@ -103,6 +104,9 @@ export function ConstructionInteractionLayer(
   }, [tool]);
   return (
     <group name="construction-edit-layer">
+      {props.previewFloor && (
+        <WallFinishHighlight floor={props.previewFloor} selection={props.selection} />
+      )}
       <ConstructionAlignmentGuide snap={snap} coordinates={coordinates} />
       <mesh
         name="construction-marquee-surface"
@@ -340,7 +344,7 @@ export function ConstructionInteractionLayer(
           defaultThicknessMeters={tool === "wall" ? draft.interiorWallThicknessMeters : 0.055}
           labelKind={
             tool === "hedge"
-              ? "Hedge"
+              ? "Boundary"
               : tool === "wall"
                 ? "Wall"
                 : tool === "platform"

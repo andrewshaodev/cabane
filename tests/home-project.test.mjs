@@ -269,6 +269,20 @@ await withModules(async (load) => {
     roomFurnishings: {},
   });
 
+  test("wall custom edge color survives portable JSON and rejects malformed values", () => {
+    const project = fixtureHomeProject();
+    project.floors[0].walls[0].edgeColor = "#bcb99b";
+    const parsed = parseHomeProjectSchema(
+      JSON.parse(homeProjectApi.serializeCanonicalJson(project)),
+    );
+    assert.equal(parsed.valid, true);
+    assert.equal(parsed.project.floors[0].walls[0].edgeColor, "#bcb99b");
+    project.floors[0].walls[0].edgeColor = 123;
+    const invalid = parseHomeProjectSchema(project);
+    assert.equal(invalid.valid, false);
+    assert.ok(invalid.issues.some((issue) => issue.path === "floors[0].walls[0].edgeColor"));
+  });
+
   test("exports the home project contract from the engine public API", () => {
     assert.equal(engineApi.defineHomeProject, defineHomeProject);
   });

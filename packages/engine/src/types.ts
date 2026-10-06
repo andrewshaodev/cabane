@@ -105,7 +105,12 @@ export const FLOOR_PATTERN_PRESET_IDS = [
   "terrazzo",
   "dark-walnut",
   "limestone",
+  "square-tile",
+  "subway-tile",
+  "checkerboard-tile",
   "encaustic-tile",
+  "black-white-patchwork",
+  "blue-quatrefoil-tile",
   "sand",
   "gravel",
   "light-dirt",
@@ -119,7 +124,8 @@ export const FLOOR_PATTERN_PRESET_IDS = [
 export type FloorPatternPresetId = (typeof FLOOR_PATTERN_PRESET_IDS)[number];
 
 export type FloorFinishSpec =
-  { kind: "solid"; color: string } | { kind: "preset"; preset: FloorPatternPresetId };
+  | { kind: "solid"; color: string }
+  | { kind: "preset"; preset: FloorPatternPresetId; color?: string };
 
 export interface FloorFinishZoneSpec {
   id: string;
@@ -147,6 +153,7 @@ export interface WallSpec {
   thicknessMeters: number;
   heightMeters?: number;
   exteriorColor?: string;
+  edgeColor?: string;
   faceColors?: {
     left?: string;
     right?: string;
@@ -177,7 +184,16 @@ export interface OpeningBaseSpec {
 }
 
 export type DoorOperation = "hinged" | "sliding" | "roll-up";
-export type DoorVariant = "panel" | "french" | "full-glass" | "plank";
+export type DoorVariant =
+  | "panel"
+  | "panel-white-lever"
+  | "french"
+  | "full-glass"
+  | "steel-arched"
+  | "concealed"
+  | "flush-knob"
+  | "flush"
+  | "plank";
 export type DoorFinish = "wood" | "white";
 
 /** Relative to the owning wall's from → to direction, never the camera. */
@@ -194,6 +210,12 @@ export interface OpeningCoverSlotSpec {
 }
 
 interface DoorBaseSpec extends OpeningBaseSpec {
+  /** Optional six-digit hex finish override; omission preserves the original palette. */
+  color?: string;
+  /** Optional flush-front jamb overlap, capped by adjacent structural margins. */
+  frontOverlayMeters?: number;
+  /** Concealed door finish plane; independent of the swing side. */
+  frontSide?: "left" | "right";
   kind: "door";
   finish: DoorFinish;
   openingSide?: "left" | "right";
@@ -239,9 +261,11 @@ export type DoorConfiguration = DoorSpec extends infer D
   : never;
 
 export type WindowOperation = "fixed" | "casement";
-export type WindowVariant = "plain" | "muntined";
+export type WindowVariant = "plain" | "muntined" | "steel-arched";
 
 export interface WindowSpec extends OpeningBaseSpec, OpeningOrientation {
+  /** Optional six-digit hex finish override; omission preserves the original palette. */
+  color?: string;
   kind: "window";
   operation: WindowOperation;
   variant: WindowVariant;
@@ -293,8 +317,18 @@ export interface SlopedCeilingSpec {
 
 export type CeilingSpec = FlatCeilingSpec | SlopedCeilingSpec;
 
-/** Procedural hedge silhouettes supported by Construct. */
-export type HedgeStyle = "clipped" | "rounded" | "bushy" | "mixed" | "ivy-wall";
+/** Procedural boundary styles. Legacy hedge names remain the portable wire contract. */
+export type HedgeStyle =
+  | "clipped"
+  | "rounded"
+  | "bushy"
+  | "mixed"
+  | "ivy-wall"
+  | "picket"
+  | "privacy"
+  | "post-rail"
+  | "metal-bars"
+  | "masonry";
 
 export interface HedgeSpec {
   id: string;
@@ -554,6 +588,7 @@ export interface RoomFurnishingsProps {
 }
 
 export interface HomeDeviceModelProps {
+  color?: string;
   variant?: string;
   slot: DeviceSlotSpec;
   state?: EntityStateSnapshot;
@@ -588,6 +623,7 @@ export type HomeDeviceModelComponent = ComponentType<HomeDeviceModelProps>;
 export type HomeOpeningModelComponent = ArchitectureModelComponent;
 
 export interface SceneModelProps {
+  color?: string;
   variant?: string;
   size: readonly [number, number, number];
   entityStatesBySlotId: Readonly<Record<string, EntityStateSnapshot>>;
@@ -632,6 +668,8 @@ export interface SceneModelVariant {
 }
 
 export interface SceneModelEditorDescriptor {
+  /** Enables the fabric color picker; omission keeps a model's original palette. */
+  defaultColor?: string;
   /** Ordered choices sharing size, placement, and bindings. First is the default. */
   variants?: readonly SceneModelVariant[];
   defaultRoomType: RoomType;

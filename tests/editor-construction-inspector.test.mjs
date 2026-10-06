@@ -6,6 +6,16 @@ import { createRoot } from "react-dom/client";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
+  const { wallFinishSides } = await load(
+    "/apps/web/src/editor-preview/construct/wall-finish-sides.ts",
+  );
+  const { WallFinishFields } = await load(
+    "/apps/web/src/editor-preview/construct/WallFinishFields.tsx",
+  );
+  const { WallFinishPreviewProvider } = await load(
+    "/apps/web/src/editor-preview/construct/WallFinishPreview.tsx",
+  );
+
   const { ConstructionInspector } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
   );
@@ -16,6 +26,10 @@ await withModules(async (load) => {
   const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
   );
+  const { OpeningColorControls } = await load(
+    "/apps/web/src/editor-preview/construct/OpeningColorControls.tsx",
+  );
+  const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { OpeningDetails } = await load(
     "/apps/web/src/editor-preview/construct/OpeningDetails.tsx",
@@ -26,6 +40,57 @@ await withModules(async (load) => {
   const { SelectedOpeningActionBar } = await load(
     "/apps/web/src/editor-preview/construct/SelectedOpeningControls.tsx",
   );
+
+  test("window and door color pickers update the published floor preview, undo/redo, and reset", async () => {
+    for (const kind of ["door", "window"]) {
+      await withDom(async ({ dom, root }) => {
+        const floor = ownerHomeProject.floors[0];
+        const id = floor.openings.find((opening) => opening.kind === kind).id;
+        let controller;
+        function Harness() {
+          controller = useConstructEditor(floor);
+          return React.createElement(OpeningColorControls, {
+            opening: controller.draft.openings.find((opening) => opening.id === id),
+            onChange: controller.replaceSelectedOpening,
+          });
+        }
+        await act(async () => root.render(React.createElement(Harness)));
+        await act(async () => controller.selectOpening(id));
+        const input = dom.window.document.querySelector('input[type="color"]');
+        assert.ok(input);
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+        await act(async () => {
+          input.value = "#325a84";
+          input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+        });
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          "#325a84",
+        );
+        await act(async () => controller.undo());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+        await act(async () => controller.redo());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          "#325a84",
+        );
+        const reset = [...dom.window.document.querySelectorAll("button")].find(
+          (button) => button.textContent === "Reset color",
+        );
+        await act(async () => reset.click());
+        assert.equal(
+          controller.previewFloor.openings.find((opening) => opening.id === id).color,
+          undefined,
+        );
+      });
+    }
+  });
 
   const wall = { id: "living-east", from: [0, 0], to: [4.25, 0] };
   const opening = {
@@ -43,8 +108,12 @@ await withModules(async (load) => {
   };
   const editor = (selection, actions = {}) => ({
     previewFloor: {
+      ...neutralDemoManifest.floors[0],
       coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
-      rooms: Array.from({ length: 3 }),
+      rooms: Array.from({ length: 3 }, (_, i) => ({
+        ...neutralDemoManifest.floors[0].rooms[0],
+        id: `room-${i}`,
+      })),
       walls: [{ ...wall, classification: "exterior", thicknessMeters: 0.2 }],
     },
     draft: {
@@ -191,7 +260,7 @@ await withModules(async (load) => {
       });
       assert.deepEqual(calls, [
         ["remember", "#b86f58"],
-        ["wall", { exteriorColor: "#b86f58" }],
+        ["wall", { exteriorColor: "#b86f58", faceColors: undefined }],
       ]);
       calls.length = 0;
 
@@ -381,6 +450,169 @@ await withModules(async (load) => {
       );
       await act(async () => remove.click());
       assert.equal(deletions, 1);
+    });
+  });
+
+  test("face labels and exterior orientation follow wall direction rather than compass position", () => {
+    const floor = structuredClone(neutralDemoManifest.floors[0]);
+    const divider = {
+      id: "divider",
+      from: [2.4, 0],
+      to: [2.4, 3.6],
+      classification: "interior",
+      thicknessMeters: 0.12,
+    };
+    floor.walls.push(divider);
+    floor.rooms = [
+      {
+        name: "Living room",
+        polygon: [
+          [0, 0],
+          [2.4, 0],
+          [2.4, 3.6],
+          [0, 3.6],
+        ],
+      },
+      {
+        name: "Kitchen",
+        polygon: [
+          [2.4, 0],
+          [4.8, 0],
+          [4.8, 3.6],
+          [2.4, 3.6],
+        ],
+      },
+    ];
+    assert.equal(wallFinishSides(divider, floor).roomLabel("left"), "Living room side");
+    assert.equal(wallFinishSides(divider, floor).roomLabel("right"), "Kitchen side");
+    const reversed = { ...divider, from: divider.to, to: divider.from };
+    assert.equal(wallFinishSides(reversed, floor).roomLabel("left"), "Kitchen side");
+    for (const wall of floor.walls.filter((w) => w.classification === "exterior")) {
+      assert.equal(wallFinishSides(wall, floor).exteriorSide, "right");
+      const flipped = { ...wall, from: wall.to, to: wall.from };
+      const flippedFloor = {
+        ...floor,
+        walls: floor.walls.map((w) => (w.id === wall.id ? flipped : w)),
+      };
+      assert.equal(wallFinishSides(flipped, flippedFloor).exteriorSide, "left");
+    }
+  });
+
+  test("wall face controls use the home palette, preserve the opposite face, and reset through history", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
+    for (const isExterior of [true, false])
+      await withDom(async ({ dom, root }) => {
+        const floor = structuredClone(neutralDemoManifest.floors[0]);
+        const id = isExterior ? "north-wall" : "divider";
+        if (!isExterior)
+          floor.walls.push({
+            id,
+            from: [2.4, 0.5],
+            to: [2.4, 3],
+            classification: "interior",
+            thicknessMeters: 0.12,
+          });
+        let controller;
+        function Harness() {
+          controller = useConstructEditor(floor);
+          return React.createElement(
+            WallFinishPreviewProvider,
+            { palette: { interior: "#112233", exterior: "#445566" } },
+            React.createElement(WallFinishFields, {
+              editor: controller,
+              wall: controller.draft.walls.find((w) => w.id === id),
+              isExterior,
+            }),
+          );
+        }
+        await act(async () => root.render(React.createElement(Harness)));
+        await act(async () => controller.selectWall(id));
+        const wallNow = () => controller.previewFloor.walls.find((w) => w.id === id);
+        const input = (label) => dom.window.document.querySelector(`[aria-label="${label}"]`);
+        const paint = async (label, color) =>
+          act(async () => {
+            input(label).value = color;
+            input(label).dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+            context.mock.timers.tick(160);
+          });
+        assert.equal(input(isExterior ? "Wall interior color" : "Wall color").value, "#112233");
+        if (isExterior) {
+          assert.equal(input("Wall exterior color").value, "#445566");
+          await paint("Wall interior color", "#aabbcc");
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc" });
+          await paint("Wall exterior color", "#223344");
+          assert.equal(wallNow().exteriorColor, "#223344");
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc" });
+          await act(async () =>
+            dom.window.document.querySelector('[aria-label="Reset exterior color"]').click(),
+          );
+          assert.equal(wallNow().exteriorColor, undefined);
+          assert.equal(input("Wall exterior color").value, "#445566");
+          await act(async () => controller.undo());
+          assert.equal(wallNow().exteriorColor, "#223344");
+          await act(async () => controller.redo());
+          assert.equal(wallNow().exteriorColor, undefined);
+        } else {
+          await paint("Wall color", "#aabbcc");
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc", right: "#aabbcc" });
+          await act(async () =>
+            dom.window.document.querySelector('input[type="checkbox"]').click(),
+          );
+          await paint("Side B color", "#223344");
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc", right: "#223344" });
+          await act(async () => controller.undo());
+          assert.equal(wallNow().faceColors.right, "#aabbcc");
+          await act(async () => controller.redo());
+          assert.equal(wallNow().faceColors.right, "#223344");
+          await act(async () =>
+            dom.window.document.querySelector('[aria-label="Reset side b color"]').click(),
+          );
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc" });
+          await act(async () =>
+            dom.window.document.querySelector('input[type="checkbox"]').click(),
+          );
+          assert.deepEqual(wallNow().faceColors, { left: "#aabbcc", right: "#aabbcc" });
+          await act(async () =>
+            dom.window.document.querySelector('[aria-label="Reset wall color"]').click(),
+          );
+          assert.equal(wallNow().faceColors, undefined);
+        }
+      });
+  });
+
+  test("wall inspector switches edge color between Auto and Custom", async () => {
+    await withDom(async ({ dom, root }) => {
+      const changes = [],
+        controller = editor(
+          { kind: "wall", id: wall.id },
+          { updateSelectedWallMetadata: (change) => changes.push(change) },
+        );
+      controller.draft.walls[0].faceColors = { left: "#bcb99b", right: "#bcb99b" };
+      await act(async () =>
+        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+      );
+      let mode = dom.window.document.querySelector('[aria-label="Wall edge color mode"]');
+      assert.equal(mode.value, "auto");
+      assert.equal(dom.window.document.querySelector('[aria-label="Wall edge color"]'), null);
+      await act(async () => {
+        mode.value = "custom";
+        mode.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      assert.deepEqual(changes.pop(), { edgeColor: "#bcb99b" });
+      controller.draft.walls[0].edgeColor = "#bcb99b";
+      await act(async () =>
+        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+      );
+      assert.equal(
+        dom.window.document.querySelector('[aria-label="Wall edge color"]').value,
+        "#bcb99b",
+      );
+      mode = dom.window.document.querySelector('[aria-label="Wall edge color mode"]');
+      await act(async () => {
+        mode.value = "auto";
+        mode.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      assert.deepEqual(changes.pop(), { edgeColor: undefined });
     });
   });
 

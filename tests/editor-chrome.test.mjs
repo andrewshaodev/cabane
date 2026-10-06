@@ -109,7 +109,7 @@ await withModules(async (load) => {
           "Window",
           "Passage",
           "Floor",
-          "Hedge",
+          "Boundary",
           "Pool",
           "Measure",
           "Undo",
@@ -118,7 +118,7 @@ await withModules(async (load) => {
       );
       assert.deepEqual(
         buttons.slice(0, 9).map((button) => button.textContent),
-        ["Select", "Wall", "Door", "Window", "Passage", "Floor", "Hedge", "Pool", "Measure"],
+        ["Select", "Wall", "Door", "Window", "Passage", "Floor", "Boundary", "Pool", "Measure"],
       );
       assert.equal(
         document.querySelector('[aria-label="Wall"]').getAttribute("aria-pressed"),

@@ -1,4 +1,6 @@
 import { makeStairProject, emptyExtensions } from "./fixtures/multiple-floors";
+import { personalScaleFixture, personalFixtureAssets } from "./fixtures/personal-models-scale";
+import { createModelAssetRepository } from "@cabane/engine";
 import { composeHomeManifest } from "@cabane/engine";
 import { StrictMode, useEffect, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
@@ -25,6 +27,8 @@ import "@cabane/engine/styles.css";
 const params = new URL(window.location.href).searchParams;
 const stage = params.get("stage") ?? "room";
 const scenario = params.get("scenario") ?? "disconnected";
+const personal = stage === "scale-personal" ? personalScaleFixture() : null;
+if (personal) await createModelAssetRepository(window.indexedDB).restore(personalFixtureAssets);
 const stagedManifest =
   stage === "building"
     ? composeHomeManifest(makeStairProject(), emptyExtensions)
@@ -41,13 +45,14 @@ const mappingManifest = {
     name: "Mapping playground",
   },
 };
-const manifest = scenario === "mapping" ? mappingManifest : stagedManifest;
+const manifest = personal?.manifest ?? (scenario === "mapping" ? mappingManifest : stagedManifest);
 
 if (scenario === "connected" || scenario === "unavailable") {
   saveRuntimeBindingProfile(
     window.localStorage,
-    stage === "scale" ? scaleMappingRuntime.origin! : connectedCatalogRuntime.origin!,
-    stage === "scale" ? scaleFixtureProfile : equippedFixtureProfile,
+    personal?.runtime.origin ??
+      (stage === "scale" ? scaleMappingRuntime.origin! : connectedCatalogRuntime.origin!),
+    personal?.profile ?? (stage === "scale" ? scaleFixtureProfile : equippedFixtureProfile),
   );
 }
 
@@ -55,7 +60,7 @@ let content: ReactNode = (
   <CabaneDashboard
     manifest={manifest}
     architectureModels={stableArchitectureModelRegistry}
-    deviceModels={stableDeviceRegistry}
+    deviceModels={personal?.registries.deviceModels ?? stableDeviceRegistry}
   />
 );
 
@@ -110,9 +115,11 @@ if (scenario === "mapping") {
 } else if (scenario === "connected" || scenario === "unavailable") {
   const snapshot =
     scenario === "connected"
-      ? stage === "scale"
-        ? scaleMappingRuntime
-        : connectedCatalogRuntime
+      ? personal
+        ? personal.runtime
+        : stage === "scale"
+          ? scaleMappingRuntime
+          : connectedCatalogRuntime
       : unavailableCatalogRuntime;
   content = (
     <HomeAssistantRuntimeSnapshotTestProvider snapshot={snapshot}>

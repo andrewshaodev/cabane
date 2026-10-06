@@ -36,6 +36,41 @@ export const HEDGE_STYLES = [
     heightMeters: 2.2,
     widthMeters: 0.75,
   },
+  {
+    id: "picket",
+    label: "Picket fence",
+    description: "Painted pointed timber",
+    heightMeters: 1.1,
+    widthMeters: 0.2,
+  },
+  {
+    id: "privacy",
+    label: "Privacy fence",
+    description: "Solid horizontal timber panels",
+    heightMeters: 1.8,
+    widthMeters: 0.2,
+  },
+  {
+    id: "post-rail",
+    label: "Post and rail",
+    description: "Open timber pasture rails",
+    heightMeters: 1.2,
+    widthMeters: 0.2,
+  },
+  {
+    id: "metal-bars",
+    label: "Metal fence",
+    description: "Slender vertical steel bars",
+    heightMeters: 1.5,
+    widthMeters: 0.2,
+  },
+  {
+    id: "masonry",
+    label: "Low masonry wall",
+    description: "Stone blocks with coping",
+    heightMeters: 0.9,
+    widthMeters: 0.3,
+  },
 ] as const satisfies readonly {
   id: HedgeStyle;
   label: string;

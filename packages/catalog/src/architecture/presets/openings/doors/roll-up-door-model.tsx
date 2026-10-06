@@ -4,6 +4,7 @@ import {
   type ArchitectureModelProps,
   type DoorSpec,
 } from "@cabane/engine";
+import { omitUndefinedProperties } from "@cabane/engine";
 import { RollUpDoorFrame } from "./roll-up-door-frame";
 import { RollUpDoorSlats } from "./roll-up-door-slats";
 export function RollUpDoorModel({
@@ -22,12 +23,19 @@ export function RollUpDoorModel({
       position={[placement.start[0], opening.sillHeightMeters, placement.start[1]]}
       rotation={[0, placement.rotationY, 0]}
     >
-      <RollUpDoorFrame width={width} height={height} depth={wall.thicknessMeters} {...geometry} />
+      <RollUpDoorFrame
+        {...omitUndefinedProperties({ color: opening.color })}
+        width={width}
+        height={height}
+        depth={wall.thicknessMeters}
+        {...geometry}
+      />
       <group position={[width / 2, 0, 0]}>
         <RollUpDoorSlats
           width={geometry.clearWidth}
           {...geometry}
           finish={opening.finish}
+          {...omitUndefinedProperties({ color: opening.color })}
           side={opening.openingSide === "left" ? -1 : 1}
         />
       </group>

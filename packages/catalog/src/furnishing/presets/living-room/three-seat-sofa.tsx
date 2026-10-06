@@ -6,7 +6,13 @@ import { TailoredCushion } from "./sofa-upholstery";
 export const THREE_SEAT_SOFA_SIZE = [2.2, 0.84, 0.94] as const;
 
 /** Warm contemporary sofa. Floor origin, with the seats facing +Z. */
-export function ThreeSeatSofa({ size = THREE_SEAT_SOFA_SIZE }: { size?: SceneItemSize }) {
+export function ThreeSeatSofa({
+  size = THREE_SEAT_SOFA_SIZE,
+  color,
+}: {
+  size?: SceneItemSize;
+  color?: string;
+}) {
   return (
     <group
       name="three-seat-sofa"
@@ -31,13 +37,13 @@ export function ThreeSeatSofa({ size = THREE_SEAT_SOFA_SIZE }: { size?: SceneIte
       <RoundedFurniturePanel
         size={[2.12, 0.25, 0.88]}
         position={[0, 0.235, 0.01]}
-        color="#c8b9a1"
+        color={color ?? "#c8b9a1"}
         radius={0.055}
       />
       <RoundedFurniturePanel
         size={[1.86, 0.47, 0.16]}
         position={[0, 0.545, -0.38]}
-        color="#cbbda7"
+        color={color ?? "#cbbda7"}
         radius={0.035}
       />
       {[-1, 1].map((side) => (
@@ -46,7 +52,7 @@ export function ThreeSeatSofa({ size = THREE_SEAT_SOFA_SIZE }: { size?: SceneIte
           name="sofa-arm"
           size={[0.22, 0.47, 0.94]}
           position={[side * 0.99, 0.415, 0]}
-          color="#d6c8b2"
+          color={color ?? "#d6c8b2"}
           radius={0.07}
         />
       ))}
@@ -56,14 +62,14 @@ export function ThreeSeatSofa({ size = THREE_SEAT_SOFA_SIZE }: { size?: SceneIte
             name="sofa-seat-cushion"
             size={[0.582, 0.145, 0.67]}
             position={[x, 0.4175, 0.08]}
-            color="#e2d5bf"
+            color={color ?? "#e2d5bf"}
           />
           <TailoredCushion
             name="sofa-back-cushion"
             size={[0.582, 0.17, 0.4]}
             position={[x, 0.631, -0.275]}
             rotation={[Math.PI / 2 - 0.12, 0, 0]}
-            color="#ded0b9"
+            color={color ?? "#ded0b9"}
           />
         </group>
       ))}

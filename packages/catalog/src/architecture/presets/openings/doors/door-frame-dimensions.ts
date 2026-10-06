@@ -1,0 +1,2 @@
+export const DOOR_FRAME_JAMB_WIDTH_METERS = 0.07;
+export const DOOR_FRAME_EXTRA_DEPTH_METERS = 0.025;

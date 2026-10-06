@@ -4,16 +4,15 @@ import { MapControls, OrthographicCamera } from "@react-three/drei";
 
 import { useThree } from "@react-three/fiber";
 
-import { type OrthographicCamera as ThreeOrthographicCamera } from "three";
+import { Spherical, Vector3, type OrthographicCamera as ThreeOrthographicCamera } from "three";
 
-import { useCallback, useEffect, useRef, useState, type Ref } from "react";
-
-import { worldBoundsForPolygon } from "./geometry";
+import { useCallback, useEffect, useMemo, useRef, useState, type Ref } from "react";
 
 import { worldBoundsForFloorScene } from "./pools/pool-footprint";
 
 import type { FloorSpec, RoomSpec } from "./types";
 import { ROOF_MAX_RISE_METERS, ROOF_THICKNESS_METERS } from "./roof/roof-settings";
+import { RoomCameraTransition, type RoomFocusFrame } from "./room-navigation";
 
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
@@ -127,11 +126,14 @@ interface OrbitCameraProps {
   elevation?: number;
   buildingFloors?: readonly (FloorSpec & { elevationMeters?: number })[];
   room?: RoomSpec;
+  roomFrame?: RoomFocusFrame | null;
+  roomRequestKey?: number;
+  reducedMotion?: boolean;
   resetKey: number;
 }
 
 export function OrbitCamera(props: OrbitCameraProps) {
-  return <OrbitCameraRig key={`${props.resetKey}-${props.room?.id ?? "overview"}`} {...props} />;
+  return <OrbitCameraRig key={props.resetKey} {...props} />;
 }
 
 function OrbitCameraRig({
@@ -141,15 +143,27 @@ function OrbitCameraRig({
   buildingFloors,
   floor,
   room,
+  roomFrame = null,
+  roomRequestKey = 0,
+  reducedMotion = false,
 }: OrbitCameraProps) {
+  const orbitRef = useRef<OrbitControlsImpl | null>(null);
+  const interruptRoomFlight = useRef<(() => void) | null>(null);
+  const attachControls = useCallback(
+    (controls: OrbitControlsImpl | null) => {
+      orbitRef.current = controls;
+      if (typeof controlsRef === "function") controlsRef(controls);
+      else if (controlsRef) controlsRef.current = controls;
+    },
+    [controlsRef],
+  );
+  // MapControls reconnects its pointer listeners when onStart changes. Keep the
+  // callback stable so dashboard updates cannot strand an active touch/drag.
+  const interruptNavigation = useCallback(() => interruptRoomFlight.current?.(), []);
   const { width, height } = useThree((state) => state.size);
-  // Fit on entry or an explicit reset; scene visibility must preserve the live pose.
-  const [framing] = useState(() => {
-    const polygon = room?.polygon ?? floor.footprint;
-    const bounds = room
-      ? worldBoundsForPolygon(polygon, floor.coordinates)
-      : worldBoundsForFloorScene(floor);
-    if (!room && buildingFloors?.length) {
+  const defaultFraming = useMemo(() => {
+    const bounds = worldBoundsForFloorScene(floor);
+    if (buildingFloors?.length) {
       for (const level of buildingFloors) {
         const other = worldBoundsForFloorScene(level);
         bounds.minX = Math.min(bounds.minX, other.minX);
@@ -171,15 +185,13 @@ function OrbitCameraRig({
           buildingBase
         : 0) + (showRoof ? ROOF_MAX_RISE_METERS + ROOF_THICKNESS_METERS + 0.16 : 0);
     const span = Math.max(bounds.width, bounds.depth, buildingHeight, 2);
-    const stacked = !room && (showRoof || (buildingFloors?.length ?? 0) > 1);
-    const targetHeight = stacked
-      ? buildingBase + buildingHeight / 2
-      : (room ? 0.55 : 0.2) + elevation;
+    const stacked = showRoof || (buildingFloors?.length ?? 0) > 1;
+    const targetHeight = stacked ? buildingBase + buildingHeight / 2 : 0.2 + elevation;
     const zoom = cameraZoomForViewport(
       width,
       height,
       stacked ? { width: bounds.width, depth: bounds.depth + buildingHeight * 0.75 } : bounds,
-      Boolean(room),
+      false,
     );
     return {
       position: [
@@ -190,7 +202,18 @@ function OrbitCameraRig({
       target: [bounds.centerX, targetHeight, bounds.centerZ] as const,
       zoom,
     };
-  });
+  }, [buildingFloors, elevation, floor, height, showRoof, width]);
+  // Visibility and floor changes preserve the live pose. Overview explicitly
+  // returns to the same framing as a fresh entry at the current viewport size.
+  const [framing] = useState(defaultFraming);
+  const defaultPose = useMemo(() => {
+    const target = new Vector3(...defaultFraming.target);
+    return {
+      target,
+      offset: new Spherical().setFromVector3(new Vector3(...defaultFraming.position).sub(target)),
+      zoom: defaultFraming.zoom,
+    };
+  }, [defaultFraming]);
   const aimInitialCamera = useCallback(
     (camera: ThreeOrthographicCamera | null) => {
       camera?.lookAt(...framing.target);
@@ -209,7 +232,8 @@ function OrbitCameraRig({
       />
       <OrbitDoubleTapZoom />
       <MapControls
-        ref={controlsRef}
+        ref={attachControls}
+        onStart={interruptNavigation}
         makeDefault
         target={framing.target}
         enablePan
@@ -222,9 +246,21 @@ function OrbitCameraRig({
         zoomSpeed={1.1}
         minPolarAngle={0}
         maxPolarAngle={1.28}
-        minZoom={room ? 20 : 8}
+        minZoom={room ? 1 : 8}
         maxZoom={ORBIT_MAX_ZOOM}
         zoomToCursor
+      />
+      <RoomCameraTransition
+        controls={orbitRef}
+        interruptRef={interruptRoomFlight}
+        defaultPose={defaultPose}
+        enabled={!showRoof}
+        floor={floor}
+        room={room}
+        elevation={elevation}
+        frame={roomFrame}
+        requestKey={roomRequestKey}
+        reducedMotion={reducedMotion}
       />
     </group>
   );

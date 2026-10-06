@@ -35,6 +35,72 @@ await withModules(async (load) => {
   const floor = neutralDemoManifest.floors[0];
   const { stableFurnishingRegistry } = await load("/packages/catalog/src/furnishing/index.ts");
 
+  test("fabric overrides reach mounted curtains and sofas without changing default palettes", async () => {
+    const colors = ["#325a84", "#c03f68"];
+    for (const modelId of [
+      "single-window-curtain",
+      "children-curtains",
+      "motorized-curtain",
+      "three-seat-sofa",
+      "sectional-sofa",
+    ]) {
+      const definition = (
+        modelId === "motorized-curtain" ? stableDeviceRegistry : stableFurnishingRegistry
+      )[modelId];
+      const item = {
+        id: modelId,
+        floorId: floor.id,
+        modelId,
+        size: definition.defaultSize,
+        placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
+        ...(modelId === "motorized-curtain"
+          ? {
+              kind: "device",
+              entitySlots: [
+                {
+                  id: "curtain-cover",
+                  presentation: { label: "Curtain", dashboardRole: "primary" },
+                  compatibleDomains: ["cover"],
+                  deviceRole: "primary",
+                  autoMap: "manual",
+                },
+              ],
+            }
+          : { kind: "furnishing" }),
+      };
+      const props = {
+        item,
+        floor,
+        furnishingModels: stableFurnishingRegistry,
+        deviceModels: stableDeviceRegistry,
+        entityStatesBySlotId: {},
+        liveMediaByEntityId: {},
+        reducedMotion: true,
+        walkMode: false,
+        onInteract() {},
+      };
+      const renderer = await create(createElement(SceneItemRenderer, props));
+      const meshColors = () => {
+        const found = [];
+        renderer.scene.instance.traverse((object) => {
+          if (object.isMesh && object.material?.type === "MeshToonMaterial")
+            found.push(object.material.color.getHexString());
+        });
+        return found.sort();
+      };
+      const original = meshColors();
+      for (const color of colors) {
+        await renderer.update(
+          createElement(SceneItemRenderer, { ...props, item: { ...item, color } }),
+        );
+        assert.ok(meshColors().includes(color.slice(1)), modelId);
+      }
+      await renderer.update(createElement(SceneItemRenderer, props));
+      assert.deepEqual(meshColors(), original, `${modelId}: reset restores exact palette`);
+      await renderer.unmount();
+    }
+  });
+
   test("every built-in furnishing supports independent dimensions and height undo/redo", () => {
     for (const [modelId, definition] of Object.entries(stableFurnishingRegistry)) {
       const original = {

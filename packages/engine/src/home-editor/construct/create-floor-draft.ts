@@ -50,6 +50,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
     thicknessMeters: wall.thicknessMeters,
     ...(wall.heightMeters ? { heightMeters: wall.heightMeters } : {}),
     ...(wall.exteriorColor ? { exteriorColor: wall.exteriorColor } : {}),
+    ...(wall.edgeColor ? { edgeColor: wall.edgeColor } : {}),
     ...(wall.faceColors ? { faceColors: { ...wall.faceColors } } : {}),
   })),
   openings: floor.openings.map((opening) => {
@@ -81,6 +82,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
         ...(opening.hingeSide !== undefined ? { hingeSide: opening.hingeSide } : {}),
         ...(opening.openingSide !== undefined ? { openingSide: opening.openingSide } : {}),
         glazing: opening.glazing,
+        ...(opening.color !== undefined ? { color: opening.color } : {}),
         ...(opening.muntins ? { muntins: { ...opening.muntins } } : {}),
       };
     return opening.variant === "arched"

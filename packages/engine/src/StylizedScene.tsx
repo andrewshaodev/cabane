@@ -1,3 +1,4 @@
+import { ImportedContourMask } from "./imported-models/contour-mask";
 import { contourFragmentShader } from "./scene-contour-shader";
 import { createContext, useEffect, useMemo, type ReactNode } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -30,11 +31,14 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
     });
     target.depthTexture!.minFilter = NearestFilter;
     target.depthTexture!.magFilter = NearestFilter;
+    const importedMask = new ImportedContourMask();
     const material = new ShaderMaterial({
       depthTest: false,
       depthWrite: false,
       uniforms: {
         beauty: { value: target.texture },
+        importedDepth: { value: importedMask.target.depthTexture },
+        hasImportedModels: { value: false },
         sceneDepth: { value: target.depthTexture },
         texel: { value: new Vector2() },
         nearPlane: { value: 0.1 },
@@ -48,6 +52,7 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
     });
     return {
       target,
+      importedMask,
       material,
       quad: new FullScreenQuad(material),
       size: new Vector2(),
@@ -59,6 +64,7 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
   useEffect(
     () => () => {
       resources.target.dispose();
+      resources.importedMask.dispose();
       resources.material.dispose();
       resources.quad.dispose();
       resources.batches.dispose();
@@ -98,6 +104,13 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
         resources.lod.render(scene, camera, size.y / gl.getPixelRatio(), () =>
           resources.batches.render(gl, scene, camera),
         ),
+      );
+      material.uniforms.hasImportedModels.value = resources.importedMask.render(
+        gl,
+        scene,
+        camera,
+        size.x,
+        size.y,
       );
       gl.setRenderTarget(previousTarget);
       quad.render(gl);

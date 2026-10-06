@@ -29,10 +29,19 @@ await withModules(async (load) => {
   const floor = ownerProjectManifest.floors[0];
   const wall = floor.walls.find((wall) => wall.id === garage.wallId);
 
-  test("six catalog presets round-trip at non-unit scale and placement/history use the configured dimensions", () => {
+  test("catalog presets round-trip at non-unit scale and placement/history use the configured dimensions", () => {
     assert.deepEqual(
       DOOR_PRESETS.map((p) => p.label),
-      ["Panel wood", "Panel white", "French", "Full glass", "Sliding wood", "Garage door"],
+      [
+        "Panel wood",
+        "Panel white",
+        "Panel white · Compact lever",
+        "French",
+        "Full glass",
+        "Sliding wood",
+        "Garage door",
+        "Arched steel glass",
+      ],
     );
     for (const { configuration } of DOOR_PRESETS) {
       const opening = engine.doorFromConfiguration(configuration, 0.5, {

@@ -137,6 +137,7 @@ function DeviceSceneItem({
       rotation={[0, transform.rotationYRadians, 0]}
       scale={scale}
       userData={{
+        walkCollider: item.modelId.startsWith("custom:") && item.placement.kind === "absolute",
         deviceBindingId: item.id,
         deviceModel: item.modelId,
         visualState,
@@ -206,6 +207,7 @@ function DeviceSceneItem({
       <DeviceHoverContext.Provider value={hovered}>
         <Component
           variant={resolveModelVariant(definition, item.variant).id}
+          {...omitUndefinedProperties({ color: item.color })}
           slot={binding}
           {...omitUndefinedProperties({ state: state })}
           {...omitUndefinedProperties({
@@ -286,6 +288,9 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
     return (
       <group
         name={`scene-item-${item.id}`}
+        userData={{
+          walkCollider: item.modelId.startsWith("custom:") && item.placement.kind === "absolute",
+        }}
         position={transform.position}
         rotation={[0, transform.rotationYRadians, 0]}
       >
@@ -293,6 +298,7 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
           <FurnishingContent
             component={definition.component}
             variant={resolveModelVariant(definition, item.variant).id}
+            {...omitUndefinedProperties({ color: item.color })}
             size={item.size}
             entityStatesBySlotId={entityStatesBySlotId}
             reducedMotion={reducedMotion}

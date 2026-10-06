@@ -74,7 +74,49 @@ for (const file of files) {
       relativePath === "packages/engine/src/floor-finishes/textures.ts"
     )
       continue;
+    if (
+      rule.reason === "external model or texture loader" &&
+      relativePath === "packages/engine/src/imported-models/glb-resources.ts"
+    )
+      continue;
+    if (
+      rule.reason === "non-toon visible material" &&
+      [
+        "packages/engine/src/imported-models/ImportedModel.tsx",
+        "apps/web/src/custom-models/ModelImportPreview.tsx",
+      ].includes(relativePath)
+    )
+      continue;
     let inspectedSource = source;
+    if (
+      rule.reason === "runtime remote URL" &&
+      relativePath === "apps/web/src/custom-models/ModelGenerationGuide.tsx"
+    ) {
+      // A navigation link to the public skill repository; never a runtime asset fetch.
+      inspectedSource = inspectedSource.replace(
+        '"https://github.com/cabane-app/agent-skills"',
+        '"public-skill-repository-link"',
+      );
+    }
+    if (
+      rule.reason === "external visual asset reference" &&
+      relativePath === "apps/web/src/custom-models/ModelGenerationGuide.tsx"
+    ) {
+      // One bundled UI illustration for the generation guide, never a scene texture.
+      inspectedSource = inspectedSource.replace(
+        '"./assets/photo-to-model.png"',
+        '"bundled-generation-guide-illustration"',
+      );
+    }
+    if (
+      rule.reason === "external visual asset reference" &&
+      (relativePath.startsWith("packages/engine/src/imported-models/") ||
+        relativePath === "apps/web/src/custom-models/CustomModelCard.tsx")
+    ) {
+      // Local GLB bytes and user downloads only; remote URLs and other assets
+      // remain prohibited, including inside the import owner.
+      inspectedSource = inspectedSource.replace(/\.glb(?=["'`])/g, ".personal-model");
+    }
     if (
       rule.reason === "runtime remote URL" &&
       relativePath === "apps/web/src/editor-plan-import/plan-generation-schema.ts"
@@ -148,7 +190,10 @@ for (const file of files) {
       relativePath === "packages/engine/src/ValidatedDashboardView.tsx"
     ) {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
-      inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
+      inspectedSource = inspectedSource.replace(
+        "https://github.com/cabane-app/cabane-home-assistant/issues",
+        "feedback-navigation",
+      );
     }
     if (
       rule.reason === "external visual asset reference" &&

@@ -13,6 +13,45 @@ import {
 } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
+  const { useRoomModuleOrder } = await load(
+    "/packages/engine/src/home-assistant-dashboard/useRoomModuleOrder.ts",
+  );
+  test("module order isolates homes and rooms, reconciles modules, and tolerates storage failure", async () => {
+    await withDom(async ({ root, dom }) => {
+      let ordering;
+      function Harness({ home = "a", room = "one", ids = ["x", "y", "z"] }) {
+        ordering = useRoomModuleOrder(
+          home,
+          room,
+          ids.map((id) => ({ id })),
+        );
+        return null;
+      }
+      const render = async (props = {}) =>
+        act(async () => root.render(React.createElement(Harness, props)));
+      const ids = () => ordering.ordered.map((module) => module.id);
+      await render();
+      await act(async () => ordering.move("z", "x"));
+      assert.deepEqual(ids(), ["z", "x", "y"]);
+      await render({ home: "b" });
+      assert.deepEqual(ids(), ["x", "y", "z"]);
+      await render({ room: "two" });
+      assert.deepEqual(ids(), ["x", "y", "z"]);
+      await render({ ids: ["x", "z", "new"] });
+      assert.deepEqual(ids(), ["z", "x", "new"]);
+      await act(async () => root.render(null));
+      await render();
+      assert.deepEqual(ids(), ["z", "x", "y"]);
+      dom.window.localStorage.setItem('cabane.room-module-order.v1:["bad","one"]', "{broken");
+      await render({ home: "bad" });
+      assert.deepEqual(ids(), ["x", "y", "z"]);
+      dom.window.Storage.prototype.setItem = () => {
+        throw new Error("Storage unavailable");
+      };
+      await act(async () => ordering.move("z", "x"));
+      assert.deepEqual(ids(), ["z", "x", "y"]);
+    });
+  });
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { resolveHomeAssistantBindings, resolveHomeAssistantPictureUrl } = await load(
     "/packages/engine/src/home-assistant-resolver.ts",

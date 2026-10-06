@@ -1,3 +1,4 @@
+import { createSessionStorageSender } from "./home-assistant-storage-session";
 import { BorrowedHomeAssistantRuntime } from "./BorrowedHomeAssistantRuntime";
 import {
   useHomeAssistantHostSession,
@@ -37,7 +38,6 @@ import {
   EMPTY_STATES,
   HomeAssistantRuntimeContext,
   HomeAssistantRuntimeValue,
-  HomeAssistantRuntimeValueProvider,
 } from "./HomeAssistantRuntimeContext";
 import type {
   EntityId,
@@ -46,7 +46,6 @@ import type {
   HomeAssistantConnectionStatus,
   HomeAssistantDeviceRegistryEntry,
   HomeAssistantEntityRegistryEntry,
-  HomeAssistantRuntimeSnapshot,
 } from "./types";
 
 function HomeAssistantRuntimeProviderImpl({
@@ -74,6 +73,8 @@ function HomeAssistantRuntimeProviderImpl({
     useState<Readonly<Record<EntityId, EntityStateSnapshot>>>(EMPTY_STATES);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
+  const originRef = useRef(normalizedUrl);
+  originRef.current = normalizedUrl;
   const statusRef = useRef(status);
   const connectionRef = useRef<Connection | null>(null);
   const authRef = useRef<Auth | null>(null);
@@ -475,19 +476,15 @@ function HomeAssistantRuntimeProviderImpl({
     };
   }, [status]);
 
-  const sendStorageMessage = useCallback(
-    async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
-      const lifecycle = lifecycleRef.current;
-      const connection = connectionRef.current;
-      if (!connection || statusRef.current !== "connected")
-        throw new Error("Home Assistant is not connected.");
-      const result = await connection.sendMessagePromise<T>(message);
-      if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
-        throw new Error("This Home Assistant session is no longer active.");
-      }
-      return result;
-    },
-    [],
+  const sendStorageMessage = useMemo(
+    () =>
+      createSessionStorageSender(normalizedUrl, () => ({
+        origin: originRef.current,
+        connection: connectionRef.current,
+        status: statusRef.current,
+        lifecycle: lifecycleRef.current,
+      })),
+    [normalizedUrl],
   );
 
   const value = useMemo<HomeAssistantRuntimeValue>(() => {
@@ -579,36 +576,7 @@ export function HomeAssistantRuntimeTestProvider({
   );
 }
 
-export function HomeAssistantRuntimeSnapshotTestProvider({
-  snapshot,
-  children,
-}: {
-  snapshot: HomeAssistantRuntimeSnapshot;
-  children: ReactNode;
-}) {
-  const value = useMemo<HomeAssistantRuntimeValue>(
-    () => ({
-      ...snapshot,
-      connect: () => undefined,
-      disconnect: async () => undefined,
-      retry: () => undefined,
-      refreshing: false,
-      refreshError: null,
-      refresh: async () => undefined,
-      callService: async () => {
-        throw new Error("Deterministic snapshot fixtures cannot call Home Assistant services.");
-      },
-      cameraClient: null,
-      sendStorageMessage: async () => {
-        throw new Error("Snapshot fixtures cannot access Home Assistant storage.");
-      },
-    }),
-    [snapshot],
-  );
-  return (
-    <HomeAssistantRuntimeValueProvider value={value}>{children}</HomeAssistantRuntimeValueProvider>
-  );
-}
+export { HomeAssistantRuntimeSnapshotTestProvider } from "./HomeAssistantRuntimeSnapshotTestProvider";
 export { markEntityStatesStale, normalizeEntityStates } from "./home-assistant-entity-snapshots";
 export { homeAssistantErrorMessage } from "./home-assistant-runtime-errors";
 export {

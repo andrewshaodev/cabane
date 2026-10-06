@@ -2,7 +2,7 @@
 
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
 palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
-assumptions. Layout rooms carry empty device/dashboard arrays; runtime bindings
+assumptions, and an optional `customModels` catalog. Layout rooms carry empty device/dashboard arrays; runtime bindings
 are composed from profiles and scene items. The layout project accepts flat
 ceilings; the broader runtime manifest also supports sloped ceilings.
 
@@ -31,6 +31,16 @@ metadata, and persistent initialization state. Metadata contains the name, HA
 origin, creation time, and applied status. Related writes share a transaction. The
 repository handles parsing, migration, revision conflicts, and recovery; the
 lifecycle determines what autosave and Apply may publish.
+
+Personal GLB binaries occupy the immutable SHA-256 `model-assets` object store.
+Record writes verify referenced assets and publish asset references and project
+data atomically. Snapshots and undo history contain metadata only. Draft,
+published, and active history assets remain available; duplicates share bytes
+without sharing project identity. Complete exports use `.cabane` ZIP archives
+with the portable/private JSON document and deduplicated GLBs. Legacy JSON stays
+readable. Import restores and verifies assets before exposing the home. HA asset
+transfer precedes the revision-checked document write; see
+[personal models](personal-models.md) for limits and the companion protocol.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
 can remain visible while editing. Workspace history spans construction,
@@ -169,3 +179,12 @@ its versioned contents and validation; the engine only exposes the injected
 slices through the existing revision-checked repository, preserving unrelated
 draft edits. They survive reload, duplication, portable exports and private
 backups, and use the same workspace sync path. No separate browser store is used.
+
+Optional `home.northAngleDegrees` is finite and in [0, 360), measured clockwise
+from plan up. Omission means zero for existing V1/V2 projects; no migration or
+architecture rotation is needed. All floors share it.
+
+Walls may persist an optional `edgeColor` CSS color for caps and opening reveals.
+An absent value is Auto; returning to Auto removes the override from exported
+JSON. Existing projects need no migration. Draft conversion, topology edits,
+undo/redo and import/export preserve explicit overrides.

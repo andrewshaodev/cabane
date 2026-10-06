@@ -48,6 +48,10 @@ Home Assistant's browser URL or interpret its query parameters as OAuth callback
 The panel mounts inside a shadow root, scopes portals, focus, and input handling
 to that root, and resolves bundled UI assets beside its module. The HA menu
 control opens the host navigation; Cabane's workspace navigation stays internal.
+The panel stays in normal document flow beside HA's sidebar. Its height fills the
+viewport below its measured top edge, reserving the host's bottom safe area;
+it does not depend on HA's auto-height wrapper resolving a percentage height.
+Viewport resize and remount recalculate the available content area.
 
 Personal workspaces explicitly select “Use this Home Assistant” to borrow the
 current host session. A workspace configured for another origin shows the

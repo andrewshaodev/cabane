@@ -3,7 +3,13 @@ import { useEffect, useRef } from "react";
 
 const finishKey = (finish: FloorFinishSpec) => (finish.kind === "solid" ? "solid" : finish.preset);
 
-function PresetSwatch({ preset }: { preset: (typeof FLOOR_FINISH_PRESETS)[number] }) {
+function PresetSwatch({
+  preset,
+  color,
+}: {
+  preset: (typeof FLOOR_FINISH_PRESETS)[number];
+  color: string | undefined;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     let context: CanvasRenderingContext2D | null | undefined;
@@ -12,8 +18,8 @@ function PresetSwatch({ preset }: { preset: (typeof FLOOR_FINISH_PRESETS)[number
     } catch {
       context = null;
     }
-    if (context) paintFloorPattern(context, preset.id, "plan");
-  }, [preset]);
+    if (context) paintFloorPattern(context, preset.id, "plan", color);
+  }, [preset, color]);
   return <canvas ref={canvas} width={64} height={64} aria-hidden="true" />;
 }
 
@@ -46,11 +52,38 @@ export function FloorFinishPalette({
             aria-pressed={selected === preset.id}
             onClick={() => onChange({ kind: "preset", preset: preset.id })}
           >
-            <PresetSwatch preset={preset} />
+            <PresetSwatch
+              preset={preset}
+              color={
+                value.kind === "preset" && value.preset === preset.id ? value.color : undefined
+              }
+            />
             <small>{preset.label}</small>
           </button>
         ))}
       </div>
+      {value.kind === "preset" &&
+        FLOOR_FINISH_PRESETS.find((preset) => preset.id === value.preset)?.configurableColor && (
+          <label>
+            Tile color
+            <input
+              type="color"
+              aria-label="Tile color"
+              value={
+                value.color ??
+                FLOOR_FINISH_PRESETS.find((preset) => preset.id === value.preset)!
+                  .representativeColor
+              }
+              onChange={(event) => onChange({ ...value, color: event.target.value })}
+            />
+            <button
+              type="button"
+              onClick={() => onChange({ kind: "preset", preset: value.preset })}
+            >
+              Reset color
+            </button>
+          </label>
+        )}
       {selected === "solid" && (
         <label>
           Solid color

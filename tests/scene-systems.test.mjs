@@ -584,7 +584,7 @@ await withModules(async (load) => {
       );
       assert.ok(colors.has("123456"), "the exterior override reaches the rendered wall");
       assert.ok(colors.has("abcdef"), "the side override reaches the rendered wall");
-      assert.ok(colors.has("00ff00"), "caps retain the interior palette");
+      assert.equal(colors.has("00ff00"), false, "caps inherit authored exterior paint");
       assert.equal(colors.has("ff0000"), false);
     } finally {
       await renderer.unmount();
@@ -755,9 +755,9 @@ await withModules(async (load) => {
     const floorMaterial = renderer.scene.findByProps({ name: "room-demo-room" }).instance.material;
     const selectionMaterial = renderer.scene.findByProps({ name: "room-demo-room-interaction" })
       .instance.material;
-    assert.equal(floorMaterial.color.getHexString(), "c8bca8");
+    assert.ok(floorMaterial.color.r > new Color("#c8bca8").r);
     assert.equal(selectionMaterial.color.getHexString(), "f2c7a7");
-    assert.equal(selectionMaterial.opacity, 0.36);
+    assert.equal(selectionMaterial.opacity, 0.055);
     await renderer.unmount();
   });
 

@@ -10,7 +10,7 @@ import {
 export type CatalogEntry =
   | { key: string; kind: "furnishing"; modelId: string; definition: FurnishingModelDefinition }
   | { key: string; kind: "device"; modelId: string; definition: DeviceModelDefinition };
-export type CatalogRoom = RoomType | "all" | "devices";
+export type CatalogRoom = RoomType | "all" | "devices" | "my-models";
 
 export function catalogEntries(
   furnishings: FurnishingModelRegistry,
@@ -42,8 +42,14 @@ export function catalogEntries(
 export function filterCatalog(entries: readonly CatalogEntry[], room: CatalogRoom, query: string) {
   const words = query.trim().toLocaleLowerCase("en").split(/\s+/).filter(Boolean);
   return entries.filter((entry) => {
+    if (room === "my-models" && !entry.modelId.startsWith("custom:")) return false;
     if (room === "devices" && entry.kind !== "device") return false;
-    if (room !== "all" && room !== "devices" && entry.definition.defaultRoomType !== room)
+    if (
+      room !== "all" &&
+      room !== "devices" &&
+      room !== "my-models" &&
+      entry.definition.defaultRoomType !== room
+    )
       return false;
     const roomLabel =
       ROOM_TYPES.find((type) => type.id === entry.definition.defaultRoomType)?.label ?? "";

@@ -1,6 +1,11 @@
+import { framedHingedDoorMount } from "./framed-hinged-door-mount";
 import { omitUndefinedProperties } from "@cabane/engine";
 import { RollUpDoorModel } from "./roll-up-door-model";
-import { openingWorldPlacement, resolveOpeningOrientation } from "@cabane/engine";
+import {
+  openingWorldPlacement,
+  resolveOpeningOrientation,
+  wallLengthPlanUnits,
+} from "@cabane/engine";
 import type { DoorSpec } from "@cabane/engine";
 import { AnimatedOpeningLeaf } from "../animation/animated-opening-leaf";
 import { DoorFrame } from "./door-frame";
@@ -32,9 +37,58 @@ export function DoorModel({
   const orientation = resolveOpeningOrientation(opening);
   const paired = opening.leafCount === 2;
   // Opposing door leaves meet at the center instead of each losing clearance.
-  const gap = paired ? 0 : 0.018;
-  const leafWidth = Math.max(0.08, placement.widthMeters / opening.leafCount - gap);
-  const leafHeight = Math.max(0.08, opening.openingHeightMeters - 0.03);
+  const concealed = opening.variant === "concealed";
+  const frontSign =
+    opening.frontSide === undefined ? orientation.sideSign : opening.frontSide === "left" ? -1 : 1;
+  const flush = opening.variant === "flush" || opening.variant === "flush-knob";
+  const gap = paired ? 0 : flush || concealed ? 0.006 : 0.018;
+  // A cabinet front overlays the jamb; the structural aperture stays clear of junctions.
+  const overlay =
+    flush && opening.variant !== "flush-knob" && !paired
+      ? Math.max(
+          0,
+          Math.min(
+            opening.frontOverlayMeters ?? 0.03,
+            opening.offsetFromWallStartPlanUnits * floor.coordinates.metersPerPlanUnit,
+            (wallLengthPlanUnits(wall) -
+              opening.offsetFromWallStartPlanUnits -
+              opening.widthPlanUnits) *
+              floor.coordinates.metersPerPlanUnit,
+          ),
+        )
+      : 0;
+  const framedHinged =
+    opening.operation === "hinged" &&
+    !flush &&
+    !concealed &&
+    opening.variant !== "full-glass" &&
+    opening.variant !== "steel-arched";
+  const plankDepthScale =
+    framedHinged && opening.variant === "plank"
+      ? Math.min(1, placement.widthMeters / opening.leafCount / 0.4)
+      : 1;
+  const framedMount = framedHinged
+    ? framedHingedDoorMount(
+        placement.widthMeters,
+        opening.leafCount,
+        wall.thicknessMeters,
+        opening.variant === "panel" || opening.variant === "panel-white-lever"
+          ? 0.05
+          : opening.variant === "plank"
+            ? 0.151 * plankDepthScale
+            : 0.065,
+        orientation.sideSign,
+        opening.variant === "plank" ? 0.1185 * plankDepthScale : undefined,
+      )
+    : null;
+  const leafWidth =
+    framedMount?.leafWidth ??
+    Math.max(0.08, placement.widthMeters / opening.leafCount - gap + 2 * overlay);
+  const edgeExtension = overlay > 0 ? overlay - gap / 2 : 0;
+  const leafHeight = Math.max(
+    0.08,
+    opening.openingHeightMeters - (flush || concealed ? 0.026 : 0.03),
+  );
   const frontMountedPlankDoor = opening.operation === "sliding" && opening.variant === "plank";
   const plankLeafCenterZ =
     wall.thicknessMeters / 2 + PLANK_DOOR_WALL_GAP_METERS + PLANK_DOOR_LEAF_DEPTH_METERS / 2;
@@ -45,9 +99,17 @@ export function DoorModel({
       position={[placement.start[0], opening.sillHeightMeters, placement.start[1]]}
       rotation={[0, placement.rotationY, 0]}
     >
-      {opening.variant !== "full-glass" && (
-        <DoorFrame wall={wall} width={placement.widthMeters} height={opening.openingHeightMeters} />
-      )}
+      {opening.variant !== "full-glass" &&
+        opening.variant !== "steel-arched" &&
+        !flush &&
+        !concealed && (
+          <DoorFrame
+            {...omitUndefinedProperties({ color: opening.color })}
+            wall={wall}
+            width={placement.widthMeters}
+            height={opening.openingHeightMeters}
+          />
+        )}
       {opening.operation === "sliding" && opening.variant === "plank" && (
         <PlankDoorRail
           width={placement.widthMeters}
@@ -61,7 +123,16 @@ export function DoorModel({
         const hinged = opening.operation === "hinged";
         const hingeAtEnd = hinged && leaf.hingeAtEnd;
         const segmentStart = leaf.startRatio * placement.widthMeters;
-        const pivotX = hinged ? leaf.pivotRatio * placement.widthMeters : segmentStart;
+        const pivotX = hinged
+          ? leaf.pivotRatio * placement.widthMeters +
+            (framedMount
+              ? hingeAtEnd
+                ? -framedMount.inset
+                : framedMount.inset
+              : hingeAtEnd
+                ? edgeExtension
+                : -edgeExtension)
+          : segmentStart - edgeExtension;
         const childX = hingeAtEnd ? -leafWidth / 2 : leafWidth / 2;
         const direction = hinged ? leaf.rotationSign : leaf.slideSign;
 
@@ -76,7 +147,14 @@ export function DoorModel({
               opening.openingHeightMeters / 2,
               frontMountedPlankDoor
                 ? plankLeafCenterZ * orientation.sideSign
-                : (paired ? 0 : index % 2 === 0 ? -0.016 : 0.016) * orientation.sideSign,
+                : concealed
+                  ? (wall.thicknessMeters / 2 - 0.025) * frontSign
+                  : flush
+                    ? (wall.thicknessMeters / 2 +
+                        (opening.frontOverlayMeters === 0 ? -0.01 : 0.012)) *
+                      orientation.sideSign
+                    : (framedMount?.pivotZ ??
+                      (paired ? 0 : index % 2 === 0 ? -0.016 : 0.016) * orientation.sideSign),
             ]}
           >
             <AnimatedOpeningLeaf
@@ -86,11 +164,15 @@ export function DoorModel({
               direction={direction}
               travel={leafWidth}
             >
-              <group position={[childX, 0, 0]} scale={[1, 1, orientation.sideSign]}>
+              <group
+                position={[childX, 0, framedMount?.leafZ ?? 0]}
+                scale={[1, 1, orientation.sideSign]}
+              >
                 <DoorLeaf
                   opening={opening}
                   width={leafWidth}
                   height={leafHeight}
+                  plankDepthScale={plankDepthScale}
                   handleSide={hinged ? leaf.extentSign : (-leaf.slideSign as -1 | 1)}
                 />
               </group>

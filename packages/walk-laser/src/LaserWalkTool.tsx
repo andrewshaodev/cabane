@@ -4,6 +4,7 @@ import { createPortal, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Group, Matrix3, Raycaster, Scene, Vector2, Vector3, type PerspectiveCamera } from "three";
 import { GunPortals, type PortalControls } from "./portals";
+import { LaserTutorial } from "./LaserTutorial";
 import { LaserTouchActions } from "./LaserTouchActions";
 import { LaserCrosshair } from "./LaserCrosshair";
 import type { PortalColor } from "./portals/portal-contract";
@@ -212,6 +213,7 @@ export function LaserWalkTool({
       >
         {enabled && (
           <div className="walk-laser" data-ready={ready}>
+            <LaserTutorial coarsePointer={coarsePointer} />
             <ComicPew
               shotId={triggerId}
               shotColor={triggerColor}

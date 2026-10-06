@@ -1,5 +1,7 @@
 export const contourFragmentShader = /* glsl */ `
   uniform sampler2D beauty;
+  uniform sampler2D importedDepth;
+  uniform bool hasImportedModels;
   uniform sampler2D sceneDepth;
   uniform vec2 texel;
   uniform float nearPlane;
@@ -30,6 +32,7 @@ export const contourFragmentShader = /* glsl */ `
                          contour(center, vec2(-texel.x, 0.0))),
                      max(contour(center, vec2(0.0, texel.y)),
                          contour(center, vec2(0.0, -texel.y))));
+    if (hasImportedModels && abs(texture2D(importedDepth, vUv).x - texture2D(sceneDepth, vUv).x) < 0.000001) edge = 0.0;
     vec3 shadedInk = mix(surface.rgb * 0.42, ink, 0.35);
     gl_FragColor = vec4(mix(surface.rgb, shadedInk, edge * 0.72), surface.a);
     #include <tonemapping_fragment>
