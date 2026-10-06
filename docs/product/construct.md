@@ -137,9 +137,16 @@ symmetrically. Measurements update throughout the gesture. Escape and interrupte
 gestures cancel; each completed gesture is one undoable edit.
 
 Stairs also support L-shaped and spiral connections between adjacent floors. Choose
-Straight, L-shaped, or Spiral before drawing or in the selected stair's properties.
+Straight, L-shaped, or Spiral before drawing from the left sidebar's procedural 3D
+preview palette, styled like the door picker, or in the selected stair's properties.
+During placement, the sidebar groups the previews, shape-specific instructions, and
+Cancel stairs action; no floating placement panel covers the plan.
 Changing shape retains its ID, connected floors, and lower entrance position.
 Existing stairs without an explicit shape remain straight.
+
+Multiple staircases may connect the same adjacent floors. The Stairs tool always
+starts a new placement; select an existing staircase to edit it. Each connection
+has its own shape and dimensions, and stairs sharing a floor must not overlap.
 
 L-shaped stairs use two perpendicular flights and a square level landing. Click the
 bottom, landing center, and upper endpoint; the final point chooses the left/right

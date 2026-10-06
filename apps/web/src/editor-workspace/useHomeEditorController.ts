@@ -405,13 +405,14 @@ export function useHomeEditorController({
     if (editingLocked || unsettled) return;
     constructEditor.setTool("select");
     clearConstructionSelection();
-            const index = snapshot.project.floors.findIndex(f => f.id === activeFloorId);
-            const floor = snapshot.project.floors[index];
-            const existing = snapshot.project.stairs.find(stair => stair.lowerFloorId === activeFloorId);
-            if (existing) { setStairDialog(existing); return; }
-            setStairPlacement({ id: `stairs-${createBrowserUuid()}`, lowerFloorId: activeFloorId,
-              upperFloorId: snapshot.project.floors[index + 1].id, at: floor.footprint[0] ?? floor.coordinates.origin,
-              widthMeters: 1, runMeters: floor.floorToFloorHeightMeters * 1.5, rotationYRadians: 0 });
+    const index = snapshot.project.floors.findIndex(f => f.id === activeFloorId);
+    const floor = snapshot.project.floors[index];
+    const upperFloor = snapshot.project.floors[index + 1];
+    if (!floor || !upperFloor) return;
+    setStairDialog(null);
+    setStairPlacement({ id: `stairs-${createBrowserUuid()}`, lowerFloorId: activeFloorId,
+      upperFloorId: upperFloor.id, at: floor.footprint[0] ?? floor.coordinates.origin,
+      widthMeters: 1, runMeters: floor.floorToFloorHeightMeters * 1.5, rotationYRadians: 0 });
   };
 
   const closeEditor = useCallback(async () => {

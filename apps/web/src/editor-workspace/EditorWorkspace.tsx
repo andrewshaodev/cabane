@@ -1,4 +1,4 @@
-import { StairShapeSelect } from "../editor-floors/StairShapeSelect";
+import { StairPlacementPanel } from "../editor-floors";
 import { convertStairShape } from "../editor-floors/stair-placement-geometry";
 import { useCabaneDom, useCabaneAssetUrl } from "@cabane/engine";
 import { EditorButton } from "../editor-chrome/EditorButton";
@@ -180,12 +180,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
           onRemove={mode === "construct" && snapshot.project.floors.length > 1 && activeFloorId === snapshot.project.floors.at(-1)?.id
             ? () => setFloorDialog("remove") : undefined} />
-        {stairPlacement && <div role="status" className="stair-placement-instructions">
-          <StairShapeSelect value={stairPlacement.shape??"straight"} onChange={shape=>setStairPlacement(convertStairShape(snapshot.project,stairPlacement,shape))} />
-          {stairPlacement.shape === "spiral" ? "Click the center, then the outer edge to set diameter and rotation. Escape cancels."
-            : stairPlacement.shape === "l-shaped" ? "Click the bottom, landing center, then the upper endpoint. Escape cancels."
-            : "Drag from bottom to top, or click each endpoint. Escape cancels."}
-          <button type="button" onClick={() => setStairPlacement(null)}>Cancel stairs</button></div>}
         {mode === "construct" && lowerFloor && <label><input type="checkbox" checked={showFloorBelow}
           onChange={(event) => setShowFloorBelow(event.target.checked)} />Show floor below</label>}
       </div>
@@ -247,7 +241,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           disabled={tutorialBusy} warning={tutorial.warning} onAction={activateTutorial} onSkip={tutorial.skip} onDismiss={tutorial.dismiss} />}
         {!shortcutsMode && mode === "construct" && tutorial.state?.status !== "active" && isPristineConstructionFloor(constructEditor.previewFloor) &&
           <p className="construction-empty-hint">Your plan starts here. Choose Wall, then click each corner to draw your first room.</p>}
-        {!shortcutsMode && mode === "construct" && (
+        {!shortcutsMode && mode === "construct" && stairPlacement && <StairPlacementPanel
+          shape={stairPlacement.shape ?? "straight"}
+          onChange={shape => setStairPlacement(convertStairShape(snapshot.project, stairPlacement, shape))}
+          onCancel={() => setStairPlacement(null)} />}
+        {!shortcutsMode && mode === "construct" && !stairPlacement && (
           <ConstructionInspector inert={reference.adjusting}
             referencePlanControls={<ReferencePlanPanel reference={reference} floorName={constructEditor.previewFloor.name} />}
             planImportControls={PLAN_IMPORT_ENABLED && <PlanImportActions homeId={snapshot.project.home.id}
