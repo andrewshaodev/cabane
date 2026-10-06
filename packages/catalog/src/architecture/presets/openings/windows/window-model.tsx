@@ -1,3 +1,4 @@
+import { ArchedSteelGlassPanel } from "../steel-glazing";
 import { openingWorldPlacement, resolveOpeningOrientation } from "@cabane/engine";
 import type { WindowSpec } from "@cabane/engine";
 import { AnimatedOpeningLeaf } from "../animation/animated-opening-leaf";
@@ -43,14 +44,22 @@ export function WindowModel({
               travel={0}
             >
               <group position={[childX, 0, 0]}>
-                <FramedGlassPanel
-                  width={Math.max(0.08, panelWidth)}
-                  height={opening.openingHeightMeters}
-                  columns={columns}
-                  rows={rows}
-                  privacy={opening.glazing === "privacy"}
-                  frameDepth={opening.glazing === "privacy" ? 0.105 : 0.09}
-                />
+                {opening.variant === "steel-arched" ? (
+                  <ArchedSteelGlassPanel
+                    width={Math.max(0.08, panelWidth)}
+                    height={opening.openingHeightMeters}
+                    privacy={opening.glazing === "privacy"}
+                  />
+                ) : (
+                  <FramedGlassPanel
+                    width={Math.max(0.08, panelWidth)}
+                    height={opening.openingHeightMeters}
+                    columns={columns}
+                    rows={rows}
+                    privacy={opening.glazing === "privacy"}
+                    frameDepth={opening.glazing === "privacy" ? 0.105 : 0.09}
+                  />
+                )}
                 {opening.operation === "casement" && (
                   <WindowHandle
                     width={panelWidth}
@@ -64,10 +73,12 @@ export function WindowModel({
           </group>
         );
       })}
-      <OpeningFrameBox
-        size={[placement.widthMeters + 0.08, 0.055, wall.thicknessMeters + 0.06]}
-        position={[placement.widthMeters / 2, -opening.openingHeightMeters / 2 - 0.02, 0]}
-      />
+      {opening.variant !== "steel-arched" && (
+        <OpeningFrameBox
+          size={[placement.widthMeters + 0.08, 0.055, wall.thicknessMeters + 0.06]}
+          position={[placement.widthMeters / 2, -opening.openingHeightMeters / 2 - 0.02, 0]}
+        />
+      )}
     </group>
   );
 }

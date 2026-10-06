@@ -12,6 +12,7 @@ export const pushTriangle = (
 
 export const geometryFromBuckets = (buckets: [number[], number[]]) => {
   const geometry = new BufferGeometry();
+  geometry.userData.preservePlanarFaces = true;
   const positions = [...buckets[0], ...buckets[1]];
   geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
   if (buckets[0].length) geometry.addGroup(0, buckets[0].length / 3, 0);

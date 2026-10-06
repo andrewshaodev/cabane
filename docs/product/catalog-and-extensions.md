@@ -76,3 +76,5 @@ architectural model, not an Arrange device. Its frame and moving slats are focus
 model modules. Opening previews use the same geometry and cached rendering queue
 as Arrange. The bundled garage uses an opening and an opening cover profile;
 there is no compatibility registration for the retired garage device.
+
+Framed hinged doors fit the jamb aperture and keep sweep clearance. Concealed and flush door variants support an explicit finish plane and optional bounded front overlap. Arched steel-glass door and window variants share procedural glazing.

@@ -301,6 +301,8 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
           "hingeSide",
           "openingSide",
           "slideDirection",
+          "frontOverlayMeters",
+          "frontSide",
         ]
       : candidate.kind === "window"
         ? ["operation", "variant", "panelCount", "glazing", "muntins", "hingeSide", "openingSide"]
@@ -348,7 +350,7 @@ const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
         `${path}.operation`,
         "Window operation is invalid.",
       );
-    if (!["plain", "muntined"].includes(String(candidate.variant)))
+    if (!["plain", "muntined", "steel-arched"].includes(String(candidate.variant)))
       addProjectIssue(
         issues,
         "project.window-variant",
