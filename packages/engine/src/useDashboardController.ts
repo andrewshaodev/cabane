@@ -16,7 +16,7 @@ import { resolveHomeAssistantBindings } from "./home-assistant-resolver";
 import { deriveHomePresence } from "./home-presence/model";
 
 import { loadLightingMode, saveLightingMode } from "./WalkPreferences";
-import { isNightLighting, type SolarLightingMode } from "./lighting";
+import { resolveSolarLighting, type SolarLightingMode } from "./lighting";
 
 import { readSceneSession, writeSceneSession } from "./navigation";
 
@@ -205,11 +205,8 @@ export function useDashboardController({
     [automaticOpeningIds, resolvedBindings.openings],
   );
   const sunState = runtime.entityStates["sun.sun"];
-  const nightLighting = isNightLighting(
-    lightingMode,
-    sunState?.available !== false && !sunState?.stale ? sunState : undefined,
-    localTime,
-  );
+  const solarLighting = resolveSolarLighting(lightingMode, sunState, localTime);
+  const nightLighting = solarLighting.night;
   const allLightsCall = allLightsOffCall(runtime.entityStates);
   useEffect(() => {
     if (walkthrough) return;
@@ -441,6 +438,7 @@ export function useDashboardController({
     lightingMode,
     chooseLightingMode,
     sunState,
+    solarLighting,
     nightLighting,
     floor,
     poseRef,

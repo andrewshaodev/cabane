@@ -274,3 +274,7 @@ and platform/platform interior overlaps are errors; shared boundaries are valid.
 These edits use ordinary workspace history, autosave, export/import and Save.
 Basements, split-level decks, supports, pergolas and converting rooms to platforms
 remain outside this tool.
+
+The North disclosure sets a building-wide geographic north angle with a compass,
+rotation slider and numeric field. Zero points up the plan; positive angles turn
+clockwise. Changes use ordinary undo/redo, autosave, import/export and Save.

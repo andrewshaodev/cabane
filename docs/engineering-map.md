@@ -45,7 +45,7 @@ Contract: [Startup and host integration](../docs/product/journey.md).
 
 Contract: [Project schema and persistence](../docs/product/workspace.md).
 
-- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts).
+- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts), [`packages/engine/src/home-project/schema-json-values.ts`](../packages/engine/src/home-project/schema-json-values.ts).
 - Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.
 - Checks: `verify:workspace`.
@@ -63,7 +63,7 @@ Contract: [Editor coordination](../docs/product/workspace.md).
 
 Contract: [Construct and floor topology](../docs/product/construct.md).
 
-- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors).
+- Owners: [`apps/web/src/editor-preview/construct/useConstructEditor.ts`](../apps/web/src/editor-preview/construct/useConstructEditor.ts), [`packages/engine/src/home-editor/construct`](../packages/engine/src/home-editor/construct), [`apps/web/src/editor-floors`](../apps/web/src/editor-floors), [`apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx`](../apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx), [`apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx`](../apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx).
 - Interface: `FloorSpec` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.
 - Checks: `verify:construct`, `fixture:verify:layout`.
@@ -108,9 +108,9 @@ Contract: [Dashboard, navigation and cameras](../docs/product/dashboard-and-came
 
 Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.md).
 
-- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs).
-- Interface: `ArchitectureScene`, `StylizedScene` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation.
+- Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs), [`packages/engine/src/SceneLighting.tsx`](../packages/engine/src/SceneLighting.tsx), [`packages/engine/src/lighting.ts`](../packages/engine/src/lighting.ts), [`packages/engine/src/solar-shadow-frame.ts`](../packages/engine/src/solar-shadow-frame.ts).
+- Interface: `ArchitectureScene`, `StylizedScene`, `deriveSolarLighting`, `resolveSolarLighting` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.
 - Checks: `test:unit`, `verify:policy`, `verify:scene-contours`, `fixture:verify:scale`, `measure:scene`.
 
 ### Catalog and model extensions

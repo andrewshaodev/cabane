@@ -11,6 +11,8 @@ import { PlanImportActions } from "../editor-plan-import/PlanImportActions";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { ReferencePlanPanel } from "../editor-reference-plan/ReferencePlanPanel";
 
+import { NorthSettingsEditor } from "../editor-preview/construct/NorthSettingsEditor";
+
 import { ConstructionInspector } from "../editor-preview/construct";
 
 import { ConnectInspector } from "../editor-connect/ConnectInspector";
@@ -279,6 +281,20 @@ export function EditorSidebar({
                   )}
                 </div>
               </details>
+            }
+            northControls={
+              <NorthSettingsEditor
+                value={snapshot.project.home.northAngleDegrees ?? 0}
+                onChange={(northAngleDegrees) =>
+                  commit({
+                    ...snapshot,
+                    project: {
+                      ...snapshot.project,
+                      home: { ...snapshot.project.home, northAngleDegrees },
+                    },
+                  })
+                }
+              />
             }
             roof={snapshot.project.home.roof}
             onRoofChange={(roof) =>

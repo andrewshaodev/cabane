@@ -75,6 +75,7 @@ const FALLBACK_LIGHTING: SolarLightingState = {
 export const deriveSolarLighting = (
   sunState: SunEntityState | undefined,
   mode: SolarLightingMode = "live",
+  northAngleDegrees = 0,
 ): SolarLightingState => {
   const effective =
     mode === "live"
@@ -88,7 +89,7 @@ export const deriveSolarLighting = (
   if (azimuth === null || elevation === null) return FALLBACK_LIGHTING;
   const normalizedAzimuth = ((azimuth % 360) + 360) % 360;
   const clampedElevation = clamp(elevation, -90, 90);
-  const azimuthRadians = (normalizedAzimuth * Math.PI) / 180;
+  const azimuthRadians = ((normalizedAzimuth + northAngleDegrees) * Math.PI) / 180;
   const elevationRadians = (clampedElevation * Math.PI) / 180;
   const horizontalDistance = SUN_DISTANCE * Math.cos(elevationRadians);
   const dayProgress = smoothstep(
@@ -99,9 +100,9 @@ export const deriveSolarLighting = (
   return {
     valid: true,
     sunPosition: [
-      horizontalDistance * Math.cos(azimuthRadians),
-      SUN_DISTANCE * Math.sin(elevationRadians),
       horizontalDistance * Math.sin(azimuthRadians),
+      SUN_DISTANCE * Math.sin(elevationRadians),
+      -horizontalDistance * Math.cos(azimuthRadians),
     ],
     sunIntensity: MAX_SUN_INTENSITY * sunlightProgress,
     sunColor: mixColor(HORIZON_SUN, DAY_SUN, sunlightProgress),
@@ -109,5 +110,30 @@ export const deriveSolarLighting = (
     hemisphereSkyColor: mixColor(NIGHT_SKY, DAY_SKY, dayProgress),
     hemisphereGroundColor: mixColor(NIGHT_GROUND, DAY_GROUND, dayProgress),
     hemisphereIntensity: mix(0.78, 1.05, dayProgress),
+  };
+};
+
+/** One decision for rendering, night-only devices, and the preferences source label. */
+export const resolveSolarLighting = (
+  mode: SolarLightingMode,
+  sunState: (SunEntityState & { available?: boolean; stale?: boolean }) | undefined,
+  localTime: Date,
+) => {
+  const usable =
+    sunState?.available !== false &&
+    !sunState?.stale &&
+    (sunState?.state === "above_horizon" || sunState?.state === "below_horizon") &&
+    finiteNumber(sunState.attributes.azimuth) !== null &&
+    finiteNumber(sunState.attributes.elevation) !== null;
+  const effectiveMode =
+    mode === "live" && !usable
+      ? isNightLighting("live", undefined, localTime)
+        ? "night"
+        : "day"
+      : mode;
+  return {
+    mode: effectiveMode,
+    night: isNightLighting(effectiveMode, sunState, localTime),
+    source: mode === "live" ? (usable ? "Home Assistant" : "Local time") : "Preview",
   };
 };

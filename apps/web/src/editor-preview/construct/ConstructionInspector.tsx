@@ -4,7 +4,7 @@ import { FloorToolProperties } from "./FloorToolProperties";
 import { DoorPresetPalette } from "./DoorPresetPalette";
 import { DoorDesignFields } from "./DoorDesignFields";
 import { HedgeProperties } from "./HedgeProperties";
-import { RoofSettingsEditor } from "./RoofSettingsEditor";
+import { ConstructionBuildingSettings } from "./ConstructionBuildingSettings";
 import type { RoofSettings } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
@@ -22,8 +22,6 @@ import { useMemo } from "react";
 
 import type { ConstructEditorController } from "./useConstructEditor";
 
-import { SidebarSectionSummary } from "../../editor-chrome/SidebarSectionSummary";
-
 import type { ConstructContextualIssue } from "./contextual-validation";
 
 import { wallMeasurement } from "./drag-geometry";
@@ -34,16 +32,16 @@ import { CommittedTextInput } from "./CommittedTextInput";
 import { DebouncedColorInput } from "./DebouncedColorInput";
 import { FloorFinishPalette } from "./FloorFinishPalette";
 import type { FloorPaintingInspector } from "./floor-painting-contract";
-import { FloorSettingsEditor } from "./FloorSettingsEditor";
 
 export interface ConstructionInspectorProps {
-  inert?: boolean;
+  inert?: boolean | undefined;
   referencePlanControls?: import("react").ReactNode;
   planImportControls?: import("react").ReactNode;
   tutorialControls?: import("react").ReactNode;
+  northControls?: import("react").ReactNode;
   walkStartControls?: import("react").ReactNode;
   roof?: RoofSettings | undefined;
-  onRoofChange?: (settings: RoofSettings) => void;
+  onRoofChange?: ((settings: RoofSettings) => void) | undefined;
   editor: ConstructEditorController;
   dependencyIssues?: readonly ManifestIssue[];
   contextualIssues?: readonly ConstructContextualIssue[];
@@ -62,6 +60,7 @@ export function ConstructionInspector({
   planImportControls,
   tutorialControls,
   walkStartControls,
+  northControls,
   roof,
   onRoofChange,
   editor,
@@ -589,29 +588,18 @@ export function ConstructionInspector({
         )}
       </div>
       {referencePlanControls}
-      <div className="construction-inspector__context" inert={inert}>
-        {planImportControls}
-        {onRoofChange && (
-          <details className="construction-inspector__floor-disclosure">
-            <SidebarSectionSummary
-              icon="roof"
-              title="Roof"
-              description="Set roof direction and colors."
-            />
-            <RoofSettingsEditor value={roof} onChange={onRoofChange} />
-          </details>
-        )}
-        {walkStartControls}
-        <details className="construction-inspector__floor-disclosure">
-          <SidebarSectionSummary
-            icon="measure"
-            title="Scale & heights"
-            description="Set plan scale and wall and ceiling heights."
-          />
-          <FloorSettingsEditor editor={editor} />
-        </details>
-        {tutorialControls}
-      </div>
+      <ConstructionBuildingSettings
+        {...{
+          inert,
+          planImportControls,
+          onRoofChange,
+          roof,
+          northControls,
+          walkStartControls,
+          tutorialControls,
+          editor,
+        }}
+      />
     </section>
   );
 }
