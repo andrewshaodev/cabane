@@ -5,7 +5,7 @@ import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-e
 
 // A disposable browser profile exercises the real host and IndexedDB together.
 test(
-  "workspace host routes zero, one, multiple, missing and OAuth target homes",
+  "workspace navigation, reloads, recovery and OAuth preserve the real browser destination",
   withBrowserDiagnostics(async () => {
     const { server } = await getBrowserTestServer("app");
     let browser;
@@ -88,18 +88,6 @@ test(
           )
         ).metadata.id;
       }, process.cwd());
-      await page.goto(base);
-      await page.waitForURL(`**/workspaces/${first}/construct`);
-      await page.getByRole("navigation", { name: "Editor mode" }).waitFor();
-      assert.equal(
-        await page
-          .getByRole("button", { name: "Construct", exact: true })
-          .getAttribute("aria-pressed"),
-        "true",
-      );
-      await page.getByRole("button", { name: "Workspaces: First home", exact: true }).click();
-      await page.getByRole("heading", { name: "Your workspaces", exact: true }).waitFor();
-      await page.goto(`${base}workspaces`);
       const second = await page.evaluate(async (root) => {
         const { createWorkspaceRepository } = await import(
           `/@fs${root}/packages/engine/src/home-project/index.ts`
@@ -111,8 +99,6 @@ test(
           )
         ).metadata.id;
       }, process.cwd());
-      await page.goto(`${base}workspaces`);
-      await page.getByRole("heading", { name: "Your workspaces", exact: true }).waitFor();
       await page.goto(`${base}workspaces/missing-home`);
       await page.getByText("Could not open this workspace.", { exact: true }).waitFor();
       assert.equal(
@@ -136,19 +122,9 @@ test(
           .getAttribute("aria-pressed"),
         "true",
       );
-      await page.evaluate(() => sessionStorage.removeItem("cabane:editor-return:v1"));
-      await page.goto(`${base}?auth_callback=1`);
-      await page.getByText("This sign-in no longer has a workspace.", { exact: true }).waitFor();
-      await page.evaluate(() =>
-        sessionStorage.setItem(
-          "cabane:editor-return:v1",
-          JSON.stringify({ workspaceId: "deleted-home", mode: "connect" }),
-        ),
-      );
-      await page.goto(`${base}?auth_callback=1`);
-      await page.getByText("This sign-in no longer has a workspace.", { exact: true }).waitFor();
-      await page.getByRole("button", { name: "Workspaces", exact: true }).click();
-      await page.waitForURL("**/workspaces");
+      // Zero/one/multiple and invalid OAuth target matrices run against the
+      // real application/repository in workspace-startup-routing.test.mjs.
+      await page.goto(`${base}workspaces`);
       await page.evaluate(async (id) => {
         await new Promise((resolve, reject) => {
           const request = indexedDB.open("cabane-projects-v2");

@@ -64,13 +64,27 @@ Set `CABANE_TEST_PROGRESS=1` to print each starting test when diagnosing slow wo
 `npm run test:browser` runs the browser journeys. Individual files remain available
 through `node --no-experimental-global-navigator --test tests/<name>.test.mjs`.
 The flag lets older JSDOM fixtures install their own navigator, as the shard
-runner does. Set `TEST_PROFILE=1` to report slow tests. Failures are printed as soon
+runner does. Set `TEST_PROFILE=1` to report slow tests. For repeatable measurements use
+`npm run test:profile -- --runs 3 --output test-results/baseline.json`, then repeat
+with a different output path and `--baseline test-results/baseline.json`. Reports
+include median wall time, per-file mean cost, every original test name/status,
+worker durations, concurrency and Node/platform metadata. Comparison refuses
+failed runs or changed test inventories/statuses; intentional test migrations need
+an explicit coverage review rather than a like-for-like speed claim. Run benchmarks
+without other verification or development work competing for CPU. The profiler
+stops on failure and preserves the failed report; it never retries a failed test.
+For one run of any normal or focused command, set `CABANE_TEST_REPORT` to a JSON
+output path. `tests/test-costs.json` contains reviewed scheduling weights; use the
+profile's per-file costs to refresh it after a major suite change. Unknown files
+retain deterministic source-size weights and are never dropped. Failures are printed as soon
 as Node emits completion, including the original test/file, error and a shell-safe
 focused rerun command; successful tests remain dots.
 
 Storage, migration, restore, native startup states, and HA settings/sync cases run against the real
 repository and React components in Node, with an isolated `fake-indexeddb` factory
-per scenario. DOM checks wait for state or transaction completion; sync tests drive
+per scenario. DOM checks wait for state or transaction completion; asynchronous browser storage
+reads use `tests/async-condition.mjs`, since the pinned Playwright `waitForFunction`
+treats a returned Promise as truthy before its result is available; sync tests drive
 interval callbacks explicitly. Keep Chromium for browser-specific behavior: real
 IndexedDB through the application, route/reload persistence, file upload/download,
 reference-image interaction, responsive editor controls, and rendered scenes.
@@ -91,6 +105,16 @@ console warnings/errors and uncaught page errors. The reporter prints the absolu
 artifact directory. Successful traces are discarded; failure evidence stays local
 until removed. A manually closed page/context cannot be captured afterward. Open a
 trace with `npx playwright-core show-trace <path-to-trace.zip>`.
+
+The optional portal gun has exactly one Chromium smoke: enter Walk, equip the
+installed gun and create a visible portal. Placement, targeting, traversal at
+multiple frame rates, persistence, restore failures, closing and reduced-motion
+behavior remain in `gun-portals`, `portal-persistence`, `portal-transition` and
+`portal-view` Node tests. Full mobile travel and pixel-readback portal journeys are
+intentionally no longer part of the automatic gate; visual review remains separate.
+Standalone startup's zero/one/multiple-home and invalid OAuth identity matrices
+also run against the real React application and isolated IndexedDB in Node; browser
+coverage retains navigation, reload, valid OAuth return and recovery.
 
 Home-specific commands include `home:validate-floor`, `home:verify`, and layout,
 room, and scale fixture verification. Fixtures exercise a representative target
@@ -171,9 +195,14 @@ overrides the destination).
 
 Personal GLB coverage uses `tests/personal-models.test.mjs`,
 `tests/personal-models-browser.test.mjs`, and `tests/ha-model-assets.test.mjs`.
-The normal Arrange UI checks the public skill link and copyable install command,
-imports solid/PBR/textured files and actual Blender/Three.js skill example fixtures,
-and tests supports, history, Save/Reset, and complete archives. Installation and
+One normal Arrange browser journey imports a textured GLB, cancels real elevation
+and resize gestures, publishes, reloads, transfers a complete archive to an isolated
+browser context, and checks missing-asset recovery. A separate scene check retains
+20 rooms, 100 simulated bindings and shared textured resources. Node tests cover
+Blender/Three.js skill exports, material/format validation, support normalization,
+elevation/resize history transactions, resource lifetimes and archive integrity.
+The generation guide runs in DOM tests, including unavailable/rejected clipboard
+handling and focus restoration. Installation and
 generation are verified independently in the public skill repository. Storage
 fixtures exercise missing/corrupt files, transaction failures, deduplication,
 interruptions, origin/session isolation, old integrations, and two-client revision

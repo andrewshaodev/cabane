@@ -33,6 +33,7 @@
       "home-lighting-state.test.mjs",
       "home-presence-model.test.mjs",
       "home-presence-status.test.mjs",
+      "model-generation-guide.test.mjs",
       "multiple-floor-editing.test.mjs",
       "multiple-floor-schema.test.mjs",
       "north-browser.test.mjs",
@@ -48,8 +49,9 @@
       "room-status-overlays.test.mjs",
       "runtime-binding-profile.test.mjs",
       "setup-progress.test.mjs",
+      "weather-browser.test.mjs",
       "weather.test.mjs",
-      "weather-browser.test.mjs"
+      "workspace-startup-routing.test.mjs"
     ]
   },
   "construct": {
@@ -185,6 +187,7 @@
       "action-bar-navigation.test.mjs",
       "agent-test-reporter.test.mjs",
       "agent-workflow.test.mjs",
+      "async-condition.test.mjs",
       "browser-data-transfer.test.mjs",
       "browser-diagnostics-lifecycle.test.mjs",
       "browser-diagnostics.test.mjs",
@@ -212,6 +215,7 @@
       "panel-dom.test.mjs",
       "portal-persistence.test.mjs",
       "reference-storage.test.mjs",
+      "test-profile.test.mjs",
       "thumbnail-cache.test.mjs",
       "verification-groups.test.mjs",
       "workspace-application.test.mjs",

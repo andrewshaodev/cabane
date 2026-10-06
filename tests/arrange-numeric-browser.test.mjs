@@ -1,3 +1,4 @@
+import { waitForAsyncCondition } from "./async-condition.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
@@ -61,21 +62,23 @@ test(
       assert.equal(await rotation.inputValue(), "1");
       await page.getByRole("button", { name: "Increase Degrees", exact: true }).click();
       assert.equal(await rotation.inputValue(), "2");
-      await page.waitForFunction(
-        async ({ rootPath, id }) => {
-          const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
-          const registry = await import("/src/project-runtime.ts");
-          const result = await engine
-            .createWorkspaceRepository(window.indexedDB, registry.ownerProjectRegistries)
-            .read(id);
-          const item = result.record?.draft.sceneItems[0];
-          return (
-            item?.size[0] === 0.5 &&
-            item.placement.at[0] === 0 &&
-            Math.abs(item.placement.rotationYRadians - (2 * Math.PI) / 180) < 1e-8
-          );
-        },
-        { rootPath, id },
+      await waitForAsyncCondition(() =>
+        page.evaluate(
+          async ({ rootPath, id }) => {
+            const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
+            const registry = await import("/src/project-runtime.ts");
+            const result = await engine
+              .createWorkspaceRepository(window.indexedDB, registry.ownerProjectRegistries)
+              .read(id);
+            const item = result.record?.draft.sceneItems[0];
+            return (
+              item?.size[0] === 0.5 &&
+              item.placement.at[0] === 0 &&
+              Math.abs(item.placement.rotationYRadians - (2 * Math.PI) / 180) < 1e-8
+            );
+          },
+          { rootPath, id },
+        ),
       );
       await page.getByRole("button", { name: "Save", exact: true }).click();
       await page.locator(".direction-publish-dialog").getByRole("button", { name: /Save/ }).click();

@@ -1,3 +1,4 @@
+import costs from "./test-costs.json" with { type: "json" };
 import { selectVerificationTests } from "./verification-groups.mjs";
 import { readdir, stat, readFile } from "node:fs/promises";
 import { after, describe } from "node:test";
@@ -43,19 +44,10 @@ export async function runShard(shardIndex, shardCount) {
   // Browser setup and UI work dwarf source parsing; byte-only balancing used to
   // put most browser work on one worker. Approximate milliseconds from profiling
   // are sufficient here; unknown/new files retain a deterministic size fallback.
-  const browserCosts = {
-    "workspace-application.test.mjs": 24000,
-    "native-first-launch.test.mjs": 6000,
-    "reference-plan-browser.test.mjs": 16000,
-    "basement-browser.test.mjs": 16000,
-    "workspace-ha-storage-ui.test.mjs": 10500,
-    "workspace-open-ui.test.mjs": 4500,
-    "workspace-backup-browser.test.mjs": 3000,
-  };
   const weightedFiles = await Promise.all(
     testFiles.map(async (name) => ({
       name,
-      cost: browserCosts[name] ?? (await stat(new URL(name, testsDirectory))).size / 50,
+      cost: costs[name] ?? (await stat(new URL(name, testsDirectory))).size / 50,
     })),
   );
   const shards = Array.from({ length: shardCount }, () => ({ cost: 0, files: [] }));
