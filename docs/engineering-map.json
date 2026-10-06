@@ -1,0 +1,227 @@
+[
+  {
+    "title": "Startup and host integration",
+    "spec": "docs/product/journey.md",
+    "owners": [
+      "apps/web/src/main.tsx",
+      "apps/web/src/workspaces/WorkspaceApplication.tsx",
+      "apps/web/src/workspaces/WorkspaceHost.tsx",
+      "apps/web/src/panel/panel-element.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["CabaneApp", "CabaneDomProvider", "HomeAssistantHostSessionProvider"]
+      }
+    ],
+    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host.",
+    "checks": ["test:browser", "build", "build:panel"]
+  },
+  {
+    "title": "Project schema and persistence",
+    "spec": "docs/product/workspace.md",
+    "owners": [
+      "packages/engine/src/home-project/schema.ts",
+      "packages/engine/src/home-project/workspace-repository.ts",
+      "apps/web/src/workspaces/workspace-sync-coordinator.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["HomeProject", "parseHomeProject", "createWorkspaceRepository"]
+      }
+    ],
+    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.",
+    "checks": ["verify:workspace"]
+  },
+  {
+    "title": "Editor coordination",
+    "spec": "docs/product/workspace.md",
+    "owners": [
+      "apps/web/src/editor-workspace/useHomeEditorController.ts",
+      "apps/web/src/editor-workspace/EditorWorkspace.tsx",
+      "apps/web/src/editor-preview/useEditorWorkspace.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "apps/web/src/editor-workspace/editor-workspace-contract.ts",
+        "symbols": ["ConnectWorkspaceProps", "HomeEditorExitReason"]
+      }
+    ],
+    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary.",
+    "checks": ["test:unit", "test:browser"]
+  },
+  {
+    "title": "Construct and floor topology",
+    "spec": "docs/product/construct.md",
+    "owners": [
+      "apps/web/src/editor-preview/construct/useConstructEditor.ts",
+      "packages/engine/src/home-editor/construct",
+      "apps/web/src/editor-floors"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["FloorSpec"]
+      }
+    ],
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree.",
+    "checks": ["verify:construct", "fixture:verify:layout"]
+  },
+  {
+    "title": "Arrange and placement",
+    "spec": "docs/product/arrange.md",
+    "owners": [
+      "apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
+      "apps/web/src/editor-preview/furnish/placement",
+      "packages/engine/src/home-project/placements.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
+        "symbols": ["useFurnishingEditor"]
+      }
+    ],
+    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history.",
+    "checks": ["test:unit", "test:browser", "verify:furnishing-surfaces", "fixture:verify:room"]
+  },
+  {
+    "title": "Connect and binding profiles",
+    "spec": "docs/product/connect.md",
+    "owners": [
+      "apps/web/src/editor-connect/useConnectEditor.ts",
+      "packages/engine/src/home-assistant-mapping",
+      "packages/engine/src/runtime-binding-profile.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["RuntimeBindingProfile", "HomeAssistantMappingScreen"]
+      }
+    ],
+    "invariant": "Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.",
+    "checks": ["verify:runtime", "fixture:verify:scale"]
+  },
+  {
+    "title": "Home Assistant runtime and controls",
+    "spec": "docs/product/runtime-and-privacy.md",
+    "owners": [
+      "packages/engine/src/HomeAssistantRuntime.tsx",
+      "packages/engine/src/home-assistant-controls.ts",
+      "packages/engine/src/command-scheduler.ts"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["HomeAssistantRuntimeProvider", "useHomeAssistantRuntime"]
+      }
+    ],
+    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source.",
+    "checks": ["verify:runtime"]
+  },
+  {
+    "title": "Dashboard, navigation and cameras",
+    "spec": "docs/product/dashboard-and-cameras.md",
+    "owners": [
+      "packages/engine/src/useDashboardController.ts",
+      "packages/engine/src/CabaneDashboard.tsx",
+      "packages/engine/src/LiveCameraSurface.tsx",
+      "packages/engine/src/navigation"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["CabaneDashboard", "LiveCameraSurface"]
+      }
+    ],
+    "invariant": "Keep overview, room and walk state coherent; missing runtime data must leave a usable scene and actionable feedback.",
+    "checks": ["test:unit", "test:browser", "measure:scene"]
+  },
+  {
+    "title": "Scene geometry and rendering",
+    "spec": "docs/product/geometry-and-rendering.md",
+    "owners": [
+      "packages/engine/src/ArchitectureScene.tsx",
+      "packages/engine/src/architecture-scene",
+      "packages/engine/src/rendering.tsx",
+      "packages/engine/src/building",
+      "packages/engine/src/stairs"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["ArchitectureScene", "StylizedScene"]
+      }
+    ],
+    "invariant": "Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering.",
+    "checks": [
+      "test:unit",
+      "verify:policy",
+      "verify:scene-contours",
+      "fixture:verify:scale",
+      "measure:scene"
+    ]
+  },
+  {
+    "title": "Catalog and model extensions",
+    "spec": "docs/product/catalog-and-extensions.md",
+    "owners": [
+      "packages/catalog/src/architecture",
+      "packages/catalog/src/furnishing",
+      "packages/catalog/src/device",
+      "home/src/extensions"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/catalog/src/furnishing/index.ts",
+        "symbols": ["stableFurnishingRegistry"]
+      }
+    ],
+    "invariant": "Inspect stable registries first; supported catalog subpaths are the consumer boundary and home extensions own bespoke geometry.",
+    "checks": ["verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
+  },
+  {
+    "title": "Optional walk tools",
+    "spec": "docs/product/architecture.md",
+    "owners": [
+      "apps/web/src/walk-tools.ts",
+      "packages/walk-laser/src",
+      "packages/engine/src/walk-tools"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["WalkToolDefinition", "WalkToolProps", "WalkToolNavigation", "WalkToolStorage"]
+      }
+    ],
+    "invariant": "Register optional tools in the web host; injected navigation, activation and storage keep HA access inside the engine.",
+    "checks": ["test:unit", "test:browser", "verify:boundaries", "build"]
+  },
+  {
+    "title": "Bundled home and agent generation",
+    "spec": "docs/product/generation.md",
+    "owners": [
+      "home/src/project.ts",
+      "home/src/layout.json",
+      "home/src/items.json",
+      "home/src/project.json",
+      ".agents/skills"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["HomeProject", "FloorSpec"]
+      }
+    ],
+    "invariant": "Author one accepted layout or room stage at a time in home/; browser edits do not rewrite the bundled seed. Follow the generation skill review gates.",
+    "checks": ["home:verify", "home:evidence"]
+  },
+  {
+    "title": "Verification and delivery",
+    "spec": "docs/product/verification-and-delivery.md",
+    "owners": ["scripts", "tests", "eslint.config.mjs", "knip.config.mjs"],
+    "interfaces": [],
+    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Fixture/build success does not establish household, deployment or cross-browser acceptance.",
+    "checks": ["verify:help", "verify:fast", "verify", "browser:install"]
+  }
+]

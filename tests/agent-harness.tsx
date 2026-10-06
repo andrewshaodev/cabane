@@ -1,6 +1,6 @@
 import { makeStairProject, emptyExtensions } from "./fixtures/multiple-floors";
 import { composeHomeManifest } from "@cabane/engine";
-import { StrictMode, type ReactNode } from "react";
+import { StrictMode, useEffect, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { stableDeviceRegistry } from "@cabane/catalog/device";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
@@ -124,7 +124,18 @@ if (scenario === "mapping") {
 const root = document.getElementById("root");
 if (!root) throw new Error("The fixture harness root is missing.");
 
-createRoot(root).render(<StrictMode>{content}</StrictMode>);
-window.setTimeout(() => {
-  document.documentElement.dataset.evidenceReady = "true";
-}, 350);
+function EvidenceReady({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    document.documentElement.dataset.evidenceReady = "true";
+    return () => {
+      delete document.documentElement.dataset.evidenceReady;
+    };
+  }, []);
+  return children;
+}
+
+createRoot(root).render(
+  <StrictMode>
+    <EvidenceReady>{content}</EvidenceReady>
+  </StrictMode>,
+);
