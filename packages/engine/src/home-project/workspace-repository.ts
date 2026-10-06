@@ -199,6 +199,34 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
     });
   return {
     list, read, initialize, create, readOnboarding, dismissOnboarding, startOnboarding,
+    restoreExact: (source: HomeProjectRecord, settings: WorkspaceMetadata, expectedRevision?: number) => {
+      if (settings.id !== source.homeId || settings.hasPublished !== (source.publishedAt !== 0)) {
+        return Promise.reject(new Error("The workspace backup identity or published status is inconsistent."));
+      }
+      const normalized = settings.homeAssistantUrl ? normalizeHomeAssistantUrl(settings.homeAssistantUrl) : null;
+      if (settings.homeAssistantUrl && normalized !== settings.homeAssistantUrl) {
+        return Promise.reject(new Error("The workspace backup has an invalid Home Assistant URL."));
+      }
+      const saved = parse(serializeHomeProjectRecord(source));
+      return projectTransaction<WorkspaceEntry>(factory, "readwrite", stores, (tx, request, done) => {
+        const records = tx.objectStore(PROJECT_STORE), metadataStore = tx.objectStore(WORKSPACE_STORE);
+        request(records.get(source.homeId), raw => {
+          if (raw === undefined && expectedRevision !== undefined) throw new WorkspaceConflictError();
+          if (raw !== undefined && expectedRevision === undefined) throw new WorkspaceConflictError();
+          const current = raw === undefined ? null : parse(raw);
+          if (current && current.revision !== expectedRevision) throw new WorkspaceConflictError();
+          request(tx.objectStore(STATE_STORE).get(WORKSPACE_ONBOARDING_KEY), state => {
+            if (parseWorkspaceOnboarding(state)?.demoWorkspaceId === source.homeId) {
+              throw new Error("The demo cannot be replaced by a Home Assistant workspace.");
+            }
+            const record = { ...saved, revision: Math.max(saved.revision, (current?.revision ?? -1) + 1) };
+            const metadata = { ...settings };
+            request(records.put(serializeHomeProjectRecord(record), source.homeId), () =>
+              request(metadataStore.put(metadata, source.homeId), () => done({ record, metadata })));
+          });
+        });
+      });
+    },
     createBlank: (name: string) => {
       const record = createSeedProjectRecord(createEmptyHomeProject("new", nameOf(name)));
       record.publishedAt = 0;

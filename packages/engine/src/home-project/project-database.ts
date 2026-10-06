@@ -1,15 +1,16 @@
 const DATABASE_NAME = "cabane-projects-v2";
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 export const PROJECT_STORE = "home-projects";
 export const WORKSPACE_STORE = "workspaces";
 export const STATE_STORE = "workspace-state";
+export const SYNC_STORE = "workspace-sync";
 
 export const openProjectDatabase = (indexedDB: IDBFactory): Promise<IDBDatabase> =>
   new Promise((resolve, reject) => {
     const request = indexedDB.open(DATABASE_NAME, DATABASE_VERSION);
     request.onupgradeneeded = () => {
       const database = request.result;
-      for (const name of [PROJECT_STORE, WORKSPACE_STORE, STATE_STORE]) {
+      for (const name of [PROJECT_STORE, WORKSPACE_STORE, STATE_STORE, SYNC_STORE]) {
         if (!database.objectStoreNames.contains(name)) database.createObjectStore(name);
       }
     };
@@ -79,4 +80,3 @@ export const projectTransaction = async <T>(
     }
   });
 };
-
