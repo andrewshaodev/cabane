@@ -91,6 +91,11 @@ and [agent rules](./AGENTS.md).
 - [Catalog](./packages/catalog/README.md) — available reusable models.
 - [Home Assistant workspace storage setup](./docs/ha-workspace-storage-setup.md) — install the optional HA integration and save or restore workspaces.
 
+## Related repositories
+
+- [cabane-home-assistant](https://github.com/cabane-app/cabane-home-assistant) — Home Assistant integration, installation instructions, and releases.
+- [agent-skills](https://github.com/cabane-app/agent-skills) — public agent skills, including `create-cabane-model` for personal GLB model authoring. Install it with `npx skills add cabane-app/agent-skills --skill create-cabane-model`.
+
 ## License
 
 Source-available under PolyForm Noncommercial License 1.0.0. See [LICENSE](./LICENSE).

@@ -147,7 +147,9 @@
           "createModelAssetRepository",
           "openGlbPreview",
           "createCabaneArchive",
-          "readCabaneFile"
+          "readCabaneFile",
+          "createCabaneModelPack",
+          "readCabaneModelPack"
         ]
       }
     ],
@@ -334,11 +336,21 @@
       ".codex/hooks.json",
       "docs/ha-contract.json",
       "docs/ha-compatibility.json",
-      "scripts/ha-contract/compatibility-manifest.mjs"
+      "scripts/ha-contract/compatibility-manifest.mjs",
+      "scripts/profile-tests.mjs",
+      "scripts/test-profile-report.mjs",
+      "tests/test-costs.json"
     ],
     "interfaces": [],
-    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance. Full tests run locally before delivery; Actions validates contracts, builds, packages and publishes without rerunning tests. Only the explicit portable compatibility manifest triggers automatic releases; cosmetic edits and catalog additions/deletions are excluded. Portable type snapshots must remain current; behavioral validation/migration changes require explicit semantic revisions. A changed persisted contract requires a new fingerprint, revision and compatibility notes; a main push publishes the locally verified matching integration through the scoped release workflow.",
-    "checks": ["verify:help", "verify:fast", "verify", "browser:install", "verify:ha-contract"]
+    "invariant": "Use verify:help to select iteration checks; unknown or shared impact requires the complete verify gate, as does shared product delivery. Dependency changes require a complete portable lockfile and clean npm ci with the host npm version. Fixture/build success does not establish household, deployment or cross-browser acceptance. Full tests run locally before delivery; Actions validates contracts, builds, packages and publishes without rerunning tests. Only the explicit portable compatibility manifest triggers automatic releases; cosmetic edits and catalog additions/deletions are excluded. Portable type snapshots must remain current; behavioral validation/migration changes require explicit semantic revisions. A changed persisted contract requires a new fingerprint, revision and compatibility notes; a main push publishes the locally verified matching integration through the scoped release workflow. Test profiles record wall time, worker costs and the original test inventory; compare only passing runs with matching coverage. Keep optional portal coverage to one browser smoke and its Node behavior matrices. Personal GLB UI coverage is import-only plus the representative-scale scene; workspace navigation, reference-plan, weather, north, rug dimensions, room reorder, model-pack and imported-basement journeys are intentionally excluded from Chromium.",
+    "checks": [
+      "verify:help",
+      "verify:fast",
+      "verify",
+      "browser:install",
+      "verify:ha-contract",
+      "test:profile"
+    ]
   },
   {
     "title": "Shortcuts and private HA actions",

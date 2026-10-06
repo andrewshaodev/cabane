@@ -560,7 +560,7 @@ await withModules(async (load) => {
     assert.equal(await backing.read(record.homeId), winner);
   });
 
-  test("recovery removes only unavailable scene items and their private binding references", async () => {
+  test("unavailable scene items stay in the ready workspace for placeholder rendering", async () => {
     const { record, store, lifecycle } = await fixture();
     const damaged = structuredClone(record);
     const furnishing = damaged.draft.sceneItems.find((item) => item.id === "sectional-sofa");
@@ -593,48 +593,34 @@ await withModules(async (load) => {
     await store.write(record.homeId, raw);
 
     const loaded = await lifecycle.load();
-    assert.equal(loaded.status, "recovery");
-    assert.ok(loaded.issues.some((issue) => issue.code === "project.model-missing"));
-    const recovered = await lifecycle.recoverWithoutMissingSceneItems(loaded.record, loaded.raw);
-    assert.equal(
-      recovered.status,
-      "saved",
-      recovered.status === "storage-error" ? recovered.error.stack : undefined,
-    );
-    for (const project of [recovered.record.draft, recovered.record.published]) {
+    assert.equal(loaded.status, "ready");
+    for (const project of [loaded.record.draft, loaded.record.published]) {
       assert.equal(
         project.sceneItems.some((item) => item.id === furnishing.id),
-        false,
+        true,
       );
       assert.equal(
         project.sceneItems.some((item) => item.id === device.id),
-        false,
+        true,
       );
-      assert.ok(project.sceneItems.some((item) => item.id === "open-plan-living-dining-table"));
-      assert.ok(project.sceneItems.some((item) => item.id === "open-plan-living-dining-sideboard"));
     }
-    for (const state of Object.values(recovered.record.bindings)) {
+    for (const state of Object.values(loaded.record.bindings)) {
       assert.equal(
         slotIds.some((slotId) => slotId in state.draft.entityIdsBySlotId),
-        false,
+        true,
       );
       assert.equal(
         slotIds.some((slotId) => slotId in state.published.entityIdsBySlotId),
-        false,
+        true,
       );
       assert.equal(
         slotIds.some((slotId) => state.manualSlotIds.includes(slotId)),
-        false,
+        true,
       );
     }
-    assert.equal(recovered.record.draftUpdatedAt, damaged.draftUpdatedAt);
-    assert.equal(recovered.record.publishedAt, damaged.publishedAt);
-    assert.ok(recovered.record.revision > damaged.revision);
-    assert.deepEqual(await lifecycle.load(), {
-      status: "ready",
-      record: recovered.record,
-      source: "indexeddb",
-    });
+    assert.deepEqual(loaded.record.draftUpdatedAt, damaged.draftUpdatedAt);
+    assert.deepEqual(loaded.record.publishedAt, damaged.publishedAt);
+    assert.deepEqual((await lifecycle.load()).record, loaded.record);
   });
 
   test("native recovery preserves rejected raw if transaction readback fails", async () => {

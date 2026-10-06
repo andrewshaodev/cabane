@@ -155,6 +155,9 @@ processed by their chosen agent provider.
 
 ## Working and verification rules
 
+Before adding or changing tests, test infrastructure, or verification commands,
+read [the test guidelines](docs/test-guidelines.md).
+
 - Use the pinned Node/npm versions and `npm ci`. Install the pinned Chromium with
   `npm run browser:install` before browser verification.
 - Run `npm run format` after edits. During iteration, use the smallest relevant
@@ -196,3 +199,11 @@ processed by their chosen agent provider.
   applicable verification without asking for separate authorization. Never
   force-push. Do not configure or change a remote, or deploy, unless the user
   explicitly requests it.
+
+## Pull request creation
+
+- Keep verification screenshots local in the ignored `screenshots/` directory or
+  outside the repository. Do not commit or push screenshots, including under
+  `docs/evidence/`.
+- Before committing or opening a PR, inspect the staged file list and remove
+  screenshot artifacts from staging. Summarize visual checks in the PR description.
