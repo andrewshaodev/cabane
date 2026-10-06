@@ -16,7 +16,7 @@ import { floorWithOpeningOrientations } from "./opening-orientation-floor";
 
 import { ConstructEditorAction, ConstructEditorState } from "./construct-controller-contract";
 
-export const topologyForDraft = (draft: FloorEditorHistory["present"]) => {
+export const topologyForDraft = (draft: FloorEditorHistory["present"], reservedRoomNames: readonly string[] = []) => {
   return deriveFloorTopology({
     floorToFloorHeightMeters: draft.floorToFloorHeightMeters,
     floorId: draft.floorId,
@@ -25,6 +25,7 @@ export const topologyForDraft = (draft: FloorEditorHistory["present"]) => {
     walls: draft.walls,
     openings: draft.openings,
     rooms: draft.rooms,
+    reservedRoomNames,
     junctions: draft.junctions,
     hedges: draft.hedges,
     pools: draft.pools,

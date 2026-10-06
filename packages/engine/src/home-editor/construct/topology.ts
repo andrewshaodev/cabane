@@ -64,6 +64,15 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
 
   const assigned = new Set<string>();
   const reservedRoomIds = new Set(input.rooms.map((room) => room.id));
+  const reservedNames = new Set([...input.rooms.map((room) => room.name), ...(input.reservedRoomNames ?? [])]
+    .map((name) => name.trim().toLowerCase()));
+  let newNameSerial = 1;
+  const nextRoomName = () => {
+    while (reservedNames.has(`unnamed room ${newNameSerial}`)) newNameSerial += 1;
+    const name = `Unnamed room ${newNameSerial++}`;
+    reservedNames.add(name.toLowerCase());
+    return name;
+  };
   let newRoomSerial = 1;
   const nextRoomId = () => {
     while (reservedRoomIds.has(`${input.floorId}:room-${newRoomSerial}`)) newRoomSerial += 1;
@@ -80,7 +89,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
     const identity = anchored.find((room) => !assigned.has(room.id));
     if (identity) assigned.add(identity.id);
     const id = identity?.id ?? nextRoomId();
-    const name = identity?.name.trim() ?? "";
+    const name = identity?.name.trim() ?? nextRoomName();
     if (!name) issues.push(issue("topology.room-name", `rooms.${id}.name`, "Name every closed room before applying the floor plan."));
     return {
       id,
