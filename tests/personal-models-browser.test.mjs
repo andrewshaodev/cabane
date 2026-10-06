@@ -609,6 +609,9 @@ test(
         assert.fail("The model change was not persisted.");
       };
       await page.goto(`${url}workspaces/${source.id}/arrange`);
+      await page.locator("canvas").first().waitFor({ state: "visible" });
+      await mkdir("docs/evidence", { recursive: true });
+      await page.screenshot({ path: "docs/evidence/missing-model-fallback.png" });
       await page.getByRole("button", { name: "My models", exact: true }).click();
       const chooser = page.waitForEvent("filechooser");
       await page.getByRole("button", { name: "Import model (.glb file)", exact: true }).click();
@@ -638,6 +641,7 @@ test(
           record.draft.customModels?.length === 1 &&
           record.draft.sceneItems[0].modelId.startsWith("custom:"),
       );
+      await page.screenshot({ path: "docs/evidence/model-pack-library.png" });
       const customId = replaced.draft.sceneItems[0].modelId;
       const packDownload = page.waitForEvent("download");
       await page.getByRole("button", { name: "Export model pack (.zip)", exact: true }).click();
