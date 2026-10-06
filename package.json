@@ -45,7 +45,11 @@
     "lint:fix": "eslint . --fix --max-warnings 0",
     "knip": "knip --config knip.config.mjs",
     "browser:install": "playwright-core install chromium --no-shell",
-    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run knip && npm run verify:boundaries && npm run verify:policy"
+    "verify:fast": "npm run format:check && npm run lint && npm run typecheck && npm run knip && npm run verify:boundaries && npm run verify:policy",
+    "verify:help": "node scripts/verify-focused.mjs --help",
+    "verify:workspace": "node scripts/verify-focused.mjs workspace",
+    "verify:construct": "node scripts/verify-focused.mjs construct",
+    "verify:runtime": "node scripts/verify-focused.mjs runtime"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",

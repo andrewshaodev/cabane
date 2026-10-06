@@ -5,6 +5,14 @@ Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
 package-boundary/source-policy checks. `npm run verify` also runs all tests,
 furnishing-surface checks, and the production build. No hosted CI is configured.
 
+For the smallest sufficient iteration check, run `npm run verify:help`. Its
+selection guidance comes from the maintained test inventory, rather than a second
+script list in documentation. Focused checks retain the static gate and both Node
+and browser coverage. Shared or uncertain impact requires the complete gate;
+focused checks never replace `npm run verify` before product delivery. When adding
+or renaming tests, maintain `tests/verification-groups.json`: unclassified tests
+conservatively trigger the full suite, and stale entries fail visibly.
+
 Node 24.11.1 and npm 11.6.2 are pinned. Install with `npm ci`, then
 `npm run browser:install` to install Playwright's matching Chromium build; tests
 use modern headless Chromium rather than an independently updated system browser.

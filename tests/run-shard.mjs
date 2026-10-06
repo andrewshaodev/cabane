@@ -1,3 +1,4 @@
+import { selectVerificationTests } from "./verification-groups.mjs";
 import { readdir, stat, readFile } from "node:fs/promises";
 import { after, describe } from "node:test";
 import { closeModules } from "./test-server.mjs";
@@ -15,6 +16,14 @@ export async function runShard(shardIndex, shardCount) {
   let testFiles = (await readdir(testsDirectory))
     .filter((name) => name.endsWith(".test.mjs"))
     .sort();
+  const group = process.env.CABANE_VERIFY_GROUP;
+  if (group) {
+    if (process.env.CABANE_TEST_SUITE)
+      throw new Error("Focused groups require both unit and browser coverage.");
+    const selection = selectVerificationTests(testFiles, group);
+    testFiles = selection.files;
+    if (shardIndex === 0) console.log(`${group}: ${testFiles.length} files. ${selection.reason}`);
+  }
   const suite = process.env.CABANE_TEST_SUITE;
   if (suite && suite !== "unit" && suite !== "browser")
     throw new Error(`Unknown test suite: ${suite}`);
