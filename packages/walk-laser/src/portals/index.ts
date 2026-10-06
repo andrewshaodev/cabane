@@ -1,1 +1,1 @@
-export { GunPortals } from "./GunPortals";
+export { GunPortals, type PortalControls } from "./GunPortals";

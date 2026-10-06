@@ -18,7 +18,7 @@ export function useGunPortals(active: boolean, navigation: WalkToolNavigation, o
   const traversal = useMemo(createPortalTraversal, []);
   const transit = usePortalTransition(active, reducedMotion, navigation, traversal.reset);
   const place = useCallback(() => {
-    if (transit.transition.busy) return;
+    if (!active || transit.transition.busy) return;
     scene.updateMatrixWorld(true);
     ray.setFromCamera(new Vector2(), camera);
     ray.far = 30;
@@ -31,12 +31,12 @@ export function useGunPortals(active: boolean, navigation: WalkToolNavigation, o
     traversal.reset();
     setPair(updated);
     onPlaced(anchor.center, anchor.normal, PORTAL_COLORS[color], portals.nextColor);
-  }, [camera, scene, ray, navigation, traversal, portals, onPlaced, transit.transition]);
+  }, [active, camera, scene, ray, navigation, traversal, portals, onPlaced, transit.transition]);
   usePortalInput(active, place);
   useFrame(() => {
     if (!active) { traversal.reset(); return; }
     if (transit.transition.busy) return;
     traversal.step(portals.current, camera.position, { yaw: camera.rotation.y, pitch: camera.rotation.x }, transit.travel);
   });
-  return { pair, veil: transit.veil, iris: transit.iris };
+  return { pair, place, veil: transit.veil, iris: transit.iris };
 }

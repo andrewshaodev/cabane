@@ -12,7 +12,7 @@ pass, preserving its own depth and preventing walls from clipping the view model
 All visible geometry is procedural and uses the engine's public toon material.
 
 Add Laser through Customize action bar, Save, then equip in Walk. Click or F fires
-with mouse capture; touch uses Fire. The host restricts activation to valid lights.
+with mouse capture; touch uses the right-side zap button. The host restricts activation to valid lights.
 No state is persisted except the shortcut's tool ID. Unequipping unmounts the scene,
 removes input listeners, cancels visual timers, and suppresses late result updates.
 
@@ -39,9 +39,10 @@ The blaster includes a matching padded glove. Idle breathing and speed-driven wa
 
 Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.
 
-Desktop secondary fire places a blue portal, then a gold portal, alternating only
+Secondary fire (desktop right-click or the right-side touch portal button)
+places a blue portal, then a gold portal, alternating only
 on successful placement. Aim at a broad flat wall or floor, right-click with the
-mouse captured, and walk into either linked oval to emerge from its partner.
+mouse captured or tap the portal button, and walk into either linked oval to emerge from its partner.
 Indoor floors, outdoor slabs, terrain, and exterior walls are supported when the
 full oval fits and the exit is clear. The navigation adapter checks the existing
 terrain mesh for ground-storey support, retaining pool holes and edge clearance;
@@ -96,3 +97,8 @@ Renderer state and temporary visibility changes are restored even on failure;
 stowing disposes both targets. Reduced motion retains live perspective tracking.
 The view reuses the host's current toon geometry and lighting; it does not
 activate extra floor lights or run another contour postprocessing pass.
+
+Touch uses two separate right-side icon buttons for zap and portal, with the next
+portal color shown on its button. Both fire on contact without taking over a
+second finger on the movement/look sticks. Portal travel does not require pointer
+lock on touch; disabled controls and overlays still prevent firing and relocation.

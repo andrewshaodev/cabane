@@ -221,7 +221,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     coarsePointer={coarsePointer} reducedMotion={reducedMotion}
                     navigation={{
                       resolveLanding: position => toolNavigationRef.current?.resolveLanding(position) ?? null,
-                      teleport: (landing, facing) => toolInputEnabled && walkPointerLocked
+                      teleport: (landing, facing) => toolInputEnabled && (coarsePointer || walkPointerLocked)
                         && (toolNavigationRef.current?.teleport(landing, facing) ?? false),
                     }}
                     canActivateTarget={target => toolInputEnabled && canActivateWalkTarget(target, resolvedBindings, runtime.canMutate)}

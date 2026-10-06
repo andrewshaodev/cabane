@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createBrowserTestSession, getBrowserTestServer } from './browser-test-environment.mjs';
 
-const fixture = `<!doctype html><html><head><title>Portal walk fixture</title></head><body><div id="root"></div><script type="module">
+const fixture = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><title>Portal walk fixture</title></head><body><div id="root"></div><script type="module">
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { useFrame, useThree } from '@react-three/fiber';
@@ -129,6 +129,58 @@ for (const reducedMotion of ['no-preference','reduce']) test(`Chrome paired port
   } catch (error) {
     await page.screenshot({path:"/tmp/cabane-portals-failure.png"});
     console.error(errors, await page.evaluate(()=>window.portalObservation), await page.locator("body").innerText()); throw error;
+  } finally {await browser.close();}
+});
+
+for(const viewport of [{width:667,height:375},{width:844,height:390}]) test(`mobile touch actions and portal travel without pointer lock (${viewport.width}x${viewport.height})`,async()=>{
+  const {server}=await getBrowserTestServer('app');
+  const browser=await createBrowserTestSession();
+  const page=await browser.newPage({viewport,isMobile:true,hasTouch:true});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  // Raw CDP gestures can reset Chrome's pointer media emulation. Keep the
+  // phone capability stable while exercising real touch events and controls.
+  await page.addInitScript(()=>{
+    const match=window.matchMedia.bind(window);
+    window.matchMedia=query=>{const result=match(query);if(query==='(any-pointer: coarse)') Object.defineProperty(result,'matches',{value:true});return result;};
+    Object.defineProperty(navigator,'maxTouchPoints',{value:5});
+  });
+  const cdp=await page.context().newCDPSession(page);
+  const touch=async(type,x,y)=>{await cdp.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:5});return cdp.send('Input.dispatchTouchEvent',{type,touchPoints:type==='touchEnd'?[]:[{x,y,id:1}]});};
+  try {
+    await page.route('**/portal-touch-fixture',async route=>route.fulfill({contentType:'text/html',body:await server.transformIndexHtml('/portal-touch-fixture',fixture)}));
+    await page.goto(server.resolvedUrls.local[0]+'portal-touch-fixture');
+    await page.getByRole('button',{name:'Walk mode',exact:true}).tap();
+    await page.getByRole('button',{name:'Equip Laser',exact:true}).tap();
+    await page.getByRole('button',{name:'Fire zap',exact:true}).tap();
+    await page.waitForFunction(()=>window.zapColors?.includes('51e8f3') || window.zapColors?.length>0);
+    assert.equal(await page.evaluate(()=>Boolean(document.pointerLockElement)),false);
+    await page.getByRole('button',{name:'Create blue portal'}).tap();
+    await page.waitForFunction(()=>window.portalObservation.portals.length===1);
+    // Turn around with the actual touch-look joystick.
+    await touch('touchStart',viewport.width*.75,viewport.height-60);await touch('touchMove',viewport.width*.75+32,viewport.height-60);
+    await page.waitForFunction(()=>window.portalObservation.yaw<.1);
+    await touch('touchEnd');
+    await page.waitForTimeout(200);
+    await page.getByRole('button',{name:'Create gold portal'}).tap();
+    await page.waitForFunction(()=>window.portalObservation.portals.length===2);
+    await page.getByRole('button',{name:'Create blue portal'}).waitFor();
+    // Walk into the north portal using the touch-movement joystick.
+    await touch('touchStart',90,viewport.height-60);await touch('touchMove',90,viewport.height-92);
+    await page.waitForFunction(()=>window.portalObservation.position[2]>2.5,{},{timeout:5000});
+    await touch('touchEnd');
+    await page.waitForFunction(()=>document.querySelector('.walk-portal-transit')?.style.visibility==='hidden');
+    {
+      for(const label of ['Fire zap','Create blue portal']) {
+        const button=page.getByRole('button',{name:label,exact:true});
+        const bounds=await button.boundingBox();
+        assert.ok(bounds.x>viewport.width/2 && bounds.x+bounds.width<=viewport.width && bounds.y>=0 && bounds.y+bounds.height<=viewport.height);
+        assert.equal(await button.evaluate(el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}),true,'touch controls are not covered by look joystick');
+      }
+    }
+    assert.deepEqual(errors,[]);
+  } catch(error) {
+    console.error(JSON.stringify(await page.evaluate(()=>window.portalObservation)),errors);
+    await page.screenshot({path:'/tmp/cabane-mobile-gun.png'});throw error;
   } finally {await browser.close();}
 });
 

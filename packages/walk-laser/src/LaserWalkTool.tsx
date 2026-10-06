@@ -3,7 +3,8 @@ import { Html } from "@react-three/drei";
 import { createPortal, useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Group, Matrix3, Raycaster, Scene, Vector2, Vector3, type PerspectiveCamera } from "three";
-import { GunPortals } from "./portals";
+import { GunPortals, type PortalControls } from "./portals";
+import { LaserTouchActions } from "./LaserTouchActions";
 import { LaserCrosshair } from "./LaserCrosshair";
 import type { PortalColor } from "./portals/portal-contract";
 import { LaserGun } from "./LaserGun";
@@ -17,6 +18,7 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
   const dom = useCabaneDom();
   const gun = useRef<Group>(null);
   const muzzle = useRef<Group>(null);
+  const portalControls = useRef<PortalControls>(null);
   const weaponScene = useMemo(() => new Scene(), []);
   const { shots, recoil, emitShot } = useLaserShots(muzzle, camera, reducedMotion);
   const shot = shots.at(-1);
@@ -105,7 +107,7 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
   }, [emitShot]);
 
   return <>
-    <GunPortals active={ready && !coarsePointer} navigation={navigation} reducedMotion={reducedMotion} onPlaced={portalShot} />
+    <GunPortals active={ready} navigation={navigation} reducedMotion={reducedMotion} onPlaced={portalShot} controls={portalControls} />
     {createPortal(<><ambientLight intensity={1.1} /><directionalLight position={[-2, 4, 3]} intensity={2.2} />
       <group ref={gun}><LaserGun muzzleRef={muzzle} shotId={shot?.id ?? 0} /></group></>, weaponScene)}
     {shots.map(item => <LaserShot key={item.id} shot={item} />)}
@@ -113,7 +115,7 @@ export function LaserWalkTool({ enabled, pointerLocked, coarsePointer, reducedMo
     <Html onOcclude={() => undefined} fullscreen calculatePosition={(_, __, size) => [size.width / 2, size.height / 2]} zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
       {enabled && <div className="walk-laser" data-ready={ready}>
         <LaserCrosshair target={Boolean(aim)} desktop={!coarsePointer} ready={ready} nextPortal={nextPortal} />
-        {coarsePointer && <button type="button" className="walk-laser__fire" disabled={!ready} onClick={fire} aria-label="Fire laser">Fire</button>}
+        {coarsePointer && <LaserTouchActions ready={ready} nextPortal={nextPortal} zap={fire} portal={() => portalControls.current?.place()} />}
       </div>}
     </Html>
   </>;

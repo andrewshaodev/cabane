@@ -147,7 +147,7 @@ The web host offers an optional **Laser** action in Shortcuts → Add action,
 alongside Lights off and View. It is absent from the default bar. Save the shortcut,
 enter Walk, and select Laser to equip or unequip a procedural cartoon laser gun.
 Leaving Walk unequips it. Desktop pointer lock enables center-screen aim and
-left-click or F to fire; touch uses the existing sticks and a dedicated Fire button.
+left-click or F to fire; touch uses the existing sticks and two right-side icon buttons for zap and portal.
 The initiating pointer-lock click does not fire. Overlays, hidden documents, and
 paused mouse control disable firing. Stowing the tool restores ordinary device-panel interaction.
 
@@ -187,7 +187,7 @@ level deep, skip back-facing/off-screen openings, and use targets capped at 1024
 pixels per side; reduced motion preserves perspective tracking. Arrival protection avoids
 immediate return trips, and controls/overlays pause traversal. Stowing Laser or
 leaving Walk clears the pair. This first version is grounded travel: no ceiling
-portals, retained launch momentum or flinging. Touch keeps its existing Fire action.
+portals, retained launch momentum or flinging. Touch supports both actions and portal travel without pointer lock.
 Successful portal placement fires the same electrical zap as primary fire, tinted
 blue or gold to match its destination. Each portal blooms from zero with a brief
 overshoot, settling rim and dissipating energy ripple; replacement replays it.
@@ -198,5 +198,6 @@ Pausing or stowing cancels pending travel and restores the camera. Reduced motio
 keeps only a short gentle tint and skips the lens/ring animation.
 The desktop gun crosshair includes text-free primary/secondary fire cues: a left
 zap glyph and right portal glyph, with matching highlighted mouse buttons. The
-portal cue shows the next blue/gold placement color. Touch retains its central
-reticle and Fire control.
+portal cue shows the next blue/gold placement color. In landscape touch Walk,
+two right-side icon buttons fire zap and portal on contact. The portal button
+shows its next color; the central targeting reticle and movement/look sticks remain.

@@ -1,7 +1,1 @@
 .walk-laser { position: absolute; inset: 0; pointer-events: none; color: #fffdf3; font-family: Roboto, sans-serif; }
-.walk-laser__fire { position: absolute; right: 32px; bottom: 190px; width: 68px; height: 68px; border: 2px solid #203d39; border-radius: 50%; color: #203d39; background: #efba65; font: 700 15px Roboto, sans-serif; pointer-events: auto; touch-action: manipulation; }
-.walk-laser__fire:hover { background: #ffcf87; }
-.walk-laser__fire:active { background: #dda551; }
-.walk-laser__fire:focus-visible { outline: 3px solid #fffdf3; outline-offset: 3px; }
-.walk-laser__fire:disabled { opacity: .5; }
-@media (max-height: 600px) { .walk-laser__fire { right: 100px; bottom: 160px; } }
