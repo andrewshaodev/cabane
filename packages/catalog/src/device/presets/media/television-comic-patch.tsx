@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Shape } from "three";
-import { ToonMaterial } from "@cabane/engine";
+import { LayeredSurface } from "@cabane/engine";
 
 /** Flat comic ink, with depth-buffer separation rather than physical screen protrusion. */
 export function TelevisionComicPatch({
@@ -19,16 +19,8 @@ export function TelevisionComicPatch({
     return path;
   }, [points]);
   return (
-    <mesh position-z={layer * 0.00001} raycast={() => undefined}>
+    <LayeredSurface layer={layer} color={color} emissive={color} emissiveIntensity={0.85}>
       <shapeGeometry args={[shape]} />
-      <ToonMaterial
-        color={color}
-        emissive={color}
-        emissiveIntensity={0.85}
-        polygonOffset
-        polygonOffsetFactor={0}
-        polygonOffsetUnits={-4 * layer}
-      />
-    </mesh>
+    </LayeredSurface>
   );
 }

@@ -10,16 +10,16 @@ export function WeatherStationModel({ state, visualState }: HomeDeviceModelProps
   return (
     <group name="catalog-weather-station" userData={{ walkCollider: true }}>
       <RoundedFurniturePanel
-        size={[0.18, 0.12, 0.04]}
-        position={[0, 0.06, 0]}
+        size={[0.18, 0.12, 0.034]}
+        position={[0, 0.06, -0.003]}
         color="#d9ded9"
         radius={0.012}
         outlineColor="#52605b"
       />
       <RoundedFurniturePanel
         name="weather-station-display"
-        size={[0.148, 0.09, 0.003]}
-        position={[0, 0.064, 0.0185]}
+        size={[0.148, 0.09, 0.002]}
+        position={[0, 0.064, 0.017]}
         color="#344644"
         radius={0.005}
         outline={false}

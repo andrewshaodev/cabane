@@ -1,4 +1,5 @@
 import {
+  editorWallAttachments,
   createFloorEditorSelection,
   floorEditorSelectionTargets,
   pointInsidePolygon,
@@ -70,7 +71,7 @@ const polygonTouchesRectangle = (
 };
 
 const openingSpan = (
-  opening: FloorEditorDraft["openings"][number],
+  opening: import("@cabane/engine").EditorWallAttachment,
   draft: FloorEditorDraft,
 ): readonly [PlanPoint, PlanPoint] | null => {
   const wall = draft.walls.find((candidate) => candidate.id === opening.wallId);
@@ -108,7 +109,7 @@ export const constructionMarqueeTargets = ({
   const wallTargets = draft.walls
     .filter((wall) => segmentTouchesRectangle(wall.from, wall.to, rectangle))
     .map((wall): FloorEditorSelectionTarget => ({ kind: "wall", id: wall.id }));
-  const openingTargets = draft.openings
+  const openingTargets = editorWallAttachments(draft)
     .filter((opening) => {
       const span = openingSpan(opening, draft);
       return span ? segmentTouchesRectangle(span[0], span[1], rectangle) : false;
@@ -228,7 +229,7 @@ export const resolveConstructionDeletionTargets = ({
       );
     const selectedSpans = intervals(selectedRooms);
     const protectedSpans = selectedRoomIds.size ? intervals(unselectedRooms) : [];
-    for (const opening of draft.openings.filter((o) => o.wallId === wall.id)) {
+    for (const opening of editorWallAttachments(draft).filter((o) => o.wallId === wall.id)) {
       const start = opening.offsetPlanUnits / Math.sqrt(squared);
       const end = start + opening.widthPlanUnits / Math.sqrt(squared);
       if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON))
@@ -259,7 +260,7 @@ export const resolveConstructionDeletionTargets = ({
           : { kind: "wall", id: wall.id, span },
       );
     }
-    for (const opening of draft.openings.filter((o) => o.wallId === wall.id)) {
+    for (const opening of editorWallAttachments(draft).filter((o) => o.wallId === wall.id)) {
       const start = opening.offsetPlanUnits / Math.sqrt(squared);
       const end = start + opening.widthPlanUnits / Math.sqrt(squared);
       if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON))
@@ -302,7 +303,7 @@ export const resolveConstructionDeletionTargets = ({
       ),
       ...[...selectedRoomIds].map((id): FloorEditorSelectionTarget => ({ kind: "room", id })),
       ...wallTargets,
-      ...draft.openings
+      ...editorWallAttachments(draft)
         .filter((opening) => selectedOpeningIds.has(opening.id))
         .map((opening): FloorEditorSelectionTarget => ({ kind: "opening", id: opening.id })),
       ...(draft.pools ?? [])

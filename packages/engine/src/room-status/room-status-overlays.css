@@ -1,0 +1,65 @@
+.scene-context__room-status {
+  justify-content: flex-start;
+  max-width: 100%;
+  margin-top: 7px;
+  overflow: hidden;
+}
+
+.room-status-overlay-anchor {
+  pointer-events: auto !important;
+}
+.room-status-overlay {
+  display: grid;
+  justify-items: center;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 0;
+  color: #f7f5ee;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 7px 14px rgba(17, 28, 23, 0.18));
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(5px) scale(0.97);
+  transition:
+    opacity 0.22s var(--ease-out-quart),
+    transform 0.22s var(--ease-out-quart),
+    filter 0.18s ease,
+    visibility 0s linear 0.22s;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.room-status-overlay[data-visible="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+  transition-delay: 0s;
+  pointer-events: auto;
+}
+.room-status-overlay[data-visible="true"]:is(:hover, [data-hovered="true"]) {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 12px 22px rgba(17, 28, 23, 0.3));
+}
+.room-status-overlay:active {
+  transform: translateY(0) scale(0.97);
+}
+.room-status-overlay:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--home-accent) 72%, white);
+  outline-offset: 5px;
+  border-radius: 14px;
+}
+.room-status-overlay__name {
+  margin-bottom: 5px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.72rem;
+  font-weight: 620;
+  text-shadow: 0 2px 10px rgba(16, 25, 21, 0.7);
+  white-space: nowrap;
+}
+.room-status-overlay__stem {
+  width: 1px;
+  height: 24px;
+  margin-top: 4px;
+  background: linear-gradient(rgba(247, 245, 238, 0.75), transparent);
+}

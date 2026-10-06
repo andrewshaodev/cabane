@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 1,
+    "validationRevision": 2,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -2596,6 +2596,78 @@
                           "optional": false,
                           "schema": {
                             "type": "string"
+                          }
+                        },
+                        "niches": {
+                          "optional": true,
+                          "schema": {
+                            "items": {
+                              "properties": {
+                                "bottomMeters": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "depthMeters": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "heightMeters": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "id": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "string"
+                                  }
+                                },
+                                "offsetFromWallStartPlanUnits": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "shelfHeightsMeters": {
+                                  "optional": true,
+                                  "schema": {
+                                    "items": {
+                                      "type": "number"
+                                    }
+                                  }
+                                },
+                                "shelfThicknessMeters": {
+                                  "optional": true,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "side": {
+                                  "optional": false,
+                                  "schema": {
+                                    "anyOf": [
+                                      {
+                                        "const": "left"
+                                      },
+                                      {
+                                        "const": "right"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "widthPlanUnits": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                }
+                              }
+                            }
                           }
                         },
                         "thicknessMeters": {
@@ -6268,6 +6340,78 @@
                         "optional": false,
                         "schema": {
                           "type": "string"
+                        }
+                      },
+                      "niches": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "properties": {
+                              "bottomMeters": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              },
+                              "depthMeters": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              },
+                              "heightMeters": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              },
+                              "id": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "string"
+                                }
+                              },
+                              "offsetFromWallStartPlanUnits": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              },
+                              "shelfHeightsMeters": {
+                                "optional": true,
+                                "schema": {
+                                  "items": {
+                                    "type": "number"
+                                  }
+                                }
+                              },
+                              "shelfThicknessMeters": {
+                                "optional": true,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              },
+                              "side": {
+                                "optional": false,
+                                "schema": {
+                                  "anyOf": [
+                                    {
+                                      "const": "left"
+                                    },
+                                    {
+                                      "const": "right"
+                                    }
+                                  ]
+                                }
+                              },
+                              "widthPlanUnits": {
+                                "optional": false,
+                                "schema": {
+                                  "type": "number"
+                                }
+                              }
+                            }
+                          }
                         }
                       },
                       "thicknessMeters": {

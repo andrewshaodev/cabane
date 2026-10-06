@@ -1,0 +1,100 @@
+/* Related scene actions unfold upward, keeping the home in view. */
+.scene-action-group {
+  position: relative;
+  pointer-events: auto;
+}
+.scene-action-group__chevron {
+  margin-left: 5px;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.scene-action-group[data-open="true"] .scene-action-group__chevron {
+  transform: rotate(180deg);
+}
+.scene-action-group[data-open="true"] > button {
+  border-color: rgba(231, 213, 173, 0.7);
+  background: rgba(110, 125, 105, 0.65);
+}
+.scene-action-group__tray {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100cqw - 16px);
+  padding: 8px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(240, 232, 210, 0.24);
+  border-radius: 18px;
+  background: rgba(29, 43, 38, 0.96);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.28),
+    inset 0 1px rgba(255, 255, 255, 0.08);
+  animation: scene-tray-enter 0.2s var(--ease-out-quint) both;
+}
+.scene-action-group__tray[hidden] {
+  display: none;
+}
+.scene-action-group__tray::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 15px;
+}
+.scene-action-group:first-child .scene-action-group__tray {
+  left: -6px;
+  transform: none;
+}
+.scene-action-group__tray .scene-action-slot {
+  --action-size: max(var(--scene-action-size), 80px);
+}
+.scene-action-group__tray .scene-action-slot__label {
+  font-size: 0.6rem;
+}
+.scene-action-slot:focus-visible {
+  outline: 2px solid #f0d7a5;
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .scene-action-slot:hover:not(:disabled) {
+    border-color: rgba(240, 232, 210, 0.55);
+    filter: brightness(1.12);
+  }
+}
+@keyframes scene-tray-enter {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .scene-action-dock {
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(7px, env(safe-area-inset-left));
+    right: max(7px, env(safe-area-inset-right));
+    transform: none;
+  }
+  .scene-action-bar {
+    flex-direction: row;
+  }
+  .walk-device-action {
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--scene-action-size) + 56px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-action-group__tray {
+    animation: none;
+  }
+  .scene-action-group__chevron {
+    transition: none;
+  }
+}

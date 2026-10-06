@@ -36,6 +36,17 @@ Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
 passages rectangular/arched variants.
+Walls may also own optional rectangular blind `niches[]`, with a stable ID,
+left/right directed face, plan offset/width, bottom/height and depth in metres.
+A niche cuts only the selected face and retains at least 20 mm of solid backing;
+it must clear openings, other niches and wall junctions. Optional integral shelf
+bottom heights are relative to the recess bottom, with 25 mm default thickness.
+Shelves use the wall finish and are real connected slabs. Both standalone and
+batched geometry derive the cavity from the same wall data; fades and shadows
+remain wall-owned. Walk navigation retains the full wall barrier for these
+shallow recesses, so they cannot create passage connections. Old walls omit
+`niches` and retain their previous geometry and storage behavior.
+
 Paired hinged and sliding door leaves meet at the center in the same depth plane when closed.
 
 The engine constructs continuous walls and junction assemblies with interior and
@@ -298,3 +309,25 @@ clear/off weather returns to demand rendering and hidden pages suspend animation
 Reduced motion retains static clouds and lighting without precipitation or pulses.
 Real mobile performance and complete cross-browser weather acceptance require
 measurements on those devices; fixture success does not establish them.
+
+## Layered flat surfaces
+
+Use the public engine `LayeredSurface` for opaque, planar artwork such as screen
+illustrations and labels. Supply XY geometry as its child and a `layer` integer
+from 0 through 64; higher layers cover lower layers. Transform the complete stack
+using parent groups. Disjoint patches can reuse a layer; overlapping patches
+must use different layers. The component owns depth testing, depth writing,
+opaque toon material, and bounded polygon bias. A small local Z separation matches
+the paint order; callers do not supply material depth overrides. Colours and
+emissive colour/intensity remain configurable. This is not a transparent-glass or
+volumetric-overlay primitive, and depth bias does not replace physical clearance
+between separate objects.
+
+The geometry audit validates local planarity and actual material state before
+accepting declared layers. It rejects duplicate triangles within a mesh, duplicate
+meshes, competing exposed coplanar finishes, and overlapping patches sharing a
+layer. Shared edges, hidden support faces, and identically shaded opaque structural
+joins are not conflicts. Detection uses transformed triangle geometry, material
+groups, and draw ranges. It is a model-space diagnostic, not a guarantee against
+all camera precision, transparency-sorting, animated intersections, or shader
+instability; the toon camera-motion regression covers the separate lighting case.

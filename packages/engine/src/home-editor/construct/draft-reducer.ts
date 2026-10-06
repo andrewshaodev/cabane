@@ -1,3 +1,5 @@
+import { unusedElementId, unusedElementSerial } from "./editor-element-identity";
+import { constrainWallNiches, reduceNicheOpeningAction } from "./niche-editor-actions";
 import {
   isOutdoorPlatformOutline,
   platformWithPolygon,
@@ -34,42 +36,6 @@ const moved = (value: PlanPoint, delta: PlanPoint): PlanPoint => [
   round(value[0] + delta[0]),
   round(value[1] + delta[1]),
 ];
-
-const occupiedElementIds = (draft: FloorEditorDraft) =>
-  new Set([
-    draft.floorId,
-    ...draft.walls.map((wall) => wall.id),
-    ...draft.openings.map((opening) => opening.id),
-    ...draft.rooms.flatMap((room) => [
-      room.id,
-      room.ceilingId,
-      ...(room.floorZones ?? []).map((zone) => zone.id),
-    ]),
-    ...draft.junctions.map((junction) => junction.id),
-    ...(draft.hedges ?? []).map((hedge) => hedge.id),
-    ...(draft.outdoorPlatforms ?? []).flatMap((platform) => [
-      platform.id,
-      ...platform.edges.map((edge) => edge.id),
-    ]),
-    ...(draft.pools ?? []).map((pool) => pool.id),
-    ...(draft.groundZones ?? []).map((zone) => zone.id),
-  ]);
-
-const unusedElementSerial = (draft: FloorEditorDraft, prefix: string) => {
-  const occupied = occupiedElementIds(draft);
-  let serial = draft.nextSerial;
-  // Recovery and deletion can make collection counts smaller than existing IDs.
-  while (occupied.has(`${draft.floorId}:${prefix}-${serial}`)) serial += 1;
-  return serial;
-};
-
-const unusedElementId = (draft: FloorEditorDraft, preferred: string) => {
-  const occupied = occupiedElementIds(draft);
-  if (!occupied.has(preferred)) return preferred;
-  let suffix = 2;
-  while (occupied.has(`${preferred}-${suffix}`)) suffix += 1;
-  return `${preferred}-${suffix}`;
-};
 
 const deleteElements = (
   draft: FloorEditorDraft,
@@ -137,6 +103,8 @@ const reduceDraftAction = (
   draft: FloorEditorDraft,
   action: Exclude<FloorEditorAction, { type: "undo" | "redo" }>,
 ): FloorEditorDraft => {
+  const nicheResult = reduceNicheOpeningAction(draft, action);
+  if (nicheResult) return nicheResult;
   switch (action.type) {
     case "set-tool":
       return { ...draft, tool: action.tool, selection: null };
@@ -544,14 +512,16 @@ const reduceDraftAction = (
       };
     }
     case "update-opening": {
-      const current = draft.openings.find((opening) => opening.id === action.opening.id);
+      if (action.opening.kind === "niche") return draft;
+      const updatedOpening = action.opening;
+      const current = draft.openings.find((opening) => opening.id === updatedOpening.id);
       if (!current || current.kind !== action.opening.kind) return draft;
       return {
         ...draft,
         openings: draft.openings.map((opening) =>
           opening.id === action.opening.id
             ? {
-                ...action.opening,
+                ...updatedOpening,
                 offsetPlanUnits: round(action.opening.offsetPlanUnits),
                 widthPlanUnits: Math.max(
                   0.3 / draft.coordinates.metersPerPlanUnit,
@@ -627,7 +597,7 @@ export const reduceDraft = (
   draft: FloorEditorDraft,
   action: Exclude<FloorEditorAction, { type: "undo" | "redo" }>,
 ): FloorEditorDraft => {
-  const next = reduceDraftAction(draft, action);
+  let next = reduceDraftAction(draft, action);
   if (
     next === draft ||
     !["move-endpoint", "translate-wall", "update-wall-metadata", "update-floor-settings"].includes(
@@ -635,6 +605,7 @@ export const reduceDraft = (
     )
   )
     return next;
+  next = constrainWallNiches(next);
   const openings = next.openings.filter((opening) => {
     const wall = next.walls.find((candidate) => candidate.id === opening.wallId);
     const previous = draft.walls.find((candidate) => candidate.id === opening.wallId);

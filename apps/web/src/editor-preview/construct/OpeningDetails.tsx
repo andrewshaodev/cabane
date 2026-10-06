@@ -1,6 +1,10 @@
-import { resolveOpeningOrientation, type EditorOpening } from "@cabane/engine";
+import {
+  resolveOpeningOrientation,
+  type EditorWallAttachment as EditorOpening,
+} from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import { OpeningOrientationControls } from "./OpeningOrientationControls";
+import { NicheProperties } from "./NicheProperties";
 import { OpeningProperties } from "./OpeningProperties";
 import { openingPlanSymbol } from "./opening-plan-symbol";
 import type { ConstructEditorController } from "./useConstructEditor";
@@ -24,8 +28,18 @@ export function OpeningDetails({
   const minX = Math.min(0, ...points.map((point) => point[0])) - 0.2;
   const maxX = Math.max(width, ...points.map((point) => point[0])) + 0.2;
   const extentZ = Math.max(0.3, ...points.map((point) => Math.abs(point[1]))) + 0.12;
-  const orientable = opening.kind !== "passage" && resolveOpeningOrientation(opening).canSwitchSide;
-  const name = opening.kind === "door" ? "Door" : opening.kind === "window" ? "Window" : "Passage";
+  const orientable =
+    opening.kind !== "niche" &&
+    opening.kind !== "passage" &&
+    resolveOpeningOrientation(opening).canSwitchSide;
+  const name =
+    opening.kind === "door"
+      ? "Door"
+      : opening.kind === "window"
+        ? "Window"
+        : opening.kind === "niche"
+          ? "Niche"
+          : "Passage";
   return (
     <SelectionDetailsPanel
       mode="construct"
@@ -71,7 +85,11 @@ export function OpeningDetails({
             />
           </fieldset>
         )}
-        <OpeningProperties opening={opening} editor={editor} />
+        {opening.kind === "niche" ? (
+          <NicheProperties niche={opening} editor={editor} />
+        ) : (
+          <OpeningProperties opening={opening} editor={editor} />
+        )}
       </div>
     </SelectionDetailsPanel>
   );

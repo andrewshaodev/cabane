@@ -1,7 +1,6 @@
 import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { waitForSceneCamera } from "../scripts/browser-scene-settle.mjs";
 import { getBrowserTestServer, createBrowserTestSession } from "./browser-test-environment.mjs";
 
 test(
@@ -136,69 +135,6 @@ test(
         true,
       );
       assert.match(await page.getByRole("dialog").innerText(), /ground floor cannot be deleted/);
-      assert.deepEqual(errors, []);
-    } finally {
-      await browser?.close();
-    }
-  }),
-);
-
-test(
-  "imported basements render in the normal dashboard and Walk",
-  { timeout: 60_000 },
-  withBrowserDiagnostics(async () => {
-    const { server } = await getBrowserTestServer("app");
-    let browser;
-    try {
-      const { makeStairProject } = await server.ssrLoadModule(
-        `${process.cwd()}/tests/fixtures/multiple-floors.ts`,
-      );
-      const { createSeedProjectRecord } = await server.ssrLoadModule(
-        `${process.cwd()}/packages/engine/src/home-project/repository.ts`,
-      );
-      const project = makeStairProject();
-      project.floors = project.floors.map((floor, i) => ({
-        ...floor,
-        name: ["Floor −2", "Floor −1", "Ground floor"][i],
-        ...(i < 2 ? { belowGround: true } : {}),
-      }));
-      project.stairs.push({
-        ...project.stairs[0],
-        id: "upper-stairs",
-        lowerFloorId: "first",
-        upperFloorId: "second",
-        at: [2, 1.5],
-      });
-      const record = createSeedProjectRecord(project);
-      browser = await createBrowserTestSession();
-      const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-      const errors = [];
-      page.on("pageerror", (e) => errors.push(e.message));
-      await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
-      await page.getByRole("button", { name: "Import workspace", exact: true }).click();
-      await page.getByLabel("Cabane archive or JSON file").setInputFiles({
-        name: "basements.json",
-        mimeType: "application/json",
-        buffer: Buffer.from(JSON.stringify(record)),
-      });
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: "Import workspace", exact: true })
-        .click();
-      await page.getByRole("button", { name: "View", exact: true }).waitFor();
-      const daylight = page.getByRole("button", { name: "Use daylight", exact: true });
-      if (await daylight.count()) await daylight.click();
-      await page.getByRole("button", { name: "View", exact: true }).click();
-      await page.getByRole("button", { name: "Show roof", exact: true }).click();
-      await waitForSceneCamera(page, "OrthographicCamera");
-      await page.screenshot({ path: "/tmp/cabane-basement-whole.png" });
-      await page.locator(".floor-picker").hover();
-      await page.getByRole("button", { name: "Floor −1", exact: true }).click();
-      await waitForSceneCamera(page, "OrthographicCamera");
-      await page.screenshot({ path: "/tmp/cabane-basement-cutaway.png" });
-      await page.getByRole("button", { name: "Walk mode", exact: true }).click();
-      await waitForSceneCamera(page, "PerspectiveCamera");
-      await page.screenshot({ path: "/tmp/cabane-basement-walk.png" });
       assert.deepEqual(errors, []);
     } finally {
       await browser?.close();

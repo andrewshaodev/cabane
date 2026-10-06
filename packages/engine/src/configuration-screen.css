@@ -1,0 +1,99 @@
+.layout-recovery-notice {
+  position: absolute;
+  z-index: 27;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: 105px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 9px;
+  width: min(700px, calc(100vw - 32px));
+  padding: 13px 13px 13px 17px;
+  color: #fff4ec;
+  background: #653c30;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 17px;
+  box-shadow: 0 18px 42px rgba(53, 28, 22, 0.25);
+}
+.layout-recovery-notice span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.layout-recovery-notice small {
+  color: #efb79f;
+  font-size: 0.53rem;
+  font-weight: 820;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.layout-recovery-notice strong {
+  font-size: 0.66rem;
+  line-height: 1.35;
+}
+.layout-recovery-notice button {
+  min-height: 42px;
+  padding: 0 12px;
+  color: #fff4ec;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 10px;
+  font-size: 0.58rem;
+  font-weight: 730;
+}
+.configuration-screen {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 28px;
+  color: #17231f;
+  background: #e8ece5;
+}
+.configuration-screen section {
+  width: min(720px, 100%);
+}
+.configuration-screen__eyebrow {
+  color: #b65b3d;
+  font-size: 0.7rem;
+  font-weight: 780;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.configuration-screen h1 {
+  max-width: 590px;
+  margin: 8px 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 7vw, 4.8rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+.configuration-screen > section > p:not(.configuration-screen__eyebrow) {
+  max-width: 580px;
+  color: #65736d;
+  line-height: 1.55;
+}
+.configuration-screen ol {
+  display: grid;
+  gap: 8px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.configuration-screen li {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.45fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #cfd6ce;
+}
+.configuration-screen code {
+  overflow-wrap: anywhere;
+  color: #943f29;
+  font-size: 0.75rem;
+}
+.configuration-screen li span {
+  color: #3f4d48;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}

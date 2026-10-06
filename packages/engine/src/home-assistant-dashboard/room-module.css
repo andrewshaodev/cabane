@@ -1,0 +1,169 @@
+.room-module {
+  min-width: 0;
+  padding: 12px;
+  background: color-mix(in srgb, #e9eee7 84%, #fbf8ef);
+  border: 1px solid rgba(70, 91, 82, 0.09);
+  border-radius: 18px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.58);
+}
+.room-module.is-focused {
+  padding: clamp(18px, 3cqw, 26px);
+}
+.room-module__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-bottom: 10px;
+}
+.room-module__header h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #21342e;
+  font-size: 0.86rem;
+  font-weight: 790;
+  letter-spacing: -0.018em;
+  line-height: 1.3;
+  white-space: normal;
+}
+.room-module__icon,
+.device-mapping-row__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  color: #315846;
+  background: #d8e5d9;
+  border-radius: 11px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.room-module__icon {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+}
+.room-module__icon.is-light,
+.device-mapping-row__icon.is-light {
+  color: #83542c;
+  background: #f1dfbd;
+}
+.room-module__icon.is-climate,
+.device-mapping-row__icon.is-climate {
+  color: #2f5e56;
+  background: #d6e7df;
+}
+.room-module__icon.is-cover,
+.device-mapping-row__icon.is-cover {
+  color: #654e3e;
+  background: #e6ddd1;
+}
+.room-module__icon.is-media_player,
+.device-mapping-row__icon.is-media_player {
+  color: #6a4f67;
+  background: #e7dce5;
+}
+.room-module__icon.is-camera,
+.device-mapping-row__icon.is-camera {
+  color: #245c57;
+  background: #d3e8e2;
+}
+.room-module__icon.is-humidifier,
+.device-mapping-row__icon.is-humidifier,
+.room-module__icon.is-water_heater,
+.device-mapping-row__icon.is-water_heater {
+  color: #2a6070;
+  background: #d5e8eb;
+}
+.room-module__icon.is-lock,
+.device-mapping-row__icon.is-lock,
+.room-module__icon.is-alarm_control_panel,
+.device-mapping-row__icon.is-alarm_control_panel,
+.room-module__icon.is-siren,
+.device-mapping-row__icon.is-siren {
+  color: #70413f;
+  background: #ecd9d4;
+}
+.room-module__icon.is-vacuum,
+.device-mapping-row__icon.is-vacuum,
+.room-module__icon.is-valve,
+.device-mapping-row__icon.is-valve,
+.room-module__icon.is-select,
+.device-mapping-row__icon.is-select,
+.room-module__icon.is-number,
+.device-mapping-row__icon.is-number,
+.room-module__icon.is-button,
+.device-mapping-row__icon.is-button {
+  color: #565738;
+  background: #e7e6cf;
+}
+.device-mapping-row__icon:not(.is-connected) {
+  color: #737b77;
+  background: #e2e4e1;
+}
+.room-module__body,
+.room-module__controls,
+.room-module__entity {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.room-module__entity h3 {
+  margin: 0;
+  color: #66776f;
+  font-size: 0.68rem;
+}
+.room-module button,
+.room-module select {
+  min-height: 44px;
+}
+.room-module button {
+  --room-button-color: #2d423a;
+  --room-button-background: #f8f7f0;
+  --room-button-border-color: #d3dcd3;
+  --room-button-hover-color: var(--room-button-color);
+  --room-button-hover-background: #fdfbf4;
+  --room-button-hover-border-color: #bfcbbf;
+  color: var(--room-button-color);
+  background: var(--room-button-background);
+  border: 1px solid var(--room-button-border-color);
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 760;
+  transition:
+    color 0.16s ease,
+    transform 0.14s var(--ease-out-quart),
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+.room-module button:hover:not(:disabled) {
+  color: var(--room-button-hover-color);
+  background: var(--room-button-hover-background);
+  border-color: var(--room-button-hover-border-color);
+  transform: translateY(-1px);
+}
+.room-module button.is-primary {
+  --room-button-color: #f5faf5;
+  --room-button-background: color-mix(in srgb, var(--home-secondary) 76%, #244940);
+  --room-button-border-color: transparent;
+  --room-button-hover-color: #fff;
+  --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
+  --room-button-hover-border-color: transparent;
+}
+.room-module button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.room-module__camera-action {
+  display: grid;
+  gap: 10px;
+}
+.room-module__camera-action > span {
+  color: #60746c;
+  font-size: 0.64rem;
+  font-weight: 680;
+}
+.room-module__camera-action > button {
+  width: 100%;
+}

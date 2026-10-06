@@ -15,6 +15,7 @@ import type {
 import { type OpeningOrientationAction } from "../../opening-orientation";
 
 import { type EditorOpening, type EditorRoomIdentity, type EditorWall } from "./topology";
+import type { EditorWallAttachment } from "./wall-attachments";
 
 export const FLOOR_EDITOR_DRAFT_VERSION = 1 as const;
 
@@ -31,6 +32,7 @@ export type FloorEditorTool =
   | "hedge"
   | "wall"
   | "door"
+  | "niche"
   | "window"
   | "passage"
   | "floor"
@@ -146,7 +148,12 @@ export type FloorEditorAction =
       changes: Partial<
         Pick<
           EditorWall,
-          "thicknessMeters" | "heightMeters" | "exteriorColor" | "edgeColor" | "faceColors"
+          | "thicknessMeters"
+          | "heightMeters"
+          | "exteriorColor"
+          | "edgeColor"
+          | "faceColors"
+          | "niches"
         >
       >;
     }
@@ -155,14 +162,15 @@ export type FloorEditorAction =
   | {
       type: "add-opening";
       wallId: string;
-      kind: "door" | "window" | "passage";
+      kind: "door" | "window" | "passage" | "niche";
+      side?: "left" | "right";
       offsetPlanUnits: number;
       doorConfiguration?: import("../../types").DoorConfiguration;
     }
   | { type: "duplicate-opening"; openingId: string }
   | { type: "move-opening"; openingId: string; wallId: string; offsetPlanUnits: number }
   | { type: "resize-opening"; openingId: string; widthPlanUnits: number }
-  | { type: "update-opening"; opening: EditorOpening }
+  | { type: "update-opening"; opening: EditorWallAttachment }
   | { type: "reorient-opening"; openingId: string; change: OpeningOrientationAction }
   | { type: "name-room"; roomId: string; name: string; accent: string; anchor: PlanPoint }
   | {

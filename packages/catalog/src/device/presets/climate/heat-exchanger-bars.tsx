@@ -9,7 +9,7 @@ export function HeatExchangerBars({ horizontal }: { horizontal: boolean }) {
     const bars = Array.from({ length: 8 }, (_, i) => {
       const bar = horizontal
         ? new BoxGeometry(0.54, 0.025, 0.055)
-        : new BoxGeometry(0.018, 0.47, 0.02);
+        : new BoxGeometry(0.018, 0.47, 0.016);
       bar.translate(
         horizontal ? 0 : -0.39 + i * 0.112,
         horizontal ? 0.12 + i * 0.145 : 0.31,

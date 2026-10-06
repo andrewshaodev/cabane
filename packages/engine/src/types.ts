@@ -145,12 +145,27 @@ export interface RoomSpec {
   devices: readonly DeviceSlotSpec[];
 }
 
+/** A rectangular blind recess owned by one directed wall face. */
+export interface WallNicheSpec {
+  id: string;
+  side: "left" | "right";
+  offsetFromWallStartPlanUnits: number;
+  widthPlanUnits: number;
+  bottomMeters: number;
+  heightMeters: number;
+  depthMeters: number;
+  /** Shelf bottom heights measured upward from the niche bottom. White wall finish. */
+  shelfHeightsMeters?: readonly number[];
+  shelfThicknessMeters?: number;
+}
+
 export interface WallSpec {
   id: string;
   from: PlanPoint;
   to: PlanPoint;
   classification: "interior" | "exterior";
   thicknessMeters: number;
+  niches?: readonly WallNicheSpec[];
   heightMeters?: number;
   exteriorColor?: string;
   edgeColor?: string;

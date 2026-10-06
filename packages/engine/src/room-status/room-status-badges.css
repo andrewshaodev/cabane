@@ -1,0 +1,93 @@
+.room-status-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+.room-status-badges[data-variant="detailed"] {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+}
+.room-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 9px 0 6px;
+  color: #f8f6ef;
+  background: color-mix(in srgb, #17241f 78%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(14, 23, 19, 0.18);
+  backdrop-filter: blur(12px) saturate(1.08);
+  font-size: 0.62rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+.room-status-badges[data-variant="detailed"] .room-status-badge {
+  width: auto;
+}
+.room-status-badges[data-variant="detailed"] .room-status-badge__label {
+  line-height: 1;
+  text-align: left;
+}
+.room-status-badge__icon {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: #f5dfa7;
+}
+.room-status-badge__icon svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.room-status-badge[data-kind="humidity"] .room-status-badge__icon,
+.room-status-badge[data-kind="cooling"] .room-status-badge__icon {
+  color: #bfe3ec;
+}
+.room-status-badge[data-kind="presence"] .room-status-badge__icon {
+  color: #c6e4ce;
+}
+.room-status-badge[data-kind="absence"] .room-status-badge__icon {
+  color: #b8c5bf;
+}
+.room-status-badge[data-kind="door"] .room-status-badge__icon {
+  color: #efc3a9;
+}
+.room-status-badges[data-variant="compact"] {
+  flex-wrap: nowrap;
+  gap: 1px;
+  padding: 4px 6px;
+  background: rgba(21, 33, 28, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(17, 26, 22, 0.2);
+  backdrop-filter: blur(12px) saturate(1.08);
+}
+.room-status-badges[data-variant="compact"] .room-status-badge {
+  min-height: 22px;
+  padding: 0 3px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.room-status-badges[data-variant="compact"] .room-status-badge__icon {
+  width: 15px;
+  height: 15px;
+}
+.room-status-badges[data-variant="compact"] .room-status-badge__icon svg {
+  width: 13px;
+  height: 13px;
+}
+.room-status-badges[data-variant="compact"] .room-status-badge__label {
+  font-size: 0.55rem;
+}

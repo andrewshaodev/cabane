@@ -26,7 +26,7 @@ export function SmartLockModel({ visualState }: HomeDeviceModelProps) {
         />
       </mesh>
       <mesh name="smart-lock-thumbturn" position={[0, 0.065, 0.05]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.025, 0.025, 0.02, 18]} />
+        <cylinderGeometry args={[0.025, 0.025, 0.016, 18]} />
         <ToonMaterial color="#69736f" />
       </mesh>
       <mesh position={[0, 0.065, 0.059]} rotation={[0, 0, active ? Math.PI / 2 : 0]}>

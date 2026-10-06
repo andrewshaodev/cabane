@@ -9,10 +9,10 @@ export function AirQualityMonitorModel({ state, visualState }: HomeDeviceModelPr
   return (
     <group name="catalog-air-quality-monitor" userData={{ walkCollider: true }}>
       <RoundedBox
-        args={[0.1, 0.16, 0.06]}
+        args={[0.1, 0.16, 0.056]}
         radius={0.014}
         smoothness={2}
-        position={[0, 0.08, 0]}
+        position={[0, 0.08, -0.002]}
         castShadow
       >
         <ToonMaterial color={palette.body} />

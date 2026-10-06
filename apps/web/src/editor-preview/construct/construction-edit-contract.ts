@@ -43,7 +43,12 @@ export interface ConstructionEditLayerProps {
   onTranslateWall: (wallId: string, delta: PlanPoint) => void;
   onMoveOpening: (openingId: string, wallId: string, offsetPlanUnits: number) => void;
   onResizeOpening: (offsetPlanUnits: number, widthPlanUnits: number) => void;
-  onPlaceOpening: (kind: OpeningTool, wallId: string, offsetPlanUnits: number) => void;
+  onPlaceOpening: (
+    kind: OpeningTool,
+    wallId: string,
+    offsetPlanUnits: number,
+    side?: "left" | "right",
+  ) => void;
   onBeginWall: (point: PlanPoint) => void;
   onPreviewWall: (point: PlanPoint) => void;
   onAddWall: (point: PlanPoint) => void;

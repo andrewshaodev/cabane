@@ -122,7 +122,7 @@ Their decorative extent does not change physical placement or collision bounds.
 The complete preset categorization is maintained in [device activity](../device-activity.md).
 
 TV artwork is a procedural comic-book Superman flight with a gently moving cape
-and drifting clouds. Ordered polygon depth bias separates the screen layers at
+and drifting clouds. The engine LayeredSurface primitive owns ordered polygon depth bias for the screen layers at
 overview and oblique camera angles while retaining scene occlusion. Wall TVs
 omit their glass reflection while active. Reduced motion freezes the composition;
 inactive and unavailable states retain their existing appearance.

@@ -4,6 +4,7 @@ export function CommittedNumberInput({
   label,
   value,
   min,
+  max,
   step = 0.1,
   onCommit,
   commitOnChange = false,
@@ -11,6 +12,7 @@ export function CommittedNumberInput({
   label: string;
   value: number;
   min?: number;
+  max?: number;
   step?: number;
   onCommit: (value: number) => void;
   commitOnChange?: boolean;
@@ -44,6 +46,7 @@ export function CommittedNumberInput({
       aria-label={label}
       type="number"
       min={min}
+      max={max}
       step={step}
       value={draft}
       onChange={(event) => {

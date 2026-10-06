@@ -77,3 +77,6 @@ export {
 } from "./opening-offsets";
 export { snapPlanPoint, wallOpeningOffsetAtPoint } from "./plan-snapping";
 export type { SnapTarget } from "./plan-snapping";
+
+export { editorWallAttachments, nicheDepthLimit } from "./wall-attachments";
+export type { EditorNiche, EditorWallAttachment } from "./wall-attachments";

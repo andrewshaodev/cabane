@@ -33,15 +33,14 @@
       "home-lighting-state.test.mjs",
       "home-presence-model.test.mjs",
       "home-presence-status.test.mjs",
+      "model-generation-guide.test.mjs",
       "multiple-floor-editing.test.mjs",
       "multiple-floor-schema.test.mjs",
-      "north-browser.test.mjs",
       "onboarding.test.mjs",
       "opening-connect.test.mjs",
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
-      "room-module-order.test.mjs",
       "room-navigation.test.mjs",
       "room-status-badges.test.mjs",
       "room-status-model.test.mjs",
@@ -49,7 +48,7 @@
       "runtime-binding-profile.test.mjs",
       "setup-progress.test.mjs",
       "weather.test.mjs",
-      "weather-browser.test.mjs"
+      "workspace-startup-routing.test.mjs"
     ]
   },
   "construct": {
@@ -96,7 +95,6 @@
       "multiple-floor-regressions.test.mjs",
       "multiple-floor-scale.test.mjs",
       "multiple-floor-schema.test.mjs",
-      "north-browser.test.mjs",
       "opening-junction-clearance.test.mjs",
       "opening-orientation.test.mjs",
       "outdoor-platforms.test.mjs",
@@ -105,7 +103,6 @@
       "platform-low-wall-corners.test.mjs",
       "pools.test.mjs",
       "prepared-walk-colliders.test.mjs",
-      "reference-plan-browser.test.mjs",
       "reference-plan.test.mjs",
       "roof.test.mjs",
       "room-interior-area.test.mjs",
@@ -125,7 +122,9 @@
       "validate-floor-cli.test.mjs",
       "wall-cap-fade.test.mjs",
       "wall-edge-colors.test.mjs",
-      "wall-face-colors-browser.test.mjs"
+      "wall-face-colors-browser.test.mjs",
+      "wall-niche-properties.test.mjs",
+      "wall-niches.test.mjs"
     ]
   },
   "runtime": {
@@ -165,7 +164,6 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
-      "room-module-order.test.mjs",
       "room-navigation.test.mjs",
       "room-status-badges.test.mjs",
       "room-status-model.test.mjs",
@@ -174,8 +172,7 @@
       "scene-action-bar.test.mjs",
       "scene-systems.test.mjs",
       "setup-progress.test.mjs",
-      "weather.test.mjs",
-      "weather-browser.test.mjs"
+      "weather.test.mjs"
     ]
   },
   "common": {
@@ -185,6 +182,7 @@
       "action-bar-navigation.test.mjs",
       "agent-test-reporter.test.mjs",
       "agent-workflow.test.mjs",
+      "async-condition.test.mjs",
       "browser-data-transfer.test.mjs",
       "browser-diagnostics-lifecycle.test.mjs",
       "browser-diagnostics.test.mjs",
@@ -212,9 +210,9 @@
       "panel-dom.test.mjs",
       "portal-persistence.test.mjs",
       "reference-storage.test.mjs",
+      "test-profile.test.mjs",
       "thumbnail-cache.test.mjs",
       "verification-groups.test.mjs",
-      "workspace-application.test.mjs",
       "workspace-availability.test.mjs",
       "workspace-backup-browser.test.mjs",
       "workspace-bindings.test.mjs",
@@ -244,10 +242,12 @@
       "catalog-device.test.mjs",
       "catalog-structure.test.mjs",
       "editor-furnish-preview.test.mjs",
+      "git-hooks.test.mjs",
       "gun-portals-browser.test.mjs",
       "gun-portals.test.mjs",
       "laser-device-performance.test.mjs",
       "laser-visuals.test.mjs",
+      "layered-surfaces.test.mjs",
       "package-lock.test.mjs",
       "portal-transition.test.mjs",
       "portal-view.test.mjs",

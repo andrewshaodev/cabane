@@ -8,10 +8,10 @@ export function SmartPowerStripModel({ visualState, reducedMotion }: HomeDeviceM
   return (
     <group name="catalog-smart-power-strip" userData={{ walkCollider: true }}>
       <RoundedBox
-        args={[0.34, 0.055, 0.065]}
+        args={[0.34, 0.052, 0.065]}
         radius={0.014}
         smoothness={2}
-        position={[0, 0.0275, 0]}
+        position={[0, 0.026, 0]}
         castShadow
       >
         <ToonMaterial color={palette.body} />

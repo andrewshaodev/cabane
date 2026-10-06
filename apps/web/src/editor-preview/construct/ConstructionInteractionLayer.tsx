@@ -56,6 +56,8 @@ export function ConstructionInteractionLayer(
     coordinates,
     planMode,
     displayedDraft,
+    attachments,
+    displayedAttachments,
     roomTargets,
     onSelectRoom,
     ToonMaterial,
@@ -230,7 +232,9 @@ export function ConstructionInteractionLayer(
               ))}
             </group>
           ))}
-      {planMode && <ConstructionPlanWalls draft={displayedDraft} />}
+      {planMode && (
+        <ConstructionPlanWalls draft={displayedDraft} attachments={displayedAttachments} />
+      )}
       {roomTargets.map(({ room, geometry }) => {
         const selected = floorEditorSelectionIncludes(highlightedSelection, "room", room.id);
         return (
@@ -291,6 +295,7 @@ export function ConstructionInteractionLayer(
       />
 
       <ConstructionOpeningTargets
+        attachments={attachments}
         {...{
           draft,
           draggingOpening,

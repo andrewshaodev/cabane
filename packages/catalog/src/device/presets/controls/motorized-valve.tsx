@@ -27,7 +27,7 @@ export function MotorizedValveModel({ visualState }: HomeDeviceModelProps) {
         <ToonMaterial color="#9b754e" />
       </mesh>
       <RoundedBox
-        args={[0.12, 0.12, 0.08]}
+        args={[0.12, 0.12, 0.074]}
         radius={0.016}
         smoothness={2}
         position={[0, 0.15, 0.08]}

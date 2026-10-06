@@ -8,7 +8,7 @@ export function SmartPanelRadiatorModel({ visualState, reducedMotion }: HomeDevi
   return (
     <group name="catalog-smart-panel-radiator">
       <mesh position={[0, 0.28, 0.05]} castShadow receiveShadow>
-        <boxGeometry args={[0.98, 0.56, 0.1]} />
+        <boxGeometry args={[0.976, 0.56, 0.1]} />
         <ToonMaterial color="#eeeae2" />
         <Outlines color="#7f817c" thickness={0.005} />
       </mesh>

@@ -1264,6 +1264,9 @@ await withModules(async (load) => {
     assert.equal(html.includes("light.unmodeled_path"), false);
     assert.ok(html.includes('type="range"'));
     assert.ok(html.includes("Walk inside"));
+    const navigation = document.querySelector(".room-control-sheet__nav");
+    assert.equal(navigation.firstElementChild.className, "room-control-sheet__actions");
+    assert.equal(navigation.lastElementChild.getAttribute("aria-label"), "Close room controls");
     for (const removed of [
       "Connected",
       "mapped entity",
@@ -1541,6 +1544,10 @@ await withModules(async (load) => {
         dom.window.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape" }));
       });
       assert.equal(homeCalls, 1);
+      await act(async () =>
+        dom.window.document.querySelector("button[aria-label='Close room controls']").click(),
+      );
+      assert.equal(homeCalls, 2);
     });
   });
 

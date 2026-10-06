@@ -1,3 +1,5 @@
+import type { ConstructionInspectorProps } from "./construction-inspector-contract";
+export type { ConstructionInspectorProps } from "./construction-inspector-contract";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { PlatformProperties } from "./PlatformProperties";
 import { FloorToolProperties } from "./FloorToolProperties";
@@ -5,7 +7,6 @@ import { DoorPresetPalette } from "./DoorPresetPalette";
 import { DoorDesignFields } from "./DoorDesignFields";
 import { HedgeProperties } from "./HedgeProperties";
 import { ConstructionBuildingSettings } from "./ConstructionBuildingSettings";
-import type { RoofSettings } from "@cabane/engine";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
 import { PoolProperties } from "./PoolProperties";
@@ -15,14 +16,14 @@ import {
   pointInsidePolygon,
   resolveRoomFloorFinish,
   roomInteriorAreaSquareMeters,
-  type ManifestIssue,
 } from "@cabane/engine";
 
 import { useMemo } from "react";
 
-import type { ConstructEditorController } from "./useConstructEditor";
-
-import type { ConstructContextualIssue } from "./contextual-validation";
+import type {
+  ConstructContextualIssue,
+  ConstructValidationDiagnostic as InspectorValidationIssue,
+} from "./contextual-validation";
 
 import { wallMeasurement } from "./drag-geometry";
 
@@ -32,28 +33,6 @@ import { CommittedTextInput } from "./CommittedTextInput";
 import { WallFinishFields } from "./WallFinishFields";
 import { DebouncedColorInput } from "./DebouncedColorInput";
 import { FloorFinishPalette } from "./FloorFinishPalette";
-import type { FloorPaintingInspector } from "./floor-painting-contract";
-
-export interface ConstructionInspectorProps {
-  inert?: boolean | undefined;
-  referencePlanControls?: import("react").ReactNode;
-  planImportControls?: import("react").ReactNode;
-  tutorialControls?: import("react").ReactNode;
-  northControls?: import("react").ReactNode;
-  walkStartControls?: import("react").ReactNode;
-  roof?: RoofSettings | undefined;
-  onRoofChange?: ((settings: RoofSettings) => void) | undefined;
-  editor: ConstructEditorController;
-  dependencyIssues?: readonly ManifestIssue[];
-  contextualIssues?: readonly ConstructContextualIssue[];
-  onIssueFocus?: (issue: ConstructContextualIssue) => void;
-  floorPainting?: FloorPaintingInspector;
-}
-
-type InspectorValidationIssue = ManifestIssue &
-  Pick<ConstructContextualIssue, "target"> & {
-    suggestion?: string;
-  };
 
 export function ConstructionInspector({
   inert,
@@ -219,6 +198,21 @@ export function ConstructionInspector({
               value={editor.doorConfiguration}
               onChange={editor.setDoorConfiguration}
             />
+            {editor.openingError && <p role="alert">{editor.openingError}</p>}
+          </div>
+        )}
+        {editor.tool === "niche" && (
+          <div className="construction-inspector__selection" role="status">
+            <header>
+              <div>
+                <small>Niche tool</small>
+                <strong>Place a niche</strong>
+              </div>
+            </header>
+            <p className="construction-inspector__tool-hint">
+              Click a wall face to place a recess. Drag it along the wall and use its handles to
+              change the width. Open Details to adjust height, depth and height from floor.
+            </p>
             {editor.openingError && <p role="alert">{editor.openingError}</p>}
           </div>
         )}
@@ -580,15 +574,15 @@ export function ConstructionInspector({
       {referencePlanControls}
       <ConstructionBuildingSettings
         {...{
-          inert,
           planImportControls,
-          onRoofChange,
           roof,
           northControls,
           walkStartControls,
           tutorialControls,
           editor,
         }}
+        {...(inert === undefined ? {} : { inert })}
+        {...(onRoofChange ? { onRoofChange } : {})}
       />
     </section>
   );

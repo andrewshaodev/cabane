@@ -15,6 +15,7 @@ await withModules(async (load) => {
     openingPlacementForPlanPoint,
     openingOffsetForWorldPoint,
     resizeOpeningSpan,
+    resizeWallAttachmentAtPoint,
     snapConstructPlanPoint,
     wallMeasurement,
     wallOverlayTransform,
@@ -39,6 +40,53 @@ await withModules(async (load) => {
 
   const floor = neutralDemoManifest.floors[0];
   const reduce = (state, action) => constructEditorReducer(state, action);
+
+  test("plan resizing gives niches a 5 cm minimum at different plan scales", () => {
+    for (const scale of [1, 2]) {
+      const draft = createConstructEditorState(floor).history.present;
+      draft.coordinates = { ...draft.coordinates, metersPerPlanUnit: scale };
+      const wall = draft.walls.find((wall) => wall.id === "north-wall");
+      wall.niches = [
+        {
+          id: "narrow-niche",
+          side: "left",
+          offsetFromWallStartPlanUnits: 1,
+          widthPlanUnits: 0.6,
+          bottomMeters: 0.1,
+          heightMeters: 0.8,
+          depthMeters: 0.03,
+        },
+      ];
+      const length = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
+      const point = wall.from.map(
+        (value, axis) => value + ((wall.to[axis] - value) * 1.001) / length,
+      );
+      const resize = {
+        openingId: "narrow-niche",
+        wallId: wall.id,
+        edge: "end",
+        originalOffsetPlanUnits: 1,
+        originalWidthPlanUnits: 0.6,
+      };
+      assert.ok(
+        Math.abs(
+          resizeWallAttachmentAtPoint(draft, resize, point, true).widthPlanUnits * scale - 0.05,
+        ) < 1e-6,
+      );
+      assert.ok(
+        Math.abs(
+          resizeWallAttachmentAtPoint(
+            draft,
+            { ...resize, openingId: "ordinary-opening" },
+            point,
+            true,
+          ).widthPlanUnits *
+            scale -
+            0.3,
+        ) < 1e-6,
+      );
+    }
+  });
 
   test("detaches wall items before their deleted support reaches the renderer", () => {
     const attached = ownerProjectManifest.sceneItems.filter(

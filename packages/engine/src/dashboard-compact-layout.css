@@ -1,0 +1,221 @@
+@container (max-width: 699px) {
+  .device-control-overlay__backdrop {
+    display: none;
+  }
+  .room-control-sheet,
+  .room-control-sheet[data-device-overlay="true"] {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100dvh;
+    padding-bottom: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .room-control-sheet[data-device-overlay="true"] {
+    transform: none;
+    animation: panel-enter 0.32s var(--ease-out-quint) both;
+  }
+  .room-control-sheet[data-expanded="true"] {
+    background: #fbf9f2;
+  }
+  .room-control-sheet__drag-handle {
+    display: none;
+  }
+  .room-control-sheet__hero {
+    height: clamp(300px, 42dvh, 460px);
+  }
+  .room-control-sheet__nav {
+    padding-right: max(17px, env(safe-area-inset-right));
+    padding-left: max(17px, env(safe-area-inset-left));
+  }
+  .room-control-sheet__walk {
+    padding-inline: 12px;
+  }
+  .room-control-sheet__foreground {
+    padding-right: max(22px, env(safe-area-inset-right));
+    padding-left: max(22px, env(safe-area-inset-left));
+  }
+  .room-control-sheet__title h1 {
+    font-size: clamp(2.25rem, 9.5cqw, 3.6rem);
+  }
+  .room-control-sheet__content {
+    padding: 14px 12px max(18px, env(safe-area-inset-bottom));
+  }
+  .mode-room .room-control-sheet__content {
+    padding-bottom: calc(var(--scene-action-size) + max(28px, env(safe-area-inset-bottom)));
+  }
+  .room-control-sheet__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .room-module {
+    padding: 12px;
+  }
+  .room-module.is-focused {
+    padding: 18px;
+  }
+  .room-module__header h2 {
+    font-size: 0.84rem;
+  }
+  .command-range label,
+  .option-control {
+    font-size: 0.74rem;
+  }
+  .room-module__primary-row {
+    grid-template-columns: minmax(0, 1fr) minmax(116px, 0.72fr);
+  }
+  .room-control-sheet__content > .connection-problem {
+    margin: 0 0 9px;
+  }
+  .home-mapping__header {
+    min-height: 64px;
+    gap: 8px;
+    padding-inline: max(10px, env(safe-area-inset-left));
+  }
+  .home-mapping__mark {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+  }
+  .home-mapping__title h1 {
+    font-size: 1.08rem;
+  }
+  .home-mapping__title p,
+  .home-mapping__privacy,
+  .home-mapping__feedback {
+    display: none;
+  }
+  .home-mapping__refresh {
+    min-height: 38px;
+    padding-inline: 10px;
+  }
+  .home-mapping__tabs {
+    min-height: 48px;
+    padding-inline: max(8px, env(safe-area-inset-left));
+  }
+  .home-mapping__tabs button {
+    min-height: 48px;
+  }
+  .home-plan-mapping {
+    --plan-inset-x: 10px;
+    --plan-inset-y: 16px;
+  }
+  .home-plan-mapping__instruction {
+    top: 10px;
+    left: 10px;
+  }
+  .home-plan-mapping__controls {
+    top: 8px;
+    right: 8px;
+  }
+  .home-plan-mapping__controls button {
+    min-width: 38px;
+    min-height: 38px;
+  }
+  .devices-mapping-view__groups {
+    gap: 22px;
+    padding: 18px 12px 28px;
+  }
+  .home-mapping__footer {
+    min-height: 58px;
+    gap: 7px;
+    padding-inline: 10px;
+  }
+  .home-mapping__enter,
+  .home-mapping__save {
+    padding-inline: 12px;
+  }
+  .home-mapping__save {
+    margin-left: auto;
+  }
+}
+
+@container (max-width: 480px) {
+  .device-mapping-inspector__panel {
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .cabane-shell {
+    --scene-action-size: 44px;
+  }
+  .scene-hud {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+  .scene-menu summary {
+    width: 44px;
+    height: 44px;
+  }
+  .scene-context {
+    padding: 7px 13px;
+  }
+  .scene-context__room-status {
+    margin-top: 4px;
+  }
+  .scene-action-dock {
+    right: max(7px, env(safe-area-inset-right));
+    bottom: 50%;
+    left: auto;
+    transform: translateY(50%);
+  }
+  .scene-action-bar {
+    flex-direction: column;
+  }
+  .scene-action-overflow__tray {
+    right: calc(100% + 10px);
+    bottom: 0;
+    width: min(250px, calc(100cqw - 100px));
+    max-height: calc(100dvh - 28px);
+  }
+  .building-floor-controls {
+    bottom: max(10px, env(safe-area-inset-bottom));
+    right: calc(max(7px, env(safe-area-inset-right)) + var(--scene-action-size) + 30px);
+  }
+  .walk-device-action {
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  .home-mapping__header {
+    min-height: 54px;
+  }
+  .home-mapping__mark {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+  .home-mapping__title p {
+    display: none;
+  }
+  .home-plan-mapping {
+    --plan-inset-x: 20px;
+    --plan-inset-y: 14px;
+  }
+  .devices-mapping-view__content {
+    grid-template-columns: 174px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .devices-mapping-view__rooms {
+    flex-direction: column;
+    padding: 8px;
+    border-right: 1px solid #ccd6cd;
+    border-bottom: 0;
+  }
+  .devices-mapping-view__rooms button {
+    min-width: 0;
+    min-height: 42px;
+    text-align: left;
+  }
+  .devices-mapping-view__groups {
+    padding-top: 14px;
+  }
+  .home-mapping__footer {
+    min-height: 54px;
+    padding-top: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+}

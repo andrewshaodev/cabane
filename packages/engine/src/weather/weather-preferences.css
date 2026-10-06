@@ -1,0 +1,33 @@
+.weather-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: calc(6 * max(var(--scene-action-size), 80px) + 30px);
+  max-width: calc(100cqw - 34px);
+}
+.weather-menu__status {
+  flex-basis: 100%;
+  margin: 2px 4px 6px;
+  font-size: 12px;
+  color: #d2dbd5;
+  line-height: 1.4;
+}
+.weather-source-select:focus-visible {
+  outline: 2px solid #315d58;
+  outline-offset: 2px;
+}
+.weather-source-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.weather-source-select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid #a7b7bc;
+  border-radius: 8px;
+  background: #fff;
+  color: #263c46;
+  font: inherit;
+}

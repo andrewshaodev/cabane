@@ -3,7 +3,7 @@
 Construct is an implemented 2D plan editor. Two-finger trackpad scrolling pans
 the plan without clicking or changing tools, including during construction.
 Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, Wall, Door,
-Window, Passage, Floor, Pool, Boundary, Measure, and Pan. Users can edit wall endpoints and
+Window, Passage, Floor, Measure, Pan, and Decorations (Niche, Boundary, Pool). Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
 also controls default wall/ceiling settings. Select a door, window, or passage and
@@ -12,6 +12,21 @@ controls rectangular/arched shape and arch rise. Valid width and height edits up
 the scene immediately. Sizes that do not fit report an error; leaving the field
 restores the accepted value. These edits use the ordinary
 preview, undo/redo, autosave, and Apply flow.
+
+Niche uses the same wall placement preview, single-shot selection, dragging,
+width handles, marquee, duplication and deletion system as doors/windows.
+Decorations groups Niche, Boundary and Pool in a floating disclosure outside the
+scrolling tool strip. Mouse hover, click/tap and keyboard activation open it;
+Escape or clicking outside closes it. Select Niche, then click the desired wall
+face. Details exposes width, height, depth and height from floor, with a wall-face
+switch and optional shelf settings. Depth is capped at the current wall thickness
+minus 20 mm so the backing remains solid, including when moving to a thinner wall
+or reducing its thickness. Resizing a wall removes niches whose width or height
+no longer fits; Undo restores the wall and its recesses together.
+The old wall-sidebar add form is removed. Recesses remain wall-owned in persistence;
+full workspace import/export preserves existing niche IDs and shelves. External
+plan generation still excludes optional niches. These changes use ordinary
+preview, validation, undo/redo, autosave and Save.
 
 The “Have a floor plan?” sidebar block is temporarily disabled by
 `PLAN_IMPORT_ENABLED` in `EditorWorkspace.tsx`. Its implementation is retained for

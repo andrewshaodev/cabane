@@ -98,6 +98,24 @@ export const normalizeWallRuns = (
         classification,
         wall: {
           ...sourceWall,
+          ...(sourceWall.niches
+            ? {
+                niches: sourceWall.niches
+                  .filter(
+                    (niche) =>
+                      niche.offsetFromWallStartPlanUnits >=
+                        startOffsetPlanUnits - FLOOR_EDITOR_EPSILON &&
+                      niche.offsetFromWallStartPlanUnits <
+                        endOffsetPlanUnits - FLOOR_EDITOR_EPSILON,
+                  )
+                  .map((niche) => ({
+                    ...niche,
+                    offsetFromWallStartPlanUnits: round(
+                      niche.offsetFromWallStartPlanUnits - startOffsetPlanUnits,
+                    ),
+                  })),
+              }
+            : {}),
           id: wallId,
           from: first.from.point,
           to: last.to.point,

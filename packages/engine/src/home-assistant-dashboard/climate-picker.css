@@ -1,0 +1,130 @@
+.vtherm-picker {
+  position: relative;
+  min-width: 0;
+}
+.vtherm-picker summary {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 9px 10px;
+  color: #35483f;
+  background: #f2f2eb;
+  border: 1px solid #d6ddd5;
+  border-radius: 15px;
+  cursor: pointer;
+  list-style: none;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.16s var(--ease-out-quart);
+}
+.vtherm-picker summary::-webkit-details-marker {
+  display: none;
+}
+.vtherm-picker summary:focus-visible {
+  outline: 3px solid rgba(190, 103, 72, 0.22);
+  outline-offset: 2px;
+}
+.vtherm-picker summary:hover {
+  background: #f8f6ef;
+  border-color: #c5d0c7;
+  transform: translateY(-1px);
+}
+.vtherm-picker[open] {
+  z-index: 10;
+}
+.vtherm-picker[open] summary {
+  background: #e7e9e3;
+  border-color: #bac6bd;
+}
+.vtherm-picker[data-disabled="true"] summary {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+.vtherm-picker__symbol {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: #5c6c64;
+  font-size: 1rem;
+}
+.vtherm-picker__symbol::before {
+  content: attr(data-symbol);
+}
+.vtherm-picker__copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.vtherm-picker__copy small {
+  color: #748078;
+  font-size: 0.54rem;
+  font-weight: 690;
+  line-height: 1;
+}
+.vtherm-picker__copy strong {
+  overflow: hidden;
+  font-size: 0.69rem;
+  font-weight: 750;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vtherm-picker__menu {
+  position: absolute;
+  z-index: 12;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  gap: 2px;
+  width: max(178px, 100%);
+  max-height: 252px;
+  padding: 6px;
+  overflow-y: auto;
+  background: #f8f7f1;
+  border: 1px solid #9da8a1;
+  border-radius: 15px;
+  box-shadow: 0 16px 34px rgba(39, 52, 46, 0.22);
+  animation: menu-enter 0.18s var(--ease-out-quart) both;
+}
+.vtherm-picker-shell:last-child .vtherm-picker__menu {
+  right: 0;
+  left: auto;
+}
+.vtherm-picker__menu button {
+  --room-button-color: #3d4e46;
+  --room-button-background: transparent;
+  --room-button-border-color: transparent;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 10px;
+  text-align: left;
+}
+.vtherm-picker__menu button:hover:not(:disabled) {
+  transform: none;
+}
+.vtherm-picker__option-symbol::before {
+  content: attr(data-symbol);
+}
+.vtherm-picker__menu button[aria-pressed="true"] {
+  --room-button-color: #fffaf1;
+  --room-button-background: color-mix(in srgb, var(--home-accent) 78%, #6f493b);
+  --room-button-hover-color: #fff;
+  --room-button-hover-background: color-mix(in srgb, var(--room-button-background) 88%, #fff);
+}
+.vtherm-control[data-mode="cool"]
+  .vtherm-picker--mode
+  .vtherm-picker__menu
+  button[aria-pressed="true"] {
+  --room-button-background: #247dbb;
+}
+.vtherm-picker-shell > [role="alert"] {
+  margin-top: 5px;
+}

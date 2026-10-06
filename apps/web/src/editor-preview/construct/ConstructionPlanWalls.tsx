@@ -1,5 +1,10 @@
 import { openingPlanSymbol } from "./opening-plan-symbol";
-import { planPointToWorld, type FloorEditorDraft } from "@cabane/engine";
+import {
+  editorWallAttachments,
+  type EditorWallAttachment,
+  planPointToWorld,
+  type FloorEditorDraft,
+} from "@cabane/engine";
 import { memo, useMemo } from "react";
 import { PlanStrokeBatch, type BatchedPlanStroke } from "./PlanStrokeBatch";
 import { ConstructionPlanWallJoints } from "./ConstructionPlanWallJoints";
@@ -7,8 +12,10 @@ import { ConstructionPlanWallJoints } from "./ConstructionPlanWallJoints";
 /** Draft geometry is also used during pointer previews, including unfinished walls. */
 export const ConstructionPlanWalls = memo(function ConstructionPlanWalls({
   draft,
+  attachments = editorWallAttachments(draft),
 }: {
   draft: FloorEditorDraft;
+  attachments?: readonly EditorWallAttachment[];
 }) {
   const strokes = useMemo(() => {
     const result: BatchedPlanStroke[] = [];
@@ -17,7 +24,7 @@ export const ConstructionPlanWalls = memo(function ConstructionPlanWalls({
       const to = planPointToWorld(wall.to, draft.coordinates);
       const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
       if (length < 0.0001) continue;
-      const openings = draft.openings
+      const openings = attachments
         .filter((opening) => opening.wallId === wall.id)
         .sort((a, b) => a.offsetPlanUnits - b.offsetPlanUnits);
       const scale = draft.coordinates.metersPerPlanUnit;
@@ -59,7 +66,7 @@ export const ConstructionPlanWalls = memo(function ConstructionPlanWalls({
       }
     }
     return result;
-  }, [draft.walls, draft.openings, draft.coordinates, draft.interiorWallThicknessMeters]);
+  }, [draft.walls, attachments, draft.coordinates, draft.interiorWallThicknessMeters]);
   return (
     <group name="construction-plan-walls">
       <ConstructionPlanWallJoints draft={draft} />

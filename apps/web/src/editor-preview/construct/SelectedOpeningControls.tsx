@@ -2,7 +2,7 @@ import { Html } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
   planPointToWorld,
-  type EditorOpening,
+  type EditorWallAttachment as EditorOpening,
   type FloorEditorDraft,
   type OpeningOrientationAction,
 } from "@cabane/engine";

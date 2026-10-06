@@ -1,3 +1,4 @@
+import { buildRecessedWallGeometry } from "./recessed-wall-geometry";
 import { planPointToWorld } from "../geometry";
 
 import type { FloorSpec, OpeningSpec, WallSpec } from "../types";
@@ -89,6 +90,17 @@ export function buildContinuousWallGeometry(
     exteriorNormal[0] * frame.normal[0] + exteriorNormal[1] * frame.normal[1] < -0.5
       ? 1
       : 0;
+  if (wall.niches?.length)
+    return buildRecessedWallGeometry(
+      wall,
+      floor,
+      wallOpenings,
+      trimIntervals,
+      plusMaterial,
+      minusMaterial,
+      !startOwnedByJunction,
+      !endOwnedByJunction,
+    );
   const point = (distance: number, y: number, side: number): readonly [number, number, number] => [
     frame.from[0] + frame.direction[0] * distance + frame.normal[0] * half * side,
     y,

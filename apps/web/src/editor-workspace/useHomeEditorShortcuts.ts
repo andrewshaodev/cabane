@@ -25,7 +25,7 @@ interface ShortcutContext {
   previewOpen: boolean;
   publishOpen: boolean;
   redoProject: () => void;
-  selectedOpening: ReturnType<typeof useConstructEditor>["draft"]["openings"][number] | undefined;
+  selectedOpening: import("@cabane/engine").EditorWallAttachment | undefined;
   undoProject: () => void;
   setPendingRoomPaintId: Dispatch<SetStateAction<string | null>>;
   setDragging: Dispatch<SetStateAction<boolean>>;
@@ -140,7 +140,9 @@ export function useHomeEditorShortcuts({
         } else if (constructEditor.tool === "measure") constructEditor.setTool("select");
         else if (constructEditor.poolDrawing.active) constructEditor.poolDrawing.cancel();
         else if (constructEditor.drawStart) constructEditor.cancelWall();
-        else if (["door", "window", "passage", "hedge", "pool"].includes(constructEditor.tool))
+        else if (
+          ["door", "window", "passage", "niche", "hedge", "pool"].includes(constructEditor.tool)
+        )
           constructEditor.setTool("select");
         else clearConstructionSelection();
         setDragging(false);
