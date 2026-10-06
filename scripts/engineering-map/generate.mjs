@@ -33,7 +33,16 @@ export async function generateEngineeringMap(root, { write = false } = {}) {
       const source = program.getSourceFile(resolve(root, module));
       const symbol = source && checker.getSymbolAtLocation(source);
       const exports = new Set(
-        symbol ? checker.getExportsOfModule(symbol).map((item) => item.name) : [],
+        symbol
+          ? checker
+              .getExportsOfModule(symbol)
+              .filter((item) => {
+                const target =
+                  item.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(item) : item;
+                return target.declarations?.length;
+              })
+              .map((item) => item.name)
+          : [],
       );
       for (const name of symbols) {
         if (!exports.has(name)) errors.push(`Missing export: ${module} -> ${name}`);

@@ -89,3 +89,29 @@ test("engineering map checks nested npm commands and their executable paths", as
     /Missing or out-of-repository path:.*missing.mjs/,
   );
 });
+
+test("engineering map resolves named aliases instead of trusting stale re-export text", async (t) => {
+  const { root, put } = await fixture(t);
+  await put("packages/example/src/index.ts", 'export { Missing as Example } from "./model";');
+  await assert.rejects(generateEngineeringMap(root), /Missing export:.*Example/);
+});
+
+test("engineering map resolves workspace commands in their own package", async (t) => {
+  const { root, put } = await fixture(t);
+  await put("package.json", {
+    workspaces: ["packages/*"],
+    scripts: { "verify:example": "npm run build --workspace=@cabane/example" },
+  });
+  await put("packages/example/package.json", {
+    name: "@cabane/example",
+    exports: { ".": "./src/index.ts" },
+    scripts: { build: "node scripts/build.mjs" },
+  });
+  await assert.rejects(
+    generateEngineeringMap(root),
+    /Missing or out-of-repository path: packages\/example\/scripts\/build.mjs/,
+  );
+  await put("packages/example/scripts/build.mjs", "");
+  await generateEngineeringMap(root, { write: true });
+  await generateEngineeringMap(root);
+});
