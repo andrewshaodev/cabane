@@ -14,8 +14,12 @@ export const openProjectDatabase = (indexedDB: IDBFactory): Promise<IDBDatabase>
         if (!database.objectStoreNames.contains(name)) database.createObjectStore(name);
       }
     };
-    request.onsuccess = () => { request.result.onversionchange = () => request.result.close(); resolve(request.result); };
-    request.onerror = () => reject(request.error ?? new Error("Unable to open the project database."));
+    request.onsuccess = () => {
+      request.result.onversionchange = () => request.result.close();
+      resolve(request.result);
+    };
+    request.onerror = () =>
+      reject(request.error ?? new Error("Unable to open the project database."));
     request.onblocked = () => reject(new Error("The project database upgrade is blocked."));
   });
 
@@ -54,7 +58,8 @@ export const projectTransaction = async <T>(
       }
     };
     const request = <R>(pending: IDBRequest<R>, onSuccess: (value: R) => void) => {
-      pending.onerror = () => fail(pending.error ?? new Error("The project record request failed."));
+      pending.onerror = () =>
+        fail(pending.error ?? new Error("The project record request failed."));
       pending.onsuccess = () => {
         try {
           onSuccess(pending.result);
@@ -68,13 +73,18 @@ export const projectTransaction = async <T>(
       if (failure) reject(failure);
       else resolve(result);
     };
-    transaction.onerror = () => fail(transaction.error ?? new Error("The project record transaction failed."));
+    transaction.onerror = () =>
+      fail(transaction.error ?? new Error("The project record transaction failed."));
     transaction.onabort = () => {
       database.close();
-      reject(failure ?? transaction.error ?? new Error("The project record transaction was aborted."));
+      reject(
+        failure ?? transaction.error ?? new Error("The project record transaction was aborted."),
+      );
     };
     try {
-      operation(transaction, request, (value) => { result = value; });
+      operation(transaction, request, (value) => {
+        result = value;
+      });
     } catch (error) {
       fail(error);
     }

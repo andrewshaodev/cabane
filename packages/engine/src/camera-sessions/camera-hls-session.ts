@@ -2,16 +2,17 @@ import Hls from "hls.js";
 
 import type { HomeAssistantCameraClient } from "../camera-runtime";
 
-import {
-  resolveHomeAssistantMediaUrl
-} from "../camera-stream";
+import { resolveHomeAssistantMediaUrl } from "../camera-stream";
 
-import type {
-  CameraTransport,
-  EntityId
-} from "../types";
+import type { CameraTransport, EntityId } from "../types";
 import { CameraSession } from "./camera-session-types";
-import { closeVideo, makeVideo, throwIfAborted, waitForFirstFrame, waitWithSignal } from "./camera-video-lifecycle";
+import {
+  closeVideo,
+  makeVideo,
+  throwIfAborted,
+  waitForFirstFrame,
+  waitWithSignal,
+} from "./camera-video-lifecycle";
 
 export const openHlsSession = async (
   client: HomeAssistantCameraClient,
@@ -23,11 +24,14 @@ export const openHlsSession = async (
   videoContainer?: HTMLElement,
 ): Promise<CameraSession> => {
   throwIfAborted(signal);
-  const stream = await waitWithSignal(client.sendMessagePromise<{ url: string }>({
-    type: "camera/stream",
-    entity_id: entityId,
-    format: "hls",
-  }), signal);
+  const stream = await waitWithSignal(
+    client.sendMessagePromise<{ url: string }>({
+      type: "camera/stream",
+      entity_id: entityId,
+      format: "hls",
+    }),
+    signal,
+  );
   const url = resolveHomeAssistantMediaUrl(stream.url, homeAssistantOrigin);
   if (!url) throw new Error("Home Assistant returned an unsafe camera stream URL.");
   let video = makeVideo(true, videoContainer);

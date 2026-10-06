@@ -2,7 +2,7 @@ import {
   ERR_CANNOT_CONNECT,
   ERR_INVALID_AUTH,
   ERR_INVALID_AUTH_CALLBACK,
-  ERR_INVALID_HTTPS_TO_HTTP
+  ERR_INVALID_HTTPS_TO_HTTP,
 } from "home-assistant-js-websocket";
 
 export const isAuthenticationError = (error: unknown) =>

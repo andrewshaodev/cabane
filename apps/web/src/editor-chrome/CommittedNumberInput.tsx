@@ -4,7 +4,7 @@ export function CommittedNumberInput({
   label,
   value,
   min,
-  step = .1,
+  step = 0.1,
   onCommit,
   commitOnChange = false,
 }: {
@@ -50,11 +50,16 @@ export function CommittedNumberInput({
         const text = event.target.value;
         setDraft(text);
         const next = event.target.valueAsNumber;
-        if (commitOnChange && Number.isFinite(next) && (min === undefined || next >= min) && next !== value) onCommit(next);
+        if (
+          commitOnChange &&
+          Number.isFinite(next) &&
+          (min === undefined || next >= min) &&
+          next !== value
+        )
+          onCommit(next);
       }}
       onBlur={commit}
       onKeyDown={onKeyDown}
     />
   );
 }
-

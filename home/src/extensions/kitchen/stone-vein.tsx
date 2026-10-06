@@ -8,13 +8,15 @@ export function StoneVein({
   readonly points: readonly KitchenVector3[];
   readonly width: number;
 }) {
-  return points.slice(1).map((point, index) => (
-    <CabinetJoint
-      key={`${point[0]}-${point[2]}`}
-      from={points[index]}
-      to={point}
-      color={KITCHEN_STONE_VEIN}
-      thickness={width}
-    />
-  ));
+  return points
+    .slice(1)
+    .map((point, index) => (
+      <CabinetJoint
+        key={`${point[0]}-${point[2]}`}
+        from={points[index]}
+        to={point}
+        color={KITCHEN_STONE_VEIN}
+        thickness={width}
+      />
+    ));
 }

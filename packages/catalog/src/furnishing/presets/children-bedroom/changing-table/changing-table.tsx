@@ -42,24 +42,14 @@ export function ChangingTable() {
         <ToonMaterial color="#dfbbb7" />
       </mesh>
       {[-0.325, 0.325].map((x) => (
-        <mesh
-          key={x}
-          position={[x, 0.91, 0.005]}
-          rotation={[Math.PI / 2, 0, 0]}
-          castShadow
-        >
+        <mesh key={x} position={[x, 0.91, 0.005]} rotation={[Math.PI / 2, 0, 0]} castShadow>
           <capsuleGeometry args={[0.034, 0.31, 6, 12]} />
           <ToonMaterial color="#efd7d1" />
           <Outlines color="#9d7773" thickness={0.004} screenspace={false} />
         </mesh>
       ))}
       {[-0.17, 0.17].map((z) => (
-        <mesh
-          key={z}
-          position={[0, 0.895, z]}
-          rotation={[0, 0, Math.PI / 2]}
-          castShadow
-        >
+        <mesh key={z} position={[0, 0.895, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
           <capsuleGeometry args={[0.025, 0.58, 5, 12]} />
           <ToonMaterial color="#efd7d1" />
         </mesh>

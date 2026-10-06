@@ -6,16 +6,11 @@
 
 import { pointInsidePolygon } from "../../geometry";
 
-import type {
-  ManifestIssue,
-  PlanPoint,
-  Polygon
-} from "../../types";
+import type { ManifestIssue, PlanPoint, Polygon } from "../../types";
 import { EditorWall, FLOOR_EDITOR_EPSILON } from "./topology-contract";
 
-export const round = (value: number) => Math.abs(value) < FLOOR_EDITOR_EPSILON
-  ? 0
-  : Number(value.toFixed(8));
+export const round = (value: number) =>
+  Math.abs(value) < FLOOR_EDITOR_EPSILON ? 0 : Number(value.toFixed(8));
 
 export const point = (x: number, y: number): PlanPoint => [round(x), round(y)];
 
@@ -31,19 +26,26 @@ export const length = (wall: Pick<EditorWall, "from" | "to">) =>
   Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
 
 export const pointOnSegment = (candidate: PlanPoint, wall: Pick<EditorWall, "from" | "to">) => {
-  if (Math.abs(cross(wall.from, wall.to, candidate)) > FLOOR_EDITOR_EPSILON * Math.max(1, length(wall))) return false;
-  return candidate[0] >= Math.min(wall.from[0], wall.to[0]) - FLOOR_EDITOR_EPSILON &&
+  if (
+    Math.abs(cross(wall.from, wall.to, candidate)) >
+    FLOOR_EDITOR_EPSILON * Math.max(1, length(wall))
+  )
+    return false;
+  return (
+    candidate[0] >= Math.min(wall.from[0], wall.to[0]) - FLOOR_EDITOR_EPSILON &&
     candidate[0] <= Math.max(wall.from[0], wall.to[0]) + FLOOR_EDITOR_EPSILON &&
     candidate[1] >= Math.min(wall.from[1], wall.to[1]) - FLOOR_EDITOR_EPSILON &&
-    candidate[1] <= Math.max(wall.from[1], wall.to[1]) + FLOOR_EDITOR_EPSILON;
+    candidate[1] <= Math.max(wall.from[1], wall.to[1]) + FLOOR_EDITOR_EPSILON
+  );
 };
 
 export const progressOnWall = (candidate: PlanPoint, wall: EditorWall) => {
   const dx = wall.to[0] - wall.from[0];
   const dy = wall.to[1] - wall.from[1];
   const squared = dx * dx + dy * dy;
-  return squared <= FLOOR_EDITOR_EPSILON ? 0 :
-    ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared;
+  return squared <= FLOOR_EDITOR_EPSILON
+    ? 0
+    : ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared;
 };
 
 export const properIntersection = (left: EditorWall, right: EditorWall): PlanPoint | null => {
@@ -57,15 +59,25 @@ export const properIntersection = (left: EditorWall, right: EditorWall): PlanPoi
   const offsetY = right.from[1] - left.from[1];
   const leftProgress = (offsetX * rightDy - offsetY * rightDx) / denominator;
   const rightProgress = (offsetX * leftDy - offsetY * leftDx) / denominator;
-  if (leftProgress < -FLOOR_EDITOR_EPSILON || leftProgress > 1 + FLOOR_EDITOR_EPSILON ||
-    rightProgress < -FLOOR_EDITOR_EPSILON || rightProgress > 1 + FLOOR_EDITOR_EPSILON) return null;
+  if (
+    leftProgress < -FLOOR_EDITOR_EPSILON ||
+    leftProgress > 1 + FLOOR_EDITOR_EPSILON ||
+    rightProgress < -FLOOR_EDITOR_EPSILON ||
+    rightProgress > 1 + FLOOR_EDITOR_EPSILON
+  )
+    return null;
   return point(left.from[0] + leftDx * leftProgress, left.from[1] + leftDy * leftProgress);
 };
 
 export const collinearOverlap = (left: EditorWall, right: EditorWall) => {
-  if (Math.abs(cross(left.from, left.to, right.from)) > FLOOR_EDITOR_EPSILON ||
-    Math.abs(cross(left.from, left.to, right.to)) > FLOOR_EDITOR_EPSILON) return false;
-  const values = [progressOnWall(right.from, left), progressOnWall(right.to, left)].sort((a, b) => a - b);
+  if (
+    Math.abs(cross(left.from, left.to, right.from)) > FLOOR_EDITOR_EPSILON ||
+    Math.abs(cross(left.from, left.to, right.to)) > FLOOR_EDITOR_EPSILON
+  )
+    return false;
+  const values = [progressOnWall(right.from, left), progressOnWall(right.to, left)].sort(
+    (a, b) => a - b,
+  );
   return Math.min(1, values[1]) - Math.max(0, values[0]) > FLOOR_EDITOR_EPSILON;
 };
 
@@ -91,8 +103,9 @@ export const centroid = (polygon: Polygon): PlanPoint => {
 };
 
 export const containsPoint = (candidate: PlanPoint, polygon: Polygon) =>
-  pointInsidePolygon(candidate, polygon) || polygon.some((value, index) =>
-    pointOnSegment(candidate, { from: value, to: polygon[(index + 1) % polygon.length] })
+  pointInsidePolygon(candidate, polygon) ||
+  polygon.some((value, index) =>
+    pointOnSegment(candidate, { from: value, to: polygon[(index + 1) % polygon.length] }),
   );
 
 export const issue = (code: string, path: string, message: string): ManifestIssue => ({

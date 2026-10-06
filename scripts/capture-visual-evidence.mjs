@@ -12,9 +12,9 @@ const fixture = argument("--fixture");
 const requestedStage = argument("--stage");
 const requestedRoomId = argument("--room-id");
 const fixtureMode = Boolean(fixture);
-const ownerHomeId = fixtureMode ? null : JSON.parse(
-  await readFile(resolve(process.cwd(), "home/src/project.json"), "utf8"),
-).home.id;
+const ownerHomeId = fixtureMode
+  ? null
+  : JSON.parse(await readFile(resolve(process.cwd(), "home/src/project.json"), "utf8")).home.id;
 if (!fixtureMode && !ownerHomeId) {
   throw new Error("Could not determine the owner home ID for visual evidence.");
 }
@@ -55,21 +55,27 @@ const capture = async ({
     viewport: viewports[viewport],
     hasTouch: mode === "walk",
   });
-  await context.addInitScript(({ nextMode, selectedRoomId, fade, onboardingKey, modelingNudgeKey }) => {
-    window.sessionStorage.setItem("cabane-scene-session", JSON.stringify({
-      mode: nextMode,
-      selectedRoomId: nextMode === "overview" ? null : selectedRoomId,
-      wallFadeEnabled: fade,
-    }));
-    if (onboardingKey) window.localStorage.setItem(onboardingKey, "complete");
-    if (modelingNudgeKey) window.localStorage.setItem(modelingNudgeKey, "complete");
-  }, {
-    nextMode: mode === "walk" ? "overview" : mode,
-    selectedRoomId: roomId,
-    fade: wallFadeEnabled,
-    onboardingKey: ownerHomeId ? `cabane:onboarding:v1:${ownerHomeId}` : null,
-    modelingNudgeKey: ownerHomeId ? `cabane:modeling-nudge:v1:${ownerHomeId}` : null,
-  });
+  await context.addInitScript(
+    ({ nextMode, selectedRoomId, fade, onboardingKey, modelingNudgeKey }) => {
+      window.sessionStorage.setItem(
+        "cabane-scene-session",
+        JSON.stringify({
+          mode: nextMode,
+          selectedRoomId: nextMode === "overview" ? null : selectedRoomId,
+          wallFadeEnabled: fade,
+        }),
+      );
+      if (onboardingKey) window.localStorage.setItem(onboardingKey, "complete");
+      if (modelingNudgeKey) window.localStorage.setItem(modelingNudgeKey, "complete");
+    },
+    {
+      nextMode: mode === "walk" ? "overview" : mode,
+      selectedRoomId: roomId,
+      fade: wallFadeEnabled,
+      onboardingKey: ownerHomeId ? `cabane:onboarding:v1:${ownerHomeId}` : null,
+      modelingNudgeKey: ownerHomeId ? `cabane:modeling-nudge:v1:${ownerHomeId}` : null,
+    },
+  );
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -84,9 +90,7 @@ const capture = async ({
     }
   });
   const origin = serverOrigin(server);
-  const path = fixtureMode
-    ? `/tests/agent-harness.html?stage=${stage}&scenario=${scenario}`
-    : "/";
+  const path = fixtureMode ? `/tests/agent-harness.html?stage=${stage}&scenario=${scenario}` : "/";
   await page.goto(`${origin}${path}`, { waitUntil: "networkidle" });
   if (fixtureMode) await page.locator("html[data-evidence-ready='true']").waitFor();
   await page.locator(".cabane-shell").waitFor();
@@ -133,27 +137,162 @@ try {
   });
   for (const stage of stages) {
     if (stage === "layout") {
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "desktop", name: "layout-desktop-solid", wallFadeEnabled: false, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "desktop", name: "layout-desktop-faded", wallFadeEnabled: true, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "portrait", name: "layout-portrait-solid", wallFadeEnabled: false, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "portrait", name: "layout-portrait-faded", wallFadeEnabled: true, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "landscape", name: "layout-landscape-solid", wallFadeEnabled: false, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "landscape", name: "layout-landscape-faded", wallFadeEnabled: true, dayMode: true });
-      await capture({ stage, scenario: "disconnected", mode: "walk", viewport: "desktop", name: "layout-desktop-walk" });
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "desktop", name: "layout-junction-grazing", grazing: true, wallFadeEnabled: false, dayMode: true });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "desktop",
+        name: "layout-desktop-solid",
+        wallFadeEnabled: false,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "desktop",
+        name: "layout-desktop-faded",
+        wallFadeEnabled: true,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "portrait",
+        name: "layout-portrait-solid",
+        wallFadeEnabled: false,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "portrait",
+        name: "layout-portrait-faded",
+        wallFadeEnabled: true,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "landscape",
+        name: "layout-landscape-solid",
+        wallFadeEnabled: false,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "landscape",
+        name: "layout-landscape-faded",
+        wallFadeEnabled: true,
+        dayMode: true,
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "walk",
+        viewport: "desktop",
+        name: "layout-desktop-walk",
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "desktop",
+        name: "layout-junction-grazing",
+        grazing: true,
+        wallFadeEnabled: false,
+        dayMode: true,
+      });
     } else {
-      await capture({ stage, scenario: "disconnected", mode: "overview", viewport: "desktop", name: "room-disconnected-overview" });
-      await capture({ stage, scenario: "disconnected", mode: "room", viewport: "desktop", name: "room-disconnected-focus" });
-      await capture({ stage, scenario: "disconnected", mode: "walk", viewport: "desktop", name: "room-disconnected-walk" });
-      await capture({ stage, scenario: "disconnected", mode: "room", viewport: "desktop", name: "room-wall-contact-grazing", grazing: true });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "overview",
+        viewport: "desktop",
+        name: "room-disconnected-overview",
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "room",
+        viewport: "desktop",
+        name: "room-disconnected-focus",
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "walk",
+        viewport: "desktop",
+        name: "room-disconnected-walk",
+      });
+      await capture({
+        stage,
+        scenario: "disconnected",
+        mode: "room",
+        viewport: "desktop",
+        name: "room-wall-contact-grazing",
+        grazing: true,
+      });
       if (fixtureMode) {
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "desktop", name: "room-connected-device", deviceLabel: "Speaker" });
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "portrait", name: "room-connected-portrait" });
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "landscape", name: "room-connected-landscape", deviceLabel: "Speaker" });
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "desktop", name: "runtime-bindings-desktop", bindingSetup: true });
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "portrait", name: "runtime-bindings-portrait", bindingSetup: true });
-        await capture({ stage, scenario: "connected", mode: "room", viewport: "landscape", name: "runtime-bindings-landscape", bindingSetup: true });
-        await capture({ stage, scenario: "unavailable", mode: "room", viewport: "desktop", name: "room-unavailable" });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "desktop",
+          name: "room-connected-device",
+          deviceLabel: "Speaker",
+        });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "portrait",
+          name: "room-connected-portrait",
+        });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "landscape",
+          name: "room-connected-landscape",
+          deviceLabel: "Speaker",
+        });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "desktop",
+          name: "runtime-bindings-desktop",
+          bindingSetup: true,
+        });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "portrait",
+          name: "runtime-bindings-portrait",
+          bindingSetup: true,
+        });
+        await capture({
+          stage,
+          scenario: "connected",
+          mode: "room",
+          viewport: "landscape",
+          name: "runtime-bindings-landscape",
+          bindingSetup: true,
+        });
+        await capture({
+          stage,
+          scenario: "unavailable",
+          mode: "room",
+          viewport: "desktop",
+          name: "room-unavailable",
+        });
       }
     }
   }
@@ -163,9 +302,11 @@ try {
     "utf8",
   );
   console.log(`Captured ${captures.length} normal-UI views in ${outputDirectory}.`);
-  console.log(stages.includes("room")
-    ? `ROOM_REVIEW_REQUIRED:${fixtureMode ? "fixture-studio" : requestedRoomId}`
-    : "LAYOUT_REVIEW_REQUIRED");
+  console.log(
+    stages.includes("room")
+      ? `ROOM_REVIEW_REQUIRED:${fixtureMode ? "fixture-studio" : requestedRoomId}`
+      : "LAYOUT_REVIEW_REQUIRED",
+  );
 } finally {
   await browser?.close();
   await server.close();

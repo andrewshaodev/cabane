@@ -94,9 +94,24 @@ export function CabinBed() {
 
       <GuardRail z={-0.82} />
       <GuardRail z={0.82} />
-      <Cushion position={[-0.28, 0.5, -0.78]} color="#f0ded5" scale={[0.34, 0.22, 0.42]} rotationY={-0.08} />
-      <Cushion position={[0.05, 0.49, -0.76]} color="#c78c91" scale={[0.33, 0.22, 0.41]} rotationY={0.05} />
-      <Cushion position={[0.31, 0.5, -0.73]} color="#e5bdb2" scale={[0.31, 0.2, 0.38]} rotationY={0.1} />
+      <Cushion
+        position={[-0.28, 0.5, -0.78]}
+        color="#f0ded5"
+        scale={[0.34, 0.22, 0.42]}
+        rotationY={-0.08}
+      />
+      <Cushion
+        position={[0.05, 0.49, -0.76]}
+        color="#c78c91"
+        scale={[0.33, 0.22, 0.41]}
+        rotationY={0.05}
+      />
+      <Cushion
+        position={[0.31, 0.5, -0.73]}
+        color="#e5bdb2"
+        scale={[0.31, 0.2, 0.38]}
+        rotationY={0.1}
+      />
       <PlushBear />
     </group>
   );

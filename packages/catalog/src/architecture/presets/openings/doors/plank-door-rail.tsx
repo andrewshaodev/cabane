@@ -57,10 +57,7 @@ export function PlankDoorRail({
   const railCenterZ = wallSurfaceZ + WALL_GAP_METERS + RAIL_DEPTH_METERS / 2;
 
   return (
-    <group
-      name="opening-plank-rail"
-      position={[0, 0, railCenterZ * orientation.sideSign]}
-    >
+    <group name="opening-plank-rail" position={[0, 0, railCenterZ * orientation.sideSign]}>
       <group name="opening-plank-rail-bar" position={[railCenterX, 0, 0]}>
         <OpeningFrameBox
           size={[railWidth, 0.065, RAIL_DEPTH_METERS]}

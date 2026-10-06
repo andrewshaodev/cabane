@@ -50,7 +50,13 @@ await withModules(async (load) => {
     const migrated = loadSetupRecord(legacyStorage, "returning-home");
     assert.equal(migrated.migrated, true);
     assert.deepEqual(migrated.record, {
-      launch: { entry: null, introductionDismissed: true, starterConsumed: true, nudgeDismissed: true, firstControlConfirmed: false },
+      launch: {
+        entry: null,
+        introductionDismissed: true,
+        starterConsumed: true,
+        nudgeDismissed: true,
+        firstControlConfirmed: false,
+      },
       schemaVersion: 2,
       connectionStage: "connected",
       buildChoice: "deferred",
@@ -58,24 +64,41 @@ await withModules(async (load) => {
     });
     assert.equal(legacyStorage.values.has("smart-home-3d:onboarding:v1:returning-home"), true);
     assert.equal(legacyStorage.values.has("smart-home-3d:modeling-nudge:v1:returning-home"), true);
-    assert.equal(JSON.parse(legacyStorage.values.get(setupStorageKey("returning-home"))).activated, true);
+    assert.equal(
+      JSON.parse(legacyStorage.values.get(setupStorageKey("returning-home"))).activated,
+      true,
+    );
 
-    const versionOneStorage = mapStorage([[setupStorageKey("version-one-home"), JSON.stringify({
-      schemaVersion: 1,
-      realSessionConnected: false,
-      modelingStage: "floor-review",
-      activated: false,
-    })]]);
+    const versionOneStorage = mapStorage([
+      [
+        setupStorageKey("version-one-home"),
+        JSON.stringify({
+          schemaVersion: 1,
+          realSessionConnected: false,
+          modelingStage: "floor-review",
+          activated: false,
+        }),
+      ],
+    ]);
     const versionOne = loadSetupRecord(versionOneStorage, "version-one-home");
     assert.equal(versionOne.migrated, true);
     assert.deepEqual(versionOne.record, {
-      launch: { entry: null, introductionDismissed: true, starterConsumed: true, nudgeDismissed: true, firstControlConfirmed: false },
+      launch: {
+        entry: null,
+        introductionDismissed: true,
+        starterConsumed: true,
+        nudgeDismissed: true,
+        firstControlConfirmed: false,
+      },
       schemaVersion: 2,
       connectionStage: "not-started",
       buildChoice: "agents",
       activated: false,
     });
-    assert.deepEqual(JSON.parse(versionOneStorage.values.get(setupStorageKey("version-one-home"))), versionOne.record);
+    assert.deepEqual(
+      JSON.parse(versionOneStorage.values.get(setupStorageKey("version-one-home"))),
+      versionOne.record,
+    );
   });
 
   test("advances one current task at a time through connection and build choices", () => {
@@ -92,24 +115,38 @@ await withModules(async (load) => {
     const profile = { ...connectedProfileFixture(), roomAreaIds: {}, entityIdsBySlotId: {} };
     const fresh = createSetupRecord();
     assert.deepEqual(
-      deriveSetupProgress({ manifest, runtime, profile, record: fresh }).steps.map((step) => step.status),
+      deriveSetupProgress({ manifest, runtime, profile, record: fresh }).steps.map(
+        (step) => step.status,
+      ),
       ["current", "pending", "pending", "pending"],
     );
 
     const connectionDeferred = { ...fresh, connectionStage: "deferred" };
     assert.deepEqual(
-      deriveSetupProgress({ manifest, runtime, profile, record: connectionDeferred }).steps.map((step) => step.status),
+      deriveSetupProgress({ manifest, runtime, profile, record: connectionDeferred }).steps.map(
+        (step) => step.status,
+      ),
       ["deferred", "current", "pending", "pending"],
     );
 
     const buildSelected = { ...connectionDeferred, buildChoice: "construction" };
-    const selectedProgress = deriveSetupProgress({ manifest, runtime, profile, record: buildSelected });
-    assert.deepEqual(selectedProgress.steps.map((step) => step.status), ["deferred", "complete", "pending", "pending"]);
+    const selectedProgress = deriveSetupProgress({
+      manifest,
+      runtime,
+      profile,
+      record: buildSelected,
+    });
+    assert.deepEqual(
+      selectedProgress.steps.map((step) => step.status),
+      ["deferred", "complete", "pending", "pending"],
+    );
     assert.equal(selectedProgress.completedCount, 1);
 
     const connected = { ...buildSelected, connectionStage: "connected" };
     assert.deepEqual(
-      deriveSetupProgress({ manifest, runtime, profile, record: connected }).steps.map((step) => step.status),
+      deriveSetupProgress({ manifest, runtime, profile, record: connected }).steps.map(
+        (step) => step.status,
+      ),
       ["complete", "complete", "current", "pending"],
     );
   });
@@ -143,17 +180,23 @@ await withModules(async (load) => {
 
   test("counts a compatible cross-area entity for a single-slot modeled device", () => {
     const singleDeviceManifest = structuredClone(manifest);
-    singleDeviceManifest.floors[0].rooms[0].devices = [singleDeviceManifest.floors[0].rooms[0].devices[0]];
+    singleDeviceManifest.floors[0].rooms[0].devices = [
+      singleDeviceManifest.floors[0].rooms[0].devices[0],
+    ];
     const runtime = connectedRuntimeFixture();
-    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").area_id = "outside";
+    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").area_id =
+      "outside";
     const record = { ...createSetupRecord(), connectionStage: "connected" };
 
-    assert.equal(deriveSetupProgress({
-      manifest: singleDeviceManifest,
-      runtime,
-      profile: connectedProfileFixture(),
-      record,
-    }).deviceResolvedNow, true);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: singleDeviceManifest,
+        runtime,
+        profile: connectedProfileFixture(),
+        record,
+      }).deviceResolvedNow,
+      true,
+    );
 
     singleDeviceManifest.floors[0].rooms[0].devices[0].entitySlots.push({
       id: "fixture-light-diagnostic",
@@ -163,12 +206,15 @@ await withModules(async (load) => {
       deviceRole: "diagnostic",
       presentation: { label: "Light diagnostic", dashboardRole: "diagnostic" },
     });
-    assert.equal(deriveSetupProgress({
-      manifest: singleDeviceManifest,
-      runtime,
-      profile: connectedProfileFixture(),
-      record,
-    }).deviceResolvedNow, false);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: singleDeviceManifest,
+        runtime,
+        profile: connectedProfileFixture(),
+        record,
+      }).deviceResolvedNow,
+      false,
+    );
   });
 
   test("rejects stale, duplicated, sensor-only, and roomless activation candidates", () => {
@@ -176,7 +222,9 @@ await withModules(async (load) => {
     const baseRuntime = connectedRuntimeFixture();
     const baseProfile = connectedProfileFixture();
     const oneDeviceManifest = structuredClone(manifest);
-    oneDeviceManifest.floors[0].rooms[0].devices = [oneDeviceManifest.floors[0].rooms[0].devices[0]];
+    oneDeviceManifest.floors[0].rooms[0].devices = [
+      oneDeviceManifest.floors[0].rooms[0].devices[0],
+    ];
 
     const staleRuntime = connectedRuntimeFixture({
       entityStates: {
@@ -184,7 +232,15 @@ await withModules(async (load) => {
         "light.demo_ceiling": { ...baseRuntime.entityStates["light.demo_ceiling"], stale: true },
       },
     });
-    assert.equal(deriveSetupProgress({ manifest: oneDeviceManifest, runtime: staleRuntime, profile: baseProfile, record }).deviceResolvedNow, false);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: oneDeviceManifest,
+        runtime: staleRuntime,
+        profile: baseProfile,
+        record,
+      }).deviceResolvedNow,
+      false,
+    );
 
     const duplicateProfile = {
       ...baseProfile,
@@ -193,18 +249,47 @@ await withModules(async (load) => {
         "demo-coffee-slot": "light.demo_ceiling",
       },
     };
-    assert.equal(deriveSetupProgress({ manifest: oneDeviceManifest, runtime: baseRuntime, profile: duplicateProfile, record }).deviceResolvedNow, false);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: oneDeviceManifest,
+        runtime: baseRuntime,
+        profile: duplicateProfile,
+        record,
+      }).deviceResolvedNow,
+      false,
+    );
 
     const sensorManifest = structuredClone(oneDeviceManifest);
     sensorManifest.floors[0].rooms[0].devices[0].entitySlots[0].compatibleDomains = ["sensor"];
-    assert.equal(deriveSetupProgress({ manifest: sensorManifest, runtime: baseRuntime, profile: baseProfile, record }).deviceResolvedNow, false);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: sensorManifest,
+        runtime: baseRuntime,
+        profile: baseProfile,
+        record,
+      }).deviceResolvedNow,
+      false,
+    );
 
     const diagnosticOnlyManifest = structuredClone(oneDeviceManifest);
     diagnosticOnlyManifest.floors[0].rooms[0].devices[0].entitySlots[0].deviceRole = "diagnostic";
-    assert.equal(deriveSetupProgress({ manifest: diagnosticOnlyManifest, runtime: baseRuntime, profile: baseProfile, record }).deviceResolvedNow, false);
+    assert.equal(
+      deriveSetupProgress({
+        manifest: diagnosticOnlyManifest,
+        runtime: baseRuntime,
+        profile: baseProfile,
+        record,
+      }).deviceResolvedNow,
+      false,
+    );
 
     const roomlessProfile = { ...baseProfile, roomAreaIds: {} };
-    const roomless = deriveSetupProgress({ manifest, runtime: baseRuntime, profile: roomlessProfile, record });
+    const roomless = deriveSetupProgress({
+      manifest,
+      runtime: baseRuntime,
+      profile: roomlessProfile,
+      record,
+    });
     assert.equal(roomless.roomComplete, false);
     assert.equal(roomless.deviceResolvedNow, false);
     assert.equal(roomless.activationReached, false);

@@ -66,7 +66,11 @@ function VacuumRoomAction({
         <span>{pending ? "Starting…" : room.name}</span>
         {room.name !== `Room ${room.id}` && <small>Room {room.id}</small>}
       </button>
-      {error && <p role="alert" aria-live="assertive">Couldn’t start {room.name}. Try again.</p>}
+      {error && (
+        <p role="alert" aria-live="assertive">
+          Couldn’t start {room.name}. Try again.
+        </p>
+      )}
     </div>
   );
 }
@@ -83,7 +87,11 @@ export function VacuumFields({ binding, enabled, onCallService }: DomainFieldsPr
   return (
     <div className="room-module__controls room-module__controls--vacuum">
       <div className="vacuum-status">
-        <output className="room-module__reading" aria-label={`${binding.label} status`} aria-live="polite">
+        <output
+          className="room-module__reading"
+          aria-label={`${binding.label} status`}
+          aria-live="polite"
+        >
           {readableDomainOption(entity.state)}
         </output>
         {hasBatteryLevel && <span aria-label={`${batteryLevel}% battery`}>{batteryLevel}%</span>}
@@ -117,15 +125,17 @@ export function VacuumFields({ binding, enabled, onCallService }: DomainFieldsPr
             onCallService={onCallService}
           />
         )}
-        {featureEnabled(entity, VACUUM_FEATURE_RETURN_HOME) && entity.state !== "docked" && entity.state !== "returning" && (
-          <DomainCommandAction
-            label={`Dock ${binding.label}`}
-            confirmedKey={domainConfirmationKey(entity)}
-            disabled={!enabled}
-            call={vacuumActionCall(entity, "return_to_base")}
-            onCallService={onCallService}
-          />
-        )}
+        {featureEnabled(entity, VACUUM_FEATURE_RETURN_HOME) &&
+          entity.state !== "docked" &&
+          entity.state !== "returning" && (
+            <DomainCommandAction
+              label={`Dock ${binding.label}`}
+              confirmedKey={domainConfirmationKey(entity)}
+              disabled={!enabled}
+              call={vacuumActionCall(entity, "return_to_base")}
+              onCallService={onCallService}
+            />
+          )}
       </div>
       {rooms.length > 0 && (
         <section className="vacuum-rooms" aria-labelledby={`${binding.slotId}-vacuum-rooms-title`}>
@@ -189,13 +199,19 @@ export function NumberFields({ binding, enabled, onCallService }: DomainFieldsPr
   if (!entity) return null;
   const range = numberValueRange(entity);
   const value = domainNumberAttribute(entity.state, range.min);
-  const unit = typeof entity.attributes.unit_of_measurement === "string"
-    ? entity.attributes.unit_of_measurement
-    : "";
+  const unit =
+    typeof entity.attributes.unit_of_measurement === "string"
+      ? entity.attributes.unit_of_measurement
+      : "";
   return (
     <div className="room-module__controls room-module__controls--number">
-      <output className="room-module__reading" aria-label={`${binding.label} current value`} aria-live="polite">
-        {value}{unit ? ` ${unit}` : ""}
+      <output
+        className="room-module__reading"
+        aria-label={`${binding.label} current value`}
+        aria-live="polite"
+      >
+        {value}
+        {unit ? ` ${unit}` : ""}
       </output>
       <CommandRange
         label={binding.label}
@@ -254,7 +270,11 @@ export function ButtonFields({ binding, enabled, onCallService }: DomainFieldsPr
       <span className="room-module__command-result" role="status" aria-live="polite">
         {pending ? "Sending…" : result === "success" ? "Sent" : ""}
       </span>
-      {result === "error" && <p role="alert" aria-live="assertive">Couldn’t press {binding.label}. Try again.</p>}
+      {result === "error" && (
+        <p role="alert" aria-live="assertive">
+          Couldn’t press {binding.label}. Try again.
+        </p>
+      )}
     </div>
   );
 }

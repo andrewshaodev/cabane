@@ -33,7 +33,10 @@ export const parseHomeProjectSchema = (input: unknown): HomeProjectSchemaResult 
   if (!project || issues.length > 0) {
     return { valid: false, issues: sortProjectIssues(issues) };
   }
-  return { valid: true, project: project.schemaVersion === 1 ? migrateLegacyProject(project) : project };
+  return {
+    valid: true,
+    project: project.schemaVersion === 1 ? migrateLegacyProject(project) : project,
+  };
 };
 
 export const validateHomeProject = (
@@ -46,23 +49,33 @@ export const validateHomeProject = (
   const issues: HomeProjectIssue[] = [];
   project.floors.forEach((floor, index) => {
     if (floor.footprint.length === 0 && floor.walls.length === 0 && floor.rooms.length === 0) {
-      addProjectIssue(issues, "project.floor-empty", `floors[${index}].footprint`, `Draw a closed room on “${floor.name}” before applying your changes.`);
+      addProjectIssue(
+        issues,
+        "project.floor-empty",
+        `floors[${index}].footprint`,
+        `Draw a closed room on “${floor.name}” before applying your changes.`,
+      );
       return;
     }
     const layout = validateLayoutFloorSpec(floor);
-    layout.issues.forEach((candidate) => addProjectIssue(
-      issues, candidate.code,
-      candidate.path === "$" ? `floors[${index}]` : `floors[${index}].${candidate.path}`,
-      candidate.message,
-    ));
+    layout.issues.forEach((candidate) =>
+      addProjectIssue(
+        issues,
+        candidate.code,
+        candidate.path === "$" ? `floors[${index}]` : `floors[${index}].${candidate.path}`,
+        candidate.message,
+      ),
+    );
   });
-  validateStairs(project, registries).forEach(issue => issues.push({ ...issue, severity: issue.severity === "warning" ? "warning" : "error" }));
+  validateStairs(project, registries).forEach((issue) =>
+    issues.push({ ...issue, severity: issue.severity === "warning" ? "warning" : "error" }),
+  );
   validateProfileReferencesAndSlots(project, issues);
   validateGlobalProjectIds(project, issues);
   validateActionBarTargets(project, issues);
   validateSceneItemsAndSupports(project, registries, issues);
   const ordered = sortProjectIssues(issues);
-  return !ordered.some(issue => issue.severity === "error")
+  return !ordered.some((issue) => issue.severity === "error")
     ? { valid: true, project, issues: ordered }
     : { valid: false, issues: ordered };
 };

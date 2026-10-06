@@ -20,10 +20,12 @@ await withModules(async (load) => {
   };
 
   test("renders complete labels in stable order for the detailed hero variant", () => {
-    const html = renderToStaticMarkup(React.createElement(RoomStatusBadges, {
-      summary,
-      variant: "detailed",
-    }));
+    const html = renderToStaticMarkup(
+      React.createElement(RoomStatusBadges, {
+        summary,
+        variant: "detailed",
+      }),
+    );
     const order = ["21.4 °C", "48 %", "Heating", "Lights on", "No presence", "Door open"];
     order.reduce((previous, text) => {
       const index = html.indexOf(text);
@@ -35,10 +37,12 @@ await withModules(async (load) => {
   });
 
   test("keeps only readings visible in compact mode while preserving accessible labels", () => {
-    const html = renderToStaticMarkup(React.createElement(RoomStatusBadges, {
-      summary,
-      variant: "compact",
-    }));
+    const html = renderToStaticMarkup(
+      React.createElement(RoomStatusBadges, {
+        summary,
+        variant: "compact",
+      }),
+    );
     assert.match(html, /21.4 °C/);
     assert.match(html, /48 %/);
     assert.match(html, /aria-label="Heating"/);
@@ -54,10 +58,15 @@ await withModules(async (load) => {
       cooling: false,
       doorOpen: false,
     };
-    assert.equal(renderToStaticMarkup(React.createElement(RoomStatusBadges, {
-      summary: empty,
-      variant: "compact",
-    })), "");
+    assert.equal(
+      renderToStaticMarkup(
+        React.createElement(RoomStatusBadges, {
+          summary: empty,
+          variant: "compact",
+        }),
+      ),
+      "",
+    );
     assert.equal(
       roomStatusAccessibleText(summary),
       "Temperature 21.4 °C, Humidity 48 %, Heating, Lights on, No presence, Door open",

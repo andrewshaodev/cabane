@@ -1,10 +1,6 @@
 import { RoundedBox } from "@cabane/engine";
 import { useFrame, useThree } from "@react-three/fiber";
-import {
-  LiveCameraSurface,
-  ToonMaterial,
-  type HomeDeviceModelProps,
-} from "@cabane/engine";
+import { LiveCameraSurface, ToonMaterial, type HomeDeviceModelProps } from "@cabane/engine";
 import { useEffect, useRef, type ReactNode } from "react";
 import type { Group } from "three";
 import {
@@ -20,7 +16,7 @@ import {
 } from "./camera-screen-display";
 
 const VIDEO_WIDTH = 0.78;
-const VIDEO_HEIGHT = VIDEO_WIDTH * 9 / 16;
+const VIDEO_HEIGHT = (VIDEO_WIDTH * 9) / 16;
 const PANEL_CENTER_Y = 0.31;
 const PANEL_CENTER_Z = CAMERA_SCREEN_FLOAT_GAP + CAMERA_SCREEN_DEPTH / 2;
 const FRAME_Z = CAMERA_SCREEN_DEPTH / 2 + 0.004;
@@ -61,23 +57,20 @@ const corners: ReactNode[] = [
   <HologramSegment key="br-v" position={[0.432, -0.212, HUD_Z]} size={[0.003, 0.06, 0.002]} />,
 ];
 
-export function CameraScreenModel({
-  liveMedia,
-  visualState,
-  reducedMotion,
-}: HomeDeviceModelProps) {
+export function CameraScreenModel({ liveMedia, visualState, reducedMotion }: HomeDeviceModelProps) {
   const displayRef = useRef<Group>(null);
   const { invalidate } = useThree();
   const online = liveMedia?.state === "playing";
   const connecting = liveMedia?.state === "connecting";
   const corsBlocked = liveMedia?.previewState === "cors-blocked";
-  const statusColor = online && !corsBlocked
-    ? "#9afff6"
-    : connecting
-      ? "#f3b562"
-      : corsBlocked
-        ? "#f0a56a"
-        : "#6f958f";
+  const statusColor =
+    online && !corsBlocked
+      ? "#9afff6"
+      : connecting
+        ? "#f3b562"
+        : corsBlocked
+          ? "#f0a56a"
+          : "#6f958f";
 
   useEffect(() => {
     if (reducedMotion) return undefined;
@@ -97,11 +90,7 @@ export function CameraScreenModel({
   useFrame(({ clock }) => {
     if (!displayRef.current) return;
     const pose = cameraScreenPose(clock.elapsedTime, reducedMotion);
-    displayRef.current.position.set(
-      0,
-      pose.verticalOffset,
-      PANEL_CENTER_Z + pose.normalOffset,
-    );
+    displayRef.current.position.set(0, pose.verticalOffset, PANEL_CENTER_Z + pose.normalOffset);
   });
 
   return (

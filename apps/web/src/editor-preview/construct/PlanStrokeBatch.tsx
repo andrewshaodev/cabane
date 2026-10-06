@@ -13,11 +13,13 @@ export interface BatchedPlanStroke {
 
 /** Same rectangular strokes as PlanStroke, combined by drawing style. */
 export function planStrokePositions(stroke: BatchedPlanStroke): number[] {
-  const { from, to, width = .025, elevation = .045 } = stroke;
-  const dx = to[0] - from[0], dz = to[1] - from[1];
+  const { from, to, width = 0.025, elevation = 0.045 } = stroke;
+  const dx = to[0] - from[0],
+    dz = to[1] - from[1];
   const length = Math.hypot(dx, dz);
   if (length === 0) return [];
-  const nx = -dz / length * width / 2, nz = dx / length * width / 2;
+  const nx = ((-dz / length) * width) / 2,
+    nz = ((dx / length) * width) / 2;
   const a = [from[0] + nx, elevation, from[1] + nz];
   const b = [to[0] + nx, elevation, to[1] + nz];
   const c = [to[0] - nx, elevation, to[1] - nz];
@@ -25,12 +27,19 @@ export function planStrokePositions(stroke: BatchedPlanStroke): number[] {
   return [...a, ...b, ...c, ...a, ...c, ...d];
 }
 
-export function PlanStrokeBatch({ strokes, name }: { strokes: readonly BatchedPlanStroke[]; name: string }) {
+export function PlanStrokeBatch({
+  strokes,
+  name,
+}: {
+  strokes: readonly BatchedPlanStroke[];
+  name: string;
+}) {
   const batches = useMemo(() => {
     const groups = new Map<string, { color: string; overlay: boolean; positions: number[] }>();
     for (const stroke of strokes) {
       const key = JSON.stringify([stroke.color, Boolean(stroke.overlay)]);
-      if (!groups.has(key)) groups.set(key, { color: stroke.color, overlay: Boolean(stroke.overlay), positions: [] });
+      if (!groups.has(key))
+        groups.set(key, { color: stroke.color, overlay: Boolean(stroke.overlay), positions: [] });
       groups.get(key)!.positions.push(...planStrokePositions(stroke));
     }
     return [...groups].map(([key, { positions, ...style }]) => {
@@ -41,9 +50,19 @@ export function PlanStrokeBatch({ strokes, name }: { strokes: readonly BatchedPl
       return { key, geometry, ...style };
     });
   }, [strokes]);
-  useEffect(() => () => batches.forEach(batch => batch.geometry.dispose()), [batches]);
-  return <group name={name}>{batches.map(batch => <mesh key={batch.key} geometry={batch.geometry}
-    raycast={noPlanRaycast} renderOrder={batch.overlay ? 30 : 0}>
-    <PlanMaterial color={batch.color} overlay={batch.overlay} />
-  </mesh>)}</group>;
+  useEffect(() => () => batches.forEach((batch) => batch.geometry.dispose()), [batches]);
+  return (
+    <group name={name}>
+      {batches.map((batch) => (
+        <mesh
+          key={batch.key}
+          geometry={batch.geometry}
+          raycast={noPlanRaycast}
+          renderOrder={batch.overlay ? 30 : 0}
+        >
+          <PlanMaterial color={batch.color} overlay={batch.overlay} />
+        </mesh>
+      ))}
+    </group>
+  );
 }

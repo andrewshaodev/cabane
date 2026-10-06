@@ -21,7 +21,8 @@ const SYNTHETIC_SLOT = {
 
 const fixtureParams = new URL(window.location.href).searchParams;
 const corsBlocked = fixtureParams.get("cors") === "true";
-const ScreenModel = fixtureParams.get("model") === "television" ? TelevisionModel : CameraScreenModel;
+const ScreenModel =
+  fixtureParams.get("model") === "television" ? TelevisionModel : CameraScreenModel;
 const reducedMotion = fixtureParams.get("reduced-motion") === "true";
 
 function SyntheticCameraFixture() {
@@ -78,21 +79,25 @@ function SyntheticCameraFixture() {
     video.setAttribute("aria-hidden", "true");
     document.body.appendChild(video);
     video.srcObject = stream;
-    const ready = () => setMedia({
-      kind: "camera-stream",
-      video,
-      posterUrl,
-      state: "playing",
-      transport: "webrtc",
-      previewState: corsBlocked ? "cors-blocked" : "live",
-      error: corsBlocked
-        ? "Live 3D preview needs this dashboard origin in Home Assistant HTTP CORS settings."
-        : null,
-    });
+    const ready = () =>
+      setMedia({
+        kind: "camera-stream",
+        video,
+        posterUrl,
+        state: "playing",
+        transport: "webrtc",
+        previewState: corsBlocked ? "cors-blocked" : "live",
+        error: corsBlocked
+          ? "Live 3D preview needs this dashboard origin in Home Assistant HTTP CORS settings."
+          : null,
+      });
     video.addEventListener("loadeddata", ready, { once: true });
-    void video.play().then(() => {
-      if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) ready();
-    }).catch(() => undefined);
+    void video
+      .play()
+      .then(() => {
+        if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) ready();
+      })
+      .catch(() => undefined);
     return () => {
       window.clearInterval(timer);
       stream.getTracks().forEach((track) => track.stop());
@@ -104,12 +109,17 @@ function SyntheticCameraFixture() {
 
   return (
     <main className="synthetic-camera-fixture">
-      <section className="synthetic-camera-fixture__scene" aria-label="Synthetic in-room camera screen">
+      <section
+        className="synthetic-camera-fixture__scene"
+        aria-label="Synthetic in-room camera screen"
+      >
         <div className="synthetic-camera-fixture__copy">
           <span>Deterministic media fixture</span>
           <h1>Shared camera screen</h1>
           <p>The same in-memory video powers this display and the viewer.</p>
-          <button type="button" onClick={() => setViewerOpen(true)}>Open live feed</button>
+          <button type="button" onClick={() => setViewerOpen(true)}>
+            Open live feed
+          </button>
         </div>
         <Canvas camera={{ position: [0, 0, 3.2], fov: 35 }} frameloop="demand">
           <ambientLight intensity={1.6} />

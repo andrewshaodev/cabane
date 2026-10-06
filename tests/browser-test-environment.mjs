@@ -26,11 +26,12 @@ async function startServer(kind) {
       cacheDir,
       server: { host: "127.0.0.1", port: 0, hmr: false, ws: false, watch: null },
     });
-    if (!app) server.middlewares.use((request, response, next) => {
-      if (request.url !== "/") return next();
-      response.setHeader("Content-Type", "text/html");
-      response.end("<!doctype html><title>Cabane test</title>");
-    });
+    if (!app)
+      server.middlewares.use((request, response, next) => {
+        if (request.url !== "/") return next();
+        response.setHeader("Content-Type", "text/html");
+        response.end("<!doctype html><title>Cabane test</title>");
+      });
     await server.listen();
     return { server, cacheDir };
   } catch (error) {
@@ -44,7 +45,7 @@ export async function createBrowserTestSession() {
   browserPromise ??= chromium.launch({ channel: "chrome", headless: true });
   const browser = await browserPromise;
   const contexts = new Set();
-  const newContext = async options => {
+  const newContext = async (options) => {
     const context = await browser.newContext(options);
     contexts.add(context);
     context.on("close", () => contexts.delete(context));
@@ -52,22 +53,28 @@ export async function createBrowserTestSession() {
   };
   return {
     newContext,
-    async newPage(options) { return (await newContext(options)).newPage(); },
+    async newPage(options) {
+      return (await newContext(options)).newPage();
+    },
     async close() {
-      await Promise.all([...contexts].map(context => context.close()));
+      await Promise.all([...contexts].map((context) => context.close()));
       if (process.env.CABANE_TEST_SHARED_MODULES !== "1") await closeBrowserTestEnvironment();
     },
   };
 }
 
 export async function closeBrowserTestEnvironment() {
-  try { if (browserPromise) await (await browserPromise).close(); }
-  finally {
+  try {
+    if (browserPromise) await (await browserPromise).close();
+  } finally {
     for (const pending of servers.values()) {
       const result = await pending.catch(() => null);
       if (!result) continue;
-      try { await result.server.close(); }
-      finally { await rm(result.cacheDir, { recursive: true, force: true }); }
+      try {
+        await result.server.close();
+      } finally {
+        await rm(result.cacheDir, { recursive: true, force: true });
+      }
     }
   }
   browserPromise = undefined;

@@ -20,11 +20,11 @@ export function PlatformLowWallRuns({ barriers }: { barriers: readonly OutdoorPl
     });
     return [...groups].map(([key, { height, polygons }]) => {
       const merged = polygonClipping.union(polygons[0], ...polygons.slice(1));
-      const shapes = merged.map(rings => {
+      const shapes = merged.map((rings) => {
         const shape = new Shape();
         rings.forEach((ring, index) => {
           const path = index === 0 ? shape : new Path();
-          ring.forEach(([x, z], i) => i === 0 ? path.moveTo(x, -z) : path.lineTo(x, -z));
+          ring.forEach(([x, z], i) => (i === 0 ? path.moveTo(x, -z) : path.lineTo(x, -z)));
           path.closePath();
           if (index) shape.holes.push(path);
         });
@@ -33,11 +33,22 @@ export function PlatformLowWallRuns({ barriers }: { barriers: readonly OutdoorPl
       return { key, geometry: new ExtrudeGeometry(shapes, { depth: height, bevelEnabled: false }) };
     });
   }, [barriers]);
-  useEffect(() => () => runs.forEach(run => run.geometry.dispose()), [runs]);
-  return <group name="platform-low-walls">
-    {runs.map(run => <mesh key={run.key} name={`platform-low-wall-${run.key}`} geometry={run.geometry} rotation={[-Math.PI / 2, 0, 0]} castShadow receiveShadow>
-      <ToonMaterial color="#d4c6ae" />
-      <Outlines color="#655e53" thickness={.6} />
-    </mesh>)}
-  </group>;
+  useEffect(() => () => runs.forEach((run) => run.geometry.dispose()), [runs]);
+  return (
+    <group name="platform-low-walls">
+      {runs.map((run) => (
+        <mesh
+          key={run.key}
+          name={`platform-low-wall-${run.key}`}
+          geometry={run.geometry}
+          rotation={[-Math.PI / 2, 0, 0]}
+          castShadow
+          receiveShadow
+        >
+          <ToonMaterial color="#d4c6ae" />
+          <Outlines color="#655e53" thickness={0.6} />
+        </mesh>
+      ))}
+    </group>
+  );
 }

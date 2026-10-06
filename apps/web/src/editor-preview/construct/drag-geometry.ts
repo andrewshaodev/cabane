@@ -56,12 +56,13 @@ export const worldDragToConstructPlan = ({
   coordinates: FloorCoordinates;
   absolute?: boolean;
   snapStepMeters?: number;
-}) => snapConstructPlanPoint(
-  worldToConstructPlan(point, coordinates),
-  absolute,
-  snapStepMeters / coordinates.metersPerPlanUnit,
-  coordinates.origin,
-);
+}) =>
+  snapConstructPlanPoint(
+    worldToConstructPlan(point, coordinates),
+    absolute,
+    snapStepMeters / coordinates.metersPerPlanUnit,
+    coordinates.origin,
+  );
 
 export const worldDragToSnappedConstructPlan = ({
   point,
@@ -89,7 +90,10 @@ export const worldDragToSnappedConstructPlan = ({
   absolute?: boolean;
 }): PlanPoint => {
   const candidate = worldToConstructPlan(point, coordinates);
-  if (absolute) { onSnap?.(null); return candidate; }
+  if (absolute) {
+    onSnap?.(null);
+    return candidate;
+  }
   const target = snapPlanPoint({
     candidate,
     walls,
@@ -120,7 +124,7 @@ export const openingOffsetForWorldPoint = ({
 }) => {
   const candidate = worldToConstructPlan(point, coordinates);
   const offset = wallOpeningOffsetAtPoint(candidate, wall, openingWidthPlanUnits);
-  return absolute ? round(offset) : round(Math.round(offset / .1) * .1);
+  return absolute ? round(offset) : round(Math.round(offset / 0.1) * 0.1);
 };
 
 export const wallOverlayTransform = (
@@ -141,15 +145,14 @@ export const wallOverlayTransform = (
 export const wallMeasurement = (
   wall: EditorWall,
   coordinates: FloorCoordinates,
-  offsetMeters = .42,
+  offsetMeters = 0.42,
 ) => {
   const dx = wall.to[0] - wall.from[0];
   const dz = wall.to[1] - wall.from[1];
   const planLength = Math.hypot(dx, dz);
   const lengthMeters = planLength * coordinates.metersPerPlanUnit;
-  const directionDegrees = planLength === 0
-    ? 0
-    : (Math.atan2(dz, dx) * 180 / Math.PI + 360) % 360;
+  const directionDegrees =
+    planLength === 0 ? 0 : ((Math.atan2(dz, dx) * 180) / Math.PI + 360) % 360;
   const [fromX, fromZ] = constructPlanToWorld(wall.from, coordinates);
   const [toX, toZ] = constructPlanToWorld(wall.to, coordinates);
   const rightNormalX = planLength === 0 ? 0 : -dz / planLength;
@@ -167,18 +170,15 @@ export const wallMeasurement = (
   };
 };
 
-export const wallOffsetForPlanPoint = (
-  point: PlanPoint,
-  wall: EditorWall,
-) => {
+export const wallOffsetForPlanPoint = (point: PlanPoint, wall: EditorWall) => {
   const dx = wall.to[0] - wall.from[0];
   const dz = wall.to[1] - wall.from[1];
   const length = Math.hypot(dx, dz);
   if (length === 0) return 0;
-  return Math.max(0, Math.min(
-    length,
-    ((point[0] - wall.from[0]) * dx + (point[1] - wall.from[1]) * dz) / length,
-  ));
+  return Math.max(
+    0,
+    Math.min(length, ((point[0] - wall.from[0]) * dx + (point[1] - wall.from[1]) * dz) / length),
+  );
 };
 
 export const openingPlacementForPlanPoint = ({
@@ -186,37 +186,39 @@ export const openingPlacementForPlanPoint = ({
   walls,
   widthPlanUnits,
   metersPerPlanUnit,
-  maxDistanceMeters = .75,
+  maxDistanceMeters = 0.75,
 }: {
   point: PlanPoint;
   walls: readonly EditorWall[];
   widthPlanUnits: number;
   metersPerPlanUnit: number;
   maxDistanceMeters?: number;
-}) => walls
-  .map((wall) => {
-    const wallLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
-    const centerOffset = wallOffsetForPlanPoint(point, wall);
-    const progress = wallLength === 0 ? 0 : centerOffset / wallLength;
-    const projected: PlanPoint = [
-      wall.from[0] + (wall.to[0] - wall.from[0]) * progress,
-      wall.from[1] + (wall.to[1] - wall.from[1]) * progress,
-    ];
-    return {
-      wallId: wall.id,
-      wallLengthPlanUnits: wallLength,
-      offsetPlanUnits: Math.max(0, Math.min(
-        Math.max(0, wallLength - widthPlanUnits),
-        centerOffset - widthPlanUnits / 2,
-      )),
-      distanceMeters: Math.hypot(point[0] - projected[0], point[1] - projected[1])
-        * metersPerPlanUnit,
-    };
-  })
-  .filter(({ distanceMeters, wallLengthPlanUnits }) =>
-    distanceMeters <= maxDistanceMeters && wallLengthPlanUnits >= widthPlanUnits
-  )
-  .sort((left, right) => left.distanceMeters - right.distanceMeters)[0] ?? null;
+}) =>
+  walls
+    .map((wall) => {
+      const wallLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
+      const centerOffset = wallOffsetForPlanPoint(point, wall);
+      const progress = wallLength === 0 ? 0 : centerOffset / wallLength;
+      const projected: PlanPoint = [
+        wall.from[0] + (wall.to[0] - wall.from[0]) * progress,
+        wall.from[1] + (wall.to[1] - wall.from[1]) * progress,
+      ];
+      return {
+        wallId: wall.id,
+        wallLengthPlanUnits: wallLength,
+        offsetPlanUnits: Math.max(
+          0,
+          Math.min(Math.max(0, wallLength - widthPlanUnits), centerOffset - widthPlanUnits / 2),
+        ),
+        distanceMeters:
+          Math.hypot(point[0] - projected[0], point[1] - projected[1]) * metersPerPlanUnit,
+      };
+    })
+    .filter(
+      ({ distanceMeters, wallLengthPlanUnits }) =>
+        distanceMeters <= maxDistanceMeters && wallLengthPlanUnits >= widthPlanUnits,
+    )
+    .sort((left, right) => left.distanceMeters - right.distanceMeters)[0] ?? null;
 
 export const openingPlacementIsValid = ({
   draft,
@@ -232,8 +234,14 @@ export const openingPlacementIsValid = ({
   widthPlanUnits: number;
   sillHeightMeters?: number;
   excludeOpeningId?: string;
-}) => availableOpeningOffsetRanges({ draft, wallId, widthPlanUnits, sillHeightMeters, excludeOpeningId })
-  .some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max);
+}) =>
+  availableOpeningOffsetRanges({
+    draft,
+    wallId,
+    widthPlanUnits,
+    sillHeightMeters,
+    excludeOpeningId,
+  }).some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max);
 
 export const resizeOpeningSpan = ({
   offsetPlanUnits,
@@ -242,7 +250,7 @@ export const resizeOpeningSpan = ({
   cursorOffsetPlanUnits,
   wallLengthPlanUnits,
   anchorOpposite,
-  minimumWidthPlanUnits = .3,
+  minimumWidthPlanUnits = 0.3,
 }: {
   offsetPlanUnits: number;
   widthPlanUnits: number;
@@ -253,21 +261,22 @@ export const resizeOpeningSpan = ({
   minimumWidthPlanUnits?: number;
 }) => {
   if (anchorOpposite) {
-    const fixed = edge === "start"
-      ? offsetPlanUnits + widthPlanUnits
-      : offsetPlanUnits;
-    const moving = edge === "start"
-      ? Math.min(fixed - minimumWidthPlanUnits, Math.max(0, cursorOffsetPlanUnits))
-      : Math.max(fixed + minimumWidthPlanUnits, Math.min(wallLengthPlanUnits, cursorOffsetPlanUnits));
+    const fixed = edge === "start" ? offsetPlanUnits + widthPlanUnits : offsetPlanUnits;
+    const moving =
+      edge === "start"
+        ? Math.min(fixed - minimumWidthPlanUnits, Math.max(0, cursorOffsetPlanUnits))
+        : Math.max(
+            fixed + minimumWidthPlanUnits,
+            Math.min(wallLengthPlanUnits, cursorOffsetPlanUnits),
+          );
     return edge === "start"
       ? { offsetPlanUnits: round(moving), widthPlanUnits: round(fixed - moving) }
       : { offsetPlanUnits: round(fixed), widthPlanUnits: round(moving - fixed) };
   }
 
   const center = offsetPlanUnits + widthPlanUnits / 2;
-  const directedDistance = edge === "start"
-    ? center - cursorOffsetPlanUnits
-    : cursorOffsetPlanUnits - center;
+  const directedDistance =
+    edge === "start" ? center - cursorOffsetPlanUnits : cursorOffsetPlanUnits - center;
   const maximumHalfWidth = Math.min(center, wallLengthPlanUnits - center);
   const halfWidth = Math.max(
     minimumWidthPlanUnits / 2,

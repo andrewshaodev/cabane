@@ -11,11 +11,7 @@ export function PanelDoorHandles({
   return (
     <group
       name="opening-door-handles"
-      position={[
-        handleSide * (width / 2 - Math.min(0.13, width * 0.24)),
-        -0.01,
-        0,
-      ]}
+      position={[handleSide * (width / 2 - Math.min(0.13, width * 0.24)), -0.01, 0]}
     >
       {([-1, 1] as const).map((face) => (
         <group key={face}>
@@ -29,11 +25,7 @@ export function PanelDoorHandles({
             <ToonMaterial color="#aeb4b2" />
             <Outlines thickness={0.004} color="#555b59" screenspace={false} />
           </mesh>
-          <mesh
-            castShadow
-            position={[0, 0, face * 0.052]}
-            rotation={[Math.PI / 2, 0, 0]}
-          >
+          <mesh castShadow position={[0, 0, face * 0.052]} rotation={[Math.PI / 2, 0, 0]}>
             <cylinderGeometry args={[0.014, 0.014, 0.04, 14]} />
             <ToonMaterial color="#c3c7c5" />
           </mesh>

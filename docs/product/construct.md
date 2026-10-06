@@ -134,7 +134,6 @@ basement below. Removal includes connecting stairs, items, and private draft map
 
 Separator walls may end freely, inside or outside a room, without a closure error or blocking Apply. A floor still needs at least one closed room; individual walls do not. Separator walls retain their geometry, openings, and collision behavior across save and reload.
 
-
 Straight stairs share Construct’s initial-click anchor, drag threshold, and subsequent-click
 segment completion with walls and hedges. Drawing and endpoint editing use grid,
 wall, angle, and alignment snapping from both connected floors; Alt bypasses snapping.

@@ -23,7 +23,7 @@ export const wallFrame = (wall: WallSpec, floor: WallPlanFloor) => {
 
 export const pointInsideFloorFootprint = (candidate: PlanPoint, floor: WallPlanFloor) =>
   (floor.footprintRegions ?? [floor.footprint]).some((region) =>
-    pointInsidePolygon(candidate, region)
+    pointInsidePolygon(candidate, region),
   );
 
 export const wallExteriorNormal = (wall: WallSpec, floor: WallPlanFloor): Horizontal | null => {
@@ -31,8 +31,14 @@ export const wallExteriorNormal = (wall: WallSpec, floor: WallPlanFloor): Horizo
   const frame = wallFrame(wall, floor);
   const center: Horizontal = [(frame.from[0] + frame.to[0]) / 2, (frame.from[1] + frame.to[1]) / 2];
   const offset = Math.max(wall.thicknessMeters, 0.08) * 0.75;
-  const plus = worldPointToPlan({ x: center[0] + frame.normal[0] * offset, z: center[1] + frame.normal[1] * offset }, floor.coordinates);
-  const minus = worldPointToPlan({ x: center[0] - frame.normal[0] * offset, z: center[1] - frame.normal[1] * offset }, floor.coordinates);
+  const plus = worldPointToPlan(
+    { x: center[0] + frame.normal[0] * offset, z: center[1] + frame.normal[1] * offset },
+    floor.coordinates,
+  );
+  const minus = worldPointToPlan(
+    { x: center[0] - frame.normal[0] * offset, z: center[1] - frame.normal[1] * offset },
+    floor.coordinates,
+  );
   const plusInside = pointInsideFloorFootprint(plus, floor);
   const minusInside = pointInsideFloorFootprint(minus, floor);
   if (plusInside === minusInside) return null;

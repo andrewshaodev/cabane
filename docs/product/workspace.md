@@ -131,7 +131,6 @@ blobs. Duplicated and imported homes begin without references. Failed local writ
 retain in-memory changes and allow Retry; a rejected image replacement leaves the
 previous reference intact.
 
-
 Availability is independent of device connection. Cards use cached storage state
 and label enabled sync without claiming remote freshness. The open workspace
 reports verified Synced with HA, Changes pending, Sync interrupted, or Sync needs

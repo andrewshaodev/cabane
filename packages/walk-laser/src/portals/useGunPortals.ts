@@ -3,7 +3,12 @@ import { raycastWalkScene, type WalkToolNavigation } from "@cabane/engine";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Raycaster, Vector2, type Ray } from "three";
-import { PORTAL_COLORS, type PortalPair, type PortalPlaced, type PortalColor } from "./portal-contract";
+import {
+  PORTAL_COLORS,
+  type PortalPair,
+  type PortalPlaced,
+  type PortalColor,
+} from "./portal-contract";
 import { placePortal } from "./portal-placement";
 import { createPortalPair } from "./portal-pair";
 import { createPortalTraversal } from "./portal-traversal";
@@ -13,7 +18,12 @@ import { usePortalState } from "./usePortalState";
 import { targetPortal } from "./portal-target";
 
 /** The package owns persisted anchors, hit semantics and the transient closing visual. */
-export function useGunPortals(active: boolean, navigation: WalkToolNavigation, onPlaced: PortalPlaced, reducedMotion: boolean) {
+export function useGunPortals(
+  active: boolean,
+  navigation: WalkToolNavigation,
+  onPlaced: PortalPlaced,
+  reducedMotion: boolean,
+) {
   const { camera, scene } = useThree();
   const { state, current, pending, commit } = usePortalState();
   const [closing, setClosing] = useState<PortalPair>({});
@@ -21,22 +31,34 @@ export function useGunPortals(active: boolean, navigation: WalkToolNavigation, o
   const ray = useMemo(() => new Raycaster(), []);
   const traversal = useMemo(createPortalTraversal, []);
   const transit = usePortalTransition(active, reducedMotion, navigation, traversal.reset);
-  const remove = useCallback((aim: Ray, obstructionDistance: number) => {
-    const hit = targetPortal(aim, { ...closing, ...current.current.pair }, obstructionDistance);
-    if (!hit) return null;
-    if (!active || closing[hit.color] || pending.current || transit.transition.busy) return hit;
-    const { pair, next } = current.current;
-    const updated = { ...pair };
-    delete updated[hit.color];
-    traversal.reset();
-    setClosing(previous => ({ ...previous, [hit.color]: pair[hit.color] }));
-    void commit({ pair: updated, next }).then(saved => {
-      if (!saved) setClosing(previous => { const remaining = { ...previous }; delete remaining[hit.color]; return remaining; });
-    });
-    return hit;
-  }, [active, current, pending, commit, traversal, transit.transition, closing]);
+  const remove = useCallback(
+    (aim: Ray, obstructionDistance: number) => {
+      const hit = targetPortal(aim, { ...closing, ...current.current.pair }, obstructionDistance);
+      if (!hit) return null;
+      if (!active || closing[hit.color] || pending.current || transit.transition.busy) return hit;
+      const { pair, next } = current.current;
+      const updated = { ...pair };
+      delete updated[hit.color];
+      traversal.reset();
+      setClosing((previous) => ({ ...previous, [hit.color]: pair[hit.color] }));
+      void commit({ pair: updated, next }).then((saved) => {
+        if (!saved)
+          setClosing((previous) => {
+            const remaining = { ...previous };
+            delete remaining[hit.color];
+            return remaining;
+          });
+      });
+      return hit;
+    },
+    [active, current, pending, commit, traversal, transit.transition, closing],
+  );
   const closed = useCallback((color: PortalColor) => {
-    setClosing(previous => { const remaining = { ...previous }; delete remaining[color]; return remaining; });
+    setClosing((previous) => {
+      const remaining = { ...previous };
+      delete remaining[color];
+      return remaining;
+    });
   }, []);
   const place = useCallback(() => {
     if (!active || pending.current || transit.transition.busy) return;
@@ -59,10 +81,27 @@ export function useGunPortals(active: boolean, navigation: WalkToolNavigation, o
     traversal.reset();
     void commit({ pair: updated, next: portals.nextColor });
     onPlaced(anchor.center, anchor.normal, PORTAL_COLORS[color], portals.nextColor);
-  }, [active, camera, scene, ray, navigation, traversal, onPlaced, transit.transition, current, pending, commit, remove, closing]);
+  }, [
+    active,
+    camera,
+    scene,
+    ray,
+    navigation,
+    traversal,
+    onPlaced,
+    transit.transition,
+    current,
+    pending,
+    commit,
+    remove,
+    closing,
+  ]);
   usePortalInput(active, place);
   useFrame(() => {
-    if (!active) { traversal.reset(); return; }
+    if (!active) {
+      traversal.reset();
+      return;
+    }
     if (!restored.current) {
       restored.current = true;
       const pair = validateRestoredPortals(current.current.pair, scene, navigation);
@@ -72,7 +111,21 @@ export function useGunPortals(active: boolean, navigation: WalkToolNavigation, o
       }
     }
     if (transit.transition.busy || pending.current) return;
-    traversal.step(current.current.pair, camera.position, { yaw: camera.rotation.y, pitch: camera.rotation.x }, transit.travel);
+    traversal.step(
+      current.current.pair,
+      camera.position,
+      { yaw: camera.rotation.y, pitch: camera.rotation.x },
+      transit.travel,
+    );
   });
-  return { pair: state.pair, next: state.next, closing, closed, remove, place, veil: transit.veil, iris: transit.iris };
+  return {
+    pair: state.pair,
+    next: state.next,
+    closing,
+    closed,
+    remove,
+    place,
+    veil: transit.veil,
+    iris: transit.iris,
+  };
 }

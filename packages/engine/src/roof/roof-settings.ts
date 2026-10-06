@@ -14,4 +14,4 @@ export const DEFAULT_ROOF_SETTINGS: Readonly<RoofSettings> = Object.freeze({
 
 export const ROOF_THICKNESS_METERS = 0.08;
 export const ROOF_MAX_RISE_METERS = 2;
-export const ROOF_PITCH_RADIANS = 25 * Math.PI / 180;
+export const ROOF_PITCH_RADIANS = (25 * Math.PI) / 180;

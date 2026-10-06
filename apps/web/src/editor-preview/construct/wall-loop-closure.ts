@@ -1,13 +1,9 @@
-import {
-  type EditorWall,
-  type PlanPoint
-} from "@cabane/engine";
+import { type EditorWall, type PlanPoint } from "@cabane/engine";
 
 const samePlanPoint = (left: PlanPoint, right: PlanPoint) =>
   Math.hypot(left[0] - right[0], left[1] - right[1]) <= 1e-7;
 
-const cross = (left: PlanPoint, right: PlanPoint) =>
-  left[0] * right[1] - left[1] * right[0];
+const cross = (left: PlanPoint, right: PlanPoint) => left[0] * right[1] - left[1] * right[0];
 
 const pointOnWall = (point: PlanPoint, wall: Pick<EditorWall, "from" | "to">) => {
   const direction: PlanPoint = [wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]];
@@ -21,29 +17,26 @@ const pointOnWall = (point: PlanPoint, wall: Pick<EditorWall, "from" | "to">) =>
 };
 
 const wallsIntersect = (left: EditorWall, right: EditorWall) => {
-  const leftDirection: PlanPoint = [
-    left.to[0] - left.from[0],
-    left.to[1] - left.from[1],
-  ];
-  const rightDirection: PlanPoint = [
-    right.to[0] - right.from[0],
-    right.to[1] - right.from[1],
-  ];
-  const betweenStarts: PlanPoint = [
-    right.from[0] - left.from[0],
-    right.from[1] - left.from[1],
-  ];
+  const leftDirection: PlanPoint = [left.to[0] - left.from[0], left.to[1] - left.from[1]];
+  const rightDirection: PlanPoint = [right.to[0] - right.from[0], right.to[1] - right.from[1]];
+  const betweenStarts: PlanPoint = [right.from[0] - left.from[0], right.from[1] - left.from[1]];
   const denominator = cross(leftDirection, rightDirection);
   if (Math.abs(denominator) <= 1e-10) {
-    return pointOnWall(left.from, right)
-      || pointOnWall(left.to, right)
-      || pointOnWall(right.from, left)
-      || pointOnWall(right.to, left);
+    return (
+      pointOnWall(left.from, right) ||
+      pointOnWall(left.to, right) ||
+      pointOnWall(right.from, left) ||
+      pointOnWall(right.to, left)
+    );
   }
   const leftProgress = cross(betweenStarts, rightDirection) / denominator;
   const rightProgress = cross(betweenStarts, leftDirection) / denominator;
-  return leftProgress >= -1e-7 && leftProgress <= 1 + 1e-7
-    && rightProgress >= -1e-7 && rightProgress <= 1 + 1e-7;
+  return (
+    leftProgress >= -1e-7 &&
+    leftProgress <= 1 + 1e-7 &&
+    rightProgress >= -1e-7 &&
+    rightProgress <= 1 + 1e-7
+  );
 };
 
 /**
@@ -53,18 +46,14 @@ const wallsIntersect = (left: EditorWall, right: EditorWall) => {
  * already split every segment. Reaching an unrelated component keeps the wall
  * chain active.
  */
-export const closesWallLoop = (
-  walls: readonly EditorWall[],
-  from: PlanPoint,
-  to: PlanPoint,
-) => {
+export const closesWallLoop = (walls: readonly EditorWall[], from: PlanPoint, to: PlanPoint) => {
   if (samePlanPoint(from, to)) return false;
-  const targetWalls = new Set(walls
-    .map((wall, index) => pointOnWall(to, wall) ? index : -1)
-    .filter((index) => index >= 0));
+  const targetWalls = new Set(
+    walls.map((wall, index) => (pointOnWall(to, wall) ? index : -1)).filter((index) => index >= 0),
+  );
   if (targetWalls.size === 0) return false;
   const pending = walls
-    .map((wall, index) => pointOnWall(from, wall) ? index : -1)
+    .map((wall, index) => (pointOnWall(from, wall) ? index : -1))
     .filter((index) => index >= 0);
   const visited = new Set<number>();
 

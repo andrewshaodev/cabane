@@ -1,7 +1,4 @@
-import type {
-  EntityId,
-  RuntimeBindingProfile
-} from "./types";
+import type { EntityId, RuntimeBindingProfile } from "./types";
 
 export const RUNTIME_BINDING_PROFILE_SCHEMA_VERSION = 1 as const;
 

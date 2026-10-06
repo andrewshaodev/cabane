@@ -1,16 +1,19 @@
-import { useLayoutEffect, useRef, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 
 import {
   lightBrightnessCall,
   supportsLightBrightness,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { ResolvedEntityBinding } from "../types";
 
-import {
-  useOptimisticCommand
-} from "./control-primitives";
+import { useOptimisticCommand } from "./control-primitives";
 
 import { confirmationKey, numberAttribute, toggleCallForPressed } from "./entity-field-contract";
 
@@ -56,7 +59,11 @@ export function PhysicalToggle({
         </span>
         <span className="visually-hidden">Turn {action}</span>
       </button>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -72,7 +79,10 @@ function LightDimmer({
 }) {
   const entity = binding.state;
   if (!entity) return null;
-  const brightness = Math.min(100, Math.max(1, Math.round(numberAttribute(entity.attributes.brightness, 255) / 2.55)));
+  const brightness = Math.min(
+    100,
+    Math.max(1, Math.round(numberAttribute(entity.attributes.brightness, 255) / 2.55)),
+  );
   const brightnessConfirmationKey = confirmationKey(entity, brightness);
   const requestedLevel = useRef({ confirmed: brightness, requested: brightness });
   useLayoutEffect(() => {
@@ -154,14 +164,21 @@ function LightDimmer({
             const requestedValue = (() => {
               switch (event.key) {
                 case "ArrowUp":
-                case "ArrowRight": return level.value + 1;
+                case "ArrowRight":
+                  return level.value + 1;
                 case "ArrowDown":
-                case "ArrowLeft": return level.value - 1;
-                case "PageUp": return level.value + 10;
-                case "PageDown": return level.value - 10;
-                case "Home": return 1;
-                case "End": return 100;
-                default: return null;
+                case "ArrowLeft":
+                  return level.value - 1;
+                case "PageUp":
+                  return level.value + 10;
+                case "PageDown":
+                  return level.value - 10;
+                case "Home":
+                  return 1;
+                case "End":
+                  return 100;
+                default:
+                  return null;
               }
             })();
             if (requestedValue !== null) {
@@ -186,7 +203,9 @@ function LightDimmer({
         <span className="visually-hidden">Turn {action}</span>
       </button>
       {(level.error || power.error) && (
-        <p role="alert" aria-live="assertive">{level.error ?? power.error}</p>
+        <p role="alert" aria-live="assertive">
+          {level.error ?? power.error}
+        </p>
       )}
     </div>
   );
@@ -206,6 +225,11 @@ export function LightFields({
   return supportsLightBrightness(entity) ? (
     <LightDimmer binding={binding} enabled={enabled} onCallService={onCallService} />
   ) : (
-    <PhysicalToggle binding={binding} enabled={enabled} tone="light" onCallService={onCallService} />
+    <PhysicalToggle
+      binding={binding}
+      enabled={enabled}
+      tone="light"
+      onCallService={onCallService}
+    />
   );
 }

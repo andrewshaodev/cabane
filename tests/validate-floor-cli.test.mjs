@@ -7,10 +7,11 @@ import test from "node:test";
 
 const repositoryRoot = process.cwd();
 const cliPath = resolve(repositoryRoot, "scripts/validate-floor.mjs");
-const runCli = (...arguments_) => spawnSync(process.execPath, [cliPath, ...arguments_], {
-  cwd: repositoryRoot,
-  encoding: "utf8",
-});
+const runCli = (...arguments_) =>
+  spawnSync(process.execPath, [cliPath, ...arguments_], {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+  });
 
 test("validates one pure FloorSpec JSON file with machine-readable counts", () => {
   const floorPath = resolve(repositoryRoot, "tests/fixtures/cabane-floor.json");
@@ -31,7 +32,7 @@ test("reports malformed JSON without starting layout validation", () => {
   const directory = mkdtempSync(resolve(tmpdir(), "cabane-floor-validation-"));
   try {
     const floorPath = resolve(directory, "malformed-floor.json");
-    writeFileSync(floorPath, "{\"id\":", "utf8");
+    writeFileSync(floorPath, '{"id":', "utf8");
 
     const result = runCli(floorPath, "--json");
     const payload = JSON.parse(result.stdout);
@@ -58,12 +59,14 @@ test("distinguishes file read failures and rejects ambiguous arguments", () => {
 
   const ambiguous = runCli("first.json", "second.json", "--json");
   assert.equal(ambiguous.status, 1);
-  assert.deepEqual(JSON.parse(ambiguous.stdout).issues, [{
-    code: "floor.arguments",
-    path: "$",
-    message: "Provide exactly one FloorSpec JSON path.",
-    severity: "fatal",
-  }]);
+  assert.deepEqual(JSON.parse(ambiguous.stdout).issues, [
+    {
+      code: "floor.arguments",
+      path: "$",
+      message: "Provide exactly one FloorSpec JSON path.",
+      severity: "fatal",
+    },
+  ]);
 
   const unsupported = runCli("floor.json", "--bogus", "--json");
   assert.equal(unsupported.status, 1);

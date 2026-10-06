@@ -1,8 +1,4 @@
-import type {
-  FloorSpec,
-  HomeAssistantAreaRegistryEntry,
-  RuntimeBindingProfile,
-} from "../types";
+import type { FloorSpec, HomeAssistantAreaRegistryEntry, RuntimeBindingProfile } from "../types";
 
 export const runtimeRoomDisplayName = ({
   floor,

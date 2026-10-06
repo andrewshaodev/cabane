@@ -43,13 +43,8 @@ export const createConstructMeasureState = (): ConstructMeasureState => ({
 
 const copyPlanPoint = (point: PlanPoint): PlanPoint => [point[0], point[1]];
 
-export const constructMeasurePhase = (
-  state: ConstructMeasureState,
-): ConstructMeasurePhase => state.end
-  ? "complete"
-  : state.start
-    ? "drawing"
-    : "idle";
+export const constructMeasurePhase = (state: ConstructMeasureState): ConstructMeasurePhase =>
+  state.end ? "complete" : state.start ? "drawing" : "idle";
 
 export const constructMeasureReducer = (
   state: ConstructMeasureState,
@@ -119,14 +114,12 @@ export const measureConstructPoints = (
     world: {
       from: worldFrom,
       to: worldTo,
-      center: [
-        (worldFrom[0] + worldTo[0]) / 2,
-        (worldFrom[1] + worldTo[1]) / 2,
-      ],
+      center: [(worldFrom[0] + worldTo[0]) / 2, (worldFrom[1] + worldTo[1]) / 2],
       lengthMeters: distanceMeters,
-      rotationYRadians: distanceMeters <= MIN_VISIBLE_MEASUREMENT_METERS
-        ? 0
-        : -Math.atan2(worldTo[1] - worldFrom[1], worldTo[0] - worldFrom[0]),
+      rotationYRadians:
+        distanceMeters <= MIN_VISIBLE_MEASUREMENT_METERS
+          ? 0
+          : -Math.atan2(worldTo[1] - worldFrom[1], worldTo[0] - worldFrom[0]),
     },
   };
 };
@@ -139,8 +132,5 @@ export const constructMeasurementForState = (
   return points ? measureConstructPoints(points[0], points[1], coordinates) : null;
 };
 
-export const constructMeasurementIsVisible = (
-  measurement: ConstructMeasurement | null,
-) => Boolean(
-  measurement && measurement.world.lengthMeters > MIN_VISIBLE_MEASUREMENT_METERS,
-);
+export const constructMeasurementIsVisible = (measurement: ConstructMeasurement | null) =>
+  Boolean(measurement && measurement.world.lengthMeters > MIN_VISIBLE_MEASUREMENT_METERS);

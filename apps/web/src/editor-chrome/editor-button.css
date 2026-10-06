@@ -1,14 +1,51 @@
 .direction-preview button.editor-button {
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  min-height: 37px; padding: 7px 12px; border: 1px solid var(--editor-line);
-  border-radius: 7px; color: var(--preview-ink); background: #faf6ef;
-  font: 500 var(--editor-text-control, .875rem)/1.4 "Roboto", sans-serif; cursor: pointer; text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 37px;
+  padding: 7px 12px;
+  border: 1px solid var(--editor-line);
+  border-radius: 7px;
+  color: var(--preview-ink);
+  background: #faf6ef;
+  font:
+    500 var(--editor-text-control, 0.875rem)/1.4 "Roboto",
+    sans-serif;
+  cursor: pointer;
+  text-decoration: none;
 }
-.direction-preview button.editor-button:hover:not(:disabled) { background: #eae5d9; color: var(--preview-ink); }
-.direction-preview button.editor-button[data-variant="primary"] { color: #fff9ef; background: var(--preview-accent); border-color: transparent; font-weight: 600; }
-.direction-preview button.editor-button[data-variant="primary"]:hover:not(:disabled) { color: #fff9ef; background: #a7603d; }
-.direction-preview button.editor-button[data-variant="primary"]:active:not(:disabled) { background: #925235; }
-.direction-preview button.editor-button[data-variant="text"] { border-color: transparent; background: transparent; color: #85492f; }
-.direction-preview button.editor-button[data-variant="text"]:hover:not(:disabled) { background: #eae5d9; }
-.direction-preview button.editor-button:disabled { opacity: .45; cursor: not-allowed; }
-@media (pointer: coarse) { .direction-preview button.editor-button { min-height: 44px; } }
+.direction-preview button.editor-button:hover:not(:disabled) {
+  background: #eae5d9;
+  color: var(--preview-ink);
+}
+.direction-preview button.editor-button[data-variant="primary"] {
+  color: #fff9ef;
+  background: var(--preview-accent);
+  border-color: transparent;
+  font-weight: 600;
+}
+.direction-preview button.editor-button[data-variant="primary"]:hover:not(:disabled) {
+  color: #fff9ef;
+  background: #a7603d;
+}
+.direction-preview button.editor-button[data-variant="primary"]:active:not(:disabled) {
+  background: #925235;
+}
+.direction-preview button.editor-button[data-variant="text"] {
+  border-color: transparent;
+  background: transparent;
+  color: #85492f;
+}
+.direction-preview button.editor-button[data-variant="text"]:hover:not(:disabled) {
+  background: #eae5d9;
+}
+.direction-preview button.editor-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+@media (pointer: coarse) {
+  .direction-preview button.editor-button {
+    min-height: 44px;
+  }
+}

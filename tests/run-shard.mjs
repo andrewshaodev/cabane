@@ -16,12 +16,20 @@ export async function runShard(shardIndex, shardCount) {
     .filter((name) => name.endsWith(".test.mjs"))
     .sort();
   const suite = process.env.CABANE_TEST_SUITE;
-  if (suite && suite !== "unit" && suite !== "browser") throw new Error(`Unknown test suite: ${suite}`);
+  if (suite && suite !== "unit" && suite !== "browser")
+    throw new Error(`Unknown test suite: ${suite}`);
   if (suite) {
-    const classified = await Promise.all(testFiles.map(async name => ({ name,
-      browser: /from ["'](?:playwright-core|\.\/browser-test-environment\.mjs)["']/.test(await readFile(new URL(name, testsDirectory), "utf8")),
-    })));
-    testFiles = classified.filter(file => file.browser === (suite === "browser")).map(file => file.name);
+    const classified = await Promise.all(
+      testFiles.map(async (name) => ({
+        name,
+        browser: /from ["'](?:playwright-core|\.\/browser-test-environment\.mjs)["']/.test(
+          await readFile(new URL(name, testsDirectory), "utf8"),
+        ),
+      })),
+    );
+    testFiles = classified
+      .filter((file) => file.browser === (suite === "browser"))
+      .map((file) => file.name);
   }
   // Browser setup and UI work dwarf source parsing; byte-only balancing used to
   // put most browser work on one worker. Approximate milliseconds from profiling
@@ -35,15 +43,17 @@ export async function runShard(shardIndex, shardCount) {
     "workspace-open-ui.test.mjs": 4500,
     "workspace-backup-browser.test.mjs": 3000,
   };
-  const weightedFiles = await Promise.all(testFiles.map(async (name) => ({
-    name,
-    cost: browserCosts[name] ?? (await stat(new URL(name, testsDirectory))).size / 50,
-  })));
+  const weightedFiles = await Promise.all(
+    testFiles.map(async (name) => ({
+      name,
+      cost: browserCosts[name] ?? (await stat(new URL(name, testsDirectory))).size / 50,
+    })),
+  );
   const shards = Array.from({ length: shardCount }, () => ({ cost: 0, files: [] }));
 
   for (const file of weightedFiles.sort((left, right) => right.cost - left.cost)) {
     const shard = shards.reduce((lightest, candidate) =>
-      candidate.cost < lightest.cost ? candidate : lightest
+      candidate.cost < lightest.cost ? candidate : lightest,
     );
     shard.files.push(file.name);
     shard.cost += file.cost;

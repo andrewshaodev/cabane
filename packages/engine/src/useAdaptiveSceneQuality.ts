@@ -10,10 +10,7 @@ export function useAdaptiveSceneQuality(coarsePointer: boolean, walkMode: boolea
   const canvasDpr = walkMode ? quality.dpr : foregroundRenderingDpr(quality);
   const adjustQuality = (direction: "up" | "down") => {
     if (qualityPinned.current) return;
-    if (
-      lastQualityDirection.current !== null
-      && lastQualityDirection.current !== direction
-    ) {
+    if (lastQualityDirection.current !== null && lastQualityDirection.current !== direction) {
       qualityDirectionChanges.current += 1;
     }
     lastQualityDirection.current = direction;
@@ -22,9 +19,10 @@ export function useAdaptiveSceneQuality(coarsePointer: boolean, walkMode: boolea
       setQualityTier(0);
       return;
     }
-    setQualityTier((current) => direction === "up"
-      ? Math.min(2, current + 1) as 0 | 1 | 2
-      : Math.max(0, current - 1) as 0 | 1 | 2
+    setQualityTier((current) =>
+      direction === "up"
+        ? (Math.min(2, current + 1) as 0 | 1 | 2)
+        : (Math.max(0, current - 1) as 0 | 1 | 2),
     );
   };
   return { quality, canvasDpr, adjustQuality };

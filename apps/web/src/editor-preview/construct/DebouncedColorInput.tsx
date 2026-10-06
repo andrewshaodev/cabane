@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useState
-} from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function DebouncedColorInput({
   label,
@@ -27,9 +23,12 @@ export function DebouncedColorInput({
   useEffect(() => {
     commit.current = onCommit;
   }, [onCommit]);
-  useEffect(() => () => {
-    if (pending.current) clearTimeout(pending.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (pending.current) clearTimeout(pending.current);
+    },
+    [],
+  );
 
   const flush = () => {
     if (pending.current) clearTimeout(pending.current);

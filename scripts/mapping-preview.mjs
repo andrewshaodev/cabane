@@ -13,6 +13,10 @@ const stop = async () => {
   process.exit(0);
 };
 
-process.once("SIGINT", () => { void stop(); });
-process.once("SIGTERM", () => { void stop(); });
+process.once("SIGINT", () => {
+  void stop();
+});
+process.once("SIGTERM", () => {
+  void stop();
+});
 await new Promise(() => undefined);

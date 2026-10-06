@@ -11,17 +11,17 @@ const accessibleLabel = (summary: HomePresenceSummary) => {
 export function HomePresenceStatus({ summary }: { summary: HomePresenceSummary }) {
   const label = accessibleLabel(summary);
   return (
-    <div
-      className="home-presence-status"
-      data-presence-state={summary.state}
-      aria-label={label}
-    >
+    <div className="home-presence-status" data-presence-state={summary.state} aria-label={label}>
       <span className="home-presence-status__icon">
-        <PresenceStatusIcon state={
-          summary.state === "present"
-            ? "present"
-            : summary.state === "empty" ? "absent" : "unavailable"
-        } />
+        <PresenceStatusIcon
+          state={
+            summary.state === "present"
+              ? "present"
+              : summary.state === "empty"
+                ? "absent"
+                : "unavailable"
+          }
+        />
       </span>
       {summary.state === "present" ? (
         <span className="home-presence-status__copy">
@@ -29,7 +29,9 @@ export function HomePresenceStatus({ summary }: { summary: HomePresenceSummary }
           <span aria-hidden="true"> · </span>
           <span>{summary.people.map(({ name }) => name).join(", ")}</span>
         </span>
-      ) : <span className="home-presence-status__copy">{label}</span>}
+      ) : (
+        <span className="home-presence-status__copy">{label}</span>
+      )}
     </div>
   );
 }

@@ -4,7 +4,10 @@ import type { FloorSpec } from "../types";
 
 export type Horizontal = readonly [number, number];
 
-export type WallPlanFloor = Pick<FloorSpec, "walls" | "wallJunctions" | "coordinates" | "footprint" | "footprintRegions">;
+export type WallPlanFloor = Pick<
+  FloorSpec,
+  "walls" | "wallJunctions" | "coordinates" | "footprint" | "footprintRegions"
+>;
 
 export type MaterialBucket = 0 | 1;
 

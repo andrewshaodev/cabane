@@ -4,12 +4,19 @@ import type { HomeDeviceModelProps } from "@cabane/engine";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 
 export function SmartThermostatModel({ state, visualState }: HomeDeviceModelProps) {
-  const temperature = typeof state?.attributes.current_temperature === "number"
-    ? Math.round(state.attributes.current_temperature)
-    : 21;
+  const temperature =
+    typeof state?.attributes.current_temperature === "number"
+      ? Math.round(state.attributes.current_temperature)
+      : 21;
   return (
     <group name="catalog-smart-thermostat">
-      <RoundedBox args={[0.12, 0.12, 0.025]} radius={0.018} smoothness={2} position={[0, 0.06, 0.0125]} castShadow>
+      <RoundedBox
+        args={[0.12, 0.12, 0.025]}
+        radius={0.018}
+        smoothness={2}
+        position={[0, 0.06, 0.0125]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.003} />
       </RoundedBox>

@@ -6,16 +6,25 @@ import { ToonMaterial } from "../rendering";
 /** Small analytic ripples: no textures, extra geometry, or reflection passes. */
 export function PoolWaterMaterial({ reducedMotion = false }: { reducedMotion?: boolean }) {
   const time = useMemo(() => ({ value: 0 }), []);
-  const compile = useMemo<MeshToonMaterial["onBeforeCompile"]>(() => (shader) => {
-    shader.uniforms.poolTime = time;
-    shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", "#include <common>\nvarying vec2 vPoolPosition;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvPoolPosition = position.xy;");
-    shader.fragmentShader = shader.fragmentShader
-      .replace("#include <common>", `#include <common>
+  const compile = useMemo<MeshToonMaterial["onBeforeCompile"]>(
+    () => (shader) => {
+      shader.uniforms.poolTime = time;
+      shader.vertexShader = shader.vertexShader
+        .replace("#include <common>", "#include <common>\nvarying vec2 vPoolPosition;")
+        .replace(
+          "#include <begin_vertex>",
+          "#include <begin_vertex>\nvPoolPosition = position.xy;",
+        );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          "#include <common>",
+          `#include <common>
         uniform float poolTime;
-        varying vec2 vPoolPosition;`)
-      .replace("#include <normal_fragment_maps>", `#include <normal_fragment_maps>
+        varying vec2 vPoolPosition;`,
+        )
+        .replace(
+          "#include <normal_fragment_maps>",
+          `#include <normal_fragment_maps>
         // Coordinates are in meters, so large and small pools share a ripple scale.
         vec2 p = vPoolPosition;
         float a = dot(p, vec2(3.1, 1.7)) + poolTime * 0.65;
@@ -34,12 +43,24 @@ export function PoolWaterMaterial({ reducedMotion = false }: { reducedMotion?: b
         diffuseColor.rgb *= 0.94 + 0.07 * crest;
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.63, 0.86, 0.89),
           0.24 * fresnel + 0.10 * glint);
-        diffuseColor.a = mix(opacity, 0.93, fresnel);`);
-  }, [time]);
+        diffuseColor.a = mix(opacity, 0.93, fresnel);`,
+        );
+    },
+    [time],
+  );
   useFrame((_, delta) => {
     // Only advance on frames the scene already needs. Never wake an idle canvas.
     if (!reducedMotion) time.value += Math.min(delta, 0.05);
   });
-  return <ToonMaterial color="#62b8c7" transparent opacity={0.78} side={DoubleSide}
-    depthWrite={false} onBeforeCompile={compile} customProgramCacheKey={() => "pool-water-v1"} />;
+  return (
+    <ToonMaterial
+      color="#62b8c7"
+      transparent
+      opacity={0.78}
+      side={DoubleSide}
+      depthWrite={false}
+      onBeforeCompile={compile}
+      customProgramCacheKey={() => "pool-water-v1"}
+    />
+  );
 }

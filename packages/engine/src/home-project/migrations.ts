@@ -8,7 +8,12 @@ export const migrateLegacyProject = (legacy: LegacyHomeProject): HomeProject => 
     ...rest,
     schemaVersion: 2,
     coordinates: { ...floor.coordinates, origin: [...floor.coordinates.origin] },
-    floors: [{ ...floor, floorToFloorHeightMeters: floor.floorToFloorHeightMeters ?? legacyFloorHeight(floor) }],
+    floors: [
+      {
+        ...floor,
+        floorToFloorHeightMeters: floor.floorToFloorHeightMeters ?? legacyFloorHeight(floor),
+      },
+    ],
     stairs: [],
     sceneItems: sceneItems.map((item) => ({ ...item, floorId: floor.id })),
   };

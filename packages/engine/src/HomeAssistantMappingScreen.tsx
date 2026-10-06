@@ -74,10 +74,21 @@ function MappingHeader({
             <path d="M20 6v5h-5M4 18v-5h5M18.2 9A7 7 0 0 0 6.1 6.6L4 9m16 6-2.1 2.4A7 7 0 0 1 5.8 15" />
           </svg>
         </button>
-        {refreshError && <span className="home-mapping__error" role="status">{refreshError}</span>}
+        {refreshError && (
+          <span className="home-mapping__error" role="status">
+            {refreshError}
+          </span>
+        )}
       </div>
       {onClose && (
-        <button type="button" className="home-mapping__close" aria-label="Close Connect your home" onClick={onClose}>×</button>
+        <button
+          type="button"
+          className="home-mapping__close"
+          aria-label="Close Connect your home"
+          onClick={onClose}
+        >
+          ×
+        </button>
       )}
     </header>
   );
@@ -104,36 +115,71 @@ function MappingDialog({
 }) {
   if (dialog === "clear-room-connections") {
     return (
-      <section className="home-mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="room-clear-title">
+      <section
+        className="home-mapping-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="room-clear-title"
+      >
         <h2 id="room-clear-title">Save room changes?</h2>
-        <p>This will clear {clearedConnectionCount} saved {clearedConnectionCount === 1 ? "connection" : "connections"} from reassigned rooms.</p>
+        <p>
+          This will clear {clearedConnectionCount} saved{" "}
+          {clearedConnectionCount === 1 ? "connection" : "connections"} from reassigned rooms.
+        </p>
         <div>
-          <button type="button" onClick={onCancel}>Cancel</button>
-          <button type="button" className="is-primary" onClick={onConfirmRoomSave}>Clear and save rooms</button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" className="is-primary" onClick={onConfirmRoomSave}>
+            Clear and save rooms
+          </button>
         </div>
       </section>
     );
   }
   if (dialog === "import-preview") {
     return (
-      <section className="home-mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="import-preview-title">
+      <section
+        className="home-mapping-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="import-preview-title"
+      >
         <h2 id="import-preview-title">Replace saved connections?</h2>
-        <p>The imported profile contains {Object.keys(importProfile?.roomAreaIds ?? {}).length} rooms and {Object.keys(importProfile?.entityIdsBySlotId ?? {}).length} device connections.</p>
+        <p>
+          The imported profile contains {Object.keys(importProfile?.roomAreaIds ?? {}).length} rooms
+          and {Object.keys(importProfile?.entityIdsBySlotId ?? {}).length} device connections.
+        </p>
         <div>
-          <button type="button" onClick={onCancel}>Cancel</button>
-          <button type="button" className="is-primary" onClick={onConfirmImport}>Replace saved profile</button>
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" className="is-primary" onClick={onConfirmImport}>
+            Replace saved profile
+          </button>
         </div>
       </section>
     );
   }
   return (
-    <section className="home-mapping-dialog" role="dialog" aria-modal="true" aria-labelledby="leave-mapping-title">
+    <section
+      className="home-mapping-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="leave-mapping-title"
+    >
       <h2 id="leave-mapping-title">Leave Connect your home?</h2>
       <p>You have unsaved changes in this view.</p>
       <div>
-        <button type="button" onClick={onCancel}>Stay</button>
-        <button type="button" onClick={onDiscardAndLeave}>Discard changes</button>
-        <button type="button" className="is-primary" onClick={onSaveAndLeave}>Save and continue</button>
+        <button type="button" onClick={onCancel}>
+          Stay
+        </button>
+        <button type="button" onClick={onDiscardAndLeave}>
+          Discard changes
+        </button>
+        <button type="button" className="is-primary" onClick={onSaveAndLeave}>
+          Save and continue
+        </button>
       </div>
     </section>
   );
@@ -161,7 +207,9 @@ export function HomeAssistantMappingScreen({
   const [roomAreaIds, setRoomAreaIds] = useState(automaticallyMapped.roomAreaIds);
   const [entityIdsBySlotId, setEntityIdsBySlotId] = useState(automaticallyMapped.entityIdsBySlotId);
   const [dialog, setDialog] = useState<OpenDialog>(null);
-  const [pendingRoomSave, setPendingRoomSave] = useState<ReturnType<typeof saveRoomAreaDraft> | null>(null);
+  const [pendingRoomSave, setPendingRoomSave] = useState<ReturnType<
+    typeof saveRoomAreaDraft
+  > | null>(null);
   const [pendingRoomSaveFromLeave, setPendingRoomSaveFromLeave] = useState(false);
   const [exitTarget, setExitTarget] = useState<"close" | "home" | null>(null);
   const [importProfile, setImportProfile] = useState<RuntimeBindingProfile | null>(null);
@@ -177,8 +225,10 @@ export function HomeAssistantMappingScreen({
   useEffect(() => {
     const current: RuntimeBindingProfile = { ...savedProfile, roomAreaIds, entityIdsBySlotId };
     const next = automaticallyMapRuntimeBindings(manifest, current, runtime).profile;
-    setRoomAreaIds((value) => recordsEqual(value, next.roomAreaIds) ? value : next.roomAreaIds);
-    setEntityIdsBySlotId((value) => recordsEqual(value, next.entityIdsBySlotId) ? value : next.entityIdsBySlotId);
+    setRoomAreaIds((value) => (recordsEqual(value, next.roomAreaIds) ? value : next.roomAreaIds));
+    setEntityIdsBySlotId((value) =>
+      recordsEqual(value, next.entityIdsBySlotId) ? value : next.entityIdsBySlotId,
+    );
   }, [manifest, runtime.areas, runtime.devices, runtime.entityRegistry, runtime.entityStates]);
 
   const commitSavedProfile = (next: RuntimeBindingProfile) => {
@@ -193,7 +243,10 @@ export function HomeAssistantMappingScreen({
     setExitTarget(null);
   };
 
-  const finishRoomSave = (result: ReturnType<typeof saveRoomAreaDraft>, continueLeaving = false) => {
+  const finishRoomSave = (
+    result: ReturnType<typeof saveRoomAreaDraft>,
+    continueLeaving = false,
+  ) => {
     const rebasedEntities = rebaseEntityDraftAfterRoomSave({
       entityIdsBySlotId,
       clearedSlotIds: result.affectedSlotIds,
@@ -264,7 +317,9 @@ export function HomeAssistantMappingScreen({
       const result = importRuntimeBindingProfile(json, manifest, runtime);
       setImportIssues(result.issues);
       if (!result.profile) {
-        setFeedback(`${result.issues.length} import ${result.issues.length === 1 ? "issue" : "issues"}`);
+        setFeedback(
+          `${result.issues.length} import ${result.issues.length === 1 ? "issue" : "issues"}`,
+        );
         return;
       }
       setImportProfile(result.profile);
@@ -273,7 +328,9 @@ export function HomeAssistantMappingScreen({
   };
 
   const exportProfile = () => {
-    const blob = new Blob([exportRuntimeBindingProfile(savedProfile)], { type: "application/json" });
+    const blob = new Blob([exportRuntimeBindingProfile(savedProfile)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -283,7 +340,10 @@ export function HomeAssistantMappingScreen({
   };
 
   return (
-    <section className={`home-mapping ${onboarding ? "home-mapping--onboarding" : ""}`} aria-label="Connect your home">
+    <section
+      className={`home-mapping ${onboarding ? "home-mapping--onboarding" : ""}`}
+      aria-label="Connect your home"
+    >
       <MappingHeader
         refreshing={refreshing}
         refreshError={refreshError}
@@ -292,8 +352,24 @@ export function HomeAssistantMappingScreen({
         onboarding={onboarding}
       />
       <nav className="home-mapping__tabs" role="tablist" aria-label="Connection type">
-        <button type="button" role="tab" aria-selected={activeView === "rooms"} aria-controls="mapping-rooms-panel" onClick={() => setActiveView("rooms")}>Rooms</button>
-        <button type="button" role="tab" aria-selected={activeView === "devices"} aria-controls="mapping-devices-panel" onClick={() => setActiveView("devices")}>Devices</button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === "rooms"}
+          aria-controls="mapping-rooms-panel"
+          onClick={() => setActiveView("rooms")}
+        >
+          Rooms
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeView === "devices"}
+          aria-controls="mapping-devices-panel"
+          onClick={() => setActiveView("devices")}
+        >
+          Devices
+        </button>
       </nav>
       <main className="home-mapping__workspace">
         {activeView === "rooms" ? (
@@ -331,22 +407,36 @@ export function HomeAssistantMappingScreen({
         <details className="home-mapping__more">
           <summary>More</summary>
           <div>
-            <label className="home-mapping__file-action">Import profile<input type="file" accept="application/json,.json" onChange={importFile} /></label>
-            <button type="button" className="home-mapping__file-action" onClick={exportProfile}>Export saved profile</button>
+            <label className="home-mapping__file-action">
+              Import profile
+              <input type="file" accept="application/json,.json" onChange={importFile} />
+            </label>
+            <button type="button" className="home-mapping__file-action" onClick={exportProfile}>
+              Export saved profile
+            </button>
           </div>
         </details>
-        <p className="home-mapping__privacy">Saved only in this browser · no credentials exported</p>
+        <p className="home-mapping__privacy">
+          Saved only in this browser · no credentials exported
+        </p>
         <div className="home-mapping__feedback" aria-live="polite">
-          {importIssues.length > 0 ? `${importIssues.length} import ${importIssues.length === 1 ? "issue" : "issues"}` : feedback}
+          {importIssues.length > 0
+            ? `${importIssues.length} import ${importIssues.length === 1 ? "issue" : "issues"}`
+            : feedback}
         </div>
         {onboarding && (
-          <button type="button" className="home-mapping__enter" onClick={() => requestExit("home")}>Enter home</button>
+          <button type="button" className="home-mapping__enter" onClick={() => requestExit("home")}>
+            Enter home
+          </button>
         )}
         <button
           type="button"
           className="home-mapping__save"
           disabled={activeView === "rooms" ? !roomDirty : !entityDirty}
-          onClick={() => { if (activeView === "rooms") saveRooms(); else saveDevices(); }}
+          onClick={() => {
+            if (activeView === "rooms") saveRooms();
+            else saveDevices();
+          }}
         >
           {activeView === "rooms" ? "Save rooms" : "Save devices"}
         </button>

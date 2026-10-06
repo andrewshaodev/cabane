@@ -1,15 +1,14 @@
 /* Interaction concepts were reviewed against ai_room_planner (MIT); this
  * reducer and metre-first state contract are original to Cabane. */
-import type {
-  FloorCoordinates,
-  PlanPoint
-} from "../../types";
+import type { FloorCoordinates, PlanPoint } from "../../types";
 
-import { FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS, FLOOR_EDITOR_ANGLE_STEP_RADIANS, FLOOR_EDITOR_GRID_METERS } from "./draft-contract";
-import { round, samePoint } from "./draft-reducer";
 import {
-  type EditorWall
-} from "./topology";
+  FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS,
+  FLOOR_EDITOR_ANGLE_STEP_RADIANS,
+  FLOOR_EDITOR_GRID_METERS,
+} from "./draft-contract";
+import { round, samePoint } from "./draft-reducer";
+import { type EditorWall } from "./topology";
 
 import { snapWallAttachment } from "./wall-attachment-snapping";
 import { cornerSnapRays, snapAlignment } from "./snap-alignment";
@@ -25,9 +24,15 @@ const projectToWall = (candidate: PlanPoint, wall: EditorWall): PlanPoint => {
   const dx = wall.to[0] - wall.from[0];
   const dy = wall.to[1] - wall.from[1];
   const squared = dx * dx + dy * dy;
-  const progress = squared ? Math.max(0, Math.min(1,
-    ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared,
-  )) : 0;
+  const progress = squared
+    ? Math.max(
+        0,
+        Math.min(
+          1,
+          ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared,
+        ),
+      )
+    : 0;
   return [wall.from[0] + dx * progress, wall.from[1] + dy * progress];
 };
 
@@ -56,26 +61,32 @@ export const snapPlanPoint = ({
   coordinates?: FloorCoordinates;
 }): SnapTarget => {
   const defaultRadius = pointerType === "touch" ? 28 : pointerType === "pen" ? 22 : 18;
-  const thresholdPixels = snapRadiusPixels !== undefined && Number.isFinite(snapRadiusPixels)
-    && snapRadiusPixels >= 0 ? snapRadiusPixels : defaultRadius;
-  const threshold = thresholdPixels /
-    Math.max(1, pixelsPerMeter) /
-    coordinates.metersPerPlanUnit;
+  const thresholdPixels =
+    snapRadiusPixels !== undefined && Number.isFinite(snapRadiusPixels) && snapRadiusPixels >= 0
+      ? snapRadiusPixels
+      : defaultRadius;
+  const threshold = thresholdPixels / Math.max(1, pixelsPerMeter) / coordinates.metersPerPlanUnit;
   const gridStepPlanUnits = FLOOR_EDITOR_GRID_METERS / coordinates.metersPerPlanUnit;
   const snapToGrid = (value: PlanPoint): PlanPoint => [
-    round(coordinates.origin[0] + Math.round(
-      (value[0] - coordinates.origin[0]) / gridStepPlanUnits,
-    ) * gridStepPlanUnits),
-    round(coordinates.origin[1] + Math.round(
-      (value[1] - coordinates.origin[1]) / gridStepPlanUnits,
-    ) * gridStepPlanUnits),
+    round(
+      coordinates.origin[0] +
+        Math.round((value[0] - coordinates.origin[0]) / gridStepPlanUnits) * gridStepPlanUnits,
+    ),
+    round(
+      coordinates.origin[1] +
+        Math.round((value[1] - coordinates.origin[1]) / gridStepPlanUnits) * gridStepPlanUnits,
+    ),
   ];
-  const isMovingEndpoint = (point: PlanPoint) => movingEndpoint !== undefined
-    && samePoint(point, movingEndpoint);
-  const endpoints = walls.flatMap((wall) => [wall.from, wall.to])
+  const isMovingEndpoint = (point: PlanPoint) =>
+    movingEndpoint !== undefined && samePoint(point, movingEndpoint);
+  const endpoints = walls
+    .flatMap((wall) => [wall.from, wall.to])
     .filter((point) => !isMovingEndpoint(point));
   const endpoint = endpoints
-    .map((value) => ({ value, distance: Math.hypot(value[0] - candidate[0], value[1] - candidate[1]) }))
+    .map((value) => ({
+      value,
+      distance: Math.hypot(value[0] - candidate[0], value[1] - candidate[1]),
+    }))
     .filter(({ distance }) => distance <= threshold)
     .sort((left, right) => left.distance - right.distance)[0];
   if (endpoint) return { kind: "endpoint", point: endpoint.value };
@@ -83,7 +94,11 @@ export const snapPlanPoint = ({
     .filter((wall) => !isMovingEndpoint(wall.from) && !isMovingEndpoint(wall.to))
     .map((wall) => {
       const value = projectToWall(candidate, wall);
-      return { wall, value, distance: Math.hypot(value[0] - candidate[0], value[1] - candidate[1]) };
+      return {
+        wall,
+        value,
+        distance: Math.hypot(value[0] - candidate[0], value[1] - candidate[1]),
+      };
     })
     .filter(({ distance }) => distance <= threshold)
     .sort((left, right) => left.distance - right.distance)[0];
@@ -93,10 +108,18 @@ export const snapPlanPoint = ({
     return { kind: "wall", point: attached ?? projection.value, wallId: projection.wall.id };
   }
   const alignment = snapAlignment(candidate, rays, endpoints, threshold);
-  if (alignment) return { kind: "alignment", point: alignment.point.map(value => Number(value.toFixed(12))) as unknown as PlanPoint, guideFrom: alignment.guideFrom };
+  if (alignment)
+    return {
+      kind: "alignment",
+      point: alignment.point.map((value) => Number(value.toFixed(12))) as unknown as PlanPoint,
+      guideFrom: alignment.guideFrom,
+    };
   const bestRay = [...rays].sort((a, b) => {
-    const distance = (ray: typeof a) => Math.abs((candidate[0] - ray.origin[0]) * Math.sin(ray.angle)
-      - (candidate[1] - ray.origin[1]) * Math.cos(ray.angle));
+    const distance = (ray: typeof a) =>
+      Math.abs(
+        (candidate[0] - ray.origin[0]) * Math.sin(ray.angle) -
+          (candidate[1] - ray.origin[1]) * Math.cos(ray.angle),
+      );
     return distance(a) - distance(b);
   })[0];
   if (bestRay) {
@@ -106,8 +129,10 @@ export const snapPlanPoint = ({
   if (angleOrigin) {
     const distance = Math.hypot(candidate[0] - angleOrigin[0], candidate[1] - angleOrigin[1]);
     const pointerAngle = Math.atan2(candidate[1] - angleOrigin[1], candidate[0] - angleOrigin[0]);
-    const angle = angleReferenceRadians + Math.round((pointerAngle - angleReferenceRadians) /
-      FLOOR_EDITOR_ANGLE_STEP_RADIANS) * FLOOR_EDITOR_ANGLE_STEP_RADIANS;
+    const angle =
+      angleReferenceRadians +
+      Math.round((pointerAngle - angleReferenceRadians) / FLOOR_EDITOR_ANGLE_STEP_RADIANS) *
+        FLOOR_EDITOR_ANGLE_STEP_RADIANS;
     // Magnetic assistance, not a permanent constraint. Test the raw direction
     // before grid rounding; the tiny epsilon keeps the 5-degree edge inclusive.
     if (Math.abs(pointerAngle - angle) > FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS + 1e-12) {
@@ -151,5 +176,7 @@ const projectProgress = (candidate: PlanPoint, wall: EditorWall) => {
   const dx = wall.to[0] - wall.from[0];
   const dy = wall.to[1] - wall.from[1];
   const squared = dx * dx + dy * dy;
-  return squared ? ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared : 0;
+  return squared
+    ? ((candidate[0] - wall.from[0]) * dx + (candidate[1] - wall.from[1]) * dy) / squared
+    : 0;
 };

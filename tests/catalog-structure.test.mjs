@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { access } from "node:fs/promises";
 import test from "node:test";
 
-const exists = async (path) => access(path).then(() => true, () => false);
+const exists = async (path) =>
+  access(path).then(
+    () => true,
+    () => false,
+  );
 
 test("stores reusable models in the consolidated catalog", async () => {
   assert.equal(await exists("packages/catalog/src/architecture/index.ts"), true);

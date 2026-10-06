@@ -1,4 +1,12 @@
-import { Matrix4, Vector3, type InstancedMesh, type BufferGeometry, type Camera, type Mesh, type Scene } from "three";
+import {
+  Matrix4,
+  Vector3,
+  type InstancedMesh,
+  type BufferGeometry,
+  type Camera,
+  type Mesh,
+  type Scene,
+} from "three";
 import { geometryRevision, toonBatchKey } from "./toon-batch-compatibility";
 import type { GeometryLod } from "./geometry-lod";
 import { GeometryLodWorker } from "./GeometryLodWorker";
@@ -23,8 +31,10 @@ export class SceneGeometryLod {
   private instance = new Matrix4();
   private world = new Matrix4();
   private worker = new GeometryLodWorker();
-  constructor(private invalidate: () => void,
-    private prepare: (geometry: BufferGeometry) => Promise<GeometryLod[]> = this.worker.prepare) {}
+  constructor(
+    private invalidate: () => void,
+    private prepare: (geometry: BufferGeometry) => Promise<GeometryLod[]> = this.worker.prepare,
+  ) {}
 
   private async drain() {
     if (this.running) return;
@@ -34,14 +44,19 @@ export class SceneGeometryLod {
       const { source, entry } = this.queue.shift()!;
       if (this.entries.get(source) !== entry) continue;
       const levels = await this.prepare(source);
-      if (this.disposed || this.entries.get(source) !== entry) levels.forEach(level => level.geometry.dispose());
+      if (this.disposed || this.entries.get(source) !== entry)
+        levels.forEach((level) => level.geometry.dispose());
       else entry.levels = levels;
     }
     // Publish complete families together; partial worker replies must not cause
     // repeated GPU repacking while the remaining geometry is still preparing.
-    if (!this.disposed) for (const [source, entry] of this.entries) {
-      registerGeometryLods(source, entry.levels.map(level => level.geometry));
-    }
+    if (!this.disposed)
+      for (const [source, entry] of this.entries) {
+        registerGeometryLods(
+          source,
+          entry.levels.map((level) => level.geometry),
+        );
+      }
     this.running = false;
     if (!this.disposed) this.invalidate();
   }
@@ -50,13 +65,16 @@ export class SceneGeometryLod {
     // React StrictMode replays effect cleanup while retaining memoized resources.
     this.disposed = false;
     scenes.set(scene, this);
-    if (scene.overrideMaterial) { draw(); return; }
+    if (scene.overrideMaterial) {
+      draw();
+      return;
+    }
     if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
     camera.updateWorldMatrix(true, false);
     const originals: Array<[Mesh, BufferGeometry]> = [];
     const used = new Set<BufferGeometry>();
     try {
-      scene.traverse(object => {
+      scene.traverse((object) => {
         const mesh = object as Mesh;
         if (!mesh.isMesh || toonBatchKey(mesh, true, true) === null) return;
         const source = mesh.geometry;
@@ -66,7 +84,7 @@ export class SceneGeometryLod {
         let entry = this.entries.get(source);
         if (!entry || entry.revision !== revision) {
           forgetGeometryLods(source);
-          entry?.levels.forEach(level => level.geometry.dispose());
+          entry?.levels.forEach((level) => level.geometry.dispose());
           entry = { revision, levels: [] };
           this.entries.set(source, entry);
           this.queue.push({ source, entry });
@@ -76,10 +94,17 @@ export class SceneGeometryLod {
         const sphere = source.boundingSphere!;
         const projectedScale = (matrix: Matrix4) => {
           const scale = matrix.getMaxScaleOnAxis();
-          this.center.copy(sphere.center).applyMatrix4(matrix).applyMatrix4(camera.matrixWorldInverse);
-          const distance = Math.max(.001, -this.center.z - sphere.radius * scale);
+          this.center
+            .copy(sphere.center)
+            .applyMatrix4(matrix)
+            .applyMatrix4(camera.matrixWorldInverse);
+          const distance = Math.max(0.001, -this.center.z - sphere.radius * scale);
           const perspective = camera.projectionMatrix.elements[15] === 0;
-          return scale * viewportHeight * camera.projectionMatrix.elements[5] / 2 / (perspective ? distance : 1);
+          return (
+            (scale * viewportHeight * camera.projectionMatrix.elements[5]) /
+            2 /
+            (perspective ? distance : 1)
+          );
         };
         const instances = mesh as InstancedMesh;
         let pixelsPerUnit = 0;
@@ -97,13 +122,21 @@ export class SceneGeometryLod {
         const previous = this.selected.get(mesh);
         for (const level of entry.levels) {
           // Hysteresis around one CSS pixel of projected geometric/attribute error.
-          if (level.error * pixelsPerUnit <= (previous === level.geometry ? 1.2 : .8)) geometry = level.geometry;
+          if (level.error * pixelsPerUnit <= (previous === level.geometry ? 1.2 : 0.8))
+            geometry = level.geometry;
         }
         this.selected.set(mesh, geometry);
-        if (geometry !== source) { originals.push([mesh, source]); mesh.geometry = geometry; }
+        if (geometry !== source) {
+          originals.push([mesh, source]);
+          mesh.geometry = geometry;
+        }
       });
       for (const [source, entry] of this.entries) {
-        if (!used.has(source)) { forgetGeometryLods(source); entry.levels.forEach(level => level.geometry.dispose()); this.entries.delete(source); }
+        if (!used.has(source)) {
+          forgetGeometryLods(source);
+          entry.levels.forEach((level) => level.geometry.dispose());
+          this.entries.delete(source);
+        }
       }
       draw();
     } finally {
@@ -113,8 +146,13 @@ export class SceneGeometryLod {
   }
 
   dispose() {
-    this.disposed = true; this.queue = []; this.worker.dispose();
-    for (const [source, entry] of this.entries) { forgetGeometryLods(source); entry.levels.forEach(level => level.geometry.dispose()); }
+    this.disposed = true;
+    this.queue = [];
+    this.worker.dispose();
+    for (const [source, entry] of this.entries) {
+      forgetGeometryLods(source);
+      entry.levels.forEach((level) => level.geometry.dispose());
+    }
     this.entries.clear();
   }
 }

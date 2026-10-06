@@ -3,11 +3,9 @@ import test from "node:test";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
-  const {
-    createFloorEditorDraft,
-    createFloorEditorHistory,
-    floorEditorReducer,
-  } = await load("/packages/engine/src/home-editor/construct/editor-state.ts");
+  const { createFloorEditorDraft, createFloorEditorHistory, floorEditorReducer } = await load(
+    "/packages/engine/src/home-editor/construct/editor-state.ts",
+  );
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
 
   test("edits floor coordinates and default heights as one reversible command", () => {
@@ -54,13 +52,17 @@ await withModules(async (load) => {
     });
     assert.equal(history.present.defaultWallHeightMeters, 3.1);
     assert.equal(history.present.defaultCeilingHeightMeters, 2.95);
-    assert.deepEqual({
-      walls: history.present.walls,
-      openings: history.present.openings,
-      rooms: history.present.rooms,
-      junctions: history.present.junctions,
-      nextSerial: history.present.nextSerial,
-    }, authoredData, "scale metadata must not rewrite authored IDs or geometry");
+    assert.deepEqual(
+      {
+        walls: history.present.walls,
+        openings: history.present.openings,
+        rooms: history.present.rooms,
+        junctions: history.present.junctions,
+        nextSerial: history.present.nextSerial,
+      },
+      authoredData,
+      "scale metadata must not rewrite authored IDs or geometry",
+    );
 
     history = floorEditorReducer(history, { type: "undo" });
     assert.deepEqual(history.present, initialDraft);

@@ -29,13 +29,16 @@ const roomCenter = (polygon: FloorSpec["rooms"][number]["polygon"]): readonly [n
   let best = { width: 0, point: centroid };
   for (let row = 1; row < ys.length; row++) {
     const y = (ys[row - 1] + ys[row]) / 2;
-    const intersections = polygon.flatMap(([x1, y1], index) => {
-      const [x2, y2] = polygon[(index + 1) % polygon.length];
-      return (y1 > y) !== (y2 > y) ? [x1 + (x2 - x1) * (y - y1) / (y2 - y1)] : [];
-    }).sort((a, b) => a - b);
+    const intersections = polygon
+      .flatMap(([x1, y1], index) => {
+        const [x2, y2] = polygon[(index + 1) % polygon.length];
+        return y1 > y !== y2 > y ? [x1 + ((x2 - x1) * (y - y1)) / (y2 - y1)] : [];
+      })
+      .sort((a, b) => a - b);
     for (let index = 1; index < intersections.length; index += 2) {
       const width = intersections[index] - intersections[index - 1];
-      if (width > best.width) best = { width, point: [(intersections[index] + intersections[index - 1]) / 2, y] };
+      if (width > best.width)
+        best = { width, point: [(intersections[index] + intersections[index - 1]) / 2, y] };
     }
   }
   return best.point;
@@ -51,15 +54,13 @@ const roomLabelSize = (
   const ys = polygon.map(([, y]) => y);
   const roomWidth = Math.max(...xs) - Math.min(...xs);
   const roomHeight = Math.max(...ys) - Math.min(...ys);
-  const labelWidthUnits = Math.max(label.length, 1) * .78 + (hasIcon ? 1.25 : 0);
-  const widthConstrainedSize = roomWidth * .82 / labelWidthUnits;
-  return Math.min(preferredSize, widthConstrainedSize, roomHeight * .2);
+  const labelWidthUnits = Math.max(label.length, 1) * 0.78 + (hasIcon ? 1.25 : 0);
+  const widthConstrainedSize = (roomWidth * 0.82) / labelWidthUnits;
+  return Math.min(preferredSize, widthConstrainedSize, roomHeight * 0.2);
 };
 
-const pointerDistance = (points: readonly ScreenPoint[]) => Math.hypot(
-  points[0].x - points[1].x,
-  points[0].y - points[1].y,
-);
+const pointerDistance = (points: readonly ScreenPoint[]) =>
+  Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
 
 const pointerCenter = (points: readonly ScreenPoint[]): ScreenPoint => ({
   x: (points[0].x + points[1].x) / 2,
@@ -80,11 +81,16 @@ export function HomePlanMapping({
 }: {
   floor: FloorSpec;
   relationshipLabels: Readonly<Record<string, string>>;
-  roomDeviceSummaries?: Readonly<Record<string, {
-    mapped: number;
-    total: number;
-    categories: readonly DeviceMappingGroupMeta[];
-  }>>;
+  roomDeviceSummaries?: Readonly<
+    Record<
+      string,
+      {
+        mapped: number;
+        total: number;
+        categories: readonly DeviceMappingGroupMeta[];
+      }
+    >
+  >;
   roomIcons: Readonly<Record<string, string | null>>;
   selectedRoomId: string | null;
   inspectorOpen: boolean;
@@ -121,15 +127,24 @@ export function HomePlanMapping({
       const rect = plan.getBoundingClientRect();
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1;
       if (event.ctrlKey || event.metaKey) {
-        const nextZoom = clampZoom(zoom * Math.exp(-event.deltaY * unit * .01));
+        const nextZoom = clampZoom(zoom * Math.exp(-event.deltaY * unit * 0.01));
         const ratio = 1 - nextZoom / zoom;
         setPan((current) => ({
-          x: current.x + (event.clientX - rect.left - rect.width / 2 - current.x - inspectorFocusOffset.x) * ratio,
-          y: current.y + (event.clientY - rect.top - rect.height / 2 - current.y - inspectorFocusOffset.y) * ratio,
+          x:
+            current.x +
+            (event.clientX - rect.left - rect.width / 2 - current.x - inspectorFocusOffset.x) *
+              ratio,
+          y:
+            current.y +
+            (event.clientY - rect.top - rect.height / 2 - current.y - inspectorFocusOffset.y) *
+              ratio,
         }));
         setZoom(nextZoom);
       } else {
-        setPan((current) => ({ x: current.x - event.deltaX * unit, y: current.y - event.deltaY * unit }));
+        setPan((current) => ({
+          x: current.x - event.deltaX * unit,
+          y: current.y - event.deltaY * unit,
+        }));
       }
     };
     // React wheel listeners are passive; use a native listener to prevent page
@@ -146,8 +161,12 @@ export function HomePlanMapping({
     if (typeof requestAnimationFrame === "undefined") return;
     const frame = requestAnimationFrame(() => {
       const plan = planElement.current;
-      const room = plan?.querySelector<SVGGElement>(`[data-room-id="${CSS.escape(selectedRoomId)}"]`);
-      const inspector = plan?.parentElement?.querySelector<HTMLElement>(".room-mapping-inspector__panel");
+      const room = plan?.querySelector<SVGGElement>(
+        `[data-room-id="${CSS.escape(selectedRoomId)}"]`,
+      );
+      const inspector = plan?.parentElement?.querySelector<HTMLElement>(
+        ".room-mapping-inspector__panel",
+      );
       if (!plan || !room || !inspector || plan.getBoundingClientRect().width > 900) return;
       const planRect = plan.getBoundingClientRect();
       const roomRect = room.getBoundingClientRect();
@@ -187,12 +206,21 @@ export function HomePlanMapping({
     if (points.length >= 2) {
       const center = pointerCenter(points);
       const distance = pointerDistance(points);
-      if (Math.abs(distance - gestureStart.current.distance) > 3
-        || Math.hypot(center.x - gestureStart.current.center.x, center.y - gestureStart.current.center.y) > 5) {
+      if (
+        Math.abs(distance - gestureStart.current.distance) > 3 ||
+        Math.hypot(
+          center.x - gestureStart.current.center.x,
+          center.y - gestureStart.current.center.y,
+        ) > 5
+      ) {
         gestureMoved.current = true;
         event.currentTarget.setPointerCapture?.(event.pointerId);
       }
-      setZoom(clampZoom(gestureStart.current.zoom * (distance / Math.max(gestureStart.current.distance, 1))));
+      setZoom(
+        clampZoom(
+          gestureStart.current.zoom * (distance / Math.max(gestureStart.current.distance, 1)),
+        ),
+      );
       setPan({
         x: gestureStart.current.pan.x + center.x - gestureStart.current.center.x,
         y: gestureStart.current.pan.y + center.y - gestureStart.current.center.y,
@@ -241,17 +269,39 @@ export function HomePlanMapping({
     >
       {floor.rooms.length > 0 ? (
         <>
-          {showFitControl && !selectedRoomId && <p className="home-plan-mapping__instruction">Select a 3D room</p>}
+          {showFitControl && !selectedRoomId && (
+            <p className="home-plan-mapping__instruction">Select a 3D room</p>
+          )}
           <div className="home-plan-mapping__controls" aria-label="Plan zoom controls">
-            <button type="button" aria-label="Zoom out" disabled={zoom <= 1} onClick={() => changeZoom(zoom - .25)}>−</button>
-            <button type="button" aria-label="Zoom in" disabled={zoom >= 4} onClick={() => changeZoom(zoom + .25)}>+</button>
-            {showFitControl && <button type="button" onClick={fitPlan}>Fit plan</button>}
+            <button
+              type="button"
+              aria-label="Zoom out"
+              disabled={zoom <= 1}
+              onClick={() => changeZoom(zoom - 0.25)}
+            >
+              −
+            </button>
+            <button
+              type="button"
+              aria-label="Zoom in"
+              disabled={zoom >= 4}
+              onClick={() => changeZoom(zoom + 0.25)}
+            >
+              +
+            </button>
+            {showFitControl && (
+              <button type="button" onClick={fitPlan}>
+                Fit plan
+              </button>
+            )}
           </div>
           <svg
             className="home-plan-mapping__svg"
             viewBox={viewBox}
             aria-label={`${floor.name} room map`}
-            style={{ transform: `translate3d(${pan.x + inspectorFocusOffset.x}px, ${pan.y + inspectorFocusOffset.y}px, 0) rotate(-.65deg) scale(${zoom})` }}
+            style={{
+              transform: `translate3d(${pan.x + inspectorFocusOffset.x}px, ${pan.y + inspectorFocusOffset.y}px, 0) rotate(-.65deg) scale(${zoom})`,
+            }}
           >
             {floor.rooms.map((room) => {
               const center = roomCenter(room.polygon);
@@ -263,11 +313,13 @@ export function HomePlanMapping({
                   ? `${devices.mapped} of ${devices.total} device${devices.total === 1 ? "" : "s"} connected`
                   : "No devices to connect"
                 : "";
-              const deviceTypes = devices?.categories.map((category) => category.label).join(", ") ?? "";
+              const deviceTypes =
+                devices?.categories.map((category) => category.label).join(", ") ?? "";
               const roomIcon = roomIcons[room.id] ?? null;
               const hasIcon = Boolean(homeAssistantAreaIconClassName(roomIcon));
               const labelSize = roomLabelSize(room.polygon, room.name, preferredLabelSize, hasIcon);
-              const headingWidth = labelSize * (Math.max(room.name.length, 1) * .78 + (hasIcon ? 1.25 : 0));
+              const headingWidth =
+                labelSize * (Math.max(room.name.length, 1) * 0.78 + (hasIcon ? 1.25 : 0));
               const selected = selectedRoomId === room.id;
               return (
                 <g
@@ -293,35 +345,47 @@ export function HomePlanMapping({
                   }}
                 >
                   <polygon points={room.polygon.map(([x, y]) => `${x},${y}`).join(" ")} />
-                  {devices ? <HomePlanRoomSummary room={room} center={center} preferredSize={preferredLabelSize}
-                    roomIcon={roomIcon} areaLabel={secondaryLabel} mapped={devices.mapped} total={devices.total} categories={devices.categories} /> : <>
-                  <foreignObject
-                    className="home-plan-mapping__room-heading"
-                    x={center[0] - headingWidth / 2}
-                    y={center[1] - labelSize * .92}
-                    width={headingWidth}
-                    height={labelSize * 1.35}
-                  >
-                    <div
-                      className="home-plan-mapping__room-heading-content"
-                      style={{ fontSize: `${labelSize}px` }}
-                    >
-                      <HomeAssistantAreaIcon
-                        icon={roomIcon}
-                        className="home-plan-mapping__room-icon"
-                      />
-                      <span className="home-plan-mapping__room-name">{room.name}</span>
-                    </div>
-                  </foreignObject>
-                  <text
-                    className="home-plan-mapping__area-name"
-                    x={center[0]}
-                    y={center[1] + labelSize * .78}
-                    fontSize={labelSize * .62}
-                  >
-                    {secondaryLabel}
-                  </text>
-                  </>}
+                  {devices ? (
+                    <HomePlanRoomSummary
+                      room={room}
+                      center={center}
+                      preferredSize={preferredLabelSize}
+                      roomIcon={roomIcon}
+                      areaLabel={secondaryLabel}
+                      mapped={devices.mapped}
+                      total={devices.total}
+                      categories={devices.categories}
+                    />
+                  ) : (
+                    <>
+                      <foreignObject
+                        className="home-plan-mapping__room-heading"
+                        x={center[0] - headingWidth / 2}
+                        y={center[1] - labelSize * 0.92}
+                        width={headingWidth}
+                        height={labelSize * 1.35}
+                      >
+                        <div
+                          className="home-plan-mapping__room-heading-content"
+                          style={{ fontSize: `${labelSize}px` }}
+                        >
+                          <HomeAssistantAreaIcon
+                            icon={roomIcon}
+                            className="home-plan-mapping__room-icon"
+                          />
+                          <span className="home-plan-mapping__room-name">{room.name}</span>
+                        </div>
+                      </foreignObject>
+                      <text
+                        className="home-plan-mapping__area-name"
+                        x={center[0]}
+                        y={center[1] + labelSize * 0.78}
+                        fontSize={labelSize * 0.62}
+                      >
+                        {secondaryLabel}
+                      </text>
+                    </>
+                  )}
                 </g>
               );
             })}

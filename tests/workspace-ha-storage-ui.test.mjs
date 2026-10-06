@@ -11,10 +11,13 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.goto(server.resolvedUrls.local[0]);
     await page.getByRole("button", { name: /^Explore the demo/ }).click();
     assert.equal(await page.getByRole("button", { name: "Set up Cabane" }).count(), 0);
-    const demoId = await page.evaluate(async root => {
-      const { createWorkspaceRepository } = await import(`/@fs${root}/packages/engine/src/home-project/index.ts`);
+    const demoId = await page.evaluate(async (root) => {
+      const { createWorkspaceRepository } = await import(
+        `/@fs${root}/packages/engine/src/home-project/index.ts`
+      );
       const { ownerProjectRegistries } = await import("/src/project-runtime.ts");
-      return (await createWorkspaceRepository(indexedDB, ownerProjectRegistries).readOnboarding()).demoWorkspaceId;
+      return (await createWorkspaceRepository(indexedDB, ownerProjectRegistries).readOnboarding())
+        .demoWorkspaceId;
     }, process.cwd());
     const demoHomeUrl = `${server.resolvedUrls.local[0]}workspaces/${demoId}`;
     await page.goto(`${demoHomeUrl}/home-assistant`);
@@ -38,12 +41,20 @@ test("personal workspace offers HA storage while demo does not", async () => {
     await page.getByText("Connect Home Assistant first").waitFor();
     assert.equal(await page.getByRole("button", { name: "Save", exact: true }).count(), 0);
     await page.goto(`${server.resolvedUrls.local[0]}workspaces`);
-    assert.equal(await page.getByRole("heading", { name: "Restore from Home Assistant" }).count(), 0);
+    assert.equal(
+      await page.getByRole("heading", { name: "Restore from Home Assistant" }).count(),
+      0,
+    );
     await page.getByRole("button", { name: "Import workspace", exact: true }).click();
     await page.getByRole("button", { name: "From Home Assistant", exact: true }).click();
 
     await page.getByLabel("Home Assistant address").fill("https://ha.example");
     await page.reload();
-    assert.equal(await page.getByLabel("Home Assistant address").inputValue(), "https://ha.example");
-  } finally { await browser?.close(); }
+    assert.equal(
+      await page.getByLabel("Home Assistant address").inputValue(),
+      "https://ha.example",
+    );
+  } finally {
+    await browser?.close();
+  }
 });

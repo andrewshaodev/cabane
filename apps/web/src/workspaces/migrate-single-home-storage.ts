@@ -1,5 +1,11 @@
-import { homeAssistantAuthStorageKey, loadStoredAuthData, normalizeHomeAssistantUrl, runtimeBindingProfileStorageKey, legacyRuntimeBindingProfileStorageKey,
-  type WorkspaceRepository } from "@cabane/engine";
+import {
+  homeAssistantAuthStorageKey,
+  loadStoredAuthData,
+  normalizeHomeAssistantUrl,
+  runtimeBindingProfileStorageKey,
+  legacyRuntimeBindingProfileStorageKey,
+  type WorkspaceRepository,
+} from "@cabane/engine";
 import { migrateBrowserOriginProfile } from "../project-runtime";
 
 // Delete this module after the owner's existing browser has completed conversion.
@@ -11,7 +17,11 @@ export function singleHomeUrl(storage: Storage): string | null {
   return normalizeHomeAssistantUrl(storage.getItem(URL_KEY));
 }
 
-export async function migrateSingleHomeStorage(repository: WorkspaceRepository, ownerId: string, storage: Storage) {
+export async function migrateSingleHomeStorage(
+  repository: WorkspaceRepository,
+  ownerId: string,
+  storage: Storage,
+) {
   if (await repository.migrationDone()) return;
   let entry = await repository.read(ownerId);
   if (entry?.error) return; // Preserve rejected data; other workspaces remain usable.
@@ -26,10 +36,12 @@ export async function migrateSingleHomeStorage(repository: WorkspaceRepository, 
   if (rawAuth) {
     const value = JSON.parse(rawAuth) as { hassUrl?: string; clientId?: string };
     const authOrigin = normalizeHomeAssistantUrl(value.hassUrl);
-    if (!authOrigin || !value.clientId) throw new Error("The saved Home Assistant sign-in needs recovery.");
+    if (!authOrigin || !value.clientId)
+      throw new Error("The saved Home Assistant sign-in needs recovery.");
     const key = homeAssistantAuthStorageKey(authOrigin, value.clientId);
     if (storage.getItem(key) === null) storage.setItem(key, rawAuth);
-    if (!loadStoredAuthData(storage, authOrigin, value.clientId)) throw new Error("Could not preserve the saved Home Assistant sign-in.");
+    if (!loadStoredAuthData(storage, authOrigin, value.clientId))
+      throw new Error("Could not preserve the saved Home Assistant sign-in.");
   }
   storage.removeItem(AUTH_KEY);
   storage.removeItem(URL_KEY);

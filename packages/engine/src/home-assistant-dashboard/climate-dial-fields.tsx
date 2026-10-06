@@ -8,38 +8,35 @@ import {
   climateTemperatureCall,
   climateTemperatureRange,
   stringOptions,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { EntityStateSnapshot, ResolvedEntityBinding } from "../types";
 
-import {
-  TemperatureStepper,
-  useOptimisticCommand
-} from "./control-primitives";
+import { TemperatureStepper, useOptimisticCommand } from "./control-primitives";
 
 import { confirmationKey, isVersatileThermostat, numberAttribute } from "./entity-field-contract";
 
-const readableOption = (option: string) => option
-  .replaceAll("_", " ")
-  .replace(/^./, (character) => character.toUpperCase());
+const readableOption = (option: string) =>
+  option.replaceAll("_", " ").replace(/^./, (character) => character.toUpperCase());
 
-const vthermOptionSymbol = (option: string) => ({
-  activity: "◌",
-  auto: "A",
-  boost: "▲",
-  comfort: "▰",
-  cool: "❄",
-  dry: "◇",
-  eco: "◆",
-  fan_only: "✣",
-  frost: "❄",
-  heat: "♨",
-  heat_cool: "◐",
-  home: "⌂",
-  none: "—",
-  off: "⏻",
-}[option] ?? "•");
+const vthermOptionSymbol = (option: string) =>
+  ({
+    activity: "◌",
+    auto: "A",
+    boost: "▲",
+    comfort: "▰",
+    cool: "❄",
+    dry: "◇",
+    eco: "◆",
+    fan_only: "✣",
+    frost: "❄",
+    heat: "♨",
+    heat_cool: "◐",
+    home: "⌂",
+    none: "—",
+    off: "⏻",
+  })[option] ?? "•";
 
 function ClimateOptionPicker({
   binding,
@@ -98,7 +95,9 @@ function ClimateOptionPicker({
         >
           <span
             className="vtherm-picker__symbol"
-            data-symbol={kind === "mode" ? vthermOptionSymbol(command.value) : kind === "preset" ? "◒" : "•"}
+            data-symbol={
+              kind === "mode" ? vthermOptionSymbol(command.value) : kind === "preset" ? "◒" : "•"
+            }
             aria-hidden="true"
           />
           <span className="vtherm-picker__copy">
@@ -137,7 +136,11 @@ function ClimateOptionPicker({
           ))}
         </div>
       </details>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -147,8 +150,8 @@ const vthermStatuses = (entity: EntityStateSnapshot) => {
   const windowState = String(entity.attributes.window_state ?? "unavailable");
   const safety = String(entity.attributes.safety_state ?? "unavailable");
   const overpowering = String(entity.attributes.overpowering_state ?? "unavailable");
-  const windowBypass = entity.attributes.is_window_bypass === true
-    || entity.attributes.window_bypass_state === true;
+  const windowBypass =
+    entity.attributes.is_window_bypass === true || entity.attributes.window_bypass_state === true;
   return [
     motion === "on" && "Activity detected",
     windowState === "on" && (windowBypass ? "Window bypass active" : "Window open"),
@@ -166,7 +169,9 @@ export function ClimateDialFields({
   enabled: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
 }) {
-  const [openPicker, setOpenPicker] = useState<"mode" | "preset" | "fan mode" | "swing mode" | null>(null);
+  const [openPicker, setOpenPicker] = useState<
+    "mode" | "preset" | "fan mode" | "swing mode" | null
+  >(null);
   const entity = binding.state;
   if (!entity) return null;
   const modeCommand = useOptimisticCommand({
@@ -180,23 +185,28 @@ export function ClimateDialFields({
   const [dialTargetTemperature, setDialTargetTemperature] = useState(targetTemperature);
   const currentTemperature = Number(entity.attributes.current_temperature);
   const regulatedTemperature = Number(entity.attributes.regulated_target_temperature);
-  const temperatureUnit = typeof entity.attributes.temperature_unit === "string"
-    ? entity.attributes.temperature_unit
-    : "°C";
+  const temperatureUnit =
+    typeof entity.attributes.temperature_unit === "string"
+      ? entity.attributes.temperature_unit
+      : "°C";
   const hasCurrentTemperature = Number.isFinite(currentTemperature);
   const comparisonTemperature = hasCurrentTemperature ? currentTemperature : dialTargetTemperature;
   const dialMinimum = range.min;
   const dialMaximum = range.max;
-  const dialProgress = (temperature: number) => Math.min(
-    1,
-    Math.max(0, (temperature - dialMinimum) / Math.max(Number.EPSILON, dialMaximum - dialMinimum)),
-  );
+  const dialProgress = (temperature: number) =>
+    Math.min(
+      1,
+      Math.max(
+        0,
+        (temperature - dialMinimum) / Math.max(Number.EPSILON, dialMaximum - dialMinimum),
+      ),
+    );
   const targetProgress = dialProgress(dialTargetTemperature);
   const currentProgress = dialProgress(comparisonTemperature);
   const arcStart = Math.min(targetProgress, currentProgress) * 75;
   const arcLength = Math.abs(targetProgress - currentProgress) * 75;
   const markerPosition = (progress: number) => {
-    const angle = (135 + progress * 270) * Math.PI / 180;
+    const angle = ((135 + progress * 270) * Math.PI) / 180;
     return {
       x: 100 + Math.cos(angle) * 76,
       y: 100 + Math.sin(angle) * 76,
@@ -206,31 +216,32 @@ export function ClimateDialFields({
   const currentMarker = markerPosition(currentProgress);
   const modeOptions = stringOptions(entity.attributes.hvac_modes);
   const hasDirectOff = isVersatileThermostat(binding) && modeOptions.includes("off");
-  const preferredOnMode = hasCurrentTemperature && currentTemperature > dialTargetTemperature
-    ? "cool"
-    : "heat";
-  const onMode = [preferredOnMode, "heat", "cool", "heat_cool", "auto"]
-    .find((mode) => modeOptions.includes(mode))
-    ?? modeOptions.find((mode) => mode !== "off");
+  const preferredOnMode =
+    hasCurrentTemperature && currentTemperature > dialTargetTemperature ? "cool" : "heat";
+  const onMode =
+    [preferredOnMode, "heat", "cool", "heat_cool", "auto"].find((mode) =>
+      modeOptions.includes(mode),
+    ) ?? modeOptions.find((mode) => mode !== "off");
   const powerMode = modeCommand.value === "off" ? onMode : "off";
   const presetOptions = stringOptions(entity.attributes.preset_modes);
   const fanOptions = stringOptions(entity.attributes.fan_modes);
   const swingOptions = isVersatileThermostat(binding)
     ? []
     : stringOptions(entity.attributes.swing_modes);
-  const pickerCount = [modeOptions, presetOptions, fanOptions, swingOptions]
-    .filter((options) => options.length > 0).length;
+  const pickerCount = [modeOptions, presetOptions, fanOptions, swingOptions].filter(
+    (options) => options.length > 0,
+  ).length;
   const presetMode = String(entity.attributes.preset_mode ?? "");
   const fanMode = String(entity.attributes.fan_mode ?? "");
   const swingMode = String(entity.attributes.swing_mode ?? "");
   const statuses = isVersatileThermostat(binding) ? vthermStatuses(entity) : [];
-  const rawAction = String(entity.attributes.hvac_action ?? (entity.state === "off" ? "off" : entity.state));
-  const actionLabel = modeCommand.value === "off" ? "Off" : statuses[0] ?? readableOption(rawAction);
-  const updateOpenPicker = (
-    kind: "mode" | "preset" | "fan mode" | "swing mode",
-    open: boolean,
-  ) => {
-    setOpenPicker((current) => open ? kind : current === kind ? null : current);
+  const rawAction = String(
+    entity.attributes.hvac_action ?? (entity.state === "off" ? "off" : entity.state),
+  );
+  const actionLabel =
+    modeCommand.value === "off" ? "Off" : (statuses[0] ?? readableOption(rawAction));
+  const updateOpenPicker = (kind: "mode" | "preset" | "fan mode" | "swing mode", open: boolean) => {
+    setOpenPicker((current) => (open ? kind : current === kind ? null : current));
   };
 
   return (
@@ -284,7 +295,9 @@ export function ClimateDialFields({
           </svg>
         </div>
 
-        <div className="vtherm-action" aria-live="polite">{actionLabel}</div>
+        <div className="vtherm-action" aria-live="polite">
+          {actionLabel}
+        </div>
 
         <div className="vtherm-temperature" data-unit={temperatureUnit}>
           <TemperatureStepper
@@ -314,7 +327,14 @@ export function ClimateDialFields({
               if (powerMode) void modeCommand.run(climateModeCall(entity, powerMode), powerMode);
             }}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
               <path d="M12 3v9M6.3 5.8a8 8 0 1 0 11.4 0" />
             </svg>
           </button>

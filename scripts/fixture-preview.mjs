@@ -23,6 +23,10 @@ const stop = async () => {
   await server.close();
   process.exit(0);
 };
-process.once("SIGINT", () => { void stop(); });
-process.once("SIGTERM", () => { void stop(); });
+process.once("SIGINT", () => {
+  void stop();
+});
+process.once("SIGTERM", () => {
+  void stop();
+});
 await new Promise(() => undefined);

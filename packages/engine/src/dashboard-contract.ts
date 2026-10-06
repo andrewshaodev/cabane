@@ -1,13 +1,7 @@
-import {
-  type RuntimeBindingProfileManager
-} from "./RuntimeBindingSetup";
+import { type RuntimeBindingProfileManager } from "./RuntimeBindingSetup";
 import type { HomeAssistantConnectionStatus } from "./types";
 
-import type {
-  ArchitectureModelRegistry,
-  DeviceModelRegistry,
-  HomeManifest
-} from "./types";
+import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "./types";
 
 import type { EditorMode } from "./EditorModeIcon";
 import type { ReactNode } from "react";

@@ -6,13 +6,13 @@ schemas, validation, scene behavior, persistence, and Home Assistant integration
 The catalog supplies procedural model definitions. The home package supplies the
 bundled owner's project and model extensions.
 
-| Package | Implemented responsibility |
-| --- | --- |
-| `apps/web` | Workspace library and host, routes, Construct/Arrange/Connect, editor chrome |
-| `packages/engine` | Public contracts, project lifecycle, geometry, rendering, dashboards, HA runtime |
-| `packages/catalog` | Stable architecture, furnishing, and device registries |
-| `packages/walk-laser` | Optional, lazy-loaded first-person laser experiment |
-| `home` | Portable project data and two code-defined kitchen extensions |
+| Package               | Implemented responsibility                                                       |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `apps/web`            | Workspace library and host, routes, Construct/Arrange/Connect, editor chrome     |
+| `packages/engine`     | Public contracts, project lifecycle, geometry, rendering, dashboards, HA runtime |
+| `packages/catalog`    | Stable architecture, furnishing, and device registries                           |
+| `packages/walk-laser` | Optional, lazy-loaded first-person laser experiment                              |
+| `home`                | Portable project data and two code-defined kitchen extensions                    |
 
 Consumers outside the engine use its public exports. Catalog access uses the
 `architecture`, `furnishing`, and `device` package subpaths. Stable model IDs take

@@ -14,7 +14,11 @@ export function RecessedDownlightModel({ state, visualState }: HomeDeviceModelPr
       </mesh>
       <mesh position={[0, 0.014, 0]}>
         <cylinderGeometry args={[0.038, 0.045, 0.028, 20]} />
-        <ToonMaterial color={finish.color} emissive="#f2c66d" emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)} />
+        <ToonMaterial
+          color={finish.color}
+          emissive="#f2c66d"
+          emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)}
+        />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.028, 0.033, 0]} scale={0.18} />
     </group>

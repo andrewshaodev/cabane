@@ -22,7 +22,7 @@ export const availableOpeningOffsetRanges = ({
   gapPlanUnits?: number;
   sillHeightMeters?: number;
 }) => {
-  const resolvedGapPlanUnits = gapPlanUnits ?? .08 / draft.coordinates.metersPerPlanUnit;
+  const resolvedGapPlanUnits = gapPlanUnits ?? 0.08 / draft.coordinates.metersPerPlanUnit;
   const wall = draft.walls.find((candidate) => candidate.id === wallId);
   if (!wall) return [];
   const wallLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
@@ -37,23 +37,37 @@ export const availableOpeningOffsetRanges = ({
   const { runs } = normalizeWallRuns(draft.walls, subsegments, edgeFace);
   const walls = runs.map(({ wall, classification }) => ({
     ...wall,
-    thicknessMeters: wall.thicknessMeters ?? (classification === "interior"
-      ? draft.interiorWallThicknessMeters : draft.exteriorWallThicknessMeters),
+    thicknessMeters:
+      wall.thicknessMeters ??
+      (classification === "interior"
+        ? draft.interiorWallThicknessMeters
+        : draft.exteriorWallThicknessMeters),
   }));
   const junctions = deriveJunctions(walls, nodes, draft.junctions);
   for (const run of runs.filter((run) => run.sourceWallId === wallId)) {
     const owner = walls.find((wall) => wall.id === run.wallId)!;
     const length = Math.hypot(owner.to[0] - owner.from[0], owner.to[1] - owner.from[1]);
     for (const junction of junctions.filter((junction) => junction.wallIds.includes(owner.id))) {
-      const distance = ((junction.at[0] - owner.from[0]) * (owner.to[0] - owner.from[0]) +
-        (junction.at[1] - owner.from[1]) * (owner.to[1] - owner.from[1])) / length;
-      const intervals = junctionOccupiedIntervalsForWall(owner, junction,
+      const distance =
+        ((junction.at[0] - owner.from[0]) * (owner.to[0] - owner.from[0]) +
+          (junction.at[1] - owner.from[1]) * (owner.to[1] - owner.from[1])) /
+        length;
+      const intervals = junctionOccupiedIntervalsForWall(
+        owner,
+        junction,
         walls.filter((wall) => junction.wallIds.includes(wall.id)),
-        draft.coordinates.metersPerPlanUnit, draft.defaultWallHeightMeters);
-      occupied.push(...intervals.filter(({ topMeters }) => topMeters > sillHeightMeters + 1e-6)
-        .map(({ start, end }) => ({ start: Math.max(0, start + distance + run.startOffsetPlanUnits),
-          end: Math.min(wallLength, end + distance + run.startOffsetPlanUnits) }))
-        .filter(({ start, end }) => end > start));
+        draft.coordinates.metersPerPlanUnit,
+        draft.defaultWallHeightMeters,
+      );
+      occupied.push(
+        ...intervals
+          .filter(({ topMeters }) => topMeters > sillHeightMeters + 1e-6)
+          .map(({ start, end }) => ({
+            start: Math.max(0, start + distance + run.startOffsetPlanUnits),
+            end: Math.min(wallLength, end + distance + run.startOffsetPlanUnits),
+          }))
+          .filter(({ start, end }) => end > start),
+      );
     }
   }
   occupied.sort((left, right) => left.start - right.start);
@@ -72,9 +86,10 @@ export const availableOpeningOffsetRanges = ({
 export const nearestAvailableOpeningOffset = (
   requested: number,
   ranges: readonly { min: number; max: number }[],
-) => ranges
-  .map((range) => Math.max(range.min, Math.min(range.max, requested)))
-  .sort((left, right) => Math.abs(left - requested) - Math.abs(right - requested))[0];
+) =>
+  ranges
+    .map((range) => Math.max(range.min, Math.min(range.max, requested)))
+    .sort((left, right) => Math.abs(left - requested) - Math.abs(right - requested))[0];
 
 export const duplicateOpeningOffset = (draft: FloorEditorDraft, openingId: string) => {
   const source = draft.openings.find((opening) => opening.id === openingId);

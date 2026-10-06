@@ -7,7 +7,8 @@ export function usePortalInput(active: boolean, place: () => void) {
   useEffect(() => {
     const pointer = (event: PointerEvent) => {
       if (!active || !dom.root.pointerLockElement || event.button !== 2) return;
-      event.preventDefault(); place();
+      event.preventDefault();
+      place();
     };
     const context = (event: Event) => {
       if (active && dom.root.pointerLockElement) event.preventDefault();

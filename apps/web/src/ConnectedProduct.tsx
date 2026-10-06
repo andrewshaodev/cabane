@@ -5,8 +5,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
 import {
-  WalkToolStorageProvider, useHomeAssistantHostSession, FloorNavigationProvider, CabaneAppExperience, createEmptyRuntimeBindingProfile, normalizeWorkspaceBindingOrigin,
-  type HomeProjectLifecycle, type HomeProjectRecord, type OnboardingOptions,
+  WalkToolStorageProvider,
+  useHomeAssistantHostSession,
+  FloorNavigationProvider,
+  CabaneAppExperience,
+  createEmptyRuntimeBindingProfile,
+  normalizeWorkspaceBindingOrigin,
+  type HomeProjectLifecycle,
+  type HomeProjectRecord,
+  type OnboardingOptions,
 } from "@cabane/engine";
 import { composeOwnerProjectManifest, ownerDeviceModels } from "./project-runtime";
 import type { EditorOpenRequest } from "./editor-connect/useConnectEditor";
@@ -16,18 +23,45 @@ export { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-n
 import { editorPath, editorRoutes, mobileEditorPath, workspaceHomePath } from "./editor-routes";
 import { exportWorkspaceBackup } from "./workspaces/workspace-transfer";
 import { RoutedHomeEditor } from "./RoutedHomeEditor";
-import { ShortcutDeviceIcon, ShortcutThumbnailSurface } from "./editor-action-bar/ShortcutDeviceIcon";
-import { MobileEditorPrompt, mobileEditorPromptDismissed, mobileEditorViewport } from "./mobile-editor/MobileEditorPrompt";
+import {
+  ShortcutDeviceIcon,
+  ShortcutThumbnailSurface,
+} from "./editor-action-bar/ShortcutDeviceIcon";
+import {
+  MobileEditorPrompt,
+  mobileEditorPromptDismissed,
+  mobileEditorViewport,
+} from "./mobile-editor/MobileEditorPrompt";
 
-export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssistantUrl, onHomeAssistantUrlChange, recoveryMessage, recoveryRaw,
-  initialRequest, onboarding, demoWorkspaceId,
+export function ConnectedProduct({
+  record: initialRecord,
+  lifecycle,
+  homeAssistantUrl,
+  onHomeAssistantUrlChange,
+  recoveryMessage,
+  recoveryRaw,
+  initialRequest,
+  onboarding,
+  demoWorkspaceId,
 }: {
-  record: HomeProjectRecord; lifecycle: HomeProjectLifecycle; homeAssistantUrl: string | null;
-  onHomeAssistantUrlChange: (url: string | null, current?: HomeProjectRecord) => void | Promise<HomeProjectRecord | void>; recoveryMessage?: string; recoveryRaw?: string;
-  initialRequest?: EditorOpenRequest; onboarding?: OnboardingOptions; demoWorkspaceId: string | null;
+  record: HomeProjectRecord;
+  lifecycle: HomeProjectLifecycle;
+  homeAssistantUrl: string | null;
+  onHomeAssistantUrlChange: (
+    url: string | null,
+    current?: HomeProjectRecord,
+  ) => void | Promise<HomeProjectRecord | void>;
+  recoveryMessage?: string;
+  recoveryRaw?: string;
+  initialRequest?: EditorOpenRequest;
+  onboarding?: OnboardingOptions;
+  demoWorkspaceId: string | null;
 }) {
   const [record, setRecord] = useState(initialRecord);
-  const publishedManifest = useMemo(() => record.publishedAt === 0 ? null : composeOwnerProjectManifest(record.published), [record.published, record.publishedAt]);
+  const publishedManifest = useMemo(
+    () => (record.publishedAt === 0 ? null : composeOwnerProjectManifest(record.published)),
+    [record.published, record.publishedAt],
+  );
   const [recovery, setRecovery] = useState({ message: recoveryMessage, raw: recoveryRaw });
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const toolStorage = useWorkspaceToolStorage(record, setRecord, setConnectionError);
@@ -35,68 +69,185 @@ export function ConnectedProduct({ record: initialRecord, lifecycle, homeAssista
   const navigate = useNavigate();
   const location = useLocation();
   const hostSession = useHomeAssistantHostSession();
-  const [entryRequest] = useState<EditorOpenRequest | null>(() => initialRequest ?? (hostSession ? null : readEditorReturn(initialRecord.homeId)));
+  const [entryRequest] = useState<EditorOpenRequest | null>(
+    () => initialRequest ?? (hostSession ? null : readEditorReturn(initialRecord.homeId)),
+  );
   useEffect(() => {
     if (entryRequest) {
       // Preserve OAuth query parameters until the runtime has consumed them.
       const search = new URLSearchParams(location.search);
       if (entryRequest.destination) search.set("action", entryRequest.destination);
-      void navigate(`${editorPath(entryRequest, record.homeId)}${search.size ? `?${search}` : ""}`, { replace: true, state: { editorRequest: entryRequest } });
+      void navigate(
+        `${editorPath(entryRequest, record.homeId)}${search.size ? `?${search}` : ""}`,
+        { replace: true, state: { editorRequest: entryRequest } },
+      );
       window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
     }
   }, []);
   const openEditor = async (request: EditorOpenRequest) => {
     await toolStorage.flush();
-    const path = (request.mode === "construct" || request.mode === "furnish") && !request.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
-      ? mobileEditorPath(record.homeId, request.mode) : editorPath(request, record.homeId);
+    const path =
+      (request.mode === "construct" || request.mode === "furnish") &&
+      !request.panel &&
+      mobileEditorViewport() &&
+      !mobileEditorPromptDismissed()
+        ? mobileEditorPath(record.homeId, request.mode)
+        : editorPath(request, record.homeId);
     void navigate(path, { state: { editorRequest: request } });
   };
   const origin = homeAssistantUrl ? normalizeWorkspaceBindingOrigin(homeAssistantUrl) : null;
-  const manager = useMemo(() => ({
-    profile: (origin ? record.bindings[origin]?.published : undefined) ?? createEmptyRuntimeBindingProfile(record.homeId),
-    loaded: true, hasStoredProfile: Boolean(origin && record.bindings[origin]),
-    // The controlled real dashboard can never activate independent mappings.
-    save: () => undefined,
-  }), [origin, record]);
-  const editor = <RoutedHomeEditor initialRecord={record} lifecycle={lifecycle} recoveryMessage={recovery.message} recoveryRaw={recovery.raw}
+  const manager = useMemo(
+    () => ({
+      profile:
+        (origin ? record.bindings[origin]?.published : undefined) ??
+        createEmptyRuntimeBindingProfile(record.homeId),
+      loaded: true,
+      hasStoredProfile: Boolean(origin && record.bindings[origin]),
+      // The controlled real dashboard can never activate independent mappings.
+      save: () => undefined,
+    }),
+    [origin, record],
+  );
+  const editor = (
+    <RoutedHomeEditor
+      initialRecord={record}
+      lifecycle={lifecycle}
+      recoveryMessage={recovery.message}
+      recoveryRaw={recovery.raw}
       homeAssistantUrl={homeAssistantUrl}
       onPrepareOrigin={async (current, url) => {
         const next = await onHomeAssistantUrlChange(url, current);
         const updated = next ?? current;
-        setRecord(updated); return updated;
+        setRecord(updated);
+        return updated;
       }}
-      onClose={(next, reason) => { setRecovery({ message: undefined, raw: undefined }); setRecord(next); setConstructionApplied(reason === "applied"); window.sessionStorage.removeItem(CONNECT_RETURN_KEY); }} />;
-  const home = record.publishedAt === 0
-    ? <Navigate to={editorPath({ mode: "construct" }, record.homeId)} replace />
-    : <WalkToolStorageProvider storage={toolStorage.storage}><ShortcutThumbnailSurface><CabaneAppExperience manifest={publishedManifest!} architectureModels={stableArchitectureModelRegistry}
-    onboarding={onboarding} walkTools={installedWalkTools}
-    deviceModels={ownerDeviceModels} homeAssistantUrl={homeAssistantUrl} onHomeAssistantUrlChange={(url) => {
-      setConnectionError(null);
-      void Promise.resolve().then(() => onHomeAssistantUrlChange(url, record)).then((next) => { if (next) setRecord(next); })
-        .catch((error) => setConnectionError(error instanceof Error ? error.message : "Connection settings could not be saved."));
-    }}
-    onHomeAssistantSettings={() => void navigate(`${workspaceHomePath(record.homeId)}/home-assistant`)}
-    onWorkspaces={() => void navigate("/workspaces")}
-    renderActionBarDeviceIcon={modelId => <ShortcutDeviceIcon modelId={modelId} models={ownerDeviceModels} />}
-    bindingManager={manager} constructionApplied={constructionApplied} onEditHome={(mode = "construct") => openEditor({ mode })}
-    onCustomizeActionBar={() => openEditor({ mode: "construct", panel: "action-bar" })}
-    onOpenConnect={(view, roomId) => openEditor({ mode: "connect", view, roomId })}
-    onExportBrowserData={() => downloadConnectData(exportWorkspaceBackup({ name: record.draft.home.name, homeAssistantUrl, hasPublished: record.publishedAt !== 0 }, record), `${record.homeId}-private-workspace.json`)} /></ShortcutThumbnailSurface></WalkToolStorageProvider>;
-  return <FloorNavigationProvider key={record.homeId}>
-    {connectionError && <div className="workspace-connection-error" role="alert">{connectionError}<button type="button" onClick={() => setConnectionError(null)}>Dismiss</button></div>}
-    <Routes>
-    <Route path="/welcome" element={home} />
-    <Route path="/demo" element={home} />
-    <Route path="/workspaces/:workspaceId" element={home} />
-    <Route path="/workspaces/:workspaceId/home-assistant" element={<HomeAssistantPage record={record} lifecycle={lifecycle}
-      origin={homeAssistantUrl} onChangeOrigin={async url => {
-        const next = await onHomeAssistantUrlChange(url, record); if (next) setRecord(next);
-      }} onRecordChange={setRecord} isDemo={onboarding?.isDemo ?? false} onCreatePersonal={() => onboarding?.start("connect")} />} />
-    <Route path="/workspaces/:workspaceId/mobile-editor" element={<MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />} />
-    {editorRoutes.map(({ path, handle }) => <Route key={path} path={path} element={
-      (handle.mode === "construct" || handle.mode === "furnish") && !handle.panel && mobileEditorViewport() && !mobileEditorPromptDismissed()
-        ? path === "/build" ? <MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />
-          : <Navigate to={mobileEditorPath(record.homeId, handle.mode)} replace /> : editor} />)}
-    <Route path="*" element={<Navigate to={workspaceHomePath(record.homeId)} replace />} />
-  </Routes></FloorNavigationProvider>;
+      onClose={(next, reason) => {
+        setRecovery({ message: undefined, raw: undefined });
+        setRecord(next);
+        setConstructionApplied(reason === "applied");
+        window.sessionStorage.removeItem(CONNECT_RETURN_KEY);
+      }}
+    />
+  );
+  const home =
+    record.publishedAt === 0 ? (
+      <Navigate to={editorPath({ mode: "construct" }, record.homeId)} replace />
+    ) : (
+      <WalkToolStorageProvider storage={toolStorage.storage}>
+        <ShortcutThumbnailSurface>
+          <CabaneAppExperience
+            manifest={publishedManifest!}
+            architectureModels={stableArchitectureModelRegistry}
+            onboarding={onboarding}
+            walkTools={installedWalkTools}
+            deviceModels={ownerDeviceModels}
+            homeAssistantUrl={homeAssistantUrl}
+            onHomeAssistantUrlChange={(url) => {
+              setConnectionError(null);
+              void Promise.resolve()
+                .then(() => onHomeAssistantUrlChange(url, record))
+                .then((next) => {
+                  if (next) setRecord(next);
+                })
+                .catch((error) =>
+                  setConnectionError(
+                    error instanceof Error
+                      ? error.message
+                      : "Connection settings could not be saved.",
+                  ),
+                );
+            }}
+            onHomeAssistantSettings={() =>
+              void navigate(`${workspaceHomePath(record.homeId)}/home-assistant`)
+            }
+            onWorkspaces={() => void navigate("/workspaces")}
+            renderActionBarDeviceIcon={(modelId) => (
+              <ShortcutDeviceIcon modelId={modelId} models={ownerDeviceModels} />
+            )}
+            bindingManager={manager}
+            constructionApplied={constructionApplied}
+            onEditHome={(mode = "construct") => openEditor({ mode })}
+            onCustomizeActionBar={() => openEditor({ mode: "construct", panel: "action-bar" })}
+            onOpenConnect={(view, roomId) => openEditor({ mode: "connect", view, roomId })}
+            onExportBrowserData={() =>
+              downloadConnectData(
+                exportWorkspaceBackup(
+                  {
+                    name: record.draft.home.name,
+                    homeAssistantUrl,
+                    hasPublished: record.publishedAt !== 0,
+                  },
+                  record,
+                ),
+                `${record.homeId}-private-workspace.json`,
+              )
+            }
+          />
+        </ShortcutThumbnailSurface>
+      </WalkToolStorageProvider>
+    );
+  return (
+    <FloorNavigationProvider key={record.homeId}>
+      {connectionError && (
+        <div className="workspace-connection-error" role="alert">
+          {connectionError}
+          <button type="button" onClick={() => setConnectionError(null)}>
+            Dismiss
+          </button>
+        </div>
+      )}
+      <Routes>
+        <Route path="/welcome" element={home} />
+        <Route path="/demo" element={home} />
+        <Route path="/workspaces/:workspaceId" element={home} />
+        <Route
+          path="/workspaces/:workspaceId/home-assistant"
+          element={
+            <HomeAssistantPage
+              record={record}
+              lifecycle={lifecycle}
+              origin={homeAssistantUrl}
+              onChangeOrigin={async (url) => {
+                const next = await onHomeAssistantUrlChange(url, record);
+                if (next) setRecord(next);
+              }}
+              onRecordChange={setRecord}
+              isDemo={onboarding?.isDemo ?? false}
+              onCreatePersonal={() => onboarding?.start("connect")}
+            />
+          }
+        />
+        <Route
+          path="/workspaces/:workspaceId/mobile-editor"
+          element={
+            <MobileEditorPrompt workspaceId={record.homeId} demoWorkspaceId={demoWorkspaceId} />
+          }
+        />
+        {editorRoutes.map(({ path, handle }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              (handle.mode === "construct" || handle.mode === "furnish") &&
+              !handle.panel &&
+              mobileEditorViewport() &&
+              !mobileEditorPromptDismissed() ? (
+                path === "/build" ? (
+                  <MobileEditorPrompt
+                    workspaceId={record.homeId}
+                    demoWorkspaceId={demoWorkspaceId}
+                  />
+                ) : (
+                  <Navigate to={mobileEditorPath(record.homeId, handle.mode)} replace />
+                )
+              ) : (
+                editor
+              )
+            }
+          />
+        ))}
+        <Route path="*" element={<Navigate to={workspaceHomePath(record.homeId)} replace />} />
+      </Routes>
+    </FloorNavigationProvider>
+  );
 }

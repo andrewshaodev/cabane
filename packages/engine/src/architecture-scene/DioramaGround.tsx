@@ -1,8 +1,6 @@
 import { cutStairGroundOpenings } from "../stairs/ground-apertures";
 import { useStairSurfaceApertures } from "../stairs/surface-apertures";
-import {
-  Shape
-} from "three";
+import { Shape } from "three";
 
 import { memo, useMemo } from "react";
 
@@ -12,16 +10,9 @@ import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 
 import { ToonMaterial } from "../rendering";
 
-import type {
-  FloorSpec
-} from "../types";
+import type { FloorSpec } from "../types";
 
-const roundedDioramaShape = (
-  centerX: number,
-  centerZ: number,
-  size: number,
-  radius: number,
-) => {
+const roundedDioramaShape = (centerX: number, centerZ: number, size: number, radius: number) => {
   const left = centerX - size / 2;
   const right = centerX + size / 2;
   const near = centerZ - size / 2;
@@ -55,16 +46,26 @@ export const DioramaGround = memo(function DioramaGround({
 }) {
   const apertures = useStairSurfaceApertures("floor");
   const baseShape = useMemo(
-    () => cutStairGroundOpenings(cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size, 0.42), floor), floor.coordinates, apertures),
+    () =>
+      cutStairGroundOpenings(
+        cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size, 0.42), floor),
+        floor.coordinates,
+        apertures,
+      ),
     [centerX, centerZ, size, floor, apertures],
   );
   const grassShape = useMemo(
-    () => cutStairGroundOpenings(cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size - 0.1, 0.36), floor), floor.coordinates, apertures),
+    () =>
+      cutStairGroundOpenings(
+        cutPoolOpenings(roundedDioramaShape(centerX, centerZ, size - 0.1, 0.36), floor),
+        floor.coordinates,
+        apertures,
+      ),
     [centerX, centerZ, size, floor, apertures],
   );
   const topY = GROUND_ELEVATION_METERS;
   const grassThickness = 0.1;
-  const baseThickness = floor.pools?.length ? POOL_DEPTH_METERS + .06 : .28;
+  const baseThickness = floor.pools?.length ? POOL_DEPTH_METERS + 0.06 : 0.28;
   return (
     <group>
       <mesh

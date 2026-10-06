@@ -15,13 +15,23 @@ independent UI color.
 {
   "id": "bedroom",
   "name": "Bedroom",
-  "polygon": [[0.2, 0.2], [3.8, 0.2], [3.8, 2.8], [0.2, 2.8]],
+  "polygon": [
+    [0.2, 0.2],
+    [3.8, 0.2],
+    [3.8, 2.8],
+    [0.2, 2.8]
+  ],
   "accent": "#c9a477",
   "floorFinish": { "kind": "preset", "preset": "light-oak" },
   "floorZones": [
     {
       "id": "bedroom-rug-zone",
-      "polygon": [[0.8, 0.7], [2.4, 0.7], [2.4, 1.9], [0.8, 1.9]],
+      "polygon": [
+        [0.8, 0.7],
+        [2.4, 0.7],
+        [2.4, 1.9],
+        [0.8, 1.9]
+      ],
       "finish": { "kind": "solid", "color": "#b58a62" }
     }
   ],

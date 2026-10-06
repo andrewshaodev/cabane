@@ -36,4 +36,3 @@ export const contourFragmentShader = /* glsl */ `
     #include <colorspace_fragment>
   }
 `;
-

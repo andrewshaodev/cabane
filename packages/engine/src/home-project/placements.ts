@@ -20,12 +20,11 @@ export const resolveItemTransform = (
   }
 
   if (placement.kind === "ceiling") {
-    const ceiling = floor.ceilings?.find((candidate) =>
-      candidate.kind === "flat" && candidate.roomIds.includes(placement.roomId)
+    const ceiling = floor.ceilings?.find(
+      (candidate) => candidate.kind === "flat" && candidate.roomIds.includes(placement.roomId),
     );
-    const height = ceiling?.kind === "flat"
-      ? ceiling.heightMeters
-      : floor.defaultCeilingHeightMeters;
+    const height =
+      ceiling?.kind === "flat" ? ceiling.heightMeters : floor.defaultCeilingHeightMeters;
     const [x, z] = planPointToWorld(placement.at, floor.coordinates);
     return {
       position: [x, height - placement.dropMeters, z],
@@ -52,9 +51,8 @@ export const resolveItemTransform = (
   const side = placement.face === "left" ? -1 : 1;
   const normalX = rightNormalX * side;
   const normalZ = rightNormalZ * side;
-  const normalMeters = Math.round(
-    (wall.thicknessMeters / 2 + placement.depthOffsetMeters) * 1e12,
-  ) / 1e12;
+  const normalMeters =
+    Math.round((wall.thicknessMeters / 2 + placement.depthOffsetMeters) * 1e12) / 1e12;
   const normalPlan = normalMeters / floor.coordinates.metersPerPlanUnit;
   const at = [
     wall.from[0] + ux * placement.offsetFromWallStartPlanUnits + normalX * normalPlan,
@@ -64,7 +62,8 @@ export const resolveItemTransform = (
 
   return {
     position: [x, placement.elevationMeters, z],
-    rotationYRadians: Math.atan2(rightNormalX, rightNormalZ) +
+    rotationYRadians:
+      Math.atan2(rightNormalX, rightNormalZ) +
       (placement.face === "left" ? Math.PI : 0) +
       placement.rotationOffsetRadians,
   };

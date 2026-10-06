@@ -1,12 +1,7 @@
 import { useCabaneDom } from "./CabaneDom";
-import {
-  useEffect,
-  type MutableRefObject
-} from "react";
+import { useEffect, type MutableRefObject } from "react";
 
-import {
-  type StickVector
-} from "./navigation";
+import { type StickVector } from "./navigation";
 
 export function DesktopLookSurface({
   lookDeltaRef,

@@ -110,7 +110,10 @@ export function RoomMappingInspector({
               const ownedByAnotherRoom = Boolean(ownerRoomId && ownerRoomId !== room.id);
               return (
                 <option key={area.area_id} value={area.area_id} disabled={ownedByAnotherRoom}>
-                  {area.name}{ownedByAnotherRoom ? ` · Used by ${roomNameById[ownerRoomId] ?? "another 3D room"}` : ""}
+                  {area.name}
+                  {ownedByAnotherRoom
+                    ? ` · Used by ${roomNameById[ownerRoomId] ?? "another 3D room"}`
+                    : ""}
                 </option>
               );
             })}
@@ -129,9 +132,11 @@ export function RoomMappingInspector({
       >
         <strong>{room.name} 3D</strong>
         <span aria-hidden="true">→</span>
-        <span>{relationshipLabel === "No HA area" || relationshipLabel === "Saved area unavailable"
-          ? relationshipLabel
-          : `${relationshipLabel} HA`}</span>
+        <span>
+          {relationshipLabel === "No HA area" || relationshipLabel === "Saved area unavailable"
+            ? relationshipLabel
+            : `${relationshipLabel} HA`}
+        </span>
       </button>
     </aside>
   );

@@ -10,7 +10,10 @@ export function resolveActionBarDestination(
       if (target.kind === "room" && room.id === target.roomId) {
         return { floorId: floor.id, roomId: room.id };
       }
-      if (target.kind === "device" && room.devices.some(device => device.id === target.deviceId)) {
+      if (
+        target.kind === "device" &&
+        room.devices.some((device) => device.id === target.deviceId)
+      ) {
         return { floorId: floor.id, roomId: room.id, deviceId: target.deviceId };
       }
     }

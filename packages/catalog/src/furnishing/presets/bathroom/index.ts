@@ -1,8 +1,5 @@
 export { ArchedMirror } from "./arched-mirror";
-export {
-  DarkOakVesselVanity,
-  DARK_OAK_VESSEL_VANITY_SIZE,
-} from "./dark-oak-vessel-vanity";
+export { DarkOakVesselVanity, DARK_OAK_VESSEL_VANITY_SIZE } from "./dark-oak-vessel-vanity";
 export { ConcealedCisternToilet } from "./concealed-cistern-toilet";
 export { ShowerScreen, ShowerTray } from "./shower-screen";
 export { TowelRail } from "./towel-rail";

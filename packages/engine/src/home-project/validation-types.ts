@@ -12,8 +12,7 @@ export type HomeProjectValidationResult =
   | { valid: false; issues: readonly HomeProjectIssue[] };
 
 export type HomeProjectSchemaResult =
-  | { valid: true; project: HomeProject }
-  | { valid: false; issues: readonly HomeProjectIssue[] };
+  { valid: true; project: HomeProject } | { valid: false; issues: readonly HomeProjectIssue[] };
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -30,7 +29,10 @@ export const addProjectIssue = (
   message: string,
 ) => issues.push({ code, path, message, severity: "error" });
 
-export const sortProjectIssues = (issues: HomeProjectIssue[]) => issues.sort((left, right) =>
-  left.path.localeCompare(right.path) || left.code.localeCompare(right.code) ||
-  left.message.localeCompare(right.message)
-);
+export const sortProjectIssues = (issues: HomeProjectIssue[]) =>
+  issues.sort(
+    (left, right) =>
+      left.path.localeCompare(right.path) ||
+      left.code.localeCompare(right.code) ||
+      left.message.localeCompare(right.message),
+  );

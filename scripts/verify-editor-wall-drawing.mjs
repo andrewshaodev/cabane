@@ -14,7 +14,9 @@ try {
   await page.getByRole("button", { name: "Construct", exact: true }).click();
   await page.locator(".construction-plan__room-label").first().waitFor();
   await page.evaluate(async () => {
-    const url = performance.getEntriesByType("resource").map((entry) => entry.name)
+    const url = performance
+      .getEntriesByType("resource")
+      .map((entry) => entry.name)
       .find((name) => name.includes("/@react-three_fiber.js"));
     const { _roots } = await import(url);
     window.wallDrawingProbe = () => {
@@ -29,24 +31,35 @@ try {
         if (object.name.startsWith("construction-wall-target-")) wallCount++;
       });
       return {
-        wallCount, guide: guide?.userData, pointer: pointer.toArray(),
-        tip: projected && [rect.x + (projected.x + 1) * rect.width / 2,
-          rect.y + (1 - projected.y) * rect.height / 2],
+        wallCount,
+        guide: guide?.userData,
+        pointer: pointer.toArray(),
+        tip: projected && [
+          rect.x + ((projected.x + 1) * rect.width) / 2,
+          rect.y + ((1 - projected.y) * rect.height) / 2,
+        ],
       };
     };
   });
   const probe = () => page.evaluate(() => window.wallDrawingProbe());
-  const paint = () => page.evaluate(() => new Promise((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(resolve));
-  }));
+  const paint = () =>
+    page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          requestAnimationFrame(() => requestAnimationFrame(resolve));
+        }),
+    );
 
-  for (const viewport of [{ width: 1440, height: 960 }, { width: 960, height: 720 }]) {
+  for (const viewport of [
+    { width: 1440, height: 960 },
+    { width: 960, height: 720 },
+  ]) {
     await page.setViewportSize(viewport);
     await page.getByRole("button", { name: "Wall", exact: true }).click();
     const canvas = page.locator(".direction-preview__model canvas");
     const bounds = await canvas.boundingBox();
-    const x = Math.round(bounds.x + bounds.width * .42);
-    const y = Math.round(bounds.y + bounds.height * .8);
+    const x = Math.round(bounds.x + bounds.width * 0.42);
+    const y = Math.round(bounds.y + bounds.height * 0.8);
     const initialWallCount = (await probe()).wallCount;
     // Alt isolates pointer tracking from intentionally magnetic/angle snapping.
     await page.keyboard.down("Alt");
@@ -62,8 +75,10 @@ try {
       const current = await probe();
       assert.deepEqual(current.guide.from, start, "hovering preserves the first edge");
       assert.equal(current.wallCount, initialWallCount, "hovering never commits a wall");
-      assert.ok(current.tip && Math.hypot(current.tip[0] - x - offset, current.tip[1] - y) < .5,
-        `preview jumped away from cursor at ${x + offset},${y}: ${current.tip}`);
+      assert.ok(
+        current.tip && Math.hypot(current.tip[0] - x - offset, current.tip[1] - y) < 0.5,
+        `preview jumped away from cursor at ${x + offset},${y}: ${current.tip}`,
+      );
     }
     await page.screenshot({ path: `/tmp/cabane-wall-preview-${viewport.width}.png` });
     // Snapping must still use the cursor's canvas coordinates at the midpoint.
@@ -72,8 +87,10 @@ try {
       await page.mouse.move(x + offset, y);
       await paint();
       const current = await probe();
-      assert.ok(Math.abs(current.pointer[0] - ((x + offset - bounds.x) / bounds.width * 2 - 1)) < .001);
-      assert.ok(Math.abs(current.pointer[1] - (1 - (y - bounds.y) / bounds.height * 2)) < .001);
+      assert.ok(
+        Math.abs(current.pointer[0] - (((x + offset - bounds.x) / bounds.width) * 2 - 1)) < 0.001,
+      );
+      assert.ok(Math.abs(current.pointer[1] - (1 - ((y - bounds.y) / bounds.height) * 2)) < 0.001);
       assert.equal(current.wallCount, initialWallCount);
     }
     await page.mouse.click(x + 100, y);
@@ -84,8 +101,16 @@ try {
     assert.equal((await probe()).guide, undefined, "Escape removes the transient preview");
     await page.getByRole("button", { name: "Undo", exact: true }).click();
     await paint();
-    assert.equal((await probe()).wallCount, initialWallCount, "one Undo removes the committed wall");
+    assert.equal(
+      (await probe()).wallCount,
+      initialWallCount,
+      "one Undo removes the committed wall",
+    );
   }
   assert.deepEqual(errors, []);
-  console.log("Verified wall-preview label crossings, short walls, snapping, commit, cancellation, and undo at two viewport sizes without flicker or browser errors.");
-} finally { await browser.close(); }
+  console.log(
+    "Verified wall-preview label crossings, short walls, snapping, commit, cancellation, and undo at two viewport sizes without flicker or browser errors.",
+  );
+} finally {
+  await browser.close();
+}

@@ -3,13 +3,22 @@ import type { EditorOpenRequest } from "./editor-connect/connect-navigation";
 
 export const editorRoutes = [
   { path: "/build", handle: { mode: "construct" } },
-  { path: "/workspaces/:workspaceId/shortcuts", handle: { mode: "construct", panel: "action-bar" } },
-  { path: "/workspaces/:workspaceId/action-bar", handle: { mode: "construct", panel: "action-bar" } },
+  {
+    path: "/workspaces/:workspaceId/shortcuts",
+    handle: { mode: "construct", panel: "action-bar" },
+  },
+  {
+    path: "/workspaces/:workspaceId/action-bar",
+    handle: { mode: "construct", panel: "action-bar" },
+  },
   { path: "/workspaces/:workspaceId/construct", handle: { mode: "construct" } },
   { path: "/workspaces/:workspaceId/arrange", handle: { mode: "furnish" } },
   { path: "/workspaces/:workspaceId/connect", handle: { mode: "connect" } },
   { path: "/workspaces/:workspaceId/connect/rooms", handle: { mode: "connect", view: "rooms" } },
-  { path: "/workspaces/:workspaceId/connect/devices", handle: { mode: "connect", view: "devices" } },
+  {
+    path: "/workspaces/:workspaceId/connect/devices",
+    handle: { mode: "connect", view: "devices" },
+  },
 ] satisfies { path: string; handle: EditorOpenRequest }[];
 
 export function mobileEditorPath(workspaceId: string, mode: "construct" | "furnish"): string {
@@ -25,7 +34,9 @@ export function workspaceHomePath(workspaceId: string): string {
 }
 
 export function workspaceIdForPath(pathname: string): string | null {
-  return matchRoutes([{ path: "/workspaces/:workspaceId/*" }], pathname)?.[0].params.workspaceId ?? null;
+  return (
+    matchRoutes([{ path: "/workspaces/:workspaceId/*" }], pathname)?.[0].params.workspaceId ?? null
+  );
 }
 
 export function editorPath(request: EditorOpenRequest, workspaceId: string): string {
@@ -34,7 +45,11 @@ export function editorPath(request: EditorOpenRequest, workspaceId: string): str
   if (request.panel === "action-bar") return `${base}/shortcuts`;
   if (request.mode === "construct") return `${base}/construct`;
   if (request.mode === "furnish") return `${base}/arrange`;
-  return request.relationshipId ? `${base}/connect/devices` : request.view ? `${base}/connect/${request.view}` : `${base}/connect`;
+  return request.relationshipId
+    ? `${base}/connect/devices`
+    : request.view
+      ? `${base}/connect/${request.view}`
+      : `${base}/connect`;
 }
 
 /** Editor history is shared only within the same home; all other exits save. */

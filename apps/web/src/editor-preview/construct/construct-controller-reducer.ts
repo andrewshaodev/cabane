@@ -9,14 +9,17 @@ import {
   type EditorOpening,
   type FloorEditorAction,
   type FloorEditorHistory,
-  type FloorSpec
+  type FloorSpec,
 } from "@cabane/engine";
 
 import { floorWithOpeningOrientations } from "./opening-orientation-floor";
 
 import { ConstructEditorAction, ConstructEditorState } from "./construct-controller-contract";
 
-export const topologyForDraft = (draft: FloorEditorHistory["present"], reservedRoomNames: readonly string[] = []) => {
+export const topologyForDraft = (
+  draft: FloorEditorHistory["present"],
+  reservedRoomNames: readonly string[] = [],
+) => {
   return deriveFloorTopology({
     floorToFloorHeightMeters: draft.floorToFloorHeightMeters,
     belowGround: draft.belowGround,
@@ -64,13 +67,15 @@ const engineActionFor = (
   }
   if (action.type === "update-selected-opening" || action.type === "replace-selected-opening") {
     const selection = history.present.selection;
-    const opening = selection?.kind === "opening"
-      ? history.present.openings.find((candidate) => candidate.id === selection.id)
-      : undefined;
+    const opening =
+      selection?.kind === "opening"
+        ? history.present.openings.find((candidate) => candidate.id === selection.id)
+        : undefined;
     if (!opening) return null;
-    const updated = action.type === "replace-selected-opening"
-      ? action.opening
-      : { ...opening, ...action.patch } as EditorOpening;
+    const updated =
+      action.type === "replace-selected-opening"
+        ? action.opening
+        : ({ ...opening, ...action.patch } as EditorOpening);
     if (updated.id !== opening.id || updated.kind !== opening.kind) return null;
     const constrainedOffset = nearestAvailableOpeningOffset(
       updated.offsetPlanUnits,
@@ -113,12 +118,20 @@ export const constructEditorReducer = (
 ): ConstructEditorState => {
   const history = constructEditorHistoryReducer(state.history, action);
   if (history === state.history) return state;
-  const orientedFloor = floorWithOpeningOrientations(state.history.present, history.present, state.previewFloor);
+  const orientedFloor = floorWithOpeningOrientations(
+    state.history.present,
+    history.present,
+    state.previewFloor,
+  );
   if (orientedFloor) return { ...state, history, previewFloor: orientedFloor };
   const topology = topologyForDraft(history.present);
   return {
     history,
-    previewFloor: topology.floor ?? (topology.faces.length === 0 ? incompleteFloorPreview(history.present, state.previewFloor) : state.previewFloor),
+    previewFloor:
+      topology.floor ??
+      (topology.faces.length === 0
+        ? incompleteFloorPreview(history.present, state.previewFloor)
+        : state.previewFloor),
     topologyIssues: topology.issues,
     wallRuns: topology.wallRuns,
   };

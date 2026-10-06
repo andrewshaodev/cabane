@@ -6,10 +6,12 @@
   visibility: hidden;
   opacity: 0;
   overflow: hidden;
-  background: radial-gradient(ellipse at center,
+  background: radial-gradient(
+    ellipse at center,
     color-mix(in srgb, var(--portal-color) 24%, #111925) 0%,
     color-mix(in srgb, var(--portal-color) 48%, #111925) 65%,
-    #111925 100%);
+    #111925 100%
+  );
 }
 .walk-portal-transit__iris {
   position: absolute;
@@ -19,9 +21,11 @@
   height: min(88vh, 90vw);
   border: 3px solid var(--portal-color);
   border-radius: 50%;
-  opacity: .5;
+  opacity: 0.5;
   transform: translate(-50%, -50%);
 }
 @media (prefers-reduced-motion: reduce) {
-  .walk-portal-transit__iris { display: none !important; }
+  .walk-portal-transit__iris {
+    display: none !important;
+  }
 }

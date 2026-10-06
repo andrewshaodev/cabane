@@ -1,10 +1,6 @@
 import { validateDevicePlacementContact } from "../devices";
 
-import {
-  type FloorSpec,
-  type HomeManifest,
-  type ManifestIssue
-} from "../types";
+import { type FloorSpec, type HomeManifest, type ManifestIssue } from "../types";
 
 import {
   STABLE_MODELS,
@@ -18,7 +14,7 @@ import {
   issue,
   registerId,
   type RawObject,
-  type ValidationContext
+  type ValidationContext,
 } from "./core";
 
 import { validateEntitySlot } from "./entity-slot-rules";
@@ -36,18 +32,22 @@ export const validateDevice = (
   const issues = [...registerId(context, rawDevice.id, `${devicePath}.id`)];
   const modelIsExtension = isNonEmptyString(rawDevice.model) && !STABLE_MODELS.has(rawDevice.model);
   if (!isNonEmptyString(rawDevice.model)) {
-    issues.push(issue(
-      "device.model",
-      `${devicePath}.model`,
-      "A stable model ID or extension key is required.",
-    ));
+    issues.push(
+      issue(
+        "device.model",
+        `${devicePath}.model`,
+        "A stable model ID or extension key is required.",
+      ),
+    );
   }
   if (modelIsExtension && !extensionHas(context.input, "deviceModels", rawDevice.model as string)) {
-    issues.push(issue(
-      "device.model-extension",
-      `${devicePath}.model`,
-      `Device extension "${String(rawDevice.model)}" is not registered.`,
-    ));
+    issues.push(
+      issue(
+        "device.model-extension",
+        `${devicePath}.model`,
+        `Device extension "${String(rawDevice.model)}" is not registered.`,
+      ),
+    );
   }
   const definition = isNonEmptyString(rawDevice.model)
     ? modelIsExtension
@@ -57,41 +57,55 @@ export const validateDevice = (
         : undefined
     : undefined;
   if (!modelIsExtension && isNonEmptyString(rawDevice.model) && !definition) {
-    issues.push(issue(
-      "device.model-registry",
-      `${devicePath}.model`,
-      `Stable device model "${rawDevice.model}" is not available in the supplied catalog.`,
-    ));
+    issues.push(
+      issue(
+        "device.model-registry",
+        `${devicePath}.model`,
+        `Stable device model "${rawDevice.model}" is not available in the supplied catalog.`,
+      ),
+    );
   }
   if (!Array.isArray(rawDevice.entitySlots) || rawDevice.entitySlots.length === 0) {
-    issues.push(issue(
-      "device.entity-slots",
-      `${devicePath}.entitySlots`,
-      "A modeled device requires at least one typed entity slot.",
-    ));
+    issues.push(
+      issue(
+        "device.entity-slots",
+        `${devicePath}.entitySlots`,
+        "A modeled device requires at least one typed entity slot.",
+      ),
+    );
   } else {
     rawDevice.entitySlots.forEach((rawSlot, slotIndex) => {
-      issues.push(...validateEntitySlot(
-        rawSlot,
-        `${devicePath}.entitySlots[${slotIndex}]`,
-        context,
-        definition,
-      ));
+      issues.push(
+        ...validateEntitySlot(
+          rawSlot,
+          `${devicePath}.entitySlots[${slotIndex}]`,
+          context,
+          definition,
+        ),
+      );
     });
-    const primaryCount = rawDevice.entitySlots.filter((rawSlot) =>
-      isObject(rawSlot) && rawSlot.deviceRole === "primary"
+    const primaryCount = rawDevice.entitySlots.filter(
+      (rawSlot) => isObject(rawSlot) && rawSlot.deviceRole === "primary",
     ).length;
     if (primaryCount !== 1) {
-      issues.push(issue(
-        "device.primary-slot",
-        `${devicePath}.entitySlots`,
-        "A modeled device requires exactly one primary entity slot.",
-      ));
+      issues.push(
+        issue(
+          "device.primary-slot",
+          `${devicePath}.entitySlots`,
+          "A modeled device requires exactly one primary entity slot.",
+        ),
+      );
     }
-    if (definition?.liveMedia?.kind === "camera-stream" &&
+    if (
+      definition?.liveMedia?.kind === "camera-stream" &&
       (!definition.supportedDomains.includes("media_player") ||
-        rawDevice.entitySlots.some((slot) => isObject(slot) &&
-          Array.isArray(slot.compatibleDomains) && slot.compatibleDomains.includes("camera")))) {
+        rawDevice.entitySlots.some(
+          (slot) =>
+            isObject(slot) &&
+            Array.isArray(slot.compatibleDomains) &&
+            slot.compatibleDomains.includes("camera"),
+        ))
+    ) {
       const cameraSlot = rawDevice.entitySlots[0];
       if (
         rawDevice.entitySlots.length !== 1 ||
@@ -100,23 +114,26 @@ export const validateDevice = (
         cameraSlot.required !== true ||
         !Array.isArray(cameraSlot.compatibleDomains) ||
         cameraSlot.compatibleDomains.length === 0 ||
-        cameraSlot.compatibleDomains.some((domain) => domain !== "camera" &&
-          !(domain === "media_player" && definition.supportedDomains.includes("media_player")))
+        cameraSlot.compatibleDomains.some(
+          (domain) =>
+            domain !== "camera" &&
+            !(domain === "media_player" && definition.supportedDomains.includes("media_player")),
+        )
       ) {
-        issues.push(issue(
-          "device.camera-stream-slot",
-          `${devicePath}.entitySlots`,
-          "A camera-stream device requires one required primary slot using camera or a supported media-player alternative.",
-        ));
+        issues.push(
+          issue(
+            "device.camera-stream-slot",
+            `${devicePath}.entitySlots`,
+            "A camera-stream device requires one required primary slot using camera or a supported media-player alternative.",
+          ),
+        );
       }
     }
   }
   if (!isObject(rawDevice.placement)) {
-    issues.push(issue(
-      "device.placement",
-      `${devicePath}.placement`,
-      "Device placement must be an object.",
-    ));
+    issues.push(
+      issue("device.placement", `${devicePath}.placement`, "Device placement must be an object."),
+    );
     return issues;
   }
 
@@ -124,88 +141,123 @@ export const validateDevice = (
   const elevationMeters = rawDevice.placement.elevationMeters;
   const validElevation = isFiniteNumber(elevationMeters);
   if (!validPoint) {
-    issues.push(issue(
-      "device.placement",
-      `${devicePath}.placement.at`,
-      "Device placement requires a finite plan point.",
-    ));
+    issues.push(
+      issue(
+        "device.placement",
+        `${devicePath}.placement.at`,
+        "Device placement requires a finite plan point.",
+      ),
+    );
   }
   if (!validElevation) {
-    issues.push(issue(
-      "device.placement",
-      `${devicePath}.placement.elevationMeters`,
-      "Device elevation must be finite.",
-    ));
+    issues.push(
+      issue(
+        "device.placement",
+        `${devicePath}.placement.elevationMeters`,
+        "Device elevation must be finite.",
+      ),
+    );
   } else if (elevationMeters < 0) {
-    issues.push(issue(
-      "device.elevation",
-      `${devicePath}.placement.elevationMeters`,
-      "Device elevation cannot be negative.",
-    ));
+    issues.push(
+      issue(
+        "device.elevation",
+        `${devicePath}.placement.elevationMeters`,
+        "Device elevation cannot be negative.",
+      ),
+    );
   }
-  if (rawDevice.placement.rotationYRadians !== undefined &&
-    !isFiniteNumber(rawDevice.placement.rotationYRadians)) {
-    issues.push(issue(
-      "device.rotation",
-      `${devicePath}.placement.rotationYRadians`,
-      "Device rotation must be finite when provided.",
-    ));
+  if (
+    rawDevice.placement.rotationYRadians !== undefined &&
+    !isFiniteNumber(rawDevice.placement.rotationYRadians)
+  ) {
+    issues.push(
+      issue(
+        "device.rotation",
+        `${devicePath}.placement.rotationYRadians`,
+        "Device rotation must be finite when provided.",
+      ),
+    );
   }
-  if (rawDevice.placement.scale !== undefined &&
-    (!isFiniteNumber(rawDevice.placement.scale) || rawDevice.placement.scale <= 0)) {
-    issues.push(issue(
-      "device.scale",
-      `${devicePath}.placement.scale`,
-      "Device scale must be greater than zero when provided.",
-    ));
+  if (
+    rawDevice.placement.scale !== undefined &&
+    (!isFiniteNumber(rawDevice.placement.scale) || rawDevice.placement.scale <= 0)
+  ) {
+    issues.push(
+      issue(
+        "device.scale",
+        `${devicePath}.placement.scale`,
+        "Device scale must be greater than zero when provided.",
+      ),
+    );
   }
-  if (!isObject(rawDevice.placement.support) ||
-    !["surface", "wall"].includes(String(rawDevice.placement.support.kind))) {
-    issues.push(issue(
-      "device.support",
-      `${devicePath}.placement.support`,
-      "Device support must be surface or wall.",
-    ));
+  if (
+    !isObject(rawDevice.placement.support) ||
+    !["surface", "wall"].includes(String(rawDevice.placement.support.kind))
+  ) {
+    issues.push(
+      issue(
+        "device.support",
+        `${devicePath}.placement.support`,
+        "Device support must be surface or wall.",
+      ),
+    );
   } else if (rawDevice.placement.support.kind === "wall") {
     if (!isNonEmptyString(rawDevice.placement.support.wallId)) {
-      issues.push(issue(
-        "device.support-wall",
-        `${devicePath}.placement.support.wallId`,
-        "Wall support requires an exact wall ID.",
-      ));
+      issues.push(
+        issue(
+          "device.support-wall",
+          `${devicePath}.placement.support.wallId`,
+          "Wall support requires an exact wall ID.",
+        ),
+      );
     }
     if (!isFiniteNumber(rawDevice.placement.rotationYRadians)) {
-      issues.push(issue(
-        "device.wall-rotation",
-        `${devicePath}.placement.rotationYRadians`,
-        "Wall support requires a finite inward-facing rotation.",
-      ));
+      issues.push(
+        issue(
+          "device.wall-rotation",
+          `${devicePath}.placement.rotationYRadians`,
+          "Wall support requires a finite inward-facing rotation.",
+        ),
+      );
     }
   }
 
-  const composedSceneItem = Array.isArray(context.input.sceneItems) &&
-    context.input.sceneItems.some((candidate) =>
-      isObject(candidate) && candidate.kind === "device" &&
-      candidate.id === rawDevice.id && candidate.modelId === rawDevice.model
+  const composedSceneItem =
+    Array.isArray(context.input.sceneItems) &&
+    context.input.sceneItems.some(
+      (candidate) =>
+        isObject(candidate) &&
+        candidate.kind === "device" &&
+        candidate.id === rawDevice.id &&
+        candidate.modelId === rawDevice.model,
     );
-  if (!composedSceneItem && definition && isObject(rawDevice.placement.support) &&
+  if (
+    !composedSceneItem &&
+    definition &&
+    isObject(rawDevice.placement.support) &&
     ["surface", "wall"].includes(String(rawDevice.placement.support.kind)) &&
     (rawDevice.placement.support.kind !== "wall" ||
       isFiniteNumber(rawDevice.placement.rotationYRadians)) &&
-    validPoint && validElevation &&
+    validPoint &&
+    validElevation &&
     (rawDevice.placement.scale === undefined ||
       (isFiniteNumber(rawDevice.placement.scale) && rawDevice.placement.scale > 0)) &&
-    isPolygon(rawRoom.polygon) && isObject(rawFloor.coordinates) &&
+    isPolygon(rawRoom.polygon) &&
+    isObject(rawFloor.coordinates) &&
     isPlanPoint(rawFloor.coordinates.origin) &&
     isFiniteNumber(rawFloor.coordinates.metersPerPlanUnit) &&
-    Array.isArray(rawFloor.walls)) {
-    issues.push(...validateDevicePlacementContact({
-      binding: rawDevice as unknown as HomeManifest["floors"][number]["rooms"][number]["devices"][number],
-      definition,
-      floor: rawFloor as unknown as FloorSpec,
-      room: rawRoom as unknown as HomeManifest["floors"][number]["rooms"][number],
-      path: devicePath,
-    }));
+    Array.isArray(rawFloor.walls)
+  ) {
+    issues.push(
+      ...validateDevicePlacementContact({
+        binding:
+          rawDevice as unknown as HomeManifest["floors"][number]["rooms"][number]["devices"][number],
+        definition,
+        floor: rawFloor as unknown as FloorSpec,
+        room: rawRoom as unknown as HomeManifest["floors"][number]["rooms"][number],
+        path: devicePath,
+      }),
+    );
   }
   return issues;
 };

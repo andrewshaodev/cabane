@@ -1,9 +1,46 @@
-.ha-cors-help { margin-top: 12px; color: #53645c; font-size: .875rem; line-height: 1.6; }
-.ha-cors-help summary { min-height: 44px; padding-block: 10px; cursor: pointer; }
-.ha-cors-help p { margin: 8px 0 12px; font-size: inherit; }
-.ha-cors-help code { overflow-wrap: anywhere; user-select: text; }
-.ha-cors-help__origin { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
-.ha-cors-help__origin code { min-width: 0; flex: 1 1 180px; }
-.ha-cors-help__origin button { min-height: 44px; padding: 8px 12px; color: inherit; background: transparent; border: 1px solid #bcc7b2; border-radius: 9px; font: inherit; cursor: pointer; }
-.ha-cors-help__origin button:hover { background: #e7e9e3; }
-.ha-cors-help a { color: inherit; text-underline-offset: 3px; }
+.ha-cors-help {
+  margin-top: 12px;
+  color: #53645c;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.ha-cors-help summary {
+  min-height: 44px;
+  padding-block: 10px;
+  cursor: pointer;
+}
+.ha-cors-help p {
+  margin: 8px 0 12px;
+  font-size: inherit;
+}
+.ha-cors-help code {
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+.ha-cors-help__origin {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.ha-cors-help__origin code {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+.ha-cors-help__origin button {
+  min-height: 44px;
+  padding: 8px 12px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid #bcc7b2;
+  border-radius: 9px;
+  font: inherit;
+  cursor: pointer;
+}
+.ha-cors-help__origin button:hover {
+  background: #e7e9e3;
+}
+.ha-cors-help a {
+  color: inherit;
+  text-underline-offset: 3px;
+}

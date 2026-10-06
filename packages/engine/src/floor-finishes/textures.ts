@@ -1,15 +1,6 @@
-import {
-  CanvasTexture,
-  LinearMipmapLinearFilter,
-  RepeatWrapping,
-  SRGBColorSpace,
-} from "three";
+import { CanvasTexture, LinearMipmapLinearFilter, RepeatWrapping, SRGBColorSpace } from "three";
 import type { FloorPatternPresetId } from "../types";
-import {
-  FLOOR_FINISH_PRESETS,
-  paintFloorPattern,
-  type FloorPatternVariant,
-} from "./presets";
+import { FLOOR_FINISH_PRESETS, paintFloorPattern, type FloorPatternVariant } from "./presets";
 
 export interface FloorFinishTextureSet {
   get: (id: FloorPatternPresetId) => CanvasTexture | null;
@@ -20,8 +11,7 @@ type CanvasDocument = Pick<Document, "createElement">;
 
 export const createFloorFinishTextureSet = (
   variant: FloorPatternVariant,
-  canvasDocument: CanvasDocument | null =
-    typeof document === "undefined" ? null : document,
+  canvasDocument: CanvasDocument | null = typeof document === "undefined" ? null : document,
 ): FloorFinishTextureSet => {
   const textures = new Map<FloorPatternPresetId, CanvasTexture>();
   if (canvasDocument) {

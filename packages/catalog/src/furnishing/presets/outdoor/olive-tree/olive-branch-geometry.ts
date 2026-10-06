@@ -7,7 +7,7 @@ export function createOliveBranchGeometry(
   points: readonly OliveBranchPoint[],
   rings = 12,
   sides = 12,
-  fluting = .13,
+  fluting = 0.13,
 ) {
   const curve = new CatmullRomCurve3(points.map(([x, y, z]) => new Vector3(x, y, z)));
   const frames = curve.computeFrenetFrames(rings, false);
@@ -23,19 +23,20 @@ export function createOliveBranchGeometry(
     const blend = t * (points.length - 1) - interval;
     const radius = points[interval][3] * (1 - blend) + points[interval + 1][3] * blend;
     for (let side = 0; side < sides; side++) {
-      const angle = side / sides * Math.PI * 2;
+      const angle = (side / sides) * Math.PI * 2;
       const flute = Math.cos(angle * 5 + t * 5.5);
       const distance = radius * (1 + flute * fluting);
-      const vertex = center.clone()
+      const vertex = center
+        .clone()
         .addScaledVector(frames.normals[ring], Math.cos(angle) * distance)
         .addScaledVector(frames.binormals[ring], Math.sin(angle) * distance);
       // The root flare is cut at soil level, without a soil disk or planter.
       positions.push(vertex.x, Math.max(0, vertex.y), vertex.z);
-      const color = shadow.clone().lerp(ridge, .35 + .3 * flute + .12 * Math.sin(angle));
+      const color = shadow.clone().lerp(ridge, 0.35 + 0.3 * flute + 0.12 * Math.sin(angle));
       colors.push(color.r, color.g, color.b);
       if (ring < rings) {
         const a = ring * sides + side;
-        const b = ring * sides + (side + 1) % sides;
+        const b = ring * sides + ((side + 1) % sides);
         indices.push(a, b, a + sides, b, b + sides, a + sides);
       }
     }

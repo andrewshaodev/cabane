@@ -95,7 +95,9 @@ const connection = {
     if (message.type === "config/entity_registry/list") return structuredClone(registry);
     throw new Error(`Unexpected fixture message: ${message.type}`);
   },
-  async subscribeEvents() { return () => undefined; },
+  async subscribeEvents() {
+    return () => undefined;
+  },
 };
 
 const authData = {
@@ -109,7 +111,8 @@ const authData = {
 window.localStorage.setItem(HOME_ASSISTANT_TOKEN_STORAGE_KEY, JSON.stringify(authData));
 if (firstRunScenario) {
   const onboardingKey = onboardingStorageKey(manifest.home.id);
-  if (["post-onboarding", "home-editor"].includes(scenario)) window.localStorage.setItem(onboardingKey, "complete");
+  if (["post-onboarding", "home-editor"].includes(scenario))
+    window.localStorage.setItem(onboardingKey, "complete");
   else window.localStorage.removeItem(onboardingKey);
   window.localStorage.removeItem(modelingNudgeStorageKey(manifest.home.id));
   saveRuntimeBindingProfile(
@@ -118,7 +121,11 @@ if (firstRunScenario) {
     createEmptyRuntimeBindingProfile(manifest.home.id),
   );
 } else {
-  saveRuntimeBindingProfile(window.localStorage, "http://fixture-ha.local:8123", connectedProfileFixture());
+  saveRuntimeBindingProfile(
+    window.localStorage,
+    "http://fixture-ha.local:8123",
+    connectedProfileFixture(),
+  );
 }
 
 const client = {
@@ -138,7 +145,9 @@ const client = {
     callback(states);
     return () => undefined;
   },
-  async callService() { return undefined; },
+  async callService() {
+    return undefined;
+  },
 };
 
 const root = document.getElementById("root");
@@ -160,7 +169,11 @@ createRoot(root).render(
           onExportBrowserData={() => undefined}
         />
       ) : (
-        <CabaneDashboard manifest={manifest} architectureModels={stableArchitectureModelRegistry} deviceModels={stableDeviceRegistry} />
+        <CabaneDashboard
+          manifest={manifest}
+          architectureModels={stableArchitectureModelRegistry}
+          deviceModels={stableDeviceRegistry}
+        />
       )}
     </HomeAssistantRuntimeTestProvider>
   </StrictMode>,

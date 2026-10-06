@@ -17,10 +17,7 @@ import type { RoofSettings } from "../roof/roof-settings";
 import type { ActionBarConfiguration } from "../action-bar/action-bar-config";
 import { migrateLegacyProject } from "./migrations";
 
-export type LayoutRoomSpec = Omit<
-  RoomSpec,
-  "furnishings" | "dashboardSlots" | "devices"
-> & {
+export type LayoutRoomSpec = Omit<RoomSpec, "furnishings" | "dashboardSlots" | "devices"> & {
   furnishings?: never;
   dashboardSlots: readonly [];
   devices: readonly [];
@@ -32,10 +29,7 @@ type LayoutOpeningWithoutContact<T extends OpeningSpec> = T extends OpeningSpec
 
 export type LayoutOpeningSpec = LayoutOpeningWithoutContact<OpeningSpec>;
 
-export type LayoutFloorSpec = Omit<
-  FloorSpec,
-  "rooms" | "openings" | "ceilings" | "footprint"
-> & {
+export type LayoutFloorSpec = Omit<FloorSpec, "rooms" | "openings" | "ceilings" | "footprint"> & {
   footprint: Polygon;
   rooms: readonly LayoutRoomSpec[];
   openings: readonly LayoutOpeningSpec[];
@@ -45,11 +39,7 @@ export type LayoutFloorSpec = Omit<
 export type DraftLayoutFloorSpec = Omit<LayoutFloorSpec, "footprint"> & {
   footprint: readonly PlanPoint[];
 };
-export type SceneItemSize = readonly [
-  width: number,
-  height: number,
-  depth: number,
-];
+export type SceneItemSize = readonly [width: number, height: number, depth: number];
 
 export type ItemPlacement =
   | {
@@ -139,11 +129,17 @@ export interface HomeProject {
 }
 
 export type LegacySceneItemSpec = SceneItemSpec extends infer Item
-  ? Item extends SceneItemSpec ? Omit<Item, "floorId"> & { floorId?: string } : never : never;
+  ? Item extends SceneItemSpec
+    ? Omit<Item, "floorId"> & { floorId?: string }
+    : never
+  : never;
 export type LegacyLayoutFloorSpec = Omit<LayoutFloorSpec, "floorToFloorHeightMeters"> & {
   floorToFloorHeightMeters?: number;
 };
-export type LegacyHomeProject = Omit<HomeProject, "schemaVersion" | "coordinates" | "floors" | "stairs" | "sceneItems"> & {
+export type LegacyHomeProject = Omit<
+  HomeProject,
+  "schemaVersion" | "coordinates" | "floors" | "stairs" | "sceneItems"
+> & {
   schemaVersion: 1;
   floor: LegacyLayoutFloorSpec;
   sceneItems: readonly LegacySceneItemSpec[];

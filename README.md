@@ -24,12 +24,12 @@ has two furnished floors and serves as the initial demo home.
 
 This npm workspace separates the reusable product from the bundled home:
 
-| Path | Responsibility |
-| --- | --- |
-| `apps/web` | Web application, routes, workspace and editor shell |
-| `packages/engine` | Project contracts, validation, 3D runtime, dashboard, and Home Assistant integration |
-| `packages/catalog` | Reusable architecture, furnishing, and device models |
-| `home` | Bundled home data and home-specific procedural extensions |
+| Path               | Responsibility                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `apps/web`         | Web application, routes, workspace and editor shell                                  |
+| `packages/engine`  | Project contracts, validation, 3D runtime, dashboard, and Home Assistant integration |
+| `packages/catalog` | Reusable architecture, furnishing, and device models                                 |
+| `home`             | Bundled home data and home-specific procedural extensions                            |
 
 The home project is stored in `home/src/layout.json`, `items.json`, and
 `project.json`. Browser edits are stored locally and do not update these files.

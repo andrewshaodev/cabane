@@ -1,9 +1,6 @@
 import type { ManifestIssue } from "../types";
 
-import {
-  type RawObject,
-  type ValidationContext
-} from "./core";
+import { type RawObject, type ValidationContext } from "./core";
 
 import { validateCeilings } from "./ceiling-rules";
 import { validateJunctions } from "./junction-rules";

@@ -42,13 +42,18 @@ await withModules(async (load) => {
   });
 
   test("exposes the room and compact status through one accessible button", () => {
-    const html = renderToStaticMarkup(React.createElement(RoomStatusOverlayButton, {
-      roomName: "Demo room",
-      summary,
-      onSelect: () => undefined,
-    }));
+    const html = renderToStaticMarkup(
+      React.createElement(RoomStatusOverlayButton, {
+        roomName: "Demo room",
+        summary,
+        onSelect: () => undefined,
+      }),
+    );
     assert.match(html, /<button/);
-    assert.match(html, /aria-label="Open Demo room\. Temperature 21 °C, Cooling, Lights on, Presence"/);
+    assert.match(
+      html,
+      /aria-label="Open Demo room\. Temperature 21 °C, Cooling, Lights on, Presence"/,
+    );
     assert.match(html, /data-visible="true"/);
     assert.match(html, /Demo room/);
     assert.equal(html.includes("Humidity"), false);
@@ -59,13 +64,16 @@ await withModules(async (load) => {
     assert.equal(roomStatusOverlayLimitForWidth(759), 6);
     assert.equal(roomStatusOverlayLimitForWidth(760), 10);
     assert.equal(roomStatusOverlayPriority(summary), 3);
-    assert.equal(roomStatusOverlayPriority({
-      roomId: "humidity-only",
-      humidity: { value: "48", unit: "%" },
-      heating: false,
-      cooling: false,
-      doorOpen: false,
-    }), 0);
+    assert.equal(
+      roomStatusOverlayPriority({
+        roomId: "humidity-only",
+        humidity: { value: "48", unit: "%" },
+        heating: false,
+        cooling: false,
+        doorOpen: false,
+      }),
+      0,
+    );
 
     const candidates = Array.from({ length: 7 }, (_, index) => ({
       id: `room-${index}`,
@@ -84,12 +92,47 @@ await withModules(async (load) => {
   });
 
   test("declutters overlapping labels and ignores off-screen rooms", () => {
-    const selected = selectRoomStatusOverlayIds([
-      { id: "priority", screenX: 100, screenY: 100, distanceFromCenter: .2, labelWidth: 100, priority: 2, inViewport: true },
-      { id: "overlap", screenX: 112, screenY: 108, distanceFromCenter: .1, labelWidth: 100, priority: 1, inViewport: true },
-      { id: "clear", screenX: 300, screenY: 100, distanceFromCenter: .3, labelWidth: 100, priority: 1, inViewport: true },
-      { id: "offscreen", screenX: 500, screenY: 100, distanceFromCenter: .05, labelWidth: 100, priority: 3, inViewport: false },
-    ], 5);
+    const selected = selectRoomStatusOverlayIds(
+      [
+        {
+          id: "priority",
+          screenX: 100,
+          screenY: 100,
+          distanceFromCenter: 0.2,
+          labelWidth: 100,
+          priority: 2,
+          inViewport: true,
+        },
+        {
+          id: "overlap",
+          screenX: 112,
+          screenY: 108,
+          distanceFromCenter: 0.1,
+          labelWidth: 100,
+          priority: 1,
+          inViewport: true,
+        },
+        {
+          id: "clear",
+          screenX: 300,
+          screenY: 100,
+          distanceFromCenter: 0.3,
+          labelWidth: 100,
+          priority: 1,
+          inViewport: true,
+        },
+        {
+          id: "offscreen",
+          screenX: 500,
+          screenY: 100,
+          distanceFromCenter: 0.05,
+          labelWidth: 100,
+          priority: 3,
+          inViewport: false,
+        },
+      ],
+      5,
+    );
     assert.deepEqual([...selected], ["priority", "clear"]);
   });
 
@@ -103,8 +146,14 @@ await withModules(async (load) => {
       priority: 1,
       inViewport: true,
     }));
-    assert.equal(selectRoomStatusOverlayIds(candidates, roomStatusOverlayLimitForWidth(1200)).size, 10);
-    assert.equal(selectRoomStatusOverlayIds(candidates, roomStatusOverlayLimitForWidth(390)).size, 6);
+    assert.equal(
+      selectRoomStatusOverlayIds(candidates, roomStatusOverlayLimitForWidth(1200)).size,
+      10,
+    );
+    assert.equal(
+      selectRoomStatusOverlayIds(candidates, roomStatusOverlayLimitForWidth(390)).size,
+      6,
+    );
     assert.equal(selectRoomStatusOverlayIds(candidates.slice(0, 8), 10).size, 8);
   });
 
@@ -131,20 +180,28 @@ await withModules(async (load) => {
     const selected = [];
     const root = createRoot(dom.window.document.getElementById("root"));
     try {
-      await act(async () => root.render(React.createElement(RoomStatusOverlayButton, {
-        roomName: "Demo room",
-        summary,
-        onSelect: () => selected.push("demo-room"),
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomStatusOverlayButton, {
+            roomName: "Demo room",
+            summary,
+            onSelect: () => selected.push("demo-room"),
+          }),
+        ),
+      );
       await act(async () => dom.window.document.querySelector("button").click());
       assert.deepEqual(selected, ["demo-room"]);
 
-      await act(async () => root.render(React.createElement(RoomStatusOverlayButton, {
-        roomName: "Demo room",
-        summary,
-        visible: false,
-        onSelect: () => selected.push("hidden-room"),
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomStatusOverlayButton, {
+            roomName: "Demo room",
+            summary,
+            visible: false,
+            onSelect: () => selected.push("hidden-room"),
+          }),
+        ),
+      );
       const hidden = dom.window.document.querySelector("button");
       assert.equal(hidden.getAttribute("aria-hidden"), "true");
       assert.equal(hidden.tabIndex, -1);

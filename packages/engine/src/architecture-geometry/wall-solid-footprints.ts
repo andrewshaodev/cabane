@@ -5,7 +5,12 @@ import { BufferGeometry } from "three";
 import { planPointToWorld } from "../geometry";
 
 import type { FloorSpec, OpeningSpec, WallJunctionSpec, WallSpec } from "../types";
-import { EPSILON, Horizontal, JUNCTION_SEAM_OVERLAP_METERS, WallPlanFloor } from "./architecture-geometry-contract";
+import {
+  EPSILON,
+  Horizontal,
+  JUNCTION_SEAM_OVERLAP_METERS,
+  WallPlanFloor,
+} from "./architecture-geometry-contract";
 import { wallExteriorNormal, wallFrame } from "./wall-coordinate-frame";
 
 export interface ArchitecturalWallGeometryGroup {
@@ -26,11 +31,18 @@ export const orientedWallPolygon = (
   const end = endDistance ?? frame.length;
   const across = wall.thicknessMeters / 2;
   const corners = [
-    [start, -across], [end, -across], [end, across], [start, across], [start, -across],
-  ].map(([distance, side]) => [
-    frame.from[0] + frame.direction[0] * distance + frame.normal[0] * side,
-    frame.from[1] + frame.direction[1] * distance + frame.normal[1] * side,
-  ] as [number, number]);
+    [start, -across],
+    [end, -across],
+    [end, across],
+    [start, across],
+    [start, -across],
+  ].map(
+    ([distance, side]) =>
+      [
+        frame.from[0] + frame.direction[0] * distance + frame.normal[0] * side,
+        frame.from[1] + frame.direction[1] * distance + frame.normal[1] * side,
+      ] as [number, number],
+  );
   return [corners];
 };
 
@@ -40,18 +52,21 @@ const junctionEndpointExtension = (
   floor: FloorSpec,
 ): number => {
   const frame = wallFrame(wall, floor);
-  return Math.min(2, Math.max(
-    ...floor.walls
-      .filter((other) => other.id !== wall.id && junction.wallIds.includes(other.id))
-      .map((other) => {
-        const otherFrame = wallFrame(other, floor);
-        const crossing = Math.abs(
-          frame.direction[0] * otherFrame.normal[0] + frame.direction[1] * otherFrame.normal[1],
-        );
-        return crossing > 0.001 ? other.thicknessMeters / (2 * crossing) : 0;
-      }),
-    JUNCTION_SEAM_OVERLAP_METERS,
-  ));
+  return Math.min(
+    2,
+    Math.max(
+      ...floor.walls
+        .filter((other) => other.id !== wall.id && junction.wallIds.includes(other.id))
+        .map((other) => {
+          const otherFrame = wallFrame(other, floor);
+          const crossing = Math.abs(
+            frame.direction[0] * otherFrame.normal[0] + frame.direction[1] * otherFrame.normal[1],
+          );
+          return crossing > 0.001 ? other.thicknessMeters / (2 * crossing) : 0;
+        }),
+      JUNCTION_SEAM_OVERLAP_METERS,
+    ),
+  );
 };
 
 export const junctionConnectorInterval = (
@@ -61,7 +76,8 @@ export const junctionConnectorInterval = (
 ): readonly [number, number] | null => {
   const frame = wallFrame(wall, floor);
   const center = planPointToWorld(junction.at, floor.coordinates);
-  const distance = (center[0] - frame.from[0]) * frame.direction[0] +
+  const distance =
+    (center[0] - frame.from[0]) * frame.direction[0] +
     (center[1] - frame.from[1]) * frame.direction[1];
   const atStart = Math.abs(distance) <= JUNCTION_SEAM_OVERLAP_METERS;
   const atEnd = Math.abs(distance - frame.length) <= JUNCTION_SEAM_OVERLAP_METERS;
@@ -82,12 +98,21 @@ const junctionEndpointArmPolygon = (
   if (!interval) return null;
   const [start, end] = interval;
   const across = wall.thicknessMeters / 2;
-  return [[
-    [start, -across], [end, -across], [end, across], [start, across], [start, -across],
-  ].map(([distance, side]) => [
-    frame.from[0] + frame.direction[0] * distance + frame.normal[0] * side,
-    frame.from[1] + frame.direction[1] * distance + frame.normal[1] * side,
-  ] as [number, number])];
+  return [
+    [
+      [start, -across],
+      [end, -across],
+      [end, across],
+      [start, across],
+      [start, -across],
+    ].map(
+      ([distance, side]) =>
+        [
+          frame.from[0] + frame.direction[0] * distance + frame.normal[0] * side,
+          frame.from[1] + frame.direction[1] * distance + frame.normal[1] * side,
+        ] as [number, number],
+    ),
+  ];
 };
 
 export const junctionExteriorMiterPolygon = (
@@ -96,8 +121,8 @@ export const junctionExteriorMiterPolygon = (
   floor: WallPlanFloor,
 ): ClippingPolygon | null => {
   if (junction.wallIds.length !== 2) return null;
-  const walls = activeWalls.filter((wall) =>
-    junction.wallIds.includes(wall.id) && wall.classification === "exterior"
+  const walls = activeWalls.filter(
+    (wall) => junction.wallIds.includes(wall.id) && wall.classification === "exterior",
   );
   if (walls.length !== 2) return null;
   const [left, right] = walls;
@@ -106,38 +131,44 @@ export const junctionExteriorMiterPolygon = (
   const leftNormal = wallExteriorNormal(left, floor);
   const rightNormal = wallExteriorNormal(right, floor);
   if (!leftNormal || !rightNormal) return null;
-  const denominator = leftFrame.direction[0] * rightFrame.direction[1] -
+  const denominator =
+    leftFrame.direction[0] * rightFrame.direction[1] -
     leftFrame.direction[1] * rightFrame.direction[0];
   if (Math.abs(denominator) <= EPSILON) return null;
   const center = planPointToWorld(junction.at, floor.coordinates);
   const leftOffset: Horizontal = [
-    center[0] + leftNormal[0] * left.thicknessMeters / 2,
-    center[1] + leftNormal[1] * left.thicknessMeters / 2,
+    center[0] + (leftNormal[0] * left.thicknessMeters) / 2,
+    center[1] + (leftNormal[1] * left.thicknessMeters) / 2,
   ];
   const rightOffset: Horizontal = [
-    center[0] + rightNormal[0] * right.thicknessMeters / 2,
-    center[1] + rightNormal[1] * right.thicknessMeters / 2,
+    center[0] + (rightNormal[0] * right.thicknessMeters) / 2,
+    center[1] + (rightNormal[1] * right.thicknessMeters) / 2,
   ];
   const offset: Horizontal = [rightOffset[0] - leftOffset[0], rightOffset[1] - leftOffset[1]];
-  const progress = (offset[0] * rightFrame.direction[1] - offset[1] * rightFrame.direction[0]) /
-    denominator;
+  const progress =
+    (offset[0] * rightFrame.direction[1] - offset[1] * rightFrame.direction[0]) / denominator;
   const miter: Horizontal = [
     leftOffset[0] + leftFrame.direction[0] * progress,
     leftOffset[1] + leftFrame.direction[1] * progress,
   ];
   const maximumMiter = Math.max(left.thicknessMeters, right.thicknessMeters) * 2;
   if (Math.hypot(miter[0] - center[0], miter[1] - center[1]) > maximumMiter) return null;
-  return [[
-    [center[0], center[1]],
-    [leftOffset[0], leftOffset[1]],
-    [miter[0], miter[1]],
-    [rightOffset[0], rightOffset[1]],
-    [center[0], center[1]],
-  ]];
+  return [
+    [
+      [center[0], center[1]],
+      [leftOffset[0], leftOffset[1]],
+      [miter[0], miter[1]],
+      [rightOffset[0], rightOffset[1]],
+      [center[0], center[1]],
+    ],
+  ];
 };
 
 /** Horizontal wall solids, including corner miters, shared by rendering and outdoor clearance. */
-export const wallSolidFootprintPolygons = (floor: WallPlanFloor, activeWalls: readonly WallSpec[] = floor.walls): ClippingPolygon[] => [
+export const wallSolidFootprintPolygons = (
+  floor: WallPlanFloor,
+  activeWalls: readonly WallSpec[] = floor.walls,
+): ClippingPolygon[] => [
   ...activeWalls.map((wall) => orientedWallPolygon(wall, floor)),
   ...floor.wallJunctions.flatMap((junction) => {
     const miter = junctionExteriorMiterPolygon(junction, activeWalls, floor);
@@ -158,19 +189,29 @@ export const openingCutPolygon = (wall: WallSpec, opening: OpeningSpec, floor: F
   );
 };
 
-const pointCoveredByWall = (point: Horizontal, wall: WallSpec, frame: ReturnType<typeof wallFrame>) => {
+const pointCoveredByWall = (
+  point: Horizontal,
+  wall: WallSpec,
+  frame: ReturnType<typeof wallFrame>,
+) => {
   const offsetX = point[0] - frame.from[0];
   const offsetZ = point[1] - frame.from[1];
   const along = offsetX * frame.direction[0] + offsetZ * frame.direction[1];
   const across = Math.abs(offsetX * frame.normal[0] + offsetZ * frame.normal[1]);
-  return along >= -JUNCTION_SEAM_OVERLAP_METERS &&
+  return (
+    along >= -JUNCTION_SEAM_OVERLAP_METERS &&
     along <= frame.length + JUNCTION_SEAM_OVERLAP_METERS &&
-    across <= wall.thicknessMeters / 2 + JUNCTION_SEAM_OVERLAP_METERS;
+    across <= wall.thicknessMeters / 2 + JUNCTION_SEAM_OVERLAP_METERS
+  );
 };
 
 const pointInsideRing = (point: Horizontal, ring: readonly (readonly [number, number])[]) => {
   let inside = false;
-  for (let current = 0, previous = ring.length - 1; current < ring.length; previous = current, current += 1) {
+  for (
+    let current = 0, previous = ring.length - 1;
+    current < ring.length;
+    previous = current, current += 1
+  ) {
     const [x, z] = ring[current];
     const [previousX, previousZ] = ring[previous];
     // Visible corner faces lie exactly on the assembly boundary. Include
@@ -178,12 +219,15 @@ const pointInsideRing = (point: Horizontal, ring: readonly (readonly [number, nu
     const dx = previousX - x;
     const dz = previousZ - z;
     const lengthSquared = dx * dx + dz * dz;
-    const progress = lengthSquared > 0
-      ? Math.max(0, Math.min(1, ((point[0] - x) * dx + (point[1] - z) * dz) / lengthSquared))
-      : 0;
-    if (Math.hypot(point[0] - x - progress * dx, point[1] - z - progress * dz) <= EPSILON) return true;
-    const crosses = (z > point[1]) !== (previousZ > point[1]);
-    if (crosses && point[0] < ((previousX - x) * (point[1] - z)) / (previousZ - z) + x) inside = !inside;
+    const progress =
+      lengthSquared > 0
+        ? Math.max(0, Math.min(1, ((point[0] - x) * dx + (point[1] - z) * dz) / lengthSquared))
+        : 0;
+    if (Math.hypot(point[0] - x - progress * dx, point[1] - z - progress * dz) <= EPSILON)
+      return true;
+    const crosses = z > point[1] !== previousZ > point[1];
+    if (crosses && point[0] < ((previousX - x) * (point[1] - z)) / (previousZ - z) + x)
+      inside = !inside;
   }
   return inside;
 };
@@ -196,6 +240,6 @@ export const createWallAssemblyPointTest = (wall: WallSpec, floor: FloorSpec) =>
     const arm = junctionEndpointArmPolygon(wall, junction, floor);
     return arm ? [arm[0]] : [];
   });
-  return (point: Horizontal) => pointCoveredByWall(point, wall, frame)
-    || arms.some((arm) => pointInsideRing(point, arm));
+  return (point: Horizontal) =>
+    pointCoveredByWall(point, wall, frame) || arms.some((arm) => pointInsideRing(point, arm));
 };

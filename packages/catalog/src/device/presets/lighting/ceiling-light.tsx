@@ -14,7 +14,11 @@ export function CeilingLightModel({ state, visualState }: HomeDeviceModelProps) 
       </mesh>
       <mesh position={[0, 0.04, 0]} castShadow>
         <cylinderGeometry args={[0.18, 0.19, 0.08, 24]} />
-        <ToonMaterial color={finish.color} emissive="#f2c66d" emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)} />
+        <ToonMaterial
+          color={finish.color}
+          emissive="#f2c66d"
+          emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)}
+        />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.13, 0.075, 0]} scale={0.3} />
     </group>

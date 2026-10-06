@@ -29,27 +29,77 @@ export interface EditorActionBarProps {
 }
 
 export function EditorActionBar({
-  inert, mode, tool, onToolChange, canUndo, canRedo, onUndo, onRedo, onStairs, stairsActive, stairsDisabledReason,
+  inert,
+  mode,
+  tool,
+  onToolChange,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onStairs,
+  stairsActive,
+  stairsDisabledReason,
 }: EditorActionBarProps) {
   const constructing = mode === "construct";
   return (
-    <div inert={inert} className="editor-action-bar" role="group" data-mode={mode}
-      aria-label={constructing ? "Construction actions" : "Edit history"}>
-      {constructing && <>
-        {constructionTools.flatMap((action) => [<EditorActionButton key={action.tool}
-          icon={action.tool} label={action.label} showLabel pressed={!stairsActive && (tool === action.tool || (tool === "platform" && action.tool === "floor"))}
-          shortcut={action.key} keyShortcuts={action.key} onClick={() => onToolChange(action.tool)} />,
-          ...(action.tool === "wall" && onStairs ? [<EditorActionButton key="stairs" icon="stairs" label="Stairs" showLabel
-            pressed={stairsActive} disabled={Boolean(stairsDisabledReason)} disabledReason={stairsDisabledReason} onClick={onStairs} />] : []),
-        ])}
-        <span className="editor-action-bar__separator" aria-hidden="true" />
-      </>}
-      <EditorActionButton icon="undo" label="Undo" disabled={!canUndo} onClick={onUndo}
+    <div
+      inert={inert}
+      className="editor-action-bar"
+      role="group"
+      data-mode={mode}
+      aria-label={constructing ? "Construction actions" : "Edit history"}
+    >
+      {constructing && (
+        <>
+          {constructionTools.flatMap((action) => [
+            <EditorActionButton
+              key={action.tool}
+              icon={action.tool}
+              label={action.label}
+              showLabel
+              pressed={
+                !stairsActive &&
+                (tool === action.tool || (tool === "platform" && action.tool === "floor"))
+              }
+              shortcut={action.key}
+              keyShortcuts={action.key}
+              onClick={() => onToolChange(action.tool)}
+            />,
+            ...(action.tool === "wall" && onStairs
+              ? [
+                  <EditorActionButton
+                    key="stairs"
+                    icon="stairs"
+                    label="Stairs"
+                    showLabel
+                    pressed={stairsActive}
+                    disabled={Boolean(stairsDisabledReason)}
+                    disabledReason={stairsDisabledReason}
+                    onClick={onStairs}
+                  />,
+                ]
+              : []),
+          ])}
+          <span className="editor-action-bar__separator" aria-hidden="true" />
+        </>
+      )}
+      <EditorActionButton
+        icon="undo"
+        label="Undo"
+        disabled={!canUndo}
+        onClick={onUndo}
         shortcut="⌘/Ctrl Z"
-        keyShortcuts="Control+Z Meta+Z" />
-      <EditorActionButton icon="redo" label="Redo" disabled={!canRedo} onClick={onRedo}
+        keyShortcuts="Control+Z Meta+Z"
+      />
+      <EditorActionButton
+        icon="redo"
+        label="Redo"
+        disabled={!canRedo}
+        onClick={onRedo}
         shortcut="⌘/Ctrl Shift Z · Ctrl Y"
-        keyShortcuts="Control+Shift+Z Meta+Shift+Z Control+Y" />
+        keyShortcuts="Control+Shift+Z Meta+Shift+Z Control+Y"
+      />
     </div>
   );
 }

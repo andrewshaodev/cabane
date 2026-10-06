@@ -21,12 +21,13 @@ export function FramedGlassPanel({
   const frame = Math.min(0.055, width * 0.14, height * 0.14);
   const innerWidth = Math.max(0.02, width - frame * 2);
   const innerHeight = Math.max(0.02, height - frame * 2);
-  const rowPositions = privacy && rows === 2
-    ? [-innerHeight * 0.18]
-    : Array.from(
-      { length: Math.max(0, rows - 1) },
-      (_, index) => -innerHeight / 2 + innerHeight * ((index + 1) / rows),
-    );
+  const rowPositions =
+    privacy && rows === 2
+      ? [-innerHeight * 0.18]
+      : Array.from(
+          { length: Math.max(0, rows - 1) },
+          (_, index) => -innerHeight / 2 + innerHeight * ((index + 1) / rows),
+        );
 
   return (
     <group>

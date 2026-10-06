@@ -19,10 +19,18 @@
   stroke-width: 1.8;
   stroke-linecap: round;
 }
-.walk-laser__sight[data-target="true"] { color: #51e8f3; }
-.walk-laser__lock { opacity: 0; }
-.walk-laser__sight[data-target="true"] .walk-laser__lock { opacity: 1; }
-.walk-laser__sight[data-target="true"] .walk-laser__ticks { opacity: 0; }
+.walk-laser__sight[data-target="true"] {
+  color: #51e8f3;
+}
+.walk-laser__lock {
+  opacity: 0;
+}
+.walk-laser__sight[data-target="true"] .walk-laser__lock {
+  opacity: 1;
+}
+.walk-laser__sight[data-target="true"] .walk-laser__ticks {
+  opacity: 0;
+}
 .walk-laser-crosshair__action {
   display: flex;
   flex-direction: column;
@@ -30,9 +38,11 @@
   gap: 5px;
   width: 24px;
   margin-top: 20px;
-  opacity: .8;
+  opacity: 0.8;
 }
-.walk-laser-crosshair[data-ready="false"] .walk-laser-crosshair__action { opacity: .35; }
+.walk-laser-crosshair[data-ready="false"] .walk-laser-crosshair__action {
+  opacity: 0.35;
+}
 .walk-laser-crosshair__ability {
   width: 24px;
   height: 24px;
@@ -48,5 +58,5 @@
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
-  opacity: .85;
+  opacity: 0.85;
 }

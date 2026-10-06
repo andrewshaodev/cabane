@@ -3,13 +3,10 @@ import {
   useEffect,
   useRef,
   type MutableRefObject,
-  type PointerEvent as ReactPointerEvent
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 
-import {
-  normalizeStickInput,
-  type StickVector
-} from "./navigation";
+import { normalizeStickInput, type StickVector } from "./navigation";
 
 export function VirtualJoystick({
   label,

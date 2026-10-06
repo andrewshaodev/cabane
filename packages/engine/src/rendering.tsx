@@ -7,7 +7,8 @@ import {
   NearestFilter,
   RedFormat,
   type Group,
-  type Material, type Mesh,
+  type Material,
+  type Mesh,
 } from "three";
 import { createContext, useContext, useEffect, useRef, type ComponentProps } from "react";
 import { cameraFacingWallOpacityForNormals } from "./wall-fade";
@@ -26,10 +27,7 @@ toonGradient.magFilter = NearestFilter;
 toonGradient.generateMipmaps = false;
 toonGradient.needsUpdate = true;
 
-export type ToonMaterialProps = Omit<
-  ComponentProps<"meshToonMaterial">,
-  "gradientMap"
->;
+export type ToonMaterialProps = Omit<ComponentProps<"meshToonMaterial">, "gradientMap">;
 
 /** Local colour lift for interactive device models, preserving their live state. */
 export const DeviceHoverContext = createContext(false);
@@ -59,14 +57,7 @@ export function Outlines({
 }: OutlinesProps) {
   const sceneContours = useContext(SceneContourContext);
   if (sceneContours) return null;
-  return (
-    <SceneOutlines
-      color={color}
-      thickness={thickness}
-      screenspace={screenspace}
-      {...props}
-    />
-  );
+  return <SceneOutlines color={color} thickness={thickness} screenspace={screenspace} {...props} />;
 }
 
 export const applyCameraFadeToMesh = (mesh: Mesh, opacity: number) => {
@@ -132,7 +123,9 @@ export function CameraFacingFade({
       [camera.position.x, camera.position.z],
       fadeNormals,
     );
-    const next = reducedMotion ? target : opacityRef.current + (target - opacityRef.current) * (1 - Math.exp(-12 * delta));
+    const next = reducedMotion
+      ? target
+      : opacityRef.current + (target - opacityRef.current) * (1 - Math.exp(-12 * delta));
     const resolved = Math.abs(next - target) < 0.002 ? target : next;
     if (Math.abs(resolved - opacityRef.current) > 0.0005) {
       opacityRef.current = resolved;

@@ -16,10 +16,18 @@ await withModules(async (load) => {
   });
   test("top removal and private draft changes undo together; ground cannot be removed", () => {
     const initial = { project: makeThreeFloorProject(), bindings: {} };
-    const profile = { schemaVersion: 1, homeId: initial.project.home.id,
-      roomAreaIds: { "second-demo-room": "synthetic-area" }, entityIdsBySlotId: {} };
-    initial.bindings["https://synthetic.invalid"] = { draft: profile, published: profile,
-      manualRoomIds: ["second-demo-room"], manualSlotIds: [] };
+    const profile = {
+      schemaVersion: 1,
+      homeId: initial.project.home.id,
+      roomAreaIds: { "second-demo-room": "synthetic-area" },
+      entityIdsBySlotId: {},
+    };
+    initial.bindings["https://synthetic.invalid"] = {
+      draft: profile,
+      published: profile,
+      manualRoomIds: ["second-demo-room"],
+      manualSlotIds: [],
+    };
     const removed = api.removeTopFloor(initial);
     assert.deepEqual(removed.bindings["https://synthetic.invalid"].draft.roomAreaIds, {});
     assert.deepEqual(removed.bindings["https://synthetic.invalid"].published, profile);

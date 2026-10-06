@@ -29,31 +29,29 @@ export function FloorPaintConfirmation({
       priorFocusRef.current?.focus();
     };
   }, []);
-  return <dialog
-    ref={dialogRef}
-    className="floor-paint-confirmation"
-    aria-labelledby="floor-paint-confirmation-title"
-    onCancel={(event) => {
-      event.preventDefault();
-      onCancel();
-    }}
-  >
-    <div>
-      <h2 id="floor-paint-confirmation-title">
-        Paint all of {roomName}?
-      </h2>
-      <p>This room already contains custom floor areas.</p>
-      <button
-        ref={firstActionRef}
-        type="button"
-        onClick={onKeepZones}
-      >
-        Keep custom areas
-      </button>
-      <button type="button" onClick={onReplaceEverything}>
-        Replace everything
-      </button>
-      <button type="button" onClick={onCancel}>Cancel</button>
-    </div>
-  </dialog>;
+  return (
+    <dialog
+      ref={dialogRef}
+      className="floor-paint-confirmation"
+      aria-labelledby="floor-paint-confirmation-title"
+      onCancel={(event) => {
+        event.preventDefault();
+        onCancel();
+      }}
+    >
+      <div>
+        <h2 id="floor-paint-confirmation-title">Paint all of {roomName}?</h2>
+        <p>This room already contains custom floor areas.</p>
+        <button ref={firstActionRef} type="button" onClick={onKeepZones}>
+          Keep custom areas
+        </button>
+        <button type="button" onClick={onReplaceEverything}>
+          Replace everything
+        </button>
+        <button type="button" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </dialog>
+  );
 }

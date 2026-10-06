@@ -10,13 +10,24 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
   const { SolarLighting } = await load("/packages/engine/src/SceneLighting.tsx");
   const { deriveSolarLighting } = await load("/packages/engine/src/lighting.ts");
-  const { transitionSolarDirection } = await load("/packages/engine/src/solar-direction-transition.ts");
+  const { transitionSolarDirection } = await load(
+    "/packages/engine/src/solar-direction-transition.ts",
+  );
 
   await test("sun transitions remain finite and nonzero across opposite directions and azimuth wrap", () => {
     for (const [start, end] of [
-      [[18, 0, 0], [-18, 0, 0]],
-      [[18, 0, -0.01], [18, 0, 0.01]],
-      [[0, 18, 0], [0, -18, 0]],
+      [
+        [18, 0, 0],
+        [-18, 0, 0],
+      ],
+      [
+        [18, 0, -0.01],
+        [18, 0, 0.01],
+      ],
+      [
+        [0, 18, 0],
+        [0, -18, 0],
+      ],
     ]) {
       const current = new Vector3(...start);
       const target = new Vector3(...end);
@@ -34,17 +45,28 @@ await withModules(async (load) => {
     const renderer = await create(createElement(SolarLighting, props));
     try {
       for (const input of [
-        { mode: "day" }, { mode: "night" }, { mode: "live" },
+        { mode: "day" },
+        { mode: "night" },
+        { mode: "live" },
         { mode: "live", sunState: { state: "unknown", attributes: { elevation: "bad" } } },
-        ...[-8, -1, 0, 4, 35].map(elevation => ({ mode: "live", sunState: {
-          state: "above_horizon", attributes: { azimuth: 359, elevation },
-        } })),
+        ...[-8, -1, 0, 4, 35].map((elevation) => ({
+          mode: "live",
+          sunState: {
+            state: "above_horizon",
+            attributes: { azimuth: 359, elevation },
+          },
+        })),
       ]) {
         await renderer.update(createElement(SolarLighting, { ...props, ...input }));
         await renderer.advanceFrames(1, 1 / 60);
         const sky = renderer.scene.findByProps({ name: "walk-sky" }).instance;
-        const sun = renderer.scene.children.find(node => node.instance.isDirectionalLight).instance;
-        assert.ok(sky.material.uniforms.sunDirection.value.distanceTo(sun.position.clone().normalize()) < 1e-6);
+        const sun = renderer.scene.children.find(
+          (node) => node.instance.isDirectionalLight,
+        ).instance;
+        assert.ok(
+          sky.material.uniforms.sunDirection.value.distanceTo(sun.position.clone().normalize()) <
+            1e-6,
+        );
         assert.equal(sky.material.depthWrite, false);
         assert.equal(sky.castShadow, false);
         assert.equal(sky.frustumCulled, false);
@@ -55,6 +77,8 @@ await withModules(async (load) => {
       }
       await renderer.update(createElement(SolarLighting, { ...props, walkMode: false }));
       assert.equal(renderer.scene.findAllByProps({ name: "walk-sky" }).length, 0);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 });

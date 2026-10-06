@@ -7,9 +7,17 @@ const WICKER_DARK = "#6d4c31";
 
 // Continuous outer wall, rolled rim, inner wall, and recessed floor. No lid.
 const BASKET_PROFILE = [
-  [0, 0], [.34, 0], [.29, .48], [.305, .495], [.305, .505],
-  [.298, .512], [.28, .512], [.273, .505], [.273, .485],
-  [.313, .03], [0, .03],
+  [0, 0],
+  [0.34, 0],
+  [0.29, 0.48],
+  [0.305, 0.495],
+  [0.305, 0.505],
+  [0.298, 0.512],
+  [0.28, 0.512],
+  [0.273, 0.505],
+  [0.273, 0.485],
+  [0.313, 0.03],
+  [0, 0.03],
 ].map(([radius, height]) => new Vector2(radius, height));
 
 export function ChildrenBedroomWovenFloorBasket() {
@@ -25,11 +33,7 @@ export function ChildrenBedroomWovenFloorBasket() {
         return (
           <mesh
             key={angle}
-            position={[
-              Math.cos(angle) * 0.312,
-              0.2,
-              Math.sin(angle) * 0.312,
-            ]}
+            position={[Math.cos(angle) * 0.312, 0.2, Math.sin(angle) * 0.312]}
             rotation={[0, -angle, Math.sin(angle) * 0.04]}
           >
             <cylinderGeometry args={[0.006, 0.008, 0.36, 6]} />

@@ -57,14 +57,8 @@ function TallPantry() {
         to={[0.34, 1.04 * TALL_PANTRY_VERTICAL_SCALE, 0.291]}
         color="#a69e93"
       />
-      <BrassCabinetHandle
-        position={[0.25, 1.32 * TALL_PANTRY_VERTICAL_SCALE, 0.335]}
-        vertical
-      />
-      <BrassCabinetHandle
-        position={[0.25, 0.68 * TALL_PANTRY_VERTICAL_SCALE, 0.335]}
-        vertical
-      />
+      <BrassCabinetHandle position={[0.25, 1.32 * TALL_PANTRY_VERTICAL_SCALE, 0.335]} vertical />
+      <BrassCabinetHandle position={[0.25, 0.68 * TALL_PANTRY_VERTICAL_SCALE, 0.335]} vertical />
     </group>
   );
 }
@@ -147,11 +141,7 @@ function UpperDoor({ cabinet }: { readonly cabinet: (typeof upperCabinets)[numbe
       <group position={[cabinet.center, KITCHEN_CEILING_MOUNT_OFFSET, 0.25]}>
         <GlazedUpperDoor width={cabinet.width} position={[0, 1.35, 0.235]} />
         <BrassCabinetHandle
-          position={[
-            cabinet.handleSide * (cabinet.width / 2 - 0.055),
-            1.13,
-            0.285,
-          ]}
+          position={[cabinet.handleSide * (cabinet.width / 2 - 0.055), 1.13, 0.285]}
           vertical
         />
       </group>
@@ -161,11 +151,7 @@ function UpperDoor({ cabinet }: { readonly cabinet: (typeof upperCabinets)[numbe
     <group position={[cabinet.center, KITCHEN_CEILING_MOUNT_OFFSET, 0.25]}>
       <KitchenPanel width={cabinet.width} height={0.64} position={[0, 1.35, 0.211]} />
       <BrassCabinetHandle
-        position={[
-          (cabinet.center < 2.8 ? 1 : -1) * (cabinet.width / 2 - 0.055),
-          1.13,
-          0.255,
-        ]}
+        position={[(cabinet.center < 2.8 ? 1 : -1) * (cabinet.width / 2 - 0.055), 1.13, 0.255]}
         vertical
       />
     </group>
@@ -176,14 +162,12 @@ export function KitchenCabinetry() {
   return (
     <group name="custom-kitchen-cabinetry">
       <TallPantry />
-      <KitchenBox
-        size={[2.93, 0.79, 0.56]}
-        position={[2.245, 0.415, 0.31]}
-        color={KITCHEN_CREAM}
-      />
-      {baseCabinets.filter((cabinet) => cabinet.kind === "door").map((cabinet) => (
-        <BaseDoor key={cabinet.center} center={cabinet.center} width={cabinet.width} />
-      ))}
+      <KitchenBox size={[2.93, 0.79, 0.56]} position={[2.245, 0.415, 0.31]} color={KITCHEN_CREAM} />
+      {baseCabinets
+        .filter((cabinet) => cabinet.kind === "door")
+        .map((cabinet) => (
+          <BaseDoor key={cabinet.center} center={cabinet.center} width={cabinet.width} />
+        ))}
       {[1.38, 2.04, 2.7, 3.36].map((jointX) => (
         <CabinetJoint
           key={jointX}

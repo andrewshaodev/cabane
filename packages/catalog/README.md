@@ -61,17 +61,17 @@ Dimensions below are **width × depth × height in centimetres**. In code,
 models have a floor-contact origin at Y=0, centered footprints, and face +Z
 (the back/headboard is toward −Z).
 
-| Model ID | Public component | Default dimensions | Finish and construction | Arrange room |
-| --- | --- | --- | --- | --- |
-| `three-seat-sofa` | `ThreeSeatSofa` | 220 × 94 × 84 | Beige fabric, three seat/back cushions, rounded arms, oak feet | Living room |
-| `rectangular-dining-table` | `RectangularDiningTable` | 180 × 90 × 75 | Light oak, thin top, four square legs | Dining room |
-| `oak-dining-chair` | `OakDiningChair` | 49 × 50 × 82 | Oak frame, curved wood back, lightly padded beige seat | Dining room |
-| `oak-nightstand` | `OakNightstand` | 45 × 40 × 50 | Compact, simple oak nightstand with one drawer, recessed pull, and open lower shelf | Bedroom |
-| `flat-door-wardrobe` | `FlatDoorWardrobe` | 200 × 60 × 220 | Four off-white flat doors, oak case and pulls | Bedroom |
-| `oak-desk` | `OakDesk` | 140 × 70 × 74 | Oak, 2.5 cm top, four square legs | Office |
-| `ergonomic-office-chair` | `ErgonomicOfficeChair` | 68 × 68 × 104 | Cream padding, grey shell, dark five-spoke caster base, lumbar pad and arms | Office |
-| `oak-bookshelf` | `OakBookshelf` | 80 × 30 × 190 | Oak, five usable shelf levels including the bottom, separate top panel | Office |
-| `single-bed` | `SingleBed` | 100 × 210 × 95 overall | 90 × 200 mattress, oak frame, beige padded headboard and neutral bedding | Bedroom |
+| Model ID                   | Public component         | Default dimensions     | Finish and construction                                                             | Arrange room |
+| -------------------------- | ------------------------ | ---------------------- | ----------------------------------------------------------------------------------- | ------------ |
+| `three-seat-sofa`          | `ThreeSeatSofa`          | 220 × 94 × 84          | Beige fabric, three seat/back cushions, rounded arms, oak feet                      | Living room  |
+| `rectangular-dining-table` | `RectangularDiningTable` | 180 × 90 × 75          | Light oak, thin top, four square legs                                               | Dining room  |
+| `oak-dining-chair`         | `OakDiningChair`         | 49 × 50 × 82           | Oak frame, curved wood back, lightly padded beige seat                              | Dining room  |
+| `oak-nightstand`           | `OakNightstand`          | 45 × 40 × 50           | Compact, simple oak nightstand with one drawer, recessed pull, and open lower shelf | Bedroom      |
+| `flat-door-wardrobe`       | `FlatDoorWardrobe`       | 200 × 60 × 220         | Four off-white flat doors, oak case and pulls                                       | Bedroom      |
+| `oak-desk`                 | `OakDesk`                | 140 × 70 × 74          | Oak, 2.5 cm top, four square legs                                                   | Office       |
+| `ergonomic-office-chair`   | `ErgonomicOfficeChair`   | 68 × 68 × 104          | Cream padding, grey shell, dark five-spoke caster base, lumbar pad and arms         | Office       |
+| `oak-bookshelf`            | `OakBookshelf`           | 80 × 30 × 190          | Oak, five usable shelf levels including the bottom, separate top panel              | Office       |
+| `single-bed`               | `SingleBed`              | 100 × 210 × 95 overall | 90 × 200 mattress, oak frame, beige padded headboard and neutral bedding            | Bedroom      |
 
 Unspecified heights and sofa/chair dimensions are inferred standard proportions,
 not measurements of a particular product. The bed's requested 90 × 200 cm is
@@ -140,12 +140,12 @@ face +Z, and use Y=0 at the floor or supporting shelf. New presets have centered
 X/Z footprints; the reused washing machine preserves its existing origin and
 conservative outline-inclusive bounds.
 
-| Model ID | Public component | Placement dimensions | Finish and defining features | Arrange room |
-| --- | --- | --- | --- | --- |
-| `washing-machine` (reused) | `WashingMachineModel` | 63.2 × 63 × 86.5 | Off-white front loader, dark round door, detergent drawer, dial and display; existing 62 × 58 × 86 cm cabinet | Laundry |
-| `tumble-dryer` | `TumbleDryerModel` | 60 × 65 × 85 | Off-white condenser dryer, round glass door and grip, condensate drawer, lower vents | Laundry |
-| `dishwasher` | `DishwasherModel` | 60 × 65 × 85 | White freestanding dishwasher, full-height front door, top controls, projecting pull and recessed plinth | Kitchen |
-| `oven` | `OvenModel` | 60 × 62 × 60 | Independently placeable built-in oven, charcoal glass, stainless-style trim, two dials and bracketed pull; no cabinet or hob | Kitchen |
+| Model ID                   | Public component      | Placement dimensions | Finish and defining features                                                                                                 | Arrange room |
+| -------------------------- | --------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `washing-machine` (reused) | `WashingMachineModel` | 63.2 × 63 × 86.5     | Off-white front loader, dark round door, detergent drawer, dial and display; existing 62 × 58 × 86 cm cabinet                | Laundry      |
+| `tumble-dryer`             | `TumbleDryerModel`    | 60 × 65 × 85         | Off-white condenser dryer, round glass door and grip, condensate drawer, lower vents                                         | Laundry      |
+| `dishwasher`               | `DishwasherModel`     | 60 × 65 × 85         | White freestanding dishwasher, full-height front door, top controls, projecting pull and recessed plinth                     | Kitchen      |
+| `oven`                     | `OvenModel`           | 60 × 62 × 60         | Independently placeable built-in oven, charcoal glass, stainless-style trim, two dials and bracketed pull; no cabinet or hob | Kitchen      |
 
 The oven's origin is its supporting shelf: use absolute placement with the
 appropriate elevation when placing it in a cabinet. The dryer and dishwasher
@@ -176,14 +176,14 @@ base, door, or bowl. They use inferred standard proportions and do not claim to
 match a manufacturer. All have fixed sizes, face +Z, and use Y=0 at the floor or
 supporting surface.
 
-| Model ID | Public component | Dimensions | Finish and defining features | Arrange room |
-| --- | --- | --- | --- | --- |
-| `microwave` | `MicrowaveModel` | 52 × 40 × 31 | Pale grey countertop housing, dark window, vertical pull, display, and controls | Kitchen |
-| `coffee-maker` | `CoffeeMakerModel` | 24 × 34 × 36 | Warm-white filter machine with brew head, glass carafe, handle, and display | Kitchen |
-| `electric-kettle` | `ElectricKettleModel` | 22 × 20 × 26 | Pale grey cordless kettle with charging base, spout, lid, and dark handle | Kitchen |
-| `freezer` | `FreezerModel` | 65 × 68 × 175 | Upright pale-grey freezer with one tall door, long pull, display, and drawer lines | Kitchen |
-| `pet-feeder` | `PetFeederModel` | 24 × 36 × 35 | Automatic dry-food feeder with hopper, lid, chute, forward bowl, and display | Kitchen |
-| `weather-station` | `WeatherStationModel` | 18 × 4 × 12 | Indoor tabletop console with weather display, sun indicator, and trend bars | Living room |
+| Model ID          | Public component      | Dimensions    | Finish and defining features                                                       | Arrange room |
+| ----------------- | --------------------- | ------------- | ---------------------------------------------------------------------------------- | ------------ |
+| `microwave`       | `MicrowaveModel`      | 52 × 40 × 31  | Pale grey countertop housing, dark window, vertical pull, display, and controls    | Kitchen      |
+| `coffee-maker`    | `CoffeeMakerModel`    | 24 × 34 × 36  | Warm-white filter machine with brew head, glass carafe, handle, and display        | Kitchen      |
+| `electric-kettle` | `ElectricKettleModel` | 22 × 20 × 26  | Pale grey cordless kettle with charging base, spout, lid, and dark handle          | Kitchen      |
+| `freezer`         | `FreezerModel`        | 65 × 68 × 175 | Upright pale-grey freezer with one tall door, long pull, display, and drawer lines | Kitchen      |
+| `pet-feeder`      | `PetFeederModel`      | 24 × 36 × 35  | Automatic dry-food feeder with hopper, lid, chute, forward bowl, and display       | Kitchen      |
+| `weather-station` | `WeatherStationModel` | 18 × 4 × 12   | Indoor tabletop console with weather display, sun indicator, and trend bars        | Living room  |
 
 The microwave and coffee maker accept generic `switch`, `sensor`, `select`,
 `number`, or `button` entities. The kettle accepts `switch`, `sensor`, or
@@ -239,30 +239,30 @@ Their dimensions and warm-neutral finishes are inferred standard proportions;
 they do not claim to reproduce a particular manufacturer. Dimensions are
 **width × depth × height in centimetres**.
 
-| Model ID | Default dimensions | Finish and defining construction | Arrange room |
-| --- | --- | --- | --- |
-| `double-bed` | 170 × 215 × 110 | Light oak frame, beige padded headboard, 160 × 200 mattress, duvet and two pillows | Bedroom |
-| `rectangular-coffee-table` | 110 × 60 × 40 | Light oak rounded top, lower rail and four legs | Living room |
-| `upholstered-armchair` | 85 × 88 × 90 | Greige upholstery, separate seat/back cushions, two arms and four oak feet | Living room |
-| `chest-of-drawers` | 100 × 45 × 90 | Light oak case, four off-white drawers, recessed pulls and low plinth | Bedroom |
-| `neutral-area-rug` | 200 × 300 × 1.5 | Ivory and taupe code-native field, border and raised geometric bands | Living room |
-| `low-media-console` | 160 × 42 × 55 | Light oak, two cream doors, central open niche, cable port and short feet | Living room |
-| `three-door-sideboard` | 160 × 45 × 82 | Light oak three-door dining storage with projecting top and four feet | Dining room |
-| `kitchen-base-cabinet` | 60 × 63 × 90 | Off-white modular case, oak worktop, drawer, two doors and plinth | Kitchen |
-| `kitchen-sink-cabinet` | 60 × 63 × 112 | Off-white two-door base, pale worktop, inset basin, drain and 112 cm-high faucet envelope | Kitchen |
-| `kitchen-wall-cabinet` | 60 × 35 × 80 | Off-white wall case with two doors and low pulls | Kitchen |
-| `freestanding-bathtub` | 170 × 78 × 60 | Warm-white rounded shell, visible inner basin, drain and overflow | Bathroom |
-| `dark-oak-vessel-vanity` | 80 × 52 × 123 overall | Dark oak two-door vanity, white vessel basin and tall matte-black faucet | Bathroom |
-| `shower-assembly` | 202 × 91 × 230 overall | Walk-in tray, partial frameless glass screen with stabilizer and clamps, wall-mounted rain shower and hand shower | Bathroom |
-| `white-corner-wardrobe` | 180 × 120 × 235 overall | White L-shaped floor-to-ceiling storage, three long-run doors and one return door | Bedroom |
-| `entryway-shoe-bench` | 100 × 38 × 50 | Light oak frame and slatted shelf with a beige padded seat | Entryway |
-| `wall-coat-rack` | 80 × 22 × 32 | Light oak back and shelf with five supported grey hooks | Entryway |
-| `hallway-console-table` | 110 × 35 × 80 | Narrow light oak table with two drawers and four legs | Hallway |
-| `floating-wall-shelf` | 80 × 25 × 22 | Light oak shelf and back lip with two visible grey brackets | Hallway |
-| `framed-wall-art` | 80 × 4 × 60 | Oak frame with texture-free cream, terracotta, sage and earth relief planes | Living room |
-| `wooden-crib` | 76 × 146 × 95 | Light oak slatted cot with a 70 × 140 mattress and ivory bedding | Bedroom |
-| `counter-stool` | 48 × 50 × 92 | Light oak four-leg frame, 65 cm beige seat, low back and foot rail | Kitchen |
-| `upholstered-ottoman` | 70 × 55 × 42 | Beige upholstered cushion, perimeter seam and four short oak feet | Living room |
+| Model ID                   | Default dimensions      | Finish and defining construction                                                                                  | Arrange room |
+| -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------ |
+| `double-bed`               | 170 × 215 × 110         | Light oak frame, beige padded headboard, 160 × 200 mattress, duvet and two pillows                                | Bedroom      |
+| `rectangular-coffee-table` | 110 × 60 × 40           | Light oak rounded top, lower rail and four legs                                                                   | Living room  |
+| `upholstered-armchair`     | 85 × 88 × 90            | Greige upholstery, separate seat/back cushions, two arms and four oak feet                                        | Living room  |
+| `chest-of-drawers`         | 100 × 45 × 90           | Light oak case, four off-white drawers, recessed pulls and low plinth                                             | Bedroom      |
+| `neutral-area-rug`         | 200 × 300 × 1.5         | Ivory and taupe code-native field, border and raised geometric bands                                              | Living room  |
+| `low-media-console`        | 160 × 42 × 55           | Light oak, two cream doors, central open niche, cable port and short feet                                         | Living room  |
+| `three-door-sideboard`     | 160 × 45 × 82           | Light oak three-door dining storage with projecting top and four feet                                             | Dining room  |
+| `kitchen-base-cabinet`     | 60 × 63 × 90            | Off-white modular case, oak worktop, drawer, two doors and plinth                                                 | Kitchen      |
+| `kitchen-sink-cabinet`     | 60 × 63 × 112           | Off-white two-door base, pale worktop, inset basin, drain and 112 cm-high faucet envelope                         | Kitchen      |
+| `kitchen-wall-cabinet`     | 60 × 35 × 80            | Off-white wall case with two doors and low pulls                                                                  | Kitchen      |
+| `freestanding-bathtub`     | 170 × 78 × 60           | Warm-white rounded shell, visible inner basin, drain and overflow                                                 | Bathroom     |
+| `dark-oak-vessel-vanity`   | 80 × 52 × 123 overall   | Dark oak two-door vanity, white vessel basin and tall matte-black faucet                                          | Bathroom     |
+| `shower-assembly`          | 202 × 91 × 230 overall  | Walk-in tray, partial frameless glass screen with stabilizer and clamps, wall-mounted rain shower and hand shower | Bathroom     |
+| `white-corner-wardrobe`    | 180 × 120 × 235 overall | White L-shaped floor-to-ceiling storage, three long-run doors and one return door                                 | Bedroom      |
+| `entryway-shoe-bench`      | 100 × 38 × 50           | Light oak frame and slatted shelf with a beige padded seat                                                        | Entryway     |
+| `wall-coat-rack`           | 80 × 22 × 32            | Light oak back and shelf with five supported grey hooks                                                           | Entryway     |
+| `hallway-console-table`    | 110 × 35 × 80           | Narrow light oak table with two drawers and four legs                                                             | Hallway      |
+| `floating-wall-shelf`      | 80 × 25 × 22            | Light oak shelf and back lip with two visible grey brackets                                                       | Hallway      |
+| `framed-wall-art`          | 80 × 4 × 60             | Oak frame with texture-free cream, terracotta, sage and earth relief planes                                       | Living room  |
+| `wooden-crib`              | 76 × 146 × 95           | Light oak slatted cot with a 70 × 140 mattress and ivory bedding                                                  | Bedroom      |
+| `counter-stool`            | 48 × 50 × 92            | Light oak four-leg frame, 65 cm beige seat, low back and foot rail                                                | Kitchen      |
+| `upholstered-ottoman`      | 70 × 55 × 42            | Beige upholstered cushion, perimeter seam and four short oak feet                                                 | Living room  |
 
 Freestanding models use a floor-contact origin at Y=0, centered X/Z footprints,
 and face +Z. Wall models use X-centered, bottom-edge Y=0 geometry with their
@@ -288,11 +288,11 @@ according to the bound entity's capabilities.
 Dimensions are **width × depth × height in centimetres**, including the base,
 guard, and motor; animation waves are outside the physical placement envelope.
 
-| Model ID | Public component | Default dimensions | Finish and construction | Arrange room |
-| --- | --- | --- | --- | --- |
-| `ceiling-fan` | `CeilingFanModel` | 120 × 120 × 40 | Four rounded wood blades, off-white motor/canopy, grey downrod | Living room |
-| `table-fan` | `TableFanModel` | 36 × 24 × 48 | Three blades, front/back wire guards, off-white base and short neck | Office |
-| `pedestal-fan` | `PedestalFanModel` | 45 × 40 × 135 | Three blades, front/back wire guards, off-white round base and telescopic post | Bedroom |
+| Model ID       | Public component   | Default dimensions | Finish and construction                                                        | Arrange room |
+| -------------- | ------------------ | ------------------ | ------------------------------------------------------------------------------ | ------------ |
+| `ceiling-fan`  | `CeilingFanModel`  | 120 × 120 × 40     | Four rounded wood blades, off-white motor/canopy, grey downrod                 | Living room  |
+| `table-fan`    | `TableFanModel`    | 36 × 24 × 48       | Three blades, front/back wire guards, off-white base and short neck            | Office       |
+| `pedestal-fan` | `PedestalFanModel` | 45 × 40 × 135      | Three blades, front/back wire guards, off-white round base and telescopic post | Bedroom      |
 
 These are generic presets; all dimensions, proportions, and finishes are
 inferred, with no manufacturer reference. Each supports uniform resizing.
@@ -318,33 +318,33 @@ presets. Dimensions are **width × depth × height in centimetres**; code uses
 `[width, height, depth]` in metres. All dimensions and finishes are inferred
 standard proportions rather than verified manufacturer specifications.
 
-| Model ID | Public component | Dimensions | Domain / device class | Default room and placement |
-| --- | --- | --- | --- | --- |
-| `heated-towel-rail` | `HeatedTowelRailModel` | 60 × 12 × 120 | `climate` or `switch` | Bathroom, wall |
-| `smart-panel-radiator` | `SmartPanelRadiatorModel` | 100 × 12 × 60 | `climate` or `switch` | Living room, wall |
-| `smart-thermostat` | `SmartThermostatModel` | 12 × 3.5 × 12 | `climate` | Hallway, wall |
-| `smart-plug` | `SmartPlugModel` | 7 × 5.5 × 7 | `switch` / `outlet` | Living room, wall |
-| `table-lamp` | `TableLampModel` | 32 × 32 × 52 | `light` | Bedroom, surface |
-| `woven-pendant` | `WovenPendantModel` | 84.7 × 86 × 58 | `light` | Dining room, ceiling |
-| `children-pendant` | `ChildrenPendantModel` | 58 × 58 × 47.9 | `light` | Bedroom, ceiling |
-| `ceiling-light` | `CeilingLightModel` | 40 × 40 × 12 | `light` | Living room, ceiling |
-| `recessed-downlight` | `RecessedDownlightModel` | 10 × 10 × 4 | `light` | Hallway, ceiling |
-| `wall-sconce` | `WallSconceModel` | 22 × 16 × 32 | `light` | Bedroom, wall |
-| `illuminated-round-mirror` | `IlluminatedRoundMirrorModel` | 80 × 4.5 × 80 | `light` | Bathroom, wall |
-| `motorized-curtain` | `MotorizedCurtainModel` | 200 × 16 × 240 | `cover` / `curtain` | Living room, wall |
-| `connected-frame-oak` | `ConnectedFrameOakModel` | 72 × 4.5 × 52 | `camera` | Living room, wall |
-| `connected-frame-black` | `ConnectedFrameBlackModel` | 72 × 4.5 × 52 | `camera` | Living room, wall |
-| `video-doorbell` | `VideoDoorbellModel` | 5 × 3.5 × 13.5 | `camera` | Entryway, wall |
-| `indoor-security-camera` | `IndoorSecurityCameraModel` | 10 × 10 × 16 | `camera` | Living room, surface |
-| `smoke-alarm` | `SmokeAlarmModel` | 12 × 12 × 4.5 | `binary_sensor` / `smoke` | Hallway, ceiling |
-| `carbon-monoxide-alarm` | `CarbonMonoxideAlarmModel` | 11 × 3.5 × 11 | `binary_sensor` / `carbon_monoxide` | Hallway, wall |
-| `humidity-sensor` | `HumiditySensorModel` | 8.5 × 3 × 8.5 | `sensor` / `humidity` | Bathroom, wall |
-| `air-quality-monitor` | `AirQualityMonitorModel` | 10 × 6 × 16 | `sensor` / AQI, CO₂, PM2.5, VOC | Bedroom, surface |
-| `energy-monitor` | `EnergyMonitorModel` | 20 × 9 × 30 | `sensor` / power, energy, current, voltage | Laundry, wall |
-| `air-purifier` | `AirPurifierModel` | 27 × 27 × 52 | `fan` or `switch` | Bedroom, surface |
-| `bathroom-extractor-fan` | `BathroomExtractorFanModel` | 18 × 9 × 18 | `fan` or `switch` | Bathroom, wall |
-| `refrigerator` | `RefrigeratorModel` | 70 × 72 × 185 | `sensor` / `temperature` | Kitchen, surface |
-| `smart-power-strip` | `SmartPowerStripModel` | 34 × 6.5 × 5.5 | `switch` / `outlet` | Office, surface |
+| Model ID                   | Public component              | Dimensions     | Domain / device class                      | Default room and placement |
+| -------------------------- | ----------------------------- | -------------- | ------------------------------------------ | -------------------------- |
+| `heated-towel-rail`        | `HeatedTowelRailModel`        | 60 × 12 × 120  | `climate` or `switch`                      | Bathroom, wall             |
+| `smart-panel-radiator`     | `SmartPanelRadiatorModel`     | 100 × 12 × 60  | `climate` or `switch`                      | Living room, wall          |
+| `smart-thermostat`         | `SmartThermostatModel`        | 12 × 3.5 × 12  | `climate`                                  | Hallway, wall              |
+| `smart-plug`               | `SmartPlugModel`              | 7 × 5.5 × 7    | `switch` / `outlet`                        | Living room, wall          |
+| `table-lamp`               | `TableLampModel`              | 32 × 32 × 52   | `light`                                    | Bedroom, surface           |
+| `woven-pendant`            | `WovenPendantModel`           | 84.7 × 86 × 58 | `light`                                    | Dining room, ceiling       |
+| `children-pendant`         | `ChildrenPendantModel`        | 58 × 58 × 47.9 | `light`                                    | Bedroom, ceiling           |
+| `ceiling-light`            | `CeilingLightModel`           | 40 × 40 × 12   | `light`                                    | Living room, ceiling       |
+| `recessed-downlight`       | `RecessedDownlightModel`      | 10 × 10 × 4    | `light`                                    | Hallway, ceiling           |
+| `wall-sconce`              | `WallSconceModel`             | 22 × 16 × 32   | `light`                                    | Bedroom, wall              |
+| `illuminated-round-mirror` | `IlluminatedRoundMirrorModel` | 80 × 4.5 × 80  | `light`                                    | Bathroom, wall             |
+| `motorized-curtain`        | `MotorizedCurtainModel`       | 200 × 16 × 240 | `cover` / `curtain`                        | Living room, wall          |
+| `connected-frame-oak`      | `ConnectedFrameOakModel`      | 72 × 4.5 × 52  | `camera`                                   | Living room, wall          |
+| `connected-frame-black`    | `ConnectedFrameBlackModel`    | 72 × 4.5 × 52  | `camera`                                   | Living room, wall          |
+| `video-doorbell`           | `VideoDoorbellModel`          | 5 × 3.5 × 13.5 | `camera`                                   | Entryway, wall             |
+| `indoor-security-camera`   | `IndoorSecurityCameraModel`   | 10 × 10 × 16   | `camera`                                   | Living room, surface       |
+| `smoke-alarm`              | `SmokeAlarmModel`             | 12 × 12 × 4.5  | `binary_sensor` / `smoke`                  | Hallway, ceiling           |
+| `carbon-monoxide-alarm`    | `CarbonMonoxideAlarmModel`    | 11 × 3.5 × 11  | `binary_sensor` / `carbon_monoxide`        | Hallway, wall              |
+| `humidity-sensor`          | `HumiditySensorModel`         | 8.5 × 3 × 8.5  | `sensor` / `humidity`                      | Bathroom, wall             |
+| `air-quality-monitor`      | `AirQualityMonitorModel`      | 10 × 6 × 16    | `sensor` / AQI, CO₂, PM2.5, VOC            | Bedroom, surface           |
+| `energy-monitor`           | `EnergyMonitorModel`          | 20 × 9 × 30    | `sensor` / power, energy, current, voltage | Laundry, wall              |
+| `air-purifier`             | `AirPurifierModel`            | 27 × 27 × 52   | `fan` or `switch`                          | Bedroom, surface           |
+| `bathroom-extractor-fan`   | `BathroomExtractorFanModel`   | 18 × 9 × 18    | `fan` or `switch`                          | Bathroom, wall             |
+| `refrigerator`             | `RefrigeratorModel`           | 70 × 72 × 185  | `sensor` / `temperature`                   | Kitchen, surface           |
+| `smart-power-strip`        | `SmartPowerStripModel`        | 34 × 6.5 × 5.5 | `switch` / `outlet`                        | Office, surface            |
 
 All instances receive a fresh manual primary slot. Lights, including the
 illuminated mirror's perimeter ring, contribute an engine-owned scene light,
@@ -381,15 +381,15 @@ These generic presets use the native Home Assistant domains already supported
 by Cabane. Dimensions are **width × depth × height in centimetres** and are
 inferred standard proportions, not verified manufacturer specifications.
 
-| Model ID | Public component | Dimensions | Domain | Default room and placement |
-| --- | --- | --- | --- | --- |
-| `humidifier-dehumidifier` | `HumidifierDehumidifierModel` | 32 × 28 × 60 | `humidifier` | Bedroom, surface |
-| `robot-vacuum` | `RobotVacuumModel` | 35 × 35 × 9 | `vacuum` | Living room, surface |
-| `smart-lock` | `SmartLockModel` | 7 × 6 × 18 | `lock` | Entryway, wall |
-| `alarm-keypad` | `AlarmKeypadModel` | 18 × 3.5 × 25 | `alarm_control_panel` | Entryway, wall |
-| `motorized-valve` | `MotorizedValveModel` | 24 × 12 × 22 | `valve` | Laundry, wall |
-| `siren` | `SirenModel` | 16 × 7 × 16 | `siren` | Hallway, wall |
-| `smart-button` | `SmartButtonModel` | 9 × 3.5 × 9 | `button` | Living room, wall |
+| Model ID                  | Public component              | Dimensions    | Domain                | Default room and placement |
+| ------------------------- | ----------------------------- | ------------- | --------------------- | -------------------------- |
+| `humidifier-dehumidifier` | `HumidifierDehumidifierModel` | 32 × 28 × 60  | `humidifier`          | Bedroom, surface           |
+| `robot-vacuum`            | `RobotVacuumModel`            | 35 × 35 × 9   | `vacuum`              | Living room, surface       |
+| `smart-lock`              | `SmartLockModel`              | 7 × 6 × 18    | `lock`                | Entryway, wall             |
+| `alarm-keypad`            | `AlarmKeypadModel`            | 18 × 3.5 × 25 | `alarm_control_panel` | Entryway, wall             |
+| `motorized-valve`         | `MotorizedValveModel`         | 24 × 12 × 22  | `valve`               | Laundry, wall              |
+| `siren`                   | `SirenModel`                  | 16 × 7 × 16   | `siren`               | Hallway, wall              |
+| `smart-button`            | `SmartButtonModel`            | 9 × 3.5 × 9   | `button`              | Living room, wall          |
 
 The humidity appliance intentionally covers both humidifying and dehumidifying
 entities without claiming a product-specific mechanism. The valve silhouette
@@ -500,11 +500,11 @@ Search **compact**, **Tesla**, or **pickup** in All items. Public exports are
 `CompactCarModel` / `COMPACT_CAR_SIZE`, `ElectricSedanModel` / `ELECTRIC_SEDAN_SIZE`,
 and `PickupTruckModel` / `PICKUP_TRUCK_SIZE` from `@cabane/catalog/device`.
 
-| Model ID | Width × length × height | Construction |
-| --- | --- | --- |
-| `compact-car` | 194 × 400 × 150 cm | Blue European hatchback, short hood, upright rear, four wheels and divided side glazing |
-| `electric-sedan` | 208 × 470 × 145 cm | White Tesla-inspired sedan, low swept cabin, smooth nose and slim headlights |
-| `pickup-truck` | 224 × 540 × 186 cm | Graphite double cab, raised chassis, large tires, open ribbed cargo bed and tailgate |
+| Model ID         | Width × length × height | Construction                                                                            |
+| ---------------- | ----------------------- | --------------------------------------------------------------------------------------- |
+| `compact-car`    | 194 × 400 × 150 cm      | Blue European hatchback, short hood, upright rear, four wheels and divided side glazing |
+| `electric-sedan` | 208 × 470 × 145 cm      | White Tesla-inspired sedan, low swept cabin, smooth nose and slim headlights            |
+| `pickup-truck`   | 224 × 540 × 186 cm      | Graphite double cab, raised chassis, large tires, open ribbed cargo bed and tailgate    |
 
 Dimensions include mirrors and bumpers and are inferred generic proportions,
 not verified manufacturer specifications or exact Tesla replicas. Sizes are fixed;
@@ -546,13 +546,13 @@ size and connection behavior. No duplicate dishwasher or household binding is ad
 
 New independently placeable presets (width × depth × height, cm):
 
-| Model ID | Public component | Dimensions | Arrange |
-| --- | --- | --- | --- |
-| `kitchen-pantry-cabinet` | `KitchenPantryCabinet` | 60 × 63 × 210 | Kitchen |
-| `kitchen-hob-cabinet` | `KitchenHobCabinet` | 60 × 63 × 91 | Kitchen |
-| `kitchen-island` | `KitchenIsland` | 150 × 90 × 90 | Kitchen |
-| `outdoor-bbq` | `OutdoorBbq` | 120 × 60 × 110 | Outdoor |
-| `wooden-garden-swing` | `WoodenGardenSwing` | 220 × 140 × 210 | Outdoor |
+| Model ID                 | Public component       | Dimensions      | Arrange |
+| ------------------------ | ---------------------- | --------------- | ------- |
+| `kitchen-pantry-cabinet` | `KitchenPantryCabinet` | 60 × 63 × 210   | Kitchen |
+| `kitchen-hob-cabinet`    | `KitchenHobCabinet`    | 60 × 63 × 91    | Kitchen |
+| `kitchen-island`         | `KitchenIsland`        | 150 × 90 × 90   | Kitchen |
+| `outdoor-bbq`            | `OutdoorBbq`           | 120 × 60 × 110  | Outdoor |
+| `wooden-garden-swing`    | `WoodenGardenSwing`    | 220 × 140 × 210 | Outdoor |
 
 The pantry has two handled doors; the hob module adds four cooking rings to a
 base cabinet; the island has three handled doors and an overhanging oak top.
@@ -572,12 +572,12 @@ these modules. Models use procedural toon geometry with no external assets.
 
 Arrange → Outdoor includes four generic connected irrigation presets:
 
-| ID | Component | Solid size (W × H × D, metres) | Connection |
-| --- | --- | --- | --- |
-| `pop-up-sprinkler` | `PopUpSprinklerModel` | .14 × .182 × .14 (extended) | valve or switch |
-| `rotating-sprinkler` | `RotatingSprinklerModel` | .28 × .164 × .28 | valve or switch |
-| `smart-hose-timer` | `SmartHoseTimerModel` | .09 × .20 × .063 | valve or switch |
-| `soil-moisture-sensor` | `SoilMoistureSensorModel` | .065 × .12 × .044 | sensor, moisture class |
+| ID                     | Component                 | Solid size (W × H × D, metres) | Connection             |
+| ---------------------- | ------------------------- | ------------------------------ | ---------------------- |
+| `pop-up-sprinkler`     | `PopUpSprinklerModel`     | .14 × .182 × .14 (extended)    | valve or switch        |
+| `rotating-sprinkler`   | `RotatingSprinklerModel`  | .28 × .164 × .28               | valve or switch        |
+| `smart-hose-timer`     | `SmartHoseTimerModel`     | .09 × .20 × .063               | valve or switch        |
+| `soil-moisture-sensor` | `SoilMoistureSensorModel` | .065 × .12 × .044              | sensor, moisture class |
 
 Dimensions are inferred generic proportions, not manufacturer specifications.
 Sprinklers and the soil sensor use a ground-contact origin; the hose timer mounts
@@ -598,18 +598,18 @@ below are width × depth × height in centimetres. Each model uses a centered X/
 footprint, Y=0 floor contact, +Z front, and proportional resizing. Bar-cart wheels
 and the trunk lid are static. The divider is a furniture obstacle, not a wall.
 
-| Model ID | Public component | Dimensions | Construction |
-| --- | --- | --- | --- |
-| `two-seat-loveseat` | `TwoSeatLoveseat` | 160 × 88 × 82 | Sage upholstery, two separate seats and back cushions, rounded arms and oak feet |
-| `indoor-chaise-longue` | `IndoorChaiseLongue` | 80 × 165 × 80 | Terracotta day chaise with a full-length cushion and raised headrest |
-| `pedestal-side-table` | `PedestalSideTable` | 50 × 50 × 55 | Round oak top and circular foot with a thick central pedestal |
-| `c-shaped-sofa-table` | `CShapedSofaTable` | 40 × 45 × 62 | Oak overhanging top and charcoal steel C frame |
-| `blanket-storage-trunk` | `BlanketStorageTrunk` | 95 × 48 × 46 | Closed oak blanket chest with lid seam, brass latch and short feet |
-| `floor-magazine-rack` | `FloorMagazineRack` | 42 × 30 × 45 | Open oak magazine trough with tall side cheeks and carry crossbar |
-| `vinyl-record-cabinet` | `VinylRecordCabinet` | 90 × 40 × 70 | Walnut cabinet with four open record compartments and a turntable-height top |
-| `open-display-bookcase` | `OpenDisplayBookcase` | 100 × 35 × 160 | Open-backed oak display case with staggered dividers and four shelf bays |
-| `two-tier-bar-cart` | `TwoTierBarCart` | 70 × 42 × 80 | Two walnut trays on a brass frame with four dark wheels and a push handle |
-| `slatted-room-divider` | `SlattedRoomDivider` | 120 × 40 × 180 | Freestanding oak screen with twelve vertical slats and two stabilizing feet |
+| Model ID                | Public component      | Dimensions     | Construction                                                                     |
+| ----------------------- | --------------------- | -------------- | -------------------------------------------------------------------------------- |
+| `two-seat-loveseat`     | `TwoSeatLoveseat`     | 160 × 88 × 82  | Sage upholstery, two separate seats and back cushions, rounded arms and oak feet |
+| `indoor-chaise-longue`  | `IndoorChaiseLongue`  | 80 × 165 × 80  | Terracotta day chaise with a full-length cushion and raised headrest             |
+| `pedestal-side-table`   | `PedestalSideTable`   | 50 × 50 × 55   | Round oak top and circular foot with a thick central pedestal                    |
+| `c-shaped-sofa-table`   | `CShapedSofaTable`    | 40 × 45 × 62   | Oak overhanging top and charcoal steel C frame                                   |
+| `blanket-storage-trunk` | `BlanketStorageTrunk` | 95 × 48 × 46   | Closed oak blanket chest with lid seam, brass latch and short feet               |
+| `floor-magazine-rack`   | `FloorMagazineRack`   | 42 × 30 × 45   | Open oak magazine trough with tall side cheeks and carry crossbar                |
+| `vinyl-record-cabinet`  | `VinylRecordCabinet`  | 90 × 40 × 70   | Walnut cabinet with four open record compartments and a turntable-height top     |
+| `open-display-bookcase` | `OpenDisplayBookcase` | 100 × 35 × 160 | Open-backed oak display case with staggered dividers and four shelf bays         |
+| `two-tier-bar-cart`     | `TwoTierBarCart`      | 70 × 42 × 80   | Two walnut trays on a brass frame with four dark wheels and a push handle        |
+| `slatted-room-divider`  | `SlattedRoomDivider`  | 120 × 40 × 180 | Freestanding oak screen with twelve vertical slats and two stabilizing feet      |
 
 ## Everyday outdoor essentials
 
@@ -621,23 +621,23 @@ placements or smart bindings are added. The parasol blocks walking only at its
 base and pole; other items use their full footprint. The fire pit is unlit, the
 planter is empty, and the raised bed includes recessed soil.
 
-| Model ID | Dimensions | Category | Construction |
-| --- | --- | --- | --- |
-| `outdoor-dining-table` | 160 × 90 × 75 | Tables | Teak slatted top, charcoal four-leg frame |
-| `outdoor-dining-chair` | 56 × 58 × 85 | Seating | Teak slats, charcoal frame and armrests |
-| `garden-bench` | 150 × 60 × 90 | Seating | Three-seat teak slatted bench with charcoal arms |
-| `outdoor-side-table` | 50 × 50 × 45 | Tables | Compact round teak top and charcoal pedestal |
-| `patio-parasol` | 240 × 240 × 250 | Garden structures | Sand-colored open canopy, central pole and weighted base |
-| `terracotta-planter` | 50 × 50 × 50 | Vegetation | Empty tapered terracotta pot with thick lip |
-| `raised-garden-bed` | 120 × 80 × 40 | Garden structures | Timber raised bed with recessed soil |
-| `outdoor-storage-box` | 120 × 55 × 60 | Storage | Sage deck box, separate lid, front grip and panel seams |
-| `garden-hose-reel` | 48 × 42 × 60 | Garden tools | Freestanding reel with wound green hose and crank |
-| `watering-can` | 54 × 22 × 36 | Garden tools | Sage watering can with carry handle and projecting spout |
-| `garden-birdbath` | 60 × 60 × 80 | Decor | Stone-colored open basin on flared pedestal |
-| `outdoor-fire-pit` | 80 × 80 × 40 | Garden structures | Unlit charcoal fire bowl with three connected feet |
-| `garden-compost-bin` | 80 × 80 × 100 | Garden tools | Dark green compost bin, lift lid, ventilation and access hatch |
-| `wheelie-bin` | 58 × 64 × 105 | Garden tools | Green refuse bin, hinged lid, rear handle and two wheels |
-| `garden-trellis` | 90 × 12 × 180 | Garden structures | Freestanding timber lattice panel with two floor feet |
+| Model ID               | Dimensions      | Category          | Construction                                                   |
+| ---------------------- | --------------- | ----------------- | -------------------------------------------------------------- |
+| `outdoor-dining-table` | 160 × 90 × 75   | Tables            | Teak slatted top, charcoal four-leg frame                      |
+| `outdoor-dining-chair` | 56 × 58 × 85    | Seating           | Teak slats, charcoal frame and armrests                        |
+| `garden-bench`         | 150 × 60 × 90   | Seating           | Three-seat teak slatted bench with charcoal arms               |
+| `outdoor-side-table`   | 50 × 50 × 45    | Tables            | Compact round teak top and charcoal pedestal                   |
+| `patio-parasol`        | 240 × 240 × 250 | Garden structures | Sand-colored open canopy, central pole and weighted base       |
+| `terracotta-planter`   | 50 × 50 × 50    | Vegetation        | Empty tapered terracotta pot with thick lip                    |
+| `raised-garden-bed`    | 120 × 80 × 40   | Garden structures | Timber raised bed with recessed soil                           |
+| `outdoor-storage-box`  | 120 × 55 × 60   | Storage           | Sage deck box, separate lid, front grip and panel seams        |
+| `garden-hose-reel`     | 48 × 42 × 60    | Garden tools      | Freestanding reel with wound green hose and crank              |
+| `watering-can`         | 54 × 22 × 36    | Garden tools      | Sage watering can with carry handle and projecting spout       |
+| `garden-birdbath`      | 60 × 60 × 80    | Decor             | Stone-colored open basin on flared pedestal                    |
+| `outdoor-fire-pit`     | 80 × 80 × 40    | Garden structures | Unlit charcoal fire bowl with three connected feet             |
+| `garden-compost-bin`   | 80 × 80 × 100   | Garden tools      | Dark green compost bin, lift lid, ventilation and access hatch |
+| `wheelie-bin`          | 58 × 64 × 105   | Garden tools      | Green refuse bin, hinged lid, rear handle and two wheels       |
+| `garden-trellis`       | 90 × 12 × 180   | Garden structures | Freestanding timber lattice panel with two floor feet          |
 
 ## Practical household objects
 
@@ -648,24 +648,23 @@ Floor and countertop objects have centered X/Z footprints and Y=0 at their suppo
 wall objects have their back at Z=0, bottom at Y=0, and face +Z. Set elevation for
 countertop objects. No binding slots or household placements are added.
 
-| Model ID | Public component | Dimensions | Construction | Arrange room |
-| --- | --- | --- | --- | --- |
-| `drying-rack` | `DryingRack` | 120 × 60 × 95 | White steel standing frame with ten drying rails | laundry |
-| `ironing-board` | `IroningBoard` | 120 × 40 × 90 | Rounded padded sage board, steel trestles and connecting brace | laundry |
-| `two-step-stool` | `TwoStepStool` | 45 × 50 × 45 | Oak two-step platform with open risers and four supports | kitchen |
-| `utility-shelving` | `UtilityShelving` | 90 × 45 × 180 | Four steel uprights and five full-width shelves | laundry |
-| `workbench` | `Workbench` | 150 × 65 × 90 | Thick oak worktop, steel legs and lower tool shelf | laundry |
-| `toolbox` | `Toolbox` | 45 × 24 × 30 | Blue tool case with lid seam, two latches and raised carry handle | laundry |
-| `shoe-cabinet` | `ShoeCabinet` | 80 × 30 × 110 | Slim oak cabinet with three cream tilt fronts and recessed pulls | entryway |
-| `umbrella-stand` | `UmbrellaStand` | 28 × 28 × 55 | Open sage slatted holder with drip tray | entryway |
-| `freestanding-coat-stand` | `FreestandingCoatStand` | 50 × 50 × 175 | Oak central post with six supported coat pegs and cross feet | entryway |
-| `laundry-carry-basket` | `LaundryCarryBasket` | 60 × 40 × 35 | Open cream slatted basket with reinforced grip rims | laundry |
-| `kitchen-trolley` | `KitchenTrolley` | 70 × 45 × 90 | Oak worktop, two lower shelves, steel posts and four casters | kitchen |
-| `bread-bin` | `BreadBin` | 40 × 25 × 25 | Warm-white box with rounded lid and oak front pull | kitchen |
-| `dish-drying-rack` | `DishDryingRack` | 45 × 32 × 15 | Drain tray with eight plate dividers and open side rails | kitchen |
-| `toilet-paper-holder` | `ToiletPaperHolder` | 18 × 14 × 12 | Wall plate, two brackets, spindle and paper roll | bathroom |
-| `medicine-cabinet` | `MedicineCabinet` | 50 × 16 × 65 | Wall-mounted cream cabinet with framed pale-blue mirror and side pull | bathroom |
-
+| Model ID                  | Public component        | Dimensions    | Construction                                                          | Arrange room |
+| ------------------------- | ----------------------- | ------------- | --------------------------------------------------------------------- | ------------ |
+| `drying-rack`             | `DryingRack`            | 120 × 60 × 95 | White steel standing frame with ten drying rails                      | laundry      |
+| `ironing-board`           | `IroningBoard`          | 120 × 40 × 90 | Rounded padded sage board, steel trestles and connecting brace        | laundry      |
+| `two-step-stool`          | `TwoStepStool`          | 45 × 50 × 45  | Oak two-step platform with open risers and four supports              | kitchen      |
+| `utility-shelving`        | `UtilityShelving`       | 90 × 45 × 180 | Four steel uprights and five full-width shelves                       | laundry      |
+| `workbench`               | `Workbench`             | 150 × 65 × 90 | Thick oak worktop, steel legs and lower tool shelf                    | laundry      |
+| `toolbox`                 | `Toolbox`               | 45 × 24 × 30  | Blue tool case with lid seam, two latches and raised carry handle     | laundry      |
+| `shoe-cabinet`            | `ShoeCabinet`           | 80 × 30 × 110 | Slim oak cabinet with three cream tilt fronts and recessed pulls      | entryway     |
+| `umbrella-stand`          | `UmbrellaStand`         | 28 × 28 × 55  | Open sage slatted holder with drip tray                               | entryway     |
+| `freestanding-coat-stand` | `FreestandingCoatStand` | 50 × 50 × 175 | Oak central post with six supported coat pegs and cross feet          | entryway     |
+| `laundry-carry-basket`    | `LaundryCarryBasket`    | 60 × 40 × 35  | Open cream slatted basket with reinforced grip rims                   | laundry      |
+| `kitchen-trolley`         | `KitchenTrolley`        | 70 × 45 × 90  | Oak worktop, two lower shelves, steel posts and four casters          | kitchen      |
+| `bread-bin`               | `BreadBin`              | 40 × 25 × 25  | Warm-white box with rounded lid and oak front pull                    | kitchen      |
+| `dish-drying-rack`        | `DishDryingRack`        | 45 × 32 × 15  | Drain tray with eight plate dividers and open side rails              | kitchen      |
+| `toilet-paper-holder`     | `ToiletPaperHolder`     | 18 × 14 × 12  | Wall plate, two brackets, spindle and paper roll                      | bathroom     |
+| `medicine-cabinet`        | `MedicineCabinet`       | 50 × 16 × 65  | Wall-mounted cream cabinet with framed pale-blue mirror and side pull | bathroom     |
 
 `@cabane/catalog/architecture` exports `DOOR_PRESETS`: six typed configurations
 (Panel wood, Panel white, French, Full glass, Sliding wood, Garage door) with
@@ -681,17 +680,17 @@ wood; no manufacturer measurements are claimed. Dimensions are width × height
 × depth in metres. Each accepts independent axis resizing and has a centered
 footprint with Y=0 at its support and the front facing +Z.
 
-| ID | Dimensions | Construction |
-| --- | --- | --- |
-| `knob-door-wardrobe` | 1 × 2.4 × .6 | Two plain doors by default; single-door variants with left/right black knob |
-| `overbed-bridge-cabinet` | 2 × .65 × .4 | Three doors and round pulls; elevate above a bed, no floor collider |
-| `shelf-headboard` | 2 × 1.15 × .22 | Wood backing, top shelf, white inset panel, two small bedside ledges |
-| `headboard-free-double-bed` | 1.64 × .66 × 2.04 | 160 × 200 cm mattress, white frame, neutral duvet and two pillows |
-| `drawer-pedestal-desk` | 1.8 × .75 × .6 | Wood worktop, two white five-drawer supports, recessed dark grips |
-| `white-folding-chair` | .46 × .8 × .52 | White seat and three back slats, crossed metal supports and floor pads |
-| `desktop-monitor` | .54 × .42 × .18 | Dark screen bezel, muted flat display, stem and base; elevate onto a desk |
-| `open-laptop` | .34 × .24 × .24 | Dark open notebook, flat screen, keyboard and touchpad |
-| `round-globe-wall-lamp` | .24 × .24 × .16 | Static white globe on a round backplate; no light slot or floor collider |
+| ID                          | Dimensions        | Construction                                                                |
+| --------------------------- | ----------------- | --------------------------------------------------------------------------- |
+| `knob-door-wardrobe`        | 1 × 2.4 × .6      | Two plain doors by default; single-door variants with left/right black knob |
+| `overbed-bridge-cabinet`    | 2 × .65 × .4      | Three doors and round pulls; elevate above a bed, no floor collider         |
+| `shelf-headboard`           | 2 × 1.15 × .22    | Wood backing, top shelf, white inset panel, two small bedside ledges        |
+| `headboard-free-double-bed` | 1.64 × .66 × 2.04 | 160 × 200 cm mattress, white frame, neutral duvet and two pillows           |
+| `drawer-pedestal-desk`      | 1.8 × .75 × .6    | Wood worktop, two white five-drawer supports, recessed dark grips           |
+| `white-folding-chair`       | .46 × .8 × .52    | White seat and three back slats, crossed metal supports and floor pads      |
+| `desktop-monitor`           | .54 × .42 × .18   | Dark screen bezel, muted flat display, stem and base; elevate onto a desk   |
+| `open-laptop`               | .34 × .24 × .24   | Dark open notebook, flat screen, keyboard and touchpad                      |
+| `round-globe-wall-lamp`     | .24 × .24 × .16   | Static white globe on a round backplate; no light slot or floor collider    |
 
 `knob-door-wardrobe` offers Two doors (`default`), One door · left knob
 (`single-left`), and One door · right knob (`single-right`). These keep the same

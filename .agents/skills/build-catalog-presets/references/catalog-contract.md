@@ -6,18 +6,18 @@ reference supersedes a changed repository contract.
 
 ## Integration map
 
-| Concern | Current source |
-| --- | --- |
-| Public furnishing exports | `packages/catalog/src/furnishing/index.ts` → `presets/index.ts` → domain barrels |
-| Stable furnishing registry | `packages/catalog/src/furnishing/registry.tsx` |
-| Public device exports and registry | `packages/catalog/src/device/index.ts`, `registry.ts` |
-| Scene/model props and editor descriptors | `packages/engine/src/types.ts` |
-| Owner's effective furnishing registry | `home/src/project-runtime.ts` merges the stable registry with local models |
-| Arrange entries and room/search filtering | `apps/web/src/editor-preview/furnish/catalog/catalog.ts` |
-| Arrange preview props | `apps/web/src/editor-preview/furnish/catalog/ModelVisual.tsx` |
-| Add-item identity and default size | `apps/web/src/editor-preview/furnish/placement/item-creation.ts` |
-| Geometry and inventory regression tests | `tests/owner-home-project.test.mjs` |
-| User/agent-facing dimensions and usage | `packages/catalog/README.md` |
+| Concern                                   | Current source                                                                   |
+| ----------------------------------------- | -------------------------------------------------------------------------------- |
+| Public furnishing exports                 | `packages/catalog/src/furnishing/index.ts` → `presets/index.ts` → domain barrels |
+| Stable furnishing registry                | `packages/catalog/src/furnishing/registry.tsx`                                   |
+| Public device exports and registry        | `packages/catalog/src/device/index.ts`, `registry.ts`                            |
+| Scene/model props and editor descriptors  | `packages/engine/src/types.ts`                                                   |
+| Owner's effective furnishing registry     | `home/src/project-runtime.ts` merges the stable registry with local models       |
+| Arrange entries and room/search filtering | `apps/web/src/editor-preview/furnish/catalog/catalog.ts`                         |
+| Arrange preview props                     | `apps/web/src/editor-preview/furnish/catalog/ModelVisual.tsx`                    |
+| Add-item identity and default size        | `apps/web/src/editor-preview/furnish/placement/item-creation.ts`                 |
+| Geometry and inventory regression tests   | `tests/owner-home-project.test.mjs`                                              |
+| User/agent-facing dimensions and usage    | `packages/catalog/README.md`                                                     |
 
 The effective registry already makes newly registered furnishings available in
 Arrange. Check that bridge; ordinary additions do not require editing the home

@@ -11,10 +11,7 @@ import {
 import { ToonMaterial } from "@cabane/engine";
 import type { ClimateAirflowMode } from "../climate-airflow";
 
-const AIRFLOW_PALETTE: Record<
-  ClimateAirflowMode,
-  { color: string; emissive: string }
-> = {
+const AIRFLOW_PALETTE: Record<ClimateAirflowMode, { color: string; emissive: string }> = {
   cool: { color: "#58c8ff", emissive: "#147fc4" },
   heat: { color: "#ff6d58", emissive: "#b82f24" },
   dry: { color: "#5ed6c1", emissive: "#208d7c" },
@@ -36,12 +33,15 @@ const airflowWaveStateForProgress = (progress: number) => {
 };
 
 export const airflowWaveState = (elapsedTime: number, index: number) => {
-  const progress =
-    (elapsedTime * 0.42 + index / AIRFLOW_WAVE_COUNT) % 1;
+  const progress = (elapsedTime * 0.42 + index / AIRFLOW_WAVE_COUNT) % 1;
   return airflowWaveStateForProgress(progress);
 };
 
-export const createAirflowWaveGeometry = (width: number, tubularSegments = 48, radialSegments = 6) => {
+export const createAirflowWaveGeometry = (
+  width: number,
+  tubularSegments = 48,
+  radialSegments = 6,
+) => {
   const halfWidth = width * 0.34;
   const points = Array.from({ length: 25 }, (_, index) => {
     const progress = index / 24;
@@ -74,14 +74,20 @@ export function AirflowWaves({
 }) {
   const waves = useRef<Group>(null);
   const airflowPalette = AIRFLOW_PALETTE[mode];
-  const geometry = useMemo(() => forward
-    ? createAirflowWaveGeometry(width, 32, 4)
-    : createAirflowWaveGeometry(width), [width, forward]);
-  const positionFor = (state: ReturnType<typeof airflowWaveState>): readonly [number, number, number] =>
-    forward ? [0, 0, .16 + state.progress * .95] : state.position;
-  useEffect(() => () => {
-    geometry.dispose();
-  }, [geometry]);
+  const geometry = useMemo(
+    () => (forward ? createAirflowWaveGeometry(width, 32, 4) : createAirflowWaveGeometry(width)),
+    [width, forward],
+  );
+  const positionFor = (
+    state: ReturnType<typeof airflowWaveState>,
+  ): readonly [number, number, number] =>
+    forward ? [0, 0, 0.16 + state.progress * 0.95] : state.position;
+  useEffect(
+    () => () => {
+      geometry.dispose();
+    },
+    [geometry],
+  );
 
   useFrame(({ clock, invalidate }) => {
     if (!waves.current || reducedMotion) return;
@@ -101,9 +107,7 @@ export function AirflowWaves({
   return (
     <group ref={waves} name={forward ? "fan-airflow-waves" : `flux-climatisation-${mode}`}>
       {Array.from({ length: AIRFLOW_WAVE_COUNT }, (_, index) => {
-        const staticState = airflowWaveStateForProgress(
-          (index + 1) / (AIRFLOW_WAVE_COUNT + 1),
-        );
+        const staticState = airflowWaveStateForProgress((index + 1) / (AIRFLOW_WAVE_COUNT + 1));
         return (
           <mesh
             key={index}

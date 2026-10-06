@@ -4,11 +4,7 @@ import { createServer } from "vite";
 
 const repositoryRoot = process.cwd();
 
-export async function startFixtureServer({
-  port = 4174,
-  fixture = true,
-  hmr = false,
-} = {}) {
+export async function startFixtureServer({ port = 4174, fixture = true, hmr = false } = {}) {
   const root = fixture ? repositoryRoot : resolve(repositoryRoot, "apps/web");
   const server = await createServer({
     root,

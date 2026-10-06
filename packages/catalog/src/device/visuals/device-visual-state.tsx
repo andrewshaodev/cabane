@@ -14,10 +14,14 @@ export const palette = {
 
 const stateColor = (state: DeviceVisualState) => {
   switch (state) {
-    case "connected-active": return palette.coral;
-    case "connected-inactive": return palette.green;
-    case "unavailable": return palette.amber;
-    case "disconnected": return palette.muted;
+    case "connected-active":
+      return palette.coral;
+    case "connected-inactive":
+      return palette.green;
+    case "unavailable":
+      return palette.amber;
+    case "disconnected":
+      return palette.muted;
   }
 };
 
@@ -31,11 +35,7 @@ export function StatusBeacon({
   scale?: number;
 }) {
   return (
-    <group
-      name={`device-state-${visualState}`}
-      position={position}
-      scale={scale}
-    >
+    <group name={`device-state-${visualState}`} position={position} scale={scale}>
       {visualState === "disconnected" && (
         <mesh rotation={[Math.PI / 2, 0, 0]}>
           <torusGeometry args={[0.018, 0.005, 6, 12, Math.PI * 1.55]} />

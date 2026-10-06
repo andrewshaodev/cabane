@@ -19,12 +19,12 @@ export function SpeakerModel({ visualState, reducedMotion }: HomeDeviceModelProp
         <Outlines color="#39433f" thickness={0.006} />
       </mesh>
       <group ref={soundBands} name="speaker-sound-bands" position={[0, 0, 0.124]}>
-      {[0.08, 0.14, 0.2, 0.26].map((height) => (
-        <mesh key={height} position={[0, height, 0]}>
-          <boxGeometry args={[0.125, 0.009, 0.004]} />
-          <ToonMaterial color={active ? palette.coral : palette.bodyDark} />
-        </mesh>
-      ))}
+        {[0.08, 0.14, 0.2, 0.26].map((height) => (
+          <mesh key={height} position={[0, height, 0]}>
+            <boxGeometry args={[0.125, 0.009, 0.004]} />
+            <ToonMaterial color={active ? palette.coral : palette.bodyDark} />
+          </mesh>
+        ))}
       </group>
       <mesh position={[0, 0.365, 0]}>
         <cylinderGeometry args={[0.08, 0.105, 0.015, 16]} />

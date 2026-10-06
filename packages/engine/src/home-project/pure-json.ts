@@ -1,8 +1,4 @@
-import {
-  addProjectIssue,
-  isPlainRecord,
-  type HomeProjectIssue,
-} from "./validation-types";
+import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
 
 const FORBIDDEN_KEYS = new Set(["entity_id", "area_id", "access_token"]);
 const ARRAY_INDEX = /^(0|[1-9]\d*)$/;
@@ -26,7 +22,12 @@ const scanObjectDescriptors = (
     return;
   }
   if (ancestors.has(value)) {
-    addProjectIssue(issues, "project.circular", path, "Projects cannot contain circular references.");
+    addProjectIssue(
+      issues,
+      "project.circular",
+      path,
+      "Projects cannot contain circular references.",
+    );
     return;
   }
   ancestors.add(value);

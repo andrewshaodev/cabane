@@ -7,15 +7,21 @@ export interface PanelMount {
   assetBaseUrl: string;
   session: HomeAssistantHostSession;
 }
-interface PanelApplication { update(session: HomeAssistantHostSession): void; dispose(): void; }
-interface PanelOptions { assetBaseUrl: string; mount(input: PanelMount): PanelApplication; }
+interface PanelApplication {
+  update(session: HomeAssistantHostSession): void;
+  dispose(): void;
+}
+interface PanelOptions {
+  assetBaseUrl: string;
+  mount(input: PanelMount): PanelApplication;
+}
 
 // Font faces are document resources in browsers. Only font declarations (never
 // application styles) live outside the shadow root, and only while a panel exists.
 const fontLinks = new WeakMap<Document, Map<string, { link: HTMLLinkElement; count: number }>>();
 function retainFonts(document: Document, href: string) {
   let links = fontLinks.get(document);
-  if (!links) fontLinks.set(document, links = new Map());
+  if (!links) fontLinks.set(document, (links = new Map()));
   let entry = links.get(href);
   if (!entry) {
     const link = document.createElement("link");
@@ -23,10 +29,15 @@ function retainFonts(document: Document, href: string) {
     link.href = href;
     link.dataset.cabaneFonts = "";
     document.head.append(link);
-    links.set(href, entry = { link, count: 0 });
+    links.set(href, (entry = { link, count: 0 }));
   }
   entry.count++;
-  return () => { if (--entry.count === 0) { entry.link.remove(); links.delete(href); } };
+  return () => {
+    if (--entry.count === 0) {
+      entry.link.remove();
+      links.delete(href);
+    }
+  };
 }
 
 export function createCabanePanelElement(options: PanelOptions) {
@@ -65,8 +76,16 @@ export function createCabanePanelElement(options: PanelOptions) {
       const menu = document.createElement("button");
       menu.type = "button";
       menu.setAttribute("aria-label", "Open Home Assistant menu");
-      menu.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>';
-      menu.addEventListener("click", () => this.dispatchEvent(new this.ownerDocument.defaultView!.CustomEvent("hass-toggle-menu", { bubbles: true, composed: true })));
+      menu.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>';
+      menu.addEventListener("click", () =>
+        this.dispatchEvent(
+          new this.ownerDocument.defaultView!.CustomEvent("hass-toggle-menu", {
+            bubbles: true,
+            composed: true,
+          }),
+        ),
+      );
       header.append(menu, document.createTextNode("Cabane"));
       this.#content = document.createElement("div");
       this.#content.className = "panel-content";
@@ -80,7 +99,8 @@ export function createCabanePanelElement(options: PanelOptions) {
       this.#waiting.textContent = "Waiting for the Home Assistant session…";
       stylesheet.addEventListener("error", () => {
         this.#waiting.hidden = false;
-        this.#waiting.textContent = "Cabane’s files could not load. Reload Home Assistant after updating the integration.";
+        this.#waiting.textContent =
+          "Cabane’s files could not load. Reload Home Assistant after updating the integration.";
       });
       this.#content.append(this.#container, this.#portals, this.#waiting);
       shadow.append(stylesheet, style, header, this.#content);
@@ -89,16 +109,23 @@ export function createCabanePanelElement(options: PanelOptions) {
     set hass(value: { connection?: HomeAssistantHostSession["connection"] } | undefined) {
       const connection = value?.connection;
       if (connection === this.#session?.connection) return;
-      this.#session = connection ? { connection, origin: this.ownerDocument.location.origin } : null;
+      this.#session = connection
+        ? { connection, origin: this.ownerDocument.location.origin }
+        : null;
       this.#render();
     }
-    set narrow(value: boolean) { this.toggleAttribute("narrow", value); }
+    set narrow(value: boolean) {
+      this.toggleAttribute("narrow", value);
+    }
     // Cabane uses memory routing. HA owns these properties and the browser URL.
     set route(_value: unknown) {}
     set panel(_value: unknown) {}
 
     connectedCallback() {
-      this.#releaseFonts ??= retainFonts(this.ownerDocument, new URL("cabane-fonts.css", options.assetBaseUrl).href);
+      this.#releaseFonts ??= retainFonts(
+        this.ownerDocument,
+        new URL("cabane-fonts.css", options.assetBaseUrl).href,
+      );
       if (typeof ResizeObserver !== "undefined") {
         this.#observer = new ResizeObserver(() => this.#measure());
         this.#observer.observe(this.#content);
@@ -129,8 +156,14 @@ export function createCabanePanelElement(options: PanelOptions) {
         return;
       }
       if (this.#application) this.#application.update(this.#session);
-      else this.#application = options.mount({ container: this.#container, portalContainer: this.#portals,
-        root: this.shadowRoot!, assetBaseUrl: options.assetBaseUrl, session: this.#session });
+      else
+        this.#application = options.mount({
+          container: this.#container,
+          portalContainer: this.#portals,
+          root: this.shadowRoot!,
+          assetBaseUrl: options.assetBaseUrl,
+          session: this.#session,
+        });
     }
   };
 }

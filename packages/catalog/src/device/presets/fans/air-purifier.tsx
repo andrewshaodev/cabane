@@ -23,7 +23,11 @@ export function AirPurifierModel({ visualState }: HomeDeviceModelProps) {
       ))}
       <mesh position={[0, 0.495, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.07, 0.008, 8, 20]} />
-        <ToonMaterial color={active ? palette.green : palette.muted} emissive={palette.green} emissiveIntensity={active ? 0.3 : 0} />
+        <ToonMaterial
+          color={active ? palette.green : palette.muted}
+          emissive={palette.green}
+          emissiveIntensity={active ? 0.3 : 0}
+        />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.08, 0.445, 0.09]} scale={0.35} />
     </group>

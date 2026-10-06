@@ -17,16 +17,16 @@ import { placementNearWallsForWorldDrag } from "./placement/wall-drag-placement"
 import { duplicateSceneItem } from "./duplicate-item";
 import { createSceneItemId } from "./scene-item-identity";
 
-const MINIMUM_SIZE_METERS = .01;
+const MINIMUM_SIZE_METERS = 0.01;
 
-export const snapToGrid = (value: number, gridMeters = .1) =>
+export const snapToGrid = (value: number, gridMeters = 0.1) =>
   Math.round(value / gridMeters) * gridMeters;
 
 export const planPointForWorldDrag = (
   world: { x: number; z: number },
   coordinates: { origin: PlanPoint; metersPerPlanUnit: number },
   raw: boolean,
-  gridMeters = .1,
+  gridMeters = 0.1,
 ): PlanPoint => {
   const worldX = raw ? world.x : snapToGrid(world.x, gridMeters);
   const worldZ = raw ? world.z : snapToGrid(world.z, gridMeters);
@@ -42,7 +42,7 @@ export const placementForWorldDrag = ({
   definition,
   floor,
   raw,
-  wallSnapDistanceMeters = .55,
+  wallSnapDistanceMeters = 0.55,
 }: {
   world: { x: number; z: number };
   item: SceneItemSpec;
@@ -72,9 +72,11 @@ export const placementForWorldDrag = ({
   }
 
   const ceilingRoomId = item.placement.kind === "ceiling" ? item.placement.roomId : null;
-  if (item.placement.kind === "ceiling" && floor.rooms.some((room) =>
-    room.id === ceilingRoomId && pointInsidePolygon(at, room.polygon)
-  )) return { ...item.placement, at };
+  if (
+    item.placement.kind === "ceiling" &&
+    floor.rooms.some((room) => room.id === ceilingRoomId && pointInsidePolygon(at, room.polygon))
+  )
+    return { ...item.placement, at };
 
   return {
     kind: "absolute",
@@ -85,16 +87,16 @@ export const placementForWorldDrag = ({
 };
 
 const positive = (value: number, fallback: number) =>
-  Number.isFinite(value) && value > 0
-    ? Math.max(MINIMUM_SIZE_METERS, value)
-    : fallback;
+  Number.isFinite(value) && value > 0 ? Math.max(MINIMUM_SIZE_METERS, value) : fallback;
 
 export const normalizeSizeForPolicy = (
   defaultSize: SceneItemSize,
   requested: SceneItemSize,
   policy: ResizePolicy,
 ): SceneItemSize => {
-  const safe = requested.map((value, axis) => positive(value, defaultSize[axis])) as unknown as SceneItemSize;
+  const safe = requested.map((value, axis) =>
+    positive(value, defaultSize[axis]),
+  ) as unknown as SceneItemSize;
   if (policy.kind === "fixed") return [...defaultSize];
   if (policy.kind === "planar") return [safe[0], defaultSize[1], safe[2]];
   if (policy.kind === "axes") {
@@ -107,8 +109,8 @@ export const normalizeSizeForPolicy = (
   }
   if (policy.kind === "custom") return policy.normalize(defaultSize, safe);
 
-  const changedAxis = safe.findIndex((value, axis) =>
-    Math.abs(value / defaultSize[axis] - 1) > 1e-9
+  const changedAxis = safe.findIndex(
+    (value, axis) => Math.abs(value / defaultSize[axis] - 1) > 1e-9,
   );
   const scale = changedAxis < 0 ? 1 : safe[changedAxis] / defaultSize[changedAxis];
   return defaultSize.map((value) => value * scale) as unknown as SceneItemSize;
@@ -128,9 +130,13 @@ export const selectionBoxGeometry = (
   const scaledMin = definition.bounds.min.map((value, axis) => value * scale[axis]);
   const scaledMax = definition.bounds.max.map((value, axis) => value * scale[axis]);
   return {
-    center: scaledMin.map((value, axis) => (value + scaledMax[axis]) / 2) as unknown as readonly [number, number, number],
+    center: scaledMin.map((value, axis) => (value + scaledMax[axis]) / 2) as unknown as readonly [
+      number,
+      number,
+      number,
+    ],
     size: scaledMin.map((value, axis) =>
-      Math.max(.04, scaledMax[axis] - value + paddingMeters * 2)
+      Math.max(0.04, scaledMax[axis] - value + paddingMeters * 2),
     ) as unknown as SceneItemSize,
   };
 };
@@ -153,7 +159,11 @@ export type FurnishingEditorAction =
   | { type: "commit-transaction" }
   | { type: "cancel-transaction" }
   | { type: "update-variant"; id: string; variant: string; definition: SceneModelEditorDescriptor }
-  | { type: "update-light-state"; id: string; lightState: "always-off" | "always-on" | "night-only" | "connected" }
+  | {
+      type: "update-light-state";
+      id: string;
+      lightState: "always-off" | "always-on" | "night-only" | "connected";
+    }
   | { type: "update-placements"; placements: Readonly<Record<string, ItemPlacement>> }
   | { type: "update-placement"; id: string; placement: ItemPlacement }
   | { type: "update-size"; id: string; size: SceneItemSize; definition: SceneModelEditorDescriptor }
@@ -240,16 +250,25 @@ export const furnishingEditorReducer = (
 ): FurnishingEditorState => {
   switch (action.type) {
     case "add-item":
-      return withChange(state, { items: [...state.items, action.item], selectedId: action.item.id });
+      return withChange(state, {
+        items: [...state.items, action.item],
+        selectedId: action.item.id,
+      });
     case "replace-items":
-      return { ...createFurnishingEditorState(action.items), selectedId: action.selectedId ?? null };
+      return {
+        ...createFurnishingEditorState(action.items),
+        selectedId: action.selectedId ?? null,
+      };
     case "select":
       return state.selectedId === action.id ? state : { ...state, selectedId: action.id };
     case "begin-transaction":
       return state.transaction ? state : { ...state, transaction: snapshot(state) };
     case "commit-transaction":
       if (!state.transaction) return state;
-      if (state.transaction.items === state.items && state.transaction.selectedId === state.selectedId) {
+      if (
+        state.transaction.items === state.items &&
+        state.transaction.selectedId === state.selectedId
+      ) {
         return { ...state, transaction: null };
       }
       return {
@@ -259,29 +278,36 @@ export const furnishingEditorReducer = (
         transaction: null,
       };
     case "cancel-transaction":
-      return state.transaction
-        ? { ...state, ...state.transaction, transaction: null }
-        : state;
+      return state.transaction ? { ...state, ...state.transaction, transaction: null } : state;
     case "update-variant":
-      if (!modelVariants(action.definition).some((variant) => variant.id === action.variant)) return state;
+      if (!modelVariants(action.definition).some((variant) => variant.id === action.variant))
+        return state;
       return updateItem(state, action.id, (item) => ({ ...item, variant: action.variant }));
     case "update-light-state":
-      return updateItem(state, action.id, (item) => item.kind === "device"
-        ? { ...item, lightState: action.lightState } : item);
+      return updateItem(state, action.id, (item) =>
+        item.kind === "device" ? { ...item, lightState: action.lightState } : item,
+      );
     case "update-placements": {
-      const items = state.items.map(item => {
+      const items = state.items.map((item) => {
         const placement = action.placements[item.id];
-        return placement && JSON.stringify(placement) !== JSON.stringify(item.placement) ? { ...item, placement } : item;
+        return placement && JSON.stringify(placement) !== JSON.stringify(item.placement)
+          ? { ...item, placement }
+          : item;
       });
       return items.some((item, index) => item !== state.items[index])
-        ? withChange(state, { items, selectedId: state.selectedId }) : state;
+        ? withChange(state, { items, selectedId: state.selectedId })
+        : state;
     }
     case "update-placement":
       return updateItem(state, action.id, (item) => ({ ...item, placement: action.placement }));
     case "update-size":
       return updateItem(state, action.id, (item) => ({
         ...item,
-        size: normalizeSizeForPolicy(action.definition.defaultSize, action.size, action.definition.resizePolicy),
+        size: normalizeSizeForPolicy(
+          action.definition.defaultSize,
+          action.size,
+          action.definition.resizePolicy,
+        ),
       }));
     case "rotate":
       return updateItem(state, action.id, (item) => ({
@@ -296,9 +322,12 @@ export const furnishingEditorReducer = (
     }
     case "delete-items": {
       const ids = new Set(action.ids);
-      const items = state.items.filter(item => !ids.has(item.id));
+      const items = state.items.filter((item) => !ids.has(item.id));
       if (items.length === state.items.length) return state;
-      return withChange(state, { items, selectedId: state.selectedId && ids.has(state.selectedId) ? null : state.selectedId });
+      return withChange(state, {
+        items,
+        selectedId: state.selectedId && ids.has(state.selectedId) ? null : state.selectedId,
+      });
     }
     case "delete": {
       const index = state.items.findIndex((item) => item.id === action.id);
@@ -308,7 +337,12 @@ export const furnishingEditorReducer = (
       return withChange(state, { items, selectedId });
     }
     case "add-preset": {
-      const id = createSceneItemId(state.items.flatMap(item => [item.id, ...(item.kind === "device" ? item.entitySlots.map(slot => slot.id) : [])]));
+      const id = createSceneItemId(
+        state.items.flatMap((item) => [
+          item.id,
+          ...(item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : []),
+        ]),
+      );
       const item: FurnishingItemSpec = {
         id,
         kind: "furnishing",

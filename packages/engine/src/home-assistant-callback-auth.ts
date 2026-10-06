@@ -1,7 +1,4 @@
-import {
-  getAuth,
-  type Auth
-} from "home-assistant-js-websocket";
+import { getAuth, type Auth } from "home-assistant-js-websocket";
 
 import { HomeAssistantRuntimeClient } from "./home-assistant-runtime-client";
 
@@ -25,11 +22,11 @@ export const getCallbackAuthOnce = (
   generation: string | null = null,
 ) => {
   if (
-    callbackAuthAttempt?.client === client
-    && callbackAuthAttempt.hassUrl === hassUrl
-    && callbackAuthAttempt.clientId === clientId
-    && callbackAuthAttempt.redirectUrl === options.redirectUrl
-    && callbackAuthAttempt.generation === generation
+    callbackAuthAttempt?.client === client &&
+    callbackAuthAttempt.hassUrl === hassUrl &&
+    callbackAuthAttempt.clientId === clientId &&
+    callbackAuthAttempt.redirectUrl === options.redirectUrl &&
+    callbackAuthAttempt.generation === generation
   ) {
     // Strict Mode replays ownership while retaining one callback exchange.
     callbackAuthAttempt.saveTokens = options.saveTokens;
@@ -43,10 +40,12 @@ export const getCallbackAuthOnce = (
     redirectUrl: options.redirectUrl,
     generation,
     saveTokens: options.saveTokens,
-    promise: Promise.resolve().then(() => client.getAuth({
-      ...options,
-      saveTokens: (tokens) => attempt.saveTokens?.(tokens),
-    })),
+    promise: Promise.resolve().then(() =>
+      client.getAuth({
+        ...options,
+        saveTokens: (tokens) => attempt.saveTokens?.(tokens),
+      }),
+    ),
   };
   callbackAuthAttempt = attempt;
   const release = () => {

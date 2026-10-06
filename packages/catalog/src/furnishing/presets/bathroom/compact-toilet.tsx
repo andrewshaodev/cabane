@@ -16,7 +16,12 @@ export function CompactToilet() {
         color="#f0f1ed"
         outline="#8e9693"
       />
-      <mesh position={[0, 0.38, -0.07]} rotation={[Math.PI / 2, 0, 0]} scale={[1, 1.3, 1]} castShadow>
+      <mesh
+        position={[0, 0.38, -0.07]}
+        rotation={[Math.PI / 2, 0, 0]}
+        scale={[1, 1.3, 1]}
+        castShadow
+      >
         <torusGeometry args={[0.15, 0.027, 10, 24]} />
         <ToonMaterial color="#d5d9d5" />
         <Outlines thickness={0.004} color="#7f8885" screenspace={false} />

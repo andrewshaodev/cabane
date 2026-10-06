@@ -8,5 +8,7 @@ export const laserWalkTool: WalkToolDefinition = {
   defaultShortcut: true,
   shortcutKey: "G",
   Icon: LaserIcon,
-  Scene: lazy(() => import("./LaserWalkTool").then(module => ({ default: module.LaserWalkTool }))),
+  Scene: lazy(() =>
+    import("./LaserWalkTool").then((module) => ({ default: module.LaserWalkTool })),
+  ),
 };

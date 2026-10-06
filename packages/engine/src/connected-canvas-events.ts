@@ -4,7 +4,7 @@ import { events, type RootStore } from "@react-three/fiber";
 export function connectedCanvasEvents(store: RootStore) {
   const manager = events(store);
   const connect = manager.connect;
-  manager.connect = target => {
+  manager.connect = (target) => {
     if (!target?.isConnected) return;
     connect?.(target);
   };

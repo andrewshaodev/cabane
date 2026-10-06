@@ -1,22 +1,16 @@
 import { useFrame, useThree } from "@react-three/fiber";
 
-import {
-  Raycaster,
-  Vector2,
-  type Intersection,
-  type Object3D
-} from "three";
+import { Raycaster, Vector2, type Intersection, type Object3D } from "three";
 
 import { useEffect, useMemo, useRef } from "react";
 
-import type {
-  ExtensionInteractionTarget
-} from "../types";
+import type { ExtensionInteractionTarget } from "../types";
 
 const walkDeviceTargetForObject = (object: Object3D) => {
   let candidate: Object3D | null = object;
   while (candidate) {
-    const target = candidate.userData.walkDeviceInteraction as ExtensionInteractionTarget | undefined;
+    const target = candidate.userData.walkDeviceInteraction as
+      ExtensionInteractionTarget | undefined;
     if (target) return target;
     candidate = candidate.parent;
   }

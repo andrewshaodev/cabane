@@ -9,7 +9,8 @@ export function sampleLaserPulse(distance: number, elapsed: number) {
   const tail = Math.max(0, head - LASER_TRAIL_LENGTH);
   const impactAge = elapsed - travelSeconds;
   return {
-    head, tail,
+    head,
+    tail,
     traveling: elapsed >= 0 && elapsed < travelSeconds,
     travelSeconds,
     impact: impactAge >= 0 && impactAge < LASER_IMPACT_SECONDS,

@@ -1,10 +1,16 @@
-import { pointInsidePolygon, resolveItemTransform, type FloorSpec, type ItemPlacement, type SceneItemSpec } from "@cabane/engine";
+import {
+  pointInsidePolygon,
+  resolveItemTransform,
+  type FloorSpec,
+  type ItemPlacement,
+  type SceneItemSpec,
+} from "@cabane/engine";
 
 import { createSceneItemId } from "./scene-item-identity";
 
 const nearbyPlacement = (source: SceneItemSpec, floor?: FloorSpec): ItemPlacement => {
   const placement = source.placement;
-  const offset = .25 / (floor?.coordinates.metersPerPlanUnit ?? 1);
+  const offset = 0.25 / (floor?.coordinates.metersPerPlanUnit ?? 1);
   if (placement.kind === "wall") {
     const wall = floor?.walls.find((candidate) => candidate.id === placement.wallId);
     if (!wall) return { ...placement };
@@ -15,11 +21,17 @@ const nearbyPlacement = (source: SceneItemSpec, floor?: FloorSpec): ItemPlacemen
     }
     return { ...placement };
   }
-  for (const [dx, dz] of [[offset, offset], [-offset, offset], [offset, -offset], [-offset, -offset]]) {
+  for (const [dx, dz] of [
+    [offset, offset],
+    [-offset, offset],
+    [offset, -offset],
+    [-offset, -offset],
+  ]) {
     const at = [placement.at[0] + dx, placement.at[1] + dz] as const;
     if (floor) {
       const rooms = floor.rooms.filter((room) => pointInsidePolygon(at, room.polygon));
-      if (rooms.length !== 1 || (placement.kind === "ceiling" && rooms[0].id !== placement.roomId)) continue;
+      if (rooms.length !== 1 || (placement.kind === "ceiling" && rooms[0].id !== placement.roomId))
+        continue;
     }
     return { ...placement, at };
   }
@@ -33,25 +45,35 @@ export const duplicateSceneItem = (
   floor?: FloorSpec,
   reservedSlotIds: readonly string[] = [],
 ): SceneItemSpec => {
-  const occupied = new Set([...items.map((item) => item.id), ...reservedSlotIds,
-    ...items.flatMap((item) => item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [])]);
+  const occupied = new Set([
+    ...items.map((item) => item.id),
+    ...reservedSlotIds,
+    ...items.flatMap((item) =>
+      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
+    ),
+  ]);
   const id = createSceneItemId(occupied);
   occupied.add(id);
   let placement = nearbyPlacement(source, floor);
   if (floor && placement.kind === "wall") {
     const { position } = resolveItemTransform(placement, floor);
-    const point = [position[0] / floor.coordinates.metersPerPlanUnit + floor.coordinates.origin[0],
-      position[2] / floor.coordinates.metersPerPlanUnit + floor.coordinates.origin[1]] as const;
-    if (floor.rooms.filter((room) => pointInsidePolygon(point, room.polygon)).length !== 1) placement = { ...source.placement };
+    const point = [
+      position[0] / floor.coordinates.metersPerPlanUnit + floor.coordinates.origin[0],
+      position[2] / floor.coordinates.metersPerPlanUnit + floor.coordinates.origin[1],
+    ] as const;
+    if (floor.rooms.filter((room) => pointInsidePolygon(point, room.polygon)).length !== 1)
+      placement = { ...source.placement };
   }
   const common = { ...source, id, size: [...source.size] as [number, number, number], placement };
-  return source.kind === "device" ? {
-    ...common,
-    kind: "device",
-    entitySlots: source.entitySlots.map((slot) => {
-      const slotId = createSceneItemId(occupied);
-      occupied.add(slotId);
-      return { ...structuredClone(slot), id: slotId };
-    }),
-  } : { ...common, kind: "furnishing" };
+  return source.kind === "device"
+    ? {
+        ...common,
+        kind: "device",
+        entitySlots: source.entitySlots.map((slot) => {
+          const slotId = createSceneItemId(occupied);
+          occupied.add(slotId);
+          return { ...structuredClone(slot), id: slotId };
+        }),
+      }
+    : { ...common, kind: "furnishing" };
 };

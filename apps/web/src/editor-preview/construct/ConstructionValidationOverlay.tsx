@@ -1,5 +1,10 @@
 import { Html } from "@react-three/drei";
-import { resolveItemTransform, ToonMaterial as LitMaterial, type FloorSpec, type SceneItemSpec } from "@cabane/engine";
+import {
+  resolveItemTransform,
+  ToonMaterial as LitMaterial,
+  type FloorSpec,
+  type SceneItemSpec,
+} from "@cabane/engine";
 import { PlanOverlayMaterial } from "./PlanDrawing";
 import { DoubleSide } from "three";
 import { useMemo } from "react";
@@ -36,33 +41,60 @@ export function ConstructionValidationOverlay({
   const ToonMaterial = planMode ? PlanOverlayMaterial : LitMaterial;
   // Dismissal is local to this editor session and only hides the HTML marker.
   // Keep validation, blocking errors, and geometry highlights unchanged.
-  const { hiddenKeys: dismissedIssueKeys, hide } = useValidationLabels(issues, activeIssueKey, focusVersion);
-  const errorIssues = useMemo(() => issues.filter((issue) => issue.severity !== "warning"), [issues]);
-  const visuals = useMemo(() => errorIssues.flatMap((issue) =>
-    constructIssueVisualTargets(issue, floor, sceneItems).map((target) => ({ issue, target }))
-  ), [errorIssues, floor, sceneItems]);
-  const areaEdges = useMemo(() => visuals.flatMap(({ issue, target }) => {
-    const area = target.kind === "outdoor-platform" ? floor.outdoorPlatforms?.find(p=>p.id===target.id) : target.kind === "pool"
-      ? floor.pools?.find((candidate) => candidate.id === target.id)
-      : target.kind === "room"
-        ? floor.rooms.find((candidate) => candidate.id === target.id)
-        : target.kind === "floor-zone"
-          ? [...(floor.groundZones ?? []), ...floor.rooms.flatMap((room) => room.floorZones ?? [])]
-            .find((candidate) => candidate.id === target.id)
-          : undefined;
-    if (!area) return [];
-    return area.polygon.map((from, edgeIndex) => ({
-      issue,
-      target,
-      edgeIndex,
-      transform: wallOverlayTransform(from, area.polygon[(edgeIndex + 1) % area.polygon.length], floor.coordinates),
-    }));
-  }), [floor, visuals]);
+  const { hiddenKeys: dismissedIssueKeys, hide } = useValidationLabels(
+    issues,
+    activeIssueKey,
+    focusVersion,
+  );
+  const errorIssues = useMemo(
+    () => issues.filter((issue) => issue.severity !== "warning"),
+    [issues],
+  );
+  const visuals = useMemo(
+    () =>
+      errorIssues.flatMap((issue) =>
+        constructIssueVisualTargets(issue, floor, sceneItems).map((target) => ({ issue, target })),
+      ),
+    [errorIssues, floor, sceneItems],
+  );
+  const areaEdges = useMemo(
+    () =>
+      visuals.flatMap(({ issue, target }) => {
+        const area =
+          target.kind === "outdoor-platform"
+            ? floor.outdoorPlatforms?.find((p) => p.id === target.id)
+            : target.kind === "pool"
+              ? floor.pools?.find((candidate) => candidate.id === target.id)
+              : target.kind === "room"
+                ? floor.rooms.find((candidate) => candidate.id === target.id)
+                : target.kind === "floor-zone"
+                  ? [
+                      ...(floor.groundZones ?? []),
+                      ...floor.rooms.flatMap((room) => room.floorZones ?? []),
+                    ].find((candidate) => candidate.id === target.id)
+                  : undefined;
+        if (!area) return [];
+        return area.polygon.map((from, edgeIndex) => ({
+          issue,
+          target,
+          edgeIndex,
+          transform: wallOverlayTransform(
+            from,
+            area.polygon[(edgeIndex + 1) % area.polygon.length],
+            floor.coordinates,
+          ),
+        }));
+      }),
+    [floor, visuals],
+  );
   const markerGroups = useMemo(() => {
-    const groups = new Map<string, {
-      point: readonly [number, number];
-      issues: ConstructContextualIssue[];
-    }>();
+    const groups = new Map<
+      string,
+      {
+        point: readonly [number, number];
+        issues: ConstructContextualIssue[];
+      }
+    >();
     errorIssues.forEach((issue) => {
       if (dismissedIssueKeys.has(constructIssueKey(issue))) return;
       const point = constructIssuePlanPoint(issue, floor, sceneItems);
@@ -84,9 +116,24 @@ export function ConstructionValidationOverlay({
           const transform = wallOverlayTransform(wall.from, wall.to, floor.coordinates);
           const wallHeight = wall.heightMeters ?? floor.defaultWallHeightMeters;
           return (
-            <mesh key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`} name={`validation-wall-${target.id}`} position={[transform.center[0], wallHeight / 2 + index * .002, transform.center[1]]} rotation={[0, transform.rotationYRadians, 0]} renderOrder={31}>
-              <boxGeometry args={[transform.length + .06, wallHeight + .08, wall.thicknessMeters + .1]} />
-              <ToonMaterial color="#c53f32" transparent opacity={.7} wireframe depthTest={false} depthWrite={false} />
+            <mesh
+              key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`}
+              name={`validation-wall-${target.id}`}
+              position={[transform.center[0], wallHeight / 2 + index * 0.002, transform.center[1]]}
+              rotation={[0, transform.rotationYRadians, 0]}
+              renderOrder={31}
+            >
+              <boxGeometry
+                args={[transform.length + 0.06, wallHeight + 0.08, wall.thicknessMeters + 0.1]}
+              />
+              <ToonMaterial
+                color="#c53f32"
+                transparent
+                opacity={0.7}
+                wireframe
+                depthTest={false}
+                depthWrite={false}
+              />
             </mesh>
           );
         }
@@ -98,9 +145,28 @@ export function ConstructionValidationOverlay({
           const [x, z] = constructPlanToWorld(point, floor.coordinates);
           const rotation = -Math.atan2(wall.to[1] - wall.from[1], wall.to[0] - wall.from[0]);
           return (
-            <mesh key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`} name={`validation-opening-${target.id}`} position={[x, opening.sillHeightMeters + opening.openingHeightMeters / 2, z]} rotation={[0, rotation, 0]} renderOrder={32}>
-              <boxGeometry args={[opening.widthPlanUnits * floor.coordinates.metersPerPlanUnit + .08, opening.openingHeightMeters + .08, .24]} />
-              <ToonMaterial color="#d94738" transparent opacity={.78} wireframe depthTest={false} depthWrite={false} />
+            <mesh
+              key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`}
+              name={`validation-opening-${target.id}`}
+              position={[x, opening.sillHeightMeters + opening.openingHeightMeters / 2, z]}
+              rotation={[0, rotation, 0]}
+              renderOrder={32}
+            >
+              <boxGeometry
+                args={[
+                  opening.widthPlanUnits * floor.coordinates.metersPerPlanUnit + 0.08,
+                  opening.openingHeightMeters + 0.08,
+                  0.24,
+                ]}
+              />
+              <ToonMaterial
+                color="#d94738"
+                transparent
+                opacity={0.78}
+                wireframe
+                depthTest={false}
+                depthWrite={false}
+              />
             </mesh>
           );
         }
@@ -109,9 +175,22 @@ export function ConstructionValidationOverlay({
           if (!point) return null;
           const [x, z] = constructPlanToWorld(point, floor.coordinates);
           return (
-            <mesh key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`} name={`validation-junction-${target.id}`} position={[x, .12, z]} rotation={[-Math.PI / 2, 0, 0]} renderOrder={33}>
-              <ringGeometry args={[.2, .31, 28]} />
-              <ToonMaterial color="#d94738" transparent opacity={.95} side={DoubleSide} depthTest={false} depthWrite={false} />
+            <mesh
+              key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`}
+              name={`validation-junction-${target.id}`}
+              position={[x, 0.12, z]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              renderOrder={33}
+            >
+              <ringGeometry args={[0.2, 0.31, 28]} />
+              <ToonMaterial
+                color="#d94738"
+                transparent
+                opacity={0.95}
+                side={DoubleSide}
+                depthTest={false}
+                depthWrite={false}
+              />
             </mesh>
           );
         }
@@ -121,9 +200,10 @@ export function ConstructionValidationOverlay({
           if (!item || !point) return null;
           const [x, z] = constructPlanToWorld(point, floor.coordinates);
           let rotationYRadians = 0;
-          let baseY = item.placement.kind === "ceiling"
-            ? floor.defaultCeilingHeightMeters - item.placement.dropMeters
-            : item.placement.elevationMeters;
+          let baseY =
+            item.placement.kind === "ceiling"
+              ? floor.defaultCeilingHeightMeters - item.placement.dropMeters
+              : item.placement.elevationMeters;
           try {
             const transform = resolveItemTransform(item.placement, floor);
             rotationYRadians = transform.rotationYRadians;
@@ -132,9 +212,22 @@ export function ConstructionValidationOverlay({
             // Invalid supports still need a visible, non-crashing marker.
           }
           return (
-            <mesh key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`} name={`validation-item-${target.id}`} position={[x, Math.max(.15, baseY + item.size[1] / 2), z]} rotation={[0, rotationYRadians, 0]} renderOrder={31}>
-              <boxGeometry args={[item.size[0] + .12, item.size[1] + .12, item.size[2] + .12]} />
-              <ToonMaterial color="#d94738" transparent opacity={.68} wireframe depthTest={false} depthWrite={false} />
+            <mesh
+              key={`${constructIssueKey(issue)}:${target.kind}:${target.id}`}
+              name={`validation-item-${target.id}`}
+              position={[x, Math.max(0.15, baseY + item.size[1] / 2), z]}
+              rotation={[0, rotationYRadians, 0]}
+              renderOrder={31}
+            >
+              <boxGeometry args={[item.size[0] + 0.12, item.size[1] + 0.12, item.size[2] + 0.12]} />
+              <ToonMaterial
+                color="#d94738"
+                transparent
+                opacity={0.68}
+                wireframe
+                depthTest={false}
+                depthWrite={false}
+              />
             </mesh>
           );
         }
@@ -144,63 +237,77 @@ export function ConstructionValidationOverlay({
         <mesh
           key={`${constructIssueKey(issue)}:${target.id}:${edgeIndex}`}
           name={`validation-${target.kind}-${target.id}-edge-${edgeIndex}`}
-          position={[transform.center[0], .06, transform.center[1]]}
+          position={[transform.center[0], 0.06, transform.center[1]]}
           rotation={[0, transform.rotationYRadians, 0]}
           renderOrder={30}
         >
-          <boxGeometry args={[transform.length + .035, .055, .09]} />
-          <ToonMaterial color="#c53f32" transparent opacity={.84} side={DoubleSide} depthTest={false} depthWrite={false} />
+          <boxGeometry args={[transform.length + 0.035, 0.055, 0.09]} />
+          <ToonMaterial
+            color="#c53f32"
+            transparent
+            opacity={0.84}
+            side={DoubleSide}
+            depthTest={false}
+            depthWrite={false}
+          />
         </mesh>
       ))}
-      {showLabels && markerGroups.map(({ point, issues: markerIssues }, index) => {
-        const [x, z] = constructPlanToWorld(point, floor.coordinates);
-        const issue = markerIssues[0];
-        const active = markerIssues.some((candidate) => constructIssueKey(candidate) === activeIssueKey);
-        const label = markerIssues.length === 1
-          ? constructIssueShortLabel(issue)
-          : `${markerIssues.length} issues here`;
-        return (
-          <Html
-            key={`${x}:${z}`}
-            position={[x, .55, z]}
-            center
-            zIndexRange={[90, 70]}
-            wrapperClass="construction-validation-overlay-label"
-            style={{ pointerEvents: "none" }}
-          >
-            <div
-              className={`construction-validation-marker ${active ? "is-active" : ""}`}
-              role="group"
-              aria-label={label}
-              onPointerDown={(event) => event.stopPropagation()}
-              onPointerUp={(event) => event.stopPropagation()}
+      {showLabels &&
+        markerGroups.map(({ point, issues: markerIssues }, index) => {
+          const [x, z] = constructPlanToWorld(point, floor.coordinates);
+          const issue = markerIssues[0];
+          const active = markerIssues.some(
+            (candidate) => constructIssueKey(candidate) === activeIssueKey,
+          );
+          const label =
+            markerIssues.length === 1
+              ? constructIssueShortLabel(issue)
+              : `${markerIssues.length} issues here`;
+          return (
+            <Html
+              key={`${x}:${z}`}
+              position={[x, 0.55, z]}
+              center
+              zIndexRange={[90, 70]}
+              wrapperClass="construction-validation-overlay-label"
+              style={{ pointerEvents: "none" }}
             >
-              <button
-                type="button"
-                className="construction-validation-marker__details"
-                aria-label={`${label}. ${markerIssues.map((candidate) => candidate.message).join(" ")}`}
-                title={markerIssues.map((candidate) => candidate.message).join("\n")}
-                onClick={(event) => { event.stopPropagation(); onActivate(issue); }}
+              <div
+                className={`construction-validation-marker ${active ? "is-active" : ""}`}
+                role="group"
+                aria-label={label}
+                onPointerDown={(event) => event.stopPropagation()}
+                onPointerUp={(event) => event.stopPropagation()}
               >
-                <span>{index + 1}</span>
-                <strong>{label}</strong>
-              </button>
-              <button
-                type="button"
-                className="construction-validation-marker__dismiss"
-                aria-label={`Hide error label: ${label}`}
-                title="Hide this label. Use Locate in the issue list to show it again."
-                onClick={(event) => {
-                  event.stopPropagation();
-                  hide(markerIssues.map(constructIssueKey));
-                }}
-              >
-                <span aria-hidden="true">×</span>
-              </button>
-            </div>
-          </Html>
-        );
-      })}
+                <button
+                  type="button"
+                  className="construction-validation-marker__details"
+                  aria-label={`${label}. ${markerIssues.map((candidate) => candidate.message).join(" ")}`}
+                  title={markerIssues.map((candidate) => candidate.message).join("\n")}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onActivate(issue);
+                  }}
+                >
+                  <span>{index + 1}</span>
+                  <strong>{label}</strong>
+                </button>
+                <button
+                  type="button"
+                  className="construction-validation-marker__dismiss"
+                  aria-label={`Hide error label: ${label}`}
+                  title="Hide this label. Use Locate in the issue list to show it again."
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    hide(markerIssues.map(constructIssueKey));
+                  }}
+                >
+                  <span aria-hidden="true">×</span>
+                </button>
+              </div>
+            </Html>
+          );
+        })}
     </group>
   );
 }

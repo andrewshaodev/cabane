@@ -1,16 +1,20 @@
-import { parseBuildTutorialState, type BuildTutorialState } from "./onboarding/build-tutorial-state";
+import {
+  parseBuildTutorialState,
+  type BuildTutorialState,
+} from "./onboarding/build-tutorial-state";
 import {
   allowsCrossAreaEntityBinding,
   collectBindingSlots,
   entityAreaId,
   entityMatchesBindingSlot,
 } from "./runtime-binding-profile";
-import type {
-  HomeAssistantRuntimeSnapshot,
-  HomeManifest,
-  RuntimeBindingProfile,
-} from "./types";
-import { createLaunchOnboardingState, parseLaunchOnboardingState, returningLaunchOnboardingState, type LaunchOnboardingState } from "./onboarding/onboarding-state";
+import type { HomeAssistantRuntimeSnapshot, HomeManifest, RuntimeBindingProfile } from "./types";
+import {
+  createLaunchOnboardingState,
+  parseLaunchOnboardingState,
+  returningLaunchOnboardingState,
+  type LaunchOnboardingState,
+} from "./onboarding/onboarding-state";
 
 export const SETUP_RECORD_SCHEMA_VERSION = 2 as const;
 export const SETUP_STORAGE_PREFIX = "cabane:onboarding:v2";
@@ -63,11 +67,7 @@ export interface SetupStorage {
   setItem: (key: string, value: string) => void;
 }
 
-const CONNECTION_STAGES = new Set<ConnectionSetupStage>([
-  "not-started",
-  "deferred",
-  "connected",
-]);
+const CONNECTION_STAGES = new Set<ConnectionSetupStage>(["not-started", "deferred", "connected"]);
 
 const BUILD_CHOICES = new Set<BuildSetupChoice>([
   "not-started",
@@ -118,8 +118,7 @@ export const createSetupRecord = (): SetupRecord => ({
   launch: createLaunchOnboardingState(),
 });
 
-export const setupStorageKey = (homeId: string) =>
-  `${SETUP_STORAGE_PREFIX}:${homeId}`;
+export const setupStorageKey = (homeId: string) => `${SETUP_STORAGE_PREFIX}:${homeId}`;
 
 export const setupCollapseSessionKey = (homeId: string) =>
   `${SETUP_COLLAPSE_SESSION_PREFIX}:${homeId}`;
@@ -131,7 +130,8 @@ interface ParsedSetupRecord {
 
 const legacyBuildChoice = (stage: string): BuildSetupChoice => {
   if (["deferred", "floor-deferred", "room-deferred"].includes(stage)) return "deferred";
-  if (["floor-review", "floor-approved", "room-review", "complete"].includes(stage)) return "agents";
+  if (["floor-review", "floor-approved", "room-review", "complete"].includes(stage))
+    return "agents";
   return "not-started";
 };
 
@@ -140,13 +140,16 @@ const parseSetupRecord = (raw: string): ParsedSetupRecord | null => {
     const value = JSON.parse(raw) as unknown;
     if (!isObject(value) || typeof value.activated !== "boolean") return null;
     if (
-      value.schemaVersion === SETUP_RECORD_SCHEMA_VERSION
-      && typeof value.connectionStage === "string"
-      && CONNECTION_STAGES.has(value.connectionStage as ConnectionSetupStage)
-      && typeof value.buildChoice === "string"
-      && BUILD_CHOICES.has(value.buildChoice as BuildSetupChoice)
+      value.schemaVersion === SETUP_RECORD_SCHEMA_VERSION &&
+      typeof value.connectionStage === "string" &&
+      CONNECTION_STAGES.has(value.connectionStage as ConnectionSetupStage) &&
+      typeof value.buildChoice === "string" &&
+      BUILD_CHOICES.has(value.buildChoice as BuildSetupChoice)
     ) {
-      const launch = value.launch === undefined ? returningLaunchOnboardingState() : parseLaunchOnboardingState(value.launch);
+      const launch =
+        value.launch === undefined
+          ? returningLaunchOnboardingState()
+          : parseLaunchOnboardingState(value.launch);
       if (!launch) return null;
       const buildTutorial = parseBuildTutorialState(value.buildTutorial);
       return {
@@ -162,10 +165,10 @@ const parseSetupRecord = (raw: string): ParsedSetupRecord | null => {
       };
     }
     if (
-      value.schemaVersion === 1
-      && typeof value.realSessionConnected === "boolean"
-      && typeof value.modelingStage === "string"
-      && LEGACY_MODELING_STAGES.has(value.modelingStage)
+      value.schemaVersion === 1 &&
+      typeof value.realSessionConnected === "boolean" &&
+      typeof value.modelingStage === "string" &&
+      LEGACY_MODELING_STAGES.has(value.modelingStage)
     ) {
       return {
         record: {
@@ -184,11 +187,7 @@ const parseSetupRecord = (raw: string): ParsedSetupRecord | null => {
   }
 };
 
-export const saveSetupRecord = (
-  storage: SetupStorage,
-  homeId: string,
-  record: SetupRecord,
-) => {
+export const saveSetupRecord = (storage: SetupStorage, homeId: string, record: SetupRecord) => {
   try {
     storage.setItem(setupStorageKey(homeId), JSON.stringify(record));
     return true;
@@ -197,10 +196,7 @@ export const saveSetupRecord = (
   }
 };
 
-export const loadSetupRecord = (
-  storage: SetupStorage,
-  homeId: string,
-): SetupRecordLoadResult => {
+export const loadSetupRecord = (storage: SetupStorage, homeId: string): SetupRecordLoadResult => {
   try {
     const raw = storage.getItem(setupStorageKey(homeId));
     if (raw !== null) {
@@ -269,11 +265,7 @@ export const loadSetupCollapsed = (storage: Pick<SetupStorage, "getItem">, homeI
   }
 };
 
-export const saveSetupCollapsed = (
-  storage: SetupStorage,
-  homeId: string,
-  collapsed: boolean,
-) => {
+export const saveSetupCollapsed = (storage: SetupStorage, homeId: string, collapsed: boolean) => {
   try {
     storage.setItem(setupCollapseSessionKey(homeId), collapsed ? "collapsed" : "open");
     return true;
@@ -287,19 +279,22 @@ const validMappedRoomIds = (
   runtime: HomeAssistantRuntimeSnapshot,
   profile: RuntimeBindingProfile,
 ) => {
-  const roomIds = new Set(manifest.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? []);
+  const roomIds = new Set(
+    manifest.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? [],
+  );
   const areaIds = new Set(runtime.areas.map((area) => area.area_id));
   const counts = new Map<string, number>();
   Object.values(profile.roomAreaIds).forEach((areaId) => {
     counts.set(areaId, (counts.get(areaId) ?? 0) + 1);
   });
-  return new Set(Object.entries(profile.roomAreaIds)
-    .filter(([roomId, areaId]) => (
-      roomIds.has(roomId)
-      && areaIds.has(areaId)
-      && counts.get(areaId) === 1
-    ))
-    .map(([roomId]) => roomId));
+  return new Set(
+    Object.entries(profile.roomAreaIds)
+      .filter(
+        ([roomId, areaId]) =>
+          roomIds.has(roomId) && areaIds.has(areaId) && counts.get(areaId) === 1,
+      )
+      .map(([roomId]) => roomId),
+  );
 };
 
 const resolvedControllableRoomId = (
@@ -314,7 +309,9 @@ const resolvedControllableRoomId = (
     entityCounts.set(entityId, (entityCounts.get(entityId) ?? 0) + 1);
   });
   const entries = new Map(runtime.entityRegistry.map((entry) => [entry.entity_id, entry]));
-  const descriptors = new Map(collectBindingSlots(manifest).map((descriptor) => [descriptor.slotId, descriptor]));
+  const descriptors = new Map(
+    collectBindingSlots(manifest).map((descriptor) => [descriptor.slotId, descriptor]),
+  );
 
   for (const room of manifest.floors.flatMap((floor) => floor.rooms) ?? []) {
     if (!mappedRoomIds.has(room.id)) continue;
@@ -328,23 +325,22 @@ const resolvedControllableRoomId = (
       const descriptor = descriptors.get(primary.id);
       const domain = entityId?.split(".", 1)[0];
       if (
-        !entityId
-        || !entry
-        || !state
-        || !descriptor
-        || entityCounts.get(entityId) !== 1
-        || entry.disabled_by !== null
-        || Boolean(entry.hidden_by)
-        || (
-          !allowsCrossAreaEntityBinding(manifest, descriptor)
-          && entityAreaId(entry, runtime) !== expectedAreaId
-        )
-        || !entityMatchesBindingSlot(descriptor, entityId, runtime)
-        || !domain
-        || !CONTROLLABLE_DOMAINS.has(domain)
-        || !state.available
-        || state.stale
-      ) continue;
+        !entityId ||
+        !entry ||
+        !state ||
+        !descriptor ||
+        entityCounts.get(entityId) !== 1 ||
+        entry.disabled_by !== null ||
+        Boolean(entry.hidden_by) ||
+        (!allowsCrossAreaEntityBinding(manifest, descriptor) &&
+          entityAreaId(entry, runtime) !== expectedAreaId) ||
+        !entityMatchesBindingSlot(descriptor, entityId, runtime) ||
+        !domain ||
+        !CONTROLLABLE_DOMAINS.has(domain) ||
+        !state.available ||
+        state.stale
+      )
+        continue;
       return room.id;
     }
   }
@@ -369,13 +365,15 @@ export const deriveSetupProgress = ({
   const roomComplete = record.activated || roomResolvedNow;
   const deviceResolvedNow = resolvedRoomId !== null;
   const deviceComplete = record.activated || deviceResolvedNow;
-  const activationReached = record.activated
-    || (record.connectionStage === "connected" && roomComplete && deviceResolvedNow);
+  const activationReached =
+    record.activated ||
+    (record.connectionStage === "connected" && roomComplete && deviceResolvedNow);
   const buildComplete = ["construction", "agents"].includes(record.buildChoice);
   const buildResolved = buildComplete || record.buildChoice === "deferred";
   const connectionResolved = record.connectionStage !== "not-started";
-  const connectionNeedsAttention = record.connectionStage === "connected"
-    && ["disconnected", "auth-expired", "error"].includes(runtime.status);
+  const connectionNeedsAttention =
+    record.connectionStage === "connected" &&
+    ["disconnected", "auth-expired", "error"].includes(runtime.status);
 
   const steps: SetupStepProgress[] = [
     {
@@ -385,7 +383,9 @@ export const deriveSetupProgress = ({
         ? "attention"
         : record.connectionStage === "connected"
           ? "complete"
-          : record.connectionStage === "deferred" ? "deferred" : "current",
+          : record.connectionStage === "deferred"
+            ? "deferred"
+            : "current",
     },
     {
       id: "modeling",
@@ -394,14 +394,18 @@ export const deriveSetupProgress = ({
         ? "complete"
         : record.buildChoice === "deferred"
           ? "deferred"
-          : connectionResolved ? "current" : "pending",
+          : connectionResolved
+            ? "current"
+            : "pending",
     },
     {
       id: "room",
       complete: roomComplete,
       status: roomComplete
         ? "complete"
-        : record.connectionStage === "connected" && buildResolved ? "current" : "pending",
+        : record.connectionStage === "connected" && buildResolved
+          ? "current"
+          : "pending",
     },
     {
       id: "device",

@@ -1,6 +1,14 @@
 import {
-  BoxWalkCollider, SegmentWalkCollider, StickVector, WALK_CRUISE_SPEED, WALK_EDGE_BOOST_START,
-  WALK_MAX_SPEED, WALK_PITCH_LIMIT, WALK_PLAYER_RADIUS, WalkCollider, WalkPoint
+  BoxWalkCollider,
+  SegmentWalkCollider,
+  StickVector,
+  WALK_CRUISE_SPEED,
+  WALK_EDGE_BOOST_START,
+  WALK_MAX_SPEED,
+  WALK_PITCH_LIMIT,
+  WALK_PLAYER_RADIUS,
+  WalkCollider,
+  WalkPoint,
 } from "./walk-navigation-contract";
 
 export const normalizeStickInput = (
@@ -23,12 +31,8 @@ export const normalizeStickInput = (
   };
 };
 
-export const dampValue = (
-  current: number,
-  target: number,
-  rate: number,
-  delta: number,
-) => current + (target - current) * (1 - Math.exp(-rate * delta));
+export const dampValue = (current: number, target: number, rate: number, delta: number) =>
+  current + (target - current) * (1 - Math.exp(-rate * delta));
 
 export const integrateWalkVelocity = (
   current: StickVector,
@@ -43,17 +47,9 @@ export const integrateWalkVelocity = (
   const inputScale = rawInputMagnitude > 1 ? 1 / rawInputMagnitude : 1;
   const edgeProgress = Math.max(
     0,
-    Math.min(
-      1,
-      (inputMagnitude - WALK_EDGE_BOOST_START) /
-      (1 - WALK_EDGE_BOOST_START),
-    ),
+    Math.min(1, (inputMagnitude - WALK_EDGE_BOOST_START) / (1 - WALK_EDGE_BOOST_START)),
   );
-  const edgeMultiplier =
-    1 +
-    edgeProgress *
-    edgeProgress *
-    (WALK_MAX_SPEED / WALK_CRUISE_SPEED - 1);
+  const edgeMultiplier = 1 + edgeProgress * edgeProgress * (WALK_MAX_SPEED / WALK_CRUISE_SPEED - 1);
   const targetSpeed = cruiseSpeed * edgeMultiplier;
   const rate = inputMagnitude > 0 ? acceleration : deceleration;
   return {
@@ -65,24 +61,17 @@ export const integrateWalkVelocity = (
 export const clampPitch = (pitch: number, limit = WALK_PITCH_LIMIT) =>
   Math.max(-limit, Math.min(limit, pitch));
 
-export const closestPointOnSegment = (
-  point: WalkPoint,
-  from: WalkPoint,
-  to: WalkPoint,
-) => {
+export const closestPointOnSegment = (point: WalkPoint, from: WalkPoint, to: WalkPoint) => {
   const dx = to.x - from.x;
   const dz = to.z - from.z;
   const lengthSquared = dx * dx + dz * dz;
-  const progress = lengthSquared === 0
-    ? 0
-    : Math.max(
-      0,
-      Math.min(
-        1,
-        ((point.x - from.x) * dx + (point.z - from.z) * dz) /
-        lengthSquared,
-      ),
-    );
+  const progress =
+    lengthSquared === 0
+      ? 0
+      : Math.max(
+          0,
+          Math.min(1, ((point.x - from.x) * dx + (point.z - from.z) * dz) / lengthSquared),
+        );
   return { x: from.x + dx * progress, z: from.z + dz * progress };
 };
 
@@ -110,11 +99,7 @@ const resolveSegmentCollision = (
   point.z += dz * correction;
 };
 
-const resolveBoxCollision = (
-  point: WalkPoint,
-  collider: BoxWalkCollider,
-  radius: number,
-) => {
+const resolveBoxCollision = (point: WalkPoint, collider: BoxWalkCollider, radius: number) => {
   const closestX = Math.max(collider.minX, Math.min(point.x, collider.maxX));
   const closestZ = Math.max(collider.minZ, Math.min(point.z, collider.maxZ));
   let dx = point.x - closestX;

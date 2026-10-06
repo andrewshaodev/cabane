@@ -5,13 +5,7 @@ interface ClimateEntityState {
   attributes?: Readonly<Record<string, unknown>>;
 }
 
-const INACTIVE_STATES = new Set([
-  "off",
-  "idle",
-  "standby",
-  "unavailable",
-  "unknown",
-]);
+const INACTIVE_STATES = new Set(["off", "idle", "standby", "unavailable", "unknown"]);
 
 export const deriveClimateAirflowMode = (
   entity: ClimateEntityState | undefined,

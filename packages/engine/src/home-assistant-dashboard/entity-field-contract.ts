@@ -1,7 +1,4 @@
-import {
-  toggleEntityCall,
-  type SupportedServiceCall
-} from "../home-assistant-controls";
+import { toggleEntityCall, type SupportedServiceCall } from "../home-assistant-controls";
 
 import type { EntityStateSnapshot, ResolvedEntityBinding } from "../types";
 
@@ -17,8 +14,10 @@ export const numberAttribute = (value: unknown, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-export const confirmationKey = (entity: EntityStateSnapshot, value: string | number = entity.state) =>
-  `${value}:${entity.lastUpdated ?? entity.lastConfirmedAt ?? ""}`;
+export const confirmationKey = (
+  entity: EntityStateSnapshot,
+  value: string | number = entity.state,
+) => `${value}:${entity.lastUpdated ?? entity.lastConfirmedAt ?? ""}`;
 
 export const toggleCallForPressed = (entity: EntityStateSnapshot, pressed: boolean) =>
   toggleEntityCall({ ...entity, state: pressed ? "off" : "on" });

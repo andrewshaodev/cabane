@@ -8,16 +8,19 @@ const directions = ["above", "below"] as const;
 export function useAdjacentFloorReferences(floors: readonly FloorSpec[], activeFloorId: string) {
   const [visibility, setVisibility] = useState({ above: true, below: true });
   const references = useMemo(() => {
-    const index = floors.findIndex(floor => floor.id === activeFloorId);
+    const index = floors.findIndex((floor) => floor.id === activeFloorId);
     if (index < 0) return [];
-    return directions.flatMap(direction => {
+    return directions.flatMap((direction) => {
       const floor = floors[index + (direction === "above" ? 1 : -1)];
       return floor ? [{ direction, floor, visible: visibility[direction] }] : [];
     });
   }, [floors, activeFloorId, visibility]);
-  const referenceWalls = useMemo(() => references.flatMap(reference => reference.visible ? reference.floor.walls : []), [references]);
+  const referenceWalls = useMemo(
+    () => references.flatMap((reference) => (reference.visible ? reference.floor.walls : [])),
+    [references],
+  );
   const setVisible = (direction: FloorReferenceDirection, visible: boolean) => {
-    setVisibility(current => ({ ...current, [direction]: visible }));
+    setVisibility((current) => ({ ...current, [direction]: visible }));
   };
   return { references, referenceWalls, setVisible };
 }

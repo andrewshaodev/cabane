@@ -40,8 +40,10 @@ const rectangleCorners = (rectangle: ConstructionSelectionRectangle): readonly P
 ];
 
 const pointInsideRectangle = (point: PlanPoint, rectangle: ConstructionSelectionRectangle) =>
-  point[0] >= rectangle.minX - EPSILON && point[0] <= rectangle.maxX + EPSILON
-  && point[1] >= rectangle.minY - EPSILON && point[1] <= rectangle.maxY + EPSILON;
+  point[0] >= rectangle.minX - EPSILON &&
+  point[0] <= rectangle.maxX + EPSILON &&
+  point[1] >= rectangle.minY - EPSILON &&
+  point[1] <= rectangle.maxY + EPSILON;
 
 const segmentTouchesRectangle = (
   from: PlanPoint,
@@ -50,12 +52,9 @@ const segmentTouchesRectangle = (
 ) => {
   if (pointInsideRectangle(from, rectangle) || pointInsideRectangle(to, rectangle)) return true;
   const corners = rectangleCorners(rectangle);
-  return corners.some((corner, index) => segmentsIntersect(
-    from,
-    to,
-    corner,
-    corners[(index + 1) % corners.length],
-  ));
+  return corners.some((corner, index) =>
+    segmentsIntersect(from, to, corner, corners[(index + 1) % corners.length]),
+  );
 };
 
 const polygonTouchesRectangle = (
@@ -65,11 +64,9 @@ const polygonTouchesRectangle = (
   if (polygon.some((point) => pointInsideRectangle(point, rectangle))) return true;
   const corners = rectangleCorners(rectangle);
   if (corners.some((corner) => pointInsidePolygon(corner, polygon))) return true;
-  return polygon.some((from, index) => segmentTouchesRectangle(
-    from,
-    polygon[(index + 1) % polygon.length],
-    rectangle,
-  ));
+  return polygon.some((from, index) =>
+    segmentTouchesRectangle(from, polygon[(index + 1) % polygon.length], rectangle),
+  );
 };
 
 const openingSpan = (
@@ -87,7 +84,10 @@ const openingSpan = (
     wall.from[0] + direction[0] * offset,
     wall.from[1] + direction[1] * offset,
   ];
-  return [pointAt(opening.offsetPlanUnits), pointAt(opening.offsetPlanUnits + opening.widthPlanUnits)];
+  return [
+    pointAt(opening.offsetPlanUnits),
+    pointAt(opening.offsetPlanUnits + opening.widthPlanUnits),
+  ];
 };
 
 export const constructionMarqueeTargets = ({
@@ -121,22 +121,29 @@ export const constructionMarqueeTargets = ({
     ...(draft.groundZones ?? []),
     ...draft.rooms.flatMap((room) => room.floorZones ?? []),
   ]
-      .filter((zone) => zone.polygon.every((point) =>
-        pointInsideRectangle(point, rectangle)
-      ))
-      .map((zone): FloorEditorSelectionTarget => ({
-        kind: "floor-zone",
-        id: zone.id,
-      }));
-  return floorEditorSelectionTargets(createFloorEditorSelection([
-    ...roomTargets,
-    ...wallTargets,
-    ...openingTargets,
-    ...(draft.hedges ?? []).filter((hedge) => segmentTouchesRectangle(hedge.from, hedge.to, rectangle)).map((hedge): FloorEditorSelectionTarget => ({ kind: "hedge", id: hedge.id })),
-    ...(draft.outdoorPlatforms ?? []).filter(platform=>polygonTouchesRectangle(platform.polygon,rectangle)).map((platform): FloorEditorSelectionTarget=>({kind:"outdoor-platform",id:platform.id})),
-    ...poolTargets,
-    ...floorZoneTargets,
-  ]));
+    .filter((zone) => zone.polygon.every((point) => pointInsideRectangle(point, rectangle)))
+    .map((zone): FloorEditorSelectionTarget => ({
+      kind: "floor-zone",
+      id: zone.id,
+    }));
+  return floorEditorSelectionTargets(
+    createFloorEditorSelection([
+      ...roomTargets,
+      ...wallTargets,
+      ...openingTargets,
+      ...(draft.hedges ?? [])
+        .filter((hedge) => segmentTouchesRectangle(hedge.from, hedge.to, rectangle))
+        .map((hedge): FloorEditorSelectionTarget => ({ kind: "hedge", id: hedge.id })),
+      ...(draft.outdoorPlatforms ?? [])
+        .filter((platform) => polygonTouchesRectangle(platform.polygon, rectangle))
+        .map((platform): FloorEditorSelectionTarget => ({
+          kind: "outdoor-platform",
+          id: platform.id,
+        })),
+      ...poolTargets,
+      ...floorZoneTargets,
+    ]),
+  );
 };
 
 const collinearSegmentOverlap = (
@@ -152,8 +159,12 @@ const collinearSegmentOverlap = (
   const tolerance = EPSILON * Math.max(1, Math.hypot(leftDx, leftDy));
   if (Math.abs(crossFrom) > tolerance || Math.abs(crossTo) > tolerance) return false;
   const useX = Math.abs(leftDx) >= Math.abs(leftDy);
-  const left = [useX ? leftFrom[0] : leftFrom[1], useX ? leftTo[0] : leftTo[1]].sort((a, b) => a - b);
-  const right = [useX ? rightFrom[0] : rightFrom[1], useX ? rightTo[0] : rightTo[1]].sort((a, b) => a - b);
+  const left = [useX ? leftFrom[0] : leftFrom[1], useX ? leftTo[0] : leftTo[1]].sort(
+    (a, b) => a - b,
+  );
+  const right = [useX ? rightFrom[0] : rightFrom[1], useX ? rightTo[0] : rightTo[1]].sort(
+    (a, b) => a - b,
+  );
   return Math.min(left[1], right[1]) - Math.max(left[0], right[0]) > EPSILON;
 };
 
@@ -171,86 +182,138 @@ export const resolveConstructionDeletionTargets = ({
   const selected = Array.isArray(selection)
     ? selection
     : floorEditorSelectionTargets(selection as FloorEditorSelection);
-  const selectedRoomIds = new Set(selected.filter((target) => target.kind === "room").map((target) => target.id));
-  const selectedOpeningIds = new Set(selected.filter((target) => target.kind === "opening").map((target) => target.id));
-  const selectedPoolIds = new Set(selected.filter((target) => target.kind === "pool").map((target) => target.id));
-  const selectedFloorZoneIds = new Set(selected
-    .filter((target) => target.kind === "floor-zone")
-    .map((target) => target.id));
-  const sourceWallId = (wallId: string) => draft.walls.some((wall) => wall.id === wallId)
-    ? wallId
-    : wallRuns.find((run) => run.wallId === wallId)?.sourceWallId;
+  const selectedRoomIds = new Set(
+    selected.filter((target) => target.kind === "room").map((target) => target.id),
+  );
+  const selectedOpeningIds = new Set(
+    selected.filter((target) => target.kind === "opening").map((target) => target.id),
+  );
+  const selectedPoolIds = new Set(
+    selected.filter((target) => target.kind === "pool").map((target) => target.id),
+  );
+  const selectedFloorZoneIds = new Set(
+    selected.filter((target) => target.kind === "floor-zone").map((target) => target.id),
+  );
+  const sourceWallId = (wallId: string) =>
+    draft.walls.some((wall) => wall.id === wallId)
+      ? wallId
+      : wallRuns.find((run) => run.wallId === wallId)?.sourceWallId;
 
   const wallTargets: FloorEditorSelectionTarget[] = [];
   const rooms = previewFloor.rooms;
-  const selectedRooms = rooms.filter(room => selectedRoomIds.has(room.id));
-  const unselectedRooms = rooms.filter(room => !selectedRoomIds.has(room.id));
-  const explicitlySelected = new Set(selected.filter(target => target.kind === "wall")
-    .map(target => sourceWallId(target.id)));
+  const selectedRooms = rooms.filter((room) => selectedRoomIds.has(room.id));
+  const unselectedRooms = rooms.filter((room) => !selectedRoomIds.has(room.id));
+  const explicitlySelected = new Set(
+    selected.filter((target) => target.kind === "wall").map((target) => sourceWallId(target.id)),
+  );
   for (const wall of draft.walls) {
-    const dx = wall.to[0] - wall.from[0], dy = wall.to[1] - wall.from[1];
+    const dx = wall.to[0] - wall.from[0],
+      dy = wall.to[1] - wall.from[1];
     const squared = dx * dx + dy * dy;
     if (squared <= EPSILON * EPSILON) continue;
-    const progress = (p: PlanPoint) => ((p[0] - wall.from[0]) * dx + (p[1] - wall.from[1]) * dy) / squared;
-    const intervals = (polygons: readonly RoomSpec[]) => polygons.flatMap(room => room.polygon.flatMap((from, index) => {
-      const to = room.polygon[(index + 1) % room.polygon.length];
-      if (!collinearSegmentOverlap(wall.from, wall.to, from, to)) return [];
-      return [[Math.max(0, Math.min(progress(from), progress(to))), Math.min(1, Math.max(progress(from), progress(to)))]];
-    }));
+    const progress = (p: PlanPoint) =>
+      ((p[0] - wall.from[0]) * dx + (p[1] - wall.from[1]) * dy) / squared;
+    const intervals = (polygons: readonly RoomSpec[]) =>
+      polygons.flatMap((room) =>
+        room.polygon.flatMap((from, index) => {
+          const to = room.polygon[(index + 1) % room.polygon.length];
+          if (!collinearSegmentOverlap(wall.from, wall.to, from, to)) return [];
+          return [
+            [
+              Math.max(0, Math.min(progress(from), progress(to))),
+              Math.min(1, Math.max(progress(from), progress(to))),
+            ],
+          ];
+        }),
+      );
     const selectedSpans = intervals(selectedRooms);
     const protectedSpans = selectedRoomIds.size ? intervals(unselectedRooms) : [];
-    for (const opening of draft.openings.filter(o => o.wallId === wall.id)) {
+    for (const opening of draft.openings.filter((o) => o.wallId === wall.id)) {
       const start = opening.offsetPlanUnits / Math.sqrt(squared);
       const end = start + opening.widthPlanUnits / Math.sqrt(squared);
-      if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON)) protectedSpans.push([start, end]);
+      if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON))
+        protectedSpans.push([start, end]);
     }
-    const cuts = [...new Set([0, 1, ...selectedSpans.flat(), ...protectedSpans.flat()])].sort((a, b) => a - b);
+    const cuts = [...new Set([0, 1, ...selectedSpans.flat(), ...protectedSpans.flat()])].sort(
+      (a, b) => a - b,
+    );
     const removals: [number, number][] = [];
     for (let i = 1; i < cuts.length; i++) {
-      const start = cuts[i - 1], end = cuts[i], middle = (start + end) / 2;
-      if (end - start < EPSILON || protectedSpans.some(([a, b]) => middle > a && middle < b)) continue;
-      if (!explicitlySelected.has(wall.id) && !selectedSpans.some(([a, b]) => middle > a && middle < b)) continue;
+      const start = cuts[i - 1],
+        end = cuts[i],
+        middle = (start + end) / 2;
+      if (end - start < EPSILON || protectedSpans.some(([a, b]) => middle > a && middle < b))
+        continue;
+      if (
+        !explicitlySelected.has(wall.id) &&
+        !selectedSpans.some(([a, b]) => middle > a && middle < b)
+      )
+        continue;
       if (removals.at(-1)?.[1] === start) removals[removals.length - 1][1] = end;
       else removals.push([start, end]);
     }
     for (const span of removals) {
-      wallTargets.push(span[0] === 0 && span[1] === 1 ? { kind: "wall", id: wall.id } : { kind: "wall", id: wall.id, span });
+      wallTargets.push(
+        span[0] === 0 && span[1] === 1
+          ? { kind: "wall", id: wall.id }
+          : { kind: "wall", id: wall.id, span },
+      );
     }
-    for (const opening of draft.openings.filter(o => o.wallId === wall.id)) {
+    for (const opening of draft.openings.filter((o) => o.wallId === wall.id)) {
       const start = opening.offsetPlanUnits / Math.sqrt(squared);
       const end = start + opening.widthPlanUnits / Math.sqrt(squared);
-      if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON)) selectedOpeningIds.delete(opening.id);
-      else if (removals.some(([a, b]) => end > a + EPSILON && start < b - EPSILON)) selectedOpeningIds.add(opening.id);
+      if (protectedSpans.some(([a, b]) => end > a + EPSILON && start < b - EPSILON))
+        selectedOpeningIds.delete(opening.id);
+      else if (removals.some(([a, b]) => end > a + EPSILON && start < b - EPSILON))
+        selectedOpeningIds.add(opening.id);
     }
   }
   // An enclosed room with only shared walls cannot be removed without opening a neighbor.
   for (const room of selectedRooms) {
-    const hasRemoval = wallTargets.some(target => {
+    const hasRemoval = wallTargets.some((target) => {
       if (target.kind !== "wall") return false;
-      const wall = draft.walls.find(w => w.id === target.id)!;
-      const point = (t: number): PlanPoint => [wall.from[0] + (wall.to[0] - wall.from[0]) * t, wall.from[1] + (wall.to[1] - wall.from[1]) * t];
-      return room.polygon.some((from, i) => collinearSegmentOverlap(point(target.span?.[0] ?? 0), point(target.span?.[1] ?? 1), from, room.polygon[(i + 1) % room.polygon.length]));
+      const wall = draft.walls.find((w) => w.id === target.id)!;
+      const point = (t: number): PlanPoint => [
+        wall.from[0] + (wall.to[0] - wall.from[0]) * t,
+        wall.from[1] + (wall.to[1] - wall.from[1]) * t,
+      ];
+      return room.polygon.some((from, i) =>
+        collinearSegmentOverlap(
+          point(target.span?.[0] ?? 0),
+          point(target.span?.[1] ?? 1),
+          from,
+          room.polygon[(i + 1) % room.polygon.length],
+        ),
+      );
     });
     if (!hasRemoval) selectedRoomIds.delete(room.id);
   }
 
-  return floorEditorSelectionTargets(createFloorEditorSelection([
-    ...selected.filter(target=>target.kind === "outdoor-platform" && draft.outdoorPlatforms?.some(platform=>platform.id===target.id)),
-    ...selected.filter((target) => target.kind === "hedge" && draft.hedges?.some((hedge) => hedge.id === target.id)),
-    ...[...selectedRoomIds].map((id): FloorEditorSelectionTarget => ({ kind: "room", id })),
-    ...wallTargets,
-    ...draft.openings.filter((opening) => selectedOpeningIds.has(opening.id))
-      .map((opening): FloorEditorSelectionTarget => ({ kind: "opening", id: opening.id })),
-    ...(draft.pools ?? []).filter((pool) => selectedPoolIds.has(pool.id))
-      .map((pool): FloorEditorSelectionTarget => ({ kind: "pool", id: pool.id })),
-    ...[
-      ...(draft.groundZones ?? []),
-      ...draft.rooms.flatMap((room) => room.floorZones ?? []),
-    ]
-      .filter((zone) => selectedFloorZoneIds.has(zone.id))
-      .map((zone): FloorEditorSelectionTarget => ({
-        kind: "floor-zone",
-        id: zone.id,
-      })),
-  ]));
+  return floorEditorSelectionTargets(
+    createFloorEditorSelection([
+      ...selected.filter(
+        (target) =>
+          target.kind === "outdoor-platform" &&
+          draft.outdoorPlatforms?.some((platform) => platform.id === target.id),
+      ),
+      ...selected.filter(
+        (target) =>
+          target.kind === "hedge" && draft.hedges?.some((hedge) => hedge.id === target.id),
+      ),
+      ...[...selectedRoomIds].map((id): FloorEditorSelectionTarget => ({ kind: "room", id })),
+      ...wallTargets,
+      ...draft.openings
+        .filter((opening) => selectedOpeningIds.has(opening.id))
+        .map((opening): FloorEditorSelectionTarget => ({ kind: "opening", id: opening.id })),
+      ...(draft.pools ?? [])
+        .filter((pool) => selectedPoolIds.has(pool.id))
+        .map((pool): FloorEditorSelectionTarget => ({ kind: "pool", id: pool.id })),
+      ...[...(draft.groundZones ?? []), ...draft.rooms.flatMap((room) => room.floorZones ?? [])]
+        .filter((zone) => selectedFloorZoneIds.has(zone.id))
+        .map((zone): FloorEditorSelectionTarget => ({
+          kind: "floor-zone",
+          id: zone.id,
+        })),
+    ]),
+  );
 };

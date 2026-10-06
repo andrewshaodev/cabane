@@ -9,27 +9,59 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
   const engine = await load("/packages/engine/src/index.ts");
   const { DOOR_PRESETS, DoorModel } = await load("/packages/catalog/src/architecture/index.ts");
-  const { ownerHomeProject, ownerProjectManifest, homeExtensions } = await load("/tests/fixtures/bundled-home.ts");
-  const { deriveDemoSessionDefinition } = await load("/packages/engine/src/onboarding/demo/demo-session-definition.ts");
-  const { resolveOpeningPositions, passableOpeningIds } = await load("/packages/engine/src/opening-pose.ts");
-  const { projectFromEditorState, workspaceSnapshotFromEditorState } = await load("/apps/web/src/editor-preview/project-sync.ts");
+  const { ownerHomeProject, ownerProjectManifest, homeExtensions } = await load(
+    "/tests/fixtures/bundled-home.ts",
+  );
+  const { deriveDemoSessionDefinition } = await load(
+    "/packages/engine/src/onboarding/demo/demo-session-definition.ts",
+  );
+  const { resolveOpeningPositions, passableOpeningIds } = await load(
+    "/packages/engine/src/opening-pose.ts",
+  );
+  const { projectFromEditorState, workspaceSnapshotFromEditorState } = await load(
+    "/apps/web/src/editor-preview/project-sync.ts",
+  );
   const { ownerProjectRegistries } = await load("/apps/web/src/project-runtime.ts");
-  const { floorEditorReducer } = await load("/packages/engine/src/home-editor/construct/editor-state.ts");
-  const garage = ownerProjectManifest.floors[0].openings.find((opening) => opening.operation === "roll-up");
+  const { floorEditorReducer } = await load(
+    "/packages/engine/src/home-editor/construct/editor-state.ts",
+  );
+  const garage = ownerProjectManifest.floors[0].openings.find(
+    (opening) => opening.operation === "roll-up",
+  );
   const floor = ownerProjectManifest.floors[0];
   const wall = floor.walls.find((wall) => wall.id === garage.wallId);
 
   test("six catalog presets round-trip at non-unit scale and placement/history use the configured dimensions", () => {
-    assert.deepEqual(DOOR_PRESETS.map((p) => p.label), ["Panel wood", "Panel white", "French", "Full glass", "Sliding wood", "Garage door"]);
+    assert.deepEqual(
+      DOOR_PRESETS.map((p) => p.label),
+      ["Panel wood", "Panel white", "French", "Full glass", "Sliding wood", "Garage door"],
+    );
     for (const { configuration } of DOOR_PRESETS) {
-      const opening = engine.doorFromConfiguration(configuration, .5, { id: "test-door", wallId: wall.id, offsetFromWallStartPlanUnits: 1 });
-      assert.deepEqual(engine.doorConfiguration(opening, .5), configuration);
-      const draft = engine.createFloorEditorDraft({ ...floor, coordinates: { ...floor.coordinates, metersPerPlanUnit: .5 }, openings: [] });
-      const history = floorEditorReducer(engine.createFloorEditorHistory(draft), { type: "add-opening", wallId: wall.id, kind: "door", offsetPlanUnits: 1, doorConfiguration: configuration });
+      const opening = engine.doorFromConfiguration(configuration, 0.5, {
+        id: "test-door",
+        wallId: wall.id,
+        offsetFromWallStartPlanUnits: 1,
+      });
+      assert.deepEqual(engine.doorConfiguration(opening, 0.5), configuration);
+      const draft = engine.createFloorEditorDraft({
+        ...floor,
+        coordinates: { ...floor.coordinates, metersPerPlanUnit: 0.5 },
+        openings: [],
+      });
+      const history = floorEditorReducer(engine.createFloorEditorHistory(draft), {
+        type: "add-opening",
+        wallId: wall.id,
+        kind: "door",
+        offsetPlanUnits: 1,
+        doorConfiguration: configuration,
+      });
       const added = history.present;
       assert.deepEqual(floorEditorReducer(history, { type: "undo" }).present, draft);
-      assert.deepEqual(floorEditorReducer(floorEditorReducer(history, { type: "undo" }), { type: "redo" }).present, added);
-      assert.equal(added.openings[0].widthPlanUnits, configuration.widthMeters / .5);
+      assert.deepEqual(
+        floorEditorReducer(floorEditorReducer(history, { type: "undo" }), { type: "redo" }).present,
+        added,
+      );
+      assert.equal(added.openings[0].widthPlanUnits, configuration.widthMeters / 0.5);
       assert.equal(added.openings[0].openingHeightMeters, configuration.heightMeters);
       assert.equal(added.openings[0].operation, configuration.operation);
       assert.equal(added.openings[0].leafCount, configuration.leafCount);
@@ -38,18 +70,31 @@ await withModules(async (load) => {
 
   test("the demo owns one architectural garage with a real cover slot and a portable schema", () => {
     assert.equal(garage.id, "garage-motorized-vehicle-door");
-    assert.equal(ownerHomeProject.sceneItems.some((item) => item.id === garage.id), false);
+    assert.equal(
+      ownerHomeProject.sceneItems.some((item) => item.id === garage.id),
+      false,
+    );
     assert.equal(engine.parseHomeProjectSchema(ownerHomeProject).valid, true);
     const parsed = engine.parseHomeProject(engine.serializeHomeProject(ownerHomeProject));
     assert.deepEqual(parsed.project, ownerHomeProject);
-    const slot = engine.collectBindingSlots(ownerProjectManifest).find((slot) => slot.kind === "opening-cover");
+    const slot = engine
+      .collectBindingSlots(ownerProjectManifest)
+      .find((slot) => slot.kind === "opening-cover");
     assert.equal(slot.openingId, garage.id);
     assert.deepEqual(slot.spec.compatibleDomains, ["cover"]);
     assert.deepEqual(slot.spec.compatibleDeviceClasses, ["garage"]);
     assert.ok(slot.roomIds.length);
-    for (const changes of [{ leafCount: 1 }, { hingeSide: "start" }, { slideDirection: "end" }, { variant: "panel" }]) {
+    for (const changes of [
+      { leafCount: 1 },
+      { hingeSide: "start" },
+      { slideDirection: "end" },
+      { variant: "panel" },
+    ]) {
       const invalid = structuredClone(ownerHomeProject);
-      Object.assign(invalid.floors[0].openings.find((o) => o.id === garage.id), changes);
+      Object.assign(
+        invalid.floors[0].openings.find((o) => o.id === garage.id),
+        changes,
+      );
       assert.equal(engine.parseHomeProjectSchema(invalid).valid, false);
     }
   });
@@ -60,15 +105,31 @@ await withModules(async (load) => {
     const contactId = profile.entityIdsBySlotId[garage.contactSlot.id];
     const cover = runtime.entityStates[coverId];
     const retained = new Map();
-    const resolve = () => engine.resolveHomeAssistantBindings(ownerProjectManifest, profile, runtime);
+    const resolve = () =>
+      engine.resolveHomeAssistantBindings(ownerProjectManifest, profile, runtime);
     for (const value of [0, 50, 100]) {
-      runtime.entityStates[coverId] = { ...cover, state: value ? "open" : "closed", attributes: { ...cover.attributes, current_position: value } };
+      runtime.entityStates[coverId] = {
+        ...cover,
+        state: value ? "open" : "closed",
+        attributes: { ...cover.attributes, current_position: value },
+      };
       const bindings = resolve();
       assert.equal(bindings.openings[garage.id].position, value / 100);
-      assert.equal(resolveOpeningPositions(new Set([garage.id]), bindings.openings, retained)[garage.id], value / 100);
-      assert.ok(Object.values(bindings.rooms).some((room) => room.sections.primary.some((binding) => binding.slotId === garage.coverSlot.id)));
+      assert.equal(
+        resolveOpeningPositions(new Set([garage.id]), bindings.openings, retained)[garage.id],
+        value / 100,
+      );
+      assert.ok(
+        Object.values(bindings.rooms).some((room) =>
+          room.sections.primary.some((binding) => binding.slotId === garage.coverSlot.id),
+        ),
+      );
     }
-    runtime.entityStates[coverId] = { ...cover, state: "opening", attributes: { device_class: "garage" } };
+    runtime.entityStates[coverId] = {
+      ...cover,
+      state: "opening",
+      attributes: { device_class: "garage" },
+    };
     runtime.entityStates[contactId] = { ...runtime.entityStates[contactId], state: "off" };
     assert.equal(resolve().openings[garage.id].position, 0);
     runtime.entityStates[contactId].available = false;
@@ -77,54 +138,112 @@ await withModules(async (load) => {
     assert.equal(resolveOpeningPositions(new Set(), resolve().openings, retained)[garage.id], 0);
     delete profile.entityIdsBySlotId[garage.coverSlot.id];
     delete profile.entityIdsBySlotId[garage.contactSlot.id];
-    assert.equal(resolveOpeningPositions(new Set([garage.id]), resolve().openings, retained)[garage.id], 1);
+    assert.equal(
+      resolveOpeningPositions(new Set([garage.id]), resolve().openings, retained)[garage.id],
+      1,
+    );
   });
 
   test("roll-up panels clear the aperture while the frame stays fixed, on both wall faces", async () => {
     for (const side of ["left", "right"]) {
-      const render = (position) => createElement(DoorModel, { wall, floor, opening: { ...garage, openingSide: side }, position, reducedMotion: true });
+      const render = (position) =>
+        createElement(DoorModel, {
+          wall,
+          floor,
+          opening: { ...garage, openingSide: side },
+          position,
+          reducedMotion: true,
+        });
       const renderer = await create(render(0));
       const frame = () => renderer.scene.findByProps({ name: "roll-up-door-frame" });
       const slats = () => renderer.scene.findByProps({ name: "roll-up-door-slats" }).children;
       const bounds = new Box3().setFromObject(frame().instance);
       assert.ok(slats().length > 4);
-      await renderer.update(render(.5));
+      await renderer.update(render(0.5));
       assert.ok(slats().length > 0);
       const first = slats()[0].instance;
       assert.ok(first.position.y - first.geometry.parameters.height / 2 > 1);
       await renderer.update(render(1));
       assert.equal(slats().length, 0);
       assert.ok(new Box3().setFromObject(frame().instance).equals(bounds));
-      for (const mesh of renderer.scene.findAll((node) => node.type === "Mesh")) assert.equal(mesh.instance.material.type, "MeshToonMaterial");
+      for (const mesh of renderer.scene.findAll((node) => node.type === "Mesh"))
+        assert.equal(mesh.instance.material.type, "MeshToonMaterial");
       await renderer.unmount();
     }
   });
 
   test("walk clearance uses actual panel travel and jump height", () => {
-    const geometry = engine.rollUpDoorGeometry(garage.widthPlanUnits, garage.openingHeightMeters, 1);
-    const threshold = (1.52 + .18) / geometry.clearHeight;
-    assert.equal(passableOpeningIds([floor], { [garage.id]: threshold - .001 }).has(garage.id), false);
-    assert.equal(passableOpeningIds([floor], { [garage.id]: threshold + .001 }).has(garage.id), true);
-    assert.equal(passableOpeningIds([floor], { [garage.id]: threshold + .001 }, .2).has(garage.id), false);
+    const geometry = engine.rollUpDoorGeometry(
+      garage.widthPlanUnits,
+      garage.openingHeightMeters,
+      1,
+    );
+    const threshold = (1.52 + 0.18) / geometry.clearHeight;
+    assert.equal(
+      passableOpeningIds([floor], { [garage.id]: threshold - 0.001 }).has(garage.id),
+      false,
+    );
+    assert.equal(
+      passableOpeningIds([floor], { [garage.id]: threshold + 0.001 }).has(garage.id),
+      true,
+    );
+    assert.equal(
+      passableOpeningIds([floor], { [garage.id]: threshold + 0.001 }, 0.2).has(garage.id),
+      false,
+    );
   });
 
   test("preset replacement reconciles cover mappings atomically and undo restores them", () => {
     const slotId = garage.coverSlot.id;
-    const profile = { schemaVersion: 1, homeId: ownerHomeProject.home.id, roomAreaIds: {}, entityIdsBySlotId: { [slotId]: "cover.test_garage" } };
-    const before = { project: ownerHomeProject, bindings: { "https://fixture.invalid": { draft: profile, published: profile, manualRoomIds: [], manualSlotIds: [slotId] } } };
+    const profile = {
+      schemaVersion: 1,
+      homeId: ownerHomeProject.home.id,
+      roomAreaIds: {},
+      entityIdsBySlotId: { [slotId]: "cover.test_garage" },
+    };
+    const before = {
+      project: ownerHomeProject,
+      bindings: {
+        "https://fixture.invalid": {
+          draft: profile,
+          published: profile,
+          manualRoomIds: [],
+          manualSlotIds: [slotId],
+        },
+      },
+    };
     const conventional = engine.doorFromConfiguration(DOOR_PRESETS[0].configuration, 1, garage);
-    const edited = { ...floor, openings: floor.openings.map((o) => o.id === garage.id ? conventional : o) };
-    const after = workspaceSnapshotFromEditorState(before, edited, ownerHomeProject.sceneItems, ownerProjectRegistries);
-    assert.equal(after.bindings["https://fixture.invalid"].draft.entityIdsBySlotId[slotId], undefined);
+    const edited = {
+      ...floor,
+      openings: floor.openings.map((o) => (o.id === garage.id ? conventional : o)),
+    };
+    const after = workspaceSnapshotFromEditorState(
+      before,
+      edited,
+      ownerHomeProject.sceneItems,
+      ownerProjectRegistries,
+    );
+    assert.equal(
+      after.bindings["https://fixture.invalid"].draft.entityIdsBySlotId[slotId],
+      undefined,
+    );
     assert.equal(after.project.openingProfiles[garage.id].coverSlot, undefined);
     const history = engine.commitWorkspaceSnapshot(engine.createWorkspaceHistory(before), after);
     assert.deepEqual(engine.undoWorkspaceHistory(history).present, before);
-    assert.deepEqual(engine.redoWorkspaceHistory(engine.undoWorkspaceHistory(history)).present, after);
+    assert.deepEqual(
+      engine.redoWorkspaceHistory(engine.undoWorkspaceHistory(history)).present,
+      after,
+    );
   });
 
   test("changing the garage to a conventional door removes only its cover profile", () => {
     const conventional = engine.doorFromConfiguration(DOOR_PRESETS[0].configuration, 1, garage);
-    const edited = { ...floor, openings: floor.openings.map((opening) => opening.id === garage.id ? conventional : opening) };
+    const edited = {
+      ...floor,
+      openings: floor.openings.map((opening) =>
+        opening.id === garage.id ? conventional : opening,
+      ),
+    };
     const project = projectFromEditorState(ownerHomeProject, edited, ownerHomeProject.sceneItems);
     assert.equal(project.openingProfiles[garage.id].coverSlot, undefined);
     assert.equal(ownerHomeProject.openingProfiles[garage.id].coverSlot.id, garage.coverSlot.id);

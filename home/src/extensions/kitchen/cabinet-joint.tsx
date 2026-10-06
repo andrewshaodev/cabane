@@ -22,11 +22,7 @@ export function CabinetJoint({
 
   return (
     <mesh
-      position={[
-        (from[0] + to[0]) / 2,
-        (from[1] + to[1]) / 2,
-        (from[2] + to[2]) / 2,
-      ]}
+      position={[(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2]}
       rotation={[0, rotationY, rotationZ]}
     >
       <boxGeometry args={[length, thickness, thickness]} />

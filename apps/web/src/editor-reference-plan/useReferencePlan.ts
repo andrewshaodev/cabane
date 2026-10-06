@@ -2,9 +2,24 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createBrowserUuid, useCabaneDom } from "@cabane/engine";
 import type { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
 import { decodeReferenceImage } from "./decode-reference-image";
-import { calibrateReference, defaultReferencePreference, type ReferencePlan, type ReferencePoint, type ReferencePreference } from "./reference-plan";
-export interface ReferenceViewport { center: ReferencePoint; width: number; height: number }
-export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace>, floorId: string, enabled: boolean, busy: boolean) {
+import {
+  calibrateReference,
+  defaultReferencePreference,
+  type ReferencePlan,
+  type ReferencePoint,
+  type ReferencePreference,
+} from "./reference-plan";
+export interface ReferenceViewport {
+  center: ReferencePoint;
+  width: number;
+  height: number;
+}
+export function useReferencePlan(
+  workspace: ReturnType<typeof useEditorWorkspace>,
+  floorId: string,
+  enabled: boolean,
+  busy: boolean,
+) {
   const { events } = useCabaneDom();
   const storage = workspace.referenceStorage;
   const input = useRef<HTMLInputElement>(null);
@@ -23,47 +38,87 @@ export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace
   const plan = session?.floorId === floorId ? session.plan : saved;
   const adjusting = Boolean(enabled && session?.floorId === floorId);
   const cancel = useCallback(() => {
-    gestureCancel.current?.(); gestureCancel.current = null;
-    if (initialPreference.current) storage.setPreference(initialPreference.current.floorId, initialPreference.current.value);
+    gestureCancel.current?.();
+    gestureCancel.current = null;
+    if (initialPreference.current)
+      storage.setPreference(initialPreference.current.floorId, initialPreference.current.value);
     initialPreference.current = null;
-    setSession(null); setCalibrating(false); setPoints([]); setError(null);
+    setSession(null);
+    setCalibrating(false);
+    setPoints([]);
+    setError(null);
   }, [storage.setPreference]);
   useEffect(() => {
     generation.current++;
-    cancel(); setLoading(false);
-    return () => { generation.current++; };
+    cancel();
+    setLoading(false);
+    return () => {
+      generation.current++;
+    };
   }, [enabled, floorId, cancel]);
   const begin = (scale = false) => {
     if (!plan || busy || !storage.ready) return;
     initialPreference.current ??= { floorId, value: preference };
-    setSession({ floorId, plan }); setExpanded(true); setCalibrating(scale); setPoints([]); setError(null);
+    setSession({ floorId, plan });
+    setExpanded(true);
+    setCalibrating(scale);
+    setPoints([]);
+    setError(null);
     storage.setPreference(floorId, { ...preference, visible: true });
   };
   const update = (next: ReferencePlan) => {
-    if (!Number.isFinite(next.width) || next.width < .01 || !Number.isFinite(next.angle) || !next.center.every(Number.isFinite)) {
-      setError("Enter a positive width of at least 0.01 m and finite coordinates."); return;
+    if (
+      !Number.isFinite(next.width) ||
+      next.width < 0.01 ||
+      !Number.isFinite(next.angle) ||
+      !next.center.every(Number.isFinite)
+    ) {
+      setError("Enter a positive width of at least 0.01 m and finite coordinates.");
+      return;
     }
-    setSession({ floorId, plan: next }); setError(null);
+    setSession({ floorId, plan: next });
+    setError(null);
   };
   const upload = async (files: FileList | readonly File[]) => {
     if (!enabled || busy || adjusting || !storage.ready) return;
-    if (files.length !== 1) { setError("Choose one reference image for this floor."); return; }
+    if (files.length !== 1) {
+      setError("Choose one reference image for this floor.");
+      return;
+    }
     const file = files[0];
     const ticket = ++generation.current;
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const decoded = await decodeReferenceImage(file);
       if (ticket !== generation.current) return;
       const assetId = createBrowserUuid();
       storage.addAsset(assetId, decoded.blob);
       const view = viewport.current;
-      const width = .8 * Math.min(view.width, view.height * decoded.width / decoded.height);
+      const width = 0.8 * Math.min(view.width, (view.height * decoded.width) / decoded.height);
       initialPreference.current = { floorId, value: preference };
-      setSession({ floorId, plan: { assetId, name: file.name, pixelWidth: decoded.width, pixelHeight: decoded.height, center: view.center, width, angle: 0 } });
-      setExpanded(true); setCalibrating(false); setPoints([]);
+      setSession({
+        floorId,
+        plan: {
+          assetId,
+          name: file.name,
+          pixelWidth: decoded.width,
+          pixelHeight: decoded.height,
+          center: view.center,
+          width,
+          angle: 0,
+        },
+      });
+      setExpanded(true);
+      setCalibrating(false);
+      setPoints([]);
       storage.setPreference(floorId, defaultReferencePreference);
-    } catch (cause) { if (ticket === generation.current) setError(cause instanceof Error ? cause.message : "Could not open this image."); }
-    finally { if (ticket === generation.current) setLoading(false); }
+    } catch (cause) {
+      if (ticket === generation.current)
+        setError(cause instanceof Error ? cause.message : "Could not open this image.");
+    } finally {
+      if (ticket === generation.current) setLoading(false);
+    }
   };
   const done = () => {
     if (!session || gestureCancel.current) return;
@@ -75,17 +130,31 @@ export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace
     if (!plan || points.length !== 2) return;
     try {
       const next = calibrateReference(plan, points[0], points[1], distance);
-      if (!Number.isFinite(next.width) || next.width < .01 || !next.center.every(Number.isFinite)) throw new Error("This scale is outside the supported range. The image width must be at least 0.01 m.");
+      if (!Number.isFinite(next.width) || next.width < 0.01 || !next.center.every(Number.isFinite))
+        throw new Error(
+          "This scale is outside the supported range. The image width must be at least 0.01 m.",
+        );
       update(next);
-      setCalibrating(false); setPoints([]);
-    } catch (cause) { setError((cause as Error).message); }
+      setCalibrating(false);
+      setPoints([]);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
   };
   const pickPoint = (point: ReferencePoint) => {
-    if (point.some(value => value < 0 || value > 1)) return;
-    if (points.length === 1 && Math.hypot((point[0] - points[0][0]) * (plan?.pixelWidth ?? 1), (point[1] - points[0][1]) * (plan?.pixelHeight ?? 1)) < 1) {
-      setError("Choose two different points on the image."); return;
+    if (point.some((value) => value < 0 || value > 1)) return;
+    if (
+      points.length === 1 &&
+      Math.hypot(
+        (point[0] - points[0][0]) * (plan?.pixelWidth ?? 1),
+        (point[1] - points[0][1]) * (plan?.pixelHeight ?? 1),
+      ) < 1
+    ) {
+      setError("Choose two different points on the image.");
+      return;
     }
-    setError(null); setPoints(previous => previous.length < 2 ? [...previous, point] : [point]);
+    setError(null);
+    setPoints((previous) => (previous.length < 2 ? [...previous, point] : [point]));
   };
   useEffect(() => {
     if (!adjusting) return;
@@ -93,17 +162,54 @@ export function useReferencePlan(workspace: ReturnType<typeof useEditorWorkspace
       if (event.key !== "Escape") return;
       // Numeric fields own Escape to cancel their pending text first.
       if (event.target instanceof HTMLElement && event.target.closest("input")) return;
-      event.preventDefault(); event.stopImmediatePropagation();
-      if (gestureCancel.current) { gestureCancel.current(); gestureCancel.current = null; }
-      else cancel();
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (gestureCancel.current) {
+        gestureCancel.current();
+        gestureCancel.current = null;
+      } else cancel();
     };
     events.addEventListener("keydown", onKey, true);
     return () => events.removeEventListener("keydown", onKey, true);
   }, [adjusting, cancel, events]);
-  return { input, openPicker: () => { if (!busy && storage.ready) { setExpanded(true); input.current?.click(); } }, plan, preference, adjusting, expanded, setExpanded, loading, error, storage, viewport, gestureCancel, points, calibrating,
-    disabled: busy || loading || !storage.ready, begin, update, cancel, done, upload, calibrate, pickPoint,
-    remove: () => { workspace.commitReferences(Object.fromEntries(Object.entries(workspace.snapshot.references ?? {}).filter(([id]) => id !== floorId))); cancel(); },
-    setPreference: (change: Partial<typeof preference>) => storage.setPreference(floorId, { ...preference, ...change }),
+  return {
+    input,
+    openPicker: () => {
+      if (!busy && storage.ready) {
+        setExpanded(true);
+        input.current?.click();
+      }
+    },
+    plan,
+    preference,
+    adjusting,
+    expanded,
+    setExpanded,
+    loading,
+    error,
+    storage,
+    viewport,
+    gestureCancel,
+    points,
+    calibrating,
+    disabled: busy || loading || !storage.ready,
+    begin,
+    update,
+    cancel,
+    done,
+    upload,
+    calibrate,
+    pickPoint,
+    remove: () => {
+      workspace.commitReferences(
+        Object.fromEntries(
+          Object.entries(workspace.snapshot.references ?? {}).filter(([id]) => id !== floorId),
+        ),
+      );
+      cancel();
+    },
+    setPreference: (change: Partial<typeof preference>) =>
+      storage.setPreference(floorId, { ...preference, ...change }),
   };
 }
 export type ReferencePlanController = ReturnType<typeof useReferencePlan>;

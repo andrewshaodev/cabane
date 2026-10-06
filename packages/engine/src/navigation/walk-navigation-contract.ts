@@ -1,6 +1,4 @@
-import type {
-  SceneMode
-} from "../types";
+import type { SceneMode } from "../types";
 
 export const SCENE_TAP_MOVE_TOLERANCE_PX = 10;
 

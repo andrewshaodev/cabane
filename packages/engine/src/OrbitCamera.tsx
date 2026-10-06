@@ -1,23 +1,12 @@
 import { deriveFloorLevels } from "./building/floor-levels";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import {
-  MapControls,
-  OrthographicCamera
-} from "@react-three/drei";
+import { MapControls, OrthographicCamera } from "@react-three/drei";
 
 import { useThree } from "@react-three/fiber";
 
-import {
-  type OrthographicCamera as ThreeOrthographicCamera
-} from "three";
+import { type OrthographicCamera as ThreeOrthographicCamera } from "three";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type Ref
-} from "react";
+import { useCallback, useEffect, useRef, useState, type Ref } from "react";
 
 import { worldBoundsForPolygon } from "./geometry";
 
@@ -80,10 +69,11 @@ function OrbitDoubleTapZoom() {
       }
 
       const previous = current.lastTap;
-      const isDoubleTap = previous !== null
-        && event.timeStamp - previous.time <= ORBIT_DOUBLE_TAP_DELAY_MS
-        && Math.hypot(event.clientX - previous.x, event.clientY - previous.y)
-        <= ORBIT_DOUBLE_TAP_DISTANCE_PX;
+      const isDoubleTap =
+        previous !== null &&
+        event.timeStamp - previous.time <= ORBIT_DOUBLE_TAP_DELAY_MS &&
+        Math.hypot(event.clientX - previous.x, event.clientY - previous.y) <=
+          ORBIT_DOUBLE_TAP_DISTANCE_PX;
 
       if (!isDoubleTap) {
         current.lastTap = { time: event.timeStamp, x: event.clientX, y: event.clientY };
@@ -94,10 +84,7 @@ function OrbitDoubleTapZoom() {
       event.preventDefault();
       const orbitCamera = camera as ThreeOrthographicCamera;
       if (!orbitCamera.isOrthographicCamera) return;
-      orbitCamera.zoom = Math.min(
-        ORBIT_MAX_ZOOM,
-        orbitCamera.zoom * ORBIT_DOUBLE_TAP_ZOOM_FACTOR,
-      );
+      orbitCamera.zoom = Math.min(ORBIT_MAX_ZOOM, orbitCamera.zoom * ORBIT_DOUBLE_TAP_ZOOM_FACTOR);
       orbitCamera.updateProjectionMatrix();
       invalidate();
     };
@@ -148,40 +135,68 @@ export function OrbitCamera(props: OrbitCameraProps) {
 }
 
 function OrbitCameraRig({
-  showRoof = false, controlsRef, elevation = 0, buildingFloors, floor, room,
+  showRoof = false,
+  controlsRef,
+  elevation = 0,
+  buildingFloors,
+  floor,
+  room,
 }: OrbitCameraProps) {
   const { width, height } = useThree((state) => state.size);
   // Fit on entry or an explicit reset; scene visibility must preserve the live pose.
   const [framing] = useState(() => {
     const polygon = room?.polygon ?? floor.footprint;
-    const bounds = room ? worldBoundsForPolygon(polygon, floor.coordinates) : worldBoundsForFloorScene(floor);
+    const bounds = room
+      ? worldBoundsForPolygon(polygon, floor.coordinates)
+      : worldBoundsForFloorScene(floor);
     if (!room && buildingFloors?.length) {
       for (const level of buildingFloors) {
         const other = worldBoundsForFloorScene(level);
-        bounds.minX = Math.min(bounds.minX, other.minX); bounds.maxX = Math.max(bounds.maxX, other.maxX);
-        bounds.minZ = Math.min(bounds.minZ, other.minZ); bounds.maxZ = Math.max(bounds.maxZ, other.maxZ);
+        bounds.minX = Math.min(bounds.minX, other.minX);
+        bounds.maxX = Math.max(bounds.maxX, other.maxX);
+        bounds.minZ = Math.min(bounds.minZ, other.minZ);
+        bounds.maxZ = Math.max(bounds.maxZ, other.maxZ);
       }
-      bounds.width = bounds.maxX - bounds.minX; bounds.depth = bounds.maxZ - bounds.minZ;
-      bounds.centerX = (bounds.minX + bounds.maxX) / 2; bounds.centerZ = (bounds.minZ + bounds.maxZ) / 2;
+      bounds.width = bounds.maxX - bounds.minX;
+      bounds.depth = bounds.maxZ - bounds.minZ;
+      bounds.centerX = (bounds.minX + bounds.maxX) / 2;
+      bounds.centerZ = (bounds.minZ + bounds.maxZ) / 2;
     }
     const levels = deriveFloorLevels(buildingFloors ?? []);
     const buildingBase = levels[0]?.elevationMeters ?? 0;
-    const buildingHeight = (levels.length ? levels.at(-1)!.elevationMeters + buildingFloors!.at(-1)!.floorToFloorHeightMeters - buildingBase : 0)
-      + (showRoof ? ROOF_MAX_RISE_METERS + ROOF_THICKNESS_METERS + 0.16 : 0);
+    const buildingHeight =
+      (levels.length
+        ? levels.at(-1)!.elevationMeters +
+          buildingFloors!.at(-1)!.floorToFloorHeightMeters -
+          buildingBase
+        : 0) + (showRoof ? ROOF_MAX_RISE_METERS + ROOF_THICKNESS_METERS + 0.16 : 0);
     const span = Math.max(bounds.width, bounds.depth, buildingHeight, 2);
     const stacked = !room && (showRoof || (buildingFloors?.length ?? 0) > 1);
-    const targetHeight = stacked ? buildingBase + buildingHeight / 2 : (room ? 0.55 : 0.2) + elevation;
-    const zoom = cameraZoomForViewport(width, height,
-      stacked ? { width: bounds.width, depth: bounds.depth + buildingHeight * 0.75 } : bounds, Boolean(room));
+    const targetHeight = stacked
+      ? buildingBase + buildingHeight / 2
+      : (room ? 0.55 : 0.2) + elevation;
+    const zoom = cameraZoomForViewport(
+      width,
+      height,
+      stacked ? { width: bounds.width, depth: bounds.depth + buildingHeight * 0.75 } : bounds,
+      Boolean(room),
+    );
     return {
-      position: [bounds.centerX + span * 0.82, span * 1.16 + 2.8 + targetHeight, bounds.centerZ + span * 0.92] as const,
+      position: [
+        bounds.centerX + span * 0.82,
+        span * 1.16 + 2.8 + targetHeight,
+        bounds.centerZ + span * 0.92,
+      ] as const,
       target: [bounds.centerX, targetHeight, bounds.centerZ] as const,
       zoom,
     };
   });
-  const aimInitialCamera = useCallback((camera: ThreeOrthographicCamera | null) => {
-    camera?.lookAt(...framing.target);
-  }, [framing]);
+  const aimInitialCamera = useCallback(
+    (camera: ThreeOrthographicCamera | null) => {
+      camera?.lookAt(...framing.target);
+    },
+    [framing],
+  );
   return (
     <group>
       <OrthographicCamera

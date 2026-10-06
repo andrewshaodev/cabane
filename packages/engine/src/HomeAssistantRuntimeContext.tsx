@@ -1,20 +1,10 @@
-import {
-  createContext,
-  useContext,
-  type ReactNode
-} from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
-import type {
-  HomeAssistantCameraClient
-} from "./camera-runtime";
+import type { HomeAssistantCameraClient } from "./camera-runtime";
 
 import type { SupportedServiceCall } from "./home-assistant-controls";
 
-import type {
-  EntityId,
-  EntityStateSnapshot,
-  HomeAssistantRuntimeSnapshot
-} from "./types";
+import type { EntityId, EntityStateSnapshot, HomeAssistantRuntimeSnapshot } from "./types";
 
 export interface HomeAssistantRuntimeValue extends HomeAssistantRuntimeSnapshot {
   connect: () => void;
@@ -46,12 +36,17 @@ const DEFAULT_RUNTIME: HomeAssistantRuntimeValue = {
   refreshing: false,
   refreshError: null,
   refresh: async () => undefined,
-  callService: async () => { throw new Error("Home Assistant is not connected."); },
+  callService: async () => {
+    throw new Error("Home Assistant is not connected.");
+  },
   cameraClient: null,
-  sendStorageMessage: async () => { throw new Error("Home Assistant is not connected."); },
+  sendStorageMessage: async () => {
+    throw new Error("Home Assistant is not connected.");
+  },
 };
 
-export const HomeAssistantRuntimeContext = createContext<HomeAssistantRuntimeValue>(DEFAULT_RUNTIME);
+export const HomeAssistantRuntimeContext =
+  createContext<HomeAssistantRuntimeValue>(DEFAULT_RUNTIME);
 
 export const useHomeAssistantRuntime = () => useContext(HomeAssistantRuntimeContext);
 

@@ -100,7 +100,7 @@ device placement.
 9. Let engine navigation derive walk collision from the same walls, junctions, and opening
    states. Never author an independent collision layout.
 10. Preserve existing IDs across corrections and keep architectural components
-   free of room-specific furnishings.
+    free of room-specific furnishings.
 
 Do not edit `apps/web`, `packages/engine`, or `packages/catalog` during
 ordinary generation. If a public API is insufficient, report the missing API

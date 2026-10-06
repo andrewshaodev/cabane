@@ -20,19 +20,10 @@ export function RoundedBedroomFurnitureBlock({
   readonly receiveShadow?: boolean;
 }) {
   return (
-    <mesh
-      position={position}
-      rotation={rotation}
-      castShadow
-      receiveShadow={receiveShadow}
-    >
+    <mesh position={position} rotation={rotation} castShadow receiveShadow={receiveShadow}>
       <boxGeometry args={size} />
       <ToonMaterial color={color} />
-      <Outlines
-        thickness={outlineThickness}
-        color={outlineColor}
-        screenspace={false}
-      />
+      <Outlines thickness={outlineThickness} color={outlineColor} screenspace={false} />
     </mesh>
   );
 }

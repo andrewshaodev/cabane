@@ -12,22 +12,22 @@ unsaved changes. A top-level boundary also covers failures outside the router.
 Each workspace owns its draft, published home, mappings, and HA connection.
 Home renders published data; the editor reads the draft. Routes are:
 
-| Route | Surface |
-| --- | --- |
-| `/` | Opens the last successfully opened workspace; the demo resolves to Welcome or Demo according to saved welcome dismissal; falls back to the sole workspace or library |
-| `/welcome` | Introduction over the browser's existing demo, with Explore and Build choices |
-| `/demo` | Published demo with simulated controls and the introduction closed |
-| `/build` | Construct for the browser's Build destination; creates that destination on a first direct visit, or shows mobile editor guidance on phones |
-| `/workspaces` | Library: New, Import, Open, Rename, Duplicate, Export, Delete |
-| `/open/:workspaceId?ha=<origin>` | Authenticate, open the exact HA-saved home, and enable sync in this browser; optional `view=dashboard` identifies a dashboard link |
-| `/workspaces/:workspaceId` | Published Home; unapplied homes open Construct |
-| `/workspaces/:workspaceId/home-assistant` | HA connection, cross-device storage, full workspace backups |
-| `/workspaces/:workspaceId/construct` | 2D architecture editing |
-| `/workspaces/:workspaceId/arrange` | Furniture and device placement |
-| `/workspaces/:workspaceId/mobile-editor?mode=construct` or `?mode=arrange` | Phone editor guidance before Construct or Arrange |
-| `/workspaces/:workspaceId/connect` | Resolves the initial mapping view |
-| `/workspaces/:workspaceId/connect/rooms` | Room-to-area mapping |
-| `/workspaces/:workspaceId/connect/devices` | Device and entity-slot mapping |
+| Route                                                                      | Surface                                                                                                                                                              |
+| -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                                                        | Opens the last successfully opened workspace; the demo resolves to Welcome or Demo according to saved welcome dismissal; falls back to the sole workspace or library |
+| `/welcome`                                                                 | Introduction over the browser's existing demo, with Explore and Build choices                                                                                        |
+| `/demo`                                                                    | Published demo with simulated controls and the introduction closed                                                                                                   |
+| `/build`                                                                   | Construct for the browser's Build destination; creates that destination on a first direct visit, or shows mobile editor guidance on phones                           |
+| `/workspaces`                                                              | Library: New, Import, Open, Rename, Duplicate, Export, Delete                                                                                                        |
+| `/open/:workspaceId?ha=<origin>`                                           | Authenticate, open the exact HA-saved home, and enable sync in this browser; optional `view=dashboard` identifies a dashboard link                                   |
+| `/workspaces/:workspaceId`                                                 | Published Home; unapplied homes open Construct                                                                                                                       |
+| `/workspaces/:workspaceId/home-assistant`                                  | HA connection, cross-device storage, full workspace backups                                                                                                          |
+| `/workspaces/:workspaceId/construct`                                       | 2D architecture editing                                                                                                                                              |
+| `/workspaces/:workspaceId/arrange`                                         | Furniture and device placement                                                                                                                                       |
+| `/workspaces/:workspaceId/mobile-editor?mode=construct` or `?mode=arrange` | Phone editor guidance before Construct or Arrange                                                                                                                    |
+| `/workspaces/:workspaceId/connect`                                         | Resolves the initial mapping view                                                                                                                                    |
+| `/workspaces/:workspaceId/connect/rooms`                                   | Room-to-area mapping                                                                                                                                                 |
+| `/workspaces/:workspaceId/connect/devices`                                 | Device and entity-slot mapping                                                                                                                                       |
 
 Old unscoped editor paths are not aliases. Missing local workspace IDs offer Open from Home Assistant and the library; absence in this browser is not described as remote deletion. Refresh retains the workspace URL. Mode changes retain edit history within
 a home. Leaving for Home, the library, or another workspace flushes the draft;
@@ -147,7 +147,6 @@ panel on portrait mobile layouts.
 Home Assistant settings are linked from each workspace menu, below Edit the home
 in the dashboard menu, and from Connection settings in the Connect footer. Leaving
 the editor for this page uses the same guarded draft flush as other exits.
-
 
 The library groups primary New workspace and secondary Import workspace beside
 the title. Import workspace offers From file and From Home Assistant; legacy

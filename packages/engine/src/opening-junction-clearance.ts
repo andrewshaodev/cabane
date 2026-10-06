@@ -1,12 +1,14 @@
 import type { WallSpec, WallJunctionSpec } from "./types";
 
-type ClearanceWall = Pick<WallSpec, "id" | "from" | "to" | "thicknessMeters"> & { heightMeters?: unknown };
+type ClearanceWall = Pick<WallSpec, "id" | "from" | "to" | "thicknessMeters"> & {
+  heightMeters?: unknown;
+};
 const JUNCTION_EPSILON = 1e-6;
 
 // Door and window casings can legitimately finish slightly into the nominal
 // junction footprint. Keep the structural arm protected while tolerating a
 // small finish overlap so near-corner openings do not fail on harmless trim.
-const OPENING_JUNCTION_FINISH_TOLERANCE_METERS = .02;
+const OPENING_JUNCTION_FINISH_TOLERANCE_METERS = 0.02;
 
 export const junctionOccupiedIntervalsForWall = (
   wall: ClearanceWall,
@@ -21,7 +23,10 @@ export const junctionOccupiedIntervalsForWall = (
   return incidentWalls
     .filter((candidate) => candidate.id !== wall.id)
     .flatMap((candidate) => {
-      const candidateLength = Math.hypot(candidate.to[0] - candidate.from[0], candidate.to[1] - candidate.from[1]);
+      const candidateLength = Math.hypot(
+        candidate.to[0] - candidate.from[0],
+        candidate.to[1] - candidate.from[1],
+      );
       const candidateDx = (candidate.to[0] - candidate.from[0]) / candidateLength;
       const candidateDy = (candidate.to[1] - candidate.from[1]) / candidateLength;
       const sine = Math.abs(wallDx * candidateDy - wallDy * candidateDx);
@@ -45,8 +50,17 @@ export const junctionOccupiedIntervalsForWall = (
       const tolerance = OPENING_JUNCTION_FINISH_TOLERANCE_METERS / metersPerPlanUnit;
       start += tolerance;
       end -= tolerance;
-      return end > start ? [{ start, end, topMeters: typeof candidate.heightMeters === "number"
-        ? candidate.heightMeters : defaultWallHeightMeters }] : [];
+      return end > start
+        ? [
+            {
+              start,
+              end,
+              topMeters:
+                typeof candidate.heightMeters === "number"
+                  ? candidate.heightMeters
+                  : defaultWallHeightMeters,
+            },
+          ]
+        : [];
     });
 };
-

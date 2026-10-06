@@ -10,34 +10,42 @@ export function FanGuard() {
     const pieces: BufferGeometry[] = [];
     const rod = (from: Vector3, to: Vector3) => {
       const direction = to.clone().sub(from);
-      const part = new CylinderGeometry(.0016, .0016, direction.length(), 4);
-      part.applyQuaternion(new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.normalize()));
-      part.translate(...from.clone().add(to).multiplyScalar(.5).toArray());
+      const part = new CylinderGeometry(0.0016, 0.0016, direction.length(), 4);
+      part.applyQuaternion(
+        new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), direction.normalize()),
+      );
+      part.translate(...from.clone().add(to).multiplyScalar(0.5).toArray());
       pieces.push(part);
     };
-    for (const z of [-.025, .045]) {
-      for (const radius of [.067, .12, .175]) {
-        const ring = new TorusGeometry(radius, radius === .175 ? .005 : .0016, 4, 32);
+    for (const z of [-0.025, 0.045]) {
+      for (const radius of [0.067, 0.12, 0.175]) {
+        const ring = new TorusGeometry(radius, radius === 0.175 ? 0.005 : 0.0016, 4, 32);
         ring.translate(0, 0, z);
         pieces.push(ring);
       }
       for (let index = 0; index < 16; index++) {
-        const angle = index * Math.PI / 8;
-        rod(new Vector3(.028 * Math.cos(angle), .028 * Math.sin(angle), z),
-          new Vector3(.175 * Math.cos(angle), .175 * Math.sin(angle), z));
+        const angle = (index * Math.PI) / 8;
+        rod(
+          new Vector3(0.028 * Math.cos(angle), 0.028 * Math.sin(angle), z),
+          new Vector3(0.175 * Math.cos(angle), 0.175 * Math.sin(angle), z),
+        );
       }
     }
     for (let index = 0; index < 8; index++) {
-      const angle = index * Math.PI / 4;
-      rod(new Vector3(.175 * Math.cos(angle), .175 * Math.sin(angle), -.025),
-        new Vector3(.175 * Math.cos(angle), .175 * Math.sin(angle), .045));
+      const angle = (index * Math.PI) / 4;
+      rod(
+        new Vector3(0.175 * Math.cos(angle), 0.175 * Math.sin(angle), -0.025),
+        new Vector3(0.175 * Math.cos(angle), 0.175 * Math.sin(angle), 0.045),
+      );
     }
     const result = mergeGeometries(pieces);
     pieces.forEach((piece) => piece.dispose());
     return result;
   }, []);
   useEffect(() => () => geometry.dispose(), [geometry]);
-  return <mesh name="fan-guard" geometry={geometry} castShadow>
-    <ToonMaterial color={palette.charcoal} />
-  </mesh>;
+  return (
+    <mesh name="fan-guard" geometry={geometry} castShadow>
+      <ToonMaterial color={palette.charcoal} />
+    </mesh>
+  );
 }

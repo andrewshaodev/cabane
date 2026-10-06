@@ -23,9 +23,13 @@ export const requestPopupAuthorizationCode = (
       popup.close();
     };
     const receive = (event: MessageEvent) => {
-      if (event.origin !== host.location.origin || event.source !== popup
-        || event.data?.type !== "cabane:ha-authorization"
-        || event.data.state !== state) return;
+      if (
+        event.origin !== host.location.origin ||
+        event.source !== popup ||
+        event.data?.type !== "cabane:ha-authorization" ||
+        event.data.state !== state
+      )
+        return;
       if (!isCurrent()) {
         cleanup();
         reject(new Error("Home Assistant sign-in was cancelled."));

@@ -4,7 +4,13 @@
  * Cabane and keeps the data model independent from either application.
  */
 
-import { DerivedWallRun, EditorWall, FLOOR_EDITOR_EPSILON, RemappedWallOffset, Subsegment } from "./topology-contract";
+import {
+  DerivedWallRun,
+  EditorWall,
+  FLOOR_EDITOR_EPSILON,
+  RemappedWallOffset,
+  Subsegment,
+} from "./topology-contract";
 import { length, progressOnWall, round } from "./topology-plan-math";
 
 export const remapWallOffsetToDerivedRun = (
@@ -13,15 +19,20 @@ export const remapWallOffsetToDerivedRun = (
   offsetFromWallStartPlanUnits: number,
 ): RemappedWallOffset | undefined => {
   const candidates = wallRuns.filter((run) => run.sourceWallId === sourceWallId);
-  const run = candidates.find((candidate, index) =>
-    offsetFromWallStartPlanUnits >= candidate.startOffsetPlanUnits - FLOOR_EDITOR_EPSILON &&
-    (offsetFromWallStartPlanUnits < candidate.endOffsetPlanUnits - FLOOR_EDITOR_EPSILON ||
-      index === candidates.length - 1)
+  const run = candidates.find(
+    (candidate, index) =>
+      offsetFromWallStartPlanUnits >= candidate.startOffsetPlanUnits - FLOOR_EDITOR_EPSILON &&
+      (offsetFromWallStartPlanUnits < candidate.endOffsetPlanUnits - FLOOR_EDITOR_EPSILON ||
+        index === candidates.length - 1),
   );
-  return run ? {
-    wallId: run.wallId,
-    offsetFromWallStartPlanUnits: round(offsetFromWallStartPlanUnits - run.startOffsetPlanUnits),
-  } : undefined;
+  return run
+    ? {
+        wallId: run.wallId,
+        offsetFromWallStartPlanUnits: round(
+          offsetFromWallStartPlanUnits - run.startOffsetPlanUnits,
+        ),
+      }
+    : undefined;
 };
 
 interface NormalizedWallRun extends DerivedWallRun {
@@ -41,25 +52,31 @@ export const normalizeWallRuns = (
     const classified = segments.map((segment) => {
       const forward = edgeFace.get(`${segment.id}:forward`);
       const reverse = edgeFace.get(`${segment.id}:reverse`);
-      const faceCount = forward !== undefined && reverse !== undefined && forward === reverse
-        ? 0
-        : new Set([forward, reverse].filter((value) => value !== undefined)).size;
+      const faceCount =
+        forward !== undefined && reverse !== undefined && forward === reverse
+          ? 0
+          : new Set([forward, reverse].filter((value) => value !== undefined)).size;
       return {
         segment,
-        classification: faceCount === 2 ? "interior" as const : "exterior" as const,
+        classification: faceCount === 2 ? ("interior" as const) : ("exterior" as const),
       };
     });
     const grouped = classified.reduce<Array<typeof classified>>((result, candidate) => {
       const current = result.at(-1);
-      if (!current || current[0].classification !== candidate.classification) result.push([candidate]);
+      if (!current || current[0].classification !== candidate.classification)
+        result.push([candidate]);
       else current.push(candidate);
       return result;
     }, []);
     grouped.forEach((group, runIndex) => {
       const first = group[0].segment;
       const last = group.at(-1)!.segment;
-      const startOffsetPlanUnits = round(progressOnWall(first.from.point, sourceWall) * length(sourceWall));
-      const endOffsetPlanUnits = round(progressOnWall(last.to.point, sourceWall) * length(sourceWall));
+      const startOffsetPlanUnits = round(
+        progressOnWall(first.from.point, sourceWall) * length(sourceWall),
+      );
+      const endOffsetPlanUnits = round(
+        progressOnWall(last.to.point, sourceWall) * length(sourceWall),
+      );
       let wallId = sourceWall.id;
       if (runIndex > 0) {
         const base = `${sourceWall.id}--split-${runIndex + 1}`;

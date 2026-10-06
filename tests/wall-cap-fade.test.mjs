@@ -30,15 +30,16 @@ await withModules(async (load) => {
 
   test("uses the most transparent opacity for geometry shared by multiple normals", () => {
     const camera = [10, 10];
-    const normals = [[1, 0], [0, 1], [-1, 0]];
+    const normals = [
+      [1, 0],
+      [0, 1],
+      [-1, 0],
+    ];
     const expected = Math.min(
       ...normals.map((normal) => fade.cameraFacingWallOpacity(true, camera, normal)),
     );
 
-    assert.equal(
-      fade.cameraFacingWallOpacityForNormals(true, camera, normals),
-      expected,
-    );
+    assert.equal(fade.cameraFacingWallOpacityForNormals(true, camera, normals), expected);
     assert.equal(fade.cameraFacingWallOpacityForNormals(false, camera, normals), 1);
     assert.equal(fade.cameraFacingWallOpacityForNormals(true, camera, []), 1);
   });

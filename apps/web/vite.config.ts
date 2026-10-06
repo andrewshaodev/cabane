@@ -9,7 +9,7 @@ const useWoff2MaterialDesignIcons = (): Plugin => ({
     if (!id.includes("/@mdi/font/css/materialdesignicons.min.css")) return null;
     return source.replace(
       /^@font-face\{[^}]+\}/,
-      "@font-face{font-family:\"Material Design Icons\";src:url(\"../fonts/materialdesignicons-webfont.woff2?v=7.4.47\") format(\"woff2\");font-weight:normal;font-style:normal}",
+      '@font-face{font-family:"Material Design Icons";src:url("../fonts/materialdesignicons-webfont.woff2?v=7.4.47") format("woff2");font-weight:normal;font-style:normal}',
     );
   },
 });

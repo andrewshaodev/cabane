@@ -6,7 +6,7 @@ import type {
   FloorSpec,
   HomeExtensionRegistry,
   ResolvedHomeBindings,
-  RoomSpec
+  RoomSpec,
 } from "../types";
 
 export function Furnishings({
@@ -28,21 +28,26 @@ export function Furnishings({
 }) {
   if (!room.furnishings) return null;
   const roomRegistry = extensions.roomFurnishings;
-  const Component = roomRegistry && Object.hasOwn(roomRegistry, room.furnishings)
-    ? roomRegistry[room.furnishings]
-    : undefined;
+  const Component =
+    roomRegistry && Object.hasOwn(roomRegistry, room.furnishings)
+      ? roomRegistry[room.furnishings]
+      : undefined;
   if (!Component) return null;
   const resolvedRoom = resolvedBindings.rooms[room.id];
   const relevantEntities = [
     ...Object.values(resolvedRoom?.sections ?? {}).flat(),
     ...(resolvedRoom?.devices.flatMap((device) => device.entities) ?? []),
   ];
-  const relevantStates = Object.fromEntries(relevantEntities
-    .filter((entity) => entity.state)
-    .map((entity) => [entity.entityId, entity.state!])) as Readonly<Record<EntityId, EntityStateSnapshot>>;
-  const statesBySlotId = Object.fromEntries(relevantEntities
-    .filter((entity) => entity.state)
-    .map((entity) => [entity.slotId, entity.state!])) as Readonly<Record<string, EntityStateSnapshot>>;
+  const relevantStates = Object.fromEntries(
+    relevantEntities
+      .filter((entity) => entity.state)
+      .map((entity) => [entity.entityId, entity.state!]),
+  ) as Readonly<Record<EntityId, EntityStateSnapshot>>;
+  const statesBySlotId = Object.fromEntries(
+    relevantEntities
+      .filter((entity) => entity.state)
+      .map((entity) => [entity.slotId, entity.state!]),
+  ) as Readonly<Record<string, EntityStateSnapshot>>;
   return (
     <Component
       coordinates={floor.coordinates}
@@ -68,7 +73,9 @@ export const statesBySlotIdForRoom = (
     ...resolvedRoom.devices.flatMap((device) => device.entities),
   ];
   const withState = entities.filter((entity) => entity.state);
-  return withState.length ? Object.fromEntries(withState.map((entity) => [entity.slotId, entity.state!])) : EMPTY_STATES;
+  return withState.length
+    ? Object.fromEntries(withState.map((entity) => [entity.slotId, entity.state!]))
+    : EMPTY_STATES;
 };
 
 export const EMPTY_STATES: Readonly<Record<string, EntityStateSnapshot>> = {};

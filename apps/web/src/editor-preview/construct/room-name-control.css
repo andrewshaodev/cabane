@@ -1,8 +1,49 @@
-.construction-room-name { pointer-events: auto; display: inline-block; }
-.construction-room-name button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid transparent; border-radius: 6px; padding: 5px 7px; color: #5e5a50; background: rgba(247, 242, 233, .85); font: inherit; cursor: text; min-height: 32px; }
-.construction-room-name button span { color: #8b6650; }
-.construction-room-name button:hover { border-color: #b3a18b; }
-.construction-room-name button:disabled { cursor: default; pointer-events: none; }
-.construction-room-name input { width: 150px; max-width: 36vw; font: 500 13px/1.4 "Roboto", sans-serif; padding: 7px; border: 1px solid #934c2e; border-radius: 6px; background: #fffdf6; color: #49483e; }
-.construction-room-name :is(button, input):focus-visible { outline: 2px solid #934c2e; outline-offset: 2px; }
-@media (pointer: coarse) { .construction-room-name :is(button, input) { min-height: 44px; } }
+.construction-room-name {
+  pointer-events: auto;
+  display: inline-block;
+}
+.construction-room-name button {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 5px 7px;
+  color: #5e5a50;
+  background: rgba(247, 242, 233, 0.85);
+  font: inherit;
+  cursor: text;
+  min-height: 32px;
+}
+.construction-room-name button span {
+  color: #8b6650;
+}
+.construction-room-name button:hover {
+  border-color: #b3a18b;
+}
+.construction-room-name button:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+.construction-room-name input {
+  width: 150px;
+  max-width: 36vw;
+  font:
+    500 13px/1.4 "Roboto",
+    sans-serif;
+  padding: 7px;
+  border: 1px solid #934c2e;
+  border-radius: 6px;
+  background: #fffdf6;
+  color: #49483e;
+}
+.construction-room-name :is(button, input):focus-visible {
+  outline: 2px solid #934c2e;
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .construction-room-name :is(button, input) {
+    min-height: 44px;
+  }
+}

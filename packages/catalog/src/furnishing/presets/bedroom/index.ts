@@ -7,7 +7,10 @@ export { DresserWithTv } from "./dresser-with-tv";
 export { KnobDoorWardrobe, KNOB_DOOR_WARDROBE_SIZE } from "./knob-door-wardrobe";
 export { OverbedBridgeCabinet, OVERBED_BRIDGE_CABINET_SIZE } from "./overbed-bridge-cabinet";
 export { ShelfHeadboard, SHELF_HEADBOARD_SIZE } from "./shelf-headboard";
-export { HeadboardFreeDoubleBed, HEADBOARD_FREE_DOUBLE_BED_SIZE } from "./headboard-free-double-bed";
+export {
+  HeadboardFreeDoubleBed,
+  HEADBOARD_FREE_DOUBLE_BED_SIZE,
+} from "./headboard-free-double-bed";
 export { RoundGlobeWallLamp, ROUND_GLOBE_WALL_LAMP_SIZE } from "./round-globe-wall-lamp";
 export { WallReadingSpot, WALL_READING_SPOT_SIZE } from "./wall-reading-spot";
 export { OakWallUplight, OAK_WALL_UPLIGHT_SIZE } from "./oak-wall-uplight";

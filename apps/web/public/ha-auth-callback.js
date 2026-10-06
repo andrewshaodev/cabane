@@ -4,8 +4,12 @@ window.history.replaceState(null, "", window.location.pathname);
 const code = params.get("code");
 const state = params.get("state");
 if (window.opener && code && state) {
-  window.opener.postMessage({ type: "cabane:ha-authorization", code, state }, window.location.origin);
+  window.opener.postMessage(
+    { type: "cabane:ha-authorization", code, state },
+    window.location.origin,
+  );
   document.getElementById("status").textContent = "Return to Cabane. You can close this window.";
 } else {
-  document.getElementById("status").textContent = "Sign-in could not return to Cabane. Close this window and connect again.";
+  document.getElementById("status").textContent =
+    "Sign-in could not return to Cabane. Close this window and connect again.";
 }

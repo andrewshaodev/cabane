@@ -3,8 +3,11 @@ import { BufferGeometry, Float32BufferAttribute } from "three";
 import { MaterialBucket } from "./architecture-geometry-contract";
 
 export const pushTriangle = (
-  buckets: [number[], number[]], material: MaterialBucket,
-  a: readonly [number, number, number], b: readonly [number, number, number], c: readonly [number, number, number],
+  buckets: [number[], number[]],
+  material: MaterialBucket,
+  a: readonly [number, number, number],
+  b: readonly [number, number, number],
+  c: readonly [number, number, number],
 ) => buckets[material].push(...a, ...b, ...c);
 
 export const geometryFromBuckets = (buckets: [number[], number[]]) => {
@@ -18,5 +21,5 @@ export const geometryFromBuckets = (buckets: [number[], number[]]) => {
   return geometry;
 };
 
-export const uniqueSorted = (values: readonly number[]) => [...new Set(values.map((value) => Number(value.toFixed(6))))]
-  .sort((left, right) => left - right);
+export const uniqueSorted = (values: readonly number[]) =>
+  [...new Set(values.map((value) => Number(value.toFixed(6))))].sort((left, right) => left - right);

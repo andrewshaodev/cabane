@@ -1,7 +1,11 @@
 import type { EditorWall, FloorCoordinates, PlanPoint } from "@cabane/engine";
 
 type WallSegment = Pick<EditorWall, "from" | "to" | "thicknessMeters"> & { id?: string };
-export type WallLengthGuide = WallSegment & { key: string; primary: boolean; avoidPoint?: PlanPoint };
+export type WallLengthGuide = WallSegment & {
+  key: string;
+  primary: boolean;
+  avoidPoint?: PlanPoint;
+};
 export interface WallAngleGuide {
   key: string;
   junction: PlanPoint;
@@ -17,15 +21,24 @@ const distance = (a: PlanPoint, b: PlanPoint) => Math.hypot(a[0] - b[0], a[1] - 
 
 /** Only actual joins get measurements, not walls merely near the pointer. */
 const containsPoint = (wall: WallSegment, point: PlanPoint, epsilon: number) => {
-  const dx = wall.to[0] - wall.from[0], dy = wall.to[1] - wall.from[1];
+  const dx = wall.to[0] - wall.from[0],
+    dy = wall.to[1] - wall.from[1];
   const length = Math.hypot(dx, dy);
   if (length <= epsilon) return false;
-  const x = point[0] - wall.from[0], y = point[1] - wall.from[1];
+  const x = point[0] - wall.from[0],
+    y = point[1] - wall.from[1];
   const along = (x * dx + y * dy) / length;
-  return along >= -epsilon && along <= length + epsilon && Math.abs(x * dy - y * dx) / length <= epsilon;
+  return (
+    along >= -epsilon && along <= length + epsilon && Math.abs(x * dy - y * dx) / length <= epsilon
+  );
 };
 
-export function wallConnectionMeasurements({ walls, primary, junctions, coordinates }: {
+export function wallConnectionMeasurements({
+  walls,
+  primary,
+  junctions,
+  coordinates,
+}: {
   walls: readonly EditorWall[];
   /** An existing ID means a corner resize; no ID means a new wall preview. */
   primary: WallSegment;
@@ -35,11 +48,16 @@ export function wallConnectionMeasurements({ walls, primary, junctions, coordina
   const epsilon = 1e-6 / coordinates.metersPerPlanUnit;
   const lengths: WallLengthGuide[] = [{ ...primary, key: "primary", primary: true }];
   const angles: WallAngleGuide[] = [];
-  if (primary.id === undefined && distance(primary.from, primary.to) <= epsilon) return { lengths, angles };
-  const uniqueJunctions = junctions.filter((point, index) =>
-    junctions.findIndex((other) => distance(point, other) <= epsilon) === index);
+  if (primary.id === undefined && distance(primary.from, primary.to) <= epsilon)
+    return { lengths, angles };
+  const uniqueJunctions = junctions.filter(
+    (point, index) => junctions.findIndex((other) => distance(point, other) <= epsilon) === index,
+  );
   for (const wall of walls) {
-    if (wall.id !== primary.id && uniqueJunctions.some((point) => containsPoint(wall, point, epsilon))) {
+    if (
+      wall.id !== primary.id &&
+      uniqueJunctions.some((point) => containsPoint(wall, point, epsilon))
+    ) {
       lengths.push({ ...wall, key: `wall:${wall.id}`, primary: false });
     }
   }
@@ -50,7 +68,11 @@ export function wallConnectionMeasurements({ walls, primary, junctions, coordina
       for (const end of [wall.from, wall.to]) {
         if (distance(junction, end) <= epsilon) continue;
         const heading = (Math.atan2(end[1] - junction[1], end[0] - junction[0]) + TAU) % TAU;
-        const duplicate = rays.find((ray) => Math.abs(Math.atan2(Math.sin(heading - ray.heading), Math.cos(heading - ray.heading))) < 1e-8);
+        const duplicate = rays.find(
+          (ray) =>
+            Math.abs(Math.atan2(Math.sin(heading - ray.heading), Math.cos(heading - ray.heading))) <
+            1e-8,
+        );
         if (duplicate) duplicate.keys.push(wall.key);
         else rays.push({ heading, keys: [wall.key] });
       }
@@ -61,12 +83,23 @@ export function wallConnectionMeasurements({ walls, primary, junctions, coordina
       const next = rays[(index + 1) % rays.length];
       const sweep = (next.heading - ray.heading + TAU) % TAU;
       // Show adjacent, non-reflex sectors; a straight two-wall join appears once.
-      if (sweep > Math.PI + 1e-8 || (rays.length === 2 && index === 1 && Math.abs(sweep - Math.PI) < 1e-8)) return;
+      if (
+        sweep > Math.PI + 1e-8 ||
+        (rays.length === 2 && index === 1 && Math.abs(sweep - Math.PI) < 1e-8)
+      )
+        return;
       const wallKeys = [...new Set([...ray.keys, ...next.keys])];
       if (primary.id === undefined && !wallKeys.includes("primary")) return;
-      const degrees = Math.min(180, sweep * 180 / Math.PI);
-      angles.push({ key: `${junctionIndex}:${index}`, junction, startRadians: ray.heading,
-        sweepRadians: sweep, degrees, label: `${Number(degrees.toFixed(1))}°`, wallKeys });
+      const degrees = Math.min(180, (sweep * 180) / Math.PI);
+      angles.push({
+        key: `${junctionIndex}:${index}`,
+        junction,
+        startRadians: ray.heading,
+        sweepRadians: sweep,
+        degrees,
+        label: `${Number(degrees.toFixed(1))}°`,
+        wallKeys,
+      });
     });
   });
   for (const length of lengths) {

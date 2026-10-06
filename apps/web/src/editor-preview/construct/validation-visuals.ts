@@ -1,8 +1,5 @@
 import type { FloorSpec, PlanPoint, SceneItemSpec } from "@cabane/engine";
-import type {
-  ConstructContextualIssue,
-  ConstructValidationTarget,
-} from "./contextual-validation";
+import type { ConstructContextualIssue, ConstructValidationTarget } from "./contextual-validation";
 
 const quoted = (message: string, id: string) =>
   message.includes(`"${id}"`) || message.includes(`“${id}”`);
@@ -14,12 +11,23 @@ export const constructIssueKey = (issue: ConstructContextualIssue) =>
 
 export const constructIssueVisualTargets = (
   issue: ConstructContextualIssue,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
+  floor: Pick<
+    FloorSpec,
+    | "walls"
+    | "wallJunctions"
+    | "openings"
+    | "rooms"
+    | "ceilings"
+    | "pools"
+    | "outdoorPlatforms"
+    | "groundZones"
+  >,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): readonly ConstructValidationTarget[] => {
   const targets: ConstructValidationTarget[] = issue.target ? [issue.target] : [];
   const add = (target: ConstructValidationTarget) => {
-    if (!targets.some((candidate) => targetKey(candidate) === targetKey(target))) targets.push(target);
+    if (!targets.some((candidate) => targetKey(candidate) === targetKey(target)))
+      targets.push(target);
   };
 
   floor.walls.forEach((wall) => {
@@ -50,8 +58,9 @@ export const constructIssueVisualTargets = (
 
   for (const target of [...targets]) {
     if (target.kind === "junction") {
-      floor.wallJunctions.find((junction) => junction.id === target.id)?.wallIds
-        .forEach((id) => add({ kind: "wall", id }));
+      floor.wallJunctions
+        .find((junction) => junction.id === target.id)
+        ?.wallIds.forEach((id) => add({ kind: "wall", id }));
     }
     if (target.kind === "opening") {
       const opening = floor.openings.find((candidate) => candidate.id === target.id);
@@ -116,7 +125,17 @@ const firstPolygonCrossing = (polygon: readonly PlanPoint[]): PlanPoint | null =
 
 export const constructTargetPlanPoint = (
   target: ConstructValidationTarget,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
+  floor: Pick<
+    FloorSpec,
+    | "walls"
+    | "wallJunctions"
+    | "openings"
+    | "rooms"
+    | "ceilings"
+    | "pools"
+    | "outdoorPlatforms"
+    | "groundZones"
+  >,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): PlanPoint | null => {
   if (target.kind === "wall") {
@@ -146,12 +165,12 @@ export const constructTargetPlanPoint = (
     const zone = [
       ...(floor.groundZones ?? []),
       ...floor.rooms.flatMap((room) => room.floorZones ?? []),
-    ]
-      .find((candidate) => candidate.id === target.id);
+    ].find((candidate) => candidate.id === target.id);
     return zone ? polygonCenter(zone.polygon) : null;
   }
   if (target.kind === "outdoor-platform") {
-    const platform = floor.outdoorPlatforms?.find(p=>p.id===target.id); return platform ? polygonCenter(platform.polygon) : null;
+    const platform = floor.outdoorPlatforms?.find((p) => p.id === target.id);
+    return platform ? polygonCenter(platform.polygon) : null;
   }
   if (target.kind === "pool") {
     const pool = floor.pools?.find((candidate) => candidate.id === target.id);
@@ -200,7 +219,17 @@ export const constructIssueShortLabel = (issue: ConstructContextualIssue) => {
 
 export const constructIssuePlanPoint = (
   issue: ConstructContextualIssue,
-  floor: Pick<FloorSpec, "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">,
+  floor: Pick<
+    FloorSpec,
+    | "walls"
+    | "wallJunctions"
+    | "openings"
+    | "rooms"
+    | "ceilings"
+    | "pools"
+    | "outdoorPlatforms"
+    | "groundZones"
+  >,
   sceneItems: readonly Pick<SceneItemSpec, "id" | "placement">[],
 ): PlanPoint | null => {
   if (issue.code === "room.polygon-invalid" && issue.target?.kind === "room") {

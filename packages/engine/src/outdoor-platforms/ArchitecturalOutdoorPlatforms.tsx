@@ -6,15 +6,31 @@ import { PlatformBarrierModel } from "./PlatformBarrierModel";
 import { PlatformLowWallRuns } from "./PlatformLowWallRuns";
 import { PlatformSlab } from "./PlatformSlab";
 
-export function ArchitecturalOutdoorPlatforms({ floor, below }: { floor: FloorSpec; below?: FloorSpec }) {
+export function ArchitecturalOutdoorPlatforms({
+  floor,
+  below,
+}: {
+  floor: FloorSpec;
+  below?: FloorSpec;
+}) {
   const barriers = useMemo(() => deriveOutdoorPlatformBarriers(floor), [floor]);
-  return <group name="outdoor-platforms">
-    {(floor.outdoorPlatforms ?? []).filter(platform => isOutdoorPlatformOutline(platform.polygon)).map(platform =>
-      <PlatformSlab key={platform.id} platform={platform} floor={floor} below={below} />
-    )}
-    <PlatformLowWallRuns barriers={barriers} />
-    {barriers.filter(barrier => barrier.configuration.kind === "railing").map((barrier, index) =>
-      <PlatformBarrierModel key={`${barrier.edgeId}-${index}`} name={`platform-barrier-${barrier.edgeId}-${index}`} {...barrier} />
-    )}
-  </group>;
+  return (
+    <group name="outdoor-platforms">
+      {(floor.outdoorPlatforms ?? [])
+        .filter((platform) => isOutdoorPlatformOutline(platform.polygon))
+        .map((platform) => (
+          <PlatformSlab key={platform.id} platform={platform} floor={floor} below={below} />
+        ))}
+      <PlatformLowWallRuns barriers={barriers} />
+      {barriers
+        .filter((barrier) => barrier.configuration.kind === "railing")
+        .map((barrier, index) => (
+          <PlatformBarrierModel
+            key={`${barrier.edgeId}-${index}`}
+            name={`platform-barrier-${barrier.edgeId}-${index}`}
+            {...barrier}
+          />
+        ))}
+    </group>
+  );
 }

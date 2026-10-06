@@ -22,24 +22,55 @@ await withModules(async (load) => {
         const dom = new JSDOM('<div id="root"></div>', {
           url: `${dashboard}/${entry === "callback" ? "?auth_callback=1&code=synthetic&state=synthetic" : ""}`,
         });
-        const previous = Object.fromEntries(["window", "document", "IS_REACT_ACT_ENVIRONMENT"].map(key => [key, globalThis[key]]));
-        Object.assign(globalThis, { window: dom.window, document: dom.window.document, IS_REACT_ACT_ENVIRONMENT: true });
+        const previous = Object.fromEntries(
+          ["window", "document", "IS_REACT_ACT_ENVIRONMENT"].map((key) => [key, globalThis[key]]),
+        );
+        Object.assign(globalThis, {
+          window: dom.window,
+          document: dom.window.document,
+          IS_REACT_ACT_ENVIRONMENT: true,
+        });
         const root = createRoot(document.getElementById("root"));
         let value;
         let calls = 0;
         const client = {
-          async getAuth() { calls++; throw new Error("Synthetic auth boundary reached"); },
-          async createConnection() { assert.fail("No real connection permitted"); },
+          async getAuth() {
+            calls++;
+            throw new Error("Synthetic auth boundary reached");
+          },
+          async createConnection() {
+            assert.fail("No real connection permitted");
+          },
         };
-        function Probe() { value = runtime.useHomeAssistantRuntime(); return null; }
+        function Probe() {
+          value = runtime.useHomeAssistantRuntime();
+          return null;
+        }
         try {
-          if (entry === "restore") auth.saveStoredAuthData(window.localStorage, {
-            hassUrl: ha, clientId: dashboard, expires: Date.now() + 60000,
-            refresh_token: "synthetic", access_token: "synthetic", expires_in: 1800,
-          }, ha, dashboard);
+          if (entry === "restore")
+            auth.saveStoredAuthData(
+              window.localStorage,
+              {
+                hassUrl: ha,
+                clientId: dashboard,
+                expires: Date.now() + 60000,
+                refresh_token: "synthetic",
+                access_token: "synthetic",
+                expires_in: 1800,
+              },
+              ha,
+              dashboard,
+            );
           assert.equal(flow.validateHomeAssistantUrlInput(ha).error === null, allowed);
-          await act(async () => root.render(React.createElement(runtime.HomeAssistantRuntimeTestProvider,
-            { homeAssistantUrl: ha, client }, React.createElement(Probe))));
+          await act(async () =>
+            root.render(
+              React.createElement(
+                runtime.HomeAssistantRuntimeTestProvider,
+                { homeAssistantUrl: ha, client },
+                React.createElement(Probe),
+              ),
+            ),
+          );
           if (entry === "sign-in") await act(async () => value.connect());
           assert.equal(calls, allowed ? 1 : 0);
           if (!allowed) {

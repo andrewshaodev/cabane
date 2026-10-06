@@ -6,7 +6,12 @@ import { PORTAL_COLORS } from "./portal-contract";
 import { createPortalTransition, type PortalTravel } from "./portal-transition";
 
 /** Own only temporary presentation; the injected controller still validates and moves the walker. */
-export function usePortalTransition(active: boolean, reducedMotion: boolean, navigation: WalkToolNavigation, onRejected: () => void) {
+export function usePortalTransition(
+  active: boolean,
+  reducedMotion: boolean,
+  navigation: WalkToolNavigation,
+  onRejected: () => void,
+) {
   const { camera } = useThree();
   const transition = useMemo(createPortalTransition, []);
   const veil = useRef<HTMLDivElement>(null);
@@ -19,11 +24,20 @@ export function usePortalTransition(active: boolean, reducedMotion: boolean, nav
     lens.updateProjectionMatrix();
     baseFov.current = null;
   }, [camera]);
-  useEffect(() => () => { transition.cancel(); restoreCamera(); }, [transition, restoreCamera]);
-  const travel = useCallback((request: PortalTravel) => transition.start(request, reducedMotion), [transition, reducedMotion]);
+  useEffect(
+    () => () => {
+      transition.cancel();
+      restoreCamera();
+    },
+    [transition, restoreCamera],
+  );
+  const travel = useCallback(
+    (request: PortalTravel) => transition.start(request, reducedMotion),
+    [transition, reducedMotion],
+  );
   useFrame((_, delta) => {
     if (!active) transition.cancel();
-    const sample = transition.advance(delta, request => {
+    const sample = transition.advance(delta, (request) => {
       const accepted = navigation.teleport(request.landing, request.facing);
       if (!accepted) onRejected();
       return accepted;

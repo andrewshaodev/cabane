@@ -1,6 +1,13 @@
 import { useLayoutEffect, type MutableRefObject, type RefObject } from "react";
 import type { Box3, Scene, PerspectiveCamera } from "three";
-import { clampPitch, roomAtWorldPoint, WALK_EYE_HEIGHT, type WalkPose, type StickVector, type BoxWalkCollider } from "../navigation";
+import {
+  clampPitch,
+  roomAtWorldPoint,
+  WALK_EYE_HEIGHT,
+  type WalkPose,
+  type StickVector,
+  type BoxWalkCollider,
+} from "../navigation";
 import { resolveWalkLanding } from "../navigation/walk-landing";
 import { createTerrainSupportQuery } from "../navigation/terrain-support";
 import type { BuildingGeometry } from "../stairs/types";
@@ -9,41 +16,102 @@ import type { FloorSpec } from "../types";
 import type { WalkToolNavigation } from "./types";
 
 /** Connect generic tool relocation to the controller's authoritative movement state. */
-export function useWalkToolNavigation({ building, floor, scene, box, toolNavigationRef, poseRef, cameraRef,
-  walker, velocity, lookVelocity, lookDeltaRef, jumpHeight, jumpVelocity, bobWeight, jumpRequestRef,
-  lastRoomId, onFloorChange, onRoomChange, invalidate }: {
-  building?: BuildingGeometry; floor: FloorSpec; scene: Scene; box: Box3;
+export function useWalkToolNavigation({
+  building,
+  floor,
+  scene,
+  box,
+  toolNavigationRef,
+  poseRef,
+  cameraRef,
+  walker,
+  velocity,
+  lookVelocity,
+  lookDeltaRef,
+  jumpHeight,
+  jumpVelocity,
+  bobWeight,
+  jumpRequestRef,
+  lastRoomId,
+  onFloorChange,
+  onRoomChange,
+  invalidate,
+}: {
+  building?: BuildingGeometry;
+  floor: FloorSpec;
+  scene: Scene;
+  box: Box3;
   toolNavigationRef?: MutableRefObject<WalkToolNavigation | null>;
-  poseRef: MutableRefObject<WalkPose>; cameraRef: RefObject<PerspectiveCamera | null>;
+  poseRef: MutableRefObject<WalkPose>;
+  cameraRef: RefObject<PerspectiveCamera | null>;
   walker: MutableRefObject<BuildingWalkPoint | null>;
-  velocity: MutableRefObject<StickVector>; lookVelocity: MutableRefObject<StickVector>; lookDeltaRef: MutableRefObject<StickVector>;
-  jumpHeight: MutableRefObject<number>; jumpVelocity: MutableRefObject<number>; bobWeight: MutableRefObject<number>;
-  jumpRequestRef?: MutableRefObject<boolean>; lastRoomId: MutableRefObject<string | null>;
-  onFloorChange?: (id: string) => void; onRoomChange: (id: string | null) => void; invalidate: () => void;
+  velocity: MutableRefObject<StickVector>;
+  lookVelocity: MutableRefObject<StickVector>;
+  lookDeltaRef: MutableRefObject<StickVector>;
+  jumpHeight: MutableRefObject<number>;
+  jumpVelocity: MutableRefObject<number>;
+  bobWeight: MutableRefObject<number>;
+  jumpRequestRef?: MutableRefObject<boolean>;
+  lastRoomId: MutableRefObject<string | null>;
+  onFloorChange?: (id: string) => void;
+  onRoomChange: (id: string | null) => void;
+  invalidate: () => void;
 }) {
   useLayoutEffect(() => {
     if (!toolNavigationRef) return;
-    const geometry = building ?? { coordinates: floor.coordinates, floors: [floor], stairs: [], sceneItems: [] };
+    const geometry = building ?? {
+      coordinates: floor.coordinates,
+      floors: [floor],
+      stairs: [],
+      sceneItems: [],
+    };
     const supportsTerrain = createTerrainSupportQuery(scene);
-    const resolveLanding: WalkToolNavigation["resolveLanding"] = position => resolveWalkLanding(geometry, position, targetElevation => {
-      scene.updateMatrixWorld(true);
-      const obstacles: BoxWalkCollider[] = [];
-      scene.traverse(object => {
-        if (object.userData.walkCollider !== true) return;
-        box.setFromObject(object);
-        if (!box.isEmpty() && box.max.y > targetElevation + .05 && box.min.y < targetElevation + WALK_EYE_HEIGHT + .2)
-          obstacles.push({ kind: "box", id: object.uuid, minX: box.min.x, maxX: box.max.x, minZ: box.min.z, maxZ: box.max.z });
-      });
-      return obstacles;
-    }, supportsTerrain);
+    const resolveLanding: WalkToolNavigation["resolveLanding"] = (position) =>
+      resolveWalkLanding(
+        geometry,
+        position,
+        (targetElevation) => {
+          scene.updateMatrixWorld(true);
+          const obstacles: BoxWalkCollider[] = [];
+          scene.traverse((object) => {
+            if (object.userData.walkCollider !== true) return;
+            box.setFromObject(object);
+            if (
+              !box.isEmpty() &&
+              box.max.y > targetElevation + 0.05 &&
+              box.min.y < targetElevation + WALK_EYE_HEIGHT + 0.2
+            )
+              obstacles.push({
+                kind: "box",
+                id: object.uuid,
+                minX: box.min.x,
+                maxX: box.max.x,
+                minZ: box.min.z,
+                maxZ: box.max.z,
+              });
+          });
+          return obstacles;
+        },
+        supportsTerrain,
+      );
     const navigation: WalkToolNavigation = {
       resolveLanding,
       teleport: (landing, facing) => {
         const camera = cameraRef.current;
         if (!camera || ![facing.yaw, facing.pitch].every(Number.isFinite)) return false;
         const checked = resolveLanding({ x: landing.x, y: landing.elevation, z: landing.z });
-        if (!checked || checked.floorId !== landing.floorId || Math.abs(checked.elevation - landing.elevation) > .01) return false;
-        poseRef.current = { x: checked.x, z: checked.z, yaw: facing.yaw, pitch: clampPitch(facing.pitch) };
+        if (
+          !checked ||
+          checked.floorId !== landing.floorId ||
+          Math.abs(checked.elevation - landing.elevation) > 0.01
+        )
+          return false;
+        poseRef.current = {
+          x: checked.x,
+          z: checked.z,
+          yaw: facing.yaw,
+          pitch: clampPitch(facing.pitch),
+        };
         walker.current = checked;
         velocity.current = { x: 0, y: 0 };
         lookVelocity.current = { x: 0, y: 0 };
@@ -53,7 +121,9 @@ export function useWalkToolNavigation({ building, floor, scene, box, toolNavigat
         camera.position.set(checked.x, checked.elevation + WALK_EYE_HEIGHT, checked.z);
         camera.rotation.set(poseRef.current.pitch, poseRef.current.yaw, 0);
         if (checked.floorId !== floor.id) onFloorChange?.(checked.floorId);
-        const destinationFloor = geometry.floors.find(candidate => candidate.id === checked.floorId)!;
+        const destinationFloor = geometry.floors.find(
+          (candidate) => candidate.id === checked.floorId,
+        )!;
         lastRoomId.current = roomAtWorldPoint(checked, destinationFloor)?.id ?? null;
         onRoomChange(lastRoomId.current);
         invalidate();
@@ -61,7 +131,28 @@ export function useWalkToolNavigation({ building, floor, scene, box, toolNavigat
       },
     };
     toolNavigationRef.current = navigation;
-    return () => { if (toolNavigationRef.current === navigation) toolNavigationRef.current = null; };
-  }, [building, floor, scene, box, toolNavigationRef, poseRef, cameraRef, walker, velocity, lookVelocity,
-    lookDeltaRef, jumpHeight, jumpVelocity, bobWeight, jumpRequestRef, lastRoomId, onFloorChange, onRoomChange, invalidate]);
+    return () => {
+      if (toolNavigationRef.current === navigation) toolNavigationRef.current = null;
+    };
+  }, [
+    building,
+    floor,
+    scene,
+    box,
+    toolNavigationRef,
+    poseRef,
+    cameraRef,
+    walker,
+    velocity,
+    lookVelocity,
+    lookDeltaRef,
+    jumpHeight,
+    jumpVelocity,
+    bobWeight,
+    jumpRequestRef,
+    lastRoomId,
+    onFloorChange,
+    onRoomChange,
+    invalidate,
+  ]);
 }

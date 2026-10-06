@@ -3,13 +3,9 @@ import { WideShowerTray } from "./wide-shower-tray";
 import { FramelessShowerScreen } from "./frameless-shower-screen";
 import { ShowerColumn } from "./shower-column";
 
-export const SHOWER_ASSEMBLY_SIZE = [2.018, 2.3, .908] as const;
+export const SHOWER_ASSEMBLY_SIZE = [2.018, 2.3, 0.908] as const;
 
-export function ShowerAssembly({
-  size = SHOWER_ASSEMBLY_SIZE,
-}: {
-  size?: SceneItemSize;
-}) {
+export function ShowerAssembly({ size = SHOWER_ASSEMBLY_SIZE }: { size?: SceneItemSize }) {
   return (
     <group
       name="shower-assembly"
@@ -20,8 +16,12 @@ export function ShowerAssembly({
       ]}
     >
       <WideShowerTray />
-      <group position={[0, 0, .445]}><FramelessShowerScreen /></group>
-      <group position={[.98, 0, -.035]}><ShowerColumn /></group>
+      <group position={[0, 0, 0.445]}>
+        <FramelessShowerScreen />
+      </group>
+      <group position={[0.98, 0, -0.035]}>
+        <ShowerColumn />
+      </group>
     </group>
   );
 }

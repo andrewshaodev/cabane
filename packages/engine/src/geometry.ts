@@ -33,10 +33,7 @@ export const planPointToWorld = (
   (y - coordinates.origin[1]) * coordinates.metersPerPlanUnit,
 ];
 
-export const worldPointToPlan = (
-  point: WorldPoint,
-  coordinates: FloorCoordinates,
-): PlanPoint => [
+export const worldPointToPlan = (point: WorldPoint, coordinates: FloorCoordinates): PlanPoint => [
   point.x / coordinates.metersPerPlanUnit + coordinates.origin[0],
   point.z / coordinates.metersPerPlanUnit + coordinates.origin[1],
 ];
@@ -51,10 +48,7 @@ export const polygonSignedArea = (polygon: readonly PlanPoint[]) => {
   return area / 2;
 };
 
-export const pointInsidePolygon = (
-  [x, y]: PlanPoint,
-  polygon: readonly PlanPoint[],
-) => {
+export const pointInsidePolygon = ([x, y]: PlanPoint, polygon: readonly PlanPoint[]) => {
   let inside = false;
   for (
     let index = 0, previous = polygon.length - 1;
@@ -65,10 +59,7 @@ export const pointInsidePolygon = (
     const [previousX, previousY] = polygon[previous];
     const crosses =
       currentY > y !== previousY > y &&
-      x <
-        ((previousX - currentX) * (y - currentY)) /
-          (previousY - currentY) +
-          currentX;
+      x < ((previousX - currentX) * (y - currentY)) / (previousY - currentY) + currentX;
     if (crosses) inside = !inside;
   }
   return inside;
@@ -107,17 +98,11 @@ export const polygonSelfIntersects = (polygon: readonly PlanPoint[]) => {
     const firstNext = (first + 1) % polygon.length;
     for (let second = first + 1; second < polygon.length; second += 1) {
       const secondNext = (second + 1) % polygon.length;
+      if (first === second || firstNext === second || secondNext === first) continue;
       if (
-        first === second ||
-        firstNext === second ||
-        secondNext === first
-      ) continue;
-      if (segmentsIntersect(
-        polygon[first],
-        polygon[firstNext],
-        polygon[second],
-        polygon[secondNext],
-      )) return true;
+        segmentsIntersect(polygon[first], polygon[firstNext], polygon[second], polygon[secondNext])
+      )
+        return true;
     }
   }
   return false;
@@ -147,7 +132,12 @@ export const worldBoundsForPolygon = (
   polygon: readonly PlanPoint[],
   coordinates: FloorCoordinates,
 ): WorldBounds => {
-  const world = polygon.length ? polygon.map((point) => planPointToWorld(point, coordinates)) : [[-4, -4], [4, 4]];
+  const world = polygon.length
+    ? polygon.map((point) => planPointToWorld(point, coordinates))
+    : [
+        [-4, -4],
+        [4, 4],
+      ];
   const xs = world.map(([x]) => x);
   const zs = world.map(([, z]) => z);
   const minX = Math.min(...xs);
@@ -166,17 +156,12 @@ export const worldBoundsForPolygon = (
   };
 };
 
-export const findContainingRoom = (
-  point: PlanPoint,
-  rooms: readonly RoomSpec[],
-) => rooms.find((room) => pointInsidePolygon(point, room.polygon)) ?? null;
+export const findContainingRoom = (point: PlanPoint, rooms: readonly RoomSpec[]) =>
+  rooms.find((room) => pointInsidePolygon(point, room.polygon)) ?? null;
 
 type SlopedCeilingPlane = SlopedCeilingSpec["planes"][number];
 
-export const slopedCeilingHeightAtPoint = (
-  point: PlanPoint,
-  plane: SlopedCeilingPlane,
-) => {
+export const slopedCeilingHeightAtPoint = (point: PlanPoint, plane: SlopedCeilingPlane) => {
   const midpoint = (edge: readonly [PlanPoint, PlanPoint]): PlanPoint => [
     (edge[0][0] + edge[1][0]) / 2,
     (edge[0][1] + edge[1][1]) / 2,
@@ -186,14 +171,17 @@ export const slopedCeilingHeightAtPoint = (
   const riseX = high[0] - low[0];
   const riseY = high[1] - low[1];
   const riseLengthSquared = riseX * riseX + riseY * riseY;
-  const progress = riseLengthSquared < 1e-9
-    ? 0
-    : Math.max(0, Math.min(1,
-      ((point[0] - low[0]) * riseX + (point[1] - low[1]) * riseY) /
-        riseLengthSquared,
-    ));
-  return plane.lowHeightMeters +
-    (plane.highHeightMeters - plane.lowHeightMeters) * progress;
+  const progress =
+    riseLengthSquared < 1e-9
+      ? 0
+      : Math.max(
+          0,
+          Math.min(
+            1,
+            ((point[0] - low[0]) * riseX + (point[1] - low[1]) * riseY) / riseLengthSquared,
+          ),
+        );
+  return plane.lowHeightMeters + (plane.highHeightMeters - plane.lowHeightMeters) * progress;
 };
 
 export interface WallRun {
@@ -208,14 +196,10 @@ export interface WallRun {
 export const wallLengthPlanUnits = (wall: WallSpec) =>
   Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
 
-export const openingsForWall = (
-  wallId: string,
-  openings: readonly OpeningSpec[],
-) => openings
-  .filter((opening) => opening.wallId === wallId)
-  .sort((left, right) =>
-    left.offsetFromWallStartPlanUnits - right.offsetFromWallStartPlanUnits
-  );
+export const openingsForWall = (wallId: string, openings: readonly OpeningSpec[]) =>
+  openings
+    .filter((opening) => opening.wallId === wallId)
+    .sort((left, right) => left.offsetFromWallStartPlanUnits - right.offsetFromWallStartPlanUnits);
 
 export const splitWallIntoRuns = (
   wall: WallSpec,
@@ -295,17 +279,13 @@ export const openingWorldPlacement = (
   const length = Math.hypot(wallEndX - wallStartX, wallEndZ - wallStartZ);
   const directionX = (wallEndX - wallStartX) / length;
   const directionZ = (wallEndZ - wallStartZ) / length;
-  const startDistance =
-    opening.offsetFromWallStartPlanUnits * coordinates.metersPerPlanUnit;
+  const startDistance = opening.offsetFromWallStartPlanUnits * coordinates.metersPerPlanUnit;
   const widthMeters = opening.widthPlanUnits * coordinates.metersPerPlanUnit;
   const start = [
     wallStartX + directionX * startDistance,
     wallStartZ + directionZ * startDistance,
   ] as const;
-  const end = [
-    start[0] + directionX * widthMeters,
-    start[1] + directionZ * widthMeters,
-  ] as const;
+  const end = [start[0] + directionX * widthMeters, start[1] + directionZ * widthMeters] as const;
   return {
     start,
     end,
@@ -317,4 +297,5 @@ export const openingWorldPlacement = (
 
 export const defineFloorPolygon = <T extends Polygon>(polygon: T) => polygon;
 
-export const floorForManifest = (floors: readonly FloorSpec[]) => floors.find(floor => !floor.belowGround) ?? floors[0];
+export const floorForManifest = (floors: readonly FloorSpec[]) =>
+  floors.find((floor) => !floor.belowGround) ?? floors[0];

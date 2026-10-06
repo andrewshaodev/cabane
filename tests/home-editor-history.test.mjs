@@ -33,25 +33,32 @@ await withModules(async (load) => {
       coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
       defaultWallHeightMeters: 2.4,
       defaultCeilingHeightMeters: 2.4,
-      footprint: [[0, 0], [4, 0], [4, 3], [0, 3]],
+      footprint: [
+        [0, 0],
+        [4, 0],
+        [4, 3],
+        [0, 3],
+      ],
       rooms: [],
       walls: [],
       wallJunctions: [],
       openings: [],
       ceilings: [],
     },
-    sceneItems: [{
-      id: "chair",
-      kind: "furnishing",
-      modelId: "chair",
-      placement: {
-        kind: "absolute",
-        at: [1, 1],
-        elevationMeters: 0,
-        rotationYRadians: 0,
+    sceneItems: [
+      {
+        id: "chair",
+        kind: "furnishing",
+        modelId: "chair",
+        placement: {
+          kind: "absolute",
+          at: [1, 1],
+          elevationMeters: 0,
+          rotationYRadians: 0,
+        },
+        size: [0.6, 0.9, 0.6],
       },
-      size: [0.6, 0.9, 0.6],
-    }],
+    ],
     roomProfiles: {},
     openingProfiles: {},
     shortcuts: [],
@@ -72,20 +79,14 @@ await withModules(async (load) => {
 
   test("records semantic edits from both modes in one history", () => {
     let history = createProjectHistory(fixtureProject());
-    history = commitProjectCommand(history, command(
-      "rename-floor",
-      "construct",
-      ["floor", "name"],
-      "Ground floor",
-      "Main floor",
-    ));
-    history = commitProjectCommand(history, command(
-      "move-chair",
-      "furnish",
-      ["sceneItems", 0, "placement", "at"],
-      [1, 1],
-      [2, 1.5],
-    ));
+    history = commitProjectCommand(
+      history,
+      command("rename-floor", "construct", ["floor", "name"], "Ground floor", "Main floor"),
+    );
+    history = commitProjectCommand(
+      history,
+      command("move-chair", "furnish", ["sceneItems", 0, "placement", "at"], [1, 1], [2, 1.5]),
+    );
 
     assert.equal(history.undo.length, 2);
     assert.deepEqual(history.present.sceneItems[0].placement.at, [2, 1.5]);
@@ -98,7 +99,13 @@ await withModules(async (load) => {
 
   test("redo is stable and a new semantic command clears the redo stack", () => {
     const initial = fixtureProject();
-    const rename = command("rename-floor", "construct", ["floor", "name"], "Ground floor", "Main floor");
+    const rename = command(
+      "rename-floor",
+      "construct",
+      ["floor", "name"],
+      "Ground floor",
+      "Main floor",
+    );
     let history = commitProjectCommand(createProjectHistory(initial), rename);
     const committed = history.present;
 
@@ -109,13 +116,10 @@ await withModules(async (load) => {
     assert.equal(history.redo.length, 0);
 
     history = undoProjectHistory(history);
-    history = commitProjectCommand(history, command(
-      "rename-home",
-      "project",
-      ["home", "name"],
-      "Fixture home",
-      "My home",
-    ));
+    history = commitProjectCommand(
+      history,
+      command("rename-home", "project", ["home", "name"], "Fixture home", "My home"),
+    );
     assert.equal(history.redo.length, 0);
   });
 
@@ -123,12 +127,21 @@ await withModules(async (load) => {
     let history = createProjectHistory(fixtureProject(), 3);
     for (let index = 0; index < 5; index += 1) {
       const before = `Floor ${index}`;
-      if (index === 0) history = commitProjectCommand(history, command(
-        "rename-0", "construct", ["floor", "name"], "Ground floor", before,
-      ));
-      history = commitProjectCommand(history, command(
-        `rename-${index + 1}`, "construct", ["floor", "name"], before, `Floor ${index + 1}`,
-      ));
+      if (index === 0)
+        history = commitProjectCommand(
+          history,
+          command("rename-0", "construct", ["floor", "name"], "Ground floor", before),
+        );
+      history = commitProjectCommand(
+        history,
+        command(
+          `rename-${index + 1}`,
+          "construct",
+          ["floor", "name"],
+          before,
+          `Floor ${index + 1}`,
+        ),
+      );
     }
     assert.equal(history.undo.length, 3);
     history = undoProjectHistory(undoProjectHistory(undoProjectHistory(history)));
@@ -166,19 +179,33 @@ await withModules(async (load) => {
       ],
     };
     assert.throws(() => commitProjectCommand(history, overlapping), /overlapping paths/);
-    assert.throws(() => commitProjectCommand(history, command(
-      "unsafe", "project", ["__proto__", "polluted"], undefined, true,
-    )), /invalid path/);
-    assert.throws(() => commitProjectCommand(history, {
-      id: "mismatch",
-      label: "Mismatch",
-      domain: "project",
-      before: [{ path: ["home", "name"], value: "Fixture home" }],
-      after: [{ path: ["floor", "name"], value: "Other" }],
-    }), /same paths/);
-    assert.throws(() => commitProjectCommand(history, command(
-      "stale", "project", ["home", "name"], "Stale home", "Other",
-    )), /does not match/);
+    assert.throws(
+      () =>
+        commitProjectCommand(
+          history,
+          command("unsafe", "project", ["__proto__", "polluted"], undefined, true),
+        ),
+      /invalid path/,
+    );
+    assert.throws(
+      () =>
+        commitProjectCommand(history, {
+          id: "mismatch",
+          label: "Mismatch",
+          domain: "project",
+          before: [{ path: ["home", "name"], value: "Fixture home" }],
+          after: [{ path: ["floor", "name"], value: "Other" }],
+        }),
+      /same paths/,
+    );
+    assert.throws(
+      () =>
+        commitProjectCommand(
+          history,
+          command("stale", "project", ["home", "name"], "Stale home", "Other"),
+        ),
+      /does not match/,
+    );
   });
 
   test("applies multiple patches immutably and ignores no-op commands", () => {
@@ -197,9 +224,10 @@ await withModules(async (load) => {
 
     const history = createProjectHistory(project);
     assert.equal(
-      commitProjectCommand(history, command(
-        "noop", "project", ["home", "name"], "Fixture home", "Fixture home",
-      )),
+      commitProjectCommand(
+        history,
+        command("noop", "project", ["home", "name"], "Fixture home", "Fixture home"),
+      ),
       history,
     );
     assert.equal(undoProjectHistory(history), history);

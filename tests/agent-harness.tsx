@@ -4,7 +4,11 @@ import { StrictMode, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { stableDeviceRegistry } from "@cabane/catalog/device";
 import { stableArchitectureModelRegistry } from "@cabane/catalog/architecture";
-import { HomeAssistantMappingScreen, saveRuntimeBindingProfile, CabaneDashboard } from "@cabane/engine";
+import {
+  HomeAssistantMappingScreen,
+  saveRuntimeBindingProfile,
+  CabaneDashboard,
+} from "@cabane/engine";
 import { HomeAssistantRuntimeSnapshotTestProvider } from "../packages/engine/src/HomeAssistantRuntime";
 import {
   connectedCatalogRuntime,
@@ -21,11 +25,14 @@ import "@cabane/engine/styles.css";
 const params = new URL(window.location.href).searchParams;
 const stage = params.get("stage") ?? "room";
 const scenario = params.get("scenario") ?? "disconnected";
-const stagedManifest = stage === "building" ? composeHomeManifest(makeStairProject(), emptyExtensions) : stage === "layout"
-  ? layoutFixtureManifest
-  : stage === "scale"
-    ? scaleFixtureManifest
-    : equippedFixtureManifest;
+const stagedManifest =
+  stage === "building"
+    ? composeHomeManifest(makeStairProject(), emptyExtensions)
+    : stage === "layout"
+      ? layoutFixtureManifest
+      : stage === "scale"
+        ? scaleFixtureManifest
+        : equippedFixtureManifest;
 const mappingManifest = {
   ...equippedFixtureManifest,
   home: {
@@ -37,9 +44,11 @@ const mappingManifest = {
 const manifest = scenario === "mapping" ? mappingManifest : stagedManifest;
 
 if (scenario === "connected" || scenario === "unavailable") {
-  saveRuntimeBindingProfile(window.localStorage,
+  saveRuntimeBindingProfile(
+    window.localStorage,
     stage === "scale" ? scaleMappingRuntime.origin! : connectedCatalogRuntime.origin!,
-    stage === "scale" ? scaleFixtureProfile : equippedFixtureProfile);
+    stage === "scale" ? scaleFixtureProfile : equippedFixtureProfile,
+  );
 }
 
 let content: ReactNode = (
@@ -54,9 +63,9 @@ if (scenario === "mapping") {
   const snapshot = {
     ...connectedCatalogRuntime,
     areas: [
-      ...connectedCatalogRuntime.areas.map((area) => area.area_id === "fixture_hall"
-        ? { ...area, name: "Entryway" }
-        : area),
+      ...connectedCatalogRuntime.areas.map((area) =>
+        area.area_id === "fixture_hall" ? { ...area, name: "Entryway" } : area,
+      ),
       { area_id: "fixture_patio", name: "Patio", icon: "mdi:patio-heater", picture: null },
     ],
   };
@@ -69,7 +78,12 @@ if (scenario === "mapping") {
     <HomeAssistantMappingScreen
       manifest={mappingManifest}
       runtime={snapshot}
-      manager={{ profile: mappingProfile, loaded: true, hasStoredProfile: true, save: () => undefined }}
+      manager={{
+        profile: mappingProfile,
+        loaded: true,
+        hasStoredProfile: true,
+        save: () => undefined,
+      }}
       refreshing={false}
       refreshError={null}
       onRefresh={async () => undefined}
@@ -81,7 +95,12 @@ if (scenario === "mapping") {
     <HomeAssistantMappingScreen
       manifest={scaleFixtureManifest}
       runtime={scaleMappingRuntime}
-      manager={{ profile: scaleFixtureProfile, loaded: true, hasStoredProfile: true, save: () => undefined }}
+      manager={{
+        profile: scaleFixtureProfile,
+        loaded: true,
+        hasStoredProfile: true,
+        save: () => undefined,
+      }}
       refreshing={false}
       refreshError={null}
       onRefresh={async () => undefined}
@@ -89,13 +108,14 @@ if (scenario === "mapping") {
     />
   );
 } else if (scenario === "connected" || scenario === "unavailable") {
-  const snapshot = scenario === "connected"
-    ? stage === "scale" ? scaleMappingRuntime : connectedCatalogRuntime
-    : unavailableCatalogRuntime;
+  const snapshot =
+    scenario === "connected"
+      ? stage === "scale"
+        ? scaleMappingRuntime
+        : connectedCatalogRuntime
+      : unavailableCatalogRuntime;
   content = (
-    <HomeAssistantRuntimeSnapshotTestProvider
-      snapshot={snapshot}
-    >
+    <HomeAssistantRuntimeSnapshotTestProvider snapshot={snapshot}>
       {content}
     </HomeAssistantRuntimeSnapshotTestProvider>
   );

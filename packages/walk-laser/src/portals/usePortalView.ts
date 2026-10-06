@@ -17,6 +17,6 @@ export function usePortalView(entry: PortalAnchor, exit: PortalAnchor) {
     if (!view.update(camera, entry, exit)) return;
     capture.render(gl, scene, view.camera, exit);
     surface.current.visible = true;
-  }, .5);
+  }, 0.5);
   return { surface, texture: capture.target.texture };
 }

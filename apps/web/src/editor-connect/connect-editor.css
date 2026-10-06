@@ -7,23 +7,45 @@
   --connect-muted: #626d62;
   background: #e5e8dc;
 }
-.is-connect :is(button, input, select, summary):focus-visible { outline-color: var(--connect-blue); }
+.is-connect :is(button, input, select, summary):focus-visible {
+  outline-color: var(--connect-blue);
+}
 .direction-modes [data-mode="connect"][aria-pressed="true"],
-.connect-action-bar button[aria-pressed="true"] { color: var(--connect-blue); background: var(--connect-blue-surface); }
-.connect-action-bar .editor-action-button__warning { display: inline-flex; color: #94621f; }
-.connect-action-bar .editor-action-button__warning .editor-icon { width: 16px; height: 16px; }
+.connect-action-bar button[aria-pressed="true"] {
+  color: var(--connect-blue);
+  background: var(--connect-blue-surface);
+}
+.connect-action-bar .editor-action-button__warning {
+  display: inline-flex;
+  color: #94621f;
+}
+.connect-action-bar .editor-action-button__warning .editor-icon {
+  width: 16px;
+  height: 16px;
+}
 
 /* Connection state is the fill; selection is always a separate outline. */
-.connect-map { position: absolute; inset: 130px 0 0 var(--editor-rail-width); }
+.connect-map {
+  position: absolute;
+  inset: 130px 0 0 var(--editor-rail-width);
+}
 .connect-map .home-plan-mapping {
   --plan-inset-x: clamp(22px, 4vw, 64px);
   --plan-inset-y: 60px;
   background: #e5e8dc;
 }
-.connect-map .home-plan-mapping__svg { filter: none; }
-.connect-map .home-plan-mapping.has-selection .home-plan-mapping__room { opacity: 1; }
-.connect-map .home-plan-mapping__room { --connect-room-fill: var(--connect-neutral); }
-.connect-map .home-plan-mapping__room.is-assigned { --connect-room-fill: var(--connect-sage); }
+.connect-map .home-plan-mapping__svg {
+  filter: none;
+}
+.connect-map .home-plan-mapping.has-selection .home-plan-mapping__room {
+  opacity: 1;
+}
+.connect-map .home-plan-mapping__room {
+  --connect-room-fill: var(--connect-neutral);
+}
+.connect-map .home-plan-mapping__room.is-assigned {
+  --connect-room-fill: var(--connect-sage);
+}
 .direction-preview.is-connect .home-plan-mapping__room polygon {
   fill: var(--connect-room-fill);
   stroke: #f5f0e7;
@@ -35,43 +57,147 @@
   stroke-width: 3px;
   transform: none;
 }
-.connect-map .home-plan-mapping__room:focus-visible polygon { stroke-width: 5px; }
+.connect-map .home-plan-mapping__room:focus-visible polygon {
+  stroke-width: 5px;
+}
 .connect-map .home-plan-mapping__room-heading-content {
   color: #5b6256;
   font-family: inherit;
 }
-.connect-map .home-plan-mapping__room-name { font-weight: 500; }
-.connect-map .home-plan-mapping__room.is-assigned .home-plan-mapping__room-heading-content { color: #485e3f; }
-.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__room-heading-content { color: var(--connect-blue-text); }
+.connect-map .home-plan-mapping__room-name {
+  font-weight: 500;
+}
+.connect-map .home-plan-mapping__room.is-assigned .home-plan-mapping__room-heading-content {
+  color: #485e3f;
+}
+.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__room-heading-content {
+  color: var(--connect-blue-text);
+}
 .connect-map .home-plan-mapping__area-name {
   fill: #515b49 !important;
   font-family: inherit;
   font-weight: 400;
   letter-spacing: 0;
 }
-.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__area-name { fill: var(--connect-blue-text) !important; }
+.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__area-name {
+  fill: var(--connect-blue-text) !important;
+}
 /* Lay out labels at ordinary CSS pixels, then scale the whole block into plan units. */
-.connect-map .home-plan-mapping__room-summary { overflow: visible; pointer-events: none; }
-.connect-map .home-plan-mapping__room-summary-content { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; width: 100%; height: 100%; color: #515b49; text-align: center; line-height: 1.2; }
-.connect-map .home-plan-mapping__summary-name { display: flex; align-items: center; justify-content: center; gap: 4px; max-width: 100%; font-size: var(--editor-text-body, 1rem); font-weight: 500; }
-.connect-map .home-plan-mapping__summary-name span:last-child { overflow-wrap: anywhere; }
-.connect-map .home-plan-mapping__summary-meta { display: flex; align-items: center; justify-content: center; gap: 7px; max-width: 100%; min-width: 0; }
-.connect-map .home-plan-mapping__summary-area { min-width: 0; overflow: hidden; color: #5d6857; font-size: var(--editor-text-caption, .75rem); white-space: nowrap; text-overflow: ellipsis; }
-.connect-map .home-plan-mapping__device-categories { display: flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 3px; color: #5d6857; }
-.connect-map .home-plan-mapping__device-categories span { display: flex; align-items: center; }
-.connect-map .home-plan-mapping__device-categories svg { width: 15px; height: 15px; }
-.connect-map .home-plan-mapping__device-coverage { display: flex; flex-direction: column; gap: 3px; width: min(132px, 88%); }
-.connect-map .home-plan-mapping__coverage-label { display: flex; align-items: baseline; justify-content: center; gap: 5px; color: #485e3f; font-size: var(--editor-text-caption, .75rem); font-weight: 500; line-height: 1; }
-.connect-map .home-plan-mapping__coverage-label strong { font-size: var(--editor-text-control, .875rem); font-weight: 650; letter-spacing: -.03em; }
-.connect-map .home-plan-mapping__coverage-label strong span { font-size: var(--editor-text-subheading, 1.25rem); font-weight: 750; }
-.connect-map .home-plan-mapping__coverage-track { display: block; width: 100%; height: 5px; overflow: hidden; background: rgba(84, 99, 78, .18); border-radius: 999px; }
-.connect-map .home-plan-mapping__coverage-track > span { display: block; height: 100%; background: #668557; border-radius: inherit; }
-.connect-map .home-plan-mapping__no-devices { color: #687167; font-size: var(--editor-text-caption, .75rem); font-weight: 500; }
-.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__room-summary-content { color: var(--connect-blue-text); }
+.connect-map .home-plan-mapping__room-summary {
+  overflow: visible;
+  pointer-events: none;
+}
+.connect-map .home-plan-mapping__room-summary-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  color: #515b49;
+  text-align: center;
+  line-height: 1.2;
+}
+.connect-map .home-plan-mapping__summary-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  max-width: 100%;
+  font-size: var(--editor-text-body, 1rem);
+  font-weight: 500;
+}
+.connect-map .home-plan-mapping__summary-name span:last-child {
+  overflow-wrap: anywhere;
+}
+.connect-map .home-plan-mapping__summary-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  max-width: 100%;
+  min-width: 0;
+}
+.connect-map .home-plan-mapping__summary-area {
+  min-width: 0;
+  overflow: hidden;
+  color: #5d6857;
+  font-size: var(--editor-text-caption, 0.75rem);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.connect-map .home-plan-mapping__device-categories {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #5d6857;
+}
+.connect-map .home-plan-mapping__device-categories span {
+  display: flex;
+  align-items: center;
+}
+.connect-map .home-plan-mapping__device-categories svg {
+  width: 15px;
+  height: 15px;
+}
+.connect-map .home-plan-mapping__device-coverage {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: min(132px, 88%);
+}
+.connect-map .home-plan-mapping__coverage-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  color: #485e3f;
+  font-size: var(--editor-text-caption, 0.75rem);
+  font-weight: 500;
+  line-height: 1;
+}
+.connect-map .home-plan-mapping__coverage-label strong {
+  font-size: var(--editor-text-control, 0.875rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+.connect-map .home-plan-mapping__coverage-label strong span {
+  font-size: var(--editor-text-subheading, 1.25rem);
+  font-weight: 750;
+}
+.connect-map .home-plan-mapping__coverage-track {
+  display: block;
+  width: 100%;
+  height: 5px;
+  overflow: hidden;
+  background: rgba(84, 99, 78, 0.18);
+  border-radius: 999px;
+}
+.connect-map .home-plan-mapping__coverage-track > span {
+  display: block;
+  height: 100%;
+  background: #668557;
+  border-radius: inherit;
+}
+.connect-map .home-plan-mapping__no-devices {
+  color: #687167;
+  font-size: var(--editor-text-caption, 0.75rem);
+  font-weight: 500;
+}
+.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__room-summary-content {
+  color: var(--connect-blue-text);
+}
 .connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__coverage-label,
 .connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__summary-area,
-.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__device-categories { color: var(--connect-blue-text); }
-.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__coverage-track > span { background: var(--connect-blue); }
+.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__device-categories {
+  color: var(--connect-blue-text);
+}
+.connect-map .home-plan-mapping__room.is-selected .home-plan-mapping__coverage-track > span {
+  background: var(--connect-blue);
+}
 .connect-map .home-plan-mapping__controls {
   inset: auto auto 18px 20px;
   gap: 3px;
@@ -81,32 +207,85 @@
   background: var(--preview-paper);
   box-shadow: none;
 }
-.connect-map .home-plan-mapping__controls button { min-width: 37px; min-height: 37px; color: var(--connect-muted); font-weight: 400; }
-.connect-map .home-plan-mapping__controls button:focus-visible { outline: 2px solid var(--connect-blue); outline-offset: 2px; }
-.connect-map .home-plan-mapping__empty { max-width: 28ch; color: var(--connect-muted); font-size: var(--editor-text-control, .875rem); line-height: 1.6; text-align: center; }
+.connect-map .home-plan-mapping__controls button {
+  min-width: 37px;
+  min-height: 37px;
+  color: var(--connect-muted);
+  font-weight: 400;
+}
+.connect-map .home-plan-mapping__controls button:focus-visible {
+  outline: 2px solid var(--connect-blue);
+  outline-offset: 2px;
+}
+.connect-map .home-plan-mapping__empty {
+  max-width: 28ch;
+  color: var(--connect-muted);
+  font-size: var(--editor-text-control, 0.875rem);
+  line-height: 1.6;
+  text-align: center;
+}
 
 @media (max-width: 1060px) {
-  .connect-map { top: 176px; }
-  .is-connect .direction-project-actions { grid-column: 2; justify-self: end; }
+  .connect-map {
+    top: 176px;
+  }
+  .is-connect .direction-project-actions {
+    grid-column: 2;
+    justify-self: end;
+  }
 }
 @media (max-width: 760px) {
-  .connect-map { bottom: 40dvh; }
-  .connect-map .home-plan-mapping { --plan-inset-x: 18px; --plan-inset-y: 46px; }
-  .connect-map .home-plan-mapping__controls { left: 12px; bottom: 12px; }
-  .is-connect .direction-status { max-width: calc(100% - 120px); }
+  .connect-map {
+    bottom: 40dvh;
+  }
+  .connect-map .home-plan-mapping {
+    --plan-inset-x: 18px;
+    --plan-inset-y: 46px;
+  }
+  .connect-map .home-plan-mapping__controls {
+    left: 12px;
+    bottom: 12px;
+  }
+  .is-connect .direction-status {
+    max-width: calc(100% - 120px);
+  }
 }
 @media (max-height: 500px) and (orientation: landscape) {
-  .connect-map { top: 170px; bottom: 0; }
-  .connect-map .home-plan-mapping { --plan-inset-y: 24px; --plan-inset-x: 24px; }
-  .connect-map .home-plan-mapping__controls { left: 10px; bottom: 10px; }
-  .is-connect .direction-status { bottom: 10px; }
+  .connect-map {
+    top: 170px;
+    bottom: 0;
+  }
+  .connect-map .home-plan-mapping {
+    --plan-inset-y: 24px;
+    --plan-inset-x: 24px;
+  }
+  .connect-map .home-plan-mapping__controls {
+    left: 10px;
+    bottom: 10px;
+  }
+  .is-connect .direction-status {
+    bottom: 10px;
+  }
 }
 @media (pointer: coarse) {
-  .connect-map .home-plan-mapping__controls button { min-width: 44px; min-height: 44px; }
-  .connect-map { top: 188px; }
+  .connect-map .home-plan-mapping__controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .connect-map {
+    top: 188px;
+  }
 }
-@media (pointer: coarse) and (min-width: 1061px) and (min-height: 501px) { .connect-map { top: 142px; } }
+@media (pointer: coarse) and (min-width: 1061px) and (min-height: 501px) {
+  .connect-map {
+    top: 142px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
-  .connect-map .home-plan-mapping__svg, .connect-map .home-plan-mapping__room,
-  .connect-map .home-plan-mapping__room polygon, .connect-inspector .device-mapping-row__trigger { transition: none; }
+  .connect-map .home-plan-mapping__svg,
+  .connect-map .home-plan-mapping__room,
+  .connect-map .home-plan-mapping__room polygon,
+  .connect-inspector .device-mapping-row__trigger {
+    transition: none;
+  }
 }

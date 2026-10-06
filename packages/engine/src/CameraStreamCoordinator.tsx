@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { useCabaneDom } from "./CabaneDom";
 import type { HomeAssistantCameraClient } from "./camera-runtime";
@@ -19,18 +12,19 @@ import {
   cameraTransportCandidates,
   preferHlsForRemoteAppleClient,
   runCameraAttempt,
-  runCameraTransportRace
+  runCameraTransportRace,
 } from "./camera-stream";
 
 import { openHlsSession } from "./camera-sessions/camera-hls-session";
-import { CameraCapabilities, CameraSession, CameraStreamRequirement, CameraStreamsByEntityId } from "./camera-sessions/camera-session-types";
+import {
+  CameraCapabilities,
+  CameraSession,
+  CameraStreamRequirement,
+  CameraStreamsByEntityId,
+} from "./camera-sessions/camera-session-types";
 import { waitWithSignal } from "./camera-sessions/camera-video-lifecycle";
 import { openWebRtcSession } from "./camera-sessions/camera-webrtc-session";
-import type {
-  CameraTransport,
-  DeviceLiveMedia,
-  EntityId,
-} from "./types";
+import type { CameraTransport, DeviceLiveMedia, EntityId } from "./types";
 
 const initialMedia = (posterUrl: string | null): DeviceLiveMedia => ({
   kind: "camera-stream",
@@ -47,7 +41,9 @@ const capturePoster = (video: HTMLVideoElement | null) => {
   try {
     const canvas = document.createElement("canvas");
     canvas.width = Math.min(video.videoWidth || 640, 960);
-    canvas.height = Math.round(canvas.width * (video.videoHeight || 360) / (video.videoWidth || 640));
+    canvas.height = Math.round(
+      (canvas.width * (video.videoHeight || 360)) / (video.videoWidth || 640),
+    );
     canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL("image/jpeg", 0.82);
   } catch {
@@ -76,9 +72,11 @@ function CameraStreamSource({
 
   useEffect(() => {
     posterRef.current = requirement.posterUrl ?? posterRef.current;
-    setMedia((current) => current.posterUrl === posterRef.current
-      ? current
-      : { ...current, posterUrl: posterRef.current });
+    setMedia((current) =>
+      current.posterUrl === posterRef.current
+        ? current
+        : { ...current, posterUrl: posterRef.current },
+    );
   }, [requirement.posterUrl]);
 
   useEffect(() => onChange(requirement.entityId, media), [media, onChange, requirement.entityId]);
@@ -97,7 +95,9 @@ function CameraStreamSource({
         ...initialMedia(posterRef.current),
         state: client && origin && documentVisible ? "unavailable" : "idle",
       });
-      return () => { cancelled = true; };
+      return () => {
+        cancelled = true;
+      };
     }
 
     setMedia({
@@ -129,10 +129,14 @@ function CameraStreamSource({
     const connect = async () => {
       try {
         const capabilities = await runCameraAttempt(
-          (signal) => waitWithSignal(client.sendMessagePromise<CameraCapabilities>({
-            type: "camera/capabilities",
-            entity_id: requirement.entityId,
-          }), signal),
+          (signal) =>
+            waitWithSignal(
+              client.sendMessagePromise<CameraCapabilities>({
+                type: "camera/capabilities",
+                entity_id: requirement.entityId,
+              }),
+              signal,
+            ),
           CAMERA_FIRST_FRAME_TIMEOUT_MS,
           lifecycle.signal,
         );
@@ -148,30 +152,32 @@ function CameraStreamSource({
         );
         const session = await runCameraTransportRace(
           transports,
-          (transport, signal) => runCameraAttempt(
-            (attemptSignal) => transport === "webrtc"
-              ? openWebRtcSession(
-                client,
-                requirement.entityId,
-                disconnected,
-                presentConnectingVideo,
-                attemptSignal,
-                container,
-              )
-              : openHlsSession(
-                client,
-                requirement.entityId,
-                origin,
-                disconnected,
-                presentConnectingVideo,
-                attemptSignal,
-                container,
-              ),
-            transport === "hls"
-              ? CAMERA_HLS_FIRST_FRAME_TIMEOUT_MS
-              : CAMERA_FIRST_FRAME_TIMEOUT_MS,
-            signal,
-          ),
+          (transport, signal) =>
+            runCameraAttempt(
+              (attemptSignal) =>
+                transport === "webrtc"
+                  ? openWebRtcSession(
+                      client,
+                      requirement.entityId,
+                      disconnected,
+                      presentConnectingVideo,
+                      attemptSignal,
+                      container,
+                    )
+                  : openHlsSession(
+                      client,
+                      requirement.entityId,
+                      origin,
+                      disconnected,
+                      presentConnectingVideo,
+                      attemptSignal,
+                      container,
+                    ),
+              transport === "hls"
+                ? CAMERA_HLS_FIRST_FRAME_TIMEOUT_MS
+                : CAMERA_FIRST_FRAME_TIMEOUT_MS,
+              signal,
+            ),
           undefined,
           lifecycle.signal,
         );
@@ -211,7 +217,15 @@ function CameraStreamSource({
       sessionRef.current?.close();
       sessionRef.current = null;
     };
-  }, [container, client, documentVisible, origin, requirement.available, requirement.entityId, retryKey]);
+  }, [
+    container,
+    client,
+    documentVisible,
+    origin,
+    requirement.available,
+    requirement.entityId,
+    retryKey,
+  ]);
 
   useEffect(() => () => sessionRef.current?.close(), []);
   return null;
@@ -236,14 +250,16 @@ export function CameraStreamCoordinator({
     [requirements],
   );
   useEffect(() => {
-    setStreams((current) => Object.fromEntries(
-      Object.entries(current).filter(([entityId]) => activeIds.has(entityId as EntityId)),
-    ));
+    setStreams((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([entityId]) => activeIds.has(entityId as EntityId)),
+      ),
+    );
   }, [activeIds]);
   const update = useCallback((entityId: EntityId, media: DeviceLiveMedia) => {
-    setStreams((current) => current[entityId] === media
-      ? current
-      : { ...current, [entityId]: media });
+    setStreams((current) =>
+      current[entityId] === media ? current : { ...current, [entityId]: media },
+    );
   }, []);
   return (
     <>
@@ -261,4 +277,7 @@ export function CameraStreamCoordinator({
     </>
   );
 }
-export type { CameraStreamRequirement, CameraStreamsByEntityId } from "./camera-sessions/camera-session-types";
+export type {
+  CameraStreamRequirement,
+  CameraStreamsByEntityId,
+} from "./camera-sessions/camera-session-types";

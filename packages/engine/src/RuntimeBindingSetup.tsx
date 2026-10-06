@@ -5,11 +5,7 @@ import {
   runtimeBindingProfileStorageKey,
   saveRuntimeBindingProfile,
 } from "./runtime-binding-profile";
-import type {
-  HomeAssistantRuntimeSnapshot,
-  HomeManifest,
-  RuntimeBindingProfile,
-} from "./types";
+import type { HomeAssistantRuntimeSnapshot, HomeManifest, RuntimeBindingProfile } from "./types";
 
 export interface RuntimeBindingProfileManager {
   profile: RuntimeBindingProfile;
@@ -45,13 +41,16 @@ export const useRuntimeBindingProfile = (
     setLoaded(true);
   }, [manifest, origin, storageKey, controlled]);
 
-  const save = useCallback((next: RuntimeBindingProfile) => {
-    setProfile(next);
-    setHasStoredProfile(true);
-    if (origin && typeof window !== "undefined") {
-      saveRuntimeBindingProfile(window.localStorage, origin, next);
-    }
-  }, [origin]);
+  const save = useCallback(
+    (next: RuntimeBindingProfile) => {
+      setProfile(next);
+      setHasStoredProfile(true);
+      if (origin && typeof window !== "undefined") {
+        saveRuntimeBindingProfile(window.localStorage, origin, next);
+      }
+    },
+    [origin],
+  );
 
   return controlled ?? { profile, loaded, hasStoredProfile, save };
 };

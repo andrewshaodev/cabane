@@ -11,11 +11,14 @@ const clusters = [
 
 export function GardenShrub({ size }: SceneModelProps) {
   return (
-    <group name="garden-shrub" scale={[
-      size[0] / GARDEN_SHRUB_SIZE[0],
-      size[1] / GARDEN_SHRUB_SIZE[1],
-      size[2] / GARDEN_SHRUB_SIZE[2],
-    ]}>
+    <group
+      name="garden-shrub"
+      scale={[
+        size[0] / GARDEN_SHRUB_SIZE[0],
+        size[1] / GARDEN_SHRUB_SIZE[1],
+        size[2] / GARDEN_SHRUB_SIZE[2],
+      ]}
+    >
       {clusters.map(([x, y, z, radius, color], index) => (
         <mesh key={index} position={[x, y, z]} castShadow receiveShadow>
           <sphereGeometry args={[radius, 8, 6]} />

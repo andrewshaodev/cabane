@@ -6,7 +6,11 @@ export function createShotGate(cooldownMs = 300) {
     if (pending || now < nextShotAt) return false;
     pending = true;
     nextShotAt = now + cooldownMs;
-    try { await shoot(); } finally { pending = false; }
+    try {
+      await shoot();
+    } finally {
+      pending = false;
+    }
     return true;
   };
 }

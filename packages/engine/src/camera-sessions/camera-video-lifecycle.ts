@@ -21,31 +21,38 @@ export const closeVideo = (video: HTMLVideoElement) => {
   video.remove();
 };
 
-export const waitForFirstFrame = (
-  video: HTMLVideoElement,
-  signal: AbortSignal,
-) => new Promise<void>((resolve, reject) => {
-  if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-    resolve();
-    return;
-  }
-  const cleanup = () => {
-    video.removeEventListener("loadeddata", loaded);
-    video.removeEventListener("error", failed);
-    signal.removeEventListener("abort", aborted);
-  };
-  const loaded = () => { cleanup(); resolve(); };
-  const failed = () => { cleanup(); reject(new Error("Camera media playback failed.")); };
-  const aborted = () => { cleanup(); reject(signal.reason ?? new Error("Camera connection interrupted.")); };
-  if (signal.aborted) aborted();
-  else {
-    video.addEventListener("loadeddata", loaded, { once: true });
-    video.addEventListener("error", failed, { once: true });
-    signal.addEventListener("abort", aborted, { once: true });
-  }
-});
+export const waitForFirstFrame = (video: HTMLVideoElement, signal: AbortSignal) =>
+  new Promise<void>((resolve, reject) => {
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      resolve();
+      return;
+    }
+    const cleanup = () => {
+      video.removeEventListener("loadeddata", loaded);
+      video.removeEventListener("error", failed);
+      signal.removeEventListener("abort", aborted);
+    };
+    const loaded = () => {
+      cleanup();
+      resolve();
+    };
+    const failed = () => {
+      cleanup();
+      reject(new Error("Camera media playback failed."));
+    };
+    const aborted = () => {
+      cleanup();
+      reject(signal.reason ?? new Error("Camera connection interrupted."));
+    };
+    if (signal.aborted) aborted();
+    else {
+      video.addEventListener("loadeddata", loaded, { once: true });
+      video.addEventListener("error", failed, { once: true });
+      signal.addEventListener("abort", aborted, { once: true });
+    }
+  });
 
-export const waitWithSignal = <T,>(promise: Promise<T>, signal: AbortSignal) =>
+export const waitWithSignal = <T>(promise: Promise<T>, signal: AbortSignal) =>
   new Promise<T>((resolve, reject) => {
     const aborted = () => reject(signal.reason ?? new Error("Camera connection interrupted."));
     if (signal.aborted) {
@@ -54,8 +61,14 @@ export const waitWithSignal = <T,>(promise: Promise<T>, signal: AbortSignal) =>
     }
     signal.addEventListener("abort", aborted, { once: true });
     promise.then(
-      (value) => { signal.removeEventListener("abort", aborted); resolve(value); },
-      (error) => { signal.removeEventListener("abort", aborted); reject(error); },
+      (value) => {
+        signal.removeEventListener("abort", aborted);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener("abort", aborted);
+        reject(error);
+      },
     );
   });
 

@@ -5,11 +5,7 @@ import type { PassageSpec } from "@cabane/engine";
 import { buildArchedPassageSpandrelShape } from "./arched-passage-spandrel";
 import type { OpeningModelProps } from "../opening-model-props";
 
-export function PassageModel({
-  wall,
-  opening,
-  floor,
-}: OpeningModelProps<PassageSpec>) {
+export function PassageModel({ wall, opening, floor }: OpeningModelProps<PassageSpec>) {
   const placement = openingWorldPlacement(wall, opening, floor.coordinates);
   const arch = useMemo(() => {
     if (opening.variant !== "arched") return null;
@@ -29,9 +25,7 @@ export function PassageModel({
     >
       {arch && (
         <mesh position={[0, 0, -wall.thicknessMeters / 2]} castShadow>
-          <extrudeGeometry
-            args={[arch, { depth: wall.thicknessMeters, bevelEnabled: false }]}
-          />
+          <extrudeGeometry args={[arch, { depth: wall.thicknessMeters, bevelEnabled: false }]} />
           <ToonMaterial color="#e4e0d8" />
         </mesh>
       )}

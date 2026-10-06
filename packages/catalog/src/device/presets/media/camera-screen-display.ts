@@ -23,7 +23,7 @@ export const cameraScreenPose = (
   if (reducedMotion) {
     return { verticalOffset: 0, normalOffset: 0, glowPulse: 0.5 };
   }
-  const phase = elapsedSeconds * Math.PI * 2 / CAMERA_SCREEN_FLOAT_CYCLE_SECONDS;
+  const phase = (elapsedSeconds * Math.PI * 2) / CAMERA_SCREEN_FLOAT_CYCLE_SECONDS;
   return {
     verticalOffset: Math.sin(phase) * CAMERA_SCREEN_VERTICAL_AMPLITUDE,
     normalOffset: Math.cos(phase) * CAMERA_SCREEN_NORMAL_AMPLITUDE,

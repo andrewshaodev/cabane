@@ -17,12 +17,7 @@ export interface WorkspaceBindingState {
 /** Browser-private Home Assistant mappings, keyed by their canonical origin. */
 export type WorkspaceBindings = Readonly<Record<string, WorkspaceBindingState>>;
 
-const PROFILE_KEYS = new Set([
-  "schemaVersion",
-  "homeId",
-  "roomAreaIds",
-  "entityIdsBySlotId",
-]);
+const PROFILE_KEYS = new Set(["schemaVersion", "homeId", "roomAreaIds", "entityIdsBySlotId"]);
 const STATE_KEYS = new Set(["draft", "published", "manualRoomIds", "manualSlotIds"]);
 
 const clone = <T>(value: T): T => structuredClone(value);
@@ -37,8 +32,12 @@ const issue = (code: string, path: string, message: string): HomeProjectIssue =>
 const normalizeOrigin = (origin: string): string => {
   if (typeof origin !== "string") throw new TypeError("A Home Assistant origin must be a string.");
   const parsed = new URL(origin);
-  if ((parsed.protocol !== "http:" && parsed.protocol !== "https:")
-    || !parsed.hostname || parsed.username || parsed.password) {
+  if (
+    (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+    !parsed.hostname ||
+    parsed.username ||
+    parsed.password
+  ) {
     throw new TypeError("A Home Assistant origin must be an http(s) origin without credentials.");
   }
   return normalizeBindingOrigin(origin);
@@ -54,15 +53,23 @@ const profileIssues = (
 ): HomeProjectIssue[] => {
   const issues: HomeProjectIssue[] = [];
   if (!isPlainRecord(input)) {
-    return [issue("workspace-bindings.profile-type", path, "A binding profile must be a plain JSON object.")];
+    return [
+      issue(
+        "workspace-bindings.profile-type",
+        path,
+        "A binding profile must be a plain JSON object.",
+      ),
+    ];
   }
   for (const key of Object.keys(input)) {
     if (!PROFILE_KEYS.has(key)) {
-      issues.push(issue(
-        "workspace-bindings.profile-key",
-        `${path}.${key}`,
-        `Property “${key}” is not allowed in a private binding profile.`,
-      ));
+      issues.push(
+        issue(
+          "workspace-bindings.profile-key",
+          `${path}.${key}`,
+          `Property “${key}” is not allowed in a private binding profile.`,
+        ),
+      );
     }
   }
   const result = validateRuntimeBindingProfile(input, manifest);
@@ -79,21 +86,37 @@ const manualIdsIssues = (
   label: "room" | "slot",
 ): HomeProjectIssue[] => {
   if (!Array.isArray(input)) {
-    return [issue("workspace-bindings.manual-type", path, `Manual ${label} overrides must be an array.`)];
+    return [
+      issue("workspace-bindings.manual-type", path, `Manual ${label} overrides must be an array.`),
+    ];
   }
   const issues: HomeProjectIssue[] = [];
   const seen = new Set<string>();
   input.forEach((id, index) => {
     const itemPath = `${path}.${index}`;
     if (typeof id !== "string" || !id) {
-      issues.push(issue("workspace-bindings.manual-id", itemPath, `Manual ${label} IDs must be non-empty strings.`));
+      issues.push(
+        issue(
+          "workspace-bindings.manual-id",
+          itemPath,
+          `Manual ${label} IDs must be non-empty strings.`,
+        ),
+      );
       return;
     }
     if (!knownIds.has(id)) {
-      issues.push(issue("workspace-bindings.manual-unknown-id", itemPath, `Unknown ${label} ID “${id}”.`));
+      issues.push(
+        issue("workspace-bindings.manual-unknown-id", itemPath, `Unknown ${label} ID “${id}”.`),
+      );
     }
     if (seen.has(id)) {
-      issues.push(issue("workspace-bindings.manual-duplicate", itemPath, `Manual ${label} ID “${id}” is duplicated.`));
+      issues.push(
+        issue(
+          "workspace-bindings.manual-duplicate",
+          itemPath,
+          `Manual ${label} ID “${id}” is duplicated.`,
+        ),
+      );
     }
     seen.add(id);
   });
@@ -114,7 +137,9 @@ export const validateWorkspaceBindings = (
     return [issue("workspace-bindings.type", "bindings", "Bindings must be a plain JSON object.")];
   }
   const canonicalOrigins = new Map<string, string>();
-  const draftRoomIds = new Set(draft.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? []);
+  const draftRoomIds = new Set(
+    draft.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? [],
+  );
   const draftSlotIds = new Set(collectBindingSlots(draft).map((slot) => slot.slotId));
 
   for (const [origin, state] of Object.entries(bindings)) {
@@ -123,46 +148,72 @@ export const validateWorkspaceBindings = (
     try {
       canonicalOrigin = normalizeOrigin(origin);
       if (canonicalOrigin !== origin) {
-        issues.push(issue(
-          "workspace-bindings.origin-normalization",
-          statePath,
-          `Origin keys must use canonical form “${canonicalOrigin}”.`,
-        ));
+        issues.push(
+          issue(
+            "workspace-bindings.origin-normalization",
+            statePath,
+            `Origin keys must use canonical form “${canonicalOrigin}”.`,
+          ),
+        );
       }
       const duplicate = canonicalOrigins.get(canonicalOrigin);
       if (duplicate) {
-        issues.push(issue(
-          "workspace-bindings.origin-duplicate",
-          statePath,
-          `Origin “${origin}” duplicates canonical origin “${duplicate}”.`,
-        ));
+        issues.push(
+          issue(
+            "workspace-bindings.origin-duplicate",
+            statePath,
+            `Origin “${origin}” duplicates canonical origin “${duplicate}”.`,
+          ),
+        );
       } else {
         canonicalOrigins.set(canonicalOrigin, origin);
       }
     } catch {
-      issues.push(issue("workspace-bindings.origin", statePath, "Bindings keys must be valid canonical http(s) origins."));
+      issues.push(
+        issue(
+          "workspace-bindings.origin",
+          statePath,
+          "Bindings keys must be valid canonical http(s) origins.",
+        ),
+      );
     }
 
     if (!isPlainRecord(state)) {
-      issues.push(issue("workspace-bindings.state-type", statePath, "A binding envelope must be a plain JSON object."));
+      issues.push(
+        issue(
+          "workspace-bindings.state-type",
+          statePath,
+          "A binding envelope must be a plain JSON object.",
+        ),
+      );
       continue;
     }
     for (const key of Object.keys(state)) {
       if (!STATE_KEYS.has(key)) {
-        issues.push(issue(
-          "workspace-bindings.state-key",
-          `${statePath}.${key}`,
-          `Property “${key}” is not part of a binding envelope.`,
-        ));
+        issues.push(
+          issue(
+            "workspace-bindings.state-key",
+            `${statePath}.${key}`,
+            `Property “${key}” is not part of a binding envelope.`,
+          ),
+        );
       }
     }
     issues.push(...profileIssues(state.draft, draft, `${statePath}.draft`));
     issues.push(...profileIssues(state.published, published, `${statePath}.published`));
-    issues.push(...manualIdsIssues(state.manualRoomIds, `${statePath}.manualRoomIds`, draftRoomIds, "room"));
-    issues.push(...manualIdsIssues(state.manualSlotIds, `${statePath}.manualSlotIds`, draftSlotIds, "slot"));
+    issues.push(
+      ...manualIdsIssues(state.manualRoomIds, `${statePath}.manualRoomIds`, draftRoomIds, "room"),
+    );
+    issues.push(
+      ...manualIdsIssues(state.manualSlotIds, `${statePath}.manualSlotIds`, draftSlotIds, "slot"),
+    );
   }
-  return issues.sort((left, right) => left.path.localeCompare(right.path)
-    || left.code.localeCompare(right.code) || left.message.localeCompare(right.message));
+  return issues.sort(
+    (left, right) =>
+      left.path.localeCompare(right.path) ||
+      left.code.localeCompare(right.code) ||
+      left.message.localeCompare(right.message),
+  );
 };
 
 /**
@@ -178,20 +229,25 @@ export const removeWorkspaceSlotReferences = (
 
   let changed = false;
   const entries = Object.entries(bindings).map(([origin, state]) => {
-    const entityIdsBySlotId = Object.fromEntries(Object.entries(state.draft.entityIdsBySlotId)
-      .filter(([slotId]) => !removed.has(slotId)));
+    const entityIdsBySlotId = Object.fromEntries(
+      Object.entries(state.draft.entityIdsBySlotId).filter(([slotId]) => !removed.has(slotId)),
+    );
     const manualSlotIds = state.manualSlotIds.filter((slotId) => !removed.has(slotId));
     if (
-      Object.keys(entityIdsBySlotId).length === Object.keys(state.draft.entityIdsBySlotId).length
-      && manualSlotIds.length === state.manualSlotIds.length
-    ) return [origin, state] as const;
+      Object.keys(entityIdsBySlotId).length === Object.keys(state.draft.entityIdsBySlotId).length &&
+      manualSlotIds.length === state.manualSlotIds.length
+    )
+      return [origin, state] as const;
 
     changed = true;
-    return [origin, {
-      ...state,
-      draft: { ...state.draft, entityIdsBySlotId },
-      manualSlotIds,
-    } satisfies WorkspaceBindingState] as const;
+    return [
+      origin,
+      {
+        ...state,
+        draft: { ...state.draft, entityIdsBySlotId },
+        manualSlotIds,
+      } satisfies WorkspaceBindingState,
+    ] as const;
   });
   return changed ? Object.fromEntries(entries) : bindings;
 };
@@ -205,25 +261,34 @@ export const reconcileWorkspaceBindings = (
   bindings: WorkspaceBindings,
   manifest: HomeBindingManifest,
 ): WorkspaceBindings => {
-  const roomIds = new Set(manifest.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? []);
+  const roomIds = new Set(
+    manifest.floors.flatMap((floor) => floor.rooms).map((room) => room.id) ?? [],
+  );
   const slotIds = new Set(collectBindingSlots(manifest).map((slot) => slot.slotId));
-  return Object.fromEntries(Object.entries(bindings).map(([origin, state]) => {
-    const retainedRooms = Object.fromEntries(Object.entries(state.draft.roomAreaIds)
-      .filter(([id]) => roomIds.has(id)));
-    const retainedSlots = Object.fromEntries(Object.entries(state.draft.entityIdsBySlotId)
-      .filter(([id]) => slotIds.has(id)));
-    return [origin, {
-      draft: {
-        schemaVersion: state.draft.schemaVersion,
-        homeId: state.draft.homeId,
-        roomAreaIds: retainedRooms,
-        entityIdsBySlotId: retainedSlots,
-      },
-      published: clone(state.published),
-      manualRoomIds: state.manualRoomIds.filter((id) => roomIds.has(id)),
-      manualSlotIds: state.manualSlotIds.filter((id) => slotIds.has(id)),
-    } satisfies WorkspaceBindingState];
-  }));
+  return Object.fromEntries(
+    Object.entries(bindings).map(([origin, state]) => {
+      const retainedRooms = Object.fromEntries(
+        Object.entries(state.draft.roomAreaIds).filter(([id]) => roomIds.has(id)),
+      );
+      const retainedSlots = Object.fromEntries(
+        Object.entries(state.draft.entityIdsBySlotId).filter(([id]) => slotIds.has(id)),
+      );
+      return [
+        origin,
+        {
+          draft: {
+            schemaVersion: state.draft.schemaVersion,
+            homeId: state.draft.homeId,
+            roomAreaIds: retainedRooms,
+            entityIdsBySlotId: retainedSlots,
+          },
+          published: clone(state.published),
+          manualRoomIds: state.manualRoomIds.filter((id) => roomIds.has(id)),
+          manualSlotIds: state.manualSlotIds.filter((id) => slotIds.has(id)),
+        } satisfies WorkspaceBindingState,
+      ];
+    }),
+  );
 };
 
 /**

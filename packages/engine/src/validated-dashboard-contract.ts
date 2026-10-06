@@ -1,17 +1,16 @@
-import {
-  type RuntimeBindingProfileManager
-} from "./RuntimeBindingSetup";
+import { type RuntimeBindingProfileManager } from "./RuntimeBindingSetup";
 
-import type {
-  ArchitectureModelRegistry,
-  DeviceModelRegistry,
-  HomeManifest
-} from "./types";
+import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "./types";
 
 import type { EditorMode } from "./EditorModeIcon";
 import type { ReactNode } from "react";
 
-import { CabaneDashboardProps, DashboardMappingRequest, DashboardSessionPresentation, DashboardSetupAction } from "./dashboard-contract";
+import {
+  CabaneDashboardProps,
+  DashboardMappingRequest,
+  DashboardSessionPresentation,
+  DashboardSetupAction,
+} from "./dashboard-contract";
 
 export interface ValidatedDashboardProps {
   manifest: HomeManifest;

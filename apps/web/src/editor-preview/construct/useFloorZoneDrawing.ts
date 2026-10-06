@@ -51,73 +51,87 @@ export const advanceFloorZoneDrawing = (
   if (action.type === "undo") {
     if (!state.points.length) return { state };
     const points = state.points.slice(0, -1);
-    return { state: {
-      roomId: points.length ? state.roomId : null,
-      points,
-      future: [state.points.at(-1)!, ...state.future],
-      preview: null,
-      error: null,
-    } };
+    return {
+      state: {
+        roomId: points.length ? state.roomId : null,
+        points,
+        future: [state.points.at(-1)!, ...state.future],
+        preview: null,
+        error: null,
+      },
+    };
   }
   if (action.type === "redo") {
     if (!state.future.length) return { state };
-    return { state: {
-      ...state,
-      points: [...state.points, state.future[0]],
-      future: state.future.slice(1),
-      preview: state.future[0],
-      error: null,
-    } };
+    return {
+      state: {
+        ...state,
+        points: [...state.points, state.future[0]],
+        future: state.future.slice(1),
+        preview: state.future[0],
+        error: null,
+      },
+    };
   }
   const point = action.point;
   const rooms = floor.rooms;
   if (!point.every(Number.isFinite)) return { state };
   if (!state.points.length) {
-    const room = rooms.find((candidate) =>
-      floorZonePointWithinRoom(point, candidate.polygon)
-    );
+    const room = rooms.find((candidate) => floorZonePointWithinRoom(point, candidate.polygon));
     return room
-      ? { state: {
-          roomId: room.id,
-          points: [point],
-          future: [],
-          preview: point,
-          error: null,
-        } }
-      : groundZonePointOutsideFootprint(point, floor)
-        ? { state: {
-            roomId: null,
+      ? {
+          state: {
+            roomId: room.id,
             points: [point],
             future: [],
             preview: point,
             error: null,
-          } }
-        : { state: {
-            ...state,
-            error: "Start inside a room or outside the building.",
-          } };
+          },
+        }
+      : groundZonePointOutsideFootprint(point, floor)
+        ? {
+            state: {
+              roomId: null,
+              points: [point],
+              future: [],
+              preview: point,
+              error: null,
+            },
+          }
+        : {
+            state: {
+              ...state,
+              error: "Start inside a room or outside the building.",
+            },
+          };
   }
   if (same(point, state.points.at(-1)!)) return { state };
   const room = rooms.find((candidate) => candidate.id === state.roomId);
   if (state.points.length >= 3 && same(point, state.points[0])) {
     const polygon = state.points as Polygon;
     if (!isFloorZoneOutline(polygon)) {
-      return { state: {
-        ...state,
-        error: "The area crosses itself or has no area.",
-      } };
+      return {
+        state: {
+          ...state,
+          error: "The area crosses itself or has no area.",
+        },
+      };
     }
     if (room && !floorZoneWithinRoom(polygon, room.polygon)) {
-      return { state: {
-        ...state,
-        error: `Keep the complete area inside ${room.name}.`,
-      } };
+      return {
+        state: {
+          ...state,
+          error: `Keep the complete area inside ${room.name}.`,
+        },
+      };
     }
     if (!room && !groundZoneOutsideFootprint(polygon, floor)) {
-      return { state: {
-        ...state,
-        error: "Keep the complete outdoor area outside the building.",
-      } };
+      return {
+        state: {
+          ...state,
+          error: "Keep the complete outdoor area outside the building.",
+        },
+      };
     }
     return {
       state: emptyFloorZoneDrawing,
@@ -125,30 +139,38 @@ export const advanceFloorZoneDrawing = (
     };
   }
   if (room && !floorZonePointWithinRoom(point, room.polygon)) {
-    return { state: {
-      ...state,
-      error: `Keep every corner inside ${room.name}.`,
-    } };
+    return {
+      state: {
+        ...state,
+        error: `Keep every corner inside ${room.name}.`,
+      },
+    };
   }
   if (!room && !groundZonePointOutsideFootprint(point, floor)) {
-    return { state: {
-      ...state,
-      error: "Keep every outdoor corner outside the building.",
-    } };
+    return {
+      state: {
+        ...state,
+        error: "Keep every outdoor corner outside the building.",
+      },
+    };
   }
   if (state.points.some((candidate) => same(candidate, point))) {
-    return { state: {
-      ...state,
-      error: "Return to the first corner to close the area.",
-    } };
+    return {
+      state: {
+        ...state,
+        error: "Return to the first corner to close the area.",
+      },
+    };
   }
-  return { state: {
-    ...state,
-    points: [...state.points, point],
-    future: [],
-    preview: point,
-    error: null,
-  } };
+  return {
+    state: {
+      ...state,
+      points: [...state.points, point],
+      future: [],
+      preview: point,
+      error: null,
+    },
+  };
 };
 
 export function useFloorZoneDrawing(
@@ -159,21 +181,21 @@ export function useFloorZoneDrawing(
   const current = useRef(state);
   const complete = useRef(onComplete);
   complete.current = onComplete;
-  const dispatch = useCallback((action: FloorZoneDrawingAction) => {
-    const next = advanceFloorZoneDrawing(current.current, action, floor);
-    current.current = next.state;
-    setState(next.state);
-    if (next.completed) {
-      complete.current(next.completed.roomId, next.completed.polygon);
-    }
-  }, [floor]);
+  const dispatch = useCallback(
+    (action: FloorZoneDrawingAction) => {
+      const next = advanceFloorZoneDrawing(current.current, action, floor);
+      current.current = next.state;
+      setState(next.state);
+      if (next.completed) {
+        complete.current(next.completed.roomId, next.completed.polygon);
+      }
+    },
+    [floor],
+  );
   return {
     ...state,
     active: state.points.length > 0 || state.future.length > 0,
-    place: useCallback(
-      (point: PlanPoint) => dispatch({ type: "point", point }),
-      [dispatch],
-    ),
+    place: useCallback((point: PlanPoint) => dispatch({ type: "point", point }), [dispatch]),
     previewPoint: useCallback(
       (point: PlanPoint) => dispatch({ type: "preview", point }),
       [dispatch],

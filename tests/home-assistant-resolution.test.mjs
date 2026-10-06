@@ -15,32 +15,49 @@ await withModules(async (load) => {
   test("resolves only exact active-profile slots in generated order and honors area precedence", () => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const profile = connectedProfileFixture();
-    const resolved = resolver.resolveHomeAssistantBindings(manifest, profile, connectedRuntimeFixture());
+    const resolved = resolver.resolveHomeAssistantBindings(
+      manifest,
+      profile,
+      connectedRuntimeFixture(),
+    );
     const room = resolved.rooms["demo-room"];
     assert.equal(room.displayName, "Demo room");
-    assert.deepEqual(room.sections.primary.map((entity) => entity.entityId), ["climate.demo"]);
-    assert.deepEqual(room.sections.secondary.map((entity) => entity.entityId), [
-      "switch.demo_coffee",
-      "input_boolean.demo_quiet",
-      "cover.demo_shade",
-      "fan.demo",
-      "humidifier.demo",
-      "water_heater.demo",
-      "vacuum.demo",
-      "lock.demo_front_door",
-      "alarm_control_panel.demo",
-      "valve.demo_water",
-      "siren.demo",
-      "select.demo_cycle",
-      "number.demo_level",
-      "button.demo_start",
-    ]);
-    const light = room.devices.find((device) => device.slot.id === "fixture-light-device").entities[0];
+    assert.deepEqual(
+      room.sections.primary.map((entity) => entity.entityId),
+      ["climate.demo"],
+    );
+    assert.deepEqual(
+      room.sections.secondary.map((entity) => entity.entityId),
+      [
+        "switch.demo_coffee",
+        "input_boolean.demo_quiet",
+        "cover.demo_shade",
+        "fan.demo",
+        "humidifier.demo",
+        "water_heater.demo",
+        "vacuum.demo",
+        "lock.demo_front_door",
+        "alarm_control_panel.demo",
+        "valve.demo_water",
+        "siren.demo",
+        "select.demo_cycle",
+        "number.demo_level",
+        "button.demo_start",
+      ],
+    );
+    const light = room.devices.find((device) => device.slot.id === "fixture-light-device")
+      .entities[0];
     assert.equal(light.label, "Main ceiling");
     assert.equal(light.areaId, "demo_room");
     assert.equal(light.issues.length, 0, "entity area overrides a different device area");
-    const deviceFallback = room.sections.secondary.find((entity) => entity.entityId === "switch.demo_coffee");
-    assert.equal(deviceFallback.areaId, "demo_room", "device area is used when entity area is null");
+    const deviceFallback = room.sections.secondary.find(
+      (entity) => entity.entityId === "switch.demo_coffee",
+    );
+    assert.equal(
+      deviceFallback.areaId,
+      "demo_room",
+      "device area is used when entity area is null",
+    );
     assert.equal(resolved.openings["demo-window"].state, "open");
   });
 
@@ -50,12 +67,14 @@ await withModules(async (load) => {
     const runtime = connectedRuntimeFixture();
     runtime.areas.find((area) => area.area_id === "demo_room").name = "Fixture living";
     assert.equal(
-      resolver.resolveHomeAssistantBindings(manifest, profile, runtime).rooms["demo-room"].displayName,
+      resolver.resolveHomeAssistantBindings(manifest, profile, runtime).rooms["demo-room"]
+        .displayName,
       "Fixture living",
     );
     delete profile.roomAreaIds["demo-room"];
     assert.equal(
-      resolver.resolveHomeAssistantBindings(manifest, profile, runtime).rooms["demo-room"].displayName,
+      resolver.resolveHomeAssistantBindings(manifest, profile, runtime).rooms["demo-room"]
+        .displayName,
       manifest.floors[0].rooms[0].name,
     );
   });
@@ -64,8 +83,14 @@ await withModules(async (load) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const profile = connectedProfileFixture();
     profile.entityIdsBySlotId["demo-temperature-slot"] = "sensor.renamed_temperature";
-    const resolved = resolver.resolveHomeAssistantBindings(manifest, profile, connectedRuntimeFixture());
-    const missing = resolved.issues.find((candidate) => candidate.entityId === "sensor.renamed_temperature");
+    const resolved = resolver.resolveHomeAssistantBindings(
+      manifest,
+      profile,
+      connectedRuntimeFixture(),
+    );
+    const missing = resolved.issues.find(
+      (candidate) => candidate.entityId === "sensor.renamed_temperature",
+    );
     assert.equal(missing.code, "binding.entity-missing");
     assert.equal(missing.path, "runtimeProfile.entityIdsBySlotId.demo-temperature-slot");
   });
@@ -75,11 +100,13 @@ await withModules(async (load) => {
     const secondRoom = structuredClone(manifest.floors[0].rooms[0]);
     secondRoom.id = "fixture-second-room";
     secondRoom.name = "Second room";
-    secondRoom.dashboardSlots = [{
-      ...secondRoom.dashboardSlots[0],
-      id: "second-room-light-slot",
-      compatibleDomains: ["light"],
-    }];
+    secondRoom.dashboardSlots = [
+      {
+        ...secondRoom.dashboardSlots[0],
+        id: "second-room-light-slot",
+        compatibleDomains: ["light"],
+      },
+    ];
     secondRoom.devices = [];
     manifest.floors[0].rooms.push(secondRoom);
     manifest.floors[0].rooms[0].devices[0].entitySlots[0].compatibleDomains = ["switch"];
@@ -88,8 +115,11 @@ await withModules(async (load) => {
     profile.roomAreaIds["fixture-second-room"] = "outside";
     profile.entityIdsBySlotId["second-room-light-slot"] = "light.demo_ceiling";
     const runtime = connectedRuntimeFixture();
-    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").hidden_by = "user";
-    const climateRegistry = runtime.entityRegistry.find((entry) => entry.entity_id === "climate.demo");
+    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").hidden_by =
+      "user";
+    const climateRegistry = runtime.entityRegistry.find(
+      (entry) => entry.entity_id === "climate.demo",
+    );
     climateRegistry.disabled_by = "integration";
     climateRegistry.area_id = "outside";
     runtime.entityStates["sensor.demo_temperature"] = {
@@ -98,27 +128,37 @@ await withModules(async (load) => {
       available: false,
     };
 
-    const codes = new Set(resolver.resolveHomeAssistantBindings(manifest, profile, runtime).issues.map((entry) => entry.code));
+    const codes = new Set(
+      resolver
+        .resolveHomeAssistantBindings(manifest, profile, runtime)
+        .issues.map((entry) => entry.code),
+    );
     for (const code of [
       "binding.area-mismatch",
       "binding.disabled",
       "binding.domain-incompatible",
       "binding.hidden",
       "binding.unavailable",
-    ]) assert.equal(codes.has(code), true, `expected ${code}`);
+    ])
+      assert.equal(codes.has(code), true, `expected ${code}`);
   });
 
   test("keeps an explicit cross-area binding valid only for a single-slot modeled device", () => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const profile = connectedProfileFixture();
     const runtime = connectedRuntimeFixture();
-    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").area_id = "outside";
+    runtime.entityRegistry.find((entry) => entry.entity_id === "light.demo_ceiling").area_id =
+      "outside";
 
     const singleSlot = resolver.resolveHomeAssistantBindings(manifest, profile, runtime);
-    const lightDevice = singleSlot.rooms["demo-room"].devices
-      .find((device) => device.slot.id === "fixture-light-device");
+    const lightDevice = singleSlot.rooms["demo-room"].devices.find(
+      (device) => device.slot.id === "fixture-light-device",
+    );
     assert.equal(lightDevice.entities[0].entityId, "light.demo_ceiling");
-    assert.equal(lightDevice.issues.some((issue) => issue.code === "binding.area-mismatch"), false);
+    assert.equal(
+      lightDevice.issues.some((issue) => issue.code === "binding.area-mismatch"),
+      false,
+    );
 
     lightDevice.slot.entitySlots.push({
       id: "fixture-light-diagnostic",
@@ -129,9 +169,12 @@ await withModules(async (load) => {
       presentation: { label: "Light diagnostic", dashboardRole: "diagnostic" },
     });
     const multiSlot = resolver.resolveHomeAssistantBindings(manifest, profile, runtime);
-    assert.equal(multiSlot.rooms["demo-room"].devices
-      .find((device) => device.slot.id === "fixture-light-device").issues
-      .some((issue) => issue.code === "binding.area-mismatch"), true);
+    assert.equal(
+      multiSlot.rooms["demo-room"].devices
+        .find((device) => device.slot.id === "fixture-light-device")
+        .issues.some((issue) => issue.code === "binding.area-mismatch"),
+      true,
+    );
   });
 
   test("keeps a bound opening unavailable instead of assuming it is closed", () => {
@@ -143,7 +186,9 @@ await withModules(async (load) => {
       available: false,
     };
     assert.equal(
-      resolver.resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).openings["demo-window"].state,
+      resolver.resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).openings[
+        "demo-window"
+      ].state,
       "unavailable",
     );
   });
@@ -182,14 +227,16 @@ await withModules(async (load) => {
     const makeScreen = (index) => ({
       id: `shared-camera-screen-${index}`,
       model: "camera-screen",
-      entitySlots: [{
-        id: `shared-camera-slot-${index}`,
-        compatibleDomains: ["camera"],
-        required: true,
-        autoMap: "unique-compatible",
-        deviceRole: "primary",
-        presentation: { label: "Entry camera", dashboardRole: "primary" },
-      }],
+      entitySlots: [
+        {
+          id: `shared-camera-slot-${index}`,
+          compatibleDomains: ["camera"],
+          required: true,
+          autoMap: "unique-compatible",
+          deviceRole: "primary",
+          presentation: { label: "Entry camera", dashboardRole: "primary" },
+        },
+      ],
       placement: {
         at: [index, 0.1],
         elevationMeters: 1.3,
@@ -220,13 +267,21 @@ await withModules(async (load) => {
       lastUpdated: 1,
     };
     const resolved = resolver.resolveHomeAssistantBindings(manifest, profile, runtime);
-    const cameras = resolved.rooms["demo-room"].devices.filter((device) => (
-      device.slot.model === "camera-screen"
-    ));
+    const cameras = resolved.rooms["demo-room"].devices.filter(
+      (device) => device.slot.model === "camera-screen",
+    );
     assert.equal(cameras.length, 2);
-    assert.equal(cameras.every((device) => device.entities[0]?.entityId === "camera.demo_entry"), true);
-    assert.equal(cameras.flatMap((device) => device.issues).some((issue) => (
-      issue.code === "binding.duplicate" || issue.code === "binding.area-mismatch"
-    )), false);
+    assert.equal(
+      cameras.every((device) => device.entities[0]?.entityId === "camera.demo_entry"),
+      true,
+    );
+    assert.equal(
+      cameras
+        .flatMap((device) => device.issues)
+        .some(
+          (issue) => issue.code === "binding.duplicate" || issue.code === "binding.area-mismatch",
+        ),
+      false,
+    );
   });
 });

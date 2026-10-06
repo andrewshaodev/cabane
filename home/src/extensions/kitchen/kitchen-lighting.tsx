@@ -15,22 +15,24 @@ export function KitchenLighting({ state }: { state?: EntityStateSnapshot }) {
   const brightness = lightBrightnessRatio(state);
   return (
     <group name="eclairage-cuisine-custom">
-      {upperCabinets.filter((cabinet) => cabinet.kind === "glass").map((cabinet) => (
-        <group key={cabinet.center} position={[cabinet.center, KITCHEN_CEILING_MOUNT_OFFSET, 0]}>
-          <mesh position={[0, GLASS_CABINET_SPOT_Y, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.017, 0.027, 20]} />
-            <ToonMaterial color="#ddd7ca" />
-          </mesh>
-          <mesh position={[0, GLASS_CABINET_SPOT_Y - 0.001, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[0.016, 20]} />
-            <ToonMaterial
-              color={brightness > 0 ? LIGHT_ON : "#b9b1a0"}
-              emissive={LIGHT_GLOW}
-              emissiveIntensity={brightness * 0.15}
-            />
-          </mesh>
-        </group>
-      ))}
+      {upperCabinets
+        .filter((cabinet) => cabinet.kind === "glass")
+        .map((cabinet) => (
+          <group key={cabinet.center} position={[cabinet.center, KITCHEN_CEILING_MOUNT_OFFSET, 0]}>
+            <mesh position={[0, GLASS_CABINET_SPOT_Y, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.017, 0.027, 20]} />
+              <ToonMaterial color="#ddd7ca" />
+            </mesh>
+            <mesh position={[0, GLASS_CABINET_SPOT_Y - 0.001, 0.45]} rotation={[Math.PI / 2, 0, 0]}>
+              <circleGeometry args={[0.016, 20]} />
+              <ToonMaterial
+                color={brightness > 0 ? LIGHT_ON : "#b9b1a0"}
+                emissive={LIGHT_GLOW}
+                emissiveIntensity={brightness * 0.15}
+              />
+            </mesh>
+          </group>
+        ))}
       <KitchenBox
         size={[2.96, 0.025, 0.055]}
         position={[2.27, UNDER_CABINET_STRIP_Y, 0.38]}

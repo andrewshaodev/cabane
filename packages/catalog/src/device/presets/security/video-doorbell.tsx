@@ -7,7 +7,13 @@ export function VideoDoorbellModel({ visualState }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-video-doorbell">
-      <RoundedBox args={[0.05, 0.135, 0.03]} radius={0.01} smoothness={2} position={[0, 0.0675, 0.015]} castShadow>
+      <RoundedBox
+        args={[0.05, 0.135, 0.03]}
+        radius={0.01}
+        smoothness={2}
+        position={[0, 0.0675, 0.015]}
+        castShadow
+      >
         <ToonMaterial color="#4d5855" />
         <Outlines color="#252d2b" thickness={0.002} />
       </RoundedBox>

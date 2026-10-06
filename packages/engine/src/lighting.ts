@@ -48,12 +48,9 @@ const smoothstep = (value: number) => {
   const clamped = clamp(value, 0, 1);
   return clamped * clamped * (3 - 2 * clamped);
 };
-const mix = (start: number, end: number, progress: number) =>
-  start + (end - start) * progress;
+const mix = (start: number, end: number, progress: number) => start + (end - start) * progress;
 const mixColor = (start: RgbColor, end: RgbColor, progress: number) => {
-  const channels = start.map((channel, index) =>
-    Math.round(mix(channel, end[index], progress))
-  );
+  const channels = start.map((channel, index) => Math.round(mix(channel, end[index], progress)));
   return `#${channels.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
 };
 const finiteNumber = (value: unknown) => {
@@ -79,12 +76,13 @@ export const deriveSolarLighting = (
   sunState: SunEntityState | undefined,
   mode: SolarLightingMode = "live",
 ): SolarLightingState => {
-  const effective = mode === "live"
-    ? sunState
-    : {
-        state: mode === "day" ? "above_horizon" : "below_horizon",
-        attributes: { azimuth: 180, elevation: mode === "day" ? 35 : -8 },
-      };
+  const effective =
+    mode === "live"
+      ? sunState
+      : {
+          state: mode === "day" ? "above_horizon" : "below_horizon",
+          attributes: { azimuth: 180, elevation: mode === "day" ? 35 : -8 },
+        };
   const azimuth = finiteNumber(effective?.attributes.azimuth);
   const elevation = finiteNumber(effective?.attributes.elevation);
   if (azimuth === null || elevation === null) return FALLBACK_LIGHTING;
@@ -94,12 +92,10 @@ export const deriveSolarLighting = (
   const elevationRadians = (clampedElevation * Math.PI) / 180;
   const horizontalDistance = SUN_DISTANCE * Math.cos(elevationRadians);
   const dayProgress = smoothstep(
-    (clampedElevation - FULL_NIGHT_ELEVATION) /
-      (FULL_DAY_ELEVATION - FULL_NIGHT_ELEVATION),
+    (clampedElevation - FULL_NIGHT_ELEVATION) / (FULL_DAY_ELEVATION - FULL_NIGHT_ELEVATION),
   );
-  const sunlightProgress = clampedElevation <= 0
-    ? 0
-    : smoothstep(clampedElevation / FULL_DAY_ELEVATION);
+  const sunlightProgress =
+    clampedElevation <= 0 ? 0 : smoothstep(clampedElevation / FULL_DAY_ELEVATION);
   return {
     valid: true,
     sunPosition: [

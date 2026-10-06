@@ -3,16 +3,12 @@ import {
   fanPowerCall,
   fanPresetCall,
   stringOptions,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { ResolvedEntityBinding } from "../types";
 
-import {
-  AdvancedControls,
-  CommandRange,
-  CommandToggle
-} from "./control-primitives";
+import { AdvancedControls, CommandRange, CommandToggle } from "./control-primitives";
 
 import { CommandOption } from "./command-actions";
 import { confirmationKey, numberAttribute } from "./entity-field-contract";
@@ -42,7 +38,8 @@ export function FanFields({
         callForPressed={(pressed) => fanPowerCall(entity, pressed)}
         onCallService={onCallService}
       />
-      {(typeof entity.attributes.percentage === "number" || typeof entity.attributes.speed_count === "number") && (
+      {(typeof entity.attributes.percentage === "number" ||
+        typeof entity.attributes.speed_count === "number") && (
         <CommandRange
           label={`${binding.label} speed`}
           min={0}

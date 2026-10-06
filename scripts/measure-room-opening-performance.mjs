@@ -14,12 +14,18 @@ try {
     const renderers = new Map();
     window.roomCommits = [];
     window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {
-      supportsFiber: true, renderers,
-      inject(renderer) { const id = ++nextId; renderers.set(id, renderer); return id; },
+      supportsFiber: true,
+      renderers,
+      inject(renderer) {
+        const id = ++nextId;
+        renderers.set(id, renderer);
+        return id;
+      },
       onCommitFiberRoot(id, root) {
         window.roomCommits.push({
           renderer: renderers.get(id).rendererPackageName,
-          time: performance.now(), duration: root.current.actualDuration,
+          time: performance.now(),
+          duration: root.current.actualDuration,
         });
       },
       onCommitFiberUnmount() {},
@@ -32,51 +38,82 @@ try {
     await page.waitForTimeout(2000);
     // Read the existing R3F store; do not add measurement hooks to product code.
     await page.evaluate(async () => {
-      const resource = performance.getEntriesByType("resource").find((entry) => entry.name.includes("/@react-three_fiber.js"));
+      const resource = performance
+        .getEntriesByType("resource")
+        .find((entry) => entry.name.includes("/@react-three_fiber.js"));
       if (!resource) throw new Error("Use the Vite development server for this benchmark.");
       const { _roots } = await import(resource.name);
       window.roomSceneStore = [..._roots.values()][0].store;
     });
-    const sample = await page.evaluate(() => new Promise((resolve) => {
-      const store = window.roomSceneStore;
-      const camera = store.getState().camera;
-      const pose = (camera) => [...camera.position.toArray(), ...camera.quaternion.toArray(), camera.zoom];
-      const before = pose(camera);
-      window.roomCommits = [];
-      const start = performance.now();
-      const observer = new MutationObserver(() => {
-        if (!document.querySelector(".room-control-sheet")) return;
-        const panelMs = performance.now() - start;
-        observer.disconnect();
-        // The DOM panel commits ahead of the concurrent Canvas update. Collect
-        // the whole transition, including camera-triggered follow-up commits.
-        setTimeout(() => {
-          const commits = window.roomCommits.filter((commit) => commit.renderer === "@react-three/fiber");
-          resolve({
-            panelMs,
-            sceneReactMs: commits.reduce((sum, commit) => sum + commit.duration, 0),
-            sceneCommitMs: Math.max(...commits.map((commit) => commit.time - start)),
-            sceneCommits: commits.length,
-            cameraRetained: camera === store.getState().camera,
-            poseRetained: JSON.stringify(before) === JSON.stringify(pose(store.getState().camera)),
+    const sample = await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          const store = window.roomSceneStore;
+          const camera = store.getState().camera;
+          const pose = (camera) => [
+            ...camera.position.toArray(),
+            ...camera.quaternion.toArray(),
+            camera.zoom,
+          ];
+          const before = pose(camera);
+          window.roomCommits = [];
+          const start = performance.now();
+          const observer = new MutationObserver(() => {
+            if (!document.querySelector(".room-control-sheet")) return;
+            const panelMs = performance.now() - start;
+            observer.disconnect();
+            // The DOM panel commits ahead of the concurrent Canvas update. Collect
+            // the whole transition, including camera-triggered follow-up commits.
+            setTimeout(() => {
+              const commits = window.roomCommits.filter(
+                (commit) => commit.renderer === "@react-three/fiber",
+              );
+              resolve({
+                panelMs,
+                sceneReactMs: commits.reduce((sum, commit) => sum + commit.duration, 0),
+                sceneCommitMs: Math.max(...commits.map((commit) => commit.time - start)),
+                sceneCommits: commits.length,
+                cameraRetained: camera === store.getState().camera,
+                poseRetained:
+                  JSON.stringify(before) === JSON.stringify(pose(store.getState().camera)),
+              });
+            }, 700);
           });
-        }, 700);
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-      document.querySelector(".room-status-overlay").click();
-    }));
+          observer.observe(document.body, { childList: true, subtree: true });
+          document.querySelector(".room-status-overlay").click();
+        }),
+    );
     samples.push(sample);
     await page.evaluate(() => sessionStorage.clear());
   }
   assert.deepEqual(errors, []);
-  assert.ok(samples.every((sample) => sample.sceneCommits > 0), "must observe the scene, not just the panel");
+  assert.ok(
+    samples.every((sample) => sample.sceneCommits > 0),
+    "must observe the scene, not just the panel",
+  );
   const median = (key) => {
-    const values = samples.slice(1).map((sample) => sample[key]).sort((a, b) => a - b);
+    const values = samples
+      .slice(1)
+      .map((sample) => sample[key])
+      .sort((a, b) => a - b);
     return Number(values[Math.floor(values.length / 2)].toFixed(2));
   };
-  console.log(JSON.stringify({ browser: browser.version(), viewport: "1440x960", samples,
-    warmMedian: { panelMs: median("panelMs"), sceneReactMs: median("sceneReactMs"), sceneCommitMs: median("sceneCommitMs") },
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        browser: browser.version(),
+        viewport: "1440x960",
+        samples,
+        warmMedian: {
+          panelMs: median("panelMs"),
+          sceneReactMs: median("sceneReactMs"),
+          sceneCommitMs: median("sceneCommitMs"),
+        },
+      },
+      null,
+      2,
+    ),
+  );
 } finally {
   await browser.close();
 }

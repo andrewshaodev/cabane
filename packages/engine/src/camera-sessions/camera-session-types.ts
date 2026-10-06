@@ -1,8 +1,4 @@
-import type {
-  CameraTransport,
-  DeviceLiveMedia,
-  EntityId,
-} from "../types";
+import type { CameraTransport, DeviceLiveMedia, EntityId } from "../types";
 
 export interface CameraCapabilities {
   frontend_stream_types: Array<"hls" | "web_rtc">;

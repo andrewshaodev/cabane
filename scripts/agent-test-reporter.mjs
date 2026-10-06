@@ -3,8 +3,10 @@ import { dot } from "node:test/reporters";
 async function* track(source, summary) {
   for await (const event of source) {
     const suite = event.data?.details?.type === "suite";
-    const hookFailure = suite && event.type === "test:fail"
-      && event.data.details.error?.failureType !== "subtestsFailed";
+    const hookFailure =
+      suite &&
+      event.type === "test:fail" &&
+      event.data.details.error?.failureType !== "subtestsFailed";
     if ((event.type === "test:pass" || event.type === "test:fail") && (!suite || hookFailure)) {
       const skipped = Boolean(event.data.skip);
       const todo = Boolean(event.data.todo);
@@ -13,10 +15,11 @@ async function* track(source, summary) {
       else if (event.type === "test:pass") summary.passed += 1;
       else summary.failed += 1;
       const duration = event.data.details?.duration_ms;
-      if (typeof duration === "number") summary.durations.push({
-        duration,
-        name: event.data.name,
-      });
+      if (typeof duration === "number")
+        summary.durations.push({
+          duration,
+          name: event.data.name,
+        });
     }
     yield event;
   }
@@ -32,14 +35,16 @@ export default async function* agentTestReporter(source) {
     `${summary.failed} failed`,
     summary.skipped ? `${summary.skipped} skipped` : null,
     summary.todo ? `${summary.todo} todo` : null,
-  ].filter(Boolean).join(", ");
+  ]
+    .filter(Boolean)
+    .join(", ");
   yield `${details} in ${durationSeconds}s\n`;
   if (process.env.TEST_PROFILE === "1") {
     const slowest = summary.durations
       .sort((left, right) => right.duration - left.duration)
       .slice(0, 15);
-    yield `Slowest tests:\n${slowest.map(({ duration, name }) =>
-      `  ${duration.toFixed(1)}ms  ${name}`
-    ).join("\n")}\n`;
+    yield `Slowest tests:\n${slowest
+      .map(({ duration, name }) => `  ${duration.toFixed(1)}ms  ${name}`)
+      .join("\n")}\n`;
   }
 }

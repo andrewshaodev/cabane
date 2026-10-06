@@ -2,15 +2,12 @@ import {
   featureEnabled,
   mediaPlaybackCall,
   mediaVolumeCall,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { ResolvedEntityBinding } from "../types";
 
-import {
-  CommandRange,
-  useOptimisticCommand
-} from "./control-primitives";
+import { CommandRange, useOptimisticCommand } from "./control-primitives";
 
 import { confirmationKey, numberAttribute } from "./entity-field-contract";
 
@@ -55,7 +52,11 @@ export function MediaFields({
           >
             {playbackAction}
           </button>
-          {playback.error && <p role="alert" aria-live="assertive">{playback.error}</p>}
+          {playback.error && (
+            <p role="alert" aria-live="assertive">
+              {playback.error}
+            </p>
+          )}
         </div>
       )}
       {featureEnabled(entity, 4) && (

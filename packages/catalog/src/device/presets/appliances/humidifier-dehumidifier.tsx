@@ -8,7 +8,14 @@ export function HumidifierDehumidifierModel({ visualState }: HomeDeviceModelProp
   const active = visualState === "connected-active";
   return (
     <group name="catalog-humidifier-dehumidifier" userData={{ walkCollider: true }}>
-      <RoundedBox args={[0.32, 0.6, 0.28]} radius={0.035} smoothness={2} position={[0, 0.3, 0]} castShadow receiveShadow>
+      <RoundedBox
+        args={[0.32, 0.6, 0.28]}
+        radius={0.035}
+        smoothness={2}
+        position={[0, 0.3, 0]}
+        castShadow
+        receiveShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.005} />
       </RoundedBox>

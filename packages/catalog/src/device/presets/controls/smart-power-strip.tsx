@@ -6,7 +6,13 @@ import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 export function SmartPowerStripModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-smart-power-strip" userData={{ walkCollider: true }}>
-      <RoundedBox args={[0.34, 0.055, 0.065]} radius={0.014} smoothness={2} position={[0, 0.0275, 0]} castShadow>
+      <RoundedBox
+        args={[0.34, 0.055, 0.065]}
+        radius={0.014}
+        smoothness={2}
+        position={[0, 0.0275, 0]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.003} />
       </RoundedBox>

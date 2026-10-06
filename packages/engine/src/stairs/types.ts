@@ -36,8 +36,15 @@ export interface SpiralStairSpec extends StairConnection {
 }
 export type StairSpec = StraightStairSpec | LShapedStairSpec | UShapedStairSpec | SpiralStairSpec;
 export type StairShape = NonNullable<StairSpec["shape"]>;
-export interface StairPathPoint { x: number; z: number; elevation: number }
-export interface StairTread { polygon: readonly (readonly [number, number])[]; elevation: number }
+export interface StairPathPoint {
+  x: number;
+  z: number;
+  elevation: number;
+}
+export interface StairTread {
+  polygon: readonly (readonly [number, number])[];
+  elevation: number;
+}
 export interface StairShapeGeometry {
   path: StairPathPoint[];
   footprint: readonly (readonly [number, number])[];

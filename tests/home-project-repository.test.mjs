@@ -32,7 +32,7 @@ await withModules(async (load) => {
       },
       close: () => undefined,
       transaction: (name, mode) => {
-        assert.ok((Array.isArray(name) ? name : [name]).every(key => created.has(key)));
+        assert.ok((Array.isArray(name) ? name : [name]).every((key) => created.has(key)));
         assert.ok(["readonly", "readwrite"].includes(mode));
         let pendingCount = 0;
         const transaction = {
@@ -46,20 +46,24 @@ await withModules(async (load) => {
                 pending.result = operation();
                 pending.onsuccess?.();
                 pendingCount -= 1;
-                queueMicrotask(() => { if (pendingCount === 0) transaction.oncomplete?.(); });
+                queueMicrotask(() => {
+                  if (pendingCount === 0) transaction.oncomplete?.();
+                });
               });
               return pending;
             };
             return {
               get: (key) => request(() => records.get(key)),
-              put: (value, key) => request(() => {
-                records.set(key, value);
-                return key;
-              }),
-              delete: (key) => request(() => {
-                records.delete(key);
-                return undefined;
-              }),
+              put: (value, key) =>
+                request(() => {
+                  records.set(key, value);
+                  return key;
+                }),
+              delete: (key) =>
+                request(() => {
+                  records.delete(key);
+                  return undefined;
+                }),
             };
           },
         };
@@ -81,66 +85,105 @@ await withModules(async (load) => {
     };
   };
 
-  const fixtureProject = () => defineHomeProject({
-    schemaVersion: 1,
-    seedRevision: "fixture-v1",
-    home: {
-      id: "fixture-home",
-      name: "Fixture home",
-      locale: "en",
-      palette: {
-        accent: "#d48a54",
-        secondary: "#758f83",
-        exterior: "#c97370",
-        interior: "#e4e0d8",
-        ground: "#91a06a",
+  const fixtureProject = () =>
+    defineHomeProject({
+      schemaVersion: 1,
+      seedRevision: "fixture-v1",
+      home: {
+        id: "fixture-home",
+        name: "Fixture home",
+        locale: "en",
+        palette: {
+          accent: "#d48a54",
+          secondary: "#758f83",
+          exterior: "#c97370",
+          interior: "#e4e0d8",
+          ground: "#91a06a",
+        },
       },
-    },
-    floor: {
-      id: "ground-floor",
-      name: "Ground floor",
-      coordinates: {
-        origin: [0, 0],
-        metersPerPlanUnit: 1,
-        scaleBasis: "measured",
+      floor: {
+        id: "ground-floor",
+        name: "Ground floor",
+        coordinates: {
+          origin: [0, 0],
+          metersPerPlanUnit: 1,
+          scaleBasis: "measured",
+        },
+        defaultWallHeightMeters: 2.4,
+        defaultCeilingHeightMeters: 2.4,
+        footprint: [
+          [0, 0],
+          [4, 0],
+          [4, 3],
+          [0, 3],
+        ],
+        rooms: [
+          {
+            id: "room",
+            name: "Room",
+            polygon: [
+              [0.12, 0.12],
+              [3.88, 0.12],
+              [3.88, 2.88],
+              [0.12, 2.88],
+            ],
+            accent: "#c98164",
+            dashboardSlots: [],
+            devices: [],
+          },
+        ],
+        walls: [
+          {
+            id: "north",
+            from: [0, 0],
+            to: [4, 0],
+            classification: "exterior",
+            thicknessMeters: 0.18,
+          },
+          {
+            id: "east",
+            from: [4, 0],
+            to: [4, 3],
+            classification: "exterior",
+            thicknessMeters: 0.18,
+          },
+          {
+            id: "south",
+            from: [4, 3],
+            to: [0, 3],
+            classification: "exterior",
+            thicknessMeters: 0.18,
+          },
+          {
+            id: "west",
+            from: [0, 3],
+            to: [0, 0],
+            classification: "exterior",
+            thicknessMeters: 0.18,
+          },
+        ],
+        wallJunctions: [
+          { id: "north-west", at: [0, 0], wallIds: ["north", "west"] },
+          { id: "north-east", at: [4, 0], wallIds: ["north", "east"] },
+          { id: "south-east", at: [4, 3], wallIds: ["east", "south"] },
+          { id: "south-west", at: [0, 3], wallIds: ["south", "west"] },
+        ],
+        openings: [],
+        ceilings: [
+          {
+            id: "room-ceiling",
+            kind: "flat",
+            roomIds: ["room"],
+            heightMeters: 2.4,
+          },
+        ],
       },
-      defaultWallHeightMeters: 2.4,
-      defaultCeilingHeightMeters: 2.4,
-      footprint: [[0, 0], [4, 0], [4, 3], [0, 3]],
-      rooms: [{
-        id: "room",
-        name: "Room",
-        polygon: [[0.12, 0.12], [3.88, 0.12], [3.88, 2.88], [0.12, 2.88]],
-        accent: "#c98164",
-        dashboardSlots: [],
-        devices: [],
-      }],
-      walls: [
-        { id: "north", from: [0, 0], to: [4, 0], classification: "exterior", thicknessMeters: 0.18 },
-        { id: "east", from: [4, 0], to: [4, 3], classification: "exterior", thicknessMeters: 0.18 },
-        { id: "south", from: [4, 3], to: [0, 3], classification: "exterior", thicknessMeters: 0.18 },
-        { id: "west", from: [0, 3], to: [0, 0], classification: "exterior", thicknessMeters: 0.18 },
-      ],
-      wallJunctions: [
-        { id: "north-west", at: [0, 0], wallIds: ["north", "west"] },
-        { id: "north-east", at: [4, 0], wallIds: ["north", "east"] },
-        { id: "south-east", at: [4, 3], wallIds: ["east", "south"] },
-        { id: "south-west", at: [0, 3], wallIds: ["south", "west"] },
-      ],
-      openings: [],
-      ceilings: [{
-        id: "room-ceiling",
-        kind: "flat",
-        roomIds: ["room"],
-        heightMeters: 2.4,
-      }],
-    },
-    sceneItems: [],
-    roomProfiles: { room: { dashboardSlots: [] } },
-    openingProfiles: {},
-    shortcuts: [],
-    assumptions: [],
-  });
+      sceneItems: [],
+      roomProfiles: { room: { dashboardSlots: [] } },
+      openingProfiles: {},
+      shortcuts: [],
+      assumptions: [],
+    });
 
   test("serializes projects canonically and reports corrupt JSON", () => {
     const project = fixtureProject();
@@ -321,9 +364,27 @@ await withModules(async (load) => {
 
   test("orientation survives autosave, reload, Apply, and contact-profile preservation", async () => {
     const project = fixtureProject();
-    project.floors[0].openings.push({ id: "door", wallId: "north", kind: "door", operation: "hinged", variant: "panel", finish: "wood", leafCount: 1,
-      offsetFromWallStartPlanUnits: 1, widthPlanUnits: .9, openingHeightMeters: 2, sillHeightMeters: 0 });
-    project.openingProfiles.door = { contactSlot: { id: "door-contact", compatibleDeviceClasses: ["door"], openState: "on", autoMap: "manual" } };
+    project.floors[0].openings.push({
+      id: "door",
+      wallId: "north",
+      kind: "door",
+      operation: "hinged",
+      variant: "panel",
+      finish: "wood",
+      leafCount: 1,
+      offsetFromWallStartPlanUnits: 1,
+      widthPlanUnits: 0.9,
+      openingHeightMeters: 2,
+      sillHeightMeters: 0,
+    });
+    project.openingProfiles.door = {
+      contactSlot: {
+        id: "door-contact",
+        compatibleDeviceClasses: ["door"],
+        openState: "on",
+        autoMap: "manual",
+      },
+    };
     const store = createMemoryProjectRecordStore();
     const repository = createHomeProjectRepository(store, registries);
     const original = await repository.replace(createSeedProjectRecord(project, 1000));
@@ -370,11 +431,19 @@ await withModules(async (load) => {
     const store = createMemoryProjectRecordStore();
     const base = createHomeProjectRepository(store, registries);
     const record = await base.replace(createSeedProjectRecord(fixtureProject(), 1000));
-    const warning = { code: "fixture.warning", path: "floor", message: "Review this.", severity: "warning" };
+    const warning = {
+      code: "fixture.warning",
+      path: "floor",
+      message: "Review this.",
+      severity: "warning",
+    };
     const repository = { ...base, validate: () => ({ valid: false, issues: [warning] }) };
     const first = await publishHomeProject(repository, record, { now: 1200 });
     assert.equal(first.status, "confirmation-required");
-    const confirmed = await publishHomeProject(repository, record, { confirmWarnings: true, now: 1200 });
+    const confirmed = await publishHomeProject(repository, record, {
+      confirmWarnings: true,
+      now: 1200,
+    });
     assert.equal(confirmed.status, "published");
   });
 

@@ -9,16 +9,12 @@ import type {
   PoolSpec,
   OutdoorPlatformSpec,
   HedgeSpec,
-  WallJunctionSpec
+  WallJunctionSpec,
 } from "../../types";
 
 import { type OpeningOrientationAction } from "../../opening-orientation";
 
-import {
-  type EditorOpening,
-  type EditorRoomIdentity,
-  type EditorWall
-} from "./topology";
+import { type EditorOpening, type EditorRoomIdentity, type EditorWall } from "./topology";
 
 export const FLOOR_EDITOR_DRAFT_VERSION = 1 as const;
 
@@ -28,13 +24,31 @@ export const FLOOR_EDITOR_GRID_METERS = 0.1;
 
 export const FLOOR_EDITOR_ANGLE_STEP_RADIANS = Math.PI / 4;
 
-export const FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS = 5 * Math.PI / 180;
+export const FLOOR_EDITOR_ANGLE_SNAP_TOLERANCE_RADIANS = (5 * Math.PI) / 180;
 
-export type FloorEditorTool = "select" | "hedge" | "wall" | "door" | "window" | "passage" | "floor" | "platform" | "pool" | "measure" | "pan";
+export type FloorEditorTool =
+  | "select"
+  | "hedge"
+  | "wall"
+  | "door"
+  | "window"
+  | "passage"
+  | "floor"
+  | "platform"
+  | "pool"
+  | "measure"
+  | "pan";
 
 export type FloorEditorSelectionTarget =
   | { kind: "hedge"; id: string }
-  | { kind: "wall"; id: string; /** Transient deletion interval along the source wall, from 0 to 1. */ span?: readonly [number, number] }
+  | {
+      kind: "wall";
+      id: string;
+      /** Transient deletion interval along the source wall, from 0 to 1. */ span?: readonly [
+        number,
+        number,
+      ];
+    }
   | { kind: "opening"; id: string }
   | { kind: "room"; id: string }
   | { kind: "floor-zone"; id: string }
@@ -96,34 +110,52 @@ export type FloorEditorAction =
   | { type: "add-hedge"; hedge: Omit<HedgeSpec, "id"> }
   | { type: "update-hedge"; id: string; changes: Partial<Omit<HedgeSpec, "id">> }
   | { type: "add-pool"; polygon: Polygon }
-  | { type: "add-outdoor-platform"; polygon: Polygon; finish: FloorFinishSpec; defaultEdge: OutdoorPlatformSpec["defaultEdge"] }
-  | { type: "update-outdoor-platform"; id: string; changes: Partial<Omit<OutdoorPlatformSpec, "id">> }
   | {
-    type: "add-floor-zone";
-    room: Pick<EditorRoomIdentity, "id" | "name" | "accent" | "anchor">;
-    polygon: Polygon;
-    finish: FloorFinishSpec;
-  }
+      type: "add-outdoor-platform";
+      polygon: Polygon;
+      finish: FloorFinishSpec;
+      defaultEdge: OutdoorPlatformSpec["defaultEdge"];
+    }
   | {
-    type: "add-ground-zone";
-    polygon: Polygon;
-    finish: FloorFinishSpec;
-  }
+      type: "update-outdoor-platform";
+      id: string;
+      changes: Partial<Omit<OutdoorPlatformSpec, "id">>;
+    }
   | {
-    type: "update-floor-zone";
-    zoneId: string;
-    changes: Partial<Pick<FloorFinishZoneSpec, "polygon" | "finish">>;
-  }
+      type: "add-floor-zone";
+      room: Pick<EditorRoomIdentity, "id" | "name" | "accent" | "anchor">;
+      polygon: Polygon;
+      finish: FloorFinishSpec;
+    }
+  | {
+      type: "add-ground-zone";
+      polygon: Polygon;
+      finish: FloorFinishSpec;
+    }
+  | {
+      type: "update-floor-zone";
+      zoneId: string;
+      changes: Partial<Pick<FloorFinishZoneSpec, "polygon" | "finish">>;
+    }
   | { type: "update-pool"; poolId: string; polygon: Polygon }
   | { type: "move-endpoint"; from: PlanPoint; to: PlanPoint }
   | { type: "translate-wall"; wallId: string; delta: PlanPoint }
   | {
-    type: "update-wall-metadata"; wallId: string; changes: Partial<Pick<EditorWall,
-      "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">>
-  }
+      type: "update-wall-metadata";
+      wallId: string;
+      changes: Partial<
+        Pick<EditorWall, "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">
+      >;
+    }
   | { type: "delete-selection" }
   | { type: "delete-elements"; targets: readonly FloorEditorSelectionTarget[] }
-  | { type: "add-opening"; wallId: string; kind: "door" | "window" | "passage"; offsetPlanUnits: number; doorConfiguration?: import("../../types").DoorConfiguration }
+  | {
+      type: "add-opening";
+      wallId: string;
+      kind: "door" | "window" | "passage";
+      offsetPlanUnits: number;
+      doorConfiguration?: import("../../types").DoorConfiguration;
+    }
   | { type: "duplicate-opening"; openingId: string }
   | { type: "move-opening"; openingId: string; wallId: string; offsetPlanUnits: number }
   | { type: "resize-opening"; openingId: string; widthPlanUnits: number }
@@ -131,10 +163,22 @@ export type FloorEditorAction =
   | { type: "reorient-opening"; openingId: string; change: OpeningOrientationAction }
   | { type: "name-room"; roomId: string; name: string; accent: string; anchor: PlanPoint }
   | {
-    type: "update-room-metadata"; roomId: string; anchor: PlanPoint; changes: Partial<Pick<EditorRoomIdentity,
-      "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters">>
-  }
-  | { type: "resolve-room-merge"; survivorId: string; mergedRoomIds: readonly string[]; anchor: PlanPoint }
+      type: "update-room-metadata";
+      roomId: string;
+      anchor: PlanPoint;
+      changes: Partial<
+        Pick<
+          EditorRoomIdentity,
+          "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+        >
+      >;
+    }
+  | {
+      type: "resolve-room-merge";
+      survivorId: string;
+      mergedRoomIds: readonly string[];
+      anchor: PlanPoint;
+    }
   | { type: "discard-room-identity"; roomId: string }
   | { type: "set-floor-name"; name: string }
   | { type: "update-floor-settings"; settings: FloorEditorFloorSettings }

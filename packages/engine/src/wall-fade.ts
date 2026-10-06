@@ -4,9 +4,10 @@ const FADE_START_ALIGNMENT = 0.15;
 const FADE_END_ALIGNMENT = 0.65;
 const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
-export const normalizeHorizontalDirection = (
-  [x, z]: HorizontalDirection,
-): HorizontalDirection | null => {
+export const normalizeHorizontalDirection = ([
+  x,
+  z,
+]: HorizontalDirection): HorizontalDirection | null => {
   const length = Math.hypot(x, z);
   if (!Number.isFinite(length) || length < 1e-6) return null;
   return [x / length, z / length];
@@ -25,8 +26,7 @@ export const cameraWallAlignment = (
 
 export const wallOpacityForAlignment = (alignment: number) => {
   const linear = clamp01(
-    (alignment - FADE_START_ALIGNMENT) /
-      (FADE_END_ALIGNMENT - FADE_START_ALIGNMENT),
+    (alignment - FADE_START_ALIGNMENT) / (FADE_END_ALIGNMENT - FADE_START_ALIGNMENT),
   );
   const smooth = linear * linear * (3 - 2 * linear);
   return 1 - smooth * (1 - WALL_FADE_MIN_OPACITY);
@@ -49,10 +49,7 @@ export const cameraFacingWallOpacityForNormals = (
 ) => {
   if (!enabled || normals.length === 0) return 1;
   return normals.reduce(
-    (opacity, normal) => Math.min(
-      opacity,
-      cameraFacingWallOpacity(true, camera, normal),
-    ),
+    (opacity, normal) => Math.min(opacity, cameraFacingWallOpacity(true, camera, normal)),
     1,
   );
 };

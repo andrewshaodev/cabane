@@ -1,10 +1,7 @@
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
-import {
-  useEffect,
-  useState
-} from "react";
+import { useEffect, useState } from "react";
 
 import type { ConstructEditorController } from "./useConstructEditor";
 
@@ -32,13 +29,18 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
   ]);
 
   const scaleChanges = scale !== editor.draft.coordinates.metersPerPlanUnit;
-  const changes = scaleChanges || originX !== editor.draft.coordinates.origin[0] ||
+  const changes =
+    scaleChanges ||
+    originX !== editor.draft.coordinates.origin[0] ||
     originY !== editor.draft.coordinates.origin[1] ||
     scaleBasis !== editor.draft.coordinates.scaleBasis ||
     wallHeight !== editor.draft.defaultWallHeightMeters ||
     ceilingHeight !== editor.draft.defaultCeilingHeightMeters;
-  const valid = [originX, originY, scale, wallHeight, ceilingHeight].every(Number.isFinite) &&
-    scale > 0 && wallHeight > 0 && ceilingHeight > 0;
+  const valid =
+    [originX, originY, scale, wallHeight, ceilingHeight].every(Number.isFinite) &&
+    scale > 0 &&
+    wallHeight > 0 &&
+    ceilingHeight > 0;
   const stage = (setter: (value: number) => void) => (value: number) => {
     setter(value);
     setConfirmingScale(false);
@@ -61,26 +63,83 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
   };
 
   return (
-    <section className="construction-inspector__floor-settings sidebar-section-content" aria-label="Floor settings">
+    <section
+      className="construction-inspector__floor-settings sidebar-section-content"
+      aria-label="Floor settings"
+    >
       <fieldset>
         <legend>Plan coordinates</legend>
-        <label>Scale (m/unit)<CommittedNumberInput label="Meters per plan unit" min={.001} step={.01} value={scale} onCommit={stage(setScale)} /></label>
-        <label>Basis<select aria-label="Floor scale basis" value={scaleBasis} onChange={(event) => {
-          setScaleBasis(event.target.value as typeof scaleBasis);
-          setConfirmingScale(false);
-        }}><option value="measured">Measured</option><option value="inferred">Estimated</option></select></label>
-        <label>Origin X<CommittedNumberInput label="Floor origin X" step={.1} value={originX} onCommit={stage(setOriginX)} /></label>
-        <label>Origin Y<CommittedNumberInput label="Floor origin Y" step={.1} value={originY} onCommit={stage(setOriginY)} /></label>
+        <label>
+          Scale (m/unit)
+          <CommittedNumberInput
+            label="Meters per plan unit"
+            min={0.001}
+            step={0.01}
+            value={scale}
+            onCommit={stage(setScale)}
+          />
+        </label>
+        <label>
+          Basis
+          <select
+            aria-label="Floor scale basis"
+            value={scaleBasis}
+            onChange={(event) => {
+              setScaleBasis(event.target.value as typeof scaleBasis);
+              setConfirmingScale(false);
+            }}
+          >
+            <option value="measured">Measured</option>
+            <option value="inferred">Estimated</option>
+          </select>
+        </label>
+        <label>
+          Origin X
+          <CommittedNumberInput
+            label="Floor origin X"
+            step={0.1}
+            value={originX}
+            onCommit={stage(setOriginX)}
+          />
+        </label>
+        <label>
+          Origin Y
+          <CommittedNumberInput
+            label="Floor origin Y"
+            step={0.1}
+            value={originY}
+            onCommit={stage(setOriginY)}
+          />
+        </label>
       </fieldset>
       <fieldset>
         <legend>Default heights</legend>
-        <label>Wall (m)<CommittedNumberInput label="Default wall height" min={.3} step={.05} value={wallHeight} onCommit={stage(setWallHeight)} /></label>
-        <label>Ceiling (m)<CommittedNumberInput label="Default ceiling height" min={.3} step={.05} value={ceilingHeight} onCommit={stage(setCeilingHeight)} /></label>
+        <label>
+          Wall (m)
+          <CommittedNumberInput
+            label="Default wall height"
+            min={0.3}
+            step={0.05}
+            value={wallHeight}
+            onCommit={stage(setWallHeight)}
+          />
+        </label>
+        <label>
+          Ceiling (m)
+          <CommittedNumberInput
+            label="Default ceiling height"
+            min={0.3}
+            step={0.05}
+            value={ceilingHeight}
+            onCommit={stage(setCeilingHeight)}
+          />
+        </label>
       </fieldset>
       <p className="sidebar-section-note">Changing scale resizes the whole house.</p>
       {confirmingScale && (
         <p className="construction-inspector__scale-warning" role="alert">
-          This will rescale the architecture and reposition plan-authored items. Click again to confirm.
+          This will rescale the architecture and reposition plan-authored items. Click again to
+          confirm.
         </p>
       )}
       <EditorButton disabled={!changes || !valid} onClick={apply}>

@@ -9,10 +9,7 @@ export function ChildrenBedroomFrenchDoorCurtains() {
       </mesh>
       {[-0.76, 0.76].map((x) => (
         <group key={x} position={[x, 0, 0.035]}>
-          <mesh
-            position={[0, 1.12, 0]}
-            castShadow
-          >
+          <mesh position={[0, 1.12, 0]} castShadow>
             <boxGeometry args={[0.38, 2.08, 0.035]} />
             <ToonMaterial color="#d8d0c4" transparent opacity={0.9} />
             <Outlines color="#81776c" thickness={0.004} screenspace={false} />

@@ -8,13 +8,23 @@ export function AirQualityMonitorModel({ state, visualState }: HomeDeviceModelPr
   const warning = Number.isFinite(numeric) && numeric > 1_000;
   return (
     <group name="catalog-air-quality-monitor" userData={{ walkCollider: true }}>
-      <RoundedBox args={[0.1, 0.16, 0.06]} radius={0.014} smoothness={2} position={[0, 0.08, 0]} castShadow>
+      <RoundedBox
+        args={[0.1, 0.16, 0.06]}
+        radius={0.014}
+        smoothness={2}
+        position={[0, 0.08, 0]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </RoundedBox>
       <mesh position={[0, 0.105, 0.029]}>
         <boxGeometry args={[0.072, 0.052, 0.002]} />
-        <ToonMaterial color="#31413f" emissive={warning ? palette.coral : palette.green} emissiveIntensity={0.24} />
+        <ToonMaterial
+          color="#31413f"
+          emissive={warning ? palette.coral : palette.green}
+          emissiveIntensity={0.24}
+        />
       </mesh>
       {[-0.026, -0.013, 0, 0.013, 0.026].map((x) => (
         <mesh key={x} position={[x, 0.045, 0.029]}>

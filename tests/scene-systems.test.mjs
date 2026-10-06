@@ -21,13 +21,16 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const geometrySnapshot = (geometry) => ({
   index: geometry.index ? [...geometry.index.array] : null,
   groups: geometry.groups,
-  attributes: Object.fromEntries(Object.entries(geometry.attributes).map(
-    ([name, attribute]) => [name, {
-      array: [...attribute.array],
-      itemSize: attribute.itemSize,
-      normalized: attribute.normalized,
-    }],
-  )),
+  attributes: Object.fromEntries(
+    Object.entries(geometry.attributes).map(([name, attribute]) => [
+      name,
+      {
+        array: [...attribute.array],
+        itemSize: attribute.itemSize,
+        normalized: attribute.normalized,
+      },
+    ]),
+  ),
 });
 
 const geometryTriangleColors = (assemblies, predicate = () => true) => {
@@ -44,11 +47,15 @@ const geometryTriangleColors = (assemblies, predicate = () => true) => {
         positions.getZ(vertex),
       ]);
       if (!predicate(points)) continue;
-      colors.add(new Color().setRGB(
-        vertexColors.getX(vertices[0]),
-        vertexColors.getY(vertices[0]),
-        vertexColors.getZ(vertices[0]),
-      ).getHexString());
+      colors.add(
+        new Color()
+          .setRGB(
+            vertexColors.getX(vertices[0]),
+            vertexColors.getY(vertices[0]),
+            vertexColors.getZ(vertices[0]),
+          )
+          .getHexString(),
+      );
     }
   }
   return colors;
@@ -75,35 +82,63 @@ await withModules(async (load) => {
     const manifest = structuredClone(neutralDemoManifest);
     const ground = manifest.floors[0];
     const upper = {
-      ...structuredClone(ground), id: "upper-floor", name: "Upper floor",
+      ...structuredClone(ground),
+      id: "upper-floor",
+      name: "Upper floor",
       rooms: ground.rooms.map((room) => ({ ...room, id: "upper-room" })),
     };
     manifest.floors = [ground, upper];
     manifest.sceneItems = [ground, upper].map((floor) => ({
-      id: `${floor.id}-lamp`, floorId: floor.id, kind: "device",
-      modelId: "table-lamp", lightState: "always-on",
+      id: `${floor.id}-lamp`,
+      floorId: floor.id,
+      kind: "device",
+      modelId: "table-lamp",
+      lightState: "always-on",
       placement: { kind: "absolute", at: [2, 2], elevationMeters: 0.6, rotationYRadians: 0 },
       size: stableDeviceRegistry["table-lamp"].defaultSize,
       entitySlots: [],
     }));
     const props = {
-      manifest, selectedRoomId: null, floorView: "cutaway",
-      walkMode: false, wallFadeEnabled: false, reducedMotion: true,
+      manifest,
+      selectedRoomId: null,
+      floorView: "cutaway",
+      walkMode: false,
+      wallFadeEnabled: false,
+      reducedMotion: true,
       resolvedBindings: { rooms: {}, openings: {}, issues: [] },
       architectureModels: openingModels.stableArchitectureModelRegistry,
       deviceModels: stableDeviceRegistry,
-      openingPositions: {}, onInteract: () => undefined,
+      openingPositions: {},
+      onInteract: () => undefined,
     };
-    const renderer = await create(createElement(scene.ArchitectureScene, {
-      ...props, activeFloorId: upper.id,
-    }));
-    assert.equal(renderer.scene.findAllByProps({ name: `ha-device-light-${upper.id}-lamp` }).length, 1);
-    assert.equal(renderer.scene.findAllByProps({ name: `ha-device-light-${ground.id}-lamp` }).length, 0);
-    await renderer.update(createElement(scene.ArchitectureScene, {
-      ...props, activeFloorId: ground.id,
-    }));
-    assert.equal(renderer.scene.findAllByProps({ name: `ha-device-light-${ground.id}-lamp` }).length, 1);
-    assert.equal(renderer.scene.findAllByProps({ name: `ha-device-light-${upper.id}-lamp` }).length, 0);
+    const renderer = await create(
+      createElement(scene.ArchitectureScene, {
+        ...props,
+        activeFloorId: upper.id,
+      }),
+    );
+    assert.equal(
+      renderer.scene.findAllByProps({ name: `ha-device-light-${upper.id}-lamp` }).length,
+      1,
+    );
+    assert.equal(
+      renderer.scene.findAllByProps({ name: `ha-device-light-${ground.id}-lamp` }).length,
+      0,
+    );
+    await renderer.update(
+      createElement(scene.ArchitectureScene, {
+        ...props,
+        activeFloorId: ground.id,
+      }),
+    );
+    assert.equal(
+      renderer.scene.findAllByProps({ name: `ha-device-light-${ground.id}-lamp` }).length,
+      1,
+    );
+    assert.equal(
+      renderer.scene.findAllByProps({ name: `ha-device-light-${upper.id}-lamp` }).length,
+      0,
+    );
     await renderer.unmount();
   });
 
@@ -117,38 +152,45 @@ await withModules(async (load) => {
   test("renders declarative furnishing and device items exactly once", async () => {
     const manifest = structuredClone(neutralDemoManifest);
     manifest.floors[0].rooms[0].furnishings = "legacy-fixture";
-    manifest.sceneItems = [{
-      id: "fixture-chair", floorId: manifest.floors[0].id,
-      kind: "furnishing",
-      modelId: "fixture-chair-model",
-      placement: {
-        kind: "absolute",
-        at: [1, 1],
-        elevationMeters: 0,
-        rotationYRadians: 0,
+    manifest.sceneItems = [
+      {
+        id: "fixture-chair",
+        floorId: manifest.floors[0].id,
+        kind: "furnishing",
+        modelId: "fixture-chair-model",
+        placement: {
+          kind: "absolute",
+          at: [1, 1],
+          elevationMeters: 0,
+          rotationYRadians: 0,
+        },
+        size: [0.6, 0.9, 0.6],
       },
-      size: [0.6, 0.9, 0.6],
-    }, {
-      id: "fixture-switch", floorId: manifest.floors[0].id,
-      kind: "device",
-      modelId: "fixture-switch-model",
-      placement: {
-        kind: "absolute",
-        at: [2, 1],
-        elevationMeters: 1,
-        rotationYRadians: 0,
+      {
+        id: "fixture-switch",
+        floorId: manifest.floors[0].id,
+        kind: "device",
+        modelId: "fixture-switch-model",
+        placement: {
+          kind: "absolute",
+          at: [2, 1],
+          elevationMeters: 1,
+          rotationYRadians: 0,
+        },
+        size: [0.12, 0.15, 0.05],
+        entitySlots: [
+          {
+            id: "fixture-switch-primary",
+            compatibleDomains: ["switch"],
+            required: true,
+            autoMap: "unique-compatible",
+            section: "primary",
+            deviceRole: "primary",
+            presentation: { label: "Fixture switch", icon: "toggle" },
+          },
+        ],
       },
-      size: [0.12, 0.15, 0.05],
-      entitySlots: [{
-        id: "fixture-switch-primary",
-        compatibleDomains: ["switch"],
-        required: true,
-        autoMap: "unique-compatible",
-        section: "primary",
-        deviceRole: "primary",
-        presentation: { label: "Fixture switch", icon: "toggle" },
-      }],
-    }];
+    ];
     manifest.extensions = {
       furnishingModels: {
         "fixture-chair-model": {
@@ -217,19 +259,20 @@ await withModules(async (load) => {
         component: () => createElement("group", { name: "fixture-switch-stable-model" }),
       },
     };
-    const renderScene = (walkMode) => createElement(scene.ArchitectureScene, {
-      manifest,
-      selectedRoomId: null,
-      walkMode,
-      wallFadeEnabled: false,
-      reducedMotion: true,
-      resolvedBindings,
-      architectureModels: openingModels.stableArchitectureModelRegistry,
-      deviceModels: stableDeviceModels,
-      openingPositions: {},
-      onSelectRoom: () => undefined,
-      onInteract: () => undefined,
-    });
+    const renderScene = (walkMode) =>
+      createElement(scene.ArchitectureScene, {
+        manifest,
+        selectedRoomId: null,
+        walkMode,
+        wallFadeEnabled: false,
+        reducedMotion: true,
+        resolvedBindings,
+        architectureModels: openingModels.stableArchitectureModelRegistry,
+        deviceModels: stableDeviceModels,
+        openingPositions: {},
+        onSelectRoom: () => undefined,
+        onInteract: () => undefined,
+      });
     const renderer = await create(renderScene(false));
 
     assert.equal(renderer.scene.findAllByProps({ name: "scene-item-fixture-chair" }).length, 1);
@@ -244,49 +287,71 @@ await withModules(async (load) => {
       const switchItem = renderer.scene.findByProps({ name: "scene-item-fixture-switch" });
       await renderer.fireEvent(switchItem, "pointerOver");
       assert.equal(globalThis.document.body.style.cursor, "pointer");
-      assert.equal(renderer.scene.findAllByProps({ name: "device-hover-outline-fixture-switch" }).length, 0);
+      assert.equal(
+        renderer.scene.findAllByProps({ name: "device-hover-outline-fixture-switch" }).length,
+        0,
+      );
       await renderer.update(renderScene(true));
       assert.equal(globalThis.document.body.style.cursor, "crosshair");
-      assert.equal(renderer.scene.findAllByProps({ name: "device-hover-outline-fixture-switch" }).length, 0);
+      assert.equal(
+        renderer.scene.findAllByProps({ name: "device-hover-outline-fixture-switch" }).length,
+        0,
+      );
     } finally {
       globalThis.document = originalDocument;
     }
     await renderer.unmount();
 
     manifest.sceneItems[1].size = [0.24, 0.15, 0.05];
-    const invalidSizeRenderer = await create(createElement(scene.ArchitectureScene, {
-      manifest,
-      selectedRoomId: null,
-      walkMode: false,
-      wallFadeEnabled: false,
-      reducedMotion: true,
-      resolvedBindings,
-      architectureModels: openingModels.stableArchitectureModelRegistry,
-      deviceModels: stableDeviceModels,
-      openingPositions: {},
-      onSelectRoom: () => undefined,
-      onInteract: () => undefined,
-    }));
-    assert.equal(invalidSizeRenderer.scene.findAllByProps({ name: "scene-item-fixture-chair" }).length, 1);
-    assert.equal(invalidSizeRenderer.scene.findAllByProps({ name: "scene-item-fixture-switch" }).length, 0);
+    const invalidSizeRenderer = await create(
+      createElement(scene.ArchitectureScene, {
+        manifest,
+        selectedRoomId: null,
+        walkMode: false,
+        wallFadeEnabled: false,
+        reducedMotion: true,
+        resolvedBindings,
+        architectureModels: openingModels.stableArchitectureModelRegistry,
+        deviceModels: stableDeviceModels,
+        openingPositions: {},
+        onSelectRoom: () => undefined,
+        onInteract: () => undefined,
+      }),
+    );
+    assert.equal(
+      invalidSizeRenderer.scene.findAllByProps({ name: "scene-item-fixture-chair" }).length,
+      1,
+    );
+    assert.equal(
+      invalidSizeRenderer.scene.findAllByProps({ name: "scene-item-fixture-switch" }).length,
+      0,
+    );
     await invalidSizeRenderer.unmount();
 
     manifest.sceneItems = [];
-    const legacyRenderer = await create(createElement(scene.ArchitectureScene, {
-      manifest,
-      selectedRoomId: null,
-      walkMode: false,
-      wallFadeEnabled: false,
-      reducedMotion: true,
-      resolvedBindings,
-      architectureModels: openingModels.stableArchitectureModelRegistry,
-      deviceModels: stableDeviceModels,
-      openingPositions: {},
-      onSelectRoom: () => undefined,
-      onInteract: () => undefined,
-    }));
-    assert.equal(legacyRenderer.scene.findAllByProps({ name: "legacy-room-furnishings" }).length, 1);
-    assert.equal(legacyRenderer.scene.findAllByProps({ name: "scene-item-fixture-chair" }).length, 0);
+    const legacyRenderer = await create(
+      createElement(scene.ArchitectureScene, {
+        manifest,
+        selectedRoomId: null,
+        walkMode: false,
+        wallFadeEnabled: false,
+        reducedMotion: true,
+        resolvedBindings,
+        architectureModels: openingModels.stableArchitectureModelRegistry,
+        deviceModels: stableDeviceModels,
+        openingPositions: {},
+        onSelectRoom: () => undefined,
+        onInteract: () => undefined,
+      }),
+    );
+    assert.equal(
+      legacyRenderer.scene.findAllByProps({ name: "legacy-room-furnishings" }).length,
+      1,
+    );
+    assert.equal(
+      legacyRenderer.scene.findAllByProps({ name: "scene-item-fixture-chair" }).length,
+      0,
+    );
     await legacyRenderer.unmount();
   });
 
@@ -297,23 +362,20 @@ await withModules(async (load) => {
       passage: () => null,
     });
     assert.deepEqual(engine.validateArchitectureModelRegistry(complete), []);
-    assert.deepEqual(
-      engine.validateArchitectureModelRegistry({ door: () => null }),
-      [
-        {
-          code: "architecture.model-registry",
-          severity: "fatal",
-          path: "architectureModels.window",
-          message: "The stable window architecture model is missing.",
-        },
-        {
-          code: "architecture.model-registry",
-          severity: "fatal",
-          path: "architectureModels.passage",
-          message: "The stable passage architecture model is missing.",
-        },
-      ],
-    );
+    assert.deepEqual(engine.validateArchitectureModelRegistry({ door: () => null }), [
+      {
+        code: "architecture.model-registry",
+        severity: "fatal",
+        path: "architectureModels.window",
+        message: "The stable window architecture model is missing.",
+      },
+      {
+        code: "architecture.model-registry",
+        severity: "fatal",
+        path: "architectureModels.passage",
+        message: "The stable passage architecture model is missing.",
+      },
+    ]);
   });
 
   test("moves continuously from daylight through readable night", () => {
@@ -363,10 +425,10 @@ await withModules(async (load) => {
 
   test("builds crease-normal outline geometry without changing vertex positions", () => {
     const source = new BufferGeometry();
-    source.setAttribute("position", new Float32BufferAttribute([
-      0, 0, 0, 1, 0, 0, 0, 1, 0,
-      0, 0, 0, 0, 1, 0, 0, 0, 1,
-    ], 3));
+    source.setAttribute(
+      "position",
+      new Float32BufferAttribute([0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1], 3),
+    );
     const result = outline.optimizedCreasedNormalGeometry(source, Math.PI / 3);
     assert.equal(result.getAttribute("position").count, 6);
     assert.equal(result.getAttribute("normal").count, 6);
@@ -458,13 +520,17 @@ await withModules(async (load) => {
       right: "#0000ff",
     };
     const assemblies = architecture.buildArchitecturalWallGeometries(floor, "#00ff00", "#ffff00");
-    const verticalColors = geometryTriangleColors(assemblies, (points) =>
-      Math.max(...points.map((point) => point[1])) - Math.min(...points.map((point) => point[1])) > 0.5
+    const verticalColors = geometryTriangleColors(
+      assemblies,
+      (points) =>
+        Math.max(...points.map((point) => point[1])) -
+          Math.min(...points.map((point) => point[1])) >
+        0.5,
     );
     assert.ok(verticalColors.has("ff0000"));
     assert.ok(verticalColors.has("0000ff"));
     const capColors = geometryTriangleColors(assemblies, (points) =>
-      points.every((point) => Math.abs(point[1] - 2.55) < 1e-6)
+      points.every((point) => Math.abs(point[1] - 2.55) < 1e-6),
     );
     assert.deepEqual([...capColors], ["00ff00"]);
     assemblies.forEach(({ geometry }) => geometry.dispose());
@@ -474,8 +540,12 @@ await withModules(async (load) => {
     const floor = structuredClone(neutralDemoManifest.floors[0]);
     floor.walls.find((wall) => wall.id === "north-wall").exteriorColor = "#b86f58";
     const assemblies = architecture.buildArchitecturalWallGeometries(floor, "#00ff00", "#ffff00");
-    const verticalColors = geometryTriangleColors(assemblies, (points) =>
-      Math.max(...points.map((point) => point[1])) - Math.min(...points.map((point) => point[1])) > 0.5
+    const verticalColors = geometryTriangleColors(
+      assemblies,
+      (points) =>
+        Math.max(...points.map((point) => point[1])) -
+          Math.min(...points.map((point) => point[1])) >
+        0.5,
     );
     assert.ok(verticalColors.has("b86f58"));
     assert.ok(verticalColors.has("00ff00"), "the inside face keeps the interior palette");
@@ -484,29 +554,47 @@ await withModules(async (load) => {
 
   test("standalone walls honor exterior and side finishes instead of palette defaults", async () => {
     const floor = structuredClone(neutralDemoManifest.floors[0]);
-    const wall = floor.walls.find(wall => wall.id === "north-wall");
+    const wall = floor.walls.find((wall) => wall.id === "north-wall");
     wall.exteriorColor = "#123456";
     wall.faceColors = { left: "#abcdef" };
-    const renderer = await create(createElement(scene.ArchitecturalWall, {
-      wall, floor, openings: floor.openings, interiorColor: "#00ff00", exteriorColor: "#ff0000",
-      fade: false, reducedMotion: true,
-    }));
+    const renderer = await create(
+      createElement(scene.ArchitecturalWall, {
+        wall,
+        floor,
+        openings: floor.openings,
+        interiorColor: "#00ff00",
+        exteriorColor: "#ff0000",
+        fade: false,
+        reducedMotion: true,
+      }),
+    );
     try {
-      const meshes = renderer.scene.findAll(node => node.instance?.isMesh).map(node => node.instance);
-      const colors = new Set(meshes.flatMap(mesh => {
-        const attribute = mesh.geometry.getAttribute("color");
-        return attribute ? Array.from({length: attribute.count}, (_, i) => new Color().fromBufferAttribute(attribute,i).getHexString())
-          : [mesh.material.color.getHexString()];
-      }));
+      const meshes = renderer.scene
+        .findAll((node) => node.instance?.isMesh)
+        .map((node) => node.instance);
+      const colors = new Set(
+        meshes.flatMap((mesh) => {
+          const attribute = mesh.geometry.getAttribute("color");
+          return attribute
+            ? Array.from({ length: attribute.count }, (_, i) =>
+                new Color().fromBufferAttribute(attribute, i).getHexString(),
+              )
+            : [mesh.material.color.getHexString()];
+        }),
+      );
       assert.ok(colors.has("123456"), "the exterior override reaches the rendered wall");
       assert.ok(colors.has("abcdef"), "the side override reaches the rendered wall");
       assert.ok(colors.has("00ff00"), "caps retain the interior palette");
       assert.equal(colors.has("ff0000"), false);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("exterior doorway thresholds bridge terrain and floor level", async () => {
-    const { OpeningThreshold } = await load("/packages/engine/src/architecture-scene/OpeningThreshold.tsx");
+    const { OpeningThreshold } = await load(
+      "/packages/engine/src/architecture-scene/OpeningThreshold.tsx",
+    );
     const floor = structuredClone(neutralDemoManifest.floors[0]);
     const opening = floor.openings[0];
     const wall = floor.walls.find((wall) => wall.id === opening.wallId);
@@ -516,10 +604,22 @@ await withModules(async (load) => {
     const bounds = mesh.geometry.boundingBox;
     assert.ok(Math.abs(mesh.position.y + bounds.min.y + 0.05) < 1e-6);
     assert.ok(Math.abs(mesh.position.y + bounds.max.y) < 1e-6);
-    assert.ok(Math.abs(bounds.max.x - bounds.min.x - opening.widthPlanUnits * floor.coordinates.metersPerPlanUnit) < 1e-6);
-    await renderer.update(createElement(OpeningThreshold, { floor, wall: { ...wall, classification: "interior" }, opening }));
+    assert.ok(
+      Math.abs(
+        bounds.max.x - bounds.min.x - opening.widthPlanUnits * floor.coordinates.metersPerPlanUnit,
+      ) < 1e-6,
+    );
+    await renderer.update(
+      createElement(OpeningThreshold, {
+        floor,
+        wall: { ...wall, classification: "interior" },
+        opening,
+      }),
+    );
     assert.equal(renderer.scene.children.length, 0);
-    await renderer.update(createElement(OpeningThreshold, { floor, wall, opening: floor.openings[1] }));
+    await renderer.update(
+      createElement(OpeningThreshold, { floor, wall, opening: floor.openings[1] }),
+    );
     assert.equal(renderer.scene.children.length, 0);
     await renderer.unmount();
   });
@@ -533,8 +633,13 @@ await withModules(async (load) => {
     });
     assert.ok(Math.abs(Math.min(...heights) + 0.05) < 1e-6);
     assert.ok(Math.abs(Math.max(...heights) - floor.defaultWallHeightMeters) < 1e-6);
-    assert.ok(heights.some((height) => Math.abs(height - floor.openings[0].openingHeightMeters) < 1e-6));
-    assert.equal(heights.some((height) => height === 0), false);
+    assert.ok(
+      heights.some((height) => Math.abs(height - floor.openings[0].openingHeightMeters) < 1e-6),
+    );
+    assert.equal(
+      heights.some((height) => height === 0),
+      false,
+    );
     assemblies.forEach(({ geometry }) => geometry.dispose());
   });
 
@@ -551,15 +656,26 @@ await withModules(async (load) => {
       }
       const assemblies = architecture.buildArchitecturalWallGeometries(floor);
       for (const [axis, coordinate, min, max, expected] of [
-        [2, -0.09, -0.09, 0, "b86f58"], [0, -0.09, -0.09, 0, "c8bca8"],
-        [2, 3.69, -0.09, 0, "b86f58"], [0, -0.09, 3.6, 3.69, "c8bca8"],
-        [2, -0.09, 4.8, 4.89, "b86f58"], [0, 4.89, -0.09, 0, "c8bca8"],
-        [2, 3.69, 4.8, 4.89, "b86f58"], [0, 4.89, 3.6, 3.69, "c8bca8"],
+        [2, -0.09, -0.09, 0, "b86f58"],
+        [0, -0.09, -0.09, 0, "c8bca8"],
+        [2, 3.69, -0.09, 0, "b86f58"],
+        [0, -0.09, 3.6, 3.69, "c8bca8"],
+        [2, -0.09, 4.8, 4.89, "b86f58"],
+        [0, 4.89, -0.09, 0, "c8bca8"],
+        [2, 3.69, 4.8, 4.89, "b86f58"],
+        [0, 4.89, 3.6, 3.69, "c8bca8"],
       ]) {
-        const colors = geometryTriangleColors(assemblies, (points) =>
-          points.every((point) => Math.abs(point[axis] - coordinate) < 1e-5 &&
-            point[axis === 0 ? 2 : 0] >= min - 1e-5 && point[axis === 0 ? 2 : 0] <= max + 1e-5) &&
-          Math.max(...points.map((point) => point[1])) > Math.min(...points.map((point) => point[1]))
+        const colors = geometryTriangleColors(
+          assemblies,
+          (points) =>
+            points.every(
+              (point) =>
+                Math.abs(point[axis] - coordinate) < 1e-5 &&
+                point[axis === 0 ? 2 : 0] >= min - 1e-5 &&
+                point[axis === 0 ? 2 : 0] <= max + 1e-5,
+            ) &&
+            Math.max(...points.map((point) => point[1])) >
+              Math.min(...points.map((point) => point[1])),
         );
         assert.deepEqual([...colors], [expected]);
       }
@@ -573,23 +689,44 @@ await withModules(async (load) => {
       const wall = floor.walls.find((wall) => wall.id === "south-wall");
       wall.to = [2.4, 3.6];
       wall.exteriorColor = "#b86f58";
-      const neighbor = { ...wall, id: "south-second", from: [2.4, 3.6], to: [0, 3.6], exteriorColor: "#ff0000" };
+      const neighbor = {
+        ...wall,
+        id: "south-second",
+        from: [2.4, 3.6],
+        to: [0, 3.6],
+        exteriorColor: "#ff0000",
+      };
       floor.walls.push(neighbor);
-      floor.wallJunctions.find((junction) => junction.id === "south-west-junction").wallIds = [neighbor.id, "west-wall"];
-      floor.wallJunctions.push({ id: "south-middle", at: [2.4, 3.6], wallIds: [wall.id, neighbor.id] });
+      floor.wallJunctions.find((junction) => junction.id === "south-west-junction").wallIds = [
+        neighbor.id,
+        "west-wall",
+      ];
+      floor.wallJunctions.push({
+        id: "south-middle",
+        at: [2.4, 3.6],
+        wallIds: [wall.id, neighbor.id],
+      });
       if (reverse) {
         [wall.from, wall.to] = [wall.to, wall.from];
         const door = floor.openings[0];
-        door.offsetFromWallStartPlanUnits = 2.4 - door.offsetFromWallStartPlanUnits - door.widthPlanUnits;
+        door.offsetFromWallStartPlanUnits =
+          2.4 - door.offsetFromWallStartPlanUnits - door.widthPlanUnits;
         floor.walls.reverse();
       }
       const assemblies = architecture.buildArchitecturalWallGeometries(floor);
-      for (const [left, right, expected] of [[2.4, 4.8, "b86f58"], [0, 2.4, "ff0000"]]) {
+      for (const [left, right, expected] of [
+        [2.4, 4.8, "b86f58"],
+        [0, 2.4, "ff0000"],
+      ]) {
         const colors = geometryTriangleColors(assemblies, (points) => {
           const centerX = points.reduce((sum, point) => sum + point[0], 0) / 3;
-          return centerX > left && centerX < right &&
+          return (
+            centerX > left &&
+            centerX < right &&
             points.every((point) => Math.abs(point[2] - 3.69) < 1e-5 && point[1] >= 2.12 - 1e-5) &&
-            Math.max(...points.map((point) => point[1])) > Math.min(...points.map((point) => point[1]));
+            Math.max(...points.map((point) => point[1])) >
+              Math.min(...points.map((point) => point[1]))
+          );
         });
         assert.deepEqual([...colors], [expected]);
       }
@@ -600,21 +737,24 @@ await withModules(async (load) => {
   test("renders a solid room floor finish beneath the integrated interaction overlay", async () => {
     const manifest = structuredClone(neutralDemoManifest);
     manifest.floors[0].rooms[0].floorFinish = { kind: "solid", color: "#c8bca8" };
-    const renderer = await create(createElement(scene.ArchitectureScene, {
-      manifest,
-      selectedRoomId: "demo-room",
-      walkMode: false,
-      wallFadeEnabled: false,
-      reducedMotion: true,
-      resolvedBindings: { rooms: {}, issues: [] },
-      architectureModels: openingModels.stableArchitectureModelRegistry,
-      deviceModels: {},
-      openingPositions: {},
-      onSelectRoom: () => undefined,
-      onInteract: () => undefined,
-    }));
+    const renderer = await create(
+      createElement(scene.ArchitectureScene, {
+        manifest,
+        selectedRoomId: "demo-room",
+        walkMode: false,
+        wallFadeEnabled: false,
+        reducedMotion: true,
+        resolvedBindings: { rooms: {}, issues: [] },
+        architectureModels: openingModels.stableArchitectureModelRegistry,
+        deviceModels: {},
+        openingPositions: {},
+        onSelectRoom: () => undefined,
+        onInteract: () => undefined,
+      }),
+    );
     const floorMaterial = renderer.scene.findByProps({ name: "room-demo-room" }).instance.material;
-    const selectionMaterial = renderer.scene.findByProps({ name: "room-demo-room-interaction" }).instance.material;
+    const selectionMaterial = renderer.scene.findByProps({ name: "room-demo-room-interaction" })
+      .instance.material;
     assert.equal(floorMaterial.color.getHexString(), "c8bca8");
     assert.equal(selectionMaterial.color.getHexString(), "f2c7a7");
     assert.equal(selectionMaterial.opacity, 0.36);
@@ -674,19 +814,21 @@ await withModules(async (load) => {
         leafCount: 1,
       },
     );
-    const renderer = await create(createElement(scene.ArchitectureScene, {
-      manifest,
-      selectedRoomId: null,
-      walkMode: false,
-      wallFadeEnabled: false,
-      reducedMotion: true,
-      resolvedBindings: { rooms: {}, openings: {}, issues: [] },
-      architectureModels: openingModels.stableArchitectureModelRegistry,
-      deviceModels: {},
-      openingPositions: {},
-      onSelectRoom: () => undefined,
-      onInteract: () => undefined,
-    }));
+    const renderer = await create(
+      createElement(scene.ArchitectureScene, {
+        manifest,
+        selectedRoomId: null,
+        walkMode: false,
+        wallFadeEnabled: false,
+        reducedMotion: true,
+        resolvedBindings: { rooms: {}, openings: {}, issues: [] },
+        architectureModels: openingModels.stableArchitectureModelRegistry,
+        deviceModels: {},
+        openingPositions: {},
+        onSelectRoom: () => undefined,
+        onInteract: () => undefined,
+      }),
+    );
 
     assert.ok(renderer.scene.findByProps({ name: "opening-model-french" }));
     assert.ok(renderer.scene.findByProps({ name: "opening-model-full-glass" }));
@@ -702,9 +844,7 @@ await withModules(async (load) => {
     const plankOpening = manifest.floors[0].openings.find(
       (opening) => opening.id === "demo-plank-slider",
     );
-    const plankWall = manifest.floors[0].walls.find(
-      (wall) => wall.id === plankOpening.wallId,
-    );
+    const plankWall = manifest.floors[0].walls.find((wall) => wall.id === plankOpening.wallId);
     const plankLeafMount = renderer.scene.findByProps({
       name: "opening-plank-sliding-leaf-mount",
     });
@@ -719,10 +859,13 @@ await withModules(async (load) => {
   });
 
   test("builds an arched passage whose curve reaches the configured crown", () => {
-    const shape = openingModels.buildArchedPassageSpandrelShape({
-      openingHeightMeters: 2.19,
-      archRiseMeters: 0.12,
-    }, 0.82);
+    const shape = openingModels.buildArchedPassageSpandrelShape(
+      {
+        openingHeightMeters: 2.19,
+        archRiseMeters: 0.12,
+      },
+      0.82,
+    );
     assert.equal(shape.curves[0].getPoint(0).y, 2.07);
     assert.equal(shape.curves[0].getPoint(1).y, 2.19);
     assert.equal(shape.curves[1].getPoint(1).y, 2.07);
@@ -736,16 +879,24 @@ await withModules(async (load) => {
       x * Math.sin(angle) + y * Math.cos(angle),
     ];
     floor.footprint = floor.footprint.map(rotate);
-    floor.rooms.forEach((room) => { room.polygon = room.polygon.map(rotate); });
+    floor.rooms.forEach((room) => {
+      room.polygon = room.polygon.map(rotate);
+    });
     floor.walls.forEach((wall) => {
       wall.from = rotate(wall.from);
       wall.to = rotate(wall.to);
     });
-    floor.wallJunctions.forEach((junction) => { junction.at = rotate(junction.at); });
+    floor.wallJunctions.forEach((junction) => {
+      junction.at = rotate(junction.at);
+    });
     floor.walls.find((wall) => wall.id === "north-wall").faceColors = { left: "#ff0000" };
     const assemblies = architecture.buildArchitecturalWallGeometries(floor, "#00ff00", "#ffff00");
-    const verticalColors = geometryTriangleColors(assemblies, (points) =>
-      Math.max(...points.map((point) => point[1])) - Math.min(...points.map((point) => point[1])) > 0.5
+    const verticalColors = geometryTriangleColors(
+      assemblies,
+      (points) =>
+        Math.max(...points.map((point) => point[1])) -
+          Math.min(...points.map((point) => point[1])) >
+        0.5,
     );
     assert.ok(verticalColors.has("ff0000"));
     assert.ok(verticalColors.has("ffff00"));
@@ -753,7 +904,11 @@ await withModules(async (load) => {
   });
 
   test("miters unequal angled exterior walls without a shaded corner sliver", () => {
-    const assemblies = architecture.buildArchitecturalWallGeometries(cabaneFloor, "#e4e0d8", "#c97370");
+    const assemblies = architecture.buildArchitecturalWallGeometries(
+      cabaneFloor,
+      "#e4e0d8",
+      "#c97370",
+    );
     const directions = new Set();
     for (const { geometry } of assemblies) {
       const positions = geometry.getAttribute("position");
@@ -763,16 +918,35 @@ await withModules(async (load) => {
         const vertices = [0, 1, 2].map((offset) => indices.getX(index + offset));
         if (colors.getX(vertices[0]) <= colors.getY(vertices[0]) * 2) continue;
         const points = vertices.map((vertex) => [
-          positions.getX(vertex), positions.getY(vertex), positions.getZ(vertex),
+          positions.getX(vertex),
+          positions.getY(vertex),
+          positions.getZ(vertex),
         ]);
-        if (Math.max(...points.map((point) => point[1])) - Math.min(...points.map((point) => point[1])) < 1) continue;
-        const horizontal = [...new Map(points.map((point) => [`${point[0].toFixed(5)}:${point[2].toFixed(5)}`, point])).values()];
-        if (horizontal.length !== 2 || !horizontal.some((point) => Math.hypot(point[0], point[2]) < 0.25)) continue;
+        if (
+          Math.max(...points.map((point) => point[1])) -
+            Math.min(...points.map((point) => point[1])) <
+          1
+        )
+          continue;
+        const horizontal = [
+          ...new Map(
+            points.map((point) => [`${point[0].toFixed(5)}:${point[2].toFixed(5)}`, point]),
+          ).values(),
+        ];
+        if (
+          horizontal.length !== 2 ||
+          !horizontal.some((point) => Math.hypot(point[0], point[2]) < 0.25)
+        )
+          continue;
         let dx = horizontal[1][0] - horizontal[0][0];
         let dz = horizontal[1][2] - horizontal[0][2];
         const length = Math.hypot(dx, dz);
-        dx /= length; dz /= length;
-        if (dx < -1e-6 || (Math.abs(dx) <= 1e-6 && dz < 0)) { dx *= -1; dz *= -1; }
+        dx /= length;
+        dz /= length;
+        if (dx < -1e-6 || (Math.abs(dx) <= 1e-6 && dz < 0)) {
+          dx *= -1;
+          dz *= -1;
+        }
         directions.add(`${dx.toFixed(3)}:${dz.toFixed(3)}`);
       }
     }
@@ -782,24 +956,24 @@ await withModules(async (load) => {
 
   test("reduces expensive buffers for touch walk mode", () => {
     assert.deepEqual(performance.sceneRenderingQuality(false, false, 2), {
-      dpr: [1.25, 2], shadowMapSize: 2048, antialias: true,
+      dpr: [1.25, 2],
+      shadowMapSize: 2048,
+      antialias: true,
     });
     assert.deepEqual(performance.sceneRenderingQuality(true, true, 0), {
-      dpr: [0.65, 0.85], shadowMapSize: 1024, antialias: true,
+      dpr: [0.65, 0.85],
+      shadowMapSize: 1024,
+      antialias: true,
     });
   });
 
   test("keeps static foreground views at an antialiased DPR", () => {
     assert.deepEqual(
-      performance.foregroundRenderingDpr(
-        performance.sceneRenderingQuality(true, false, 2),
-      ),
+      performance.foregroundRenderingDpr(performance.sceneRenderingQuality(true, false, 2)),
       [1, 1.25],
     );
     assert.deepEqual(
-      performance.foregroundRenderingDpr(
-        performance.sceneRenderingQuality(false, false, 2),
-      ),
+      performance.foregroundRenderingDpr(performance.sceneRenderingQuality(false, false, 2)),
       [1.25, 2],
     );
   });
@@ -817,9 +991,20 @@ await withModules(async (load) => {
   test("interpolates a sloped ceiling between its declared edges", () => {
     const plane = {
       id: "slope-a",
-      boundary: [[0, 0], [4, 0], [4, 3], [0, 3]],
-      lowEdge: [[0, 0], [0, 3]],
-      highEdge: [[4, 0], [4, 3]],
+      boundary: [
+        [0, 0],
+        [4, 0],
+        [4, 3],
+        [0, 3],
+      ],
+      lowEdge: [
+        [0, 0],
+        [0, 3],
+      ],
+      highEdge: [
+        [4, 0],
+        [4, 3],
+      ],
       lowHeightMeters: 2.2,
       highHeightMeters: 3.4,
     };

@@ -4,34 +4,52 @@ import { withModules } from "./test-server.mjs";
 import { connectedManifestFixture } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
-  const { applyDemoServiceToStates } = await load("/packages/engine/src/onboarding/demo/demo-device-state.ts");
+  const { applyDemoServiceToStates } = await load(
+    "/packages/engine/src/onboarding/demo/demo-device-state.ts",
+  );
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
-  const {
-    applyDemoServiceCall,
-    deriveDemoSessionDefinition,
-  } = await load("/packages/engine/src/DemoHomeAssistantSession.tsx");
+  const { applyDemoServiceCall, deriveDemoSessionDefinition } = await load(
+    "/packages/engine/src/DemoHomeAssistantSession.tsx",
+  );
 
   const { homeManifest } = await load("/tests/fixtures/bundled-home.ts");
   const { collectBindingSlots } = await load("/packages/engine/src/binding-slot-descriptors.ts");
-  const { demoLightVisualManifest } = await load("/packages/engine/src/onboarding/demo/demo-light-visuals.ts");
+  const { demoLightVisualManifest } = await load(
+    "/packages/engine/src/onboarding/demo/demo-light-visuals.ts",
+  );
   const { sceneLightState } = await load("/packages/engine/src/scene-light-state.ts");
   test("demo light controls determine fixture visuals even for night-only home lights", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
-    const fixture = homeManifest.sceneItems.find((item) => item.kind === "device" && item.lightState === "night-only");
+    const fixture = homeManifest.sceneItems.find(
+      (item) => item.kind === "device" && item.lightState === "night-only",
+    );
     assert.ok(fixture);
-    const entityId = definition.profile.entityIdsBySlotId[fixture.entitySlots.find((slot) => slot.deviceRole === "primary").id];
-    const demoFixture = demoLightVisualManifest(homeManifest).sceneItems.find((item) => item.id === fixture.id);
+    const entityId =
+      definition.profile.entityIdsBySlotId[
+        fixture.entitySlots.find((slot) => slot.deviceRole === "primary").id
+      ];
+    const demoFixture = demoLightVisualManifest(homeManifest).sceneItems.find(
+      (item) => item.id === fixture.id,
+    );
     assert.equal(fixture.lightState, "night-only");
     assert.equal(demoFixture.lightState, "connected");
     const off = definition.runtime.entityStates[entityId];
-    const on = applyDemoServiceCall(off, { domain: "light", service: "turn_on", target: { entity_id: entityId } });
+    const on = applyDemoServiceCall(off, {
+      domain: "light",
+      service: "turn_on",
+      target: { entity_id: entityId },
+    });
     assert.equal(sceneLightState(demoFixture.lightState, off, true).state, "off");
     assert.equal(sceneLightState(demoFixture.lightState, on, false).state, "on");
   });
   test("bundled demo supplies available device/window states and leaves doors available for walking", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
-    const doorIds = new Set(homeManifest.floors.flatMap(floor => floor.openings)
-      .filter(opening => opening.kind === "door").map(opening => opening.id));
+    const doorIds = new Set(
+      homeManifest.floors
+        .flatMap((floor) => floor.openings)
+        .filter((opening) => opening.kind === "door")
+        .map((opening) => opening.id),
+    );
     for (const slot of collectBindingSlots(homeManifest)) {
       if (slot.spec.compatibleDomains.includes("camera")) continue;
       const entityId = definition.profile.entityIdsBySlotId[slot.slotId];
@@ -47,8 +65,23 @@ await withModules(async (load) => {
   test("demo security controls update in memory and reject unsupported actions", () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
     for (const [slot, domain, actions] of [
-      ["foyer-smart-lock-entity", "lock", [["unlock", "unlocked"], ["lock", "locked"]]],
-      ["foyer-alarm-keypad-entity", "alarm_control_panel", [["alarm_arm_home", "armed_home"], ["alarm_arm_away", "armed_away"], ["alarm_disarm", "disarmed"]]],
+      [
+        "foyer-smart-lock-entity",
+        "lock",
+        [
+          ["unlock", "unlocked"],
+          ["lock", "locked"],
+        ],
+      ],
+      [
+        "foyer-alarm-keypad-entity",
+        "alarm_control_panel",
+        [
+          ["alarm_arm_home", "armed_home"],
+          ["alarm_arm_away", "armed_away"],
+          ["alarm_disarm", "disarmed"],
+        ],
+      ],
     ]) {
       const entityId = definition.profile.entityIdsBySlotId[slot];
       let state = definition.runtime.entityStates[entityId];
@@ -56,9 +89,15 @@ await withModules(async (load) => {
         state = applyDemoServiceCall(state, { domain, service, target: { entity_id: entityId } });
         assert.equal(state.state, expected);
       }
-      assert.throws(() => applyDemoServiceCall(state, {
-        domain, service: "unsupported", target: { entity_id: entityId },
-      }), /demo/i);
+      assert.throws(
+        () =>
+          applyDemoServiceCall(state, {
+            domain,
+            service: "unsupported",
+            target: { entity_id: entityId },
+          }),
+        /demo/i,
+      );
     }
   });
 
@@ -72,10 +111,16 @@ await withModules(async (load) => {
     assert.ok(definition.profile.entityIdsBySlotId["demo-cover-slot"]);
     assert.ok(definition.profile.entityIdsBySlotId["demo-temperature-slot"]);
     assert.ok(definition.profile.entityIdsBySlotId["demo-window-contact-slot"]);
-    assert.match(definition.profile.entityIdsBySlotId["demo-speaker-slot"], /^media_player\.cabane_demo_/);
+    assert.match(
+      definition.profile.entityIdsBySlotId["demo-speaker-slot"],
+      /^media_player\.cabane_demo_/,
+    );
     assert.equal(definition.runtime.origin, null);
     assert.ok(definition.runtime.entityRegistry.length > 5);
-    assert.equal(Object.keys(definition.runtime.entityStates).length, definition.runtime.entityRegistry.length);
+    assert.equal(
+      Object.keys(definition.runtime.entityStates).length,
+      definition.runtime.entityRegistry.length,
+    );
   });
 
   test("falls back to one switch and renders safely without a compatible slot", () => {
@@ -106,21 +151,33 @@ await withModules(async (load) => {
     });
     assert.equal(initial.state, "off");
     assert.equal(on.state, "on");
-    assert.throws(() => applyDemoServiceCall(on, {
-      domain: "light",
-      service: "toggle",
-      target: { entity_id: entityId },
-    }), /demo/i);
-    assert.throws(() => applyDemoServiceCall(on, {
-      domain: "light",
-      service: "turn_off",
-      target: { entity_id: "light.somewhere_else" },
-    }), /demo/i);
-    assert.throws(() => applyDemoServiceCall(on, {
-      domain: "switch",
-      service: "turn_off",
-      target: { entity_id: entityId },
-    }), /demo/i);
+    assert.throws(
+      () =>
+        applyDemoServiceCall(on, {
+          domain: "light",
+          service: "toggle",
+          target: { entity_id: entityId },
+        }),
+      /demo/i,
+    );
+    assert.throws(
+      () =>
+        applyDemoServiceCall(on, {
+          domain: "light",
+          service: "turn_off",
+          target: { entity_id: "light.somewhere_else" },
+        }),
+      /demo/i,
+    );
+    assert.throws(
+      () =>
+        applyDemoServiceCall(on, {
+          domain: "switch",
+          service: "turn_off",
+          target: { entity_id: entityId },
+        }),
+      /demo/i,
+    );
   });
 
   test("simulated media player starts playing and accepts playback and volume controls", () => {
@@ -130,20 +187,36 @@ await withModules(async (load) => {
     assert.equal(playing.state, "playing");
     assert.equal(playing.attributes.volume_level, 0.45);
     const paused = applyDemoServiceCall(playing, {
-      domain: "media_player", service: "media_pause", target: { entity_id: entityId },
+      domain: "media_player",
+      service: "media_pause",
+      target: { entity_id: entityId },
     });
     assert.equal(paused.state, "paused");
     const quieter = applyDemoServiceCall(paused, {
-      domain: "media_player", service: "volume_set", data: { volume_level: 0.2 }, target: { entity_id: entityId },
+      domain: "media_player",
+      service: "volume_set",
+      data: { volume_level: 0.2 },
+      target: { entity_id: entityId },
     });
     assert.equal(quieter.attributes.volume_level, 0.2);
     assert.equal(quieter.state, "paused");
-    assert.equal(applyDemoServiceCall(quieter, {
-      domain: "media_player", service: "media_play", target: { entity_id: entityId },
-    }).state, "playing");
-    assert.equal(applyDemoServiceCall(playing, {
-      domain: "media_player", service: "volume_set", data: { volume_level: 2 }, target: { entity_id: entityId },
-    }).attributes.volume_level, 1);
+    assert.equal(
+      applyDemoServiceCall(quieter, {
+        domain: "media_player",
+        service: "media_play",
+        target: { entity_id: entityId },
+      }).state,
+      "playing",
+    );
+    assert.equal(
+      applyDemoServiceCall(playing, {
+        domain: "media_player",
+        service: "volume_set",
+        data: { volume_level: 2 },
+        target: { entity_id: entityId },
+      }).attributes.volume_level,
+      1,
+    );
   });
 
   test("stable unique IDs survive reordered rooms and punctuation in slot IDs", () => {
@@ -169,10 +242,16 @@ await withModules(async (load) => {
     const definition = deriveDemoSessionDefinition(connectedManifestFixture(neutralDemoManifest));
     const bindings = definition.profile.entityIdsBySlotId;
     const initial = definition.runtime.entityStates;
-    const apply = (states, slot, domain, service, data) => applyDemoServiceToStates(states, {
-      domain, service, data, target: { entity_id: bindings[slot] },
+    const apply = (states, slot, domain, service, data) =>
+      applyDemoServiceToStates(states, {
+        domain,
+        service,
+        data,
+        target: { entity_id: bindings[slot] },
+      });
+    const light = apply(initial, "demo-main-light-slot", "light", "turn_on", {
+      brightness_pct: 50,
     });
-    const light = apply(initial, "demo-main-light-slot", "light", "turn_on", { brightness_pct: 50 });
     assert.equal(light[bindings["demo-main-light-slot"]].attributes.brightness, 128);
     assert.equal(initial[bindings["demo-main-light-slot"]].state, "off");
     const dark = apply(light, "demo-main-light-slot", "light", "turn_on", { brightness_pct: 0 });
@@ -183,11 +262,18 @@ await withModules(async (load) => {
     assert.equal(cover[bindings["demo-cover-slot"]].attributes.current_position, 35);
     const closed = apply(cover, "demo-cover-slot", "cover", "close_cover");
     assert.equal(closed[bindings["demo-cover-slot"]].state, "closed");
-    const climate = apply(closed, "demo-climate-slot", "climate", "set_temperature", { temperature: 23.5 });
+    const climate = apply(closed, "demo-climate-slot", "climate", "set_temperature", {
+      temperature: 23.5,
+    });
     assert.equal(climate[bindings["demo-climate-slot"]].attributes.temperature, 23.5);
-    const cool = apply(climate, "demo-climate-slot", "climate", "set_hvac_mode", { hvac_mode: "cool" });
+    const cool = apply(climate, "demo-climate-slot", "climate", "set_hvac_mode", {
+      hvac_mode: "cool",
+    });
     assert.equal(cool[bindings["demo-climate-slot"]].state, "cool");
-    assert.equal(cool[bindings["demo-temperature-slot"]], initial[bindings["demo-temperature-slot"]]);
+    assert.equal(
+      cool[bindings["demo-temperature-slot"]],
+      initial[bindings["demo-temperature-slot"]],
+    );
   });
 
   test("rejects invalid calls atomically and never guesses unsupported values", () => {
@@ -197,12 +283,32 @@ await withModules(async (load) => {
     const before = JSON.stringify(initial);
     for (const call of [
       { domain: "light", service: "turn_on", target: { entity_id: [id, "light.unknown"] } },
-      { domain: "light", service: "turn_on", data: { brightness_pct: NaN }, target: { entity_id: id } },
-      { domain: "light", service: "turn_on", data: { effect: "unsupported" }, target: { entity_id: id } },
+      {
+        domain: "light",
+        service: "turn_on",
+        data: { brightness_pct: NaN },
+        target: { entity_id: id },
+      },
+      {
+        domain: "light",
+        service: "turn_on",
+        data: { effect: "unsupported" },
+        target: { entity_id: id },
+      },
       { domain: "light", service: "turn_on", target: { entity_id: [] } },
-      { domain: "sensor", service: "turn_on", target: { entity_id: definition.profile.entityIdsBySlotId["demo-temperature-slot"] } },
-      { domain: "climate", service: "set_hvac_mode", data: { hvac_mode: "invalid" }, target: { entity_id: definition.profile.entityIdsBySlotId["demo-climate-slot"] } },
-    ]) assert.throws(() => applyDemoServiceToStates(initial, call), /demo/i);
+      {
+        domain: "sensor",
+        service: "turn_on",
+        target: { entity_id: definition.profile.entityIdsBySlotId["demo-temperature-slot"] },
+      },
+      {
+        domain: "climate",
+        service: "set_hvac_mode",
+        data: { hvac_mode: "invalid" },
+        target: { entity_id: definition.profile.entityIdsBySlotId["demo-climate-slot"] },
+      },
+    ])
+      assert.throws(() => applyDemoServiceToStates(initial, call), /demo/i);
     assert.equal(JSON.stringify(initial), before);
   });
 });

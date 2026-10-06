@@ -3,26 +3,17 @@ import test from "node:test";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
-  const {
-    ownerSceneDeviceItems,
-    homeExtensions,
-    homeManifest,
-    ownerHomeProject,
-  } = await load("/tests/fixtures/bundled-home.ts");
-  const { stableDeviceRegistry } = await load(
-    "/packages/catalog/src/device/index.ts",
+  const { ownerSceneDeviceItems, homeExtensions, homeManifest, ownerHomeProject } = await load(
+    "/tests/fixtures/bundled-home.ts",
   );
-  const { stableFurnishingRegistry } = await load(
-    "/packages/catalog/src/furnishing/index.ts",
-  );
-  const {
-    composeHomeManifest,
-    parseHomeProjectSchema,
-    validateHomeProject,
-    validateHomeManifest,
-  } = await load("/packages/engine/src/index.ts");
+  const { stableDeviceRegistry } = await load("/packages/catalog/src/device/index.ts");
+  const { stableFurnishingRegistry } = await load("/packages/catalog/src/furnishing/index.ts");
+  const { composeHomeManifest, parseHomeProjectSchema, validateHomeProject, validateHomeManifest } =
+    await load("/packages/engine/src/index.ts");
 
-  const homeFurnishingItems = ownerHomeProject.sceneItems.filter((item) => item.kind === "furnishing");
+  const homeFurnishingItems = ownerHomeProject.sceneItems.filter(
+    (item) => item.kind === "furnishing",
+  );
 
   const registries = {
     furnishingModels: Object.assign(
@@ -56,13 +47,17 @@ await withModules(async (load) => {
 
   test("separates layout, profiles, and declarative scene items", () => {
     assert.equal(ownerHomeProject.floors[0].rooms.length, 5);
-    assert.ok(ownerHomeProject.floors[0].rooms.every((room) =>
-      room.dashboardSlots.length === 0 && room.devices.length === 0 &&
-      !("furnishings" in room)
-    ));
-    assert.ok(ownerHomeProject.floors[0].openings.every((opening) =>
-      !("contactSlot" in opening) && !("visualModel" in opening)
-    ));
+    assert.ok(
+      ownerHomeProject.floors[0].rooms.every(
+        (room) =>
+          room.dashboardSlots.length === 0 && room.devices.length === 0 && !("furnishings" in room),
+      ),
+    );
+    assert.ok(
+      ownerHomeProject.floors[0].openings.every(
+        (opening) => !("contactSlot" in opening) && !("visualModel" in opening),
+      ),
+    );
     assert.equal(
       ownerHomeProject.sceneItems.length,
       homeFurnishingItems.length + ownerSceneDeviceItems.length,
@@ -79,7 +74,6 @@ await withModules(async (load) => {
       ownerHomeProject.roomProfiles["open-plan-living"].dashboardSlots,
       homeManifest.floors[0].rooms.find((room) => room.id === "open-plan-living").dashboardSlots,
     );
-
   });
 
   test("passes full project validation with merged stable and home registries", () => {
@@ -91,10 +85,11 @@ await withModules(async (load) => {
     const manifest = composeHomeManifest(ownerHomeProject, homeExtensions);
     assert.equal(manifest.floors.length, 2);
     assert.equal(manifest.sceneItems.length, ownerHomeProject.sceneItems.length);
-    const roomDeviceIds = manifest.floors.flatMap((floor) => floor.rooms.flatMap((room) => room.devices.map((device) => device.id)));
+    const roomDeviceIds = manifest.floors.flatMap((floor) =>
+      floor.rooms.flatMap((room) => room.devices.map((device) => device.id)),
+    );
     assert.equal(new Set(roomDeviceIds).size, roomDeviceIds.length);
     assert.ok(roomDeviceIds.every((id) => ownerSceneDeviceItems.some((item) => item.id === id)));
     assert.ok(roomDeviceIds.length > 0);
-
   });
 });

@@ -10,7 +10,7 @@ const sortJson = (value: unknown): unknown => {
   if (value === null || typeof value !== "object") return value;
   return Object.fromEntries(
     Object.entries(value)
-      .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       .map(([key, entry]) => [key, sortJson(entry)]),
   );
 };
@@ -30,12 +30,14 @@ export const parseHomeProject = (raw: string): HomeProjectParseResult => {
     return {
       valid: false,
       raw,
-      issues: [{
-        code: "project.json",
-        path: "$",
-        message: "The project is not valid JSON.",
-        severity: "error",
-      }],
+      issues: [
+        {
+          code: "project.json",
+          path: "$",
+          message: "The project is not valid JSON.",
+          severity: "error",
+        },
+      ],
     };
   }
 

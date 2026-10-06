@@ -1,11 +1,6 @@
-import {
-  type SupportedServiceCall
-} from "../home-assistant-controls";
+import { type SupportedServiceCall } from "../home-assistant-controls";
 
-import {
-  OptionControl,
-  useOptimisticCommand
-} from "./control-primitives";
+import { OptionControl, useOptimisticCommand } from "./control-primitives";
 
 export function CommandOption({
   label,
@@ -39,7 +34,11 @@ export function CommandOption({
         disabled={disabled || command.pending}
         onChange={(nextValue) => void command.run(callForValue(nextValue), nextValue)}
       />
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -74,7 +73,11 @@ export function CommandAction({
       >
         {label.split(" ", 1)[0]}
       </button>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }

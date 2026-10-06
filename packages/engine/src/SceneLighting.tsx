@@ -7,11 +7,15 @@ import { deriveSolarLighting, type SolarLightingMode, type SunEntityState } from
 
 const TRANSITION_RATE = 4.5;
 const EPSILON = 0.002;
-const colorDifference = (left: Color, right: Color) => Math.max(
-  Math.abs(left.r - right.r), Math.abs(left.g - right.g), Math.abs(left.b - right.b),
-);
+const colorDifference = (left: Color, right: Color) =>
+  Math.max(Math.abs(left.r - right.r), Math.abs(left.g - right.g), Math.abs(left.b - right.b));
 
-export function SolarLighting({ mode, shadowMapSize, sunState, walkMode = false }: {
+export function SolarLighting({
+  mode,
+  shadowMapSize,
+  sunState,
+  walkMode = false,
+}: {
   mode: SolarLightingMode;
   shadowMapSize: 1024 | 2048;
   sunState?: SunEntityState;
@@ -23,13 +27,25 @@ export function SolarLighting({ mode, shadowMapSize, sunState, walkMode = false 
   const hemisphereRef = useRef<HemisphereLight>(null);
   const targetPosition = useMemo(() => new Vector3(...target.sunPosition), [target.sunPosition]);
   const targetSun = useMemo(() => new Color(target.sunColor), [target.sunColor]);
-  const targetBackground = useMemo(() => new Color(target.backgroundColor), [target.backgroundColor]);
-  const targetSky = useMemo(() => new Color(target.hemisphereSkyColor), [target.hemisphereSkyColor]);
-  const targetGround = useMemo(() => new Color(target.hemisphereGroundColor), [target.hemisphereGroundColor]);
+  const targetBackground = useMemo(
+    () => new Color(target.backgroundColor),
+    [target.backgroundColor],
+  );
+  const targetSky = useMemo(
+    () => new Color(target.hemisphereSkyColor),
+    [target.hemisphereSkyColor],
+  );
+  const targetGround = useMemo(
+    () => new Color(target.hemisphereGroundColor),
+    [target.hemisphereGroundColor],
+  );
   const transitioning = useRef(false);
   const { invalidate, scene } = useThree();
 
-  useEffect(() => { transitioning.current = true; invalidate(); }, [invalidate, target]);
+  useEffect(() => {
+    transitioning.current = true;
+    invalidate();
+  }, [invalidate, target]);
   useFrame((_, delta) => {
     const sun = sunRef.current;
     const hemisphere = hemisphereRef.current;
@@ -46,14 +62,21 @@ export function SolarLighting({ mode, shadowMapSize, sunState, walkMode = false 
     background.lerp(targetBackground, progress);
     const remaining = Math.max(
       sun.position.distanceTo(targetPosition) / 18,
-      colorDifference(sun.color, targetSun), Math.abs(sun.intensity - target.sunIntensity),
-      colorDifference(hemisphere.color, targetSky), colorDifference(hemisphere.groundColor, targetGround),
-      Math.abs(hemisphere.intensity - target.hemisphereIntensity), colorDifference(background, targetBackground),
+      colorDifference(sun.color, targetSun),
+      Math.abs(sun.intensity - target.sunIntensity),
+      colorDifference(hemisphere.color, targetSky),
+      colorDifference(hemisphere.groundColor, targetGround),
+      Math.abs(hemisphere.intensity - target.hemisphereIntensity),
+      colorDifference(background, targetBackground),
     );
     if (remaining <= EPSILON) {
-      sun.position.copy(targetPosition); sun.color.copy(targetSun); sun.intensity = target.sunIntensity;
-      hemisphere.color.copy(targetSky); hemisphere.groundColor.copy(targetGround);
-      hemisphere.intensity = target.hemisphereIntensity; background.copy(targetBackground);
+      sun.position.copy(targetPosition);
+      sun.color.copy(targetSun);
+      sun.intensity = target.sunIntensity;
+      hemisphere.color.copy(targetSky);
+      hemisphere.groundColor.copy(targetGround);
+      hemisphere.intensity = target.hemisphereIntensity;
+      background.copy(targetBackground);
       transitioning.current = false;
     } else invalidate();
   }, -1);
@@ -61,11 +84,14 @@ export function SolarLighting({ mode, shadowMapSize, sunState, walkMode = false 
     <>
       {walkMode && <WalkSky sunRef={sunRef} hemisphereRef={hemisphereRef} />}
       <color attach="background" args={[initial.current.backgroundColor]} />
-      <hemisphereLight ref={hemisphereRef} args={[
-        initial.current.hemisphereSkyColor,
-        initial.current.hemisphereGroundColor,
-        initial.current.hemisphereIntensity,
-      ]} />
+      <hemisphereLight
+        ref={hemisphereRef}
+        args={[
+          initial.current.hemisphereSkyColor,
+          initial.current.hemisphereGroundColor,
+          initial.current.hemisphereIntensity,
+        ]}
+      />
       <directionalLight
         key={shadowMapSize}
         ref={sunRef}

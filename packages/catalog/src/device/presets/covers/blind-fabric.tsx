@@ -7,7 +7,10 @@ const TRAVEL = 1.44;
 const TOP = 1.48;
 
 /** The cloth retracts into the fixed headbox; the bottom rail keeps its thickness. */
-export function BlindFabric({ position, reducedMotion }: {
+export function BlindFabric({
+  position,
+  reducedMotion,
+}: {
   position: number | null;
   reducedMotion: boolean;
 }) {
@@ -32,9 +35,10 @@ export function BlindFabric({ position, reducedMotion }: {
   useFrame((_, delta) => {
     const difference = target.current - current.current;
     if (Math.abs(difference) < 0.0001) return;
-    current.current = Math.abs(difference) < 0.001
-      ? target.current
-      : current.current + difference * (1 - Math.exp(-10 * Math.min(delta, 0.1)));
+    current.current =
+      Math.abs(difference) < 0.001
+        ? target.current
+        : current.current + difference * (1 - Math.exp(-10 * Math.min(delta, 0.1)));
     applyPosition(current.current);
     invalidate();
   });

@@ -18,7 +18,7 @@ export function WindowHandle({
     return (
       <group
         name="opening-window-handle-clear"
-        position={[handleSide * (width / 2 - Math.min(.07, width * .2)), -0.02, faceSide * .075]}
+        position={[handleSide * (width / 2 - Math.min(0.07, width * 0.2)), -0.02, faceSide * 0.075]}
         scale={[1, 1, faceSide]}
       >
         <OpeningFrameBox size={[0.045, 0.2, 0.055]} position={[0, 0, 0]} />
@@ -29,7 +29,7 @@ export function WindowHandle({
   return (
     <group
       name="opening-window-handle-privacy"
-      position={[handleSide * (width / 2 - Math.min(.07, width * .2)), -0.08, faceSide * .085]}
+      position={[handleSide * (width / 2 - Math.min(0.07, width * 0.2)), -0.08, faceSide * 0.085]}
       scale={[1, 1, faceSide]}
     >
       <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>

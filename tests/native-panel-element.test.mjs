@@ -3,18 +3,40 @@ import test from "node:test";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
 
-await withModules(async load => {
+await withModules(async (load) => {
   const { createCabanePanelElement } = await load("/apps/web/src/panel/panel-element.ts");
   test("panel borrows only the connection and remounts without touching host history or socket", () => {
-    const dom = new JSDOM('<main id="host"></main>', { url: "https://ha.example/cabane?host=kept" });
+    const dom = new JSDOM('<main id="host"></main>', {
+      url: "https://ha.example/cabane?host=kept",
+    });
     const before = dom.window.location.href;
     const saved = Object.getOwnPropertyDescriptor(globalThis, "HTMLElement");
-    Object.defineProperty(globalThis, "HTMLElement", { configurable: true, value: dom.window.HTMLElement });
-    const mounts = [], updates = [], disposals = [];
-    const connection = { close() { assert.fail("panel must not close host socket"); } };
+    Object.defineProperty(globalThis, "HTMLElement", {
+      configurable: true,
+      value: dom.window.HTMLElement,
+    });
+    const mounts = [],
+      updates = [],
+      disposals = [];
+    const connection = {
+      close() {
+        assert.fail("panel must not close host socket");
+      },
+    };
     try {
-      const Panel = createCabanePanelElement({ assetBaseUrl: "https://ha.example/cabane_static/revision/",
-        mount(input) { mounts.push(input); return { update(session) { updates.push(session); }, dispose() { disposals.push(true); } }; },
+      const Panel = createCabanePanelElement({
+        assetBaseUrl: "https://ha.example/cabane_static/revision/",
+        mount(input) {
+          mounts.push(input);
+          return {
+            update(session) {
+              updates.push(session);
+            },
+            dispose() {
+              disposals.push(true);
+            },
+          };
+        },
       });
       dom.window.customElements.define("cabane-panel", Panel);
       const panel = dom.window.document.createElement("cabane-panel");
@@ -36,10 +58,10 @@ await withModules(async load => {
       assert.equal(menuEvents, 1);
       const styles = [...panel.shadowRoot.querySelectorAll('link[rel="stylesheet"]')];
       assert.equal(styles[0].href, "https://ha.example/cabane_static/revision/cabane-panel.css");
-      assert.equal(dom.window.document.head.querySelectorAll('link[data-cabane-fonts]').length, 1);
+      assert.equal(dom.window.document.head.querySelectorAll("link[data-cabane-fonts]").length, 1);
       panel.remove();
       assert.equal(disposals.length, 1);
-      assert.equal(dom.window.document.head.querySelectorAll('link[data-cabane-fonts]').length, 0);
+      assert.equal(dom.window.document.head.querySelectorAll("link[data-cabane-fonts]").length, 0);
       dom.window.document.querySelector("#host").append(panel);
       assert.equal(mounts.length, 2);
       panel.hass = undefined;
@@ -48,7 +70,8 @@ await withModules(async load => {
       panel.remove();
     } finally {
       dom.window.close();
-      if (saved) Object.defineProperty(globalThis, "HTMLElement", saved); else delete globalThis.HTMLElement;
+      if (saved) Object.defineProperty(globalThis, "HTMLElement", saved);
+      else delete globalThis.HTMLElement;
     }
   });
 });

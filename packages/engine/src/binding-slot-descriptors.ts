@@ -1,14 +1,12 @@
 import { outsideRoomDevices } from "./outside-room-devices";
 import { pointInsidePolygon } from "./geometry";
 
-import type {
-  BindingSlotDescriptor,
-  FloorSpec,
-  HomeBindingManifest,
-  OpeningSpec
-} from "./types";
+import type { BindingSlotDescriptor, FloorSpec, HomeBindingManifest, OpeningSpec } from "./types";
 
-const openingRoomIds = (floor: Pick<FloorSpec, "rooms" | "walls" | "coordinates">, opening: OpeningSpec) => {
+const openingRoomIds = (
+  floor: Pick<FloorSpec, "rooms" | "walls" | "coordinates">,
+  opening: OpeningSpec,
+) => {
   const wall = floor.walls.find((candidate) => candidate.id === opening.wallId);
   if (!wall) return [];
   const dx = wall.to[0] - wall.from[0];
@@ -22,72 +20,96 @@ const openingRoomIds = (floor: Pick<FloorSpec, "rooms" | "walls" | "coordinates"
     (wall.thicknessMeters / 2 + 0.04) / floor.coordinates.metersPerPlanUnit,
     0.32 / floor.coordinates.metersPerPlanUnit,
   ];
-  return floor.rooms.filter((room) => distances.some((distance) =>
-    pointInsidePolygon([
-      midpoint[0] + normal[0] * distance,
-      midpoint[1] + normal[1] * distance,
-    ], room.polygon) || pointInsidePolygon([
-      midpoint[0] - normal[0] * distance,
-      midpoint[1] - normal[1] * distance,
-    ], room.polygon)
-  )).map((room) => room.id);
+  return floor.rooms
+    .filter((room) =>
+      distances.some(
+        (distance) =>
+          pointInsidePolygon(
+            [midpoint[0] + normal[0] * distance, midpoint[1] + normal[1] * distance],
+            room.polygon,
+          ) ||
+          pointInsidePolygon(
+            [midpoint[0] - normal[0] * distance, midpoint[1] - normal[1] * distance],
+            room.polygon,
+          ),
+      ),
+    )
+    .map((room) => room.id);
 };
 
-export const collectBindingSlots = (manifest: HomeBindingManifest): readonly BindingSlotDescriptor[] => {
+export const collectBindingSlots = (
+  manifest: HomeBindingManifest,
+): readonly BindingSlotDescriptor[] => {
   const descriptors: BindingSlotDescriptor[] = [];
   for (const floor of manifest.floors) {
-  for (const room of floor.rooms) {
-    for (const spec of room.dashboardSlots) {
-      descriptors.push({ slotId: spec.id, kind: "dashboard", roomIds: [room.id], spec });
+    for (const room of floor.rooms) {
+      for (const spec of room.dashboardSlots) {
+        descriptors.push({ slotId: spec.id, kind: "dashboard", roomIds: [room.id], spec });
+      }
+      for (const device of room.devices) {
+        for (const spec of device.entitySlots) {
+          descriptors.push({
+            slotId: spec.id,
+            kind: "device",
+            roomIds: [room.id],
+            deviceSlotId: device.id,
+            deviceModel: device.model,
+            spec,
+          });
+        }
+      }
     }
-    for (const device of room.devices) {
-      for (const spec of device.entitySlots) {
+    for (const device of outsideRoomDevices(manifest, floor.id)?.devices ?? []) {
+      for (const spec of device.entitySlots)
         descriptors.push({
           slotId: spec.id,
           kind: "device",
-          roomIds: [room.id],
+          roomIds: [],
           deviceSlotId: device.id,
           deviceModel: device.model,
           spec,
         });
-      }
     }
-  }
-  for (const device of outsideRoomDevices(manifest, floor.id)?.devices ?? []) {
-    for (const spec of device.entitySlots) descriptors.push({
-      slotId: spec.id, kind: "device", roomIds: [], deviceSlotId: device.id,
-      deviceModel: device.model, spec,
-    });
-  }
-  for (const opening of floor.openings) {
-    if (opening.coverSlot) descriptors.push({
-      slotId: opening.coverSlot.id, kind: "opening-cover", openingId: opening.id,
-      roomIds: openingRoomIds(floor, opening), spec: {
-        id: opening.coverSlot.id, compatibleDomains: ["cover"], compatibleDeviceClasses: ["garage"],
-        required: false, autoMap: opening.coverSlot.autoMap, deviceRole: "primary",
-        presentation: { label: `Garage door · ${opening.id.replaceAll("-", " ")}`, dashboardRole: "primary" },
-      },
-    });
-    if (!opening.contactSlot) continue;
-    descriptors.push({
-      slotId: opening.contactSlot.id,
-      kind: "opening-contact",
-      roomIds: openingRoomIds(floor, opening),
-      openingId: opening.id,
-      spec: {
-        id: opening.contactSlot.id,
-        compatibleDomains: ["binary_sensor"],
-        compatibleDeviceClasses: opening.contactSlot.compatibleDeviceClasses,
-        required: false,
-        autoMap: opening.contactSlot.autoMap,
-        deviceRole: "primary",
-        presentation: {
-          label: `${opening.kind === "door" ? "Door" : "Window"} · ${opening.id.replaceAll("-", " ")}`,
-          dashboardRole: "diagnostic",
+    for (const opening of floor.openings) {
+      if (opening.coverSlot)
+        descriptors.push({
+          slotId: opening.coverSlot.id,
+          kind: "opening-cover",
+          openingId: opening.id,
+          roomIds: openingRoomIds(floor, opening),
+          spec: {
+            id: opening.coverSlot.id,
+            compatibleDomains: ["cover"],
+            compatibleDeviceClasses: ["garage"],
+            required: false,
+            autoMap: opening.coverSlot.autoMap,
+            deviceRole: "primary",
+            presentation: {
+              label: `Garage door · ${opening.id.replaceAll("-", " ")}`,
+              dashboardRole: "primary",
+            },
+          },
+        });
+      if (!opening.contactSlot) continue;
+      descriptors.push({
+        slotId: opening.contactSlot.id,
+        kind: "opening-contact",
+        roomIds: openingRoomIds(floor, opening),
+        openingId: opening.id,
+        spec: {
+          id: opening.contactSlot.id,
+          compatibleDomains: ["binary_sensor"],
+          compatibleDeviceClasses: opening.contactSlot.compatibleDeviceClasses,
+          required: false,
+          autoMap: opening.contactSlot.autoMap,
+          deviceRole: "primary",
+          presentation: {
+            label: `${opening.kind === "door" ? "Door" : "Window"} · ${opening.id.replaceAll("-", " ")}`,
+            dashboardRole: "diagnostic",
+          },
         },
-      },
-    });
-  }
+      });
+    }
   }
   return descriptors;
 };

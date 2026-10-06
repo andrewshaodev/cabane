@@ -33,7 +33,9 @@ export interface EditorWall {
 }
 
 type EditableOpening<T extends OpeningSpec> = T extends OpeningSpec
-  ? Omit<T, "offsetFromWallStartPlanUnits" | "contactSlot" | "coverSlot" | "visualModel"> & { offsetPlanUnits: number }
+  ? Omit<T, "offsetFromWallStartPlanUnits" | "contactSlot" | "coverSlot" | "visualModel"> & {
+      offsetPlanUnits: number;
+    }
   : never;
 export type EditorOpening = EditableOpening<OpeningSpec>;
 
