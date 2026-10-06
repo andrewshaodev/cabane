@@ -30,6 +30,31 @@
 .model-import-dialog::backdrop {
   background: #22332766;
 }
+.model-pack-dialog {
+  width: min(460px, calc(100vw - 32px));
+  border: 1px solid var(--editor-line, #c9cabc);
+  border-radius: 14px;
+  padding: 20px;
+  background: var(--editor-paper, #faf7ef);
+  color: var(--editor-ink, #354738);
+  box-shadow: 0 12px 40px #22332733;
+}
+.model-pack-dialog::backdrop {
+  background: #22332766;
+}
+.model-pack-dialog h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.model-pack-dialog p {
+  line-height: 1.5;
+}
+.custom-model-pack-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
 .model-import-dialog header,
 .model-import-dialog footer {
   display: flex;

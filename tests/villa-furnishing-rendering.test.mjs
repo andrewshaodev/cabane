@@ -90,7 +90,7 @@ await withModules(async (load) => {
     try {
       assert.deepEqual(
         renderer.scene.findAll((node) =>
-          String(node.props.name ?? "").startsWith("missing-furnishing-model-"),
+          String(node.props.name ?? "").startsWith("missing-model-"),
         ),
         [],
       );

@@ -77,12 +77,21 @@ await withModules(async (load) => {
     assert.deepEqual(imported.record.bindings, record.bindings);
   });
 
-  test("an import without the custom kitchen definitions reports the missing models", () => {
-    assert.throws(() =>
-      parseWorkspaceImport(engine.serializeHomeProject(ownerHomeProject), {
-        furnishingModels: stableFurnishingRegistry,
-        deviceModels: stableDeviceRegistry,
-      }),
+  test("an import without the custom kitchen definitions keeps missing models as warnings", () => {
+    const registriesWithoutExtensions = {
+      furnishingModels: stableFurnishingRegistry,
+      deviceModels: stableDeviceRegistry,
+    };
+    const parsed = engine.parseHomeProject(engine.serializeHomeProject(ownerHomeProject));
+    assert.equal(parsed.valid, true);
+    const validation = engine.validateHomeProject(parsed.project, registriesWithoutExtensions);
+    assert.equal(validation.valid, true);
+    assert.ok(validation.issues.some((issue) => issue.code === "project.model-missing"));
+    assert.doesNotThrow(() =>
+      parseWorkspaceImport(
+        engine.serializeHomeProject(ownerHomeProject),
+        registriesWithoutExtensions,
+      ),
     );
   });
 

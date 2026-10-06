@@ -91,7 +91,7 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 Contract: [Personal GLB models and asset transfer](../docs/product/personal-models.md).
 
 - Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts).
-- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile`, `createCabaneModelPack`, `readCabaneModelPack` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
 - Checks: `verify:workspace`, `verify:runtime`, `verify:policy`, `fixture:verify:scale`, `build:panel`.
 
