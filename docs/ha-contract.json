@@ -1,6 +1,6 @@
 {
   "revision": 7,
-  "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
+  "fingerprint": "778ff13d5be0bd0d127ccc06d3544251c1d1b9b1251c6101bd2f020015313f4e",
   "summary": "Stabilize orbital wall lighting and TV screen layers; add comic-book flight artwork",
   "breakingChanges": [
     "No saved fields or model IDs change beyond the previously released pendant support. Existing homes remain compatible; update the panel for stable toon lighting during camera movement and the TV rendering fix and animation."
@@ -48,5 +48,10 @@
         "No saved data changes. Existing pendants retain their placement and size, with reduced light intensity and a lower bulb and emitter in the updated panel."
       ]
     }
-  ]
+  ],
+  "baseline": {
+    "revision": 7,
+    "fingerprint": "3112c323e7c5e755a3bdcd878f9ce41599aea378d9e17337d55bf31f59bea75c",
+    "compatibilityFingerprint": "778ff13d5be0bd0d127ccc06d3544251c1d1b9b1251c6101bd2f020015313f4e"
+  }
 }

@@ -1,11 +1,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { contractFingerprint, validateContractRelease } from "./ha-contract/source-contract.mjs";
+import {
+  compatibilityManifestPath,
+  portableContract,
+} from "./ha-contract/compatibility-manifest.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const path = new URL("../docs/ha-contract.json", import.meta.url);
 const args = process.argv.slice(2);
-const current = contractFingerprint(root);
 let release;
 try {
   release = JSON.parse(readFileSync(path, "utf8"));
@@ -17,6 +20,13 @@ if (args[0] === "--record") {
   const breakingChange = args[args.indexOf("--breaking-change") + 1];
   if (!args.includes("--summary") || !args.includes("--breaking-change"))
     throw new Error("Supply --summary and --breaking-change with human-readable release notes.");
+  const compatibilityPath = new URL(`../${compatibilityManifestPath}`, import.meta.url);
+  const compatibility = JSON.parse(readFileSync(compatibilityPath, "utf8"));
+  writeFileSync(
+    compatibilityPath,
+    JSON.stringify({ ...compatibility, portableTypes: portableContract(root) }, null, 2) + "\n",
+  );
+  const current = contractFingerprint(root);
   const history = [...(release.history ?? [])];
   if (release.revision)
     history.push({
@@ -30,6 +40,7 @@ if (args[0] === "--record") {
     summary,
     breakingChanges: [breakingChange],
     history,
+    ...(release.baseline ? { baseline: release.baseline } : {}),
   };
   validateContractRelease(next, current.fingerprint);
   writeFileSync(path, JSON.stringify(next, null, 2) + "\n");
@@ -37,6 +48,7 @@ if (args[0] === "--record") {
 } else if (args[0] === "--hook") {
   const event = JSON.parse(readFileSync(0, "utf8"));
   try {
+    const current = contractFingerprint(root);
     validateContractRelease(release, current.fingerprint);
     console.log("{}");
   } catch (error) {
@@ -53,6 +65,7 @@ if (args[0] === "--record") {
     );
   }
 } else {
+  const current = contractFingerprint(root);
   validateContractRelease(release, current.fingerprint);
   console.log(
     `HA contract revision ${release.revision} verified (${current.sources.length} sources).`,
