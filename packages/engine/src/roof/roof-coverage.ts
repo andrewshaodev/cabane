@@ -62,8 +62,16 @@ export function deriveRoofRegions(floors: readonly FloorSpec[]): RoofRegion[] {
     const domain = domains[index];
     if (!domain.length) return [];
     const elevation = levels[index].elevationMeters;
-    const above = coverDomains.slice(index + 1).filter(polygon => polygon.length);
+    const upperCoverage = coverDomains.slice(index + 1).filter(polygon => polygon.length);
+    // Drawn platforms stop at wall centerlines. Cover the supporting wall tops
+    // too, otherwise their outer halves become narrow, full-height gables.
+    // Restrict the extension to wall solids so exposed rooms keep their roofs.
+    const wallTops = unionClippingPolygons(wallSolidFootprintPolygons(floor));
     const margin = Math.max(0, ...floor.walls.map(wall => wall.thicknessMeters / 2)) + 0.002;
+    const above = upperCoverage.map(coverage => unionClippingPolygons([
+      ...coverage,
+      ...coverage.flatMap(polygon => ceilingWithWalls(polygon, margin, wallTops)),
+    ]));
     const ceilings = floor.ceilings ?? [{ id: "roof-default", kind: "flat" as const,
       roomIds: floor.rooms.map(room => room.id), heightMeters: floor.defaultCeilingHeightMeters }];
     const flat = new Map<number, ClipPolygon[]>();

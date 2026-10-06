@@ -83,6 +83,42 @@ await withModules(async load => {
     near(coverageArea(deriveRoofRegions([transformed])),20);
   });
 
+  test("a wraparound balcony covers the lower exterior wall tops without a gable in front of its rails", () => {
+    const lower = makeFloor([rectangle(0, 0, 14, 18)]);
+    lower.walls = lower.footprint.map((from, i, points) => ({
+      id: `wall-${i}`, from, to: points[(i + 1) % points.length],
+      classification: "exterior", thicknessMeters: .3,
+    }));
+    const upper = makeFloor([rectangle(2, 0, 12, 16)], "upper");
+    upper.outdoorPlatforms = [{
+      id: "balcony", polygon: [[14,16],[14,18],[0,18],[0,0],[2,0],[2,16]],
+      finish: { kind: "preset", preset: "travertine" },
+      defaultEdge: { kind: "railing", heightMeters: 1 },
+      edges: Array.from({ length: 6 }, (_, i) => ({ id: `edge-${i}` })),
+    }];
+    // The upper room covers its own wall tops; the balcony ends on the
+    // lower wall centerline, as it does in the reported exported home.
+    upper.walls = upper.footprint.map((from, i, points) => ({
+      id: `upper-wall-${i}`, from, to: points[(i + 1) % points.length],
+      classification: "exterior", thicknessMeters: .3,
+    }));
+    const lowerRoofs = deriveRoofRegions([lower, upper]).filter(region => region.floorId === lower.id);
+    near(coverageArea(lowerRoofs), 0);
+    for (const direction of ["left-right", "front-back", "flat"]) {
+      const geometry = buildRoofGeometries([lower, upper], { ...DEFAULT_ROOF_SETTINGS, direction });
+      try {
+        const positions = geometry.top.attributes.position;
+        for (let i = 0; i < positions.count; i++) {
+          assert.ok(positions.getY(i) >= 5.66, "no lower roof face may rise in front of the balcony rails");
+        }
+      } finally { Object.values(geometry).forEach(part => part.dispose()); }
+    }
+    // Removing the west balcony must restore the genuinely exposed room roof.
+    upper.outdoorPlatforms[0].polygon = rectangle(0, 16, 14, 2);
+    assert.ok(coverageArea(deriveRoofRegions([lower, upper]).filter(region => region.floorId === lower.id)) >= 29,
+      "wall-top coverage must not erase the exposed lower wing");
+  });
+
   test("follows different ceiling heights without overlapping coverage or crossing taller roofs", () => {
     const floor = makeFloor([rectangle(0,0,5,6), rectangle(5,0,5,6)]);
     floor.ceilings = [{id:"a",kind:"flat",roomIds:["ground-0"],heightMeters:2.5},{id:"b",kind:"flat",roomIds:["ground-1"],heightMeters:3}];

@@ -177,7 +177,7 @@ walk spawn and elevated-floor boundary checks; Open removes its barrier while
 retaining the elevated-floor support boundary. Barriers share their facade-aware
 geometry with walk collision, so existing door apertures remain usable.
 
-Platform footprints clip lower roofs without acquiring their own roofing. Slabs
+Platform footprints clip lower roofs without acquiring their own roofing. Upper coverage also clips the supporting lower wall tops, so a platform drawn to a wall centerline does not leave an exterior gable strip in front of its railing; this extension is restricted to wall solids and preserves exposed room roofs. Slabs
 above enclosed rooms retain the authored ceiling underside and replace overlapping
 lower ceiling slab coverage; remaining slab regions use 0.16 m thickness. Higher
 floors cover their actual indoor and outdoor support footprints. Explicit low
