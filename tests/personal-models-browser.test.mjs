@@ -173,7 +173,55 @@ test(
         await dialog.waitFor({ state: "hidden" });
         await page.getByRole("button", { name: `Add ${example.name}`, exact: true }).click();
         await waitCounts(index + 1, index + 1);
+        const beforeElevation = (await read()).draft.sceneItems[index].placement;
+        const elevationValue = (placement) =>
+          placement.kind === "ceiling" ? -placement.dropMeters : placement.elevationMeters;
+        const waitPlacement = async (check) => {
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const placement = (await read()).draft.sceneItems[index].placement;
+            if (check(placement)) return placement;
+            await page.waitForTimeout(50);
+          }
+          assert.fail("Elevation did not reach the expected persisted placement");
+        };
+        const dragElevation = async (dy, cancel = false) => {
+          const handle = page.getByRole("button", {
+            name: "Drag to change elevation",
+            exact: true,
+          });
+          const bounds = await handle.boundingBox();
+          assert.ok(bounds);
+          await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2 + dy, {
+            steps: 5,
+          });
+          if (cancel) await page.keyboard.press("Escape");
+          await page.mouse.up();
+        };
+        await dragElevation(-40);
+        const raised = await waitPlacement(
+          (p) => elevationValue(p) > elevationValue(beforeElevation),
+        );
+        assert.equal(raised.kind, beforeElevation.kind);
+        const { elevationMeters: _a, dropMeters: _b, ...raisedSupport } = raised;
+        const { elevationMeters: _c, dropMeters: _d, ...originalSupport } = beforeElevation;
+        assert.deepEqual(raisedSupport, originalSupport);
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(beforeElevation));
+        await page.getByRole("button", { name: "Redo", exact: true }).click();
+        await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(raised));
+        await dragElevation(30, true);
+        await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(raised));
+        await dragElevation(25);
+        await waitPlacement((p) => elevationValue(p) < elevationValue(raised));
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(raised));
+        await page.getByRole("button", { name: "Undo", exact: true }).click();
+        await waitPlacement((p) => JSON.stringify(p) === JSON.stringify(beforeElevation));
         if (index === 0) {
+          await mkdir("test-results/elevation", { recursive: true });
+          await page.screenshot({ path: "test-results/elevation/controls.png" });
           await page.getByRole("button", { name: "Duplicate", exact: true }).click();
           await waitCounts(1, 2);
           await page.getByRole("button", { name: "Undo", exact: true }).click();

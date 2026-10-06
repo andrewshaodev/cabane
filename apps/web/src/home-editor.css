@@ -1868,3 +1868,9 @@
 .construction-inspector__context > * {
   flex-shrink: 0;
 }
+
+.selected-item-elevation-button,
+.selected-item-elevation-button .editor-action-button {
+  touch-action: none;
+  cursor: ns-resize;
+}

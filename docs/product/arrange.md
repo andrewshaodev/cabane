@@ -7,7 +7,11 @@ supports searching and room-category browsing, visual model previews, and
 creation from supported registry entries. Clicking furniture or a device on a visible
 lower floor in 3D switches to that floor and selects the item. Selection exposes rotate, duplicate,
 delete, details, and, for devices with slots, Connect actions. Properties edit
-dimensions and placement. All built-in furnishings expose independent width, height,
+dimensions and placement. In 3D, a matching elevation button beside the rotation
+controls raises or lowers the selected item while dragged vertically. Release
+commits one undo step; Escape, pointer cancellation, or focus loss restores its
+initial placement. Elevation preserves horizontal position, rotation, and wall or
+ceiling support. All built-in furnishings expose independent width, height,
 and depth controls, including previously fixed-size presets. Resizing scales the
 procedural model, so extreme dimensions can stretch its details. Device and
 home-local extension controls follow their declared resize policies. Variant is a standard saved attribute for both

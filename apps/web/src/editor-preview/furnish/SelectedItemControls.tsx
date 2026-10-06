@@ -29,6 +29,15 @@ interface RotationSession {
   rotation: number;
 }
 
+interface ElevationSession {
+  kind: "elevation";
+  pointerId: number;
+  target: HTMLDivElement;
+  startY: number;
+  pixelsPerMeter: number;
+  placement: ItemPlacement;
+}
+
 interface MoveSession {
   kind: "move";
   pointerId: number;
@@ -71,10 +80,12 @@ export function SelectedItemControls({
   const left = useRef<HTMLDivElement>(null);
   const centerHandle = useRef<HTMLDivElement>(null);
   const right = useRef<HTMLDivElement>(null);
+  const elevationHandle = useRef<HTMLDivElement>(null);
   const readout = useRef<HTMLOutputElement>(null);
-  const session = useRef<RotationSession | MoveSession | null>(null);
+  const session = useRef<RotationSession | MoveSession | ElevationSession | null>(null);
   const [rotating, setRotating] = useState(false);
   const [moving, setMoving] = useState(false);
+  const [elevating, setElevating] = useState(false);
   const transform = resolveItemTransform(item.placement, floor);
   const box = selectionBoxGeometry(item, definition);
   const radius = selectionRingRadius(item, definition);
@@ -93,6 +104,7 @@ export function SelectedItemControls({
     session.current = null;
     setRotating(false);
     setMoving(false);
+    setElevating(false);
     if (cancel) callbacks.current.onCancel();
     else callbacks.current.onCommit();
     if (active.target.hasPointerCapture?.(active.pointerId))
@@ -194,6 +206,7 @@ export function SelectedItemControls({
     placeHandle(left.current, leftPoint);
     placeHandle(centerHandle.current, center);
     placeHandle(right.current, rightPoint);
+    placeHandle(elevationHandle.current, { x: rightPoint.x, y: rightPoint.y - 52 });
     const corners = [];
     const c = Math.cos(transform.rotationYRadians),
       s = Math.sin(transform.rotationYRadians);
@@ -366,6 +379,62 @@ export function SelectedItemControls({
             label="Rotate clockwise 90°"
             disabled={busy}
             onClick={() => step(-1)}
+          />
+        </div>
+        <div
+          ref={elevationHandle}
+          className="selected-item-rotation-button selected-item-elevation-button"
+          onPointerDown={(event) => {
+            if (event.button !== 0 || busy || session.current) return;
+            event.preventDefault();
+            event.stopPropagation();
+            const anchor = new Vector3(...transform.position);
+            const projected = anchor.clone().project(camera);
+            const above = anchor
+              .add(new Vector3(0, 1, 0).applyQuaternion(camera.quaternion))
+              .project(camera);
+            event.currentTarget.setPointerCapture(event.pointerId);
+            session.current = {
+              kind: "elevation",
+              pointerId: event.pointerId,
+              target: event.currentTarget,
+              startY: event.clientY,
+              pixelsPerMeter: Math.max(
+                1,
+                (Math.abs(above.y - projected.y) * gl.domElement.getBoundingClientRect().height) /
+                  2,
+              ),
+              placement: item.placement,
+            };
+            setElevating(true);
+            onSelect(item.id);
+            onBegin();
+          }}
+          onPointerMove={(event) => {
+            const active = session.current;
+            if (active?.kind !== "elevation" || active.pointerId !== event.pointerId) return;
+            event.stopPropagation();
+            const delta = (active.startY - event.clientY) / active.pixelsPerMeter;
+            const placement = active.placement;
+            onMovePlacement(
+              item.id,
+              placement.kind === "ceiling"
+                ? { ...placement, dropMeters: placement.dropMeters - delta }
+                : { ...placement, elevationMeters: placement.elevationMeters + delta },
+            );
+          }}
+          onPointerUp={(event) => {
+            event.stopPropagation();
+            if (event.pointerId === session.current?.pointerId) finish(false);
+          }}
+          onPointerCancel={() => finish(true)}
+          onLostPointerCapture={() => finish(true)}
+        >
+          <EditorActionButton
+            icon="elevation"
+            label="Drag to change elevation"
+            disabled={busy && !elevating}
+            onClick={() => onSelect(item.id)}
           />
         </div>
         <output ref={readout} className="selected-item-angle" aria-label="Rotation angle">
