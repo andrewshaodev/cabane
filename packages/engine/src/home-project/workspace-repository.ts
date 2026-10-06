@@ -1,3 +1,8 @@
+import {
+  publishModelAssetReferences,
+  referencedRecordAssets,
+  createModelAssetRepository,
+} from "../imported-models/asset-storage";
 import { createBrowserUuid } from "../browser-uuid";
 import {
   WORKSPACE_ONBOARDING_KEY,
@@ -10,6 +15,7 @@ import {
 import type { ProjectModelRegistries } from "../types";
 import { normalizeHomeAssistantUrl } from "../home-assistant-auth";
 import {
+  MODEL_ASSET_STORE,
   PROJECT_STORE,
   WORKSPACE_STORE,
   STATE_STORE,
@@ -26,7 +32,7 @@ import type { WorkspaceEntry, WorkspaceMetadata } from "./workspace-contract";
 import { copyWorkspaceRecord } from "./workspace-identity";
 import { createEmptyHomeProject } from "./empty-project";
 
-const stores = [PROJECT_STORE, WORKSPACE_STORE, STATE_STORE];
+const stores = [PROJECT_STORE, WORKSPACE_STORE, STATE_STORE, MODEL_ASSET_STORE];
 const nameOf = (name: string) => {
   if (!name.trim()) throw new Error("Give your workspace a name.");
   return name.trim();
@@ -182,7 +188,7 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
         });
       });
     });
-  const create = (
+  const create = async (
     source: HomeProjectRecord,
     options: { name: string; homeAssistantUrl?: string | null },
     sourceRevision?: { id: string; revision: number },
@@ -194,6 +200,7 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
       ? normalizeHomeAssistantUrl(options.homeAssistantUrl)
       : null;
     if (options.homeAssistantUrl && !url) throw new Error("Enter a valid Home Assistant URL.");
+    await createModelAssetRepository(factory).verify(referencedRecordAssets(record));
     const metadata: WorkspaceMetadata = {
       id: record.homeId,
       name,
@@ -203,13 +210,14 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
     };
     return projectTransaction<WorkspaceEntry>(factory, "readwrite", stores, (tx, request, done) => {
       const records = tx.objectStore(PROJECT_STORE);
-      const insert = () => {
-        request(records.add(serializeHomeProjectRecord(record), record.homeId), () => {
-          request(tx.objectStore(WORKSPACE_STORE).add(metadata, record.homeId), () =>
-            done({ metadata, record }),
-          );
+      const insert = () =>
+        publishModelAssetReferences(tx, request, referencedRecordAssets(record), () => {
+          request(records.add(serializeHomeProjectRecord(record), record.homeId), () => {
+            request(tx.objectStore(WORKSPACE_STORE).add(metadata, record.homeId), () =>
+              done({ metadata, record }),
+            );
+          });
         });
-      };
       if (sourceRevision)
         request(records.get(sourceRevision.id), (raw) => {
           if (parse(raw).revision !== sourceRevision.revision) throw new WorkspaceConflictError();
@@ -239,8 +247,10 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
               record.revision++;
               const serialized = serializeHomeProjectRecord(record);
               parse(serialized);
-              request(records.put(serialized, id), () =>
-                request(metadataStore.put(metadata, id), () => done({ metadata, record })),
+              publishModelAssetReferences(tx, request, referencedRecordAssets(record), () =>
+                request(records.put(serialized, id), () =>
+                  request(metadataStore.put(metadata, id), () => done({ metadata, record })),
+                ),
               );
             };
             if (personalOnly)
@@ -357,7 +367,7 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
     readOnboarding,
     dismissOnboarding,
     startOnboarding,
-    restoreExact: (
+    restoreExact: async (
       source: HomeProjectRecord,
       settings: WorkspaceMetadata,
       expectedRevision?: number,
@@ -374,6 +384,7 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
         return Promise.reject(new Error("The workspace backup has an invalid Home Assistant URL."));
       }
       const saved = parse(serializeHomeProjectRecord(source));
+      await createModelAssetRepository(factory).verify(referencedRecordAssets(saved));
       return projectTransaction<WorkspaceEntry>(
         factory,
         "readwrite",
@@ -398,9 +409,11 @@ export function createWorkspaceRepository(factory: IDBFactory, registries: Proje
                 revision: Math.max(saved.revision, (current?.revision ?? -1) + 1),
               };
               const metadata = { ...settings };
-              request(records.put(serializeHomeProjectRecord(record), source.homeId), () =>
-                request(metadataStore.put(metadata, source.homeId), () =>
-                  done({ record, metadata }),
+              publishModelAssetReferences(tx, request, referencedRecordAssets(record), () =>
+                request(records.put(serializeHomeProjectRecord(record), source.homeId), () =>
+                  request(metadataStore.put(metadata, source.homeId), () =>
+                    done({ record, metadata }),
+                  ),
                 ),
               );
             });

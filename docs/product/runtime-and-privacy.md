@@ -90,12 +90,17 @@ exports remain private household data even without credentials.
 
 No hosted account backend or cloud workspace synchronization is implemented.
 An optional owner-installed HA custom integration provides instance-local
-workspace storage. Any authenticated user of that HA instance can read or
+workspace and personal GLB asset storage. Any authenticated user of that HA instance can read or
 change its shared Cabane copies. Those copies can contain private area/entity
 IDs and draft layouts but omit OAuth tokens, callback data, preview caches,
 camera media, and onboarding state. A browser keeps working when this optional
 integration or HA is unavailable. The integration is not a Cabane-hosted
 service, and real owner-instance deployment acceptance remains pending.
+Personal assets contain only imported model files, addressed and verified by
+SHA-256. Authenticated transfer is bound to its HA origin/session; files arrive
+before revision-checked documents, and interruptions retain the previous copy.
+Old integrations request an update for GLB homes. The shared asset store cleans
+unreferenced files after 24 hours. See [personal models](personal-models.md).
 The public `https://cabane.my` deployment uses Vercel Web Analytics to count
 application page views through React Router, including personal-home and editor
 routes. Workspace IDs in `/workspaces/:id` and `/open/:id` are replaced with `:workspaceId`; query strings and
@@ -116,7 +121,9 @@ matching the HTTPS origin. `vercel.json` sets it to `https://cabane.my`; local
 builds, previews, and self-hosted installations are disabled by default.
 Network reachability and HA authorization
 remain deployment concerns. Source policy distinguishes approved bundled assets
-and authenticated camera media from generated procedural home content.
+and authenticated camera media from generated procedural home content. Personal
+GLB decoding and embedded images are allowed only through the dedicated import
+owner, with no external asset fetches or user-script execution.
 
 Implementation: [runtime provider](../../packages/engine/src/HomeAssistantRuntime.tsx),
 [auth storage](../../packages/engine/src/home-assistant-auth.ts),

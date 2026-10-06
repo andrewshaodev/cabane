@@ -118,9 +118,10 @@ Uncompleted acceptance/deployment concerns remain explicit:
   owner's authenticated runtime review.
 - Private deployment/network hardening and container delivery are not completed
   product features.
-- Multi-floor navigation, hosted workspace synchronization, and a shared account
+- Cabane-hosted workspace synchronization and a shared account
   backend are not implemented.
-- Browser-local authoring does not update Git or synchronize other browsers.
+- Browser-local authoring does not update Git. Optional HA synchronization can
+  transfer saved workspaces and personal assets between authenticated clients.
 
 Implementation: [commands](../../package.json),
 [test harness](../../tests/test-server.mjs),
@@ -141,3 +142,14 @@ choices, history, Save, pending and failed commands, disconnection, mobile
 overflow, and IndexedDB reload. It makes no household service calls. Screenshots
 are written to `/tmp/cabane-ha-shortcuts` by default (`CABANE_SHORTCUT_EVIDENCE`
 overrides the destination).
+
+Personal GLB coverage uses `tests/personal-models.test.mjs`,
+`tests/personal-models-browser.test.mjs`, and `tests/ha-model-assets.test.mjs`.
+The normal Arrange UI imports solid/PBR/textured files and an actual downloadable
+skill example, tests supports, history, Save/Reset, and complete archives. Storage
+fixtures exercise missing/corrupt files, transaction failures, deduplication,
+interruptions, origin/session isolation, old integrations, and two-client revision
+conflicts. Companion integration tests cover authenticated blocks, integrity,
+reference checks, and delayed cleanup. These checks use synthetic data and do not
+contact household devices. Cabane and the integration must be delivered together;
+publishing and deployment remain separate actions.

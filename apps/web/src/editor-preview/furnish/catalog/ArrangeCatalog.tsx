@@ -1,6 +1,6 @@
 import { EditorButton } from "../../../editor-chrome/EditorButton";
 import { ROOM_TYPES, type DeviceModelRegistry, type FurnishingModelRegistry } from "@cabane/engine";
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type ReactNode } from "react";
 import { EditorIcon, type EditorIconName } from "../../../editor-chrome/EditorIcon";
 import { catalogEntries, filterCatalog, type CatalogEntry, type CatalogRoom } from "./catalog";
 import { ModelThumbnail, ModelThumbnailRenderer } from "./ModelThumbnailRenderer";
@@ -9,6 +9,7 @@ import "./arrange-catalog.css";
 const roomIcons: Record<CatalogRoom, EditorIconName> = {
   all: "grid",
   devices: "devices",
+  "my-models": "furnish",
   "living-room": "furnish",
   kitchen: "kitchen",
   bedroom: "bed",
@@ -21,7 +22,11 @@ const roomIcons: Record<CatalogRoom, EditorIconName> = {
   outdoor: "outdoor",
 };
 const rooms = [{ id: "all" as const, label: "All items" }, ...ROOM_TYPES];
-const filters = [...rooms, { id: "devices" as const, label: "Devices" }];
+const filters = [
+  ...rooms,
+  { id: "devices" as const, label: "Devices" },
+  { id: "my-models" as const, label: "My models" },
+];
 
 export interface CatalogBrowsing {
   room: CatalogRoom;
@@ -36,8 +41,10 @@ export function ArrangeCatalog({
   error,
   onChoose,
   enabled = true,
+  customModels,
 }: {
   enabled?: boolean;
+  customModels?: ReactNode;
   furnishingModels: FurnishingModelRegistry;
   deviceModels: DeviceModelRegistry;
   browsing: CatalogBrowsing;
@@ -66,6 +73,7 @@ export function ArrangeCatalog({
           {error}
         </p>
       )}
+      {customModels}
       <div className="arrange-catalog__body">
         <nav className="catalog-rooms" aria-label="Catalog room types">
           {rooms.map((room) => (
@@ -80,6 +88,14 @@ export function ArrangeCatalog({
             </button>
           ))}
           <div className="catalog-device-filter">
+            <button
+              type="button"
+              aria-pressed={browsing.room === "my-models"}
+              onClick={() => chooseFilter("my-models")}
+            >
+              <EditorIcon name="furnish" />
+              <span>My models</span>
+            </button>
             <button
               type="button"
               aria-pressed={browsing.room === "devices"}
@@ -146,7 +162,9 @@ export function ArrangeCatalog({
                   <p>
                     {browsing.query.trim()
                       ? "No matching items"
-                      : "No items for this room type yet"}
+                      : browsing.room === "my-models"
+                        ? "Import your first GLB model"
+                        : "No items for this room type yet"}
                   </p>
                   <EditorButton
                     onClick={() =>

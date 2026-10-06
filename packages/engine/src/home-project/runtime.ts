@@ -1,3 +1,4 @@
+import { resolveProjectModels } from "../imported-models/resolve-models";
 import { deriveFloorLevels } from "../building/floor-levels";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import type {
@@ -109,7 +110,7 @@ export const composeHomeBindingManifest = (
   sceneItems: project.sceneItems,
   shortcuts: project.shortcuts,
   ...(project.actionBar === undefined ? {} : { actionBar: project.actionBar }),
-  extensions,
+  extensions: { ...extensions, ...resolveProjectModels(project, extensions) },
   assumptions: project.assumptions,
 });
 

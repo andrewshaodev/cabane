@@ -45,9 +45,9 @@ Contract: [Startup and host integration](../docs/product/journey.md).
 
 Contract: [Project schema and persistence](../docs/product/workspace.md).
 
-- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts), [`packages/engine/src/home-project/schema-json-values.ts`](../packages/engine/src/home-project/schema-json-values.ts).
-- Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations.
+- Owners: [`packages/engine/src/home-project/schema.ts`](../packages/engine/src/home-project/schema.ts), [`packages/engine/src/home-project/workspace-repository.ts`](../packages/engine/src/home-project/workspace-repository.ts), [`apps/web/src/workspaces/workspace-sync-coordinator.ts`](../apps/web/src/workspaces/workspace-sync-coordinator.ts), [`packages/engine/src/home-project/schema-json-values.ts`](../packages/engine/src/home-project/schema-json-values.ts), [`packages/engine/src/home-project/schema-entity-slot.ts`](../packages/engine/src/home-project/schema-entity-slot.ts), [`packages/engine/src/home-project/project-record-stores.ts`](../packages/engine/src/home-project/project-record-stores.ts), [`packages/engine/src/imported-models/asset-storage.ts`](../packages/engine/src/imported-models/asset-storage.ts), [`packages/engine/src/sha256-digest.ts`](../packages/engine/src/sha256-digest.ts).
+- Interface: `HomeProject`, `parseHomeProject`, `createWorkspaceRepository`, `sha256Hex` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction.
 - Checks: `verify:workspace`.
 
 ### Editor coordination
@@ -86,13 +86,22 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 - Review invariant: Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only.
 - Checks: `verify:runtime`, `fixture:verify:scale`.
 
+### Personal GLB models and asset transfer
+
+Contract: [Personal GLB models and asset transfer](../docs/product/personal-models.md).
+
+- Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts), [`.agents/skills/create-cabane-model`](../.agents/skills/create-cabane-model).
+- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
+- Checks: `verify:workspace`, `verify:runtime`, `verify:policy`, `fixture:verify:scale`, `build:panel`.
+
 ### Home Assistant runtime and controls
 
 Contract: [Home Assistant runtime and controls](../docs/product/runtime-and-privacy.md).
 
-- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts).
+- Owners: [`packages/engine/src/HomeAssistantRuntime.tsx`](../packages/engine/src/HomeAssistantRuntime.tsx), [`packages/engine/src/home-assistant-controls.ts`](../packages/engine/src/home-assistant-controls.ts), [`packages/engine/src/command-scheduler.ts`](../packages/engine/src/command-scheduler.ts), [`packages/engine/src/home-assistant-storage-session.ts`](../packages/engine/src/home-assistant-storage-session.ts), [`packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx`](../packages/engine/src/HomeAssistantRuntimeSnapshotTestProvider.tsx).
 - Interface: `HomeAssistantRuntimeProvider`, `useHomeAssistantRuntime` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source.
+- Review invariant: Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session.
 - Checks: `verify:runtime`.
 
 ### Dashboard, navigation and cameras
@@ -110,7 +119,7 @@ Contract: [Scene geometry and rendering](../docs/product/geometry-and-rendering.
 
 - Owners: [`packages/engine/src/ArchitectureScene.tsx`](../packages/engine/src/ArchitectureScene.tsx), [`packages/engine/src/architecture-scene`](../packages/engine/src/architecture-scene), [`packages/engine/src/rendering.tsx`](../packages/engine/src/rendering.tsx), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/building`](../packages/engine/src/building), [`packages/engine/src/stairs`](../packages/engine/src/stairs), [`packages/engine/src/SceneLighting.tsx`](../packages/engine/src/SceneLighting.tsx), [`packages/engine/src/lighting.ts`](../packages/engine/src/lighting.ts), [`packages/engine/src/solar-shadow-frame.ts`](../packages/engine/src/solar-shadow-frame.ts).
 - Interface: `ArchitectureScene`, `StylizedScene`, `deriveSolarLighting`, `resolveSolarLighting` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Trace derived geometry and collision from floor architecture; visible geometry uses procedural toon rendering. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.
+- Review invariant: Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires.
 - Checks: `test:unit`, `verify:policy`, `verify:scene-contours`, `fixture:verify:scale`, `measure:scene`.
 
 ### Catalog and model extensions

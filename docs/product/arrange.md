@@ -56,6 +56,13 @@ The source registries, not a hard-coded count in this document, determine which
 items are available. A model definition and a placed item are separate concepts:
 model geometry is code; item identity, size, placement, and slots are data.
 
+**My models** browses the active home's imported GLBs alongside the native
+catalog. **Import GLB** opens the normalization and profile preview, and
+**Download AI skill** provides standalone authoring guidance and examples.
+Personal models preserve file materials and expose uniform resizing. Their
+metadata and instances share history/publication with native items; geometry is
+an immutable asset. See [personal models](personal-models.md).
+
 Catalog model thumbnails are cached across Arrange sessions. Cache keys include
 the model preview revision so changed models invalidate earlier previews. After its
 first visit, the editor retains Arrange’s hidden 3D scene and WebGL resources

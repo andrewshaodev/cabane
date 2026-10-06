@@ -64,9 +64,15 @@ colors and the preset IDs exported by `FLOOR_PATTERN_PRESET_IDS`, including wood
 stone/tile, dirt, bark, and outdoor stone treatments. Ordered room/ground zones
 compose finishes; implementation belongs to the engine finish modules.
 
-Visible home content uses procedural geometry, toon materials, and restrained
+Native and repository-generated home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable
 product. Shared lighting, fading, and outline behavior stay engine-owned.
+Personal GLB instances preserve original materials and embedded textures; their
+foreground pixels are excluded from compulsory contours. Imported resources are
+owned, shared, and disposed by the dedicated import module and use ordinary
+draws. Floor imports add a simple envelope collider. The exception does not
+permit asset loading in native models or generated home extensions. See
+[personal models](personal-models.md).
 Physical lights render only on the active floor. On that floor, supported emitters
 stay mounted at zero intensity while off or unavailable. Device and dashboard
 light updates change uniforms without changing shader light counts, avoiding

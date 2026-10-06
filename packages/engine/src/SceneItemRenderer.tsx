@@ -137,6 +137,7 @@ function DeviceSceneItem({
       rotation={[0, transform.rotationYRadians, 0]}
       scale={scale}
       userData={{
+        walkCollider: item.modelId.startsWith("custom:") && item.placement.kind === "absolute",
         deviceBindingId: item.id,
         deviceModel: item.modelId,
         visualState,
@@ -286,6 +287,9 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
     return (
       <group
         name={`scene-item-${item.id}`}
+        userData={{
+          walkCollider: item.modelId.startsWith("custom:") && item.placement.kind === "absolute",
+        }}
         position={transform.position}
         rotation={[0, transform.rotationYRadians, 0]}
       >

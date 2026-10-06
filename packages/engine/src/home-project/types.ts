@@ -1,3 +1,4 @@
+import type { CustomModel } from "../imported-models/contracts";
 import type {
   Assumption,
   EntityBindingSlotSpec,
@@ -99,6 +100,7 @@ export interface OpeningProfileSpec {
 }
 
 export interface HomeProject {
+  customModels?: readonly CustomModel[];
   schemaVersion: 2;
   seedRevision: string;
   home: {

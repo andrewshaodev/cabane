@@ -1,3 +1,4 @@
+import { resolveProjectModels } from "@cabane/engine";
 import { composeHomeProjectPreview, deriveFloorLevels } from "@cabane/engine";
 
 import { evaluateDerivedWalkNavigation } from "@cabane/engine";
@@ -14,7 +15,7 @@ import { useFurnishingEditor } from "../editor-preview/furnish";
 
 import { projectFromEditorState } from "../editor-preview/project-sync";
 
-import { editorBindingsForManifest, ownerDeviceModels } from "../project-runtime";
+import { editorBindingsForManifest, ownerProjectRegistries } from "../project-runtime";
 
 import type { HomeProject } from "@cabane/engine";
 type Options = {
@@ -36,8 +37,10 @@ export function useEditorSceneProjection({
     items: furnishingEditorItems,
     selectedId: furnishingEditorSelectedId,
   } = furnishingEditor;
-  const furnishingModels = ownerProjectManifest.extensions.furnishingModels;
-  const deviceModels = ownerDeviceModels;
+  const { furnishingModels, deviceModels } = useMemo(
+    () => resolveProjectModels(project, ownerProjectRegistries),
+    [project],
+  );
   const ceilingDependencies = useSceneItemDependencies(
     furnishingEditor,
     constructEditorPreviewFloor,

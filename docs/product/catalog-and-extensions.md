@@ -19,11 +19,16 @@ Scene-item rendering avoids drawing both declarative items and legacy room
 composition for the same declarative project. Missing model definitions surface
 validation/recovery issues.
 
-A new model should use the public engine material/geometry vocabulary, expose
+A new native model should use the public engine material/geometry vocabulary, expose
 only its supported entry points through a local barrel, and preserve catalog
 placement and slot semantics. Do not put household HA IDs into registry entries.
 The exact available models and presets are the current registry contents, not a
 frozen product-spec enumeration.
+
+Personal GLB definitions are a separate per-project data catalog. They resolve
+through the engine import owner and preserve their original materials; they do
+not change native registry ownership or home-local procedural generation. See
+[personal models](personal-models.md) for import, device, and asset contracts.
 
 Implementation: [catalog guide](../../packages/catalog/README.md),
 [architecture registry](../../packages/catalog/src/architecture/registry.ts),

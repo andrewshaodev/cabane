@@ -74,7 +74,29 @@ for (const file of files) {
       relativePath === "packages/engine/src/floor-finishes/textures.ts"
     )
       continue;
+    if (
+      rule.reason === "external model or texture loader" &&
+      relativePath === "packages/engine/src/imported-models/glb-resources.ts"
+    )
+      continue;
+    if (
+      rule.reason === "non-toon visible material" &&
+      [
+        "packages/engine/src/imported-models/ImportedModel.tsx",
+        "apps/web/src/custom-models/ModelImportPreview.tsx",
+      ].includes(relativePath)
+    )
+      continue;
     let inspectedSource = source;
+    if (
+      rule.reason === "external visual asset reference" &&
+      (relativePath.startsWith("packages/engine/src/imported-models/") ||
+        relativePath === "apps/web/src/custom-models/CustomModelLibrary.tsx")
+    ) {
+      // Local GLB bytes and user downloads only; remote URLs and other assets
+      // remain prohibited, including inside the import owner.
+      inspectedSource = inspectedSource.replace(/\.glb(?=["'`])/g, ".personal-model");
+    }
     if (
       rule.reason === "runtime remote URL" &&
       relativePath === "apps/web/src/editor-plan-import/plan-generation-schema.ts"
