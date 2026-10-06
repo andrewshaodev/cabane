@@ -170,9 +170,8 @@ Roll-up doors own ordinary floor-level wall apertures. Their fixed header and
 jambs fit inside the opening envelope, and slats retract upward using normalized
 opening position. Geometry and Walk share the header, travel, and clear-width
 calculation. Walk requires eye height plus a 0.18 m head margin and current jump
-elevation; jambs remain collidable. Reported positions are animation targets;
-the moving position also drives Walk clearance. Reduced motion applies targets
-immediately. Unbound doors open locally on approach;
+elevation; jambs remain collidable. Reported positions apply directly, without
+an independent animation timeline. Unbound doors open locally on approach;
 bound doors follow reported/retained state, even when closed or unavailable.
 
 L-shaped stair elevation rises along each flight and remains constant across its
