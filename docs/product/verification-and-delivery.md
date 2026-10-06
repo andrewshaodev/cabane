@@ -1,5 +1,7 @@
 # Verification, delivery, and known limits
 
+Follow [the test guidelines](../test-guidelines.md) when changing coverage or test tooling.
+
 The persisted contract is explicitly defined by `docs/ha-compatibility.json`,
 with release revisions in `docs/ha-contract.json`, and checked by
 `verify:ha-contract` inside `verify:fast`. Portable field/type changes require a reviewed manifest snapshot; compatibility
@@ -86,8 +88,9 @@ per scenario. DOM checks wait for state or transaction completion; asynchronous 
 reads use `tests/async-condition.mjs`, since the pinned Playwright `waitForFunction`
 treats a returned Promise as truthy before its result is available; sync tests drive
 interval callbacks explicitly. Keep Chromium for browser-specific behavior: real
-IndexedDB through the application, route/reload persistence, file upload/download,
-reference-image interaction, responsive editor controls, and rendered scenes.
+IndexedDB through the application, minimal file imports, selected responsive editor
+controls, and representative rendered scenes. Browser-specific coverage is selective,
+not a requirement to exercise every feature in Chromium.
 
 Browser tests reuse Vite and Chromium within each shard, with fresh browser contexts
 for each test/session and teardown even after failure. Each Vite browser server
@@ -113,8 +116,8 @@ behavior remain in `gun-portals`, `portal-persistence`, `portal-transition` and
 `portal-view` Node tests. Full mobile travel and pixel-readback portal journeys are
 intentionally no longer part of the automatic gate; visual review remains separate.
 Standalone startup's zero/one/multiple-home and invalid OAuth identity matrices
-also run against the real React application and isolated IndexedDB in Node; browser
-coverage retains navigation, reload, valid OAuth return and recovery.
+also run against the real React application and isolated IndexedDB in Node. The
+standalone navigation/reload/OAuth browser journey has been removed.
 
 Home-specific commands include `home:validate-floor`, `home:verify`, and layout,
 room, and scale fixture verification. Fixtures exercise a representative target
@@ -195,9 +198,7 @@ overrides the destination).
 
 Personal GLB coverage uses `tests/personal-models.test.mjs`,
 `tests/personal-models-browser.test.mjs`, and `tests/ha-model-assets.test.mjs`.
-One normal Arrange browser journey imports a textured GLB, cancels real elevation
-and resize gestures, publishes, reloads, transfers a complete archive to an isolated
-browser context, and checks missing-asset recovery. A separate scene check retains
+One normal Arrange browser smoke imports a textured GLB into My models. A separate scene check retains
 20 rooms, 100 simulated bindings and shared textured resources. Node tests cover
 Blender/Three.js skill exports, material/format validation, support normalization,
 elevation/resize history transactions, resource lifetimes and archive integrity.
@@ -210,3 +211,12 @@ conflicts. Companion integration tests cover authenticated blocks, integrity,
 reference checks, and delayed cleanup. These checks use synthetic data and do not
 contact household devices. Cabane and the integration must be delivered together;
 publishing and deployment remain separate actions.
+
+The subsequent scope reduction deliberately removes browser journeys for model-pack
+replacement, reference-plan tracing, six weather previews, standalone navigation and
+OAuth, north/solar preview, rug dimensions, room-control reordering, and imported
+basement viewing/walking. GLB import no longer includes publication, reload, gestures
+or archive transfer. Existing Node/DOM suites retain schema, repository, model-pack,
+archive, reference-plan, weather and startup behavior; they do not establish equivalent
+end-to-end UI coverage. No replacement browser journeys or duplicate unit matrices
+are added. Basement editing and the representative-scale GLB scene remain.

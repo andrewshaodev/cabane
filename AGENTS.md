@@ -155,6 +155,9 @@ processed by their chosen agent provider.
 
 ## Working and verification rules
 
+Before adding or changing tests, test infrastructure, or verification commands,
+read [the test guidelines](docs/test-guidelines.md).
+
 - Use the pinned Node/npm versions and `npm ci`. Install the pinned Chromium with
   `npm run browser:install` before browser verification.
 - Run `npm run format` after edits and `npm run verify:fast` before handing off code.

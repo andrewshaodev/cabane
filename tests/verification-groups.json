@@ -36,20 +36,17 @@
       "model-generation-guide.test.mjs",
       "multiple-floor-editing.test.mjs",
       "multiple-floor-schema.test.mjs",
-      "north-browser.test.mjs",
       "onboarding.test.mjs",
       "opening-connect.test.mjs",
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
-      "room-module-order.test.mjs",
       "room-navigation.test.mjs",
       "room-status-badges.test.mjs",
       "room-status-model.test.mjs",
       "room-status-overlays.test.mjs",
       "runtime-binding-profile.test.mjs",
       "setup-progress.test.mjs",
-      "weather-browser.test.mjs",
       "weather.test.mjs",
       "workspace-startup-routing.test.mjs"
     ]
@@ -98,7 +95,6 @@
       "multiple-floor-regressions.test.mjs",
       "multiple-floor-scale.test.mjs",
       "multiple-floor-schema.test.mjs",
-      "north-browser.test.mjs",
       "opening-junction-clearance.test.mjs",
       "opening-orientation.test.mjs",
       "outdoor-platforms.test.mjs",
@@ -107,7 +103,6 @@
       "platform-low-wall-corners.test.mjs",
       "pools.test.mjs",
       "prepared-walk-colliders.test.mjs",
-      "reference-plan-browser.test.mjs",
       "reference-plan.test.mjs",
       "roof.test.mjs",
       "room-interior-area.test.mjs",
@@ -167,7 +162,6 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
-      "room-module-order.test.mjs",
       "room-navigation.test.mjs",
       "room-status-badges.test.mjs",
       "room-status-model.test.mjs",
@@ -176,8 +170,7 @@
       "scene-action-bar.test.mjs",
       "scene-systems.test.mjs",
       "setup-progress.test.mjs",
-      "weather.test.mjs",
-      "weather-browser.test.mjs"
+      "weather.test.mjs"
     ]
   },
   "common": {
@@ -218,7 +211,6 @@
       "test-profile.test.mjs",
       "thumbnail-cache.test.mjs",
       "verification-groups.test.mjs",
-      "workspace-application.test.mjs",
       "workspace-availability.test.mjs",
       "workspace-backup-browser.test.mjs",
       "workspace-bindings.test.mjs",
