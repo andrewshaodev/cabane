@@ -25,6 +25,7 @@ export interface HomeAssistantRuntimeValue extends HomeAssistantRuntimeSnapshot 
   refresh: () => Promise<void>;
   callService: (call: SupportedServiceCall) => Promise<unknown>;
   cameraClient: HomeAssistantCameraClient | null;
+  sendStorageMessage: <T>(message: { type: string; [key: string]: unknown }) => Promise<T>;
 }
 
 export const EMPTY_STATES = {} as Readonly<Record<EntityId, EntityStateSnapshot>>;
@@ -47,6 +48,7 @@ const DEFAULT_RUNTIME: HomeAssistantRuntimeValue = {
   refresh: async () => undefined,
   callService: async () => { throw new Error("Home Assistant is not connected."); },
   cameraClient: null,
+  sendStorageMessage: async () => { throw new Error("Home Assistant is not connected."); },
 };
 
 export const HomeAssistantRuntimeContext = createContext<HomeAssistantRuntimeValue>(DEFAULT_RUNTIME);

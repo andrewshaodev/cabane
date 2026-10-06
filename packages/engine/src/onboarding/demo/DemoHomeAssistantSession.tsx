@@ -62,6 +62,7 @@ export function DemoHomeAssistantSession({
     refresh: async () => undefined,
     callService,
     cameraClient: null,
+    sendStorageMessage: async () => { throw new Error("The demo cannot access Home Assistant storage."); },
   }), [callService, definition, snapshot]);
 
   const manager = useMemo<RuntimeBindingProfileManager>(() => ({

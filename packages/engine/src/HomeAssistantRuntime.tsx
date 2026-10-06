@@ -458,6 +458,17 @@ function HomeAssistantRuntimeProviderImpl({
         ? Promise.reject(new Error("This Home Assistant session is no longer active."))
         : schedulerRef.current.schedule(call),
       cameraClient,
+      sendStorageMessage: async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
+        const connection = connectionRef.current;
+        if (lifecycle !== lifecycleRef.current || !connection || statusRef.current !== "connected") {
+          throw new Error("Home Assistant is not connected.");
+        }
+        const result = await connection.sendMessagePromise<T>(message);
+        if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
+          throw new Error("This Home Assistant session is no longer active.");
+        }
+        return result;
+      },
     };
   }, [
     areas,
@@ -531,6 +542,7 @@ export function HomeAssistantRuntimeSnapshotTestProvider({
       throw new Error("Deterministic snapshot fixtures cannot call Home Assistant services.");
     },
     cameraClient: null,
+    sendStorageMessage: async () => { throw new Error("Snapshot fixtures cannot access Home Assistant storage."); },
   }), [snapshot]);
   return <HomeAssistantRuntimeValueProvider value={value}>{children}</HomeAssistantRuntimeValueProvider>;
 }
