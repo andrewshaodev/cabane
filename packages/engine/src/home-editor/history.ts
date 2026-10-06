@@ -1,9 +1,5 @@
 import type { HomeProject } from "../home-project";
-import type {
-  ProjectCommand,
-  ProjectHistory,
-  ProjectValuePatch,
-} from "./types";
+import type { ProjectCommand, ProjectHistory, ProjectValuePatch } from "./types";
 
 export const DEFAULT_HISTORY_LIMIT = 100;
 const UNSAFE_PATH_PARTS = new Set(["__proto__", "constructor", "prototype"]);
@@ -18,8 +14,7 @@ const isSafePathPart = (part: string | number): boolean =>
     ? Number.isSafeInteger(part) && part >= 0
     : part.length > 0 && !UNSAFE_PATH_PARTS.has(part);
 
-const pathKey = (path: readonly (string | number)[]): string =>
-  JSON.stringify(path);
+const pathKey = (path: readonly (string | number)[]): string => JSON.stringify(path);
 
 const pathsOverlap = (
   left: readonly (string | number)[],
@@ -35,10 +30,12 @@ const pathsOverlap = (
 const jsonValueEqual = (left: unknown, right: unknown): boolean => {
   if (Object.is(left, right)) return true;
   if (Array.isArray(left) || Array.isArray(right)) {
-    return Array.isArray(left)
-      && Array.isArray(right)
-      && left.length === right.length
-      && left.every((entry, index) => jsonValueEqual(entry, right[index]));
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((entry, index) => jsonValueEqual(entry, right[index]))
+    );
   }
   if (!isContainer(left) || !isContainer(right)) return false;
 
@@ -46,11 +43,14 @@ const jsonValueEqual = (left: unknown, right: unknown): boolean => {
   const rightRecord = right as Record<string, unknown>;
   const leftKeys = Object.keys(leftRecord);
   const rightKeys = Object.keys(rightRecord);
-  return leftKeys.length === rightKeys.length
-    && leftKeys.every((key) =>
-      Object.prototype.hasOwnProperty.call(rightRecord, key)
-      && jsonValueEqual(leftRecord[key], rightRecord[key])
-    );
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key) =>
+        Object.prototype.hasOwnProperty.call(rightRecord, key) &&
+        jsonValueEqual(leftRecord[key], rightRecord[key]),
+    )
+  );
 };
 
 const assertPatchPaths = (
@@ -98,17 +98,14 @@ const assertCommand = (command: ProjectCommand): void => {
   const beforePaths = new Set(command.before.map((patch) => pathKey(patch.path)));
   const afterPaths = new Set(command.after.map((patch) => pathKey(patch.path)));
   if (
-    beforePaths.size !== afterPaths.size
-    || [...beforePaths].some((path) => !afterPaths.has(path))
+    beforePaths.size !== afterPaths.size ||
+    [...beforePaths].some((path) => !afterPaths.has(path))
   ) {
     throw new Error("Project command before and after patches must target the same paths.");
   }
 };
 
-const valueAtPath = (
-  project: HomeProject,
-  path: readonly (string | number)[],
-): unknown => {
+const valueAtPath = (project: HomeProject, path: readonly (string | number)[]): unknown => {
   let value: unknown = project;
   for (const part of path) {
     if (!isContainer(value)) {
@@ -133,7 +130,9 @@ const setAtPath = (
   replacement: unknown,
 ): unknown => {
   if (!isContainer(value)) {
-    throw new Error(`Project command path ${pathKey(path)} does not resolve to a project container.`);
+    throw new Error(
+      `Project command path ${pathKey(path)} does not resolve to a project container.`,
+    );
   }
 
   const part = path[depth];
@@ -143,9 +142,7 @@ const setAtPath = (
       throw new Error(`Project command path ${pathKey(path)} contains an invalid array index.`);
     }
     const next = value.slice();
-    next[part] = isLeaf
-      ? replacement
-      : setAtPath(value[part], path, depth + 1, replacement);
+    next[part] = isLeaf ? replacement : setAtPath(value[part], path, depth + 1, replacement);
     return next;
   }
 
@@ -204,11 +201,9 @@ export const commitProjectCommand = (
   assertCommand(command);
   assertExpectedValues(history.present, command.before, "commit project command");
 
-  const beforeByPath = new Map(
-    command.before.map((patch) => [pathKey(patch.path), patch.value]),
-  );
+  const beforeByPath = new Map(command.before.map((patch) => [pathKey(patch.path), patch.value]));
   const isNoop = command.after.every((patch) =>
-    jsonValueEqual(beforeByPath.get(pathKey(patch.path)), patch.value)
+    jsonValueEqual(beforeByPath.get(pathKey(patch.path)), patch.value),
   );
   if (isNoop) return history;
 

@@ -18,9 +18,10 @@ const FRAME_CENTER_Z = FRAME_DEPTH / 2 - 0.001;
 
 type ConnectedFrameFinish = "oak" | "black";
 
-const finishPalette = (finish: ConnectedFrameFinish) => finish === "oak"
-  ? { vertical: "#b9824f", horizontal: "#c99863", outline: "#5f402a", inset: "#332d27" }
-  : { vertical: "#252a29", horizontal: "#303534", outline: "#111514", inset: "#171b1a" };
+const finishPalette = (finish: ConnectedFrameFinish) =>
+  finish === "oak"
+    ? { vertical: "#b9824f", horizontal: "#c99863", outline: "#5f402a", inset: "#332d27" }
+    : { vertical: "#252a29", horizontal: "#303534", outline: "#111514", inset: "#171b1a" };
 
 function ConnectedFrame({
   finish,

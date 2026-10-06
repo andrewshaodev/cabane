@@ -44,12 +44,22 @@ as their building. The legacy loader derives a height when older JSON omits it.
   },
   "defaultWallHeightMeters": 2.5,
   "defaultCeilingHeightMeters": 2.5,
-  "footprint": [[0, 0], [4, 0], [4, 3], [0, 3]],
+  "footprint": [
+    [0, 0],
+    [4, 0],
+    [4, 3],
+    [0, 3]
+  ],
   "rooms": [
     {
       "id": "living-room",
       "name": "Living room",
-      "polygon": [[0.2, 0.2], [3.8, 0.2], [3.8, 2.8], [0.2, 2.8]],
+      "polygon": [
+        [0.2, 0.2],
+        [3.8, 0.2],
+        [3.8, 2.8],
+        [0.2, 2.8]
+      ],
       "accent": "#c9a477",
       "floorColor": "#b58a62",
       "dashboardSlots": [],
@@ -195,7 +205,7 @@ change wall or junction coordinates.
   `leafCount: 1 | 2`, and `sillHeightMeters: 0`. Doors are traversable by
   definition; operation, visual variant, and finish are independent.
 - Windows require `operation: "fixed" | "casement"`, `variant: "plain" |
-  "muntined"`, `panelCount: 1 | 2`, and `glazing: "clear" | "privacy"`.
+"muntined"`, `panelCount: 1 | 2`, and `glazing: "clear" | "privacy"`.
   Muntined windows also require integer `muntins.columns` and `muntins.rows`
   from 1 through 6. Dimensions and sill height remain per-home configuration.
 - Passages use `kind: "passage"` with `variant: "rectangular"`, or

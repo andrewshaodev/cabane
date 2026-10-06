@@ -6,7 +6,14 @@ import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 export function RefrigeratorModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-refrigerator" userData={{ walkCollider: true }}>
-      <RoundedBox args={[0.7, 1.85, 0.69]} radius={0.025} smoothness={2} position={[0, 0.925, -0.015]} castShadow receiveShadow>
+      <RoundedBox
+        args={[0.7, 1.85, 0.69]}
+        radius={0.025}
+        smoothness={2}
+        position={[0, 0.925, -0.015]}
+        castShadow
+        receiveShadow
+      >
         <ToonMaterial color="#dfe3df" />
         <Outlines color={palette.charcoal} thickness={0.006} />
       </RoundedBox>

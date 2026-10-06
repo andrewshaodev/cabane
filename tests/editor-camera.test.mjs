@@ -16,14 +16,20 @@ await withModules(async (load) => {
     { id: "south", from: [4, 3], to: [0, 3] },
     { id: "west", from: [0, 3], to: [0, 0] },
   ];
-  const derive = (walls) => deriveFloorTopology({ floorId: "floor", floorName: "Floor", walls, openings: [], rooms: [] }).floor;
+  const derive = (walls) =>
+    deriveFloorTopology({ floorId: "floor", floorName: "Floor", walls, openings: [], rooms: [] })
+      .floor;
   const floor = derive(walls);
-  const extendedFloor = derive([...walls,
+  const extendedFloor = derive([
+    ...walls,
     { id: "extension-north", from: [4, 0], to: [10, 0] },
     { id: "extension-east", from: [10, 0], to: [10, 3] },
     { id: "extension-south", from: [10, 3], to: [4, 3] },
   ]);
-  const controlsFor = (renderer) => renderer.scene.find((node) => node.instance?.target && node.instance?.object?.isOrthographicCamera).instance;
+  const controlsFor = (renderer) =>
+    renderer.scene.find(
+      (node) => node.instance?.target && node.instance?.object?.isOrthographicCamera,
+    ).instance;
   const pose = (controls) => ({
     position: controls.object.position.toArray(),
     quaternion: controls.object.quaternion.toArray(),
@@ -31,12 +37,21 @@ await withModules(async (load) => {
     zoom: controls.object.zoom,
   });
   const options = {
-    width: 1000, height: 800,
-    beforeReturn(canvas) { canvas.ownerDocument = { addEventListener() {}, removeEventListener() {} }; },
+    width: 1000,
+    height: 800,
+    beforeReturn(canvas) {
+      canvas.ownerDocument = { addEventListener() {}, removeEventListener() {} };
+    },
   };
   const cameraProps = (overrides = {}) => ({
-    view: "top", resetKey: 0, floor, controlsEnabled: true, focusPoint: null,
-    onTargetChange() {}, savedCamera: { current: null }, ...overrides,
+    view: "top",
+    resetKey: 0,
+    floor,
+    controlsEnabled: true,
+    focusPoint: null,
+    onTargetChange() {},
+    savedCamera: { current: null },
+    ...overrides,
   });
 
   test("construction wheel pans without clicking even when pointer controls are disabled, and pinch zooms", async () => {
@@ -64,10 +79,19 @@ await withModules(async (load) => {
       controls.object.lookAt(controls.target);
       const before = pose(controls);
       let prevented = 0;
-      const wheel = (overrides = {}) => listeners.get("wheel")({
-        deltaX: 80, deltaY: 40, deltaMode: 0, clientX: 500, clientY: 400,
-        preventDefault() { prevented++; }, stopImmediatePropagation() {}, ...overrides,
-      });
+      const wheel = (overrides = {}) =>
+        listeners.get("wheel")({
+          deltaX: 80,
+          deltaY: 40,
+          deltaMode: 0,
+          clientX: 500,
+          clientY: 400,
+          preventDefault() {
+            prevented++;
+          },
+          stopImmediatePropagation() {},
+          ...overrides,
+        });
       await act(async () => wheel());
       assert.equal(controls.object.zoom, before.zoom);
       assert.ok(Math.abs(controls.target.x - before.target[0] - 80 / before.zoom) < 1e-8);
@@ -80,7 +104,9 @@ await withModules(async (load) => {
       assert.equal(prevented, 2);
       await renderer.update(createElement(PreviewCamera, { ...props, planWheelNavigation: false }));
       assert.equal(listeners.size, 0, "leaving Construct removes the wheel override");
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("orbit camera preserves the live pose when roof visibility or active floors change", async () => {
@@ -106,7 +132,9 @@ await withModules(async (load) => {
       }
       await renderer.update(createElement(OrbitCamera, { ...props, resetKey: 1 }));
       assert.notEqual(controlsFor(renderer), controls, "explicit reset still reframes");
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   for (const view of ["top", "3d"]) {
@@ -126,20 +154,37 @@ await withModules(async (load) => {
         controls.object.updateProjectionMatrix();
         controls.update();
         const before = pose(controls);
-        for (const nextFloor of [floor, extendedFloor, { ...extendedFloor, id: "upper" }, floor, extendedFloor]) {
-          await renderer.update(createElement(PreviewCamera, { ...props, floor: nextFloor, controlsEnabled: false }));
-          await renderer.update(createElement(PreviewCamera, { ...props, floor: nextFloor, controlsEnabled: true }));
+        for (const nextFloor of [
+          floor,
+          extendedFloor,
+          { ...extendedFloor, id: "upper" },
+          floor,
+          extendedFloor,
+        ]) {
+          await renderer.update(
+            createElement(PreviewCamera, { ...props, floor: nextFloor, controlsEnabled: false }),
+          );
+          await renderer.update(
+            createElement(PreviewCamera, { ...props, floor: nextFloor, controlsEnabled: true }),
+          );
           assert.equal(controlsFor(renderer), controls, "editing must not remount controls");
           assert.deepEqual(pose(controls), before, "topology edits must not refit the camera");
         }
-      } finally { await renderer.unmount(); }
+      } finally {
+        await renderer.unmount();
+      }
     });
   }
 
   test("viewport resizing preserves camera pose and zoom while updating the frustum", async () => {
     let state;
     const props = cameraProps();
-    const renderer = await create(createElement(PreviewCamera, props), { ...options, onCreated(value) { state = value; } });
+    const renderer = await create(createElement(PreviewCamera, props), {
+      ...options,
+      onCreated(value) {
+        state = value;
+      },
+    });
     try {
       const controls = controlsFor(renderer);
       controls.object.zoom = 65;
@@ -151,22 +196,41 @@ await withModules(async (load) => {
       assert.deepEqual(pose(controls), before);
       assert.equal(controls.object.right - controls.object.left, 600);
       assert.equal(controls.object.top - controls.object.bottom, 400);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("pool edits preserve the camera until overview is explicitly reset to include the rim", async () => {
     const props = cameraProps();
     const renderer = await create(createElement(PreviewCamera, props), options);
-    const withPool = { ...floor, pools: [{ id: "pool", polygon: [[15, 0], [19, 0], [19, 3], [15, 3]] }] };
+    const withPool = {
+      ...floor,
+      pools: [
+        {
+          id: "pool",
+          polygon: [
+            [15, 0],
+            [19, 0],
+            [19, 3],
+            [15, 3],
+          ],
+        },
+      ],
+    };
     try {
       const initial = pose(controlsFor(renderer));
       await renderer.update(createElement(PreviewCamera, { ...props, floor: withPool }));
       assert.deepEqual(pose(controlsFor(renderer)), initial);
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: withPool, resetKey: 1 }));
+      await renderer.update(
+        createElement(PreviewCamera, { ...props, floor: withPool, resetKey: 1 }),
+      );
       const reset = pose(controlsFor(renderer));
-      assert.deepEqual(reset.target, [9.625, .2, 1.5]);
+      assert.deepEqual(reset.target, [9.625, 0.2, 1.5]);
       assert.ok(reset.zoom < initial.zoom);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("edit renders do not detach active camera pointer listeners", async () => {
@@ -175,15 +239,30 @@ await withModules(async (load) => {
     const renderer = await create(createElement(PreviewCamera, props), {
       ...options,
       beforeReturn(canvas) {
-        canvas.ownerDocument = { addEventListener() {}, removeEventListener(type) { removed.push(type); } };
+        canvas.ownerDocument = {
+          addEventListener() {},
+          removeEventListener(type) {
+            removed.push(type);
+          },
+        };
       },
     });
     try {
       removed.length = 0;
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor, controlsEnabled: false }));
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor, controlsEnabled: true }));
-      assert.deepEqual(removed, [], "disposing controls during a gesture loses its pointer-up cleanup");
-    } finally { await renderer.unmount(); }
+      await renderer.update(
+        createElement(PreviewCamera, { ...props, floor: extendedFloor, controlsEnabled: false }),
+      );
+      await renderer.update(
+        createElement(PreviewCamera, { ...props, floor: extendedFloor, controlsEnabled: true }),
+      );
+      assert.deepEqual(
+        removed,
+        [],
+        "disposing controls during a gesture loses its pointer-up cleanup",
+      );
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("explicit focus and view changes still frame the latest floor", async () => {
@@ -191,25 +270,38 @@ await withModules(async (load) => {
     const renderer = await create(createElement(PreviewCamera, props), options);
     try {
       const initialControls = controlsFor(renderer);
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor, resetKey: 1, focusPoint: [8, 2] }));
+      await renderer.update(
+        createElement(PreviewCamera, {
+          ...props,
+          floor: extendedFloor,
+          resetKey: 1,
+          focusPoint: [8, 2],
+        }),
+      );
       const focused = controlsFor(renderer);
       assert.notEqual(focused, initialControls);
-      assert.deepEqual(focused.target.toArray(), [8, .2, 2]);
+      assert.deepEqual(focused.target.toArray(), [8, 0.2, 2]);
       assert.equal(focused.object.zoom, (1000 / (10 * 1.48)) * 2.25);
       const focusedPose = pose(focused);
-      await renderer.update(createElement(PreviewCamera, { ...props, floor, resetKey: 1, focusPoint: [8, 2] }));
+      await renderer.update(
+        createElement(PreviewCamera, { ...props, floor, resetKey: 1, focusPoint: [8, 2] }),
+      );
       assert.deepEqual(pose(focused), focusedPose, "edits after focusing must not reframe either");
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor, view: "3d", resetKey: 1 }));
+      await renderer.update(
+        createElement(PreviewCamera, { ...props, floor: extendedFloor, view: "3d", resetKey: 1 }),
+      );
       const overview = controlsFor(renderer);
       assert.notEqual(overview, focused);
-      assert.deepEqual(overview.target.toArray(), [5, .2, 1.5]);
+      assert.deepEqual(overview.target.toArray(), [5, 0.2, 1.5]);
       assert.equal(overview.object.zoom, 1000 / (10 * 1.48));
       assert.equal(overview.enableRotate, true);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("saved camera restoration survives edits but does not override an explicit focus", async () => {
-    const saved = { view: "top", position: [3, 18, 2.001], target: [3, .2, 2], zoom: 82 };
+    const saved = { view: "top", position: [3, 18, 2.001], target: [3, 0.2, 2], zoom: 82 };
     const props = cameraProps({ savedCamera: { current: saved } });
     const renderer = await create(createElement(PreviewCamera, props), options);
     try {
@@ -219,9 +311,18 @@ await withModules(async (load) => {
       const before = pose(controls);
       await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor }));
       assert.deepEqual(pose(controls), before);
-      await renderer.update(createElement(PreviewCamera, { ...props, floor: extendedFloor, resetKey: 1, focusPoint: [8, 2] }));
-      assert.deepEqual(controlsFor(renderer).target.toArray(), [8, .2, 2]);
+      await renderer.update(
+        createElement(PreviewCamera, {
+          ...props,
+          floor: extendedFloor,
+          resetKey: 1,
+          focusPoint: [8, 2],
+        }),
+      );
+      assert.deepEqual(controlsFor(renderer).target.toArray(), [8, 0.2, 2]);
       assert.notEqual(controlsFor(renderer).object.zoom, saved.zoom);
-    } finally { await renderer.unmount(); }
+    } finally {
+      await renderer.unmount();
+    }
   });
 });

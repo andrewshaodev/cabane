@@ -10,15 +10,17 @@ await withModules(async (load) => {
   );
 
   test("renders present names with concise accessible text", () => {
-    const html = renderToStaticMarkup(React.createElement(HomePresenceStatus, {
-      summary: {
-        state: "present",
-        people: [
-          { entityId: "person.alex", name: "Alex" },
-          { entityId: "person.sam", name: "Sam" },
-        ],
-      },
-    }));
+    const html = renderToStaticMarkup(
+      React.createElement(HomePresenceStatus, {
+        summary: {
+          state: "present",
+          people: [
+            { entityId: "person.alex", name: "Alex" },
+            { entityId: "person.sam", name: "Sam" },
+          ],
+        },
+      }),
+    );
 
     assert.match(html, /aria-label="At home: Alex, Sam"/);
     assert.match(html, /<strong>At home<\/strong>/);
@@ -27,12 +29,16 @@ await withModules(async (load) => {
   });
 
   test("renders distinct empty and unavailable states", () => {
-    const empty = renderToStaticMarkup(React.createElement(HomePresenceStatus, {
-      summary: { state: "empty", people: [] },
-    }));
-    const unavailable = renderToStaticMarkup(React.createElement(HomePresenceStatus, {
-      summary: { state: "unavailable", people: [] },
-    }));
+    const empty = renderToStaticMarkup(
+      React.createElement(HomePresenceStatus, {
+        summary: { state: "empty", people: [] },
+      }),
+    );
+    const unavailable = renderToStaticMarkup(
+      React.createElement(HomePresenceStatus, {
+        summary: { state: "unavailable", people: [] },
+      }),
+    );
 
     assert.match(empty, /aria-label="Nobody home"/);
     assert.match(empty, /data-presence-state="empty"/);

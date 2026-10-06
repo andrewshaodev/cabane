@@ -6,25 +6,22 @@ export const CAMERA_TRANSPORT_STAGGER_MS = 450;
 export const CAMERA_DISCONNECT_RETRY_MS = 2_500;
 export const CAMERA_ERROR_RETRY_MS = 5_000;
 
-const cameraAbortError = (signal?: AbortSignal) => signal?.reason instanceof Error
-  ? signal.reason
-  : new Error("Camera connection interrupted.");
+const cameraAbortError = (signal?: AbortSignal) =>
+  signal?.reason instanceof Error ? signal.reason : new Error("Camera connection interrupted.");
 
-const waitForCameraDelay = (
-  delayMs: number,
-  signal: AbortSignal,
-) => new Promise<void>((resolve, reject) => {
-  const timeoutId = globalThis.setTimeout(() => {
-    signal.removeEventListener("abort", aborted);
-    resolve();
-  }, delayMs);
-  const aborted = () => {
-    globalThis.clearTimeout(timeoutId);
-    reject(cameraAbortError(signal));
-  };
-  if (signal.aborted) aborted();
-  else signal.addEventListener("abort", aborted, { once: true });
-});
+const waitForCameraDelay = (delayMs: number, signal: AbortSignal) =>
+  new Promise<void>((resolve, reject) => {
+    const timeoutId = globalThis.setTimeout(() => {
+      signal.removeEventListener("abort", aborted);
+      resolve();
+    }, delayMs);
+    const aborted = () => {
+      globalThis.clearTimeout(timeoutId);
+      reject(cameraAbortError(signal));
+    };
+    if (signal.aborted) aborted();
+    else signal.addEventListener("abort", aborted, { once: true });
+  });
 
 export const runCameraTransportRace = async <T>(
   transports: readonly CameraTransport[],
@@ -34,9 +31,10 @@ export const runCameraTransportRace = async <T>(
 ): Promise<T> => {
   if (transports.length === 0) throw new Error("No camera transport is available.");
   const controllers = transports.map(() => new AbortController());
-  const abortFromParent = () => controllers.forEach((controller) => {
-    controller.abort(cameraAbortError(parentSignal));
-  });
+  const abortFromParent = () =>
+    controllers.forEach((controller) => {
+      controller.abort(cameraAbortError(parentSignal));
+    });
   if (parentSignal?.aborted) abortFromParent();
   else parentSignal?.addEventListener("abort", abortFromParent, { once: true });
 
@@ -55,7 +53,8 @@ export const runCameraTransportRace = async <T>(
   try {
     const winner = await Promise.any(attempts);
     controllers.forEach((controller, index) => {
-      if (index !== winner.index) controller.abort(new Error("Another camera transport connected first."));
+      if (index !== winner.index)
+        controller.abort(new Error("Another camera transport connected first."));
     });
     return winner.value;
   } catch (error) {
@@ -101,8 +100,10 @@ export const preferHlsForRemoteAppleClient = (
   userAgent: string,
 ) => {
   try {
-    return /\b(iPhone|iPad|iPod)\b/i.test(userAgent)
-      && new URL(uiUrl).hostname !== new URL(homeAssistantUrl).hostname;
+    return (
+      /\b(iPhone|iPad|iPod)\b/i.test(userAgent) &&
+      new URL(uiUrl).hostname !== new URL(homeAssistantUrl).hostname
+    );
   } catch {
     return false;
   }
@@ -116,30 +117,33 @@ export const cameraTransportCandidates = (
   const available = new Set<CameraTransport>();
   if (frontendStreamTypes.includes("hls")) available.add("hls");
   if (frontendStreamTypes.includes("web_rtc") && webRtcSupported) available.add("webrtc");
-  return (preferHls ? ["hls", "webrtc"] : ["webrtc", "hls"])
-    .filter((transport): transport is CameraTransport => available.has(transport as CameraTransport));
+  return (preferHls ? ["hls", "webrtc"] : ["webrtc", "hls"]).filter(
+    (transport): transport is CameraTransport => available.has(transport as CameraTransport),
+  );
 };
 
 export const appendEarlyCameraIceCandidates = (
   offerSdp: string,
   candidates: readonly Pick<RTCIceCandidate, "candidate">[],
-) => candidates.reduce(
-  (sdp, candidate) => `${sdp}a=${candidate.candidate}\r\n`,
-  offerSdp,
-);
+) => candidates.reduce((sdp, candidate) => `${sdp}a=${candidate.candidate}\r\n`, offerSdp);
 
 export const normalizeRemoteCameraCandidate = (
   candidate: RTCIceCandidateInit,
-): RTCIceCandidateInit => candidate.sdpMid || candidate.sdpMLineIndex != null
-  ? candidate
-  : { candidate: candidate.candidate, sdpMid: "0" };
+): RTCIceCandidateInit =>
+  candidate.sdpMid || candidate.sdpMLineIndex != null
+    ? candidate
+    : {
+        ...(candidate.candidate === undefined ? {} : { candidate: candidate.candidate }),
+        sdpMid: "0",
+      };
 
-export const cameraEntityAvailable = (state: EntityStateSnapshot | undefined) => Boolean(
-  state
-  && !state.stale
-  && state.available
-  && !["off", "unknown", "unavailable"].includes(state.state),
-);
+export const cameraEntityAvailable = (state: EntityStateSnapshot | undefined) =>
+  Boolean(
+    state &&
+    !state.stale &&
+    state.available &&
+    !["off", "unknown", "unavailable"].includes(state.state),
+  );
 
 export const deduplicateCameraStreamRequirements = <T extends { entityId: EntityId }>(
   requirements: readonly T[],

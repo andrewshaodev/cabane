@@ -12,14 +12,13 @@ export type HomeProjectValidationResult =
   | { valid: false; issues: readonly HomeProjectIssue[] };
 
 export type HomeProjectSchemaResult =
-  | { valid: true; project: HomeProject }
-  | { valid: false; issues: readonly HomeProjectIssue[] };
+  { valid: true; project: HomeProject } | { valid: false; issues: readonly HomeProjectIssue[] };
 
 export type JsonRecord = Record<string, unknown>;
 
 export const isPlainRecord = (value: unknown): value is JsonRecord => {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
-  const prototype = Object.getPrototypeOf(value);
+  const prototype: unknown = Object.getPrototypeOf(value);
   return prototype === Object.prototype || prototype === null;
 };
 
@@ -30,7 +29,10 @@ export const addProjectIssue = (
   message: string,
 ) => issues.push({ code, path, message, severity: "error" });
 
-export const sortProjectIssues = (issues: HomeProjectIssue[]) => issues.sort((left, right) =>
-  left.path.localeCompare(right.path) || left.code.localeCompare(right.code) ||
-  left.message.localeCompare(right.message)
-);
+export const sortProjectIssues = (issues: HomeProjectIssue[]) =>
+  issues.sort(
+    (left, right) =>
+      left.path.localeCompare(right.path) ||
+      left.code.localeCompare(right.code) ||
+      left.message.localeCompare(right.message),
+  );

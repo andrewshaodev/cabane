@@ -14,24 +14,16 @@ import {
 
 await withModules(async (load) => {
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
-  const {
-    resolveHomeAssistantBindings,
-    resolveHomeAssistantPictureUrl,
-  } = await load("/packages/engine/src/home-assistant-resolver.ts");
+  const { resolveHomeAssistantBindings, resolveHomeAssistantPictureUrl } = await load(
+    "/packages/engine/src/home-assistant-resolver.ts",
+  );
   const { RoomDashboardPanel } = await load("/packages/engine/src/HomeAssistantDashboards.tsx");
-  const {
-    AdvancedControls,
-    CommandRange,
-    CommandToggle,
-    OptionControl,
-    TemperatureStepper,
-  } = await load("/packages/engine/src/home-assistant-dashboard/control-primitives.tsx");
+  const { AdvancedControls, CommandRange, CommandToggle, OptionControl, TemperatureStepper } =
+    await load("/packages/engine/src/home-assistant-dashboard/control-primitives.tsx");
   const { buildRoomModules } = await load(
     "/packages/engine/src/home-assistant-dashboard/module-model.ts",
   );
-  const { RoomModule } = await load(
-    "/packages/engine/src/home-assistant-dashboard/RoomModule.tsx",
-  );
+  const { RoomModule } = await load("/packages/engine/src/home-assistant-dashboard/RoomModule.tsx");
   const { CameraViewer } = await load("/packages/engine/src/CameraViewer.tsx");
   const { stableDeviceRegistry } = await load("/packages/catalog/src/device/index.ts");
   const { settleRoomSheetHeight } = await load(
@@ -41,6 +33,46 @@ await withModules(async (load) => {
   const { roomHeroParallaxOffsets, useRoomHeroParallax } = await load(
     "/packages/engine/src/home-assistant-dashboard/useRoomHeroParallax.ts",
   );
+
+  const { PhysicalToggle, LightFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/light-fields.tsx",
+  );
+  const { ClimateDialFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/climate-dial-fields.tsx",
+  );
+  const { MediaFields } = await load(
+    "/packages/engine/src/home-assistant-dashboard/media-fields.tsx",
+  );
+
+  test("entity controls survive missing, available, and missing state without changing Hook order", async () => {
+    await withDom(async ({ root, dom }) => {
+      const runtime = connectedRuntimeFixture();
+      for (const [Control, entityId] of [
+        [PhysicalToggle, "light.demo_ceiling"],
+        [LightFields, "light.demo_ceiling"],
+        [ClimateDialFields, "climate.demo"],
+        [MediaFields, "media_player.demo_speaker"],
+      ]) {
+        const entity = runtime.entityStates[entityId];
+        assert.ok(entity, entityId);
+        const render = (state) =>
+          React.createElement(Control, {
+            binding: { state, label: "Test control" },
+            enabled: true,
+            tone: "light",
+            onCallService: async () => undefined,
+          });
+        for (const state of [undefined, entity, undefined, entity]) {
+          await act(async () => root.render(render(state)));
+          assert.equal(
+            Boolean(dom.window.document.querySelector("#root").children.length),
+            Boolean(state),
+          );
+        }
+        await act(async () => root.render(null));
+      }
+    });
+  });
 
   const serviceCall = {
     domain: "light",
@@ -66,37 +98,110 @@ await withModules(async (load) => {
   const modeledBlindModule = (runtime) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const room = manifest.floors[0].rooms[0];
-    const slot = { id: "modeled-blind-primary", compatibleDomains: ["cover"], required: true,
-      autoMap: "manual", deviceRole: "primary", presentation: { label: "Motorized blind", dashboardRole: "primary" } };
-    const changed = { ...manifest, floors: [{ ...manifest.floors[0], rooms: [{ ...room,
-      dashboardSlots: room.dashboardSlots.filter((slot) => slot.id !== "demo-cover-slot"),
-      devices: [...room.devices, { id: "modeled-blind", model: "motorized-blind", entitySlots: [slot],
-        placement: { at: [2, .103], elevationMeters: .82, rotationYRadians: 0, support: { kind: "wall", wallId: "north-wall" } } }],
-    }] }] };
+    const slot = {
+      id: "modeled-blind-primary",
+      compatibleDomains: ["cover"],
+      required: true,
+      autoMap: "manual",
+      deviceRole: "primary",
+      presentation: { label: "Motorized blind", dashboardRole: "primary" },
+    };
+    const changed = {
+      ...manifest,
+      floors: [
+        {
+          ...manifest.floors[0],
+          rooms: [
+            {
+              ...room,
+              dashboardSlots: room.dashboardSlots.filter((slot) => slot.id !== "demo-cover-slot"),
+              devices: [
+                ...room.devices,
+                {
+                  id: "modeled-blind",
+                  model: "motorized-blind",
+                  entitySlots: [slot],
+                  placement: {
+                    at: [2, 0.103],
+                    elevationMeters: 0.82,
+                    rotationYRadians: 0,
+                    support: { kind: "wall", wallId: "north-wall" },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
     const profile = connectedProfileFixture();
     const { ["demo-cover-slot"]: _, ...bindings } = profile.entityIdsBySlotId;
-    const resolved = resolveHomeAssistantBindings(changed, { ...profile,
-      entityIdsBySlotId: { ...bindings, [slot.id]: "cover.demo_shade" } }, runtime, stableDeviceRegistry);
-    return buildRoomModules(resolved.rooms[room.id]).find((module) => module.deviceSlotId === "modeled-blind");
+    const resolved = resolveHomeAssistantBindings(
+      changed,
+      { ...profile, entityIdsBySlotId: { ...bindings, [slot.id]: "cover.demo_shade" } },
+      runtime,
+      stableDeviceRegistry,
+    );
+    return buildRoomModules(resolved.rooms[room.id]).find(
+      (module) => module.deviceSlotId === "modeled-blind",
+    );
   };
 
   test("a modeled blind appears in the room with capability-gated HA controls and honest status", () => {
     for (const scenario of [
-      { state: "opening", position: 62, features: 15, buttons: 3, reading: "Opening · 62% open", range: true },
-      { state: "closing", position: null, features: 15, buttons: 3, reading: "Closing", range: false },
-      { state: "closed", position: null, features: 1, buttons: 1, reading: "0% open", range: false },
-      { state: "unavailable", position: 80, features: 15, buttons: 3, reading: "Unavailable", range: false },
+      {
+        state: "opening",
+        position: 62,
+        features: 15,
+        buttons: 3,
+        reading: "Opening · 62% open",
+        range: true,
+      },
+      {
+        state: "closing",
+        position: null,
+        features: 15,
+        buttons: 3,
+        reading: "Closing",
+        range: false,
+      },
+      {
+        state: "closed",
+        position: null,
+        features: 1,
+        buttons: 1,
+        reading: "0% open",
+        range: false,
+      },
+      {
+        state: "unavailable",
+        position: 80,
+        features: 15,
+        buttons: 3,
+        reading: "Unavailable",
+        range: false,
+      },
     ]) {
       const runtime = connectedRuntimeFixture();
-      runtime.entityStates["cover.demo_shade"] = { ...runtime.entityStates["cover.demo_shade"],
-        state: scenario.state, available: scenario.state !== "unavailable",
-        attributes: { current_position: scenario.position, supported_features: scenario.features } };
+      runtime.entityStates["cover.demo_shade"] = {
+        ...runtime.entityStates["cover.demo_shade"],
+        state: scenario.state,
+        available: scenario.state !== "unavailable",
+        attributes: { current_position: scenario.position, supported_features: scenario.features },
+      };
       const module = modeledBlindModule(runtime);
       assert.ok(module);
       assert.equal(module.entities[0].entityId, "cover.demo_shade");
-      const document = new JSDOM(renderToStaticMarkup(React.createElement(RoomModule, {
-        module, canMutate: true, focused: false, onCallService: async () => {},
-      }))).window.document;
+      const document = new JSDOM(
+        renderToStaticMarkup(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: false,
+            onCallService: async () => {},
+          }),
+        ),
+      ).window.document;
       assert.equal(document.querySelector('[data-module-kind="cover"] h2').textContent, "Shade");
       assert.equal(document.querySelector("output").textContent, scenario.reading);
       assert.equal(document.querySelectorAll("button").length, scenario.buttons);
@@ -112,12 +217,21 @@ await withModules(async (load) => {
       const calls = [];
       const pendingOpen = deferred();
       const runtime = connectedRuntimeFixture();
-      const render = (canMutate = true) => root.render(React.createElement(RoomModule, {
-        module: modeledBlindModule(runtime), focused: true, canMutate,
-        onCallService: (call) => { calls.push(call); return call.service === "open_cover" ? pendingOpen.promise : Promise.resolve(); },
-      }));
+      const render = (canMutate = true) =>
+        root.render(
+          React.createElement(RoomModule, {
+            module: modeledBlindModule(runtime),
+            focused: true,
+            canMutate,
+            onCallService: (call) => {
+              calls.push(call);
+              return call.service === "open_cover" ? pendingOpen.promise : Promise.resolve();
+            },
+          }),
+        );
       await act(async () => render());
-      const button = (action) => dom.window.document.querySelector(`[aria-label="${action} Motorized blind"]`);
+      const button = (action) =>
+        dom.window.document.querySelector(`[aria-label="${action} Motorized blind"]`);
       await act(async () => button("Open").click());
       assert.equal(button("Open").disabled, true);
       assert.equal(button("Stop").disabled, false);
@@ -125,25 +239,50 @@ await withModules(async (load) => {
       await act(async () => button("Close").click());
       await act(async () => {
         const range = dom.window.document.querySelector('input[type="range"]');
-        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(range, "25");
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          range,
+          "25",
+        );
         range.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
-      assert.deepEqual(calls.map(({ service, domain, target, data }) => ({ service, domain, target, data })), [
-        ...["open_cover", "stop_cover", "close_cover"].map((service) => ({ service, domain: "cover", target: { entity_id: "cover.demo_shade" }, data: undefined })),
-        { service: "set_cover_position", domain: "cover", target: { entity_id: "cover.demo_shade" }, data: { position: 25 } },
-      ]);
+      assert.deepEqual(
+        calls.map(({ service, domain, target, data }) => ({ service, domain, target, data })),
+        [
+          ...["open_cover", "stop_cover", "close_cover"].map((service) => ({
+            service,
+            domain: "cover",
+            target: { entity_id: "cover.demo_shade" },
+            data: undefined,
+          })),
+          {
+            service: "set_cover_position",
+            domain: "cover",
+            target: { entity_id: "cover.demo_shade" },
+            data: { position: 25 },
+          },
+        ],
+      );
       await act(async () => pendingOpen.reject(new Error("private upstream details")));
-      assert.match(dom.window.document.querySelector('[role="alert"]').textContent, /Couldn’t update Open Motorized blind/);
+      assert.match(
+        dom.window.document.querySelector('[role="alert"]').textContent,
+        /Couldn’t update Open Motorized blind/,
+      );
       assert.doesNotMatch(dom.window.document.body.textContent, /private upstream/);
       await act(async () => render(false));
-      assert.ok([...dom.window.document.querySelectorAll('button, input[type="range"]')].every((control) => control.disabled));
+      assert.ok(
+        [...dom.window.document.querySelectorAll('button, input[type="range"]')].every(
+          (control) => control.disabled,
+        ),
+      );
       await act(async () => button("Close").click());
       assert.equal(calls.length, 4);
     });
   });
 
   async function withDom(run) {
-    const dom = new JSDOM("<!doctype html><div id=\"root\"></div>", { url: "http://dashboard.local/" });
+    const dom = new JSDOM('<!doctype html><div id="root"></div>', {
+      url: "http://dashboard.local/",
+    });
     const previous = {
       window: globalThis.window,
       document: globalThis.document,
@@ -180,59 +319,65 @@ await withModules(async (load) => {
         IS_REACT_ACT_ENVIRONMENT: previous.actEnvironment,
       });
     }
-  };
+  }
 
-  const renderDashboard = (runtime, selectedDeviceId = null, profile = connectedProfileFixture()) => {
+  const renderDashboard = (
+    runtime,
+    selectedDeviceId = null,
+    profile = connectedProfileFixture(),
+  ) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const resolved = resolveHomeAssistantBindings(manifest, profile, runtime);
     const room = resolved.rooms["demo-room"];
     const roomStatus = deriveRoomStatusMap(manifest, profile, resolved, runtime)["demo-room"];
-    return renderToStaticMarkup(React.createElement(RoomDashboardPanel, {
-      resolved: room,
-      roomStatus,
-      status: runtime.status,
-      canMutate: runtime.canMutate,
-      selectedDeviceId,
-      onSelectDevice: () => undefined,
-      onCallService: async () => undefined,
-      onHome: () => undefined,
-      onWalk: () => undefined,
-      onConnectDevices: () => undefined,
-      onReconnect: () => undefined,
-      onRetry: () => undefined,
-    }));
+    return renderToStaticMarkup(
+      React.createElement(RoomDashboardPanel, {
+        resolved: room,
+        roomStatus,
+        status: runtime.status,
+        canMutate: runtime.canMutate,
+        selectedDeviceId,
+        onSelectDevice: () => undefined,
+        onCallService: async () => undefined,
+        onHome: () => undefined,
+        onWalk: () => undefined,
+        onConnectDevices: () => undefined,
+        onReconnect: () => undefined,
+        onRetry: () => undefined,
+      }),
+    );
   };
 
   const renderModules = (runtime, focusedDeviceId = null) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
-    const room = resolveHomeAssistantBindings(
-      manifest,
-      connectedProfileFixture(),
-      runtime,
-    ).rooms["demo-room"];
+    const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+      "demo-room"
+    ];
     const modules = buildRoomModules(room).filter((module) =>
-      focusedDeviceId ? module.deviceSlotId === focusedDeviceId : true
+      focusedDeviceId ? module.deviceSlotId === focusedDeviceId : true,
     );
-    return renderToStaticMarkup(React.createElement(
-      React.Fragment,
-      null,
-      ...modules.map((module) => React.createElement(RoomModule, {
-        key: module.id,
-        module,
-        canMutate: runtime.canMutate,
-        focused: focusedDeviceId !== null,
-        onCallService: async () => undefined,
-      })),
-    ));
+    return renderToStaticMarkup(
+      React.createElement(
+        React.Fragment,
+        null,
+        ...modules.map((module) =>
+          React.createElement(RoomModule, {
+            key: module.id,
+            module,
+            canMutate: runtime.canMutate,
+            focused: focusedDeviceId !== null,
+            onCallService: async () => undefined,
+          }),
+        ),
+      ),
+    );
   };
 
   const moduleForLabel = (runtime, label) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
-    const room = resolveHomeAssistantBindings(
-      manifest,
-      connectedProfileFixture(),
-      runtime,
-    ).rooms["demo-room"];
+    const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+      "demo-room"
+    ];
     return buildRoomModules(room).find((module) => module.label === label);
   };
 
@@ -241,8 +386,8 @@ await withModules(async (load) => {
     const document = new JSDOM(html).window.document;
     const moduleIcons = [...document.querySelectorAll(".room-module__icon")];
     assert.ok(html.includes("Main ceiling"));
-    assert.ok(html.includes("aria-label=\"Turn off Main ceiling\""));
-    assert.ok(html.includes("aria-label=\"Main ceiling brightness\""));
+    assert.ok(html.includes('aria-label="Turn off Main ceiling"'));
+    assert.ok(html.includes('aria-label="Main ceiling brightness"'));
     assert.ok(html.includes("Coffee switch"));
     assert.ok(html.includes("Temperature"));
     assert.ok(html.includes("19.7 °C"));
@@ -265,32 +410,44 @@ await withModules(async (load) => {
         priority: "secondary",
         sourceOrder: 0,
         deviceSlotId: "fixture-camera-screen",
-        entities: [{
-          entityId: "camera.fixture_camera",
-          domain: "camera",
-          path: "fixture",
-          label: "Studio camera",
-          roomId: "fixture-studio",
-          slotId: "fixture-camera-entity",
-          state: { state: "idle", available: true },
-          issues: [],
-        }],
+        entities: [
+          {
+            entityId: "camera.fixture_camera",
+            domain: "camera",
+            path: "fixture",
+            label: "Studio camera",
+            roomId: "fixture-studio",
+            slotId: "fixture-camera-entity",
+            state: { state: "idle", available: true },
+            issues: [],
+          },
+        ],
         issues: [],
       };
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: false,
-        focused: false,
-        onCallService: async () => undefined,
-        onOpenLiveFeed: () => { opens += 1; },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: false,
+            focused: false,
+            onCallService: async () => undefined,
+            onOpenLiveFeed: () => {
+              opens += 1;
+            },
+          }),
+        ),
+      );
       const html = dom.window.document.getElementById("root").innerHTML;
       assert.ok(html.includes("Studio camera"));
       assert.ok(html.includes("Ready for live view"));
       assert.equal(html.includes("camera.fixture_camera"), false);
       assert.equal(dom.window.document.querySelector(".room-module")?.dataset.gridSize, "1x2");
-      assert.ok(dom.window.document.querySelector(".room-module__icon.is-camera .room-module__glyph"));
-      const liveFeedButton = dom.window.document.querySelector(".room-module__camera-action button");
+      assert.ok(
+        dom.window.document.querySelector(".room-module__icon.is-camera .room-module__glyph"),
+      );
+      const liveFeedButton = dom.window.document.querySelector(
+        ".room-module__camera-action button",
+      );
       assert.equal(liveFeedButton?.classList.contains("is-primary"), true);
       await act(async () => liveFeedButton.click());
       assert.equal(opens, 1);
@@ -309,29 +466,36 @@ await withModules(async (load) => {
           React.Fragment,
           null,
           React.createElement("section", { id: "camera-background" }, "3D home"),
-          open && React.createElement(CameraViewer, {
-            roomName: "Studio",
-            label: "Studio camera",
-            media: {
-              kind: "camera-stream",
-              video: null,
-              posterUrl: null,
-              state: "connecting",
-              transport: "webrtc",
-              previewState: "poster",
-              error: null,
-            },
-            onClose: () => setOpen(false),
-            onReviewConnections: () => undefined,
-          }),
+          open &&
+            React.createElement(CameraViewer, {
+              roomName: "Studio",
+              label: "Studio camera",
+              media: {
+                kind: "camera-stream",
+                video: null,
+                posterUrl: null,
+                state: "connecting",
+                transport: "webrtc",
+                previewState: "poster",
+                error: null,
+              },
+              onClose: () => setOpen(false),
+              onReviewConnections: () => undefined,
+            }),
         );
       }
       await act(async () => root.render(React.createElement(Harness)));
       const background = dom.window.document.getElementById("camera-background");
       assert.equal(background.inert, true);
       assert.equal(background.getAttribute("aria-hidden"), "true");
-      assert.equal(dom.window.document.activeElement?.getAttribute("aria-label"), "Close live feed");
-      assert.equal(dom.window.document.querySelector(".camera-viewer__status")?.textContent.trim(), "Connecting…");
+      assert.equal(
+        dom.window.document.activeElement?.getAttribute("aria-label"),
+        "Close live feed",
+      );
+      assert.equal(
+        dom.window.document.querySelector(".camera-viewer__status")?.textContent.trim(),
+        "Connecting…",
+      );
       assert.equal(dom.window.document.querySelector(".camera-viewer__sound")?.disabled, true);
       await act(async () => {
         dom.window.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape" }));
@@ -346,34 +510,42 @@ await withModules(async (load) => {
 
   test("renders supported complex controls and omits unsupported alternatives", () => {
     const html = renderModules(connectedRuntimeFixture());
-    assert.ok(html.includes("aria-label=\"Decrease Room climate target temperature\""));
-    assert.ok(html.includes("aria-label=\"Increase Room climate target temperature\""));
-    assert.ok(html.includes("aria-label=\"Open Window shade\""));
-    assert.ok(html.includes("aria-label=\"Stop Window shade\""));
-    assert.ok(html.includes("aria-label=\"Close Window shade\""));
-    assert.ok(html.includes("aria-label=\"Window shade position\""));
-    assert.ok(html.includes("aria-label=\"Room fan speed\""));
-    assert.ok(html.includes("aria-label=\"Pause Speaker\""));
-    assert.ok(html.includes("aria-label=\"Speaker volume\""));
-    assert.ok(html.includes("aria-expanded=\"false\""));
+    assert.ok(html.includes('aria-label="Decrease Room climate target temperature"'));
+    assert.ok(html.includes('aria-label="Increase Room climate target temperature"'));
+    assert.ok(html.includes('aria-label="Open Window shade"'));
+    assert.ok(html.includes('aria-label="Stop Window shade"'));
+    assert.ok(html.includes('aria-label="Close Window shade"'));
+    assert.ok(html.includes('aria-label="Window shade position"'));
+    assert.ok(html.includes('aria-label="Room fan speed"'));
+    assert.ok(html.includes('aria-label="Pause Speaker"'));
+    assert.ok(html.includes('aria-label="Speaker volume"'));
+    assert.ok(html.includes('aria-expanded="false"'));
     assert.ok(html.includes("target humidity"));
     assert.ok(html.includes("target temperature"));
-    assert.ok(html.includes("aria-label=\"Clean everywhere with Vacuum\""));
-    assert.ok(html.includes("aria-label=\"Unlock Front lock\""));
+    assert.ok(html.includes('aria-label="Clean everywhere with Vacuum"'));
+    assert.ok(html.includes('aria-label="Unlock Front lock"'));
     assert.ok(html.includes("Arm vacation"));
-    assert.ok(html.includes("aria-label=\"Water valve position\""));
+    assert.ok(html.includes('aria-label="Water valve position"'));
     assert.ok(html.includes("Duration (seconds)"));
     assert.ok(html.includes("Cycle current option"));
     assert.ok(html.includes("Level current value"));
-    assert.ok(html.includes("aria-label=\"Press Start\""));
+    assert.ok(html.includes('aria-label="Press Start"'));
     assert.equal(html.includes("alarm_trigger"), false);
     assert.equal(html.includes("send_command"), false);
     assert.equal(html.includes("locate"), false);
     for (const entityId of [
-      "humidifier.demo", "water_heater.demo", "vacuum.demo", "lock.demo_front_door",
-      "alarm_control_panel.demo", "valve.demo_water", "siren.demo", "select.demo_cycle",
-      "number.demo_level", "button.demo_start",
-    ]) assert.equal(html.includes(entityId), false);
+      "humidifier.demo",
+      "water_heater.demo",
+      "vacuum.demo",
+      "lock.demo_front_door",
+      "alarm_control_panel.demo",
+      "valve.demo_water",
+      "siren.demo",
+      "select.demo_cycle",
+      "number.demo_level",
+      "button.demo_start",
+    ])
+      assert.equal(html.includes(entityId), false);
   });
 
   test("omits every unadvertised extended-domain capability", () => {
@@ -386,10 +558,13 @@ await withModules(async (load) => {
       "alarm_control_panel.demo",
       "valve.demo_water",
       "siren.demo",
-    ]) runtime.entityStates[entityId].attributes.supported_features = 0;
+    ])
+      runtime.entityStates[entityId].attributes.supported_features = 0;
     const document = new JSDOM(renderModules(runtime)).window.document;
-    const module = (label) => [...document.querySelectorAll(".room-module")]
-      .find((article) => article.querySelector("h2")?.textContent === label);
+    const module = (label) =>
+      [...document.querySelectorAll(".room-module")].find(
+        (article) => article.querySelector("h2")?.textContent === label,
+      );
     assert.equal(module("Humidifier").querySelector("select"), null);
     assert.equal(module("Water heater").querySelector("button, input, select"), null);
     assert.equal(module("Vacuum").querySelector("input, select"), null);
@@ -406,12 +581,18 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const calls = [];
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module: moduleForLabel(runtime, "Front lock"),
-        canMutate: true,
-        focused: true,
-        onCallService: async (call) => { calls.push(call); },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module: moduleForLabel(runtime, "Front lock"),
+            canMutate: true,
+            focused: true,
+            onCallService: async (call) => {
+              calls.push(call);
+            },
+          }),
+        ),
+      );
       const open = () => dom.window.document.querySelector("button[aria-label='Open Front lock']");
       const originalNow = Date.now;
       const base = originalNow();
@@ -434,21 +615,37 @@ await withModules(async (load) => {
       const input = dialog.querySelector("input");
       assert.equal(dom.window.document.activeElement, input);
       assert.equal(input.inputMode, "numeric");
-      input.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }));
-      assert.equal(dom.window.document.activeElement, dialog.querySelector("button[type='submit']"));
-      dom.window.document.activeElement.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+      input.dispatchEvent(
+        new dom.window.KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true }),
+      );
+      assert.equal(
+        dom.window.document.activeElement,
+        dialog.querySelector("button[type='submit']"),
+      );
+      dom.window.document.activeElement.dispatchEvent(
+        new dom.window.KeyboardEvent("keydown", { key: "Tab", bubbles: true }),
+      );
       assert.equal(dom.window.document.activeElement, input);
       await act(async () => {
-        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "1234");
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          input,
+          "1234",
+        );
         input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
-      await act(async () => dialog.querySelector("form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
-      assert.deepEqual(calls, [{
-        domain: "lock",
-        service: "open",
-        data: { code: "1234" },
-        target: { entity_id: "lock.demo_front_door" },
-      }]);
+      await act(async () =>
+        dialog
+          .querySelector("form")
+          .dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })),
+      );
+      assert.deepEqual(calls, [
+        {
+          domain: "lock",
+          service: "open",
+          data: { code: "1234" },
+          target: { entity_id: "lock.demo_front_door" },
+        },
+      ]);
       assert.equal(dom.window.document.querySelector(".protected-code-dialog"), null);
       assert.equal(dom.window.document.body.textContent.includes("1234"), false);
       assert.equal(dom.window.document.activeElement, open());
@@ -459,24 +656,38 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const calls = [];
-      const render = () => root.render(React.createElement(RoomModule, {
-        module: moduleForLabel(runtime, "Alarm"),
-        canMutate: true,
-        focused: true,
-        onCallService: async (call) => { calls.push(call); },
-      }));
+      const render = () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module: moduleForLabel(runtime, "Alarm"),
+            canMutate: true,
+            focused: true,
+            onCallService: async (call) => {
+              calls.push(call);
+            },
+          }),
+        );
       await act(async () => render());
-      const away = () => [...dom.window.document.querySelectorAll("button")]
-        .find((button) => button.textContent === "Arm away");
+      const away = () =>
+        [...dom.window.document.querySelectorAll("button")].find(
+          (button) => button.textContent === "Arm away",
+        );
       await act(async () => away().click());
       let dialog = dom.window.document.querySelector(".protected-code-dialog");
       assert.ok(dialog);
       let input = dialog.querySelector("input");
       await act(async () => {
-        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(input, "2468");
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          input,
+          "2468",
+        );
         input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       });
-      await act(async () => dialog.querySelector("form").dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })));
+      await act(async () =>
+        dialog
+          .querySelector("form")
+          .dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })),
+      );
       assert.equal(calls[0].service, "alarm_arm_away");
       assert.deepEqual(calls[0].data, { code: "2468" });
       assert.equal(dom.window.document.body.textContent.includes("2468"), false);
@@ -490,8 +701,9 @@ await withModules(async (load) => {
 
       runtime.entityStates["alarm_control_panel.demo"].state = "armed_away";
       await act(async () => render());
-      const disarm = [...dom.window.document.querySelectorAll("button")]
-        .find((button) => button.textContent === "Disarm");
+      const disarm = [...dom.window.document.querySelectorAll("button")].find(
+        (button) => button.textContent === "Disarm",
+      );
       await act(async () => disarm.click());
       dialog = dom.window.document.querySelector(".protected-code-dialog");
       assert.ok(dialog, "disarm still requires the advertised code format");
@@ -502,12 +714,19 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const pending = deferred();
       const calls = [];
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module: moduleForLabel(connectedRuntimeFixture(), "Start"),
-        canMutate: true,
-        focused: true,
-        onCallService: (call) => { calls.push(call); return pending.promise; },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module: moduleForLabel(connectedRuntimeFixture(), "Start"),
+            canMutate: true,
+            focused: true,
+            onCallService: (call) => {
+              calls.push(call);
+              return pending.promise;
+            },
+          }),
+        ),
+      );
       const button = dom.window.document.querySelector("button[aria-label='Press Start']");
       await act(async () => {
         button.click();
@@ -521,7 +740,10 @@ await withModules(async (load) => {
       assert.equal(button.disabled, false);
       assert.equal(dom.window.document.querySelector("[role='status']").textContent, "Sent");
       assert.deepEqual(calls[0], {
-        domain: "button", service: "press", data: undefined, target: { entity_id: "button.demo_start" },
+        domain: "button",
+        service: "press",
+        data: undefined,
+        target: { entity_id: "button.demo_start" },
       });
     });
   });
@@ -529,8 +751,9 @@ await withModules(async (load) => {
   test("renders VTherm target, room, and regulated AC temperatures in the reference composition", () => {
     const html = renderModules(connectedRuntimeFixture());
     const document = new JSDOM(html).window.document;
-    const vtherm = [...document.querySelectorAll(".room-module")]
-      .find((article) => article.querySelector("h2")?.textContent === "Room climate");
+    const vtherm = [...document.querySelectorAll(".room-module")].find(
+      (article) => article.querySelector("h2")?.textContent === "Room climate",
+    );
 
     assert.equal(vtherm?.dataset.moduleKind, "vtherm");
     assert.equal(vtherm?.dataset.gridSize, "2x2");
@@ -553,7 +776,9 @@ await withModules(async (load) => {
       "Eco",
     );
     assert.equal(
-      vtherm?.querySelector("button[aria-label='Set Room climate mode to heat']")?.getAttribute("aria-pressed"),
+      vtherm
+        ?.querySelector("button[aria-label='Set Room climate mode to heat']")
+        ?.getAttribute("aria-pressed"),
       "true",
     );
     const valueArc = vtherm?.querySelector(".vtherm-dial__value");
@@ -571,19 +796,21 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
-      const room = resolveHomeAssistantBindings(
-        manifest,
-        connectedProfileFixture(),
-        runtime,
-      ).rooms["demo-room"];
+      const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+        "demo-room"
+      ];
       const module = buildRoomModules(room).find(({ id }) => id === "slot:demo-climate-slot");
 
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: true,
-        focused: false,
-        onCallService: async () => undefined,
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: false,
+            onCallService: async () => undefined,
+          }),
+        ),
+      );
 
       const arc = dom.window.document.querySelector(".vtherm-dial__value");
       const currentMarker = dom.window.document.querySelector(".vtherm-dial__marker--current");
@@ -604,117 +831,138 @@ await withModules(async (load) => {
       });
 
       assert.equal(
-        dom.window.document.querySelector("output[aria-label='Room climate target temperature']").value,
+        dom.window.document.querySelector("output[aria-label='Room climate target temperature']")
+          .value,
         "21",
       );
-      assert.deepEqual({
-        x: currentMarker.getAttribute("cx"),
-        y: currentMarker.getAttribute("cy"),
-      }, {
-        x: before.currentX,
-        y: before.currentY,
-      });
-      assert.notDeepEqual({
-        dash: arc.getAttribute("stroke-dasharray"),
-        x: targetMarker.getAttribute("cx"),
-        y: targetMarker.getAttribute("cy"),
-      }, before);
+      assert.deepEqual(
+        {
+          x: currentMarker.getAttribute("cx"),
+          y: currentMarker.getAttribute("cy"),
+        },
+        {
+          x: before.currentX,
+          y: before.currentY,
+        },
+      );
+      assert.notDeepEqual(
+        {
+          dash: arc.getAttribute("stroke-dasharray"),
+          x: targetMarker.getAttribute("cx"),
+          y: targetMarker.getAttribute("cy"),
+        },
+        before,
+      );
     });
   });
 
   test("assigns content-aware mosaic footprints to every room module kind", () => {
     const runtime = connectedRuntimeFixture();
     const document = new JSDOM(renderModules(runtime)).window.document;
-    const gridSizeFor = (label) => [...document.querySelectorAll(".room-module")]
-      .find((article) => article.querySelector("h2")?.textContent === label)?.dataset.gridSize;
+    const gridSizeFor = (label) =>
+      [...document.querySelectorAll(".room-module")].find(
+        (article) => article.querySelector("h2")?.textContent === label,
+      )?.dataset.gridSize;
 
-    assert.deepEqual({
-      light: gridSizeFor("Ceiling light"),
-      vtherm: gridSizeFor("Room climate"),
-      speaker: gridSizeFor("Speaker"),
-      switch: gridSizeFor("Coffee switch"),
-      inputBoolean: gridSizeFor("Quiet mode"),
-      cover: gridSizeFor("Window shade"),
-      fan: gridSizeFor("Room fan"),
-      sensor: gridSizeFor("Temperature"),
-      humidifier: gridSizeFor("Humidifier"),
-      waterHeater: gridSizeFor("Water heater"),
-      vacuum: gridSizeFor("Vacuum"),
-      lock: gridSizeFor("Front lock"),
-      alarm: gridSizeFor("Alarm"),
-      valve: gridSizeFor("Water valve"),
-      siren: gridSizeFor("Siren"),
-      select: gridSizeFor("Cycle"),
-      number: gridSizeFor("Level"),
-      button: gridSizeFor("Start"),
-    }, {
-      light: "2x1",
-      vtherm: "2x2",
-      speaker: "1x2",
-      switch: "2x1",
-      inputBoolean: "2x1",
-      cover: "1x2",
-      fan: "2x1",
-      sensor: "1x1",
-      humidifier: "2x2",
-      waterHeater: "2x2",
-      vacuum: "1x2",
-      lock: "2x1",
-      alarm: "1x2",
-      valve: "1x2",
-      siren: "2x1",
-      select: "1x2",
-      number: "1x2",
-      button: "2x1",
-    });
-
-    const binarySensor = renderToStaticMarkup(React.createElement(RoomModule, {
-      module: {
-        id: "slot:fixture-presence",
-        label: "Presence",
-        priority: "diagnostic",
-        sourceOrder: 0,
-        entities: [{
-          entityId: "binary_sensor.fixture_presence",
-          domain: "binary_sensor",
-          path: "fixture",
-          label: "Presence",
-          roomId: "fixture-room",
-          slotId: "fixture-presence",
-          areaId: "fixture-room",
-          deviceId: null,
-          state: {
-            entityId: "binary_sensor.fixture_presence",
-            state: "off",
-            attributes: { device_class: "motion" },
-            available: true,
-            stale: false,
-          },
-          issues: [],
-        }],
-        issues: [],
+    assert.deepEqual(
+      {
+        light: gridSizeFor("Ceiling light"),
+        vtherm: gridSizeFor("Room climate"),
+        speaker: gridSizeFor("Speaker"),
+        switch: gridSizeFor("Coffee switch"),
+        inputBoolean: gridSizeFor("Quiet mode"),
+        cover: gridSizeFor("Window shade"),
+        fan: gridSizeFor("Room fan"),
+        sensor: gridSizeFor("Temperature"),
+        humidifier: gridSizeFor("Humidifier"),
+        waterHeater: gridSizeFor("Water heater"),
+        vacuum: gridSizeFor("Vacuum"),
+        lock: gridSizeFor("Front lock"),
+        alarm: gridSizeFor("Alarm"),
+        valve: gridSizeFor("Water valve"),
+        siren: gridSizeFor("Siren"),
+        select: gridSizeFor("Cycle"),
+        number: gridSizeFor("Level"),
+        button: gridSizeFor("Start"),
       },
-      canMutate: false,
-      focused: false,
-      onCallService: async () => undefined,
-    }));
+      {
+        light: "2x1",
+        vtherm: "2x2",
+        speaker: "1x2",
+        switch: "2x1",
+        inputBoolean: "2x1",
+        cover: "1x2",
+        fan: "2x1",
+        sensor: "1x1",
+        humidifier: "2x2",
+        waterHeater: "2x2",
+        vacuum: "1x2",
+        lock: "2x1",
+        alarm: "1x2",
+        valve: "1x2",
+        siren: "2x1",
+        select: "1x2",
+        number: "1x2",
+        button: "2x1",
+      },
+    );
+
+    const binarySensor = renderToStaticMarkup(
+      React.createElement(RoomModule, {
+        module: {
+          id: "slot:fixture-presence",
+          label: "Presence",
+          priority: "diagnostic",
+          sourceOrder: 0,
+          entities: [
+            {
+              entityId: "binary_sensor.fixture_presence",
+              domain: "binary_sensor",
+              path: "fixture",
+              label: "Presence",
+              roomId: "fixture-room",
+              slotId: "fixture-presence",
+              areaId: "fixture-room",
+              deviceId: null,
+              state: {
+                entityId: "binary_sensor.fixture_presence",
+                state: "off",
+                attributes: { device_class: "motion" },
+                available: true,
+                stale: false,
+              },
+              issues: [],
+            },
+          ],
+          issues: [],
+        },
+        canMutate: false,
+        focused: false,
+        onCallService: async () => undefined,
+      }),
+    );
     assert.equal(
       new JSDOM(binarySensor).window.document.querySelector(".room-module")?.dataset.gridSize,
       "1x1",
     );
-    assert.ok(new JSDOM(binarySensor).window.document.querySelector(
-      ".room-module__icon.is-binary_sensor .room-module__glyph",
-    ));
+    assert.ok(
+      new JSDOM(binarySensor).window.document.querySelector(
+        ".room-module__icon.is-binary_sensor .room-module__glyph",
+      ),
+    );
 
-    runtime.entityRegistry.find((entry) => entry.entity_id === "climate.demo").platform = "generic_thermostat";
+    runtime.entityRegistry.find((entry) => entry.entity_id === "climate.demo").platform =
+      "generic_thermostat";
     const genericDocument = new JSDOM(renderModules(runtime)).window.document;
-    const genericClimate = [...genericDocument.querySelectorAll(".room-module")]
-      .find((article) => article.querySelector("h2")?.textContent === "Room climate");
+    const genericClimate = [...genericDocument.querySelectorAll(".room-module")].find(
+      (article) => article.querySelector("h2")?.textContent === "Room climate",
+    );
     assert.equal(genericClimate?.dataset.moduleKind, "climate");
     assert.equal(genericClimate?.dataset.gridSize, "2x2");
     assert.ok(genericClimate?.querySelector(".vtherm-dial__value"));
     assert.equal(
-      genericClimate?.querySelector("button[aria-label='Set Room climate swing mode to vertical']")?.textContent,
+      genericClimate?.querySelector("button[aria-label='Set Room climate swing mode to vertical']")
+        ?.textContent,
       "Vertical",
     );
   });
@@ -731,28 +979,36 @@ await withModules(async (load) => {
       const module = buildRoomModules(room).find(({ label }) => label === "Vacuum");
       const calls = [];
 
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: true,
-        focused: true,
-        onCallService: async (call) => calls.push(call),
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: true,
+            onCallService: async (call) => calls.push(call),
+          }),
+        ),
+      );
 
       assert.equal(dom.window.document.querySelector(".vacuum-status")?.textContent, "Docked86%");
       assert.deepEqual(
-        [...dom.window.document.querySelectorAll(".vacuum-room-action button")].map((button) => button.getAttribute("aria-label")),
+        [...dom.window.document.querySelectorAll(".vacuum-room-action button")].map((button) =>
+          button.getAttribute("aria-label"),
+        ),
         ["Clean Kitchen", "Clean Room 6"],
       );
       await act(async () => {
         dom.window.document.querySelector("button[aria-label='Clean Kitchen']").click();
         await Promise.resolve();
       });
-      assert.deepEqual(calls, [{
-        domain: "dreame_vacuum",
-        service: "vacuum_clean_segment",
-        data: { segments: [8] },
-        target: { entity_id: "vacuum.demo" },
-      }]);
+      assert.deepEqual(calls, [
+        {
+          domain: "dreame_vacuum",
+          service: "vacuum_clean_segment",
+          data: { segments: [8] },
+          target: { entity_id: "vacuum.demo" },
+        },
+      ]);
     });
   });
 
@@ -760,19 +1016,23 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
-      const room = resolveHomeAssistantBindings(
-        manifest,
-        connectedProfileFixture(),
-        runtime,
-      ).rooms["demo-room"];
+      const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+        "demo-room"
+      ];
       const module = buildRoomModules(room).find(({ id }) => id === "slot:demo-climate-slot");
       const calls = [];
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: true,
-        focused: false,
-        onCallService: async (call) => { calls.push(call); },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: false,
+            onCallService: async (call) => {
+              calls.push(call);
+            },
+          }),
+        ),
+      );
 
       const eco = dom.window.document.querySelector(
         "button[aria-label='Set Room climate preset to eco']",
@@ -782,12 +1042,14 @@ await withModules(async (load) => {
         eco.click();
         await Promise.resolve();
       });
-      assert.deepEqual(calls, [{
-        domain: "climate",
-        service: "set_preset_mode",
-        data: { preset_mode: "eco" },
-        target: { entity_id: "climate.demo" },
-      }]);
+      assert.deepEqual(calls, [
+        {
+          domain: "climate",
+          service: "set_preset_mode",
+          data: { preset_mode: "eco" },
+          target: { entity_id: "climate.demo" },
+        },
+      ]);
       assert.equal(eco.getAttribute("aria-pressed"), "true");
     });
   });
@@ -796,23 +1058,25 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
-      const room = resolveHomeAssistantBindings(
-        manifest,
-        connectedProfileFixture(),
-        runtime,
-      ).rooms["demo-room"];
+      const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+        "demo-room"
+      ];
       const module = buildRoomModules(room).find(({ id }) => id === "slot:demo-climate-slot");
       const scrolled = [];
       dom.window.HTMLElement.prototype.scrollIntoView = function scrollIntoView(options) {
         scrolled.push({ element: this, options });
       };
 
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: true,
-        focused: false,
-        onCallService: async () => undefined,
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: false,
+            onCallService: async () => undefined,
+          }),
+        ),
+      );
 
       const summaries = [...dom.window.document.querySelectorAll(".vtherm-picker summary")];
       await act(async () => {
@@ -845,16 +1109,31 @@ await withModules(async (load) => {
         const runtime = connectedRuntimeFixture();
         const entity = runtime.entityStates["climate.demo"];
         entity.state = "off";
-        entity.attributes = { ...entity.attributes, temperature: 20, current_temperature: current, hvac_modes: modes };
+        entity.attributes = {
+          ...entity.attributes,
+          temperature: 20,
+          current_temperature: current,
+          hvac_modes: modes,
+        };
         const room = resolveHomeAssistantBindings(
-          connectedManifestFixture(neutralDemoManifest), connectedProfileFixture(), runtime,
+          connectedManifestFixture(neutralDemoManifest),
+          connectedProfileFixture(),
+          runtime,
         ).rooms["demo-room"];
         const module = buildRoomModules(room).find(({ id }) => id === "slot:demo-climate-slot");
         const calls = [];
-        await act(async () => root.render(React.createElement(RoomModule, {
-          module, canMutate: true, focused: false,
-          onCallService: async (call) => { calls.push(call); },
-        })));
+        await act(async () =>
+          root.render(
+            React.createElement(RoomModule, {
+              module,
+              canMutate: true,
+              focused: false,
+              onCallService: async (call) => {
+                calls.push(call);
+              },
+            }),
+          ),
+        );
         const power = dom.window.document.querySelector(".vtherm-off");
         assert.equal(power.disabled, false);
         assert.equal(power.getAttribute("aria-label"), "Turn on Room climate");
@@ -877,27 +1156,41 @@ await withModules(async (load) => {
     const document = new JSDOM(renderModules(runtime)).window.document;
     const vtherm = document.querySelector(".room-module[data-module-kind='vtherm']");
 
-    assert.equal(vtherm?.querySelector("button[aria-label='Set Room climate mode to heat']")?.getAttribute("aria-pressed"), "false");
-    assert.equal(vtherm?.querySelector("button[aria-label='Set Room climate mode to cool']")?.getAttribute("aria-pressed"), "false");
+    assert.equal(
+      vtherm
+        ?.querySelector("button[aria-label='Set Room climate mode to heat']")
+        ?.getAttribute("aria-pressed"),
+      "false",
+    );
+    assert.equal(
+      vtherm
+        ?.querySelector("button[aria-label='Set Room climate mode to cool']")
+        ?.getAttribute("aria-pressed"),
+      "false",
+    );
   });
 
   test("a climate temperature step uses the established coalesced service call", async () => {
     await withDom(async ({ dom, root }) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
-      const room = resolveHomeAssistantBindings(
-        manifest,
-        connectedProfileFixture(),
-        runtime,
-      ).rooms["demo-room"];
+      const room = resolveHomeAssistantBindings(manifest, connectedProfileFixture(), runtime).rooms[
+        "demo-room"
+      ];
       const module = buildRoomModules(room).find(({ id }) => id === "slot:demo-climate-slot");
       const calls = [];
-      await act(async () => root.render(React.createElement(RoomModule, {
-        module,
-        canMutate: true,
-        focused: false,
-        onCallService: async (call) => { calls.push(call); },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomModule, {
+            module,
+            canMutate: true,
+            focused: false,
+            onCallService: async (call) => {
+              calls.push(call);
+            },
+          }),
+        ),
+      );
 
       const increase = dom.window.document.querySelector(
         "button[aria-label='Increase Room climate target temperature']",
@@ -907,13 +1200,15 @@ await withModules(async (load) => {
         increase.click();
         await Promise.resolve();
       });
-      assert.deepEqual(calls, [{
-        domain: "climate",
-        service: "set_temperature",
-        data: { temperature: 21 },
-        target: { entity_id: "climate.demo" },
-        delivery: { mode: "coalesced-value", channel: "temperature" },
-      }]);
+      assert.deepEqual(calls, [
+        {
+          domain: "climate",
+          service: "set_temperature",
+          data: { temperature: 21 },
+          target: { entity_id: "climate.demo" },
+          delivery: { mode: "coalesced-value", channel: "temperature" },
+        },
+      ]);
     });
   });
 
@@ -928,7 +1223,7 @@ await withModules(async (load) => {
     );
     assert.ok(html.indexOf("Main ceiling") < html.indexOf("Room climate"));
     assert.equal(html.includes("light.unmodeled_path"), false);
-    assert.ok(html.includes("type=\"range\""));
+    assert.ok(html.includes('type="range"'));
     assert.ok(html.includes("Walk inside"));
     for (const removed of [
       "Connected",
@@ -937,7 +1232,8 @@ await withModules(async (load) => {
       "More controls",
       "Status &amp; diagnostics",
       "Room controls",
-    ]) assert.equal(html.includes(removed), false);
+    ])
+      assert.equal(html.includes(removed), false);
   });
 
   test("uses the resolved Home Assistant area name in room controls", () => {
@@ -945,9 +1241,18 @@ await withModules(async (load) => {
     runtime.areas.find((area) => area.area_id === "demo_room").name = "Fixture living";
     const html = renderDashboard(runtime);
     const document = new JSDOM(html).window.document;
-    assert.equal(document.querySelector(".room-control-sheet")?.getAttribute("aria-label"), "Fixture living controls");
-    assert.equal(document.querySelector(".room-control-sheet__title h1")?.textContent, "Fixture living");
-    assert.equal(document.querySelector(".room-control-sheet__title")?.textContent.includes("Demo room"), false);
+    assert.equal(
+      document.querySelector(".room-control-sheet")?.getAttribute("aria-label"),
+      "Fixture living controls",
+    );
+    assert.equal(
+      document.querySelector(".room-control-sheet__title h1")?.textContent,
+      "Fixture living",
+    );
+    assert.equal(
+      document.querySelector(".room-control-sheet__title")?.textContent.includes("Demo room"),
+      false,
+    );
   });
 
   test("resolves relative and absolute Home Assistant room pictures without credentials", () => {
@@ -970,7 +1275,8 @@ await withModules(async (load) => {
 
   test("keeps an empty room calm with an explicit device connection action", () => {
     const emptyProfile = { ...connectedProfileFixture(), entityIdsBySlotId: {} };
-    const document = new JSDOM(renderDashboard(connectedRuntimeFixture(), null, emptyProfile)).window.document;
+    const document = new JSDOM(renderDashboard(connectedRuntimeFixture(), null, emptyProfile))
+      .window.document;
     const empty = document.querySelector(".room-control-sheet__empty");
     assert.equal(empty?.querySelector("h2")?.textContent, "No controls connected");
     assert.equal(empty?.querySelector("button")?.textContent, "Connect devices");
@@ -1039,14 +1345,21 @@ await withModules(async (load) => {
         const scrollRef = React.useRef(null);
         const heroRef = React.useRef(null);
         useRoomHeroParallax({ scrollRef, heroRef, enabled, resetKey });
-        return React.createElement("div", { ref: scrollRef, "data-scroll": "" },
-          React.createElement("header", { ref: heroRef, "data-hero": "" }));
+        return React.createElement(
+          "div",
+          { ref: scrollRef, "data-scroll": "" },
+          React.createElement("header", { ref: heroRef, "data-hero": "" }),
+        );
       }
 
-      await act(async () => root.render(React.createElement(Harness, {
-        enabled: true,
-        resetKey: "room-a",
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, {
+            enabled: true,
+            resetKey: "room-a",
+          }),
+        ),
+      );
       const scroll = dom.window.document.querySelector("[data-scroll]");
       const hero = dom.window.document.querySelector("[data-hero]");
       Object.defineProperty(hero, "offsetHeight", { value: 200 });
@@ -1066,20 +1379,28 @@ await withModules(async (load) => {
       assert.equal(hero.style.getPropertyValue("--room-hero-visual-opacity"), "0.82");
       assert.equal(hero.style.getPropertyValue("--room-foreground-opacity"), "0.48611111111111105");
 
-      await act(async () => root.render(React.createElement(Harness, {
-        enabled: false,
-        resetKey: "fallback",
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, {
+            enabled: false,
+            resetKey: "fallback",
+          }),
+        ),
+      );
       assert.equal(hero.style.getPropertyValue("--room-photo-parallax-y"), "0%");
       assert.equal(hero.style.getPropertyValue("--room-foreground-parallax-y"), "0px");
       assert.equal(hero.style.getPropertyValue("--room-hero-visual-opacity"), "1");
       assert.equal(hero.style.getPropertyValue("--room-foreground-opacity"), "1");
 
       reducedMotion.matches = true;
-      await act(async () => root.render(React.createElement(Harness, {
-        enabled: true,
-        resetKey: "room-b",
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(Harness, {
+            enabled: true,
+            resetKey: "room-b",
+          }),
+        ),
+      );
       assert.equal(hero.style.getPropertyValue("--room-photo-parallax-y"), "0%");
       assert.equal(hero.style.getPropertyValue("--room-foreground-parallax-y"), "0px");
       assert.equal(hero.style.getPropertyValue("--room-hero-visual-opacity"), "1");
@@ -1089,8 +1410,10 @@ await withModules(async (load) => {
 
   test("hides healthy status and exposes only actionable unhealthy status", () => {
     assert.equal(renderDashboard(connectedRuntimeFixture()).includes("connection-problem"), false);
-    const reconnecting = renderDashboard(connectedRuntimeFixture({ status: "reconnecting", canMutate: false }));
-    assert.ok(reconnecting.includes("aria-label=\"Home Assistant is reconnecting\""));
+    const reconnecting = renderDashboard(
+      connectedRuntimeFixture({ status: "reconnecting", canMutate: false }),
+    );
+    assert.ok(reconnecting.includes('aria-label="Home Assistant is reconnecting"'));
     assert.match(reconnecting, /<details class="connection-problem[^"]*" aria-live="polite">/);
     assert.equal(reconnecting.includes("Connected"), false);
     const failed = renderDashboard(connectedRuntimeFixture({ status: "error", canMutate: false }));
@@ -1099,10 +1422,9 @@ await withModules(async (load) => {
 
   test("keeps unavailable and incompatible modules visible with safe wording", () => {
     const runtime = connectedRuntimeFixture({ status: "reconnecting", canMutate: false });
-    runtime.entityStates = Object.fromEntries(Object.entries(runtime.entityStates).map(([id, state]) => [
-      id,
-      { ...state, stale: true },
-    ]));
+    runtime.entityStates = Object.fromEntries(
+      Object.entries(runtime.entityStates).map(([id, state]) => [id, { ...state, stale: true }]),
+    );
     runtime.entityStates["sensor.demo_temperature"] = {
       ...runtime.entityStates["sensor.demo_temperature"],
       state: "unavailable",
@@ -1113,7 +1435,7 @@ await withModules(async (load) => {
     assert.ok(html.includes("reconnecting"));
     assert.ok(html.includes("currently unavailable"));
     assert.ok(html.includes("assigned to a different Home Assistant area"));
-    assert.ok(html.includes("disabled=\"\""));
+    assert.ok(html.includes('disabled=""'));
     assert.equal(html.includes("sensor.demo_temperature"), false);
   });
 
@@ -1122,11 +1444,7 @@ await withModules(async (load) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
       const profile = connectedProfileFixture();
-      const resolved = resolveHomeAssistantBindings(
-        manifest,
-        profile,
-        runtime,
-      );
+      const resolved = resolveHomeAssistantBindings(manifest, profile, runtime);
       const room = resolved.rooms["demo-room"];
       const roomStatus = deriveRoomStatusMap(manifest, profile, resolved, runtime)["demo-room"];
       let homeCalls = 0;
@@ -1135,11 +1453,15 @@ await withModules(async (load) => {
         return React.createElement(
           React.Fragment,
           null,
-          React.createElement("button", {
-            type: "button",
-            id: "focus-light",
-            onClick: () => setSelectedDeviceId("fixture-light-device"),
-          }, "Focus light"),
+          React.createElement(
+            "button",
+            {
+              type: "button",
+              id: "focus-light",
+              onClick: () => setSelectedDeviceId("fixture-light-device"),
+            },
+            "Focus light",
+          ),
           React.createElement(RoomDashboardPanel, {
             resolved: room,
             roomStatus,
@@ -1148,7 +1470,9 @@ await withModules(async (load) => {
             selectedDeviceId,
             onSelectDevice: setSelectedDeviceId,
             onCallService: async () => undefined,
-            onHome: () => { homeCalls += 1; },
+            onHome: () => {
+              homeCalls += 1;
+            },
             onWalk: () => undefined,
             onConnectDevices: () => undefined,
             onReconnect: () => undefined,
@@ -1164,7 +1488,9 @@ await withModules(async (load) => {
 
       await act(async () => focus.click());
       assert.ok(dom.window.document.querySelector(".room-module.is-focused"));
-      await act(async () => dom.window.document.querySelector("button[aria-label='Back to room']").click());
+      await act(async () =>
+        dom.window.document.querySelector("button[aria-label='Back to room']").click(),
+      );
       assert.equal(dom.window.document.querySelector(".room-control-sheet__scroll").scrollTop, 120);
 
       await act(async () => focus.click());
@@ -1186,21 +1512,23 @@ await withModules(async (load) => {
     const resolved = resolveHomeAssistantBindings(manifest, profile, runtime);
     const room = resolved.rooms["demo-room"];
     const roomStatus = deriveRoomStatusMap(manifest, profile, resolved, runtime)["demo-room"];
-    const html = renderToStaticMarkup(React.createElement(RoomDashboardPanel, {
-      resolved: room,
-      roomStatus,
-      status: runtime.status,
-      canMutate: runtime.canMutate,
-      selectedDeviceId: "fixture-light-device",
-      onSelectDevice: () => undefined,
-      onCallService: async () => undefined,
-      onHome: () => undefined,
-      onWalk: () => undefined,
-      onConnectDevices: () => undefined,
-      onReconnect: () => undefined,
-      onRetry: () => undefined,
-      deviceOverlay: true,
-    }));
+    const html = renderToStaticMarkup(
+      React.createElement(RoomDashboardPanel, {
+        resolved: room,
+        roomStatus,
+        status: runtime.status,
+        canMutate: runtime.canMutate,
+        selectedDeviceId: "fixture-light-device",
+        onSelectDevice: () => undefined,
+        onCallService: async () => undefined,
+        onHome: () => undefined,
+        onWalk: () => undefined,
+        onConnectDevices: () => undefined,
+        onReconnect: () => undefined,
+        onRetry: () => undefined,
+        deviceOverlay: true,
+      }),
+    );
 
     assert.match(html, /aria-label="Close device controls"/);
     assert.match(html, /class="device-control-overlay__backdrop"/);
@@ -1221,22 +1549,30 @@ await withModules(async (load) => {
       let escapeCalls = 0;
       let selectCalls = 0;
 
-      await act(async () => root.render(React.createElement(RoomDashboardPanel, {
-        resolved: room,
-        roomStatus,
-        status: runtime.status,
-        canMutate: runtime.canMutate,
-        selectedDeviceId: "fixture-light-device",
-        onSelectDevice: () => { selectCalls += 1; },
-        onCallService: async () => undefined,
-        onHome: () => undefined,
-        onWalk: () => undefined,
-        onConnectDevices: () => undefined,
-        onReconnect: () => undefined,
-        onRetry: () => undefined,
-        deviceOverlay: true,
-        onEscape: () => { escapeCalls += 1; },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomDashboardPanel, {
+            resolved: room,
+            roomStatus,
+            status: runtime.status,
+            canMutate: runtime.canMutate,
+            selectedDeviceId: "fixture-light-device",
+            onSelectDevice: () => {
+              selectCalls += 1;
+            },
+            onCallService: async () => undefined,
+            onHome: () => undefined,
+            onWalk: () => undefined,
+            onConnectDevices: () => undefined,
+            onReconnect: () => undefined,
+            onRetry: () => undefined,
+            deviceOverlay: true,
+            onEscape: () => {
+              escapeCalls += 1;
+            },
+          }),
+        ),
+      );
 
       const escapeEvent = new dom.window.KeyboardEvent("keydown", {
         key: "Escape",
@@ -1264,27 +1600,27 @@ await withModules(async (load) => {
       const runtime = connectedRuntimeFixture();
       const manifest = connectedManifestFixture(neutralDemoManifest);
       const profile = connectedProfileFixture();
-      const resolved = resolveHomeAssistantBindings(
-        manifest,
-        profile,
-        runtime,
-      );
+      const resolved = resolveHomeAssistantBindings(manifest, profile, runtime);
       const room = resolved.rooms["demo-room"];
       const roomStatus = deriveRoomStatusMap(manifest, profile, resolved, runtime)["demo-room"];
-      await act(async () => root.render(React.createElement(RoomDashboardPanel, {
-        resolved: room,
-        roomStatus,
-        status: runtime.status,
-        canMutate: runtime.canMutate,
-        selectedDeviceId: null,
-        onSelectDevice: () => undefined,
-        onCallService: async () => undefined,
-        onHome: () => undefined,
-        onWalk: () => undefined,
-        onConnectDevices: () => undefined,
-        onReconnect: () => undefined,
-        onRetry: () => undefined,
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(RoomDashboardPanel, {
+            resolved: room,
+            roomStatus,
+            status: runtime.status,
+            canMutate: runtime.canMutate,
+            selectedDeviceId: null,
+            onSelectDevice: () => undefined,
+            onCallService: async () => undefined,
+            onHome: () => undefined,
+            onWalk: () => undefined,
+            onConnectDevices: () => undefined,
+            onReconnect: () => undefined,
+            onRetry: () => undefined,
+          }),
+        ),
+      );
       const sheet = dom.window.document.querySelector(".room-control-sheet");
       let handle = dom.window.document.querySelector("button[aria-label='Expand room controls']");
       assert.equal(sheet.style.getPropertyValue("--room-sheet-mobile-height"), "68dvh");
@@ -1321,21 +1657,25 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const request = deferred();
       const calls = [];
-      await act(async () => root.render(React.createElement(
-        React.StrictMode,
-        null,
-        React.createElement(CommandToggle, {
-          label: "Ceiling lights",
-          pressed: true,
-          disabled: false,
-          confirmedKey: "light:on",
-          callForPressed: toggleCallForPressed,
-          onCallService: (call) => {
-            calls.push(call);
-            return request.promise;
-          },
-        }),
-      )));
+      await act(async () =>
+        root.render(
+          React.createElement(
+            React.StrictMode,
+            null,
+            React.createElement(CommandToggle, {
+              label: "Ceiling lights",
+              pressed: true,
+              disabled: false,
+              confirmedKey: "light:on",
+              callForPressed: toggleCallForPressed,
+              onCallService: (call) => {
+                calls.push(call);
+                return request.promise;
+              },
+            }),
+          ),
+        ),
+      );
       const button = dom.window.document.querySelector("button");
       assert.equal(button.getAttribute("aria-pressed"), "true");
       assert.equal(button.getAttribute("aria-label"), "Turn off Ceiling lights");
@@ -1355,22 +1695,31 @@ await withModules(async (load) => {
         await Promise.resolve();
       });
       assert.equal(button.getAttribute("aria-pressed"), "true");
-      assert.equal(dom.window.document.querySelector("[role=alert]").textContent, "Couldn’t update Ceiling lights. Try again.");
-      assert.doesNotMatch(dom.window.document.body.textContent, /fixture secret|light\.demo_ceiling/);
+      assert.equal(
+        dom.window.document.querySelector("[role=alert]").textContent,
+        "Couldn’t update Ceiling lights. Try again.",
+      );
+      assert.doesNotMatch(
+        dom.window.document.body.textContent,
+        /fixture secret|light\.demo_ceiling/,
+      );
     });
   });
 
   test("a confirmation change invalidates an unsettled CommandToggle request", async () => {
     await withDom(async ({ dom, root }) => {
       const request = deferred();
-      const render = (confirmedKey, pressed) => root.render(React.createElement(CommandToggle, {
-        label: "Ceiling lights",
-        pressed,
-        disabled: false,
-        confirmedKey,
-        callForPressed: toggleCallForPressed,
-        onCallService: () => request.promise,
-      }));
+      const render = (confirmedKey, pressed) =>
+        root.render(
+          React.createElement(CommandToggle, {
+            label: "Ceiling lights",
+            pressed,
+            disabled: false,
+            confirmedKey,
+            callForPressed: toggleCallForPressed,
+            onCallService: () => request.promise,
+          }),
+        );
       await act(async () => render("light:on:1", true));
       const button = dom.window.document.querySelector("button");
       await act(async () => {
@@ -1403,17 +1752,21 @@ await withModules(async (load) => {
       const second = deferred();
       const requests = [first, second];
       const calls = [];
-      await act(async () => root.render(React.createElement(CommandToggle, {
-        label: "Ceiling lights",
-        pressed: true,
-        disabled: false,
-        confirmedKey: "light:on",
-        callForPressed: toggleCallForPressed,
-        onCallService: (call) => {
-          calls.push(call);
-          return requests[calls.length - 1].promise;
-        },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(CommandToggle, {
+            label: "Ceiling lights",
+            pressed: true,
+            disabled: false,
+            confirmedKey: "light:on",
+            callForPressed: toggleCallForPressed,
+            onCallService: (call) => {
+              calls.push(call);
+              return requests[calls.length - 1].promise;
+            },
+          }),
+        ),
+      );
       const button = dom.window.document.querySelector("button");
 
       await act(async () => {
@@ -1444,20 +1797,25 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const request = deferred();
       const never = new Promise(() => undefined);
-      const Suspender = () => { throw never; };
-      const render = (confirmedKey, pressed, suspend = false) => root.render(React.createElement(
-        React.Suspense,
-        { fallback: null },
-        React.createElement(CommandToggle, {
-          label: "Ceiling lights",
-          pressed,
-          disabled: false,
-          confirmedKey,
-          callForPressed: toggleCallForPressed,
-          onCallService: () => request.promise,
-        }),
-        suspend ? React.createElement(Suspender) : null,
-      ));
+      const Suspender = () => {
+        throw never;
+      };
+      const render = (confirmedKey, pressed, suspend = false) =>
+        root.render(
+          React.createElement(
+            React.Suspense,
+            { fallback: null },
+            React.createElement(CommandToggle, {
+              label: "Ceiling lights",
+              pressed,
+              disabled: false,
+              confirmedKey,
+              callForPressed: toggleCallForPressed,
+              onCallService: () => request.promise,
+            }),
+            suspend ? React.createElement(Suspender) : null,
+          ),
+        );
 
       await act(async () => render("light:on", true));
       const button = dom.window.document.querySelector("button");
@@ -1480,7 +1838,10 @@ await withModules(async (load) => {
       });
       assert.equal(button.getAttribute("aria-pressed"), "true");
       assert.equal(button.dataset.pending, "false");
-      assert.equal(dom.window.document.querySelector("[role=alert]").textContent, "Couldn’t update Ceiling lights. Try again.");
+      assert.equal(
+        dom.window.document.querySelector("[role=alert]").textContent,
+        "Couldn’t update Ceiling lights. Try again.",
+      );
     });
   });
 
@@ -1492,27 +1853,33 @@ await withModules(async (load) => {
       const requests = [failed, earlier, latest];
       const calls = [];
       const setRangeValue = (range, value) => {
-        const setter = Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set;
+        const setter = Object.getOwnPropertyDescriptor(
+          dom.window.HTMLInputElement.prototype,
+          "value",
+        ).set;
         setter.call(range, value);
         range.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
       };
-      const render = (confirmedKey, confirmedValue) => root.render(React.createElement(CommandRange, {
-        label: "Brightness",
-        min: 1,
-        max: 100,
-        step: 1,
-        confirmedValue,
-        confirmedKey,
-        disabled: false,
-        callForValue: (value) => ({
-          ...serviceCall,
-          data: { brightness_pct: value },
-        }),
-        onCallService: (call) => {
-          calls.push(call.data.brightness_pct);
-          return requests[calls.length - 1].promise;
-        },
-      }));
+      const render = (confirmedKey, confirmedValue) =>
+        root.render(
+          React.createElement(CommandRange, {
+            label: "Brightness",
+            min: 1,
+            max: 100,
+            step: 1,
+            confirmedValue,
+            confirmedKey,
+            disabled: false,
+            callForValue: (value) => ({
+              ...serviceCall,
+              data: { brightness_pct: value },
+            }),
+            onCallService: (call) => {
+              calls.push(call.data.brightness_pct);
+              return requests[calls.length - 1].promise;
+            },
+          }),
+        );
       await act(async () => render("brightness:40", 40));
       const range = dom.window.document.querySelector("input[type=range]");
       assert.equal(range.getAttribute("aria-label"), "Brightness");
@@ -1529,7 +1896,10 @@ await withModules(async (load) => {
         await Promise.resolve();
       });
       assert.equal(range.value, "40");
-      assert.equal(dom.window.document.querySelector("[role=alert]").textContent, "Couldn’t update Brightness. Try again.");
+      assert.equal(
+        dom.window.document.querySelector("[role=alert]").textContent,
+        "Couldn’t update Brightness. Try again.",
+      );
 
       await act(async () => render("brightness:45", 45));
       assert.equal(range.value, "45");
@@ -1562,19 +1932,29 @@ await withModules(async (load) => {
   test("TemperatureStepper uses bounded advertised increments", async () => {
     await withDom(async ({ dom, root }) => {
       const values = [];
-      await act(async () => root.render(React.createElement(TemperatureStepper, {
-        label: "Target temperature",
-        min: 18,
-        max: 22,
-        step: 0.5,
-        confirmedValue: 21.5,
-        confirmedKey: "climate:21.5",
-        disabled: false,
-        callForValue: (value) => ({ ...serviceCall, data: { temperature: value } }),
-        onCallService: async (call) => { values.push(call.data.temperature); },
-      })));
-      const decrease = dom.window.document.querySelector("button[aria-label='Decrease Target temperature']");
-      const increase = dom.window.document.querySelector("button[aria-label='Increase Target temperature']");
+      await act(async () =>
+        root.render(
+          React.createElement(TemperatureStepper, {
+            label: "Target temperature",
+            min: 18,
+            max: 22,
+            step: 0.5,
+            confirmedValue: 21.5,
+            confirmedKey: "climate:21.5",
+            disabled: false,
+            callForValue: (value) => ({ ...serviceCall, data: { temperature: value } }),
+            onCallService: async (call) => {
+              values.push(call.data.temperature);
+            },
+          }),
+        ),
+      );
+      const decrease = dom.window.document.querySelector(
+        "button[aria-label='Decrease Target temperature']",
+      );
+      const increase = dom.window.document.querySelector(
+        "button[aria-label='Increase Target temperature']",
+      );
       assert.equal(decrease.tagName, "BUTTON");
       assert.equal(increase.tagName, "BUTTON");
       await act(async () => {
@@ -1595,22 +1975,28 @@ await withModules(async (load) => {
       const latest = deferred();
       const requests = [first, latest];
       const values = [];
-      await act(async () => root.render(React.createElement(TemperatureStepper, {
-        label: "Target temperature",
-        min: 18,
-        max: 22,
-        step: 0.5,
-        confirmedValue: 20,
-        confirmedKey: "climate:20",
-        disabled: false,
-        callForValue: (value) => ({ ...serviceCall, data: { temperature: value } }),
-        onCallService: (call) => {
-          values.push(call.data.temperature);
-          return requests[values.length - 1].promise;
-        },
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(TemperatureStepper, {
+            label: "Target temperature",
+            min: 18,
+            max: 22,
+            step: 0.5,
+            confirmedValue: 20,
+            confirmedKey: "climate:20",
+            disabled: false,
+            callForValue: (value) => ({ ...serviceCall, data: { temperature: value } }),
+            onCallService: (call) => {
+              values.push(call.data.temperature);
+              return requests[values.length - 1].promise;
+            },
+          }),
+        ),
+      );
       const stepper = dom.window.document.querySelector(".temperature-stepper");
-      const increase = dom.window.document.querySelector("button[aria-label='Increase Target temperature']");
+      const increase = dom.window.document.querySelector(
+        "button[aria-label='Increase Target temperature']",
+      );
 
       await act(async () => {
         increase.click();
@@ -1644,29 +2030,36 @@ await withModules(async (load) => {
   test("TemperatureStepper clamps upper and lower overshoots before creating calls", async () => {
     await withDom(async ({ dom, root }) => {
       const values = [];
-      const render = (confirmedKey, confirmedValue) => root.render(React.createElement(TemperatureStepper, {
-        label: "Target temperature",
-        min: 18,
-        max: 22,
-        step: 0.5,
-        confirmedValue,
-        confirmedKey,
-        disabled: false,
-        callForValue: (value) => {
-          values.push(value);
-          return { ...serviceCall, data: { temperature: value } };
-        },
-        onCallService: async () => undefined,
-      }));
+      const render = (confirmedKey, confirmedValue) =>
+        root.render(
+          React.createElement(TemperatureStepper, {
+            label: "Target temperature",
+            min: 18,
+            max: 22,
+            step: 0.5,
+            confirmedValue,
+            confirmedKey,
+            disabled: false,
+            callForValue: (value) => {
+              values.push(value);
+              return { ...serviceCall, data: { temperature: value } };
+            },
+            onCallService: async () => undefined,
+          }),
+        );
       await act(async () => render("climate:21.8", 21.8));
       await act(async () => {
-        dom.window.document.querySelector("button[aria-label='Increase Target temperature']").click();
+        dom.window.document
+          .querySelector("button[aria-label='Increase Target temperature']")
+          .click();
         await Promise.resolve();
       });
 
       await act(async () => render("climate:18.2", 18.2));
       await act(async () => {
-        dom.window.document.querySelector("button[aria-label='Decrease Target temperature']").click();
+        dom.window.document
+          .querySelector("button[aria-label='Decrease Target temperature']")
+          .click();
         await Promise.resolve();
       });
       assert.deepEqual(values, [22, 18]);
@@ -1674,23 +2067,32 @@ await withModules(async (load) => {
   });
 
   test("OptionControl uses a safe current option and omits empty choices", async () => {
-    assert.equal(renderToStaticMarkup(React.createElement(OptionControl, {
-      label: "Mode",
-      value: "heat",
-      options: [],
-      disabled: false,
-      onChange: () => undefined,
-    })), "");
+    assert.equal(
+      renderToStaticMarkup(
+        React.createElement(OptionControl, {
+          label: "Mode",
+          value: "heat",
+          options: [],
+          disabled: false,
+          onChange: () => undefined,
+        }),
+      ),
+      "",
+    );
 
     await withDom(async ({ dom, root }) => {
       const changes = [];
-      await act(async () => root.render(React.createElement(OptionControl, {
-        label: "Mode",
-        value: "missing",
-        options: ["heat", "cool"],
-        disabled: false,
-        onChange: (value) => changes.push(value),
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(OptionControl, {
+            label: "Mode",
+            value: "missing",
+            options: ["heat", "cool"],
+            disabled: false,
+            onChange: (value) => changes.push(value),
+          }),
+        ),
+      );
       const select = dom.window.document.querySelector("select");
       assert.equal(select.value, "heat");
       assert.equal(dom.window.document.querySelector("label").textContent, "Modeheatcool");
@@ -1704,11 +2106,15 @@ await withModules(async (load) => {
 
   test("AdvancedControls exposes an expandable identified region", async () => {
     await withDom(async ({ dom, root }) => {
-      await act(async () => root.render(React.createElement(
-        AdvancedControls,
-        { label: "More controls", defaultExpanded: false },
-        React.createElement("p", null, "Secondary controls"),
-      )));
+      await act(async () =>
+        root.render(
+          React.createElement(
+            AdvancedControls,
+            { label: "More controls", defaultExpanded: false },
+            React.createElement("p", null, "Secondary controls"),
+          ),
+        ),
+      );
       const button = dom.window.document.querySelector("button");
       assert.equal(button.getAttribute("aria-expanded"), "false");
       const regionId = button.getAttribute("aria-controls");

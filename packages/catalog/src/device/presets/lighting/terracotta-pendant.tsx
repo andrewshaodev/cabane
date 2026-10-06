@@ -19,10 +19,7 @@ const bulbColor = (visualState: HomeDeviceModelProps["visualState"]) => {
   }
 };
 
-export function TerracottaPendantModel({
-  state,
-  visualState,
-}: HomeDeviceModelProps) {
+export function TerracottaPendantModel({ state, visualState }: HomeDeviceModelProps) {
   const bulb = bulbColor(visualState);
   const brightness = lightBrightnessRatio(state);
 

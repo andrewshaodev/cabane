@@ -3,11 +3,9 @@ import test from "node:test";
 import { withModules } from "./test-server.mjs";
 
 await withModules(async (load) => {
-  const {
-    DEVICE_THROTTLE_MS,
-    DeviceCommandScheduler,
-    VALUE_DEBOUNCE_MS,
-  } = await load("/packages/engine/src/command-scheduler.ts");
+  const { DEVICE_THROTTLE_MS, DeviceCommandScheduler, VALUE_DEBOUNCE_MS } = await load(
+    "/packages/engine/src/command-scheduler.ts",
+  );
 
   test("uses the Phase 3 production timing contract", () => {
     assert.equal(VALUE_DEBOUNCE_MS, 500);
@@ -53,7 +51,9 @@ await withModules(async (load) => {
     const clock = fakeClock();
     const dispatched = [];
     const scheduler = new DeviceCommandScheduler({
-      dispatch: async (call) => { dispatched.push(call); },
+      dispatch: async (call) => {
+        dispatched.push(call);
+      },
       resolveDeviceKey: () => "device-light",
       debounceMs: 5,
       throttleMs: 20,
@@ -86,7 +86,9 @@ await withModules(async (load) => {
     const clock = fakeClock();
     const dispatched = [];
     const scheduler = new DeviceCommandScheduler({
-      dispatch: async (call) => { dispatched.push(call); },
+      dispatch: async (call) => {
+        dispatched.push(call);
+      },
       resolveDeviceKey: () => "device-light",
       now: clock.now,
       setTimer: clock.setTimer,
@@ -100,14 +102,19 @@ await withModules(async (load) => {
     });
     await pending;
     await clock.advance(5_000);
-    assert.deepEqual(dispatched.map((call) => call.service), ["turn_off"]);
+    assert.deepEqual(
+      dispatched.map((call) => call.service),
+      ["turn_off"],
+    );
   });
 
   test("coalesces humidity, temperature, position, and number values independently", async () => {
     const clock = fakeClock();
     const dispatched = [];
     const scheduler = new DeviceCommandScheduler({
-      dispatch: async (call) => { dispatched.push(call); },
+      dispatch: async (call) => {
+        dispatched.push(call);
+      },
       resolveDeviceKey: () => "device-multifunction",
       debounceMs: 5,
       throttleMs: 20,
@@ -137,25 +144,37 @@ await withModules(async (load) => {
     await clock.advance(20);
     await clock.advance(20);
     await Promise.all(scheduled);
-    assert.deepEqual(
-      dispatched.map((call) => [call.delivery.channel, call.data.value]).sort(),
-      [["humidity", 45], ["position", 70], ["temperature", 21], ["value", 15]],
-    );
+    assert.deepEqual(dispatched.map((call) => [call.delivery.channel, call.data.value]).sort(), [
+      ["humidity", 45],
+      ["position", 70],
+      ["temperature", 21],
+      ["value", 15],
+    ]);
     scheduler.dispose();
   });
 
   test("propagates dispatch failures and rejects scheduling after disposal", async () => {
     const scheduler = new DeviceCommandScheduler({
-      dispatch: async () => { throw new Error("fixture failure"); },
+      dispatch: async () => {
+        throw new Error("fixture failure");
+      },
       resolveDeviceKey: () => "device-light",
     });
     await assert.rejects(
-      scheduler.schedule({ domain: "light", service: "turn_off", target: { entity_id: "light.demo" } }),
+      scheduler.schedule({
+        domain: "light",
+        service: "turn_off",
+        target: { entity_id: "light.demo" },
+      }),
       /fixture failure/,
     );
     scheduler.dispose();
     await assert.rejects(
-      scheduler.schedule({ domain: "light", service: "turn_on", target: { entity_id: "light.demo" } }),
+      scheduler.schedule({
+        domain: "light",
+        service: "turn_on",
+        target: { entity_id: "light.demo" },
+      }),
       /stopped/,
     );
   });

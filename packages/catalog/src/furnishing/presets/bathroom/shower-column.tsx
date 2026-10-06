@@ -7,19 +7,19 @@ export function ShowerColumn() {
   const edge = "#262725";
   return (
     <group name="wall-mounted-rain-shower-column">
-      <mesh position={[-.055, 1.64, 0]} castShadow>
-        <cylinderGeometry args={[.018, .018, 1.28, 12]} />
+      <mesh position={[-0.055, 1.64, 0]} castShadow>
+        <cylinderGeometry args={[0.018, 0.018, 1.28, 12]} />
         <ToonMaterial color={metalLight} />
         <Outlines thickness={0.004} color={edge} screenspace={false} />
       </mesh>
       {[1.28, 1.98].map((height) => (
         <mesh
           key={height}
-          position={[-.0175, height, 0]}
+          position={[-0.0175, height, 0]}
           rotation={[0, 0, Math.PI / 2]}
           castShadow
         >
-          <cylinderGeometry args={[.014, .014, .075, 10]} />
+          <cylinderGeometry args={[0.014, 0.014, 0.075, 10]} />
           <ToonMaterial color={metalLight} />
         </mesh>
       ))}
@@ -40,11 +40,11 @@ export function ShowerColumn() {
           <ToonMaterial color={metalLight} />
         </mesh>
       ))}
-      <mesh position={[-.25, 2.282, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+      <mesh position={[-0.25, 2.282, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
         <cylinderGeometry args={[0.018, 0.018, 0.4, 12]} />
         <ToonMaterial color={metalLight} />
       </mesh>
-      <mesh position={[-.45, 2.245, 0]} scale={[1, 1, 0.78]} castShadow>
+      <mesh position={[-0.45, 2.245, 0]} scale={[1, 1, 0.78]} castShadow>
         <cylinderGeometry args={[0.22, 0.22, 0.045, 20]} />
         <ToonMaterial color={metal} />
         <Outlines thickness={0.005} color={edge} screenspace={false} />

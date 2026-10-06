@@ -11,9 +11,11 @@ export const roomInteriorAreaSquareMeters = (
   room: Pick<RoomSpec, "polygon">,
   floor: FloorSpec,
 ): number => {
-  const contour: ClippingPolygon = [room.polygon.map((point) =>
-    [...planPointToWorld(point, floor.coordinates)] as [number, number]
-  )];
+  const contour: ClippingPolygon = [
+    room.polygon.map(
+      (point) => [...planPointToWorld(point, floor.coordinates)] as [number, number],
+    ),
+  ];
   // Subtract occupied space rather than insetting the room again: imported
   // room polygons may already follow the inside faces of the walls.
   const walls = [
@@ -24,7 +26,11 @@ export const roomInteriorAreaSquareMeters = (
     }),
   ];
   const interior = differenceClippingGeometry(contour, unionClippingPolygons(walls));
-  return interior.reduce((total, [exterior, ...holes]) => total +
-    Math.abs(polygonSignedArea(exterior)) - holes.reduce((area, hole) =>
-      area + Math.abs(polygonSignedArea(hole)), 0), 0);
+  return interior.reduce(
+    (total, [exterior, ...holes]) =>
+      total +
+      Math.abs(polygonSignedArea(exterior)) -
+      holes.reduce((area, hole) => area + Math.abs(polygonSignedArea(hole)), 0),
+    0,
+  );
 };

@@ -5,7 +5,9 @@ export function paintPineBark(context: CanvasRenderingContext2D, quiet: boolean)
   const random = patternRandom(81731);
   context.fillStyle = "#50392b";
   context.fillRect(0, 0, size, size);
-  const colors = quiet ? ["#89674e", "#a17a59", "#76523d"] : ["#916044", "#a77950", "#70472f", "#805338"];
+  const colors = quiet
+    ? ["#89674e", "#a17a59", "#76523d"]
+    : ["#916044", "#a77950", "#70472f", "#805338"];
   for (let index = 0; index < 100; index += 1) {
     const x = random() * size;
     const y = random() * size;
@@ -17,19 +19,19 @@ export function paintPineBark(context: CanvasRenderingContext2D, quiet: boolean)
       context.rotate(angle);
       context.fillStyle = colors[index % colors.length];
       context.beginPath();
-      context.moveTo(-width, -length * .7);
-      context.lineTo(-width * .45, -length);
-      context.lineTo(width * .8, -length * .8);
-      context.lineTo(width, length * .5);
-      context.lineTo(width * .2, length);
-      context.lineTo(-width * .8, length * .65);
+      context.moveTo(-width, -length * 0.7);
+      context.lineTo(-width * 0.45, -length);
+      context.lineTo(width * 0.8, -length * 0.8);
+      context.lineTo(width, length * 0.5);
+      context.lineTo(width * 0.2, length);
+      context.lineTo(-width * 0.8, length * 0.65);
       context.closePath();
       context.fill();
       context.strokeStyle = "#573b2b";
-      context.lineWidth = size * .006;
+      context.lineWidth = size * 0.006;
       context.beginPath();
-      context.moveTo(-width * .2, -length * .6);
-      context.lineTo(width * .15, length * .55);
+      context.moveTo(-width * 0.2, -length * 0.6);
+      context.lineTo(width * 0.15, length * 0.55);
       context.stroke();
     });
   }

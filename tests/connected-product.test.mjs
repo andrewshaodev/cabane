@@ -5,14 +5,22 @@ import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const engine = await load("/packages/engine/src/index.ts");
   const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
-  const { composeOwnerProjectManifest, deleteOriginProfiles, ownerProjectRegistries, migrateOriginProfile } = await load("/apps/web/src/project-runtime.ts");
+  const {
+    composeOwnerProjectManifest,
+    deleteOriginProfiles,
+    ownerProjectRegistries,
+    migrateOriginProfile,
+  } = await load("/apps/web/src/project-runtime.ts");
   const manifest = composeOwnerProjectManifest(ownerHomeProject);
   const origin = "https://synthetic.invalid";
   const empty = engine.createEmptyRuntimeBindingProfile(ownerHomeProject.home.id);
   const room = manifest.floors[0].rooms[0];
   const profile = { ...empty, roomAreaIds: { [room.id]: "synthetic-area" } };
   const fixture = async () => {
-    const repository = engine.createHomeProjectRepository(engine.createMemoryProjectRecordStore(), ownerProjectRegistries);
+    const repository = engine.createHomeProjectRepository(
+      engine.createMemoryProjectRecordStore(),
+      ownerProjectRegistries,
+    );
     const lifecycle = engine.createHomeProjectLifecycle(repository, ownerHomeProject);
     return { repository, lifecycle, record: (await lifecycle.load()).record };
   };
@@ -29,13 +37,25 @@ await withModules(async (load) => {
     assert.equal(map.values().next().value, raw);
     assert.equal(await migrateOriginProfile(migrated, origin, storage, replace), migrated);
     await assert.rejects(migrateOriginProfile(record, origin, storage, replace), /another tab/);
-    assert.equal(await migrateOriginProfile(migrated, "https://different.invalid", storage, replace), migrated);
+    assert.equal(
+      await migrateOriginProfile(migrated, "https://different.invalid", storage, replace),
+      migrated,
+    );
   });
   test("malformed legacy profiles report recovery without replacing any record", async () => {
     const { record } = await fixture();
-    for (const raw of ["{", JSON.stringify({ ...profile, token: "secret" }), JSON.stringify({ ...profile, homeId: "other" })]) {
+    for (const raw of [
+      "{",
+      JSON.stringify({ ...profile, token: "secret" }),
+      JSON.stringify({ ...profile, homeId: "other" }),
+    ]) {
       let writes = 0;
-      await assert.rejects(migrateOriginProfile(record, origin, { getItem: () => raw }, async () => { writes++; return record; }));
+      await assert.rejects(
+        migrateOriginProfile(record, origin, { getItem: () => raw }, async () => {
+          writes++;
+          return record;
+        }),
+      );
       assert.equal(writes, 0);
       assert.deepEqual(record.bindings, {});
     }
@@ -44,7 +64,11 @@ await withModules(async (load) => {
     const homeId = ownerHomeProject.home.id;
     const currentKey = engine.runtimeBindingProfileStorageKey(origin, homeId);
     const legacyKey = engine.legacyRuntimeBindingProfileStorageKey(origin, homeId);
-    const map = new Map([[currentKey, "current"], [legacyKey, "legacy"], ["unrelated", "keep"]]);
+    const map = new Map([
+      [currentKey, "current"],
+      [legacyKey, "legacy"],
+      ["unrelated", "keep"],
+    ]);
     deleteOriginProfiles(`${origin}/`, homeId, { removeItem: (key) => map.delete(key) });
     assert.deepEqual([...map], [["unrelated", "keep"]]);
   });

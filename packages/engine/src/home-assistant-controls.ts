@@ -1,22 +1,12 @@
-import type {
-  ControllableDeviceDomain,
-  EntityId,
-  EntityStateSnapshot,
-} from "./types";
+import type { ControllableDeviceDomain, EntityId, EntityStateSnapshot } from "./types";
 
 export type CoalescedControlChannel =
-  | "brightness"
-  | "humidity"
-  | "percentage"
-  | "position"
-  | "temperature"
-  | "value"
-  | "volume";
+  "brightness" | "humidity" | "percentage" | "position" | "temperature" | "value" | "volume";
 
 export interface SupportedServiceCall {
   domain: ControllableDeviceDomain | "dreame_vacuum" | "scene" | "script";
   service: string;
-  data?: Readonly<Record<string, unknown>>;
+  data?: Readonly<Record<string, unknown>> | undefined;
   target: { entity_id: EntityId | EntityId[] };
   delivery?: {
     mode: "coalesced-value";
@@ -27,12 +17,7 @@ export interface SupportedServiceCall {
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
 
-const steppedValue = (
-  value: number,
-  minimum: number,
-  maximum: number,
-  step: number,
-) => {
+const steppedValue = (value: number, minimum: number, maximum: number, step: number) => {
   const bounded = clamp(value, minimum, maximum);
   const stepped = minimum + Math.round((bounded - minimum) / step) * step;
   return Number(clamp(stepped, minimum, maximum).toFixed(6));
@@ -62,35 +47,24 @@ const coalescedValueCall = (
   delivery: { mode: "coalesced-value", channel },
 });
 
-export const toggleEntityCall = (
-  entity: EntityStateSnapshot,
-): SupportedServiceCall => valueCall(
-  entity,
-  entity.state === "off" ? "turn_on" : "turn_off",
-);
+export const toggleEntityCall = (entity: EntityStateSnapshot): SupportedServiceCall =>
+  valueCall(entity, entity.state === "off" ? "turn_on" : "turn_off");
 
-export const lightBrightnessCall = (
-  entity: EntityStateSnapshot,
-  percent: number,
-) => coalescedValueCall(entity, "turn_on", "brightness", {
-  brightness_pct: Math.round(clamp(percent, 1, 100)),
-});
+export const lightBrightnessCall = (entity: EntityStateSnapshot, percent: number) =>
+  coalescedValueCall(entity, "turn_on", "brightness", {
+    brightness_pct: Math.round(clamp(percent, 1, 100)),
+  });
 
 export const supportsLightBrightness = (entity: EntityStateSnapshot) => {
   const modes = entity.attributes.supported_color_modes;
-  return typeof entity.attributes.brightness === "number"
-    || (Array.isArray(modes) && modes.some((mode) => mode !== "onoff"));
+  return (
+    typeof entity.attributes.brightness === "number" ||
+    (Array.isArray(modes) && modes.some((mode) => mode !== "onoff"))
+  );
 };
 
-export const lightBrightnessRatio = (
-  entity: EntityStateSnapshot | undefined,
-): number => {
-  if (
-    !entity
-    || entity.stale
-    || !entity.available
-    || entity.state !== "on"
-  ) return 0;
+export const lightBrightnessRatio = (entity: EntityStateSnapshot | undefined): number => {
+  if (!entity || entity.stale || !entity.available || entity.state !== "on") return 0;
   const brightness = entity.attributes.brightness;
   if (typeof brightness !== "number" || !Number.isFinite(brightness)) return 1;
   return clamp(brightness / 255, 0, 1);
@@ -100,17 +74,17 @@ const colorChannel = (value: number) => Math.round(clamp(value, 0, 255));
 
 const rgbForColorTemperature = (kelvin: number) => {
   const temperature = clamp(kelvin, 1_000, 40_000) / 100;
-  const red = temperature <= 66
-    ? 255
-    : 329.698727446 * ((temperature - 60) ** -0.1332047592);
-  const green = temperature <= 66
-    ? 99.4708025861 * Math.log(temperature) - 161.1195681661
-    : 288.1221695283 * ((temperature - 60) ** -0.0755148492);
-  const blue = temperature >= 66
-    ? 255
-    : temperature <= 19
-      ? 0
-      : 138.5177312231 * Math.log(temperature - 10) - 305.0447927307;
+  const red = temperature <= 66 ? 255 : 329.698727446 * (temperature - 60) ** -0.1332047592;
+  const green =
+    temperature <= 66
+      ? 99.4708025861 * Math.log(temperature) - 161.1195681661
+      : 288.1221695283 * (temperature - 60) ** -0.0755148492;
+  const blue =
+    temperature >= 66
+      ? 255
+      : temperature <= 19
+        ? 0
+        : 138.5177312231 * Math.log(temperature - 10) - 305.0447927307;
   return [colorChannel(red), colorChannel(green), colorChannel(blue)] as const;
 };
 
@@ -120,17 +94,19 @@ export const lightColorForSnapshot = (
 ): string => {
   const rgb = entity?.attributes.rgb_color;
   if (
-    Array.isArray(rgb)
-    && rgb.length === 3
-    && rgb.every((channel) => typeof channel === "number" && Number.isFinite(channel))
-  ) return `rgb(${rgb.map(colorChannel).join(", ")})`;
+    Array.isArray(rgb) &&
+    rgb.length === 3 &&
+    rgb.every((channel) => typeof channel === "number" && Number.isFinite(channel))
+  )
+    return `rgb(${rgb.map(colorChannel).join(", ")})`;
   const kelvinAttribute = entity?.attributes.color_temp_kelvin;
   const miredAttribute = entity?.attributes.color_temp;
-  const kelvin = typeof kelvinAttribute === "number" && Number.isFinite(kelvinAttribute)
-    ? kelvinAttribute
-    : typeof miredAttribute === "number" && Number.isFinite(miredAttribute) && miredAttribute > 0
-      ? 1_000_000 / miredAttribute
-      : null;
+  const kelvin =
+    typeof kelvinAttribute === "number" && Number.isFinite(kelvinAttribute)
+      ? kelvinAttribute
+      : typeof miredAttribute === "number" && Number.isFinite(miredAttribute) && miredAttribute > 0
+        ? 1_000_000 / miredAttribute
+        : null;
   if (kelvin === null) return fallback;
   const [red, green, blue] = rgbForColorTemperature(kelvin);
   return `rgb(${red}, ${green}, ${blue})`;
@@ -156,59 +132,41 @@ export const climateTemperatureCall = (
   return coalescedValueCall(entity, "set_temperature", "temperature", { temperature });
 };
 
-export const climatePowerCall = (
-  entity: EntityStateSnapshot,
-  turnOn: boolean,
-) => valueCall(entity, turnOn ? "turn_on" : "turn_off");
+export const climatePowerCall = (entity: EntityStateSnapshot, turnOn: boolean) =>
+  valueCall(entity, turnOn ? "turn_on" : "turn_off");
 
-export const climateModeCall = (
-  entity: EntityStateSnapshot,
-  hvacMode: string,
-) => valueCall(entity, "set_hvac_mode", { hvac_mode: hvacMode });
+export const climateModeCall = (entity: EntityStateSnapshot, hvacMode: string) =>
+  valueCall(entity, "set_hvac_mode", { hvac_mode: hvacMode });
 
-export const climatePresetCall = (
-  entity: EntityStateSnapshot,
-  presetMode: string,
-) => valueCall(entity, "set_preset_mode", { preset_mode: presetMode });
+export const climatePresetCall = (entity: EntityStateSnapshot, presetMode: string) =>
+  valueCall(entity, "set_preset_mode", { preset_mode: presetMode });
 
-export const climateFanModeCall = (
-  entity: EntityStateSnapshot,
-  fanMode: string,
-) => valueCall(entity, "set_fan_mode", { fan_mode: fanMode });
+export const climateFanModeCall = (entity: EntityStateSnapshot, fanMode: string) =>
+  valueCall(entity, "set_fan_mode", { fan_mode: fanMode });
 
-export const climateSwingModeCall = (
-  entity: EntityStateSnapshot,
-  swingMode: string,
-) => valueCall(entity, "set_swing_mode", { swing_mode: swingMode });
+export const climateSwingModeCall = (entity: EntityStateSnapshot, swingMode: string) =>
+  valueCall(entity, "set_swing_mode", { swing_mode: swingMode });
 
 export const coverActionCall = (
   entity: EntityStateSnapshot,
   action: "open_cover" | "stop_cover" | "close_cover",
 ) => valueCall(entity, action);
 
-export const coverPositionCall = (
-  entity: EntityStateSnapshot,
-  position: number,
-) => coalescedValueCall(entity, "set_cover_position", "position", {
-  position: Math.round(clamp(position, 0, 100)),
-});
+export const coverPositionCall = (entity: EntityStateSnapshot, position: number) =>
+  coalescedValueCall(entity, "set_cover_position", "position", {
+    position: Math.round(clamp(position, 0, 100)),
+  });
 
-export const fanPowerCall = (
-  entity: EntityStateSnapshot,
-  turnOn: boolean,
-) => valueCall(entity, turnOn ? "turn_on" : "turn_off");
+export const fanPowerCall = (entity: EntityStateSnapshot, turnOn: boolean) =>
+  valueCall(entity, turnOn ? "turn_on" : "turn_off");
 
-export const fanPercentageCall = (
-  entity: EntityStateSnapshot,
-  percentage: number,
-) => coalescedValueCall(entity, "set_percentage", "percentage", {
-  percentage: Math.round(clamp(percentage, 0, 100)),
-});
+export const fanPercentageCall = (entity: EntityStateSnapshot, percentage: number) =>
+  coalescedValueCall(entity, "set_percentage", "percentage", {
+    percentage: Math.round(clamp(percentage, 0, 100)),
+  });
 
-export const fanPresetCall = (
-  entity: EntityStateSnapshot,
-  presetMode: string,
-) => valueCall(entity, "set_preset_mode", { preset_mode: presetMode });
+export const fanPresetCall = (entity: EntityStateSnapshot, presetMode: string) =>
+  valueCall(entity, "set_preset_mode", { preset_mode: presetMode });
 
 export const HUMIDIFIER_FEATURE_MODES = 1;
 export const WATER_HEATER_FEATURE_TARGET_TEMPERATURE = 1;
@@ -247,25 +205,18 @@ export const humidifierHumidityRange = (entity: EntityStateSnapshot) => {
   };
 };
 
-export const humidifierPowerCall = (
-  entity: EntityStateSnapshot,
-  turnOn: boolean,
-) => valueCall(entity, turnOn ? "turn_on" : "turn_off");
+export const humidifierPowerCall = (entity: EntityStateSnapshot, turnOn: boolean) =>
+  valueCall(entity, turnOn ? "turn_on" : "turn_off");
 
-export const humidifierHumidityCall = (
-  entity: EntityStateSnapshot,
-  requestedHumidity: number,
-) => {
+export const humidifierHumidityCall = (entity: EntityStateSnapshot, requestedHumidity: number) => {
   const { min, max, step } = humidifierHumidityRange(entity);
   return coalescedValueCall(entity, "set_humidity", "humidity", {
     humidity: steppedValue(requestedHumidity, min, max, step),
   });
 };
 
-export const humidifierModeCall = (
-  entity: EntityStateSnapshot,
-  mode: string,
-) => valueCall(entity, "set_mode", { mode });
+export const humidifierModeCall = (entity: EntityStateSnapshot, mode: string) =>
+  valueCall(entity, "set_mode", { mode });
 
 export const waterHeaterTemperatureRange = (entity: EntityStateSnapshot) => {
   const minimum = Number(entity.attributes.min_temp ?? 40);
@@ -278,10 +229,8 @@ export const waterHeaterTemperatureRange = (entity: EntityStateSnapshot) => {
   };
 };
 
-export const waterHeaterPowerCall = (
-  entity: EntityStateSnapshot,
-  turnOn: boolean,
-) => valueCall(entity, turnOn ? "turn_on" : "turn_off");
+export const waterHeaterPowerCall = (entity: EntityStateSnapshot, turnOn: boolean) =>
+  valueCall(entity, turnOn ? "turn_on" : "turn_off");
 
 export const waterHeaterTemperatureCall = (
   entity: EntityStateSnapshot,
@@ -293,25 +242,19 @@ export const waterHeaterTemperatureCall = (
   });
 };
 
-export const waterHeaterOperationModeCall = (
-  entity: EntityStateSnapshot,
-  operationMode: string,
-) => valueCall(entity, "set_operation_mode", { operation_mode: operationMode });
+export const waterHeaterOperationModeCall = (entity: EntityStateSnapshot, operationMode: string) =>
+  valueCall(entity, "set_operation_mode", { operation_mode: operationMode });
 
-export const waterHeaterAwayModeCall = (
-  entity: EntityStateSnapshot,
-  awayMode: boolean,
-) => valueCall(entity, "set_away_mode", { away_mode: awayMode });
+export const waterHeaterAwayModeCall = (entity: EntityStateSnapshot, awayMode: boolean) =>
+  valueCall(entity, "set_away_mode", { away_mode: awayMode });
 
 export const vacuumActionCall = (
   entity: EntityStateSnapshot,
   action: "start" | "pause" | "stop" | "return_to_base",
 ) => valueCall(entity, action);
 
-export const vacuumFanSpeedCall = (
-  entity: EntityStateSnapshot,
-  fanSpeed: string,
-) => valueCall(entity, "set_fan_speed", { fan_speed: fanSpeed });
+export const vacuumFanSpeedCall = (entity: EntityStateSnapshot, fanSpeed: string) =>
+  valueCall(entity, "set_fan_speed", { fan_speed: fanSpeed });
 
 export interface VacuumRoom {
   id: number;
@@ -371,23 +314,18 @@ export type AlarmAction =
   | "alarm_arm_vacation"
   | "alarm_arm_custom_bypass";
 
-export const alarmActionCall = (
-  entity: EntityStateSnapshot,
-  action: AlarmAction,
-  code?: string,
-) => valueCall(entity, action, code ? { code } : undefined);
+export const alarmActionCall = (entity: EntityStateSnapshot, action: AlarmAction, code?: string) =>
+  valueCall(entity, action, code ? { code } : undefined);
 
 export const valveActionCall = (
   entity: EntityStateSnapshot,
   action: "open_valve" | "stop_valve" | "close_valve",
 ) => valueCall(entity, action);
 
-export const valvePositionCall = (
-  entity: EntityStateSnapshot,
-  position: number,
-) => coalescedValueCall(entity, "set_valve_position", "position", {
-  position: Math.round(clamp(position, 0, 100)),
-});
+export const valvePositionCall = (entity: EntityStateSnapshot, position: number) =>
+  coalescedValueCall(entity, "set_valve_position", "position", {
+    position: Math.round(clamp(position, 0, 100)),
+  });
 
 export interface SirenTurnOnParameters {
   tone?: string;
@@ -400,20 +338,20 @@ export const sirenPowerCall = (
   turnOn: boolean,
   parameters: SirenTurnOnParameters = {},
 ) => {
-  const data = turnOn ? {
-    ...(parameters.tone ? { tone: parameters.tone } : {}),
-    ...(parameters.duration !== undefined ? { duration: parameters.duration } : {}),
-    ...(parameters.volumeLevel !== undefined
-      ? { volume_level: clamp(parameters.volumeLevel, 0, 1) }
-      : {}),
-  } : undefined;
+  const data = turnOn
+    ? {
+        ...(parameters.tone ? { tone: parameters.tone } : {}),
+        ...(parameters.duration !== undefined ? { duration: parameters.duration } : {}),
+        ...(parameters.volumeLevel !== undefined
+          ? { volume_level: clamp(parameters.volumeLevel, 0, 1) }
+          : {}),
+      }
+    : undefined;
   return valueCall(entity, turnOn ? "turn_on" : "turn_off", data);
 };
 
-export const selectOptionCall = (
-  entity: EntityStateSnapshot,
-  option: string,
-) => valueCall(entity, "select_option", { option });
+export const selectOptionCall = (entity: EntityStateSnapshot, option: string) =>
+  valueCall(entity, "select_option", { option });
 
 export const numberValueRange = (entity: EntityStateSnapshot) => {
   const minimum = Number(entity.attributes.min ?? 0);
@@ -426,50 +364,41 @@ export const numberValueRange = (entity: EntityStateSnapshot) => {
   };
 };
 
-export const numberValueCall = (
-  entity: EntityStateSnapshot,
-  requestedValue: number,
-) => {
+export const numberValueCall = (entity: EntityStateSnapshot, requestedValue: number) => {
   const { min, max, step } = numberValueRange(entity);
   return coalescedValueCall(entity, "set_value", "value", {
     value: steppedValue(requestedValue, min, max, step),
   });
 };
 
-export const buttonPressCall = (entity: EntityStateSnapshot) =>
-  valueCall(entity, "press");
+export const buttonPressCall = (entity: EntityStateSnapshot) => valueCall(entity, "press");
 
-export const mediaPlaybackCall = (
-  entity: EntityStateSnapshot,
-): SupportedServiceCall => valueCall(
-  entity,
-  entity.state === "playing" ? "media_pause" : "media_play",
-);
+export const mediaPlaybackCall = (entity: EntityStateSnapshot): SupportedServiceCall =>
+  valueCall(entity, entity.state === "playing" ? "media_pause" : "media_play");
 
-export const mediaVolumeCall = (
-  entity: EntityStateSnapshot,
-  volume: number,
-) => coalescedValueCall(entity, "volume_set", "volume", {
-  volume_level: clamp(volume, 0, 1),
-});
+export const mediaVolumeCall = (entity: EntityStateSnapshot, volume: number) =>
+  coalescedValueCall(entity, "volume_set", "volume", {
+    volume_level: clamp(volume, 0, 1),
+  });
 
-export const availableLightEntityIds = (
-  states: Readonly<Record<EntityId, EntityStateSnapshot>>,
-) => Object.values(states)
-  .filter((entity) => entity.entityId.startsWith("light."))
-  .filter((entity) => entity.available && !entity.stale)
-  .map((entity) => entity.entityId)
-  .sort((left, right) => left.localeCompare(right));
+export const availableLightEntityIds = (states: Readonly<Record<EntityId, EntityStateSnapshot>>) =>
+  Object.values(states)
+    .filter((entity) => entity.entityId.startsWith("light."))
+    .filter((entity) => entity.available && !entity.stale)
+    .map((entity) => entity.entityId)
+    .sort((left, right) => left.localeCompare(right));
 
 export const allLightsOffCall = (
   states: Readonly<Record<EntityId, EntityStateSnapshot>>,
 ): SupportedServiceCall | null => {
   const entityIds = availableLightEntityIds(states);
-  return entityIds.length === 0 ? null : {
-    domain: "light",
-    service: "turn_off",
-    target: { entity_id: entityIds },
-  };
+  return entityIds.length === 0
+    ? null
+    : {
+        domain: "light",
+        service: "turn_off",
+        target: { entity_id: entityIds },
+      };
 };
 
 export const entityDisplayValue = (entity: EntityStateSnapshot) => {

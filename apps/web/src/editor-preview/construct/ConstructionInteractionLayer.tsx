@@ -1,17 +1,11 @@
 import { useEffect, useRef } from "react";
 import { beginSegmentPress, segmentPressAnchors, type SegmentPress } from "./segment-gesture";
 import { ConstructionAlignmentGuide } from "./ConstructionAlignmentGuide";
-import {
-  floorEditorSelectionIncludes
-} from "@cabane/engine";
+import { floorEditorSelectionIncludes } from "@cabane/engine";
 
-import {
-  DoubleSide
-} from "three";
+import { DoubleSide } from "three";
 
-import {
-  constructPlanToWorld
-} from "./drag-geometry";
+import { constructPlanToWorld } from "./drag-geometry";
 
 import { ConstructionPlanWalls } from "./ConstructionPlanWalls";
 
@@ -19,44 +13,112 @@ import { noPlanRaycast, PlanOverlayMaterial, PlanStroke } from "./PlanDrawing";
 
 import { ConstructionWallMeasurements } from "./ConstructionWallMeasurements";
 
+import {
+  capturePointer,
+  PointerCaptureTarget,
+  releasePointer,
+  stopPointer,
+} from "./construction-pointer-events";
 
+import { ConstructionOpeningTargets } from "./ConstructionOpeningTargets";
+import { ConstructionWallTargets } from "./ConstructionWallTargets";
+import { useConstructionPointerController } from "./useConstructionPointerController";
 
-import { capturePointer, PointerCaptureTarget, releasePointer, stopPointer } from "./construction-pointer-events";
-
-import { ConstructionOpeningTargets } from './ConstructionOpeningTargets';
-import { ConstructionWallTargets } from './ConstructionWallTargets';
-import { useConstructionPointerController } from './useConstructionPointerController';
-
-export function ConstructionInteractionLayer(props: Parameters<typeof useConstructionPointerController>[0]) {
+export function ConstructionInteractionLayer(
+  props: Parameters<typeof useConstructionPointerController>[0],
+) {
   const {
-    snap, drawing, segmentStart, segmentPreview, beginSegment, previewSegment, commitSegment, cancelDrawing, drawingWalls,
-    tool, rawPlanPointForEvent, clientPointForEvent, changeMarquee, onDraggingChange, onMarqueeChange,
-    activeMarquee, updateMarqueeForEvent, finishMarquee, releaseMarquee, floorSpan,
-    marqueeWorldRectangle, marqueeActive, draft, highlightedSelection, coordinates, planMode,
-    displayedDraft, roomTargets, onSelectRoom, ToonMaterial, directlySelected, draggingEndpoint,
-    draggingWall, previewPoint, openingTool, placeOpeningFromEvent, onSelectWall, setOpeningPreview,
-    placementPreviewFromEvent, translationPointForEvent, setDraggingWall, capturedSelectDrag,
-    wallDeltaForEvent, finishWallDrag, cancelWallDrag, setDraggingEndpoint, pointForEvent,
-    finishEndpointDrag, cancelEndpointDrag, draggingOpening, resizingOpening, onSelectOpening,
-    setDraggingOpening, openingPlacementFromEvent, finishOpeningDrag, cancelOpeningDrag,
-    setResizingOpening, resizedOpeningForEvent, finishOpeningResize, cancelOpeningResize, preview,
-    wallExteriorColor, drawStart, drawPreview, resizedWall, placementPreview, onClearSelection,
-    onPlaceMeasure, drawingFloorZone, onPreviewWall, onBeginWall, measurePhase, onPreviewMeasure,
-    onPreviewFloorZonePoint, onPlaceFloorZonePoint, onAddWall, onCancelWall
+    snap,
+    drawing,
+    segmentStart,
+    segmentPreview,
+    beginSegment,
+    previewSegment,
+    commitSegment,
+    cancelDrawing,
+    drawingWalls,
+    tool,
+    rawPlanPointForEvent,
+    clientPointForEvent,
+    changeMarquee,
+    onDraggingChange,
+    onMarqueeChange,
+    activeMarquee,
+    updateMarqueeForEvent,
+    finishMarquee,
+    releaseMarquee,
+    floorSpan,
+    marqueeWorldRectangle,
+    marqueeActive,
+    draft,
+    highlightedSelection,
+    coordinates,
+    planMode,
+    displayedDraft,
+    roomTargets,
+    onSelectRoom,
+    ToonMaterial,
+    directlySelected,
+    draggingEndpoint,
+    draggingWall,
+    previewPoint,
+    openingTool,
+    placeOpeningFromEvent,
+    onSelectWall,
+    setOpeningPreview,
+    placementPreviewFromEvent,
+    translationPointForEvent,
+    setDraggingWall,
+    capturedSelectDrag,
+    wallDeltaForEvent,
+    finishWallDrag,
+    cancelWallDrag,
+    setDraggingEndpoint,
+    pointForEvent,
+    finishEndpointDrag,
+    cancelEndpointDrag,
+    draggingOpening,
+    resizingOpening,
+    onSelectOpening,
+    setDraggingOpening,
+    openingPlacementFromEvent,
+    finishOpeningDrag,
+    cancelOpeningDrag,
+    setResizingOpening,
+    resizedOpeningForEvent,
+    finishOpeningResize,
+    cancelOpeningResize,
+    preview,
+    wallExteriorColor,
+    resizedWall,
+    placementPreview,
+    onClearSelection,
+    onPlaceMeasure,
+    measurePhase,
+    onPreviewMeasure,
   } = useConstructionPointerController(props);
   const startingPress = useRef<SegmentPress | null>(null);
-  useEffect(() => { startingPress.current = null; }, [tool]);
-  return ((
+  useEffect(() => {
+    startingPress.current = null;
+  }, [tool]);
+  return (
     <group name="construction-edit-layer">
       <ConstructionAlignmentGuide snap={snap} coordinates={coordinates} />
       <mesh
         name="construction-marquee-surface"
-        position={[0, .002, 0]}
+        position={[0, 0.002, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         renderOrder={39}
         onPointerDown={(event) => {
-          if (tool !== "select" || event.button !== 0 || !event.nativeEvent?.shiftKey
-            || event.nativeEvent.metaKey || event.nativeEvent.ctrlKey || event.nativeEvent.altKey) return;
+          if (
+            tool !== "select" ||
+            event.button !== 0 ||
+            !event.nativeEvent?.shiftKey ||
+            event.nativeEvent.metaKey ||
+            event.nativeEvent.ctrlKey ||
+            event.nativeEvent.altKey
+          )
+            return;
           const point = rawPlanPointForEvent(event);
           if (!point) return;
           capturePointer(event);
@@ -87,35 +149,83 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
         }}
       >
         <planeGeometry args={[floorSpan, floorSpan]} />
-        <PlanOverlayMaterial visible={false} transparent opacity={0} depthTest={false} depthWrite={false} side={DoubleSide} />
+        <PlanOverlayMaterial
+          visible={false}
+          transparent
+          opacity={0}
+          depthTest={false}
+          depthWrite={false}
+          side={DoubleSide}
+        />
       </mesh>
-      {marqueeWorldRectangle && <group name="construction-marquee-preview">
-        <mesh
-          position={[marqueeWorldRectangle.center[0], .76, marqueeWorldRectangle.center[1]]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          renderOrder={40}
-          raycast={noPlanRaycast}
-        >
-          <planeGeometry args={[marqueeWorldRectangle.width, marqueeWorldRectangle.depth]} />
-          <PlanOverlayMaterial color="#ff754d" transparent opacity={.11} depthTest={false} depthWrite={false} side={DoubleSide} />
-        </mesh>
-        <PlanStroke from={[marqueeWorldRectangle.minX, marqueeWorldRectangle.minZ]} to={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.minZ]} color="#cf6648" width={.035} elevation={.78} />
-        <PlanStroke from={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.minZ]} to={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.maxZ]} color="#cf6648" width={.035} elevation={.78} />
-        <PlanStroke from={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.maxZ]} to={[marqueeWorldRectangle.minX, marqueeWorldRectangle.maxZ]} color="#cf6648" width={.035} elevation={.78} />
-        <PlanStroke from={[marqueeWorldRectangle.minX, marqueeWorldRectangle.maxZ]} to={[marqueeWorldRectangle.minX, marqueeWorldRectangle.minZ]} color="#cf6648" width={.035} elevation={.78} />
-      </group>}
-      {marqueeActive && (draft.pools ?? []).filter((pool) =>
-        floorEditorSelectionIncludes(highlightedSelection, "pool", pool.id)
-      ).map((pool) => <group key={pool.id} name={`construction-marquee-pool-${pool.id}`}>
-        {pool.polygon.map((from, index) => <PlanStroke
-          key={index}
-          from={constructPlanToWorld(from, coordinates)}
-          to={constructPlanToWorld(pool.polygon[(index + 1) % pool.polygon.length], coordinates)}
-          color="#ff754d"
-          width={.065}
-          elevation={.79}
-        />)}
-      </group>)}
+      {marqueeWorldRectangle && (
+        <group name="construction-marquee-preview">
+          <mesh
+            position={[marqueeWorldRectangle.center[0], 0.76, marqueeWorldRectangle.center[1]]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            renderOrder={40}
+            raycast={noPlanRaycast}
+          >
+            <planeGeometry args={[marqueeWorldRectangle.width, marqueeWorldRectangle.depth]} />
+            <PlanOverlayMaterial
+              color="#ff754d"
+              transparent
+              opacity={0.11}
+              depthTest={false}
+              depthWrite={false}
+              side={DoubleSide}
+            />
+          </mesh>
+          <PlanStroke
+            from={[marqueeWorldRectangle.minX, marqueeWorldRectangle.minZ]}
+            to={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.minZ]}
+            color="#cf6648"
+            width={0.035}
+            elevation={0.78}
+          />
+          <PlanStroke
+            from={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.minZ]}
+            to={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.maxZ]}
+            color="#cf6648"
+            width={0.035}
+            elevation={0.78}
+          />
+          <PlanStroke
+            from={[marqueeWorldRectangle.maxX, marqueeWorldRectangle.maxZ]}
+            to={[marqueeWorldRectangle.minX, marqueeWorldRectangle.maxZ]}
+            color="#cf6648"
+            width={0.035}
+            elevation={0.78}
+          />
+          <PlanStroke
+            from={[marqueeWorldRectangle.minX, marqueeWorldRectangle.maxZ]}
+            to={[marqueeWorldRectangle.minX, marqueeWorldRectangle.minZ]}
+            color="#cf6648"
+            width={0.035}
+            elevation={0.78}
+          />
+        </group>
+      )}
+      {marqueeActive &&
+        (draft.pools ?? [])
+          .filter((pool) => floorEditorSelectionIncludes(highlightedSelection, "pool", pool.id))
+          .map((pool) => (
+            <group key={pool.id} name={`construction-marquee-pool-${pool.id}`}>
+              {pool.polygon.map((from, index) => (
+                <PlanStroke
+                  key={index}
+                  from={constructPlanToWorld(from, coordinates)}
+                  to={constructPlanToWorld(
+                    pool.polygon[(index + 1) % pool.polygon.length],
+                    coordinates,
+                  )}
+                  color="#ff754d"
+                  width={0.065}
+                  elevation={0.79}
+                />
+              ))}
+            </group>
+          ))}
       {planMode && <ConstructionPlanWalls draft={displayedDraft} />}
       {roomTargets.map(({ room, geometry }) => {
         const selected = floorEditorSelectionIncludes(highlightedSelection, "room", room.id);
@@ -136,7 +246,7 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
               color="#ff754d"
               transparent
               visible={selected}
-              opacity={selected ? .12 : 0}
+              opacity={selected ? 0.12 : 0}
               side={DoubleSide}
               depthTest={!selected}
               depthWrite={false}
@@ -144,21 +254,64 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
           </mesh>
         );
       })}
-      <ConstructionWallTargets {...{
-        draft, highlightedSelection, directlySelected, draggingEndpoint, draggingWall, previewPoint,
-        coordinates, openingTool, placeOpeningFromEvent, tool, onSelectWall, setOpeningPreview,
-        placementPreviewFromEvent, ToonMaterial, planMode, translationPointForEvent, setDraggingWall,
-        capturedSelectDrag, clientPointForEvent, onDraggingChange, wallDeltaForEvent, finishWallDrag,
-        cancelWallDrag, setDraggingEndpoint, pointForEvent, finishEndpointDrag, cancelEndpointDrag
-      }} />
+      <ConstructionWallTargets
+        {...{
+          draft,
+          highlightedSelection,
+          directlySelected,
+          draggingEndpoint,
+          draggingWall,
+          previewPoint,
+          coordinates,
+          openingTool,
+          placeOpeningFromEvent,
+          tool,
+          onSelectWall,
+          setOpeningPreview,
+          placementPreviewFromEvent,
+          ToonMaterial,
+          planMode,
+          translationPointForEvent,
+          setDraggingWall,
+          capturedSelectDrag,
+          clientPointForEvent,
+          onDraggingChange,
+          wallDeltaForEvent,
+          finishWallDrag,
+          cancelWallDrag,
+          setDraggingEndpoint,
+          pointForEvent,
+          finishEndpointDrag,
+          cancelEndpointDrag,
+        }}
+      />
 
-      <ConstructionOpeningTargets {...{
-        draft, draggingOpening, resizingOpening, previewPoint, coordinates, highlightedSelection,
-        directlySelected, planMode, tool, onSelectOpening, setDraggingOpening, capturedSelectDrag,
-        clientPointForEvent, onDraggingChange, openingPlacementFromEvent, finishOpeningDrag,
-        cancelOpeningDrag, ToonMaterial, setResizingOpening, resizedOpeningForEvent,
-        finishOpeningResize, cancelOpeningResize
-      }} />
+      <ConstructionOpeningTargets
+        {...{
+          draft,
+          draggingOpening,
+          resizingOpening,
+          previewPoint,
+          coordinates,
+          highlightedSelection,
+          directlySelected,
+          planMode,
+          tool,
+          onSelectOpening,
+          setDraggingOpening,
+          capturedSelectDrag,
+          clientPointForEvent,
+          onDraggingChange,
+          openingPlacementFromEvent,
+          finishOpeningDrag,
+          cancelOpeningDrag,
+          ToonMaterial,
+          setResizingOpening,
+          resizedOpeningForEvent,
+          finishOpeningResize,
+          cancelOpeningResize,
+        }}
+      />
 
       {preview && preview.length > 0.001 && (
         <mesh
@@ -169,20 +322,45 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
           renderOrder={22}
         >
           <boxGeometry args={[preview.length, 0.2, 0.12]} />
-          <ToonMaterial color={tool === "wall" ? wallExteriorColor : "#ff754d"}
-            transparent opacity={0.72} depthTest={false} />
+          <ToonMaterial
+            color={tool === "wall" ? wallExteriorColor : "#ff754d"}
+            transparent
+            opacity={0.72}
+            depthTest={false}
+          />
         </mesh>
       )}
-      {drawing && segmentStart && segmentPreview && <ConstructionWallMeasurements
-        walls={drawingWalls} primary={{ from: segmentStart, to: segmentPreview }} junctions={[segmentStart, segmentPreview]}
-        coordinates={coordinates} planMode={planMode}
-        defaultThicknessMeters={tool === "wall" ? draft.interiorWallThicknessMeters : .055}
-        labelKind={tool === "hedge" ? "Hedge" : tool === "wall" ? "Wall" : tool === "platform" ? "Platform edge" : tool === "pool" ? "Pool edge" : "Floor edge"}
-      />}
-      {resizedWall && draggingEndpoint && tool === "select" && <ConstructionWallMeasurements
-        walls={displayedDraft.walls} primary={resizedWall} junctions={[draggingEndpoint.point]}
-        coordinates={coordinates} planMode={planMode} defaultThicknessMeters={draft.interiorWallThicknessMeters}
-      />}
+      {drawing && segmentStart && segmentPreview && (
+        <ConstructionWallMeasurements
+          walls={drawingWalls}
+          primary={{ from: segmentStart, to: segmentPreview }}
+          junctions={[segmentStart, segmentPreview]}
+          coordinates={coordinates}
+          planMode={planMode}
+          defaultThicknessMeters={tool === "wall" ? draft.interiorWallThicknessMeters : 0.055}
+          labelKind={
+            tool === "hedge"
+              ? "Hedge"
+              : tool === "wall"
+                ? "Wall"
+                : tool === "platform"
+                  ? "Platform edge"
+                  : tool === "pool"
+                    ? "Pool edge"
+                    : "Floor edge"
+          }
+        />
+      )}
+      {resizedWall && draggingEndpoint && tool === "select" && (
+        <ConstructionWallMeasurements
+          walls={displayedDraft.walls}
+          primary={resizedWall}
+          junctions={[draggingEndpoint.point]}
+          coordinates={coordinates}
+          planMode={planMode}
+          defaultThicknessMeters={draft.interiorWallThicknessMeters}
+        />
+      )}
 
       {placementPreview && (
         <group
@@ -200,29 +378,31 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
           }}
         >
           <mesh renderOrder={28}>
-            <boxGeometry args={[
-              placementPreview.widthMeters,
-              placementPreview.openingHeightMeters,
-              .15,
-            ]} />
+            <boxGeometry
+              args={[placementPreview.widthMeters, placementPreview.openingHeightMeters, 0.15]}
+            />
             <ToonMaterial
               color={placementPreview.valid ? "#ff754d" : "#c45345"}
               transparent
-              opacity={.34}
+              opacity={0.34}
               wireframe
               depthTest={false}
               depthWrite={false}
             />
           </mesh>
           <mesh
-            position={[0, -placementPreview.openingHeightMeters / 2 - placementPreview.sillHeightMeters + .055, 0]}
+            position={[
+              0,
+              -placementPreview.openingHeightMeters / 2 - placementPreview.sillHeightMeters + 0.055,
+              0,
+            ]}
             renderOrder={27}
           >
-            <boxGeometry args={[placementPreview.widthMeters, .025, .28]} />
+            <boxGeometry args={[placementPreview.widthMeters, 0.025, 0.28]} />
             <ToonMaterial
               color={placementPreview.valid ? "#ff754d" : "#c45345"}
               transparent
-              opacity={.72}
+              opacity={0.72}
               depthTest={false}
             />
           </mesh>
@@ -254,7 +434,12 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
           const point = pointForEvent(event);
           if (!point) return;
           onDraggingChange?.(true);
-          startingPress.current = beginSegmentPress(event.pointerId, clientPointForEvent(event), point, Boolean(segmentStart));
+          startingPress.current = beginSegmentPress(
+            event.pointerId,
+            clientPointForEvent(event),
+            point,
+            Boolean(segmentStart),
+          );
           if (segmentStart) previewSegment?.(point);
           else beginSegment?.(point);
         }}
@@ -305,5 +490,5 @@ export function ConstructionInteractionLayer(props: Parameters<typeof useConstru
         <ToonMaterial visible={false} transparent opacity={0} depthWrite={false} />
       </mesh>
     </group>
-  ));
+  );
 }

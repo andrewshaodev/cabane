@@ -12,9 +12,7 @@ await withModules(async (load) => {
   const { resolveHomeAssistantBindings } = await load(
     "/packages/engine/src/home-assistant-resolver.ts",
   );
-  const { deriveRoomStatusMap } = await load(
-    "/packages/engine/src/room-status/model.ts",
-  );
+  const { deriveRoomStatusMap } = await load("/packages/engine/src/room-status/model.ts");
 
   const derive = (prepare = () => undefined) => {
     const manifest = connectedManifestFixture(neutralDemoManifest);

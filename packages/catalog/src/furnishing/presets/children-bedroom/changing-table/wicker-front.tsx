@@ -16,11 +16,7 @@ export function WickerFront() {
         </mesh>
       ))}
       {[-0.105, -0.035, 0.035, 0.105].map((y) => (
-        <mesh
-          key={`wicker-h-${y}`}
-          position={[0, y, 0.021]}
-          rotation={[0, 0, Math.PI / 2]}
-        >
+        <mesh key={`wicker-h-${y}`} position={[0, y, 0.021]} rotation={[0, 0, Math.PI / 2]}>
           <cylinderGeometry args={[0.005, 0.005, 0.52, 6]} />
           <ToonMaterial color="#96714d" />
         </mesh>

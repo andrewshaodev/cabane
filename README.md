@@ -24,12 +24,12 @@ has two furnished floors and serves as the initial demo home.
 
 This npm workspace separates the reusable product from the bundled home:
 
-| Path | Responsibility |
-| --- | --- |
-| `apps/web` | Web application, routes, workspace and editor shell |
-| `packages/engine` | Project contracts, validation, 3D runtime, dashboard, and Home Assistant integration |
-| `packages/catalog` | Reusable architecture, furnishing, and device models |
-| `home` | Bundled home data and home-specific procedural extensions |
+| Path               | Responsibility                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `apps/web`         | Web application, routes, workspace and editor shell                                  |
+| `packages/engine`  | Project contracts, validation, 3D runtime, dashboard, and Home Assistant integration |
+| `packages/catalog` | Reusable architecture, furnishing, and device models                                 |
+| `home`             | Bundled home data and home-specific procedural extensions                            |
 
 The home project is stored in `home/src/layout.json`, `items.json`, and
 `project.json`. Browser edits are stored locally and do not update these files.
@@ -38,15 +38,21 @@ change the Cabane product itself.
 
 ## Run locally
 
-Requires Node.js 20.19 or newer and npm.
+Use Node.js **24.11.1** and npm **11.6.2** for the reproducible local baseline, pinned in `.nvmrc`, `.node-version`, and `packageManager`. With nvm, run `nvm install && nvm use` first. The `engines` and `devEngines` compatibility checks also accept newer Node 24 and npm 11 releases because managed hosts such as Vercel update their runtimes within a major version.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by the development server. Run `npm run verify` for
-the repository's automated checks. Build the standalone app with `npm run build`.
+Open the local URL printed by the development server. For automated checks, install the
+Playwright-pinned browser once with `npm run browser:install` (Linux hosts may need
+`npm run browser:install -- --with-deps`). Run `npm run verify:fast` for formatting,
+typed ESLint, TypeScript, Knip, and repository rules; run `npm run verify` for the
+full tests, furnishing checks, and production build. These are local commands; no hosted CI is configured.
+
+Use `npm run format` to format changes and `npm run lint:fix` for safe lint fixes.
+Build the standalone app with `npm run build`.
 
 Cabane also runs as the native `cabane-panel` custom element inside Home
 Assistant. It borrows the signed-in host connection; each personal workspace
@@ -72,6 +78,9 @@ For guided setup or home authoring, see the [repository skills](./.agents/skills
 and [agent rules](./AGENTS.md).
 
 ## Documentation
+
+- [Engineering map](./docs/engineering-map.md) — owning modules, supported interfaces,
+  invariant review points, and checks by product area.
 
 - [Product specification](./PRODUCT_SPEC.md) — current behavior and links to
   focused product documentation.

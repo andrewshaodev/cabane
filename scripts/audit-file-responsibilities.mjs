@@ -9,11 +9,19 @@ const churn = new Map();
 for (const file of history.split("\n").filter(Boolean)) {
   churn.set(file, (churn.get(file) ?? 0) + 1);
 }
-const files = [...new Set(git("ls-files", "--cached", "--others", "--exclude-standard", "-z").split("\0").filter(Boolean))];
+const files = [
+  ...new Set(
+    git("ls-files", "--cached", "--others", "--exclude-standard", "-z").split("\0").filter(Boolean),
+  ),
+];
 const rows = [];
 for (const file of files) {
   let source;
-  try { source = readFileSync(file, "utf8"); } catch { continue; }
+  try {
+    source = readFileSync(file, "utf8");
+  } catch {
+    continue;
+  }
   if (source.includes("\0")) continue;
   const lines = source ? source.split("\n").length - Number(source.endsWith("\n")) : 0;
   const changes = churn.get(file) ?? 0;

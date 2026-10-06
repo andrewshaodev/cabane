@@ -1,23 +1,12 @@
-import {
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 import { CabaneDashboard } from "./CabaneDashboard";
 import { neutralDemoManifest } from "./demo";
 export { validateHomeAssistantUrlInput } from "./HomeAssistantConnectionFlow";
-import {
-  loadStoredHomeAssistantUrl,
-  saveStoredHomeAssistantUrl,
-} from "./home-assistant-auth";
-import {
-  HomeAssistantRuntimeProvider,
-} from "./HomeAssistantRuntime";
+import { loadStoredHomeAssistantUrl, saveStoredHomeAssistantUrl } from "./home-assistant-auth";
+import { HomeAssistantRuntimeProvider } from "./HomeAssistantRuntime";
 import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "./types";
 import { validateHomeManifest } from "./validation";
-import {
-  exportCabaneBrowserData,
-  importCabaneBrowserData,
-} from "./browser-data-transfer";
+import { exportCabaneBrowserData, importCabaneBrowserData } from "./browser-data-transfer";
 
 const ONBOARDING_STORAGE_PREFIX = "cabane:onboarding:v1";
 const MODELING_NUDGE_STORAGE_PREFIX = "cabane:modeling-nudge:v1";
@@ -25,9 +14,10 @@ const LEGACY_ONBOARDING_STORAGE_PREFIX = "smart-home-3d:onboarding:v1";
 const LEGACY_MODELING_NUDGE_STORAGE_PREFIX = "smart-home-3d:modeling-nudge:v1";
 const storageKey = (prefix: string, homeId: string) => `${prefix}:${homeId}`;
 
-const legacyCompletionKey = (key: string) => key
-  .replace(ONBOARDING_STORAGE_PREFIX, LEGACY_ONBOARDING_STORAGE_PREFIX)
-  .replace(MODELING_NUDGE_STORAGE_PREFIX, LEGACY_MODELING_NUDGE_STORAGE_PREFIX);
+const legacyCompletionKey = (key: string) =>
+  key
+    .replace(ONBOARDING_STORAGE_PREFIX, LEGACY_ONBOARDING_STORAGE_PREFIX)
+    .replace(MODELING_NUDGE_STORAGE_PREFIX, LEGACY_MODELING_NUDGE_STORAGE_PREFIX);
 
 export const loadStoredCompletionFlag = (
   storage: Pick<Storage, "getItem"> & Partial<Pick<Storage, "setItem">>,
@@ -46,12 +36,13 @@ export const loadStoredCompletionFlag = (
   }
 };
 
-export const onboardingStorageKey = (homeId: string) => storageKey(ONBOARDING_STORAGE_PREFIX, homeId);
-export const modelingNudgeStorageKey = (homeId: string) => storageKey(MODELING_NUDGE_STORAGE_PREFIX, homeId);
+export const onboardingStorageKey = (homeId: string) =>
+  storageKey(ONBOARDING_STORAGE_PREFIX, homeId);
+export const modelingNudgeStorageKey = (homeId: string) =>
+  storageKey(MODELING_NUDGE_STORAGE_PREFIX, homeId);
 
-const initialStoredUrl = () => typeof window === "undefined"
-  ? null
-  : loadStoredHomeAssistantUrl(window.localStorage);
+const initialStoredUrl = () =>
+  typeof window === "undefined" ? null : loadStoredHomeAssistantUrl(window.localStorage);
 
 export { CabaneAppExperience } from "./onboarding/OnboardingExperience";
 import { CabaneAppExperience } from "./onboarding/OnboardingExperience";
@@ -80,7 +71,13 @@ export function CabaneApp({
   );
   const [homeAssistantUrl, setHomeAssistantUrl] = useState(initialStoredUrl);
   if (!validation.canRender || !validation.manifest) {
-    return <CabaneDashboard manifest={manifest} architectureModels={architectureModels} deviceModels={deviceModels} />;
+    return (
+      <CabaneDashboard
+        manifest={manifest}
+        architectureModels={architectureModels}
+        deviceModels={deviceModels}
+      />
+    );
   }
   const updateHomeAssistantUrl = (url: string | null) => {
     setHomeAssistantUrl(url);
@@ -99,7 +96,12 @@ export function CabaneApp({
         constructionApplied={constructionApplied}
         onImportBrowserData={(json) => {
           if (typeof window === "undefined") {
-            return { valid: false, issues: [{ code: "transfer.browser", path: "$", message: "Browser storage is unavailable." }] };
+            return {
+              valid: false,
+              issues: [
+                { code: "transfer.browser", path: "$", message: "Browser storage is unavailable." },
+              ],
+            };
           }
           const result = importCabaneBrowserData(json, window.localStorage, activeManifest);
           if (result.valid) {

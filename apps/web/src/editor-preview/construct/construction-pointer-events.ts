@@ -1,18 +1,10 @@
 import { type ThreeEvent } from "@react-three/fiber";
 
-import {
-  FloorEditorTool,
-  PlanPoint
-} from "@cabane/engine";
+import { FloorEditorTool, PlanPoint } from "@cabane/engine";
 
-import {
-  Plane,
-  Vector3
-} from "three";
+import { Plane, Vector3 } from "three";
 
-import {
-  type SelectDragActivation
-} from "./select-drag-activation";
+import { type SelectDragActivation } from "./select-drag-activation";
 
 export type PointerEvent3D = ThreeEvent<PointerEvent>;
 

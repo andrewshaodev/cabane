@@ -30,9 +30,11 @@ export function DoorLeaf({
           rows={opening.variant === "french" ? 5 : 1}
           frameColor={frameColor}
         />
-        {opening.variant === "french"
-          ? <PanelDoorHandles width={width} side={handleSide} />
-          : <GlassDoorHandle width={width} side={handleSide} />}
+        {opening.variant === "french" ? (
+          <PanelDoorHandles width={width} side={handleSide} />
+        ) : (
+          <GlassDoorHandle width={width} side={handleSide} />
+        )}
       </group>
     );
   }
@@ -50,12 +52,7 @@ export function DoorLeaf({
 
   return (
     <group>
-      <RoundedBox
-        args={[width, height, 0.05]}
-        radius={0.018}
-        smoothness={3}
-        castShadow
-      >
+      <RoundedBox args={[width, height, 0.05]} radius={0.018} smoothness={3} castShadow>
         <ToonMaterial color={white ? "#f1f0eb" : "#b89a73"} />
         <Outlines
           color={white ? "#676965" : "#493c31"}

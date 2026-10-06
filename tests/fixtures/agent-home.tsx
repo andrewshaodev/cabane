@@ -63,98 +63,171 @@ export const layoutFixtureManifest = defineHomeManifest({
       ground: "#91a06a",
     },
   },
-  floors: [{
-    id: "fixture-floor",
-    name: "Fixture floor",
-    coordinates: {
-      origin: [0, 0],
-      metersPerPlanUnit: 1,
-      scaleBasis: "measured",
+  floors: [
+    {
+      id: "fixture-floor",
+      name: "Fixture floor",
+      coordinates: {
+        origin: [0, 0],
+        metersPerPlanUnit: 1,
+        scaleBasis: "measured",
+      },
+      defaultWallHeightMeters: 2.6,
+      defaultCeilingHeightMeters: 2.6,
+      footprint: [
+        [0, 0],
+        [8, 0],
+        [8, 5],
+        [0, 5],
+      ],
+      rooms: [
+        {
+          id: "fixture-studio",
+          name: "Fixture studio",
+          polygon: [
+            [0.12, 0.12],
+            [4.88, 0.12],
+            [4.88, 4.88],
+            [0.12, 4.88],
+          ],
+          accent: "#efc5a9",
+          dashboardSlots: [],
+          devices: [],
+        },
+        {
+          id: "fixture-hall",
+          name: "Fixture hall",
+          polygon: [
+            [5.12, 0.12],
+            [7.88, 0.12],
+            [7.88, 4.88],
+            [5.12, 4.88],
+          ],
+          accent: "#c7d9cf",
+          dashboardSlots: [],
+          devices: [],
+        },
+      ],
+      walls: [
+        {
+          id: "fixture-north",
+          from: [0, 0],
+          to: [8, 0],
+          classification: "exterior",
+          thicknessMeters: 0.18,
+        },
+        {
+          id: "fixture-east",
+          from: [8, 0],
+          to: [8, 5],
+          classification: "exterior",
+          thicknessMeters: 0.18,
+        },
+        {
+          id: "fixture-south",
+          from: [8, 5],
+          to: [0, 5],
+          classification: "exterior",
+          thicknessMeters: 0.18,
+        },
+        {
+          id: "fixture-west",
+          from: [0, 5],
+          to: [0, 0],
+          classification: "exterior",
+          thicknessMeters: 0.18,
+        },
+        {
+          id: "fixture-divider",
+          from: [5, 0],
+          to: [5, 5],
+          classification: "interior",
+          thicknessMeters: 0.12,
+        },
+      ],
+      wallJunctions: [
+        {
+          id: "fixture-north-west-junction",
+          at: [0, 0],
+          wallIds: ["fixture-north", "fixture-west"],
+        },
+        {
+          id: "fixture-north-divider-junction",
+          at: [5, 0],
+          wallIds: ["fixture-north", "fixture-divider"],
+        },
+        {
+          id: "fixture-north-east-junction",
+          at: [8, 0],
+          wallIds: ["fixture-north", "fixture-east"],
+        },
+        {
+          id: "fixture-south-east-junction",
+          at: [8, 5],
+          wallIds: ["fixture-east", "fixture-south"],
+        },
+        {
+          id: "fixture-south-divider-junction",
+          at: [5, 5],
+          wallIds: ["fixture-south", "fixture-divider"],
+        },
+        {
+          id: "fixture-south-west-junction",
+          at: [0, 5],
+          wallIds: ["fixture-south", "fixture-west"],
+        },
+      ],
+      openings: [
+        {
+          id: "fixture-entry",
+          wallId: "fixture-south",
+          kind: "door",
+          offsetFromWallStartPlanUnits: 0.7,
+          widthPlanUnits: 0.95,
+          openingHeightMeters: 2.12,
+          sillHeightMeters: 0,
+          operation: "hinged",
+          variant: "panel",
+          finish: "wood",
+          leafCount: 1,
+        },
+        {
+          id: "fixture-window",
+          wallId: "fixture-north",
+          kind: "window",
+          offsetFromWallStartPlanUnits: 1.8,
+          widthPlanUnits: 1.8,
+          openingHeightMeters: 1.2,
+          sillHeightMeters: 0.85,
+          operation: "casement",
+          variant: "plain",
+          panelCount: 1,
+          glazing: "clear",
+        },
+        {
+          id: "fixture-room-door",
+          wallId: "fixture-divider",
+          kind: "door",
+          offsetFromWallStartPlanUnits: 2,
+          widthPlanUnits: 0.9,
+          openingHeightMeters: 2.1,
+          sillHeightMeters: 0,
+          operation: "hinged",
+          variant: "panel",
+          finish: "wood",
+          leafCount: 1,
+        },
+      ],
+      ceilings: [
+        {
+          id: "fixture-ceiling",
+          kind: "flat",
+          roomIds: ["fixture-studio", "fixture-hall"],
+          heightMeters: 2.6,
+        },
+      ],
     },
-    defaultWallHeightMeters: 2.6,
-    defaultCeilingHeightMeters: 2.6,
-    footprint: [[0, 0], [8, 0], [8, 5], [0, 5]],
-    rooms: [
-      {
-        id: "fixture-studio",
-        name: "Fixture studio",
-        polygon: [[0.12, 0.12], [4.88, 0.12], [4.88, 4.88], [0.12, 4.88]],
-        accent: "#efc5a9",
-        dashboardSlots: [],
-        devices: [],
-      },
-      {
-        id: "fixture-hall",
-        name: "Fixture hall",
-        polygon: [[5.12, 0.12], [7.88, 0.12], [7.88, 4.88], [5.12, 4.88]],
-        accent: "#c7d9cf",
-        dashboardSlots: [],
-        devices: [],
-      },
-    ],
-    walls: [
-      { id: "fixture-north", from: [0, 0], to: [8, 0], classification: "exterior", thicknessMeters: 0.18 },
-      { id: "fixture-east", from: [8, 0], to: [8, 5], classification: "exterior", thicknessMeters: 0.18 },
-      { id: "fixture-south", from: [8, 5], to: [0, 5], classification: "exterior", thicknessMeters: 0.18 },
-      { id: "fixture-west", from: [0, 5], to: [0, 0], classification: "exterior", thicknessMeters: 0.18 },
-      { id: "fixture-divider", from: [5, 0], to: [5, 5], classification: "interior", thicknessMeters: 0.12 },
-    ],
-    wallJunctions: [
-      { id: "fixture-north-west-junction", at: [0, 0], wallIds: ["fixture-north", "fixture-west"] },
-      { id: "fixture-north-divider-junction", at: [5, 0], wallIds: ["fixture-north", "fixture-divider"] },
-      { id: "fixture-north-east-junction", at: [8, 0], wallIds: ["fixture-north", "fixture-east"] },
-      { id: "fixture-south-east-junction", at: [8, 5], wallIds: ["fixture-east", "fixture-south"] },
-      { id: "fixture-south-divider-junction", at: [5, 5], wallIds: ["fixture-south", "fixture-divider"] },
-      { id: "fixture-south-west-junction", at: [0, 5], wallIds: ["fixture-south", "fixture-west"] },
-    ],
-    openings: [
-      {
-        id: "fixture-entry",
-        wallId: "fixture-south",
-        kind: "door",
-        offsetFromWallStartPlanUnits: 0.7,
-        widthPlanUnits: 0.95,
-        openingHeightMeters: 2.12,
-        sillHeightMeters: 0,
-        operation: "hinged",
-        variant: "panel",
-        finish: "wood",
-        leafCount: 1,
-      },
-      {
-        id: "fixture-window",
-        wallId: "fixture-north",
-        kind: "window",
-        offsetFromWallStartPlanUnits: 1.8,
-        widthPlanUnits: 1.8,
-        openingHeightMeters: 1.2,
-        sillHeightMeters: 0.85,
-        operation: "casement",
-        variant: "plain",
-        panelCount: 1,
-        glazing: "clear",
-      },
-      {
-        id: "fixture-room-door",
-        wallId: "fixture-divider",
-        kind: "door",
-        offsetFromWallStartPlanUnits: 2,
-        widthPlanUnits: 0.9,
-        openingHeightMeters: 2.1,
-        sillHeightMeters: 0,
-        operation: "hinged",
-        variant: "panel",
-        finish: "wood",
-        leafCount: 1,
-      },
-    ],
-    ceilings: [{
-      id: "fixture-ceiling",
-      kind: "flat",
-      roomIds: ["fixture-studio", "fixture-hall"],
-      heightMeters: 2.6,
-    }],
-  }],
+  ],
   sceneItems: [],
   shortcuts: [
     { id: "fixture-home", action: "home-view", context: "both", order: 0 },
@@ -167,12 +240,14 @@ export const layoutFixtureManifest = defineHomeManifest({
     { id: "fixture-all-off", action: "all-lights", context: "both", order: 7 },
   ],
   extensions: emptyExtensions,
-  assumptions: [{
-    id: "fixture-measured-scale",
-    subjectId: "fixture-floor",
-    summary: "The agent workflow fixture uses synthetic metre coordinates.",
-    basis: "measured",
-  }],
+  assumptions: [
+    {
+      id: "fixture-measured-scale",
+      subjectId: "fixture-floor",
+      summary: "The agent workflow fixture uses synthetic metre coordinates.",
+      basis: "measured",
+    },
+  ],
 });
 
 const entitySlot = (
@@ -206,12 +281,9 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-washing-machine",
     model: "washing-machine",
-    entitySlots: [entitySlot(
-      "fixture-washing-machine-entity",
-      ["switch"],
-      "Washing machine",
-      "secondary",
-    )],
+    entitySlots: [
+      entitySlot("fixture-washing-machine-entity", ["switch"], "Washing machine", "secondary"),
+    ],
     placement: {
       at: [1.4, 3.4],
       elevationMeters: 0,
@@ -221,7 +293,9 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-tumble-dryer",
     model: "tumble-dryer",
-    entitySlots: [entitySlot("fixture-tumble-dryer-entity", ["switch"], "Tumble dryer", "secondary")],
+    entitySlots: [
+      entitySlot("fixture-tumble-dryer-entity", ["switch"], "Tumble dryer", "secondary"),
+    ],
     placement: {
       at: [1, 4.2],
       elevationMeters: 0.002,
@@ -251,12 +325,9 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-water-heater",
     model: "water-heater",
-    entitySlots: [entitySlot(
-      "fixture-water-heater-entity",
-      ["switch"],
-      "Water heater",
-      "secondary",
-    )],
+    entitySlots: [
+      entitySlot("fixture-water-heater-entity", ["switch"], "Water heater", "secondary"),
+    ],
     placement: {
       at: [3.1, 0.299],
       elevationMeters: 0.8,
@@ -277,12 +348,9 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-television",
     model: "television",
-    entitySlots: [entitySlot(
-      "fixture-television-entity",
-      ["media_player"],
-      "Television",
-      "secondary",
-    )],
+    entitySlots: [
+      entitySlot("fixture-television-entity", ["media_player"], "Television", "secondary"),
+    ],
     placement: {
       at: [3, 3.4],
       elevationMeters: 0,
@@ -303,12 +371,7 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-floor-lamp",
     model: "floor-lamp",
-    entitySlots: [entitySlot(
-      "fixture-floor-lamp-entity",
-      ["light"],
-      "Floor lamp",
-      "secondary",
-    )],
+    entitySlots: [entitySlot("fixture-floor-lamp-entity", ["light"], "Floor lamp", "secondary")],
     placement: {
       at: [4, 2],
       elevationMeters: 0,
@@ -318,12 +381,9 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-terracotta-pendant",
     model: "terracotta-pendant",
-    entitySlots: [entitySlot(
-      "fixture-terracotta-pendant-entity",
-      ["light"],
-      "Terracotta pendant",
-      "secondary",
-    )],
+    entitySlots: [
+      entitySlot("fixture-terracotta-pendant-entity", ["light"], "Terracotta pendant", "secondary"),
+    ],
     placement: {
       at: [1.3, 1.4],
       elevationMeters: 1.8,
@@ -344,7 +404,14 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-contact",
     model: "opening-contact",
-    entitySlots: [entitySlot("fixture-contact-entity", ["binary_sensor"], "Opening contact", "diagnostic", ["door", "garage_door", "opening", "window"])],
+    entitySlots: [
+      entitySlot("fixture-contact-entity", ["binary_sensor"], "Opening contact", "diagnostic", [
+        "door",
+        "garage_door",
+        "opening",
+        "window",
+      ]),
+    ],
     placement: {
       at: [3.6, 0.094],
       elevationMeters: 1.35,
@@ -355,7 +422,11 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-thermometer",
     model: "thermometer",
-    entitySlots: [entitySlot("fixture-temperature-entity", ["sensor"], "Thermometer", "diagnostic", ["temperature"])],
+    entitySlots: [
+      entitySlot("fixture-temperature-entity", ["sensor"], "Thermometer", "diagnostic", [
+        "temperature",
+      ]),
+    ],
     placement: {
       at: [0.094, 1.25],
       elevationMeters: 1.45,
@@ -366,7 +437,13 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-motion",
     model: "motion-sensor",
-    entitySlots: [entitySlot("fixture-motion-entity", ["binary_sensor"], "Motion sensor", "diagnostic", ["motion", "occupancy", "presence"])],
+    entitySlots: [
+      entitySlot("fixture-motion-entity", ["binary_sensor"], "Motion sensor", "diagnostic", [
+        "motion",
+        "occupancy",
+        "presence",
+      ]),
+    ],
     placement: {
       at: [0.094, 3.65],
       elevationMeters: 2.05,
@@ -388,7 +465,11 @@ const studioDevices: HomeManifest["floors"][number]["rooms"][number]["devices"] 
   {
     id: "fixture-leak",
     model: "leak-sensor",
-    entitySlots: [entitySlot("fixture-leak-entity", ["binary_sensor"], "Leak sensor", "diagnostic", ["moisture"])],
+    entitySlots: [
+      entitySlot("fixture-leak-entity", ["binary_sensor"], "Leak sensor", "diagnostic", [
+        "moisture",
+      ]),
+    ],
     placement: {
       at: [4.25, 4.1],
       elevationMeters: 0,
@@ -437,10 +518,12 @@ const equippedStudio = {
 export const equippedFixtureManifest = defineHomeManifest({
   ...layoutFixtureManifest,
   home: { ...layoutFixtureManifest.home, id: "agent-room-fixture" },
-  floors: [{
-    ...layoutFixtureManifest.floors[0],
-    rooms: [equippedStudio, layoutFixtureManifest.floors[0].rooms[1]],
-  }],
+  floors: [
+    {
+      ...layoutFixtureManifest.floors[0],
+      rooms: [equippedStudio, layoutFixtureManifest.floors[0].rooms[1]],
+    },
+  ],
   extensions: defineHomeExtensionRegistry({
     furnishingModels: {},
     roomFurnishings: {
@@ -486,16 +569,25 @@ export const fixtureCatalogStates: Readonly<Record<EntityId, EntityStateSnapshot
     friendly_name: "Tumble dryer",
   }),
   "fan.fixture_pedestal_fan": state("fan.fixture_pedestal_fan", "on", {
-    friendly_name: "Pedestal fan", percentage: 50, percentage_step: 10,
-    preset_modes: ["normal", "sleep"], preset_mode: "normal",
+    friendly_name: "Pedestal fan",
+    percentage: 50,
+    percentage_step: 10,
+    preset_modes: ["normal", "sleep"],
+    preset_mode: "normal",
   }),
   "fan.fixture_table_fan": state("fan.fixture_table_fan", "on", {
-    friendly_name: "Table fan", percentage: 50, percentage_step: 10,
-    preset_modes: ["normal", "sleep"], preset_mode: "normal",
+    friendly_name: "Table fan",
+    percentage: 50,
+    percentage_step: 10,
+    preset_modes: ["normal", "sleep"],
+    preset_mode: "normal",
   }),
   "fan.fixture_ceiling_fan": state("fan.fixture_ceiling_fan", "on", {
-    friendly_name: "Ceiling fan", percentage: 50, percentage_step: 10,
-    preset_modes: ["normal", "sleep"], preset_mode: "normal",
+    friendly_name: "Ceiling fan",
+    percentage: 50,
+    percentage_step: 10,
+    preset_modes: ["normal", "sleep"],
+    preset_mode: "normal",
   }),
   "climate.fixture_ac": state("climate.fixture_ac", "cool", {
     friendly_name: "Indoor AC",
@@ -642,10 +734,12 @@ export const connectedCatalogRuntime: HomeAssistantRuntimeSnapshot = {
 export const unavailableCatalogRuntime: HomeAssistantRuntimeSnapshot = {
   ...connectedCatalogRuntime,
   canMutate: false,
-  entityStates: Object.fromEntries(catalogEntityIds.map((entityId) => [
-    entityId,
-    state(entityId, "unavailable", fixtureCatalogStates[entityId].attributes),
-  ])) as Readonly<Record<EntityId, EntityStateSnapshot>>,
+  entityStates: Object.fromEntries(
+    catalogEntityIds.map((entityId) => [
+      entityId,
+      state(entityId, "unavailable", fixtureCatalogStates[entityId].attributes),
+    ]),
+  ) as Readonly<Record<EntityId, EntityStateSnapshot>>,
 };
 
 const scaleRooms: HomeManifest["floors"][number]["rooms"] = Array.from(
@@ -673,12 +767,14 @@ const scaleRooms: HomeManifest["floors"][number]["rooms"] = Array.from(
       devices: entityIds.map((entityId, deviceIndex) => ({
         id: `scale-device-${roomIndex}-${deviceIndex}`,
         model: "speaker" as const,
-        entitySlots: [entitySlot(
-          `scale-entity-slot-${roomIndex}-${deviceIndex}`,
-          ["media_player"],
-          `Scale device ${roomIndex + 1}.${deviceIndex + 1}`,
-          "secondary",
-        )],
+        entitySlots: [
+          entitySlot(
+            `scale-entity-slot-${roomIndex}-${deviceIndex}`,
+            ["media_player"],
+            `Scale device ${roomIndex + 1}.${deviceIndex + 1}`,
+            "secondary",
+          ),
+        ],
         placement: {
           at: [x + 0.65 + deviceIndex * 0.65, y + 1.4] as const,
           elevationMeters: 0,
@@ -694,14 +790,14 @@ const scaleWalls: HomeManifest["floors"][number]["walls"] = [
     id: `scale-wall-v-${column}`,
     from: [column * 4, 0] as const,
     to: [column * 4, 12] as const,
-    classification: column === 0 || column === 5 ? "exterior" as const : "interior" as const,
+    classification: column === 0 || column === 5 ? ("exterior" as const) : ("interior" as const),
     thicknessMeters: column === 0 || column === 5 ? 0.18 : 0.12,
   })),
   ...Array.from({ length: 5 }, (_, row) => ({
     id: `scale-wall-h-${row}`,
     from: [0, row * 3] as const,
     to: [20, row * 3] as const,
-    classification: row === 0 || row === 4 ? "exterior" as const : "interior" as const,
+    classification: row === 0 || row === 4 ? ("exterior" as const) : ("interior" as const),
     thicknessMeters: row === 0 || row === 4 ? 0.18 : 0.12,
   })),
 ];
@@ -727,49 +823,62 @@ export const scaleFixtureManifest: HomeManifest = defineHomeManifest({
     locale: "en",
     palette: layoutFixtureManifest.home.palette,
   },
-  floors: [{
-    id: "scale-floor",
-    name: "Scale floor",
-    coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
-    defaultWallHeightMeters: 2.6,
-    defaultCeilingHeightMeters: 2.6,
-    footprint: [[0, 0], [20, 0], [20, 12], [0, 12]],
-    rooms: scaleRooms,
-    walls: scaleWalls,
-    wallJunctions: scaleWallJunctions,
-    openings: [],
-  }],
+  floors: [
+    {
+      id: "scale-floor",
+      name: "Scale floor",
+      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+      defaultWallHeightMeters: 2.6,
+      defaultCeilingHeightMeters: 2.6,
+      footprint: [
+        [0, 0],
+        [20, 0],
+        [20, 12],
+        [0, 12],
+      ],
+      rooms: scaleRooms,
+      walls: scaleWalls,
+      wallJunctions: scaleWallJunctions,
+      openings: [],
+    },
+  ],
   sceneItems: [],
   shortcuts: layoutFixtureManifest.shortcuts,
   extensions: emptyExtensions,
-  assumptions: [{
-    id: "scale-fixture-purpose",
-    subjectId: "scale-floor",
-    summary: "Synthetic 20-room/100-binding fixture for deterministic budgets.",
-    basis: "measured",
-  }],
+  assumptions: [
+    {
+      id: "scale-fixture-purpose",
+      subjectId: "scale-floor",
+      summary: "Synthetic 20-room/100-binding fixture for deterministic budgets.",
+      basis: "measured",
+    },
+  ],
 });
 
 export const scaleFixtureProfile = {
   schemaVersion: 1 as const,
   homeId: "representative-scale-fixture",
-  roomAreaIds: Object.fromEntries(Array.from({ length: 20 }, (_, roomIndex) => [
-    `scale-room-${roomIndex}`,
-    `scale_room_${roomIndex}`,
-  ])),
-  entityIdsBySlotId: Object.fromEntries(Array.from({ length: 20 }, (_, roomIndex) =>
-    Array.from({ length: 5 }, (_, deviceIndex) => [
-      `scale-entity-slot-${roomIndex}-${deviceIndex}`,
-      `media_player.scale_${roomIndex}_${deviceIndex}` as EntityId,
-    ])
-  ).flat()),
+  roomAreaIds: Object.fromEntries(
+    Array.from({ length: 20 }, (_, roomIndex) => [
+      `scale-room-${roomIndex}`,
+      `scale_room_${roomIndex}`,
+    ]),
+  ),
+  entityIdsBySlotId: Object.fromEntries(
+    Array.from({ length: 20 }, (_, roomIndex) =>
+      Array.from({ length: 5 }, (_, deviceIndex) => [
+        `scale-entity-slot-${roomIndex}-${deviceIndex}`,
+        `media_player.scale_${roomIndex}_${deviceIndex}` as EntityId,
+      ]),
+    ).flat(),
+  ),
 };
 
 const scaleEntityRecords = Array.from({ length: 20 }, (_, roomIndex) =>
   Array.from({ length: 5 }, (_, deviceIndex) => {
     const entityId = `media_player.scale_${roomIndex}_${deviceIndex}` as EntityId;
     return { roomIndex, deviceIndex, entityId };
-  })
+  }),
 ).flat();
 
 export const scaleMappingRuntime: HomeAssistantRuntimeSnapshot = {
@@ -801,20 +910,22 @@ export const scaleMappingRuntime: HomeAssistantRuntimeSnapshot = {
     name: null,
     original_name: `Speaker ${roomIndex + 1}.${deviceIndex + 1}`,
   })),
-  entityStates: Object.fromEntries(scaleEntityRecords.map(({ roomIndex, deviceIndex, entityId }) => [
-    entityId,
-    {
+  entityStates: Object.fromEntries(
+    scaleEntityRecords.map(({ roomIndex, deviceIndex, entityId }) => [
       entityId,
-      state: "idle",
-      attributes: {
-        friendly_name: `Speaker ${roomIndex + 1}.${deviceIndex + 1}`,
-        supported_features: 0,
+      {
+        entityId,
+        state: "idle",
+        attributes: {
+          friendly_name: `Speaker ${roomIndex + 1}.${deviceIndex + 1}`,
+          supported_features: 0,
+        },
+        available: true,
+        stale: false,
+        lastConfirmedAt: timestamp,
+        lastChanged: timestamp,
+        lastUpdated: timestamp,
       },
-      available: true,
-      stale: false,
-      lastConfirmedAt: timestamp,
-      lastChanged: timestamp,
-      lastUpdated: timestamp,
-    },
-  ])) as Readonly<Record<EntityId, EntityStateSnapshot>>,
+    ]),
+  ) as Readonly<Record<EntityId, EntityStateSnapshot>>,
 };

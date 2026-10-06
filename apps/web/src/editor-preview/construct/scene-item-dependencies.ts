@@ -21,58 +21,73 @@ export const detachSceneItemsFromMissingWalls = (
   items: readonly SceneItemSpec[],
   floor: FloorSpec,
   rememberedWalls: ReadonlyMap<string, WallSpec>,
-): readonly SceneItemSpec[] => items.flatMap((item) => {
-  const placement = item.placement;
-  if (placement.kind !== "wall") return [item];
-  const wall = floor.walls.find((wall) => wall.id === placement.wallId);
-  if (wall) {
-    const dx = wall.to[0] - wall.from[0];
-    const dy = wall.to[1] - wall.from[1];
-    const length = Math.hypot(dx, dy);
-    const previous = rememberedWalls.get(placement.wallId);
-    const oldDx = previous ? previous.to[0] - previous.from[0] : dx;
-    const oldDy = previous ? previous.to[1] - previous.from[1] : dy;
-    const oldLength = Math.hypot(oldDx, oldDy);
-    const shortened = length < oldLength - 1e-8;
-    let offset = placement.offsetFromWallStartPlanUnits;
-    // Preserve the original anchor when trimming a collinear wall start.
-    if (shortened && previous && length > 0 && oldLength > 0) {
-      const shiftX = wall.from[0] - previous.from[0];
-      const shiftY = wall.from[1] - previous.from[1];
-      if (dx * oldDx + dy * oldDy > 0 &&
-        Math.abs(dx * oldDy - dy * oldDx) < 1e-8 &&
-        Math.abs(shiftX * oldDy - shiftY * oldDx) < 1e-8) {
-        offset -= (shiftX * oldDx + shiftY * oldDy) / oldLength;
+): readonly SceneItemSpec[] =>
+  items.flatMap((item) => {
+    const placement = item.placement;
+    if (placement.kind !== "wall") return [item];
+    const wall = floor.walls.find((wall) => wall.id === placement.wallId);
+    if (wall) {
+      const dx = wall.to[0] - wall.from[0];
+      const dy = wall.to[1] - wall.from[1];
+      const length = Math.hypot(dx, dy);
+      const previous = rememberedWalls.get(placement.wallId);
+      const oldDx = previous ? previous.to[0] - previous.from[0] : dx;
+      const oldDy = previous ? previous.to[1] - previous.from[1] : dy;
+      const oldLength = Math.hypot(oldDx, oldDy);
+      const shortened = length < oldLength - 1e-8;
+      let offset = placement.offsetFromWallStartPlanUnits;
+      // Preserve the original anchor when trimming a collinear wall start.
+      if (shortened && previous && length > 0 && oldLength > 0) {
+        const shiftX = wall.from[0] - previous.from[0];
+        const shiftY = wall.from[1] - previous.from[1];
+        if (
+          dx * oldDx + dy * oldDy > 0 &&
+          Math.abs(dx * oldDy - dy * oldDx) < 1e-8 &&
+          Math.abs(shiftX * oldDy - shiftY * oldDx) < 1e-8
+        ) {
+          offset -= (shiftX * oldDx + shiftY * oldDy) / oldLength;
+        }
       }
+      const halfWidth = shortened ? item.size[0] / floor.coordinates.metersPerPlanUnit / 2 : 0;
+      if (offset - halfWidth < -1e-8 || offset + halfWidth > length + 1e-8) return [];
+      return offset === placement.offsetFromWallStartPlanUnits
+        ? [item]
+        : [
+            {
+              ...item,
+              placement: { ...placement, offsetFromWallStartPlanUnits: offset },
+            },
+          ];
     }
-    const halfWidth = shortened ? item.size[0] / floor.coordinates.metersPerPlanUnit / 2 : 0;
-    if (offset - halfWidth < -1e-8 || offset + halfWidth > length + 1e-8) return [];
-    return offset === placement.offsetFromWallStartPlanUnits ? [item] : [{
-      ...item,
-      placement: { ...placement, offsetFromWallStartPlanUnits: offset },
-    }];
-  }
 
-  const rememberedWall = rememberedWalls.get(placement.wallId);
-  if (!rememberedWall) return [];
-  const transform = resolveItemTransform(placement, {
-    ...floor,
-    walls: [...floor.walls.filter((candidate) => candidate.id !== placement.wallId), rememberedWall],
+    const rememberedWall = rememberedWalls.get(placement.wallId);
+    if (!rememberedWall) return [];
+    const transform = resolveItemTransform(placement, {
+      ...floor,
+      walls: [
+        ...floor.walls.filter((candidate) => candidate.id !== placement.wallId),
+        rememberedWall,
+      ],
+    });
+    const at = worldPointToPlan(
+      {
+        x: transform.position[0],
+        z: transform.position[2],
+      },
+      floor.coordinates,
+    );
+    return [
+      {
+        ...item,
+        placement: {
+          kind: "absolute" as const,
+          at,
+          elevationMeters: transform.position[1],
+          rotationYRadians: transform.rotationYRadians,
+        },
+      },
+    ];
   });
-  const at = worldPointToPlan({
-    x: transform.position[0],
-    z: transform.position[2],
-  }, floor.coordinates);
-  return [{
-    ...item,
-    placement: {
-      kind: "absolute" as const,
-      at,
-      elevationMeters: transform.position[1],
-      rotationYRadians: transform.rotationYRadians,
-    },
-  }];
-});
 
 /**
  * Rebinds wall items to the homogeneous wall run created by topology
@@ -84,31 +99,34 @@ export const reconcileSceneItemWallDependencies = (
   floor: FloorSpec,
   rememberedWalls: ReadonlyMap<string, WallSpec>,
   wallRuns: readonly DerivedWallRun[],
-): readonly SceneItemSpec[] => detachSceneItemsFromMissingWalls(
-  items.map((item) => {
-    const placement = item.placement;
-    if (placement.kind !== "wall") return item;
-    const remapped = remapWallOffsetToDerivedRun(
-      wallRuns,
-      placement.wallId,
-      placement.offsetFromWallStartPlanUnits,
-    );
-    if (!remapped || (
-      remapped.wallId === placement.wallId &&
-      remapped.offsetFromWallStartPlanUnits === placement.offsetFromWallStartPlanUnits
-    )) return item;
-    return {
-      ...item,
-      placement: {
-        ...placement,
-        wallId: remapped.wallId,
-        offsetFromWallStartPlanUnits: remapped.offsetFromWallStartPlanUnits,
-      },
-    };
-  }),
-  floor,
-  rememberedWalls,
-);
+): readonly SceneItemSpec[] =>
+  detachSceneItemsFromMissingWalls(
+    items.map((item) => {
+      const placement = item.placement;
+      if (placement.kind !== "wall") return item;
+      const remapped = remapWallOffsetToDerivedRun(
+        wallRuns,
+        placement.wallId,
+        placement.offsetFromWallStartPlanUnits,
+      );
+      if (
+        !remapped ||
+        (remapped.wallId === placement.wallId &&
+          remapped.offsetFromWallStartPlanUnits === placement.offsetFromWallStartPlanUnits)
+      )
+        return item;
+      return {
+        ...item,
+        placement: {
+          ...placement,
+          wallId: remapped.wallId,
+          offsetFromWallStartPlanUnits: remapped.offsetFromWallStartPlanUnits,
+        },
+      };
+    }),
+    floor,
+    rememberedWalls,
+  );
 
 export interface SceneItemCeilingDependencyResult {
   items: readonly SceneItemSpec[];
@@ -137,7 +155,7 @@ export const reconcileSceneItemCeilingDependencies = (
     if (placement.kind !== "ceiling") return item;
 
     const containingRooms = floor.rooms.filter((room) =>
-      pointInsidePolygon(placement.at, room.polygon)
+      pointInsidePolygon(placement.at, room.polygon),
     );
     if (containingRooms.length === 0) {
       issues.push({

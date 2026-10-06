@@ -24,8 +24,7 @@ const layoutRoom: LayoutRoomSpec = equippedRoom;
 const layoutOpening: LayoutOpeningSpec = contactDoor;
 
 // @ts-expect-error Layout projects support only flat ceilings.
-const layoutCeiling: NonNullable<LayoutFloorSpec["ceilings"]>[number] =
-  slopedCeiling;
+const layoutCeiling: NonNullable<LayoutFloorSpec["ceilings"]>[number] = slopedCeiling;
 
 // @ts-expect-error A floor with a sloped ceiling is not a layout floor.
 const layoutFloor: LayoutFloorSpec = floorWithSlopedCeiling;

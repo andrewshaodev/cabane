@@ -1,13 +1,8 @@
 import type { HomeProject } from "./types";
 
-import {
-  type HomeProjectIssue,
-  type HomeProjectValidationResult
-} from "./validation";
+import { type HomeProjectIssue, type HomeProjectValidationResult } from "./validation";
 
-import {
-  type WorkspaceBindings
-} from "./workspace-bindings";
+import { type WorkspaceBindings } from "./workspace-bindings";
 
 /** A revision/raw compare failed; retrying the stale record cannot be safe. */
 export class WorkspaceConflictError extends Error {
@@ -48,17 +43,17 @@ export type HomeProjectRecordParseResult =
 
 export type ProjectLoadResult =
   | {
-    status: "ready";
-    record: HomeProjectRecord;
-    source: "indexeddb" | "seed" | "legacy";
-  }
+      status: "ready";
+      record: HomeProjectRecord;
+      source: "indexeddb" | "seed" | "legacy";
+    }
   | {
-    status: "recovery";
-    record: HomeProjectRecord;
-    raw: string;
-    reason: string;
-    issues: readonly HomeProjectIssue[];
-  };
+      status: "recovery";
+      record: HomeProjectRecord;
+      raw: string;
+      reason: string;
+      issues: readonly HomeProjectIssue[];
+    };
 
 export interface HomeProjectRepository {
   load(homeId: string): Promise<HomeProjectRecord | null>;

@@ -7,13 +7,23 @@ export function SmartLockModel({ visualState }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   return (
     <group name="catalog-smart-lock">
-      <RoundedBox args={[0.07, 0.18, 0.035]} radius={0.012} smoothness={2} position={[0, 0.09, 0.0175]} castShadow>
+      <RoundedBox
+        args={[0.07, 0.18, 0.035]}
+        radius={0.012}
+        smoothness={2}
+        position={[0, 0.09, 0.0175]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </RoundedBox>
       <mesh position={[0, 0.142, 0.0375]}>
         <boxGeometry args={[0.034, 0.022, 0.005]} />
-        <ToonMaterial color={active ? palette.green : "#42504c"} emissive={palette.green} emissiveIntensity={active ? 0.3 : 0.04} />
+        <ToonMaterial
+          color={active ? palette.green : "#42504c"}
+          emissive={palette.green}
+          emissiveIntensity={active ? 0.3 : 0.04}
+        />
       </mesh>
       <mesh name="smart-lock-thumbturn" position={[0, 0.065, 0.05]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.025, 0.025, 0.02, 18]} />

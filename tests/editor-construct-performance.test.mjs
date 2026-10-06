@@ -13,12 +13,13 @@ await withModules(async (load) => {
   const { ConstructionEditLayer } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionEditLayer.tsx",
   );
-  const { CONSTRUCT_ARCHITECTURE_SETTLE_MS, useConstructEditor } = await load(
+  const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
   );
   const { interactionFloor: floor } = await load("/tests/fixtures/interaction-floor.ts");
 
-  test("publishes committed topology immediately without waiting for 3D mesh construction", async () => {
+  test("publishes committed topology immediately without waiting for 3D mesh construction", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const dom = new JSDOM("<!doctype html><div id='root'></div>");
     const previousWindow = globalThis.window;
     const previousDocument = globalThis.document;
@@ -40,12 +41,14 @@ await withModules(async (load) => {
         (candidate) => candidate.id === opening.id,
       ).offsetFromWallStartPlanUnits;
 
-      act(() => editor.dispatch({
-        type: "move-opening",
-        openingId: opening.id,
-        wallId: opening.wallId,
-        offsetPlanUnits: previousOffset + 0.1,
-      }));
+      act(() =>
+        editor.dispatch({
+          type: "move-opening",
+          openingId: opening.id,
+          wallId: opening.wallId,
+          offsetPlanUnits: previousOffset + 0.1,
+        }),
+      );
 
       assert.equal(editor.draft.openings[0].offsetPlanUnits, previousOffset + 0.1);
       assert.equal(editor.isSettling, false, "The synchronous topology is ready for Home/Apply");
@@ -58,10 +61,7 @@ await withModules(async (load) => {
       assert.equal(editor.history.past.length, 1, "one release creates one undo step");
 
       await act(async () => {
-        await new Promise((resolve) => setTimeout(
-          resolve,
-          CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30,
-        ));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -76,12 +76,9 @@ await withModules(async (load) => {
       );
 
       act(() => editor.selectWall("fixture-north"));
-      act(() => editor.updateSelectedWallMetadata({ thicknessMeters: .26 }));
+      act(() => editor.updateSelectedWallMetadata({ thicknessMeters: 0.26 }));
       await act(async () => {
-        await new Promise((resolve) => setTimeout(
-          resolve,
-          CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30,
-        ));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.topologyIssues.length,
@@ -98,7 +95,8 @@ await withModules(async (load) => {
     }
   });
 
-  test("republishes the original architecture after undoing back to the initial draft", async () => {
+  test("republishes the original architecture after undoing back to the initial draft", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
     const dom = new JSDOM("<!doctype html><div id='root'></div>");
     const previousWindow = globalThis.window;
     const previousDocument = globalThis.document;
@@ -117,17 +115,16 @@ await withModules(async (load) => {
       const opening = editor.draft.openings[0];
       const initialOffset = opening.offsetPlanUnits;
 
-      act(() => editor.dispatch({
-        type: "move-opening",
-        openingId: opening.id,
-        wallId: opening.wallId,
-        offsetPlanUnits: initialOffset + 0.1,
-      }));
+      act(() =>
+        editor.dispatch({
+          type: "move-opening",
+          openingId: opening.id,
+          wallId: opening.wallId,
+          offsetPlanUnits: initialOffset + 0.1,
+        }),
+      );
       await act(async () => {
-        await new Promise((resolve) => setTimeout(
-          resolve,
-          CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30,
-        ));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -139,10 +136,7 @@ await withModules(async (load) => {
       assert.equal(editor.draft.openings[0].offsetPlanUnits, initialOffset);
       assert.equal(editor.isSettling, false);
       await act(async () => {
-        await new Promise((resolve) => setTimeout(
-          resolve,
-          CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30,
-        ));
+        context.mock.timers.runAll();
       });
       assert.equal(
         editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
@@ -151,11 +145,24 @@ await withModules(async (load) => {
       );
       assert.equal(editor.isSettling, false);
       // A shared workspace history restore supersedes a pending geometry edit.
-      act(() => editor.dispatch({ type: "move-opening", openingId: opening.id, wallId: opening.wallId, offsetPlanUnits: initialOffset + .2 }));
+      act(() =>
+        editor.dispatch({
+          type: "move-opening",
+          openingId: opening.id,
+          wallId: opening.wallId,
+          offsetPlanUnits: initialOffset + 0.2,
+        }),
+      );
       act(() => editor.replaceFloor(floor));
       assert.equal(editor.isSettling, false);
-      await act(async () => { await new Promise((resolve) => setTimeout(resolve, CONSTRUCT_ARCHITECTURE_SETTLE_MS + 30)); });
-      assert.equal(editor.previewFloor.openings.find((candidate) => candidate.id === opening.id).offsetFromWallStartPlanUnits, initialOffset);
+      await act(async () => {
+        context.mock.timers.runAll();
+      });
+      assert.equal(
+        editor.previewFloor.openings.find((candidate) => candidate.id === opening.id)
+          .offsetFromWallStartPlanUnits,
+        initialOffset,
+      );
       assert.equal(editor.isSettling, false);
     } finally {
       await act(async () => root.unmount());
@@ -238,7 +245,11 @@ await withModules(async (load) => {
       assert.equal(editor.draft.walls.length, initialWallCount + 4);
       assert.equal(editor.drawStart, null);
       assert.equal(editor.drawPreview, null);
-      assert.equal(editor.selection, null, "the closing wall does not leave an orange selection behind");
+      assert.equal(
+        editor.selection,
+        null,
+        "the closing wall does not leave an orange selection behind",
+      );
       assert.equal(editor.tool, "select", "closing a room returns to the default Select tool");
       assert.equal(editor.history.past.length, 4);
     } finally {
@@ -276,8 +287,8 @@ await withModules(async (load) => {
         support.from[0] + along[0] * progress,
         support.from[1] + along[1] * progress,
       ];
-      const start = pointAt(.25);
-      const end = pointAt(.75);
+      const start = pointAt(0.25);
+      const end = pointAt(0.75);
       const offset = (point) => [point[0] + normal[0], point[1] + normal[1]];
 
       act(() => editor.setTool("wall"));
@@ -291,8 +302,16 @@ await withModules(async (load) => {
       assert.equal(editor.draft.walls.length, initialWallCount + 3);
       assert.equal(editor.drawStart, null);
       assert.equal(editor.drawPreview, null);
-      assert.equal(editor.selection, null, "closing on an existing wall also clears the wall selection");
-      assert.equal(editor.tool, "select", "closing three new walls against an existing wall returns to Select");
+      assert.equal(
+        editor.selection,
+        null,
+        "closing on an existing wall also clears the wall selection",
+      );
+      assert.equal(
+        editor.tool,
+        "select",
+        "closing three new walls against an existing wall returns to Select",
+      );
       assert.equal(editor.history.past.length, 3);
     } finally {
       await act(async () => root.unmount());
@@ -321,65 +340,76 @@ await withModules(async (load) => {
     };
     const moves = [];
     const resizes = [];
-    const renderer = await create(createElement(ConstructionEditLayer, {
-      draft: {
-        version: 1,
-        floorId: floor.id,
-        floorName: floor.name,
-        walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
-        openings: [draftOpening],
+    const renderer = await create(
+      createElement(ConstructionEditLayer, {
+        draft: {
+          version: 1,
+          floorId: floor.id,
+          floorName: floor.name,
+          walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
+          openings: [draftOpening],
+          rooms: [],
+          junctions: [],
+          defaultWallHeightMeters: floor.defaultWallHeightMeters,
+          defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
+          exteriorWallThicknessMeters: 0.2,
+          interiorWallThicknessMeters: 0.12,
+          tool: "select",
+          selection: { kind: "opening", id: opening.id },
+          view: { center: [0, 0], pixelsPerMeter: 82 },
+          nextSerial: 1,
+        },
+        coordinates: floor.coordinates,
         rooms: [],
-        junctions: [],
-        defaultWallHeightMeters: floor.defaultWallHeightMeters,
-        defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
-        exteriorWallThicknessMeters: 0.2,
-        interiorWallThicknessMeters: 0.12,
-        tool: "select",
         selection: { kind: "opening", id: opening.id },
-        view: { center: [0, 0], pixelsPerMeter: 82 },
-        nextSerial: 1,
-      },
-      coordinates: floor.coordinates,
-      rooms: [],
-      selection: { kind: "opening", id: opening.id },
-      tool: "select",
-      onSelectWall() {},
-      onSelectOpening() {},
-      onSelectRoom() {},
-      onMoveEndpoint() {},
-      onTranslateWall() {},
-      onMoveOpening: (...args) => moves.push(args),
-      onResizeOpening: (...args) => resizes.push(args),
-      onPlaceOpening() {},
-      onBeginWall() {},
-      onPreviewWall() {},
-      onAddWall() {},
-      onCancelWall() {},
-    }));
+        tool: "select",
+        onSelectWall() {},
+        onSelectOpening() {},
+        onSelectRoom() {},
+        onMoveEndpoint() {},
+        onTranslateWall() {},
+        onMoveOpening: (...args) => moves.push(args),
+        onResizeOpening: (...args) => resizes.push(args),
+        onPlaceOpening() {},
+        onBeginWall() {},
+        onPreviewWall() {},
+        onAddWall() {},
+        onCancelWall() {},
+      }),
+    );
     const pointerTarget = {
       setPointerCapture() {},
-      hasPointerCapture() { return true; },
+      hasPointerCapture() {
+        return true;
+      },
       releasePointerCapture() {},
     };
-    const pointerAt = (planX, planZ = .16, altKey = false) => ({
+    const pointerAt = (planX, planZ = 0.16, altKey = false) => ({
       pointerId: 7,
       target: pointerTarget,
       stopPropagation() {},
       nativeEvent: { altKey, pointerType: "mouse", clientX: planX * 100, clientY: planZ * 100 },
-      ray: new Ray(new Vector3(
-        (planX - floor.coordinates.origin[0]) * floor.coordinates.metersPerPlanUnit,
-        1,
-        (planZ - floor.coordinates.origin[1]) * floor.coordinates.metersPerPlanUnit,
-      ), new Vector3(0, -1, 0)),
+      ray: new Ray(
+        new Vector3(
+          (planX - floor.coordinates.origin[0]) * floor.coordinates.metersPerPlanUnit,
+          1,
+          (planZ - floor.coordinates.origin[1]) * floor.coordinates.metersPerPlanUnit,
+        ),
+        new Vector3(0, -1, 0),
+      ),
     });
 
     try {
-      assert.ok(renderer.scene.findByProps({
-        name: `construction-opening-clearances-${opening.id}`,
-      }));
-      assert.ok(renderer.scene.findByProps({
-        name: `construction-opening-resize-${opening.id}-start`,
-      }));
+      assert.ok(
+        renderer.scene.findByProps({
+          name: `construction-opening-clearances-${opening.id}`,
+        }),
+      );
+      assert.ok(
+        renderer.scene.findByProps({
+          name: `construction-opening-resize-${opening.id}-start`,
+        }),
+      );
       let target = renderer.scene.findByProps({
         name: `construction-opening-target-${opening.id}`,
       });
@@ -445,69 +475,79 @@ await withModules(async (load) => {
   test("previews direct opening placement and commits only clear wall spans", async () => {
     const opening = floor.openings.find((candidate) => candidate.id === "fixture-door");
     const placements = [];
-    const renderer = await create(createElement(ConstructionEditLayer, {
-      draft: {
-        version: 1,
-        floorId: floor.id,
-        floorName: floor.name,
-        walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
-        openings: [{
-          id: opening.id,
-          wallId: opening.wallId,
-          kind: opening.kind,
-          offsetPlanUnits: opening.offsetFromWallStartPlanUnits,
-          widthPlanUnits: opening.widthPlanUnits,
-          openingHeightMeters: opening.openingHeightMeters,
-          sillHeightMeters: opening.sillHeightMeters,
-          operation: opening.operation,
-          variant: opening.variant,
-          finish: opening.finish,
-          leafCount: opening.leafCount,
-        }],
+    const renderer = await create(
+      createElement(ConstructionEditLayer, {
+        draft: {
+          version: 1,
+          coordinates: floor.coordinates,
+          floorId: floor.id,
+          floorName: floor.name,
+          walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
+          openings: [
+            {
+              id: opening.id,
+              wallId: opening.wallId,
+              kind: opening.kind,
+              offsetPlanUnits: opening.offsetFromWallStartPlanUnits,
+              widthPlanUnits: opening.widthPlanUnits,
+              openingHeightMeters: opening.openingHeightMeters,
+              sillHeightMeters: opening.sillHeightMeters,
+              operation: opening.operation,
+              variant: opening.variant,
+              finish: opening.finish,
+              leafCount: opening.leafCount,
+            },
+          ],
+          rooms: [],
+          junctions: [],
+          defaultWallHeightMeters: floor.defaultWallHeightMeters,
+          defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
+          exteriorWallThicknessMeters: 0.2,
+          interiorWallThicknessMeters: 0.12,
+          tool: "door",
+          selection: null,
+          view: { center: [0, 0], pixelsPerMeter: 82 },
+          nextSerial: 1,
+        },
+        coordinates: floor.coordinates,
         rooms: [],
-        junctions: [],
-        defaultWallHeightMeters: floor.defaultWallHeightMeters,
-        defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
-        exteriorWallThicknessMeters: 0.2,
-        interiorWallThicknessMeters: 0.12,
-        tool: "door",
         selection: null,
-        view: { center: [0, 0], pixelsPerMeter: 82 },
-        nextSerial: 1,
-      },
-      coordinates: floor.coordinates,
-      rooms: [],
-      selection: null,
-      tool: "door",
-      onSelectWall() {},
-      onSelectOpening() {},
-      onSelectRoom() {},
-      onMoveEndpoint() {},
-      onTranslateWall() {},
-      onMoveOpening() {},
-      onResizeOpening() {},
-      onPlaceOpening: (...args) => placements.push(args),
-      onBeginWall() {},
-      onPreviewWall() {},
-      onAddWall() {},
-      onCancelWall() {},
-    }));
+        tool: "door",
+        onSelectWall() {},
+        onSelectOpening() {},
+        onSelectRoom() {},
+        onMoveEndpoint() {},
+        onTranslateWall() {},
+        onMoveOpening() {},
+        onResizeOpening() {},
+        onPlaceOpening: (...args) => placements.push(args),
+        onBeginWall() {},
+        onPreviewWall() {},
+        onAddWall() {},
+        onCancelWall() {},
+      }),
+    );
     const pointerAt = (planX) => ({
       pointerId: 11,
       target: {},
       stopPropagation() {},
       nativeEvent: { altKey: false, pointerType: "mouse", clientX: planX * 100, clientY: 16 },
-      ray: new Ray(new Vector3(
-        (planX - floor.coordinates.origin[0]) * floor.coordinates.metersPerPlanUnit,
-        1,
-        (.16 - floor.coordinates.origin[1]) * floor.coordinates.metersPerPlanUnit,
-      ), new Vector3(0, -1, 0)),
+      ray: new Ray(
+        new Vector3(
+          (planX - floor.coordinates.origin[0]) * floor.coordinates.metersPerPlanUnit,
+          1,
+          (0.16 - floor.coordinates.origin[1]) * floor.coordinates.metersPerPlanUnit,
+        ),
+        new Vector3(0, -1, 0),
+      ),
     });
 
     try {
       const surface = renderer.scene.findByProps({ name: "construction-placement-surface" });
       await renderer.fireEvent(surface, "pointerMove", pointerAt(2));
-      let preview = renderer.scene.findByProps({ name: "construction-opening-placement-preview-door" });
+      let preview = renderer.scene.findByProps({
+        name: "construction-opening-placement-preview-door",
+      });
       assert.equal(preview.props.userData.validPlacement, true);
       assert.equal(preview.props.userData.wallId, "fixture-north");
       await renderer.fireEvent(surface, "pointerDown", pointerAt(2));
@@ -519,6 +559,15 @@ await withModules(async (load) => {
       assert.equal(preview.props.userData.validPlacement, false);
       await renderer.fireEvent(surface, "pointerDown", pointerAt(5.5));
       assert.equal(placements.length, 1, "colliding previews never commit");
+      await renderer.fireEvent(surface, "pointerMove", pointerAt(0.45));
+      preview = renderer.scene.findByProps({ name: "construction-opening-placement-preview-door" });
+      assert.equal(
+        preview.props.userData.validPlacement,
+        false,
+        "corner clearance is shown in the preview",
+      );
+      await renderer.fireEvent(surface, "pointerDown", pointerAt(0.45));
+      assert.equal(placements.length, 1, "junction collisions never commit");
     } finally {
       await renderer.unmount();
     }
@@ -526,41 +575,43 @@ await withModules(async (load) => {
 
   test("selects resolved rooms through the lightweight 3d floor overlay", async () => {
     const selections = [];
-    const renderer = await create(createElement(ConstructionEditLayer, {
-      draft: {
-        version: 1,
-        floorId: floor.id,
-        floorName: floor.name,
-        walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
-        openings: [],
-        rooms: [],
-        junctions: [],
-        defaultWallHeightMeters: floor.defaultWallHeightMeters,
-        defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
-        exteriorWallThicknessMeters: 0.2,
-        interiorWallThicknessMeters: 0.12,
-        tool: "select",
+    const renderer = await create(
+      createElement(ConstructionEditLayer, {
+        draft: {
+          version: 1,
+          floorId: floor.id,
+          floorName: floor.name,
+          walls: floor.walls.map((wall) => ({ id: wall.id, from: wall.from, to: wall.to })),
+          openings: [],
+          rooms: [],
+          junctions: [],
+          defaultWallHeightMeters: floor.defaultWallHeightMeters,
+          defaultCeilingHeightMeters: floor.defaultCeilingHeightMeters,
+          exteriorWallThicknessMeters: 0.2,
+          interiorWallThicknessMeters: 0.12,
+          tool: "select",
+          selection: null,
+          view: { center: [0, 0], pixelsPerMeter: 82 },
+          nextSerial: 1,
+        },
+        coordinates: floor.coordinates,
+        rooms: floor.rooms,
         selection: null,
-        view: { center: [0, 0], pixelsPerMeter: 82 },
-        nextSerial: 1,
-      },
-      coordinates: floor.coordinates,
-      rooms: floor.rooms,
-      selection: null,
-      tool: "select",
-      onSelectWall() {},
-      onSelectOpening() {},
-      onSelectRoom: (id) => selections.push(id),
-      onMoveEndpoint() {},
-      onTranslateWall() {},
-      onMoveOpening() {},
-      onResizeOpening() {},
-      onPlaceOpening() {},
-      onBeginWall() {},
-      onPreviewWall() {},
-      onAddWall() {},
-      onCancelWall() {},
-    }));
+        tool: "select",
+        onSelectWall() {},
+        onSelectOpening() {},
+        onSelectRoom: (id) => selections.push(id),
+        onMoveEndpoint() {},
+        onTranslateWall() {},
+        onMoveOpening() {},
+        onResizeOpening() {},
+        onPlaceOpening() {},
+        onBeginWall() {},
+        onPreviewWall() {},
+        onAddWall() {},
+        onCancelWall() {},
+      }),
+    );
     try {
       const room = floor.rooms[0];
       const target = renderer.scene.findByProps({ name: `construction-room-target-${room.id}` });
@@ -579,44 +630,48 @@ await withModules(async (load) => {
       { id: "vertical", from: [2, 0], to: [2, 2] },
       { id: "snap-target", from: [3, 1], to: [4, 1] },
     ];
-    const renderer = await create(createElement(ConstructionEditLayer, {
-      draft: {
-        version: 1,
-        floorId: "corner-floor",
-        floorName: "Corner floor",
-        walls,
-        openings: [],
+    const renderer = await create(
+      createElement(ConstructionEditLayer, {
+        draft: {
+          version: 1,
+          floorId: "corner-floor",
+          floorName: "Corner floor",
+          walls,
+          openings: [],
+          rooms: [],
+          junctions: [],
+          defaultWallHeightMeters: 2.5,
+          defaultCeilingHeightMeters: 2.5,
+          exteriorWallThicknessMeters: 0.2,
+          interiorWallThicknessMeters: 0.12,
+          tool: "select",
+          selection: { kind: "wall", id: "horizontal" },
+          view: { center: [1, 1], pixelsPerMeter: 82 },
+          nextSerial: 1,
+        },
+        coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
         rooms: [],
-        junctions: [],
-        defaultWallHeightMeters: 2.5,
-        defaultCeilingHeightMeters: 2.5,
-        exteriorWallThicknessMeters: 0.2,
-        interiorWallThicknessMeters: 0.12,
-        tool: "select",
         selection: { kind: "wall", id: "horizontal" },
-        view: { center: [1, 1], pixelsPerMeter: 82 },
-        nextSerial: 1,
-      },
-      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
-      rooms: [],
-      selection: { kind: "wall", id: "horizontal" },
-      tool: "select",
-      onSelectWall() {},
-      onSelectOpening() {},
-      onSelectRoom() {},
-      onMoveEndpoint: (...args) => moves.push(args),
-      onTranslateWall() {},
-      onMoveOpening() {},
-      onResizeOpening() {},
-      onPlaceOpening() {},
-      onBeginWall() {},
-      onPreviewWall() {},
-      onAddWall() {},
-      onCancelWall() {},
-    }));
+        tool: "select",
+        onSelectWall() {},
+        onSelectOpening() {},
+        onSelectRoom() {},
+        onMoveEndpoint: (...args) => moves.push(args),
+        onTranslateWall() {},
+        onMoveOpening() {},
+        onResizeOpening() {},
+        onPlaceOpening() {},
+        onBeginWall() {},
+        onPreviewWall() {},
+        onAddWall() {},
+        onCancelWall() {},
+      }),
+    );
     const pointerTarget = {
       setPointerCapture() {},
-      hasPointerCapture() { return true; },
+      hasPointerCapture() {
+        return true;
+      },
       releasePointerCapture() {},
     };
     const pointerAtGround = (x, z) => ({
@@ -665,44 +720,48 @@ await withModules(async (load) => {
       { id: "left", from: [0, 0], to: [0, 2] },
       { id: "right", from: [2, 0], to: [2, 2] },
     ];
-    const renderer = await create(createElement(ConstructionEditLayer, {
-      draft: {
-        version: 1,
-        floorId: "translated-corners",
-        floorName: "Translated corners",
-        walls,
-        openings: [],
+    const renderer = await create(
+      createElement(ConstructionEditLayer, {
+        draft: {
+          version: 1,
+          floorId: "translated-corners",
+          floorName: "Translated corners",
+          walls,
+          openings: [],
+          rooms: [],
+          junctions: [],
+          defaultWallHeightMeters: 2.5,
+          defaultCeilingHeightMeters: 2.5,
+          exteriorWallThicknessMeters: 0.2,
+          interiorWallThicknessMeters: 0.12,
+          tool: "select",
+          selection: { kind: "wall", id: "horizontal" },
+          view: { center: [1, 1], pixelsPerMeter: 82 },
+          nextSerial: 1,
+        },
+        coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
         rooms: [],
-        junctions: [],
-        defaultWallHeightMeters: 2.5,
-        defaultCeilingHeightMeters: 2.5,
-        exteriorWallThicknessMeters: 0.2,
-        interiorWallThicknessMeters: 0.12,
-        tool: "select",
         selection: { kind: "wall", id: "horizontal" },
-        view: { center: [1, 1], pixelsPerMeter: 82 },
-        nextSerial: 1,
-      },
-      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
-      rooms: [],
-      selection: { kind: "wall", id: "horizontal" },
-      tool: "select",
-      onSelectWall() {},
-      onSelectOpening() {},
-      onSelectRoom() {},
-      onMoveEndpoint() {},
-      onTranslateWall: (...args) => translations.push(args),
-      onMoveOpening() {},
-      onResizeOpening() {},
-      onPlaceOpening() {},
-      onBeginWall() {},
-      onPreviewWall() {},
-      onAddWall() {},
-      onCancelWall() {},
-    }));
+        tool: "select",
+        onSelectWall() {},
+        onSelectOpening() {},
+        onSelectRoom() {},
+        onMoveEndpoint() {},
+        onTranslateWall: (...args) => translations.push(args),
+        onMoveOpening() {},
+        onResizeOpening() {},
+        onPlaceOpening() {},
+        onBeginWall() {},
+        onPreviewWall() {},
+        onAddWall() {},
+        onCancelWall() {},
+      }),
+    );
     const pointerTarget = {
       setPointerCapture() {},
-      hasPointerCapture() { return true; },
+      hasPointerCapture() {
+        return true;
+      },
       releasePointerCapture() {},
     };
     const pointerAtGround = (x, z) => ({

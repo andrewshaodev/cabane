@@ -1,37 +1,15 @@
+import { omitUndefinedProperties } from "../defined-properties";
 import { useCabaneDom } from "./../CabaneDom";
 import { cutSurfaceShapes, useStairSurfaceApertures } from "../stairs/surface-apertures";
 import { useFrame, useThree } from "@react-three/fiber";
 
-import {
-  DoubleSide,
-  Shape,
-  ShapeGeometry,
-  type Mesh
-} from "three";
+import { DoubleSide, ShapeGeometry, type Mesh } from "three";
 
 import { memo, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  planPointToWorld
-} from "../geometry";
-
 import { Outlines, ToonMaterial } from "../rendering";
 
-import type {
-  FloorSpec,
-  Polygon
-} from "../types";
-
-export const shapeForPolygon = (polygon: Polygon, floor: FloorSpec) => {
-  const shape = new Shape();
-  polygon.forEach((point, index) => {
-    const [x, z] = planPointToWorld(point, floor.coordinates);
-    if (index === 0) shape.moveTo(x, -z);
-    else shape.lineTo(x, -z);
-  });
-  shape.closePath();
-  return shape;
-};
+import type { FloorSpec, Polygon } from "../types";
 
 export const PolygonSurface = memo(function PolygonSurface({
   polygon,
@@ -76,8 +54,10 @@ export const PolygonSurface = memo(function PolygonSurface({
     if (!hovered || !onSelect || typeof document === "undefined") return;
     const previousCursor = dom.container.style.cursor;
     dom.container.style.cursor = "pointer";
-    return () => { dom.container.style.cursor = previousCursor; };
-  }, [hovered, onSelect]);
+    return () => {
+      dom.container.style.cursor = previousCursor;
+    };
+  }, [hovered, onSelect, dom]);
 
   useEffect(() => {
     invalidate();
@@ -89,7 +69,8 @@ export const PolygonSurface = memo(function PolygonSurface({
     if (!material || Array.isArray(material)) return;
     const next = reducedMotion
       ? interactionOpacity
-      : opacityRef.current + (interactionOpacity - opacityRef.current) * (1 - Math.exp(-16 * delta));
+      : opacityRef.current +
+        (interactionOpacity - opacityRef.current) * (1 - Math.exp(-16 * delta));
     const resolved = Math.abs(next - interactionOpacity) < 0.002 ? interactionOpacity : next;
     if (Math.abs(resolved - opacityRef.current) > 0.0005) {
       opacityRef.current = resolved;
@@ -107,46 +88,75 @@ export const PolygonSurface = memo(function PolygonSurface({
   return (
     <group>
       <mesh
-        name={name}
+        {...omitUndefinedProperties({ name: name })}
         geometry={geometry}
         position={[0, elevation, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow={receiveShadow}
-        onPointerOver={onSelect ? (event) => {
-          event.stopPropagation();
-          setHovered(true);
-        } : undefined}
-        onPointerOut={onSelect ? (event) => {
-          event.stopPropagation();
-          setHovered(false);
-          clearPress();
-        } : undefined}
-        onPointerDown={onSelect ? (event) => {
-          event.stopPropagation();
-          setPressed(true);
-          press.current = {
-            pointerId: event.pointerId,
-            x: event.nativeEvent.clientX,
-            y: event.nativeEvent.clientY,
-          };
-        } : undefined}
-        onPointerMove={onSelect ? (event) => {
-          const candidate = press.current;
-          if (!candidate || candidate.pointerId !== event.pointerId) return;
-          if (Math.hypot(
-            event.nativeEvent.clientX - candidate.x,
-            event.nativeEvent.clientY - candidate.y,
-          ) > 10) clearPress();
-        } : undefined}
-        onPointerUp={onSelect ? (event) => {
-          event.stopPropagation();
-          const candidate = press.current;
-          clearPress();
-          if (candidate?.pointerId === event.pointerId) onSelect();
-        } : undefined}
-        onPointerCancel={onSelect ? clearPress : undefined}
+        {...omitUndefinedProperties({
+          onPointerOver: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                setHovered(true);
+              }
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerOut: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                setHovered(false);
+                clearPress();
+              }
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerDown: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                setPressed(true);
+                press.current = {
+                  pointerId: event.pointerId,
+                  x: event.nativeEvent.clientX,
+                  y: event.nativeEvent.clientY,
+                };
+              }
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerMove: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                const candidate = press.current;
+                if (!candidate || candidate.pointerId !== event.pointerId) return;
+                if (
+                  Math.hypot(
+                    event.nativeEvent.clientX - candidate.x,
+                    event.nativeEvent.clientY - candidate.y,
+                  ) > 10
+                )
+                  clearPress();
+              }
+            : undefined,
+        })}
+        {...omitUndefinedProperties({
+          onPointerUp: onSelect
+            ? (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+                event.stopPropagation();
+                const candidate = press.current;
+                clearPress();
+                if (candidate?.pointerId === event.pointerId) onSelect();
+              }
+            : undefined,
+        })}
+        {...omitUndefinedProperties({ onPointerCancel: onSelect ? clearPress : undefined })}
       >
-        <ToonMaterial color={color} side={DoubleSide} transparent={opacity < 1} opacity={opacity} depthWrite={opacity >= 1} />
+        <ToonMaterial
+          color={color}
+          side={DoubleSide}
+          transparent={opacity < 1}
+          opacity={opacity}
+          depthWrite={opacity >= 1}
+        />
       </mesh>
       {interactionColor && (
         <mesh

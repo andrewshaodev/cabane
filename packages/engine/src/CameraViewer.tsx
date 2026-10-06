@@ -19,9 +19,11 @@ const CloseGlyph = () => (
 const SoundGlyph = ({ muted }: { muted: boolean }) => (
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M5 9v6h4l5 4V5L9 9H5Z" />
-    {muted
-      ? <path d="m18 9 4 4m0-4-4 4" />
-      : <path d="M17 9.5a4 4 0 0 1 0 5M19 7a7 7 0 0 1 0 10" />}
+    {muted ? (
+      <path d="m18 9 4 4m0-4-4 4" />
+    ) : (
+      <path d="M17 9.5a4 4 0 0 1 0 5M19 7a7 7 0 0 1 0 10" />
+    )}
   </svg>
 );
 
@@ -33,14 +35,16 @@ const statusLabel = (media: DeviceLiveMedia | undefined) => {
 };
 
 const emptyState = (media: DeviceLiveMedia | undefined) => {
-  if (media?.state === "connecting") return {
-    title: "Opening the live feed",
-    detail: "Connecting securely through Home Assistant…",
-  };
-  if (media?.state === "error") return {
-    title: "Live feed unavailable",
-    detail: "Home Assistant could not open the stream. Another attempt will start automatically.",
-  };
+  if (media?.state === "connecting")
+    return {
+      title: "Opening the live feed",
+      detail: "Connecting securely through Home Assistant…",
+    };
+  if (media?.state === "error")
+    return {
+      title: "Live feed unavailable",
+      detail: "Home Assistant could not open the stream. Another attempt will start automatically.",
+    };
   return {
     title: "Camera offline",
     detail: "The live feed will start automatically when the camera becomes available.",
@@ -56,7 +60,7 @@ export function CameraViewer({
 }: {
   roomName: string;
   label: string;
-  media?: DeviceLiveMedia;
+  media?: DeviceLiveMedia | undefined;
   onClose: () => void;
   onReviewConnections: () => void;
 }) {
@@ -70,14 +74,13 @@ export function CameraViewer({
   useLayoutEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return undefined;
-    const previousFocus = dom.root.activeElement instanceof HTMLElement
-      ? dom.root.activeElement
-      : null;
+    const previousFocus =
+      dom.root.activeElement instanceof HTMLElement ? dom.root.activeElement : null;
     const parent = viewer.parentElement;
     const siblings = parent
-      ? [...parent.children].filter((element): element is HTMLElement => (
-          element instanceof HTMLElement && element !== viewer
-        ))
+      ? [...parent.children].filter(
+          (element): element is HTMLElement => element instanceof HTMLElement && element !== viewer,
+        )
       : [];
     const previousStates = siblings.map((element) => ({
       element,
@@ -98,9 +101,11 @@ export function CameraViewer({
         return;
       }
       if (event.key !== "Tab") return;
-      const controls = [...viewer.querySelectorAll<HTMLElement>(
-        "button:not(:disabled), [href], [tabindex]:not([tabindex='-1'])",
-      )];
+      const controls = [
+        ...viewer.querySelectorAll<HTMLElement>(
+          "button:not(:disabled), [href], [tabindex]:not([tabindex='-1'])",
+        ),
+      ];
       if (controls.length === 0) return;
       const first = controls[0];
       const last = controls[controls.length - 1];
@@ -123,7 +128,7 @@ export function CameraViewer({
       });
       previousFocus?.focus();
     };
-  }, [onClose]);
+  }, [onClose, dom]);
 
   useEffect(() => {
     const video = media?.video;
@@ -133,7 +138,6 @@ export function CameraViewer({
     video.removeAttribute("aria-hidden");
     delete video.dataset.cameraClosed;
     video.controls = false;
-    video.muted = muted;
     slot.appendChild(video);
     void video.play().catch(() => undefined);
     return () => {
@@ -146,7 +150,7 @@ export function CameraViewer({
       video.setAttribute("aria-hidden", "true");
       dom.container.appendChild(video);
     };
-  }, [media?.video]);
+  }, [media?.video, dom]);
 
   useEffect(() => {
     if (media?.video) media.video.muted = muted;
@@ -167,7 +171,9 @@ export function CameraViewer({
         <div ref={videoSlotRef} className="camera-viewer__video-slot" />
         {!playing && (
           <div className="camera-viewer__offline">
-            <span><CameraGlyph /></span>
+            <span>
+              <CameraGlyph />
+            </span>
             <strong>{fallback.title}</strong>
             <p>{fallback.detail}</p>
           </div>
@@ -190,20 +196,21 @@ export function CameraViewer({
           <h2 id="camera-viewer-title">{label}</h2>
         </div>
         <span className={`camera-viewer__status is-${media?.state ?? "idle"}`}>
-          <i aria-hidden="true" />{statusLabel(media)}
+          <i aria-hidden="true" />
+          {statusLabel(media)}
         </span>
       </header>
 
       <footer className="camera-viewer__controls">
         <div className="camera-viewer__meta">
-          <span>{media?.transport === "hls"
-            ? "Home Assistant · HLS"
-            : media?.transport === "webrtc"
-              ? "Home Assistant · WebRTC"
-              : "Home Assistant live camera"}</span>
-          {media?.previewState === "cors-blocked" && (
-            <small>{media.error}</small>
-          )}
+          <span>
+            {media?.transport === "hls"
+              ? "Home Assistant · HLS"
+              : media?.transport === "webrtc"
+                ? "Home Assistant · WebRTC"
+                : "Home Assistant live camera"}
+          </span>
+          {media?.previewState === "cors-blocked" && <small>{media.error}</small>}
         </div>
         <div className="camera-viewer__actions">
           {!playing && (

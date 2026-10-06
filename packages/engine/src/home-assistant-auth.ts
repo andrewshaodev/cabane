@@ -18,16 +18,25 @@ export const normalizeHomeAssistantUrl = (value: string | null | undefined) => {
 };
 
 /** HTTP is supported only for development with both endpoints on this machine. */
-export const homeAssistantTransportError = (dashboardUrl: string, homeAssistantUrl: string): string | null => {
+export const homeAssistantTransportError = (
+  dashboardUrl: string,
+  homeAssistantUrl: string,
+): string | null => {
   try {
     const dashboard = new URL(dashboardUrl);
     const ha = new URL(homeAssistantUrl);
     if (dashboard.protocol === "https:" && ha.protocol === "https:") return null;
-    const loopback = (url: URL) => url.hostname === "localhost"
-      || url.hostname === "[::1]"
-      || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(url.hostname);
-    if (dashboard.protocol === "http:" && ha.protocol === "http:"
-      && loopback(dashboard) && loopback(ha)) return null;
+    const loopback = (url: URL) =>
+      url.hostname === "localhost" ||
+      url.hostname === "[::1]" ||
+      /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(url.hostname);
+    if (
+      dashboard.protocol === "http:" &&
+      ha.protocol === "http:" &&
+      loopback(dashboard) &&
+      loopback(ha)
+    )
+      return null;
   } catch {
     // Invalid and non-web addresses fail closed.
   }
@@ -42,7 +51,8 @@ export const loadStoredHomeAssistantUrl = (
     const stored = current ?? storage.getItem(LEGACY_HOME_ASSISTANT_URL_STORAGE_KEY);
     const normalized = normalizeHomeAssistantUrl(stored);
     if (current && !normalized) storage.removeItem(HOME_ASSISTANT_URL_STORAGE_KEY);
-    if (current === null && normalized) storage.setItem?.(HOME_ASSISTANT_URL_STORAGE_KEY, normalized);
+    if (current === null && normalized)
+      storage.setItem?.(HOME_ASSISTANT_URL_STORAGE_KEY, normalized);
     return normalized;
   } catch {
     return null;
@@ -87,17 +97,20 @@ export const cleanAuthenticationCallback = (
 const isAuthData = (value: unknown): value is AuthData => {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<AuthData>;
-  return typeof candidate.hassUrl === "string"
-    && (typeof candidate.clientId === "string" || candidate.clientId === null)
-    && typeof candidate.expires === "number"
-    && typeof candidate.refresh_token === "string"
-    && typeof candidate.access_token === "string"
-    && typeof candidate.expires_in === "number";
+  return (
+    typeof candidate.hassUrl === "string" &&
+    (typeof candidate.clientId === "string" || candidate.clientId === null) &&
+    typeof candidate.expires === "number" &&
+    typeof candidate.refresh_token === "string" &&
+    typeof candidate.access_token === "string" &&
+    typeof candidate.expires_in === "number"
+  );
 };
 
 export const homeAssistantAuthStorageKey = (homeAssistantUrl: string, clientId: string) => {
   const origin = normalizeHomeAssistantUrl(homeAssistantUrl);
-  if (!origin || !clientId) throw new Error("A valid Home Assistant origin and client ID are required.");
+  if (!origin || !clientId)
+    throw new Error("A valid Home Assistant origin and client ID are required.");
   return `cabane:ha-auth:v2:${encodeURIComponent(origin)}:${encodeURIComponent(clientId)}`;
 };
 
@@ -106,19 +119,31 @@ export const homeAssistantLogoutStorageKey = (homeAssistantUrl: string, clientId
 
 // Read before loading credentials and on every write: storage events can arrive late.
 export const readLogoutGeneration = (
-  storage: Pick<Storage, "getItem">, homeAssistantUrl: string, clientId: string,
+  storage: Pick<Storage, "getItem">,
+  homeAssistantUrl: string,
+  clientId: string,
 ) => {
-  try { return storage.getItem(homeAssistantLogoutStorageKey(homeAssistantUrl, clientId)); }
-  catch { return null; }
+  try {
+    return storage.getItem(homeAssistantLogoutStorageKey(homeAssistantUrl, clientId));
+  } catch {
+    return null;
+  }
 };
 
-export const invalidateStoredAuthData = (storage: Storage, homeAssistantUrl: string, clientId: string) => {
+export const invalidateStoredAuthData = (
+  storage: Storage,
+  homeAssistantUrl: string,
+  clientId: string,
+) => {
   try {
     // getRandomValues works on HTTP dashboards too.
-    const generation = Array.from(crypto.getRandomValues(new Uint32Array(4)),
-      (value) => value.toString(16)).join("-");
+    const generation = Array.from(crypto.getRandomValues(new Uint32Array(4)), (value) =>
+      value.toString(16),
+    ).join("-");
     storage.setItem(homeAssistantLogoutStorageKey(homeAssistantUrl, clientId), generation);
-  } catch { /* Local lifecycle guards still protect a storage-disabled page. */ }
+  } catch {
+    /* Local lifecycle guards still protect a storage-disabled page. */
+  }
   saveStoredAuthData(storage, null, homeAssistantUrl, clientId);
 };
 
@@ -132,17 +157,26 @@ export const loadStoredAuthData = (
     const raw = storage.getItem(key);
     if (!raw) return null;
     const data: unknown = JSON.parse(raw);
-    if (!isAuthData(data)
-      || ("logoutGeneration" in data && data.logoutGeneration !== readLogoutGeneration(storage, homeAssistantUrl, clientId))
-      || normalizeHomeAssistantUrl(data.hassUrl) !== normalizeHomeAssistantUrl(homeAssistantUrl)
-      || data.clientId !== clientId) {
+    if (
+      !isAuthData(data) ||
+      ("logoutGeneration" in data &&
+        data.logoutGeneration !== readLogoutGeneration(storage, homeAssistantUrl, clientId)) ||
+      normalizeHomeAssistantUrl(data.hassUrl) !== normalizeHomeAssistantUrl(homeAssistantUrl) ||
+      data.clientId !== clientId
+    ) {
       storage.removeItem(key);
       return null;
     }
-    const { logoutGeneration: _generation, ...tokens } = data as AuthData & { logoutGeneration?: string | null };
+    const { logoutGeneration: _generation, ...tokens } = data as AuthData & {
+      logoutGeneration?: string | null;
+    };
     return tokens;
   } catch {
-    try { storage.removeItem(key); } catch { /* Storage may be unavailable. */ }
+    try {
+      storage.removeItem(key);
+    } catch {
+      /* Storage may be unavailable. */
+    }
     return null;
   }
 };
@@ -155,13 +189,19 @@ export const saveStoredAuthData = (
   logoutGeneration?: string | null,
 ) => {
   const key = homeAssistantAuthStorageKey(homeAssistantUrl, clientId);
-  if (data && (!isAuthData(data)
-    || normalizeHomeAssistantUrl(data.hassUrl) !== normalizeHomeAssistantUrl(homeAssistantUrl)
-    || data.clientId !== clientId)) return;
+  if (
+    data &&
+    (!isAuthData(data) ||
+      normalizeHomeAssistantUrl(data.hassUrl) !== normalizeHomeAssistantUrl(homeAssistantUrl) ||
+      data.clientId !== clientId)
+  )
+    return;
   try {
-    if (data) storage.setItem(key, JSON.stringify(
-      logoutGeneration === undefined ? data : { ...data, logoutGeneration },
-    ));
+    if (data)
+      storage.setItem(
+        key,
+        JSON.stringify(logoutGeneration === undefined ? data : { ...data, logoutGeneration }),
+      );
     else storage.removeItem(key);
   } catch {
     // OAuth can still work for the current page when persistent browser storage is blocked.

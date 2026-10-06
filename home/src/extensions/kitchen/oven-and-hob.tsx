@@ -1,8 +1,5 @@
 import { ToonMaterial } from "@cabane/engine";
-import {
-  KITCHEN_DARK,
-  KitchenBox,
-} from "./kitchen-finish";
+import { KITCHEN_DARK, KitchenBox } from "./kitchen-finish";
 
 export function OvenAndHob() {
   return (
@@ -37,12 +34,14 @@ export function OvenAndHob() {
         color="#252827"
         outline="#111312"
       />
-      {[0.96, 1.22].flatMap((x) => [0.23, 0.45].map((z) => (
-        <mesh key={`${x}-${z}`} position={[x, 0.95, z]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.062, 0.078, 24]} />
-          <ToonMaterial color="#454a48" />
-        </mesh>
-      )))}
+      {[0.96, 1.22].flatMap((x) =>
+        [0.23, 0.45].map((z) => (
+          <mesh key={`${x}-${z}`} position={[x, 0.95, z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.062, 0.078, 24]} />
+            <ToonMaterial color="#454a48" />
+          </mesh>
+        )),
+      )}
     </group>
   );
 }

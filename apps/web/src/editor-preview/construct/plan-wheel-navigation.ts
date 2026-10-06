@@ -2,9 +2,12 @@ import { OrthographicCamera, Vector3 } from "three";
 
 /** Scroll moves the plan; trackpad pinch (Ctrl-wheel) zooms around the cursor. */
 export function navigatePlanWheel(
-  event: WheelEvent, camera: OrthographicCamera, target: Vector3,
+  event: WheelEvent,
+  camera: OrthographicCamera,
+  target: Vector3,
   rect: Pick<DOMRect, "left" | "top" | "width" | "height">,
-  minZoom: number, maxZoom: number,
+  minZoom: number,
+  maxZoom: number,
 ) {
   if (!rect.width || !rect.height) return;
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? rect.height : 1;
@@ -16,14 +19,23 @@ export function navigatePlanWheel(
   const offset = new Vector3();
   if (event.ctrlKey || event.metaKey) {
     const oldZoom = camera.zoom;
-    camera.zoom = Math.max(minZoom, Math.min(maxZoom, oldZoom * Math.exp(-event.deltaY * unit * .01)));
+    camera.zoom = Math.max(
+      minZoom,
+      Math.min(maxZoom, oldZoom * Math.exp(-event.deltaY * unit * 0.01)),
+    );
     const ratio = 1 - oldZoom / camera.zoom;
-    offset.addScaledVector(right, ((event.clientX - rect.left) / rect.width - .5) * worldWidth * ratio);
-    offset.addScaledVector(up, (.5 - (event.clientY - rect.top) / rect.height) * worldHeight * ratio);
+    offset.addScaledVector(
+      right,
+      ((event.clientX - rect.left) / rect.width - 0.5) * worldWidth * ratio,
+    );
+    offset.addScaledVector(
+      up,
+      (0.5 - (event.clientY - rect.top) / rect.height) * worldHeight * ratio,
+    );
     camera.updateProjectionMatrix();
   } else {
-    offset.addScaledVector(right, event.deltaX * unit * worldWidth / rect.width);
-    offset.addScaledVector(up, -event.deltaY * unit * worldHeight / rect.height);
+    offset.addScaledVector(right, (event.deltaX * unit * worldWidth) / rect.width);
+    offset.addScaledVector(up, (-event.deltaY * unit * worldHeight) / rect.height);
   }
   camera.position.add(offset);
   target.add(offset);

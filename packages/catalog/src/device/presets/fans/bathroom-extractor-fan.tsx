@@ -7,7 +7,13 @@ export function BathroomExtractorFanModel({ visualState }: HomeDeviceModelProps)
   const active = visualState === "connected-active";
   return (
     <group name="catalog-bathroom-extractor-fan">
-      <RoundedBox args={[0.18, 0.18, 0.05]} radius={0.018} smoothness={2} position={[0, 0.09, 0.025]} castShadow>
+      <RoundedBox
+        args={[0.18, 0.18, 0.05]}
+        radius={0.018}
+        smoothness={2}
+        position={[0, 0.09, 0.025]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.003} />
       </RoundedBox>

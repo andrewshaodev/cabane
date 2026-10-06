@@ -7,13 +7,19 @@ export interface HomeAssistantHostSession {
   origin: string;
 }
 const HostSessionContext = createContext<HomeAssistantHostSession | null>(null);
-export function HomeAssistantHostSessionProvider({ session, children }: {
+export function HomeAssistantHostSessionProvider({
+  session,
+  children,
+}: {
   session: HomeAssistantHostSession | null;
   children: ReactNode;
 }) {
   const connection = session?.connection;
   const origin = session?.origin;
-  const value = useMemo(() => connection && origin ? { connection, origin } : null, [connection, origin]);
+  const value = useMemo(
+    () => (connection && origin ? { connection, origin } : null),
+    [connection, origin],
+  );
   return <HostSessionContext.Provider value={value}>{children}</HostSessionContext.Provider>;
 }
 export const useHomeAssistantHostSession = () => useContext(HostSessionContext);

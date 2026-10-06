@@ -1,18 +1,19 @@
 import { BindingEntityCandidate, BindingEntityCandidateScope } from "./binding-profile-contract";
-import { bindingDomainMatchRank, entityMatchesBindingSlot, isShareableCameraDescriptor } from "./binding-slot-compatibility";
+import {
+  bindingDomainMatchRank,
+  entityMatchesBindingSlot,
+  isShareableCameraDescriptor,
+} from "./binding-slot-compatibility";
 import type {
   BindingSlotDescriptor,
   EntityId,
   HomeAssistantEntityRegistryEntry,
   HomeAssistantRuntimeSnapshot,
-  RuntimeBindingProfile
+  RuntimeBindingProfile,
 } from "./types";
 
-export const canonicalName = (value: string) => value
-  .normalize("NFKC")
-  .trim()
-  .replace(/\s+/g, " ")
-  .toLocaleLowerCase("en");
+export const canonicalName = (value: string) =>
+  value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
 
 export const entityAreaId = (
   entry: HomeAssistantEntityRegistryEntry | undefined,
@@ -27,12 +28,13 @@ export const entityAreaId = (
 const registryLabel = (
   entry: HomeAssistantEntityRegistryEntry,
   runtime: HomeAssistantRuntimeSnapshot,
-) => entry.name
-?? (typeof runtime.entityStates[entry.entity_id]?.attributes.friendly_name === "string"
-  ? runtime.entityStates[entry.entity_id]?.attributes.friendly_name as string
-  : undefined)
-?? entry.original_name
-  ?? entry.entity_id;
+) =>
+  entry.name ??
+  (typeof runtime.entityStates[entry.entity_id]?.attributes.friendly_name === "string"
+    ? (runtime.entityStates[entry.entity_id]?.attributes.friendly_name as string)
+    : undefined) ??
+  entry.original_name ??
+  entry.entity_id;
 
 export const bindingEntityCandidates = ({
   descriptor,
@@ -49,16 +51,30 @@ export const bindingEntityCandidates = ({
 }): readonly BindingEntityCandidate[] => {
   const outsideRooms = descriptor.kind === "device" && descriptor.roomIds.length === 0;
   const roomAreaId = profile.roomAreaIds[roomId];
-  if (!outsideRooms && !roomAreaId && !((descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover") && scope === "all-areas")) return [];
+  if (
+    !outsideRooms &&
+    !roomAreaId &&
+    !(
+      (descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover") &&
+      scope === "all-areas"
+    )
+  )
+    return [];
   const homeWideCamera = isShareableCameraDescriptor(descriptor);
-  const claimed = homeWideCamera || descriptor.kind === "opening-contact"
-    ? new Set<EntityId>()
-    : new Set(Object.entries(profile.entityIdsBySlotId)
-      .filter(([slotId]) => slotId !== descriptor.slotId)
-      .map(([, entityId]) => entityId));
+  const claimed =
+    homeWideCamera || descriptor.kind === "opening-contact"
+      ? new Set<EntityId>()
+      : new Set(
+          Object.entries(profile.entityIdsBySlotId)
+            .filter(([slotId]) => slotId !== descriptor.slotId)
+            .map(([, entityId]) => entityId),
+        );
   return runtime.entityRegistry
     .map((entry) => ({ entry, areaId: entityAreaId(entry, runtime) }))
-    .filter(({ areaId }) => outsideRooms || homeWideCamera || scope === "all-areas" || areaId === roomAreaId)
+    .filter(
+      ({ areaId }) =>
+        outsideRooms || homeWideCamera || scope === "all-areas" || areaId === roomAreaId,
+    )
     .filter(({ entry }) => entityMatchesBindingSlot(descriptor, entry.entity_id, runtime))
     .map(({ entry, areaId }) => {
       const state = runtime.entityStates[entry.entity_id];
@@ -73,7 +89,9 @@ export const bindingEntityCandidates = ({
           : !state
             ? "Missing state"
             : !state.available
-              ? state.state === "unknown" ? "Unknown" : "Unavailable"
+              ? state.state === "unknown"
+                ? "Unknown"
+                : "Unavailable"
               : "Available";
       return {
         matchRank: bindingDomainMatchRank(descriptor.spec, entry.entity_id.split(".")[0]),
@@ -81,7 +99,7 @@ export const bindingEntityCandidates = ({
         label: registryLabel(entry, runtime),
         areaId,
         areaLabel: areaId
-          ? runtime.areas.find((area) => area.area_id === areaId)?.name ?? "Unknown area"
+          ? (runtime.areas.find((area) => area.area_id === areaId)?.name ?? "Unknown area")
           : "No area",
         available,
         disabled,
@@ -91,7 +109,11 @@ export const bindingEntityCandidates = ({
         stateLabel,
       };
     })
-    .sort((left, right) => left.matchRank - right.matchRank || left.label.localeCompare(right.label)
-      || left.areaLabel.localeCompare(right.areaLabel)
-      || left.entityId.localeCompare(right.entityId));
+    .sort(
+      (left, right) =>
+        left.matchRank - right.matchRank ||
+        left.label.localeCompare(right.label) ||
+        left.areaLabel.localeCompare(right.areaLabel) ||
+        left.entityId.localeCompare(right.entityId),
+    );
 };

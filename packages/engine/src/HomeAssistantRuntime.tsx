@@ -1,27 +1,20 @@
 import { BorrowedHomeAssistantRuntime } from "./BorrowedHomeAssistantRuntime";
-import { useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
-export { HomeAssistantHostSessionProvider, useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
 import {
-  getAuth,
-  type Auth,
-  type Connection
-} from "home-assistant-js-websocket";
+  useHomeAssistantHostSession,
+  type HomeAssistantHostSession,
+} from "./HomeAssistantHostSession";
+export {
+  HomeAssistantHostSessionProvider,
+  useHomeAssistantHostSession,
+  type HomeAssistantHostSession,
+} from "./HomeAssistantHostSession";
+import { getAuth, type Auth, type Connection } from "home-assistant-js-websocket";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
 import { DeviceCommandScheduler } from "./command-scheduler";
 
-import type {
-  HomeAssistantCameraClient,
-  HomeAssistantCameraMessage,
-} from "./camera-runtime";
+import type { HomeAssistantCameraClient, HomeAssistantCameraMessage } from "./camera-runtime";
 
 import {
   cleanAuthenticationCallback,
@@ -40,7 +33,12 @@ import { requestPopupAuthorizationCode } from "./home-assistant-popup-auth";
 import { markEntityStatesStale, normalizeEntityStates } from "./home-assistant-entity-snapshots";
 import { DEFAULT_CLIENT, HomeAssistantRuntimeClient } from "./home-assistant-runtime-client";
 import { homeAssistantErrorMessage, isAuthenticationError } from "./home-assistant-runtime-errors";
-import { EMPTY_STATES, HomeAssistantRuntimeContext, HomeAssistantRuntimeValue, HomeAssistantRuntimeValueProvider } from "./HomeAssistantRuntimeContext";
+import {
+  EMPTY_STATES,
+  HomeAssistantRuntimeContext,
+  HomeAssistantRuntimeValue,
+  HomeAssistantRuntimeValueProvider,
+} from "./HomeAssistantRuntimeContext";
 import type {
   EntityId,
   EntityStateSnapshot,
@@ -56,7 +54,7 @@ function HomeAssistantRuntimeProviderImpl({
   children,
   client,
 }: {
-  homeAssistantUrl?: string | null;
+  homeAssistantUrl?: (string | null) | undefined;
   children: ReactNode;
   client: HomeAssistantRuntimeClient;
 }) {
@@ -72,7 +70,8 @@ function HomeAssistantRuntimeProviderImpl({
   const [areas, setAreas] = useState<HomeAssistantAreaRegistryEntry[]>([]);
   const [devices, setDevices] = useState<HomeAssistantDeviceRegistryEntry[]>([]);
   const [entityRegistry, setEntityRegistry] = useState<HomeAssistantEntityRegistryEntry[]>([]);
-  const [entityStates, setEntityStates] = useState<Readonly<Record<EntityId, EntityStateSnapshot>>>(EMPTY_STATES);
+  const [entityStates, setEntityStates] =
+    useState<Readonly<Record<EntityId, EntityStateSnapshot>>>(EMPTY_STATES);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
   const statusRef = useRef(status);
@@ -105,13 +104,7 @@ function HomeAssistantRuntimeProviderImpl({
         if (!connection || statusRef.current !== "connected") {
           return Promise.reject(new Error("Home Assistant is not connected."));
         }
-        return client.callService(
-          connection,
-          call.domain,
-          call.service,
-          call.data,
-          call.target,
-        );
+        return client.callService(connection, call.domain, call.service, call.data, call.target);
       },
       resolveDeviceKey: (entityId) =>
         registryDeviceIdsRef.current.get(entityId) ?? `entity:${entityId}`,
@@ -165,171 +158,199 @@ function HomeAssistantRuntimeProviderImpl({
     }
   }, []);
 
-  const startSession = useCallback(async (userInitiated: boolean) => {
-    if (!normalizedUrl || typeof window === "undefined" || attemptRef.current) return;
-    const callback = hasAuthenticationCallback(window.location.href);
-    const transportError = homeAssistantTransportError(window.location.href, normalizedUrl);
-    if (transportError) {
-      if (callback) cleanAuthenticationCallback(window.location.href, window.history);
-      setError(transportError);
-      updateStatus("error");
-      return;
-    }
-    const storage = window.localStorage;
-    const generation = readLogoutGeneration(storage, normalizedUrl, clientId);
-    const storedTokens = loadStoredAuthData(storage, normalizedUrl, clientId);
-    if (!userInitiated && !callback && !storedTokens) {
-      updateStatus("disconnected");
-      return;
-    }
-
-    const lifecycle = ++lifecycleRef.current;
-    sessionGenerationRef.current = generation;
-    const isCurrent = () => lifecycle === lifecycleRef.current
-      && generation === readLogoutGeneration(storage, normalizedUrl, clientId);
-    attemptRef.current = true;
-    setError(null);
-    updateStatus(callback || userInitiated ? "authenticating" : "connecting");
-    try {
-      const authOptions: NonNullable<Parameters<typeof getAuth>[0]> = {
-        hassUrl: normalizedUrl,
-        clientId,
-        redirectUrl: window.location.href,
-        limitHassInstance: true,
-        loadTokens: async () => storedTokens,
-        saveTokens: (tokens) => {
-          if (isCurrent()) saveStoredAuthData(storage, tokens, normalizedUrl, clientId, generation);
-        },
-      };
-      if (userInitiated && !callback && !storedTokens && window.self !== window.top) {
-        authOptions.authCode = await requestPopupAuthorizationCode(window, normalizedUrl, isCurrent);
-        if (!isCurrent()) return;
+  const startSession = useCallback(
+    async (userInitiated: boolean) => {
+      if (!normalizedUrl || typeof window === "undefined" || attemptRef.current) return;
+      const callback = hasAuthenticationCallback(window.location.href);
+      const transportError = homeAssistantTransportError(window.location.href, normalizedUrl);
+      if (transportError) {
+        if (callback) cleanAuthenticationCallback(window.location.href, window.history);
+        setError(transportError);
+        updateStatus("error");
+        return;
       }
-      const auth = await (callback
-        ? getCallbackAuthOnce(client, normalizedUrl, clientId, authOptions, generation)
-        : client.getAuth(authOptions));
-      if (!isCurrent()) {
-        // Effect cleanup (including Strict Mode) must not revoke a shared Auth.
-        if (lifecycle <= cancelledThroughRef.current || generation !== readLogoutGeneration(storage, normalizedUrl, clientId)) {
-          const current = authRef.current;
-          const stored = loadStoredAuthData({
-            getItem: (key) => storage.getItem(key),
-            removeItem: () => undefined,
-          }, normalizedUrl, clientId);
-          const sameCredential = (data: Auth["data"] | null | undefined) => data
-            && data.hassUrl === auth.data.hassUrl
-            && data.refresh_token === auth.data.refresh_token;
-          if (!sameCredential(current?.data) && !sameCredential(stored)) {
-            try { await auth.revoke(); } catch { /* Local logout remains effective. */ }
+      const storage = window.localStorage;
+      const generation = readLogoutGeneration(storage, normalizedUrl, clientId);
+      const storedTokens = loadStoredAuthData(storage, normalizedUrl, clientId);
+      if (!userInitiated && !callback && !storedTokens) {
+        updateStatus("disconnected");
+        return;
+      }
+
+      const lifecycle = ++lifecycleRef.current;
+      sessionGenerationRef.current = generation;
+      const isCurrent = () =>
+        lifecycle === lifecycleRef.current &&
+        generation === readLogoutGeneration(storage, normalizedUrl, clientId);
+      attemptRef.current = true;
+      setError(null);
+      updateStatus(callback || userInitiated ? "authenticating" : "connecting");
+      try {
+        const authOptions: NonNullable<Parameters<typeof getAuth>[0]> = {
+          hassUrl: normalizedUrl,
+          clientId,
+          redirectUrl: window.location.href,
+          limitHassInstance: true,
+          loadTokens: async () => storedTokens,
+          saveTokens: (tokens) => {
+            if (isCurrent())
+              saveStoredAuthData(storage, tokens, normalizedUrl, clientId, generation);
+          },
+        };
+        if (userInitiated && !callback && !storedTokens && window.self !== window.top) {
+          authOptions.authCode = await requestPopupAuthorizationCode(
+            window,
+            normalizedUrl,
+            isCurrent,
+          );
+          if (!isCurrent()) return;
+        }
+        const auth = await (callback
+          ? getCallbackAuthOnce(client, normalizedUrl, clientId, authOptions, generation)
+          : client.getAuth(authOptions));
+        if (!isCurrent()) {
+          // Effect cleanup (including Strict Mode) must not revoke a shared Auth.
+          if (
+            lifecycle <= cancelledThroughRef.current ||
+            generation !== readLogoutGeneration(storage, normalizedUrl, clientId)
+          ) {
+            const current = authRef.current;
+            const stored = loadStoredAuthData(
+              {
+                getItem: (key) => storage.getItem(key),
+                removeItem: () => undefined,
+              },
+              normalizedUrl,
+              clientId,
+            );
+            const sameCredential = (data: Auth["data"] | null | undefined) =>
+              data &&
+              data.hassUrl === auth.data.hassUrl &&
+              data.refresh_token === auth.data.refresh_token;
+            if (!sameCredential(current?.data) && !sameCredential(stored)) {
+              try {
+                await auth.revoke();
+              } catch {
+                /* Local logout remains effective. */
+              }
+            }
           }
+          return;
         }
-        return;
-      }
-      if (callback) cleanAuthenticationCallback(window.location.href, window.history);
-      authRef.current = auth;
-      updateStatus("connecting");
-      teardownConnection();
+        if (callback) cleanAuthenticationCallback(window.location.href, window.history);
+        authRef.current = auth;
+        updateStatus("connecting");
+        teardownConnection();
 
-      const connection = await client.createConnection({ auth, setupRetry: 3 });
-      if (!isCurrent()) {
-        connection.close();
-        return;
-      }
-      connectionRef.current = connection;
-
-      const refreshRegistries = async () => {
-        const [nextAreas, nextDevices, nextEntities] = await Promise.all([
-          connection.sendMessagePromise<HomeAssistantAreaRegistryEntry[]>({
-            type: "config/area_registry/list",
-          }),
-          connection.sendMessagePromise<HomeAssistantDeviceRegistryEntry[]>({
-            type: "config/device_registry/list",
-          }),
-          connection.sendMessagePromise<HomeAssistantEntityRegistryEntry[]>({
-            type: "config/entity_registry/list",
-          }),
-        ]);
-        if (!isCurrent()) return;
-        setAreas(nextAreas);
-        setDevices(nextDevices);
-        setEntityRegistry(nextEntities);
-      };
-
-      const handleReady = () => {
-        if (!isCurrent()) return;
-        void refreshRegistries().then(() => {
-          if (!isCurrent()) return;
-          setError(null);
-          updateStatus("connected");
-        }).catch((refreshError: unknown) => {
-          if (!isCurrent()) return;
-          setError(homeAssistantErrorMessage(refreshError));
-          updateStatus("error");
-        });
-      };
-      const handleDisconnected = () => {
-        if (!isCurrent()) return;
-        schedulerRef.current?.cancelPendingValues();
-        setEntityStates((current) => markEntityStatesStale(current));
-        updateStatus("reconnecting");
-      };
-      const handleReconnectError = (_connection: Connection, reconnectError?: unknown) => {
-        if (!isCurrent()) return;
-        schedulerRef.current?.cancelPendingValues();
-        if (isAuthenticationError(reconnectError)) {
-          saveStoredAuthData(window.localStorage, null, normalizedUrl, clientId);
-          setError(homeAssistantErrorMessage(reconnectError));
-          updateStatus("auth-expired");
-        } else {
-          setError(homeAssistantErrorMessage(reconnectError));
-          updateStatus("error");
+        const connection = await client.createConnection({ auth, setupRetry: 3 });
+        if (!isCurrent()) {
+          connection.close();
+          return;
         }
-      };
-      connection.addEventListener("ready", handleReady);
-      connection.addEventListener("disconnected", handleDisconnected);
-      connection.addEventListener("reconnect-error", handleReconnectError);
-      unsubscribeRef.current.push(() => {
-        connection.removeEventListener("ready", handleReady);
-        connection.removeEventListener("disconnected", handleDisconnected);
-        connection.removeEventListener("reconnect-error", handleReconnectError);
-      });
+        connectionRef.current = connection;
 
-      await refreshRegistries();
-      if (!isCurrent()) return;
-      unsubscribeRef.current.push(client.subscribeEntities(connection, (states) => {
-        if (isCurrent()) setEntityStates(normalizeEntityStates(states));
-      }));
-      for (const eventType of [
-        "area_registry_updated",
-        "device_registry_updated",
-        "entity_registry_updated",
-      ]) {
-        const unsubscribe = await connection.subscribeEvents(() => {
-          void refreshRegistries().catch((refreshError: unknown) => {
-            if (!isCurrent()) return;
-            setError(homeAssistantErrorMessage(refreshError));
+        const refreshRegistries = async () => {
+          const [nextAreas, nextDevices, nextEntities] = await Promise.all([
+            connection.sendMessagePromise<HomeAssistantAreaRegistryEntry[]>({
+              type: "config/area_registry/list",
+            }),
+            connection.sendMessagePromise<HomeAssistantDeviceRegistryEntry[]>({
+              type: "config/device_registry/list",
+            }),
+            connection.sendMessagePromise<HomeAssistantEntityRegistryEntry[]>({
+              type: "config/entity_registry/list",
+            }),
+          ]);
+          if (!isCurrent()) return;
+          setAreas(nextAreas);
+          setDevices(nextDevices);
+          setEntityRegistry(nextEntities);
+        };
+
+        const handleReady = () => {
+          if (!isCurrent()) return;
+          void refreshRegistries()
+            .then(() => {
+              if (!isCurrent()) return;
+              setError(null);
+              updateStatus("connected");
+            })
+            .catch((refreshError: unknown) => {
+              if (!isCurrent()) return;
+              setError(homeAssistantErrorMessage(refreshError));
+              updateStatus("error");
+            });
+        };
+        const handleDisconnected = () => {
+          if (!isCurrent()) return;
+          schedulerRef.current?.cancelPendingValues();
+          setEntityStates((current) => markEntityStatesStale(current));
+          updateStatus("reconnecting");
+        };
+        const handleReconnectError = (_connection: Connection, reconnectError?: unknown) => {
+          if (!isCurrent()) return;
+          schedulerRef.current?.cancelPendingValues();
+          if (isAuthenticationError(reconnectError)) {
+            saveStoredAuthData(window.localStorage, null, normalizedUrl, clientId);
+            setError(homeAssistantErrorMessage(reconnectError));
+            updateStatus("auth-expired");
+          } else {
+            setError(homeAssistantErrorMessage(reconnectError));
             updateStatus("error");
-          });
-        }, eventType);
-        if (!isCurrent()) { void unsubscribe(); return; }
-        unsubscribeRef.current.push(unsubscribe);
+          }
+        };
+        connection.addEventListener("ready", handleReady);
+        connection.addEventListener("disconnected", handleDisconnected);
+        connection.addEventListener("reconnect-error", handleReconnectError);
+        unsubscribeRef.current.push(() => {
+          connection.removeEventListener("ready", handleReady);
+          connection.removeEventListener("disconnected", handleDisconnected);
+          connection.removeEventListener("reconnect-error", handleReconnectError);
+        });
+
+        await refreshRegistries();
+        if (!isCurrent()) return;
+        unsubscribeRef.current.push(
+          client.subscribeEntities(connection, (states) => {
+            if (isCurrent()) setEntityStates(normalizeEntityStates(states));
+          }),
+        );
+        for (const eventType of [
+          "area_registry_updated",
+          "device_registry_updated",
+          "entity_registry_updated",
+        ]) {
+          const unsubscribe = await connection.subscribeEvents(() => {
+            void refreshRegistries().catch((refreshError: unknown) => {
+              if (!isCurrent()) return;
+              setError(homeAssistantErrorMessage(refreshError));
+              updateStatus("error");
+            });
+          }, eventType);
+          if (!isCurrent()) {
+            void unsubscribe();
+            return;
+          }
+          unsubscribeRef.current.push(unsubscribe);
+        }
+        updateStatus("connected");
+      } catch (connectionError: unknown) {
+        if (lifecycle !== lifecycleRef.current) return;
+        if (callback && typeof window !== "undefined") {
+          cleanAuthenticationCallback(window.location.href, window.history);
+        }
+        if (!isCurrent()) return;
+        if (isAuthenticationError(connectionError)) {
+          saveStoredAuthData(window.localStorage, null, normalizedUrl, clientId);
+          updateStatus("auth-expired");
+        } else updateStatus("error");
+        setError(homeAssistantErrorMessage(connectionError));
+      } finally {
+        if (lifecycle === lifecycleRef.current) attemptRef.current = false;
       }
-      updateStatus("connected");
-    } catch (connectionError: unknown) {
-      if (lifecycle !== lifecycleRef.current) return;
-      if (callback && typeof window !== "undefined") {
-        cleanAuthenticationCallback(window.location.href, window.history);
-      }
-      if (!isCurrent()) return;
-      if (isAuthenticationError(connectionError)) {
-        saveStoredAuthData(window.localStorage, null, normalizedUrl, clientId);
-        updateStatus("auth-expired");
-      } else updateStatus("error");
-      setError(homeAssistantErrorMessage(connectionError));
-    } finally {
-      if (lifecycle === lifecycleRef.current) attemptRef.current = false;
-    }
-  }, [client, clientId, normalizedUrl, teardownConnection, updateStatus]);
+    },
+    [client, clientId, normalizedUrl, teardownConnection, updateStatus],
+  );
 
   useEffect(() => {
     lifecycleRef.current += 1;
@@ -384,8 +405,11 @@ function HomeAssistantRuntimeProviderImpl({
     if (!normalizedUrl) return;
     const storage = window.localStorage;
     const onStorage = (event: StorageEvent) => {
-      if (event.storageArea !== storage
-        || (event.key !== homeAssistantLogoutStorageKey(normalizedUrl, clientId) && event.key !== null)) return;
+      if (
+        event.storageArea !== storage ||
+        (event.key !== homeAssistantLogoutStorageKey(normalizedUrl, clientId) && event.key !== null)
+      )
+        return;
       const next = readLogoutGeneration(storage, normalizedUrl, clientId);
       if (next === sessionGenerationRef.current) return;
       sessionGenerationRef.current = next;
@@ -403,7 +427,11 @@ function HomeAssistantRuntimeProviderImpl({
     // cannot clear storage belonging to a subsequent login.
     if (normalizedUrl) {
       invalidateStoredAuthData(window.localStorage, normalizedUrl, clientId);
-      sessionGenerationRef.current = readLogoutGeneration(window.localStorage, normalizedUrl, clientId);
+      sessionGenerationRef.current = readLogoutGeneration(
+        window.localStorage,
+        normalizedUrl,
+        clientId,
+      );
     }
     try {
       await auth?.revoke();
@@ -420,7 +448,11 @@ function HomeAssistantRuntimeProviderImpl({
     return {
       sendMessagePromise: <T,>(message: Parameters<Connection["sendMessagePromise"]>[0]) => {
         const connection = connectionRef.current;
-        if (lifecycle !== lifecycleRef.current || !connection || statusRef.current !== "connected") {
+        if (
+          lifecycle !== lifecycleRef.current ||
+          !connection ||
+          statusRef.current !== "connected"
+        ) {
           return Promise.reject(new Error("Home Assistant is not connected."));
         }
         return connection.sendMessagePromise<T>(message);
@@ -431,7 +463,11 @@ function HomeAssistantRuntimeProviderImpl({
         options?: { resubscribe?: boolean },
       ) => {
         const connection = connectionRef.current;
-        if (lifecycle !== lifecycleRef.current || !connection || statusRef.current !== "connected") {
+        if (
+          lifecycle !== lifecycleRef.current ||
+          !connection ||
+          statusRef.current !== "connected"
+        ) {
           return Promise.reject(new Error("Home Assistant is not connected."));
         }
         return connection.subscribeMessage<T>(callback, message, options);
@@ -439,16 +475,20 @@ function HomeAssistantRuntimeProviderImpl({
     };
   }, [status]);
 
-  const sendStorageMessage = useCallback(async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
-    const lifecycle = lifecycleRef.current;
-    const connection = connectionRef.current;
-    if (!connection || statusRef.current !== "connected") throw new Error("Home Assistant is not connected.");
-    const result = await connection.sendMessagePromise<T>(message);
-    if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
-      throw new Error("This Home Assistant session is no longer active.");
-    }
-    return result;
-  }, []);
+  const sendStorageMessage = useCallback(
+    async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
+      const lifecycle = lifecycleRef.current;
+      const connection = connectionRef.current;
+      if (!connection || statusRef.current !== "connected")
+        throw new Error("Home Assistant is not connected.");
+      const result = await connection.sendMessagePromise<T>(message);
+      if (lifecycle !== lifecycleRef.current || statusRef.current !== "connected") {
+        throw new Error("This Home Assistant session is no longer active.");
+      }
+      return result;
+    },
+    [],
+  );
 
   const value = useMemo<HomeAssistantRuntimeValue>(() => {
     const lifecycle = lifecycleRef.current;
@@ -462,15 +502,20 @@ function HomeAssistantRuntimeProviderImpl({
       devices,
       entityRegistry,
       entityStates,
-      connect: () => { void startSession(true); },
+      connect: () => {
+        void startSession(true);
+      },
       disconnect,
-      retry: () => { void startSession(false); },
+      retry: () => {
+        void startSession(false);
+      },
       refreshing,
       refreshError,
       refresh,
-      callService: (call) => lifecycle !== lifecycleRef.current || !schedulerRef.current
-        ? Promise.reject(new Error("This Home Assistant session is no longer active."))
-        : schedulerRef.current.schedule(call),
+      callService: (call) =>
+        lifecycle !== lifecycleRef.current || !schedulerRef.current
+          ? Promise.reject(new Error("This Home Assistant session is no longer active."))
+          : schedulerRef.current.schedule(call),
       cameraClient,
       sendStorageMessage,
     };
@@ -500,23 +545,38 @@ function HomeAssistantRuntimeProviderImpl({
 
 export function HomeAssistantRuntimeProvider(props: {
   homeAssistantUrl?: string | null;
-  hostSession?: HomeAssistantHostSession | null;
+  hostSession?: (HomeAssistantHostSession | null) | undefined;
   children: ReactNode;
 }) {
   return <HomeAssistantRuntimeTestProvider {...props} client={DEFAULT_CLIENT} />;
 }
 
-export function HomeAssistantRuntimeTestProvider({ homeAssistantUrl, hostSession, client, children }: {
+export function HomeAssistantRuntimeTestProvider({
+  homeAssistantUrl,
+  hostSession,
+  client,
+  children,
+}: {
   homeAssistantUrl?: string | null;
-  hostSession?: HomeAssistantHostSession | null;
+  hostSession?: HomeAssistantHostSession | null | undefined;
   client: HomeAssistantRuntimeClient;
   children: ReactNode;
 }) {
   const inherited = useHomeAssistantHostSession();
   const session = hostSession === undefined ? inherited : hostSession;
-  return session
-    ? <BorrowedHomeAssistantRuntime session={session} homeAssistantUrl={homeAssistantUrl} client={client}>{children}</BorrowedHomeAssistantRuntime>
-    : <HomeAssistantRuntimeProviderImpl homeAssistantUrl={homeAssistantUrl} client={client}>{children}</HomeAssistantRuntimeProviderImpl>;
+  return session ? (
+    <BorrowedHomeAssistantRuntime
+      session={session}
+      homeAssistantUrl={homeAssistantUrl}
+      client={client}
+    >
+      {children}
+    </BorrowedHomeAssistantRuntime>
+  ) : (
+    <HomeAssistantRuntimeProviderImpl homeAssistantUrl={homeAssistantUrl} client={client}>
+      {children}
+    </HomeAssistantRuntimeProviderImpl>
+  );
 }
 
 export function HomeAssistantRuntimeSnapshotTestProvider({
@@ -526,23 +586,33 @@ export function HomeAssistantRuntimeSnapshotTestProvider({
   snapshot: HomeAssistantRuntimeSnapshot;
   children: ReactNode;
 }) {
-  const value = useMemo<HomeAssistantRuntimeValue>(() => ({
-    ...snapshot,
-    connect: () => undefined,
-    disconnect: async () => undefined,
-    retry: () => undefined,
-    refreshing: false,
-    refreshError: null,
-    refresh: async () => undefined,
-    callService: async () => {
-      throw new Error("Deterministic snapshot fixtures cannot call Home Assistant services.");
-    },
-    cameraClient: null,
-    sendStorageMessage: async () => { throw new Error("Snapshot fixtures cannot access Home Assistant storage."); },
-  }), [snapshot]);
-  return <HomeAssistantRuntimeValueProvider value={value}>{children}</HomeAssistantRuntimeValueProvider>;
+  const value = useMemo<HomeAssistantRuntimeValue>(
+    () => ({
+      ...snapshot,
+      connect: () => undefined,
+      disconnect: async () => undefined,
+      retry: () => undefined,
+      refreshing: false,
+      refreshError: null,
+      refresh: async () => undefined,
+      callService: async () => {
+        throw new Error("Deterministic snapshot fixtures cannot call Home Assistant services.");
+      },
+      cameraClient: null,
+      sendStorageMessage: async () => {
+        throw new Error("Snapshot fixtures cannot access Home Assistant storage.");
+      },
+    }),
+    [snapshot],
+  );
+  return (
+    <HomeAssistantRuntimeValueProvider value={value}>{children}</HomeAssistantRuntimeValueProvider>
+  );
 }
 export { markEntityStatesStale, normalizeEntityStates } from "./home-assistant-entity-snapshots";
 export { homeAssistantErrorMessage } from "./home-assistant-runtime-errors";
-export { HomeAssistantRuntimeValueProvider, useHomeAssistantRuntime } from "./HomeAssistantRuntimeContext";
+export {
+  HomeAssistantRuntimeValueProvider,
+  useHomeAssistantRuntime,
+} from "./HomeAssistantRuntimeContext";
 export type { HomeAssistantRuntimeValue } from "./HomeAssistantRuntimeContext";

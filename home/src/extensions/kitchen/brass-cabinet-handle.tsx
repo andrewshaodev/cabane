@@ -1,9 +1,5 @@
 import { ToonMaterial } from "@cabane/engine";
-import {
-  KITCHEN_BRASS,
-  KitchenBox,
-  type KitchenVector3,
-} from "./kitchen-finish";
+import { KITCHEN_BRASS, KitchenBox, type KitchenVector3 } from "./kitchen-finish";
 
 export function BrassCabinetHandle({
   position,
@@ -24,9 +20,7 @@ export function BrassCabinetHandle({
         <mesh
           key={side}
           castShadow
-          position={vertical
-            ? [0, side * 0.075, -0.018]
-            : [side * 0.075, 0, -0.018]}
+          position={vertical ? [0, side * 0.075, -0.018] : [side * 0.075, 0, -0.018]}
         >
           <boxGeometry args={[0.018, 0.018, 0.045]} />
           <ToonMaterial color={KITCHEN_BRASS} />

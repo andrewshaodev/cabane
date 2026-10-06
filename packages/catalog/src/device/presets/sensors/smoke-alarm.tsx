@@ -23,7 +23,11 @@ export function SmokeAlarmModel({ visualState }: HomeDeviceModelProps) {
       ))}
       <mesh position={[0, 0.038, 0.045]}>
         <sphereGeometry args={[0.006, 10, 6]} />
-        <ToonMaterial color={alert ? palette.coral : palette.green} emissive={alert ? palette.coral : palette.green} emissiveIntensity={0.35} />
+        <ToonMaterial
+          color={alert ? palette.coral : palette.green}
+          emissive={alert ? palette.coral : palette.green}
+          emissiveIntensity={0.35}
+        />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.036, 0.038, 0]} scale={0.12} />
     </group>

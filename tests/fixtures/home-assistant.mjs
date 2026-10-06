@@ -29,22 +29,112 @@ export const fixtureAreas = [
 ];
 
 export const fixtureDevices = [
-  { id: "device-light", area_id: "outside", name: "Ceiling light", name_by_user: null, model: "Fixture light" },
-  { id: "device-switch", area_id: "demo_room", name: "Coffee switch", name_by_user: null, model: "Fixture switch" },
-  { id: "device-climate", area_id: "demo_room", name: "Climate", name_by_user: null, model: "Fixture climate" },
-  { id: "device-cover", area_id: "demo_room", name: "Shade", name_by_user: null, model: "Fixture cover" },
+  {
+    id: "device-light",
+    area_id: "outside",
+    name: "Ceiling light",
+    name_by_user: null,
+    model: "Fixture light",
+  },
+  {
+    id: "device-switch",
+    area_id: "demo_room",
+    name: "Coffee switch",
+    name_by_user: null,
+    model: "Fixture switch",
+  },
+  {
+    id: "device-climate",
+    area_id: "demo_room",
+    name: "Climate",
+    name_by_user: null,
+    model: "Fixture climate",
+  },
+  {
+    id: "device-cover",
+    area_id: "demo_room",
+    name: "Shade",
+    name_by_user: null,
+    model: "Fixture cover",
+  },
   { id: "device-fan", area_id: "demo_room", name: "Fan", name_by_user: null, model: "Fixture fan" },
-  { id: "device-media", area_id: "demo_room", name: "Speaker", name_by_user: null, model: "Fixture speaker" },
-  { id: "device-humidifier", area_id: "demo_room", name: "Humidifier", name_by_user: null, model: "Fixture humidifier" },
-  { id: "device-water-heater", area_id: "demo_room", name: "Water heater", name_by_user: null, model: "Fixture water heater" },
-  { id: "device-vacuum", area_id: "demo_room", name: "Vacuum", name_by_user: null, model: "Fixture vacuum" },
-  { id: "device-lock", area_id: "demo_room", name: "Front lock", name_by_user: null, model: "Fixture lock" },
-  { id: "device-alarm", area_id: "demo_room", name: "Alarm", name_by_user: null, model: "Fixture alarm" },
-  { id: "device-valve", area_id: "demo_room", name: "Water valve", name_by_user: null, model: "Fixture valve" },
-  { id: "device-siren", area_id: "demo_room", name: "Siren", name_by_user: null, model: "Fixture siren" },
-  { id: "device-select", area_id: "demo_room", name: "Cycle selector", name_by_user: null, model: "Fixture select" },
-  { id: "device-number", area_id: "demo_room", name: "Cycle level", name_by_user: null, model: "Fixture number" },
-  { id: "device-button", area_id: "demo_room", name: "Start cycle", name_by_user: null, model: "Fixture button" },
+  {
+    id: "device-media",
+    area_id: "demo_room",
+    name: "Speaker",
+    name_by_user: null,
+    model: "Fixture speaker",
+  },
+  {
+    id: "device-humidifier",
+    area_id: "demo_room",
+    name: "Humidifier",
+    name_by_user: null,
+    model: "Fixture humidifier",
+  },
+  {
+    id: "device-water-heater",
+    area_id: "demo_room",
+    name: "Water heater",
+    name_by_user: null,
+    model: "Fixture water heater",
+  },
+  {
+    id: "device-vacuum",
+    area_id: "demo_room",
+    name: "Vacuum",
+    name_by_user: null,
+    model: "Fixture vacuum",
+  },
+  {
+    id: "device-lock",
+    area_id: "demo_room",
+    name: "Front lock",
+    name_by_user: null,
+    model: "Fixture lock",
+  },
+  {
+    id: "device-alarm",
+    area_id: "demo_room",
+    name: "Alarm",
+    name_by_user: null,
+    model: "Fixture alarm",
+  },
+  {
+    id: "device-valve",
+    area_id: "demo_room",
+    name: "Water valve",
+    name_by_user: null,
+    model: "Fixture valve",
+  },
+  {
+    id: "device-siren",
+    area_id: "demo_room",
+    name: "Siren",
+    name_by_user: null,
+    model: "Fixture siren",
+  },
+  {
+    id: "device-select",
+    area_id: "demo_room",
+    name: "Cycle selector",
+    name_by_user: null,
+    model: "Fixture select",
+  },
+  {
+    id: "device-number",
+    area_id: "demo_room",
+    name: "Cycle level",
+    name_by_user: null,
+    model: "Fixture number",
+  },
+  {
+    id: "device-button",
+    area_id: "demo_room",
+    name: "Start cycle",
+    name_by_user: null,
+    model: "Fixture button",
+  },
 ];
 
 const registryEntry = (entityId, deviceId = null, areaId = null, overrides = {}) => ({
@@ -90,7 +180,9 @@ export const fixtureRawStates = {
     supported_color_modes: ["brightness"],
   }),
   "switch.demo_coffee": rawEntity("switch.demo_coffee", "off", { friendly_name: "Coffee switch" }),
-  "input_boolean.demo_quiet": rawEntity("input_boolean.demo_quiet", "on", { friendly_name: "Quiet mode" }),
+  "input_boolean.demo_quiet": rawEntity("input_boolean.demo_quiet", "on", {
+    friendly_name: "Quiet mode",
+  }),
   "climate.demo": rawEntity("climate.demo", "heat", {
     friendly_name: "Room climate",
     supported_features: 57,
@@ -230,18 +322,22 @@ export const fixtureRawStates = {
   "sun.sun": rawEntity("sun.sun", "above_horizon", { azimuth: 174, elevation: 31 }),
 };
 
-export const toSnapshots = (rawStates = fixtureRawStates, stale = false) => Object.fromEntries(
-  Object.values(rawStates).map((entity) => [entity.entity_id, {
-    entityId: entity.entity_id,
-    state: entity.state,
-    attributes: structuredClone(entity.attributes),
-    available: !["unknown", "unavailable"].includes(entity.state),
-    stale,
-    lastConfirmedAt: entity.last_updated,
-    lastChanged: entity.last_changed,
-    lastUpdated: entity.last_updated,
-  }]),
-);
+export const toSnapshots = (rawStates = fixtureRawStates, stale = false) =>
+  Object.fromEntries(
+    Object.values(rawStates).map((entity) => [
+      entity.entity_id,
+      {
+        entityId: entity.entity_id,
+        state: entity.state,
+        attributes: structuredClone(entity.attributes),
+        available: !["unknown", "unavailable"].includes(entity.state),
+        stale,
+        lastConfirmedAt: entity.last_updated,
+        lastChanged: entity.last_changed,
+        lastUpdated: entity.last_updated,
+      },
+    ]),
+  );
 
 export const connectedRuntimeFixture = (overrides = {}) => ({
   status: "connected",
@@ -291,10 +387,12 @@ export const connectedManifestFixture = (neutralDemoManifest) => {
     {
       id: "fixture-light-device",
       model: "wall-switch",
-      entitySlots: [slot("demo-main-light-slot", ["light"], "Main ceiling", "primary", {
-        required: true,
-        deviceRole: "primary",
-      })],
+      entitySlots: [
+        slot("demo-main-light-slot", ["light"], "Main ceiling", "primary", {
+          required: true,
+          deviceRole: "primary",
+        }),
+      ],
       placement: {
         at: [2.4, 0.094],
         elevationMeters: 1.1,
@@ -305,9 +403,11 @@ export const connectedManifestFixture = (neutralDemoManifest) => {
     {
       id: "fixture-speaker-device",
       model: "speaker",
-      entitySlots: [slot("demo-speaker-slot", ["media_player"], "Speaker", "secondary", {
-        deviceRole: "primary",
-      })],
+      entitySlots: [
+        slot("demo-speaker-slot", ["media_player"], "Speaker", "secondary", {
+          deviceRole: "primary",
+        }),
+      ],
       placement: {
         at: [3.8, 1.8],
         elevationMeters: 0.8,
@@ -389,23 +489,25 @@ export const functionalMappingManifestFixture = (neutralDemoManifest) => {
     slot("fixture-number-control-slot", ["number"], "Level"),
     slot("fixture-button-control-slot", ["button"], "Start"),
   ];
-  room.devices = [{
-    id: "fixture-combined-device",
-    model: "indoor-ac",
-    entitySlots: [
-      slot("fixture-device-secondary-light", ["light"], "Display light", {
-        deviceRole: "secondary",
-      }),
-      slot("fixture-device-primary-climate", ["climate"], "Indoor AC", {
-        deviceRole: "primary",
-      }),
-    ],
-    placement: {
-      at: [2.4, 0.094],
-      elevationMeters: 2.1,
-      rotationYRadians: 0,
-      support: { kind: "wall", wallId: "north-wall" },
+  room.devices = [
+    {
+      id: "fixture-combined-device",
+      model: "indoor-ac",
+      entitySlots: [
+        slot("fixture-device-secondary-light", ["light"], "Display light", {
+          deviceRole: "secondary",
+        }),
+        slot("fixture-device-primary-climate", ["climate"], "Indoor AC", {
+          deviceRole: "primary",
+        }),
+      ],
+      placement: {
+        at: [2.4, 0.094],
+        elevationMeters: 2.1,
+        rotationYRadians: 0,
+        support: { kind: "wall", wallId: "north-wall" },
+      },
     },
-  }];
+  ];
   return manifest;
 };

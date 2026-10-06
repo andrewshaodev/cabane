@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import { RollUpDoorModel } from "./roll-up-door-model";
 import { openingWorldPlacement, resolveOpeningOrientation } from "@cabane/engine";
 import type { DoorSpec } from "@cabane/engine";
@@ -17,23 +18,26 @@ export function DoorModel({
   position,
   reducedMotion,
 }: OpeningModelProps<DoorSpec>) {
-  if (opening.operation === "roll-up") return <RollUpDoorModel wall={wall} opening={opening} floor={floor} position={position} reducedMotion={reducedMotion} />;
+  if (opening.operation === "roll-up")
+    return (
+      <RollUpDoorModel
+        wall={wall}
+        opening={opening}
+        floor={floor}
+        position={position}
+        reducedMotion={reducedMotion}
+      />
+    );
   const placement = openingWorldPlacement(wall, opening, floor.coordinates);
   const orientation = resolveOpeningOrientation(opening);
   const paired = opening.leafCount === 2;
   // Opposing door leaves meet at the center instead of each losing clearance.
   const gap = paired ? 0 : 0.018;
-  const leafWidth = Math.max(
-    0.08,
-    placement.widthMeters / opening.leafCount - gap,
-  );
+  const leafWidth = Math.max(0.08, placement.widthMeters / opening.leafCount - gap);
   const leafHeight = Math.max(0.08, opening.openingHeightMeters - 0.03);
-  const frontMountedPlankDoor =
-    opening.operation === "sliding" && opening.variant === "plank";
+  const frontMountedPlankDoor = opening.operation === "sliding" && opening.variant === "plank";
   const plankLeafCenterZ =
-    wall.thicknessMeters / 2 +
-    PLANK_DOOR_WALL_GAP_METERS +
-    PLANK_DOOR_LEAF_DEPTH_METERS / 2;
+    wall.thicknessMeters / 2 + PLANK_DOOR_WALL_GAP_METERS + PLANK_DOOR_LEAF_DEPTH_METERS / 2;
 
   return (
     <group
@@ -42,11 +46,7 @@ export function DoorModel({
       rotation={[0, placement.rotationY, 0]}
     >
       {opening.variant !== "full-glass" && (
-        <DoorFrame
-          wall={wall}
-          width={placement.widthMeters}
-          height={opening.openingHeightMeters}
-        />
+        <DoorFrame wall={wall} width={placement.widthMeters} height={opening.openingHeightMeters} />
       )}
       {opening.operation === "sliding" && opening.variant === "plank" && (
         <PlankDoorRail
@@ -68,7 +68,9 @@ export function DoorModel({
         return (
           <group
             key={index}
-            name={frontMountedPlankDoor ? "opening-plank-sliding-leaf-mount" : undefined}
+            {...omitUndefinedProperties({
+              name: frontMountedPlankDoor ? "opening-plank-sliding-leaf-mount" : undefined,
+            })}
             position={[
               pivotX,
               opening.openingHeightMeters / 2,
@@ -89,7 +91,7 @@ export function DoorModel({
                   opening={opening}
                   width={leafWidth}
                   height={leafHeight}
-                  handleSide={hinged ? leaf.extentSign : -leaf.slideSign as -1 | 1}
+                  handleSide={hinged ? leaf.extentSign : (-leaf.slideSign as -1 | 1)}
                 />
               </group>
             </AnimatedOpeningLeaf>

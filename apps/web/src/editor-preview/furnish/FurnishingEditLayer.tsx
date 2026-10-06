@@ -9,7 +9,7 @@ import {
   type ItemPlacement,
   type SceneItemSpec,
 } from "@cabane/engine";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
 import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
 import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
@@ -49,13 +49,15 @@ export interface FurnishingEditLayerProps {
 }
 
 const boxSelectionModifier = (event: ThreeEvent<MouseEvent>) =>
-  Boolean((event.nativeEvent?.metaKey || event.nativeEvent?.ctrlKey) && !event.nativeEvent?.shiftKey && !event.nativeEvent?.altKey);
+  Boolean(
+    (event.nativeEvent?.metaKey || event.nativeEvent?.ctrlKey) &&
+    !event.nativeEvent?.shiftKey &&
+    !event.nativeEvent?.altKey,
+  );
 
-const cameraModifier = (event: ThreeEvent<MouseEvent>) =>
-  Boolean(event.nativeEvent?.shiftKey);
+const cameraModifier = (event: ThreeEvent<MouseEvent>) => Boolean(event.nativeEvent?.shiftKey);
 
-const modifierIsPressed = (event: ThreeEvent<PointerEvent>) =>
-  event.nativeEvent.altKey;
+const modifierIsPressed = (event: ThreeEvent<PointerEvent>) => event.nativeEvent.altKey;
 
 type PointerCaptureTarget = EventTarget & {
   setPointerCapture?: (pointerId: number) => void;
@@ -84,19 +86,23 @@ export function FurnishingEditLayer({
 }: FurnishingEditLayerProps) {
   const dom = useCabaneDom();
   const [rectangle, setRectangle] = useState<{ from: Vector3; to: Vector3 } | null>(null);
-  const marquee = useRef<{ from: Vector3; to: Vector3; pointerId: number; target: PointerCaptureTarget | null } | null>(null);
+  const marquee = useRef<{
+    from: Vector3;
+    to: Vector3;
+    pointerId: number;
+    target: PointerCaptureTarget | null;
+  } | null>(null);
   const drag = useRef<DragSession | null>(null);
   const dragPlane = useRef(new Plane(new Vector3(0, 1, 0), 0));
   const scratch = useRef(new Vector3());
   const callbacks = useRef({ onDragEnd, onDragCancel, onDraggingChange });
-  useLayoutEffect(() => { callbacks.current = { onDragEnd, onDragCancel, onDraggingChange }; });
+  useLayoutEffect(() => {
+    callbacks.current = { onDragEnd, onDragCancel, onDraggingChange };
+  });
   const unitBox = useMemo(() => new BoxGeometry(1, 1, 1), []);
   useEffect(() => () => unitBox.dispose(), [unitBox]);
 
-  const pointOnElevationPlane = (
-    event: ThreeEvent<PointerEvent>,
-    elevation: number,
-  ) => {
+  const pointOnElevationPlane = (event: ThreeEvent<PointerEvent>, elevation: number) => {
     dragPlane.current.constant = -elevation;
     return event.ray.intersectPlane(dragPlane.current, scratch.current);
   };
@@ -106,11 +112,20 @@ export function FurnishingEditLayer({
       const current = marquee.current;
       marquee.current = null;
       setRectangle(null);
-      if (!cancel) onSelectMany?.(items.filter(item => {
-        const [x, , z] = resolveItemTransform(item.placement, floor).position;
-        return x >= Math.min(current.from.x, current.to.x) && x <= Math.max(current.from.x, current.to.x)
-          && z >= Math.min(current.from.z, current.to.z) && z <= Math.max(current.from.z, current.to.z);
-      }).map(item => item.id));
+      if (!cancel)
+        onSelectMany?.(
+          items
+            .filter((item) => {
+              const [x, , z] = resolveItemTransform(item.placement, floor).position;
+              return (
+                x >= Math.min(current.from.x, current.to.x) &&
+                x <= Math.max(current.from.x, current.to.x) &&
+                z >= Math.min(current.from.z, current.to.z) &&
+                z <= Math.max(current.from.z, current.to.z)
+              );
+            })
+            .map((item) => item.id),
+        );
       callbacks.current.onDraggingChange?.(false);
       current.target?.releasePointerCapture?.(current.pointerId);
     }
@@ -129,61 +144,113 @@ export function FurnishingEditLayer({
     event.stopPropagation();
     endDrag(false);
   };
+  const cancelDrag = useEffectEvent(() => endDrag(true));
   useEffect(() => {
     if (typeof window === "undefined") return;
     const cancel = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || (!drag.current && !marquee.current)) return;
       event.preventDefault();
       event.stopPropagation();
-      endDrag(true);
+      cancelDrag();
     };
-    const blur = () => endDrag(true);
+    const blur = () => cancelDrag();
     dom.events.addEventListener("keydown", cancel, true);
     window.addEventListener("blur", blur);
     return () => {
       dom.events.removeEventListener("keydown", cancel, true);
       window.removeEventListener("blur", blur);
-      endDrag(true);
+      cancelDrag();
     };
-  }, []);
+  }, [dom]);
 
   return (
     <group name="furnishing-edit-layer">
-      {!selectionOnly && onSelectMany && <mesh name="arrange-marquee-surface" onClick={event => { event.stopPropagation(); if (!boxSelectionModifier(event) && !cameraModifier(event)) onSelectMany([]); }} rotation={[-Math.PI / 2, 0, 0]}
-        onPointerDown={event => {
-          if (event.button !== 0 || !boxSelectionModifier(event)) return;
-          const hit = pointOnElevationPlane(event, 0);
-          if (!hit) return;
-          event.stopPropagation();
-          marquee.current = { from: hit.clone(), to: hit.clone(), pointerId: event.pointerId, target: pointerCaptureTarget(event) };
-          setRectangle(marquee.current);
-          pointerCaptureTarget(event)?.setPointerCapture?.(event.pointerId);
-          onDraggingChange?.(true);
-        }}
-        onPointerMove={event => {
-          const current = marquee.current;
-          if (!current || current.pointerId !== event.pointerId) return;
-          event.stopPropagation();
-          const hit = pointOnElevationPlane(event, 0);
-          if (hit) { current.to = hit.clone(); setRectangle({ ...current }); }
-        }}
-        onPointerUp={event => { if (marquee.current?.pointerId === event.pointerId) { event.stopPropagation(); endDrag(false); } }}
-        onPointerCancel={() => endDrag(true)} onLostPointerCapture={() => endDrag(true)}>
-        <planeGeometry args={[10000, 10000]} />
-        <PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} side={DoubleSide} />
-      </mesh>}
-      {rectangle && <mesh name="arrange-marquee-preview" raycast={noPlanRaycast} rotation={[-Math.PI / 2, 0, 0]}
-        position={[(rectangle.from.x + rectangle.to.x) / 2, .02, (rectangle.from.z + rectangle.to.z) / 2]} renderOrder={40}>
-        <planeGeometry args={[Math.abs(rectangle.to.x - rectangle.from.x), Math.abs(rectangle.to.z - rectangle.from.z)]} />
-        <PlanOverlayMaterial color="#6b896c" transparent opacity={.25} depthTest={false} depthWrite={false} side={DoubleSide} />
-      </mesh>}
+      {!selectionOnly && onSelectMany && (
+        <mesh
+          name="arrange-marquee-surface"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (!boxSelectionModifier(event) && !cameraModifier(event)) onSelectMany([]);
+          }}
+          rotation={[-Math.PI / 2, 0, 0]}
+          onPointerDown={(event) => {
+            if (event.button !== 0 || !boxSelectionModifier(event)) return;
+            const hit = pointOnElevationPlane(event, 0);
+            if (!hit) return;
+            event.stopPropagation();
+            marquee.current = {
+              from: hit.clone(),
+              to: hit.clone(),
+              pointerId: event.pointerId,
+              target: pointerCaptureTarget(event),
+            };
+            setRectangle(marquee.current);
+            pointerCaptureTarget(event)?.setPointerCapture?.(event.pointerId);
+            onDraggingChange?.(true);
+          }}
+          onPointerMove={(event) => {
+            const current = marquee.current;
+            if (!current || current.pointerId !== event.pointerId) return;
+            event.stopPropagation();
+            const hit = pointOnElevationPlane(event, 0);
+            if (hit) {
+              current.to = hit.clone();
+              setRectangle({ ...current });
+            }
+          }}
+          onPointerUp={(event) => {
+            if (marquee.current?.pointerId === event.pointerId) {
+              event.stopPropagation();
+              endDrag(false);
+            }
+          }}
+          onPointerCancel={() => endDrag(true)}
+          onLostPointerCapture={() => endDrag(true)}
+        >
+          <planeGeometry args={[10000, 10000]} />
+          <PlanOverlayMaterial
+            visible={false}
+            transparent
+            opacity={0}
+            depthWrite={false}
+            side={DoubleSide}
+          />
+        </mesh>
+      )}
+      {rectangle && (
+        <mesh
+          name="arrange-marquee-preview"
+          raycast={noPlanRaycast}
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[
+            (rectangle.from.x + rectangle.to.x) / 2,
+            0.02,
+            (rectangle.from.z + rectangle.to.z) / 2,
+          ]}
+          renderOrder={40}
+        >
+          <planeGeometry
+            args={[
+              Math.abs(rectangle.to.x - rectangle.from.x),
+              Math.abs(rectangle.to.z - rectangle.from.z),
+            ]}
+          />
+          <PlanOverlayMaterial
+            color="#6b896c"
+            transparent
+            opacity={0.25}
+            depthTest={false}
+            depthWrite={false}
+            side={DoubleSide}
+          />
+        </mesh>
+      )}
       {items.map((item) => {
-        const definition = item.kind === "device"
-          ? deviceModels[item.modelId]
-          : furnishingModels[item.modelId];
+        const definition =
+          item.kind === "device" ? deviceModels[item.modelId] : furnishingModels[item.modelId];
         if (!definition) return null;
         const transform = resolveItemTransform(item.placement, floor);
-        const box = selectionBoxGeometry(item, definition, .035);
+        const box = selectionBoxGeometry(item, definition, 0.035);
         const selected = selectedIds.includes(item.id);
         return (
           <group
@@ -198,16 +265,27 @@ export function FurnishingEditLayer({
               geometry={unitBox}
               onClick={(event) => {
                 event.stopPropagation();
-                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected) onSelect(item.id);
+                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected)
+                  onSelect(item.id);
               }}
               onPointerDown={(event) => {
-                if (event.button !== 0 || cameraModifier(event) || boxSelectionModifier(event) || drag.current || selectionOnly) return;
+                if (
+                  event.button !== 0 ||
+                  cameraModifier(event) ||
+                  boxSelectionModifier(event) ||
+                  drag.current ||
+                  selectionOnly
+                )
+                  return;
                 event.stopPropagation();
-                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected) onSelect(item.id);
+                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected)
+                  onSelect(item.id);
                 const hit = pointOnElevationPlane(event, transform.position[1]);
                 if (!hit) return;
                 drag.current = {
-                  items: selected ? items.filter(candidate => selectedIds.includes(candidate.id)) : [item],
+                  items: selected
+                    ? items.filter((candidate) => selectedIds.includes(candidate.id))
+                    : [item],
                   origin: new Vector3(...transform.position),
                   active: false,
                   id: item.id,
@@ -223,7 +301,8 @@ export function FurnishingEditLayer({
               }}
               onPointerMove={(event) => {
                 const session = drag.current;
-                if (!session || session.id !== item.id || session.pointerId !== event.pointerId) return;
+                if (!session || session.id !== item.id || session.pointerId !== event.pointerId)
+                  return;
                 event.stopPropagation();
                 if (!session.active) {
                   const movement = Math.hypot(
@@ -244,24 +323,36 @@ export function FurnishingEditLayer({
                   const z = modifierIsPressed(event) ? dz : Math.round(dz * 10) / 10;
                   const placements: Record<string, ItemPlacement> = {};
                   for (const member of session.items) {
-                    const model = member.kind === "device" ? deviceModels[member.modelId] : furnishingModels[member.modelId];
+                    const model =
+                      member.kind === "device"
+                        ? deviceModels[member.modelId]
+                        : furnishingModels[member.modelId];
                     if (!model) continue;
                     const [mx, , mz] = resolveItemTransform(member.placement, floor).position;
-                    placements[member.id] = placementForWorldDrag({ world: { x: mx + x, z: mz + z }, item: member, definition: model, floor, raw: true });
+                    placements[member.id] = placementForWorldDrag({
+                      world: { x: mx + x, z: mz + z },
+                      item: member,
+                      definition: model,
+                      floor,
+                      raw: true,
+                    });
                   }
                   onMovePlacements?.(placements);
                   return;
                 }
-                onMovePlacement(item.id, placementForWorldDrag({
-                  world: {
-                    x: hit.x + session.offsetX,
-                    z: hit.z + session.offsetZ,
-                  },
-                  item,
-                  definition,
-                  floor,
-                  raw: modifierIsPressed(event),
-                }));
+                onMovePlacement(
+                  item.id,
+                  placementForWorldDrag({
+                    world: {
+                      x: hit.x + session.offsetX,
+                      z: hit.z + session.offsetZ,
+                    },
+                    item,
+                    definition,
+                    floor,
+                    raw: modifierIsPressed(event),
+                  }),
+                );
               }}
               onPointerUp={finishDrag}
               onPointerCancel={() => endDrag(true)}
@@ -272,7 +363,7 @@ export function FurnishingEditLayer({
                 color={selected ? "#6b896c" : "#ffffff"}
                 transparent
                 visible={selected}
-                opacity={selected ? .18 : .001}
+                opacity={selected ? 0.18 : 0.001}
                 depthWrite={false}
               />
             </mesh>

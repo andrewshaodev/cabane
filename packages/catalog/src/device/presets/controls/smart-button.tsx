@@ -7,7 +7,13 @@ export function SmartButtonModel({ visualState }: HomeDeviceModelProps) {
   const pressed = visualState === "connected-active";
   return (
     <group name="catalog-smart-button">
-      <RoundedBox args={[0.09, 0.09, 0.025]} radius={0.014} smoothness={2} position={[0, 0.045, 0.0125]} castShadow>
+      <RoundedBox
+        args={[0.09, 0.09, 0.025]}
+        radius={0.014}
+        smoothness={2}
+        position={[0, 0.045, 0.0125]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </RoundedBox>

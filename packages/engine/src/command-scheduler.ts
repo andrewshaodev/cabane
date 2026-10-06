@@ -52,17 +52,17 @@ export class DeviceCommandScheduler {
     this.debounceMs = options.debounceMs ?? VALUE_DEBOUNCE_MS;
     this.throttleMs = options.throttleMs ?? DEVICE_THROTTLE_MS;
     this.now = options.now ?? Date.now;
-    this.setTimer = options.setTimer
-      ?? ((callback, delayMs) => globalThis.setTimeout(callback, delayMs));
-    this.clearTimer = options.clearTimer
-      ?? ((timer) => globalThis.clearTimeout(timer));
+    this.setTimer =
+      options.setTimer ?? ((callback, delayMs) => globalThis.setTimeout(callback, delayMs));
+    this.clearTimer = options.clearTimer ?? ((timer) => globalThis.clearTimeout(timer));
   }
 
   schedule(call: SupportedServiceCall): Promise<unknown> {
     if (this.disposed) return Promise.reject(new Error("The command scheduler is stopped."));
     const target = call.target.entity_id;
     const entityId = (Array.isArray(target) ? target[0] : target) as EntityId | undefined;
-    if (!entityId) return Promise.reject(new Error("A service call requires an exact entity target."));
+    if (!entityId)
+      return Promise.reject(new Error("A service call requires an exact entity target."));
     const queue = this.queueFor(this.resolveDeviceKey(entityId));
 
     if (call.delivery?.mode !== "coalesced-value") {
@@ -71,7 +71,9 @@ export class DeviceCommandScheduler {
       try {
         return this.dispatch(call);
       } catch (error) {
-        return Promise.reject(error);
+        return Promise.reject(
+          error instanceof Error ? error : new Error("Operation failed.", { cause: error }),
+        );
       }
     }
 
@@ -130,16 +132,21 @@ export class DeviceCommandScheduler {
   private scheduleNext(queue: DeviceQueue) {
     if (queue.timer !== null) this.clearTimer(queue.timer);
     queue.timer = null;
-    const next = [...queue.pending.values()].sort((left, right) => left.sequence - right.sequence)[0];
+    const next = [...queue.pending.values()].sort(
+      (left, right) => left.sequence - right.sequence,
+    )[0];
     if (!next) return;
     const dueAt = Math.max(
       queue.lastDispatchAt + this.throttleMs,
       next.updatedAt + this.debounceMs,
     );
-    queue.timer = this.setTimer(() => {
-      queue.timer = null;
-      void this.flushNext(queue);
-    }, Math.max(0, dueAt - this.now()));
+    queue.timer = this.setTimer(
+      () => {
+        queue.timer = null;
+        void this.flushNext(queue);
+      },
+      Math.max(0, dueAt - this.now()),
+    );
   }
 
   private async flushNext(queue: DeviceQueue) {
@@ -156,7 +163,10 @@ export class DeviceCommandScheduler {
       const result = await this.dispatch(pending.call);
       for (const waiter of pending.waiters) waiter.resolve(result);
     } catch (error) {
-      for (const waiter of pending.waiters) waiter.reject(error);
+      for (const waiter of pending.waiters)
+        waiter.reject(
+          error instanceof Error ? error : new Error("Operation failed.", { cause: error }),
+        );
     }
   }
 }

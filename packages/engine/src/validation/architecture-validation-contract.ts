@@ -1,8 +1,6 @@
 import type { PlanPoint } from "../types";
 
-import {
-  type RawObject
-} from "./core";
+import { type RawObject } from "./core";
 
 export type ValidWall = RawObject & {
   id: string;

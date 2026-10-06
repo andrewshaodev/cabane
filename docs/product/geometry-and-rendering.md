@@ -2,8 +2,19 @@
 
 Runtime `HomeManifest` carries ordered floors. The building shares one origin and
 meters-per-plan-unit scale; positive floor-to-floor heights determine elevations.
+Floors marked `belowGround: true` form a bottom-to-top prefix before ground.
+Ground remains at zero; basement elevations accumulate downward. Changing a
+basement height moves that floor and deeper floors without moving ground.
+Basements are hidden in the whole-building view and visible when selected in
+cutaway or entered in Walk. Basement cutaways hide terrain and floors above.
+Ground terrain stays at ground level, with stair apertures through every layer.
 Footprint/room polygons, straight walls, explicit wall junctions, and wall-owned
-openings define architecture. Openings inherit wall thickness, orientation, fade,
+openings define architecture. Junction/opening clearance uses the finite spans of
+adjoining walls: a shallow-angle continuation extending away from an opening
+does not obstruct it. Actual intersecting wall spans remain protected, with a
+2 cm finish tolerance. Junction clearance only reserves spans where the adjoining
+wall rises above the opening sill; windows above low partitions remain valid.
+Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
 passages rectangular/arched variants.
@@ -50,7 +61,12 @@ compose finishes; implementation belongs to the engine finish modules.
 Visible home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable
 product. Shared lighting, fading, and outline behavior stay engine-owned.
-Physical lights render only on the active floor. Indoor sources close to an
+Physical lights render only on the active floor. On that floor, supported emitters
+stay mounted at zero intensity while off or unavailable. Device and dashboard
+light updates change uniforms without changing shader light counts, avoiding
+synchronous scene shader compilation during interaction. Device emitters, including
+fallbacks from resolved bindings, are scoped to their owning floor so stair
+transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
 opaque wall emit into their room through an unshadowed spotlight; sources at
 openings and sources farther from walls retain point lighting. This avoids
 lighting through the wall without allocating point-light shadow maps.
@@ -90,8 +106,10 @@ Garden lanterns use a short, warm inverse-square falloff to softly illuminate
 nearby ground in night mode.
 
 Walk collision derives from walls, openings, junctions, and pools. Navigation
-checks clear spawn points and room connectivity; it does not maintain a second
-hand-authored collision plan. Walk controls support keyboard/mouse and touch
+derives optional clear spawn points and checks room connectivity; rooms without
+a safe spawn (such as small cupboards) do not produce a validation diagnostic.
+Walk entry still requires a safe spawn and skips rooms without one. Navigation
+does not maintain a second hand-authored collision plan. Walk controls support keyboard/mouse and touch
 input, pitch limits, collision resolution, and automatic unbound door opening.
 Mobile fullscreen/orientation requests are capability-dependent. Reduced-motion
 and document-visibility state affect behavior.
@@ -183,3 +201,5 @@ lower ceiling slab coverage; remaining slab regions use 0.16 m thickness. Higher
 floors cover their actual indoor and outdoor support footprints. Explicit low
 exterior walls retain their height when another floor exists, while full-height
 facades continue across the real inter-floor slab.
+
+Stair `railings` optionally selects `both`, `left`, `right`, or `none`, relative to ascent; omission preserves both sides. Spiral stairs retain their central support and apply side selection to the outer rail and exit bridge. Upper-opening guards are clipped to actual floor/platform support outside the opening, including partial and disconnected floor regions; exterior flights never acquire floating opening guards. All stair shapes share this guard geometry.

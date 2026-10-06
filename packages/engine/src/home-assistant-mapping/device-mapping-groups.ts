@@ -41,15 +41,15 @@ export type DeviceMappingRelationship = {
   slotIds: readonly string[];
 } & (
   | {
-    kind: "modeled-device";
-    device: DeviceSlotSpec;
-    descriptors: readonly BindingSlotDescriptor[];
-  }
+      kind: "modeled-device";
+      device: DeviceSlotSpec;
+      descriptors: readonly BindingSlotDescriptor[];
+    }
   | {
-    kind: "entity-slot";
-    slotKind: "dashboard" | "opening-contact" | "opening-cover";
-    descriptor: BindingSlotDescriptor;
-  }
+      kind: "entity-slot";
+      slotKind: "dashboard" | "opening-contact" | "opening-cover";
+      descriptor: BindingSlotDescriptor;
+    }
 );
 
 export interface DeviceMappingGroup extends DeviceMappingGroupMeta {
@@ -57,32 +57,32 @@ export interface DeviceMappingGroup extends DeviceMappingGroupMeta {
 }
 
 const groupForSlot = (descriptor: BindingSlotDescriptor): DeviceMappingGroupId => {
-  if (descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover") return "openings";
+  if (descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover")
+    return "openings";
   const domains = new Set<DeviceDomain>(descriptor.spec.compatibleDomains);
   const deviceClasses = new Set(descriptor.spec.compatibleDeviceClasses ?? []);
   if (domains.has("light")) return "lighting";
   if (
-    domains.has("climate")
-    || domains.has("fan")
-    || domains.has("humidifier")
-    || deviceClasses.has("temperature")
-    || deviceClasses.has("humidity")
-  ) return "climate-temperature";
+    domains.has("climate") ||
+    domains.has("fan") ||
+    domains.has("humidifier") ||
+    deviceClasses.has("temperature") ||
+    deviceClasses.has("humidity")
+  )
+    return "climate-temperature";
   if (domains.has("media_player") || domains.has("camera")) return "media";
   if (domains.has("cover")) return "openings";
+  if (domains.has("lock") || domains.has("alarm_control_panel") || domains.has("siren"))
+    return "security";
   if (
-    domains.has("lock")
-    || domains.has("alarm_control_panel")
-    || domains.has("siren")
-  ) return "security";
-  if (
-    domains.has("vacuum")
-    || domains.has("water_heater")
-    || domains.has("valve")
-    || domains.has("select")
-    || domains.has("number")
-    || domains.has("button")
-  ) return "appliances-utilities";
+    domains.has("vacuum") ||
+    domains.has("water_heater") ||
+    domains.has("valve") ||
+    domains.has("select") ||
+    domains.has("number") ||
+    domains.has("button")
+  )
+    return "appliances-utilities";
   if (domains.has("sensor") || domains.has("binary_sensor")) return "sensors";
   return "other";
 };
@@ -114,10 +114,11 @@ export const groupRoomMappingRelationships = (
     const deviceDescriptors = device.entitySlots
       .map((slot) => descriptors.find((candidate) => candidate.slotId === slot.id))
       .filter((descriptor): descriptor is BindingSlotDescriptor => Boolean(descriptor));
-    const primarySlot = device.entitySlots.find((slot) => slot.deviceRole === "primary")
-      ?? device.entitySlots[0];
-    const primaryDescriptor = deviceDescriptors.find((descriptor) => descriptor.slotId === primarySlot?.id)
-      ?? deviceDescriptors[0];
+    const primarySlot =
+      device.entitySlots.find((slot) => slot.deviceRole === "primary") ?? device.entitySlots[0];
+    const primaryDescriptor =
+      deviceDescriptors.find((descriptor) => descriptor.slotId === primarySlot?.id) ??
+      deviceDescriptors[0];
     if (!primaryDescriptor) continue;
     relationships.push({
       id: device.id,
@@ -131,7 +132,11 @@ export const groupRoomMappingRelationships = (
   }
 
   for (const descriptor of descriptors) {
-    if ((descriptor.kind !== "opening-contact" && descriptor.kind !== "opening-cover") || !descriptor.roomIds.includes(roomId)) continue;
+    if (
+      (descriptor.kind !== "opening-contact" && descriptor.kind !== "opening-cover") ||
+      !descriptor.roomIds.includes(roomId)
+    )
+      continue;
     relationships.push({
       id: descriptor.slotId,
       kind: "entity-slot",
@@ -143,8 +148,10 @@ export const groupRoomMappingRelationships = (
     });
   }
 
-  return deviceMappingGroups.map((group) => ({
-    ...group,
-    relationships: relationships.filter((relationship) => relationship.groupId === group.id),
-  })).filter((group) => group.relationships.length > 0);
+  return deviceMappingGroups
+    .map((group) => ({
+      ...group,
+      relationships: relationships.filter((relationship) => relationship.groupId === group.id),
+    }))
+    .filter((group) => group.relationships.length > 0);
 };

@@ -2,14 +2,10 @@ import {
   planPointToWorld,
   pointInsidePolygon,
   polygonCentroid,
-  worldPointToPlan
+  worldPointToPlan,
 } from "../geometry";
 
-import type {
-  FloorSpec,
-  PlanPoint,
-  RoomSpec
-} from "../types";
+import type { FloorSpec, PlanPoint, RoomSpec } from "../types";
 import { isWalkPointClear } from "./walk-colliders";
 import { WALK_PLAYER_RADIUS, WalkCollider, WalkPoint, WalkPose } from "./walk-navigation-contract";
 
@@ -29,9 +25,7 @@ export const safeSpawnPoseForRoom = (
     return { ...centroidCandidate, yaw: Math.PI, pitch: 0 };
   }
 
-  const worldPolygon = room.polygon.map((point) =>
-    planPointToWorld(point, floor.coordinates)
-  );
+  const worldPolygon = room.polygon.map((point) => planPointToWorld(point, floor.coordinates));
   const xs = worldPolygon.map(([x]) => x);
   const zs = worldPolygon.map(([, z]) => z);
   const minX = Math.min(...xs);
@@ -42,14 +36,8 @@ export const safeSpawnPoseForRoom = (
   const depth = maxZ - minZ;
   const maximumSamplesPerAxis = 160;
   const targetSpacing = Math.max(0.04, radius / 2);
-  const columns = Math.min(
-    maximumSamplesPerAxis,
-    Math.max(1, Math.ceil(width / targetSpacing)),
-  );
-  const rows = Math.min(
-    maximumSamplesPerAxis,
-    Math.max(1, Math.ceil(depth / targetSpacing)),
-  );
+  const columns = Math.min(maximumSamplesPerAxis, Math.max(1, Math.ceil(width / targetSpacing)));
+  const rows = Math.min(maximumSamplesPerAxis, Math.max(1, Math.ceil(depth / targetSpacing)));
 
   let best: WalkPoint | null = null;
   let bestDistanceSquared = Number.POSITIVE_INFINITY;
@@ -62,10 +50,9 @@ export const safeSpawnPoseForRoom = (
       if (
         !pointInsidePolygon(planCandidate, room.polygon) ||
         !isWalkPointClear(candidate, colliders, radius)
-      ) continue;
-      const distanceSquared =
-        (x - centroidX) * (x - centroidX) +
-        (z - centroidZ) * (z - centroidZ);
+      )
+        continue;
+      const distanceSquared = (x - centroidX) * (x - centroidX) + (z - centroidZ) * (z - centroidZ);
       if (
         distanceSquared < bestDistanceSquared - 1e-9 ||
         (Math.abs(distanceSquared - bestDistanceSquared) <= 1e-9 &&
@@ -79,10 +66,7 @@ export const safeSpawnPoseForRoom = (
   return best === null ? null : { ...best, yaw: Math.PI, pitch: 0 };
 };
 
-export const spawnPoseForRoom = (
-  room: RoomSpec | undefined,
-  floor: FloorSpec,
-): WalkPose => {
+export const spawnPoseForRoom = (room: RoomSpec | undefined, floor: FloorSpec): WalkPose => {
   const polygon = room?.polygon ?? floor.rooms[0]?.polygon ?? floor.footprint;
   const average = polygon.reduce(
     (total, point) => [total[0] + point[0], total[1] + point[1]] as PlanPoint,

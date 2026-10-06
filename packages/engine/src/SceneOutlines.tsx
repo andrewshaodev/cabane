@@ -70,17 +70,29 @@ type SceneOutlinesProps = OutlinesProps & {
 };
 
 export function SceneOutlines({
-  color = "black", opacity = 1, transparent = false, screenspace = false,
-  toneMapped = true, polygonOffset = false, polygonOffsetFactor = 0,
-  renderOrder = 0, thickness = 0.05, angle = Math.PI, clippingPlanes,
-  offsetPixels = [0, 0], ...props
+  color = "black",
+  opacity = 1,
+  transparent = false,
+  screenspace = false,
+  toneMapped = true,
+  polygonOffset = false,
+  polygonOffsetFactor = 0,
+  renderOrder = 0,
+  thickness = 0.05,
+  angle = Math.PI,
+  clippingPlanes,
+  offsetPixels = [0, 0],
+  ...props
 }: SceneOutlinesProps) {
   const ref = useRef<Group>(null);
   const [material] = useState(() => new OutlineMaterial({ side: BackSide }));
   const { gl } = useThree();
   const contextSize = gl.getDrawingBufferSize(new Vector2());
   useMemo(() => extend({ OutlineMaterial }), []);
-  const previous = useRef<{ angle: number; geometry: BufferGeometry | null }>({ angle: 0, geometry: null });
+  const previous = useRef<{ angle: number; geometry: BufferGeometry | null }>({
+    angle: 0,
+    geometry: null,
+  });
 
   useLayoutEffect(() => {
     const group = ref.current;
@@ -89,7 +101,10 @@ export function SceneOutlines({
     if (previous.current.angle === angle && previous.current.geometry === parent.geometry) return;
     previous.current = { angle, geometry: parent.geometry };
     const oldMesh = group.children[0] as Mesh | undefined;
-    if (oldMesh) { if (angle) oldMesh.geometry.dispose(); group.remove(oldMesh); }
+    if (oldMesh) {
+      if (angle) oldMesh.geometry.dispose();
+      group.remove(oldMesh);
+    }
     let mesh: Mesh | SkinnedMesh | InstancedMesh;
     if ((parent as SkinnedMesh).isSkinnedMesh) {
       const child = new SkinnedMesh();
@@ -101,7 +116,9 @@ export function SceneOutlines({
       mesh = child;
     } else mesh = new Mesh();
     mesh.material = material;
-    mesh.geometry = angle ? optimizedCreasedNormalGeometry(parent.geometry, angle) : parent.geometry;
+    mesh.geometry = angle
+      ? optimizedCreasedNormalGeometry(parent.geometry, angle)
+      : parent.geometry;
     mesh.raycast = () => null;
     mesh.userData.sceneOutline = true;
     mesh.morphTargetInfluences = parent.morphTargetInfluences;
@@ -115,30 +132,44 @@ export function SceneOutlines({
     const parent = group?.parent as Mesh | undefined;
     if (!mesh || !parent) return;
     mesh.renderOrder = renderOrder;
-    applyProps(mesh, { morphTargetInfluences: parent.morphTargetInfluences, morphTargetDictionary: parent.morphTargetDictionary });
+    applyProps(mesh, {
+      morphTargetInfluences: parent.morphTargetInfluences,
+      morphTargetDictionary: parent.morphTargetDictionary,
+    });
     applyProps(mesh.material, {
-      transparent, thickness, color, opacity, size: contextSize, screenspace, offset: offsetPixels,
-      toneMapped, polygonOffset, polygonOffsetFactor, clippingPlanes,
+      transparent,
+      thickness,
+      color,
+      opacity,
+      size: contextSize,
+      screenspace,
+      offset: offsetPixels,
+      toneMapped,
+      polygonOffset,
+      polygonOffsetFactor,
+      clippingPlanes,
       clipping: Boolean(clippingPlanes?.length),
     });
   });
 
-  useEffect(() => () => {
-    const group = ref.current;
-    if (!group) return;
-    const mesh = group.children[0] as Mesh | undefined;
-    if (mesh) {
-      if (angle) mesh.geometry.dispose();
-      group.remove(mesh);
-    }
-  }, []);
+  const currentAngle = useRef(angle);
+  currentAngle.current = angle;
+  useEffect(
+    () => () => {
+      const group = ref.current;
+      if (!group) return;
+      const mesh = group.children[0] as Mesh | undefined;
+      if (mesh) {
+        if (currentAngle.current) mesh.geometry.dispose();
+        group.remove(mesh);
+      }
+    },
+    [],
+  );
   return <group ref={ref} {...props} />;
 }
 
-export function GroupOutlines({
-  target,
-  ...props
-}: SceneOutlinesProps & { target: Group }) {
+export function GroupOutlines({ target, ...props }: SceneOutlinesProps & { target: Group }) {
   const [meshes, setMeshes] = useState<readonly Mesh[]>([]);
 
   useLayoutEffect(() => {
@@ -147,16 +178,18 @@ export function GroupOutlines({
       const mesh = object as Mesh;
       if (mesh.isMesh && !mesh.userData.sceneOutline) next.push(mesh);
     });
-    setMeshes((current) => (
+    setMeshes((current) =>
       current.length === next.length && current.every((mesh, index) => mesh === next[index])
         ? current
-        : next
-    ));
+        : next,
+    );
   }, [target]);
 
-  return <>{meshes.map((mesh) => (
-    <Fragment key={mesh.uuid}>
-      {createPortal(<SceneOutlines {...props} />, mesh)}
-    </Fragment>
-  ))}</>;
+  return (
+    <>
+      {meshes.map((mesh) => (
+        <Fragment key={mesh.uuid}>{createPortal(<SceneOutlines {...props} />, mesh)}</Fragment>
+      ))}
+    </>
+  );
 }

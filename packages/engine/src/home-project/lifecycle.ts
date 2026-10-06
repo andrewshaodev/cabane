@@ -43,14 +43,26 @@ export interface PublishOptions {
 
 export interface HomeProjectLifecycle {
   load(): Promise<ProjectLoadResult>;
-  autosave(record: HomeProjectRecord, draft: HomeProject, now?: number, bindings?: WorkspaceBindings): Promise<AutosaveResult>;
+  autosave(
+    record: HomeProjectRecord,
+    draft: HomeProject,
+    now?: number,
+    bindings?: WorkspaceBindings,
+  ): Promise<AutosaveResult>;
   publish(record: HomeProjectRecord, options?: PublishOptions): Promise<PublishResult>;
   resetDraftToPublished(record: HomeProjectRecord, now?: number): Promise<AutosaveResult>;
   resetToSeed(record: HomeProjectRecord, now?: number): Promise<AutosaveResult>;
   /** Use only after a recovery load, with that load's exact rejected raw data. */
-  recoverToSeed(record: HomeProjectRecord, expectedRaw: string, now?: number): Promise<AutosaveResult>;
+  recoverToSeed(
+    record: HomeProjectRecord,
+    expectedRaw: string,
+    now?: number,
+  ): Promise<AutosaveResult>;
   /** Preserve the project while removing furnishing/device items with unavailable models. */
-  recoverWithoutMissingSceneItems(record: HomeProjectRecord, expectedRaw: string): Promise<AutosaveResult>;
+  recoverWithoutMissingSceneItems(
+    record: HomeProjectRecord,
+    expectedRaw: string,
+  ): Promise<AutosaveResult>;
   /** Portable project-only V1 envelope, without private binding profiles. */
   exportRecord(record: HomeProjectRecord): string;
   /** Explicitly private browser recovery artifact, including binding profiles. */
@@ -80,14 +92,19 @@ export const autosaveHomeProjectDraft = async (
     draftUpdatedAt: now,
     // History snapshots may predate a Publish or omit a newly introduced
     // origin. Only draft state may move back in time; published state may not.
-    bindings: Object.fromEntries([...new Set([
-      ...Object.keys(record.bindings), ...Object.keys(bindings),
-    ])].map((origin) => [origin, {
-      draft: clone(bindings[origin]?.draft ?? createEmptyRuntimeBindingProfile(record.homeId)),
-      published: clone(record.bindings[origin]?.published ?? createEmptyRuntimeBindingProfile(record.homeId)),
-      manualRoomIds: clone(bindings[origin]?.manualRoomIds ?? []),
-      manualSlotIds: clone(bindings[origin]?.manualSlotIds ?? []),
-    }])),
+    bindings: Object.fromEntries(
+      [...new Set([...Object.keys(record.bindings), ...Object.keys(bindings)])].map((origin) => [
+        origin,
+        {
+          draft: clone(bindings[origin]?.draft ?? createEmptyRuntimeBindingProfile(record.homeId)),
+          published: clone(
+            record.bindings[origin]?.published ?? createEmptyRuntimeBindingProfile(record.homeId),
+          ),
+          manualRoomIds: clone(bindings[origin]?.manualRoomIds ?? []),
+          manualSlotIds: clone(bindings[origin]?.manualSlotIds ?? []),
+        },
+      ]),
+    ),
   };
   try {
     return { status: "saved", record: await repository.replace(candidate, record.revision) };
@@ -100,18 +117,24 @@ export const resetHomeProjectDraftToPublished = (
   repository: HomeProjectRepository,
   record: HomeProjectRecord,
   now = Date.now(),
-): Promise<AutosaveResult> => autosaveHomeProjectDraft(
-  repository,
-  record,
-  clone(record.published),
-  now,
-  Object.fromEntries(Object.entries(record.bindings).map(([origin, state]) => [origin, {
-    draft: clone(state.published),
-    published: clone(state.published),
-    manualRoomIds: [],
-    manualSlotIds: [],
-  }])),
-);
+): Promise<AutosaveResult> =>
+  autosaveHomeProjectDraft(
+    repository,
+    record,
+    clone(record.published),
+    now,
+    Object.fromEntries(
+      Object.entries(record.bindings).map(([origin, state]) => [
+        origin,
+        {
+          draft: clone(state.published),
+          published: clone(state.published),
+          manualRoomIds: [],
+          manualSlotIds: [],
+        },
+      ]),
+    ),
+  );
 
 export const resetHomeProjectToSeed = async (
   repository: HomeProjectRepository,
@@ -146,12 +169,14 @@ export const publishHomeProject = async (
       ...(options.bindingIssues ?? []),
     ];
   } catch {
-    issues = [{
-      code: "project.publish-validation",
-      path: "$",
-      message: "The draft could not be validated for publishing.",
-      severity: "error",
-    }];
+    issues = [
+      {
+        code: "project.publish-validation",
+        path: "$",
+        message: "The draft could not be validated for publishing.",
+        severity: "error",
+      },
+    ];
   }
 
   const errors = issues.filter((entry) => entry.severity === "error");
@@ -165,10 +190,15 @@ export const publishHomeProject = async (
     ...record,
     published: clone(record.draft),
     publishedAt: options.now ?? Date.now(),
-    bindings: Object.fromEntries(Object.entries(record.bindings).map(([origin, state]) => [origin, {
-      ...clone(state),
-      published: clone(state.draft),
-    }])),
+    bindings: Object.fromEntries(
+      Object.entries(record.bindings).map(([origin, state]) => [
+        origin,
+        {
+          ...clone(state),
+          published: clone(state.draft),
+        },
+      ]),
+    ),
   };
   try {
     return { status: "published", record: await repository.replace(candidate, record.revision) };
@@ -194,8 +224,7 @@ export const createHomeProjectLifecycle = (
     publishHomeProject(repository, record, { ...options, now: options.now ?? clock() }),
   resetDraftToPublished: (record, now = clock()) =>
     resetHomeProjectDraftToPublished(repository, record, now),
-  resetToSeed: (record, now = clock()) =>
-    resetHomeProjectToSeed(repository, record, seed, now),
+  resetToSeed: (record, now = clock()) => resetHomeProjectToSeed(repository, record, seed, now),
   recoverToSeed: async (record, expectedRaw, now = clock()) => {
     try {
       return { status: "saved", record: await repository.recover(seed, expectedRaw, now) };
@@ -213,6 +242,7 @@ export const createHomeProjectLifecycle = (
       return { status: "storage-error", record, error: asError(error) };
     }
   },
-  exportRecord: ({ revision: _revision, bindings: _bindings, ...record }) => serializeCanonicalJson(record),
+  exportRecord: ({ revision: _revision, bindings: _bindings, ...record }) =>
+    serializeCanonicalJson(record),
   exportStoredRaw: () => repository.readRaw(seed.home.id),
 });

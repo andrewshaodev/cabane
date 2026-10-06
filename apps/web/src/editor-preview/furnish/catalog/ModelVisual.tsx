@@ -12,11 +12,31 @@ export function ModelVisual({ entry }: { entry: ModelPreviewEntry }) {
   }
   if (entry.kind === "furnishing") {
     const Component = entry.definition.component;
-    return <Component variant={resolveModelVariant(entry.definition).id} size={entry.definition.defaultSize} entityStatesBySlotId={emptyStates}
-      reducedMotion walkMode={false} onInteract={noop} />;
+    return (
+      <Component
+        variant={resolveModelVariant(entry.definition).id}
+        size={entry.definition.defaultSize}
+        entityStatesBySlotId={emptyStates}
+        reducedMotion
+        walkMode={false}
+        onInteract={noop}
+      />
+    );
   }
   const Component = entry.definition.component;
-  return <Component variant={resolveModelVariant(entry.definition).id} visualState="disconnected" reducedMotion walkMode={false} onInteract={noop}
-    slot={{ id: `preview-${entry.key}`, model: entry.modelId, entitySlots: [],
-      placement: { at: [0, 0], elevationMeters: 0, support: { kind: "surface" } } }} />;
+  return (
+    <Component
+      variant={resolveModelVariant(entry.definition).id}
+      visualState="disconnected"
+      reducedMotion
+      walkMode={false}
+      onInteract={noop}
+      slot={{
+        id: `preview-${entry.key}`,
+        model: entry.modelId,
+        entitySlots: [],
+        placement: { at: [0, 0], elevationMeters: 0, support: { kind: "surface" } },
+      }}
+    />
+  );
 }

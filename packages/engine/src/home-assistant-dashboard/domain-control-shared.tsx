@@ -14,9 +14,8 @@ export const domainNumberAttribute = (value: unknown, fallback: number) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
-export const readableDomainOption = (option: string) => option
-  .replaceAll("_", " ")
-  .replace(/^./, (character) => character.toUpperCase());
+export const readableDomainOption = (option: string) =>
+  option.replaceAll("_", " ").replace(/^./, (character) => character.toUpperCase());
 
 export function DomainCommandOption({
   label,
@@ -50,7 +49,11 @@ export function DomainCommandOption({
         disabled={disabled || command.pending}
         onChange={(nextValue) => void command.run(callForValue(nextValue), nextValue)}
       />
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -87,7 +90,11 @@ export function DomainCommandAction({
       >
         {buttonLabel ?? label.split(" ", 1)[0]}
       </button>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -116,12 +123,11 @@ export function ProtectedCodeDialog({
   const previousFocus = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    previousFocus.current = dom.root.activeElement instanceof HTMLElement
-      ? dom.root.activeElement
-      : null;
+    previousFocus.current =
+      dom.root.activeElement instanceof HTMLElement ? dom.root.activeElement : null;
     inputRef.current?.focus();
     return () => previousFocus.current?.focus();
-  }, []);
+  }, [dom]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -149,9 +155,11 @@ export function ProtectedCodeDialog({
       onKeyDown={(event) => {
         if (event.key === "Escape" && !pending) onCancel();
         if (event.key === "Tab") {
-          const controls = [...(dialogRef.current?.querySelectorAll<HTMLElement>(
-            "input:not(:disabled), button:not(:disabled)",
-          ) ?? [])];
+          const controls = [
+            ...(dialogRef.current?.querySelectorAll<HTMLElement>(
+              "input:not(:disabled), button:not(:disabled)",
+            ) ?? []),
+          ];
           if (controls.length === 0) return;
           const first = controls[0];
           const last = controls.at(-1);
@@ -179,10 +187,21 @@ export function ProtectedCodeDialog({
             disabled={pending}
           />
         </label>
-        {error && <p role="alert" aria-live="assertive">{error}</p>}
+        {error && (
+          <p role="alert" aria-live="assertive">
+            {error}
+          </p>
+        )}
         <div className="protected-code-dialog__actions">
-          <button type="button" disabled={pending} onClick={onCancel}>Cancel</button>
-          <button type="submit" className="is-primary" disabled={pending} data-pending={pending ? "true" : "false"}>
+          <button type="button" disabled={pending} onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="is-primary"
+            disabled={pending}
+            data-pending={pending ? "true" : "false"}
+          >
             {actionLabel}
           </button>
         </div>

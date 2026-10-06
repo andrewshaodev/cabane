@@ -21,7 +21,6 @@ test("panel CSS stays inside its host, sizes against the panel, and separates fo
   assert.doesNotMatch(fonts, /\.modal/);
 });
 
-
 test("compound panel breakpoints separate container dimensions from input capabilities", () => {
   const { css } = scopePanelCss(`
     @media (max-width:760px) and (orientation:portrait) { .a { color:red } }
@@ -30,7 +29,10 @@ test("compound panel breakpoints separate container dimensions from input capabi
     @media (prefers-reduced-motion:reduce) { .d { color:red } }
   `);
   assert.match(css, /@container cabane \(max-width:760px\) and \(orientation:portrait\)/);
-  assert.match(css, /@media \(pointer:coarse\)\s*\{\s*@container cabane \(min-width:1241px\) and \(min-height:501px\)/);
+  assert.match(
+    css,
+    /@media \(pointer:coarse\)\s*\{\s*@container cabane \(min-width:1241px\) and \(min-height:501px\)/,
+  );
   assert.match(css, /@container cabane \(max-width:699px\)/);
   assert.match(css, /@media \(hover:none\) and \(pointer:coarse\)/);
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);

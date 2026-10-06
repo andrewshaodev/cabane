@@ -9,7 +9,7 @@ export function ConstructionDistanceLabel({
   label: string;
   ariaLabel?: string;
   copyText?: string;
-  onCopy?: (value: string) => void;
+  onCopy?: ((value: string) => void) | undefined;
 }) {
   return onCopy ? (
     <button

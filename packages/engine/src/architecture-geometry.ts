@@ -13,8 +13,16 @@ import { worldPointToPlan } from "./geometry";
 import { differenceClippingGeometry } from "./architecture-geometry/architecture-clipping";
 import { EPSILON, Horizontal } from "./architecture-geometry/architecture-geometry-contract";
 import { uniqueSorted } from "./architecture-geometry/architecture-mesh-buckets";
-import { normalize, pointInsideFloorFootprint, wallExteriorNormal, wallFrame } from "./architecture-geometry/wall-coordinate-frame";
-import { ArchitecturalWallGeometryGroup, createWallAssemblyPointTest } from "./architecture-geometry/wall-solid-footprints";
+import {
+  normalize,
+  pointInsideFloorFootprint,
+  wallExteriorNormal,
+  wallFrame,
+} from "./architecture-geometry/wall-coordinate-frame";
+import {
+  ArchitecturalWallGeometryGroup,
+  createWallAssemblyPointTest,
+} from "./architecture-geometry/wall-solid-footprints";
 import type { FloorSpec, WallSpec } from "./types";
 
 /** Generalized version of the original house-wide occupied-grid wall union. */
@@ -26,14 +34,25 @@ export function buildArchitecturalWallGeometries(
   neighbors: { below?: FloorSpec; above?: FloorSpec } = {},
 ): ArchitecturalWallGeometryGroup[] {
   // Continue exterior finish across the structural slab between ceiling and next level.
-  const floor = neighbors.above ? { ...sourceFloor, walls: sourceFloor.walls.map(wall =>
-    ({ ...wall, heightMeters: wallStructuralHeight(wall, sourceFloor) })
-  ) } : sourceFloor;
-  const wallData = new Map(floor.walls.map(wall => [wall, {
-    frame: wallFrame(wall, floor),
-    exteriorNormal: wallExteriorNormal(wall, floor),
-    contains: createWallAssemblyPointTest(wall, floor),
-  }]));
+  const floor = neighbors.above
+    ? {
+        ...sourceFloor,
+        walls: sourceFloor.walls.map((wall) => ({
+          ...wall,
+          heightMeters: wallStructuralHeight(wall, sourceFloor),
+        })),
+      }
+    : sourceFloor;
+  const wallData = new Map(
+    floor.walls.map((wall) => [
+      wall,
+      {
+        frame: wallFrame(wall, floor),
+        exteriorNormal: wallExteriorNormal(wall, floor),
+        contains: createWallAssemblyPointTest(wall, floor),
+      },
+    ]),
+  );
   type Buffers = {
     outwardNormal: Horizontal | null;
     fadeNormals: Horizontal[];
@@ -57,10 +76,14 @@ export function buildArchitecturalWallGeometries(
       buffersByDirection.set(key, buffers);
     }
     for (const normal of fadeNormals) {
-      if (buffers.fadeNormals.some((candidate) =>
-        Math.abs(candidate[0] - normal[0]) < EPSILON &&
-        Math.abs(candidate[1] - normal[1]) < EPSILON
-      )) continue;
+      if (
+        buffers.fadeNormals.some(
+          (candidate) =>
+            Math.abs(candidate[0] - normal[0]) < EPSILON &&
+            Math.abs(candidate[1] - normal[1]) < EPSILON,
+        )
+      )
+        continue;
       buffers.fadeNormals.push(normal);
     }
     return buffers;
@@ -98,7 +121,12 @@ export function buildArchitecturalWallGeometries(
       .map((wall) => wallData.get(wall)!.exteriorNormal)
       .filter((normal): normal is Horizontal => normal !== null);
     return normals.length
-      ? normalize(normals.reduce<Horizontal>((sum, normal) => [sum[0] + normal[0], sum[1] + normal[1]], [0, 0]))
+      ? normalize(
+          normals.reduce<Horizontal>(
+            (sum, normal) => [sum[0] + normal[0], sum[1] + normal[1]],
+            [0, 0],
+          ),
+        )
       : null;
   };
   const addHorizontalSurface = (
@@ -109,7 +137,9 @@ export function buildArchitecturalWallGeometries(
   ) => {
     surface.forEach((polygon) => {
       const contour = polygon[0].slice(0, -1).map(([x, z]) => new Vector2(x, z));
-      const holes = polygon.slice(1).map((ring) => ring.slice(0, -1).map(([x, z]) => new Vector2(x, z)));
+      const holes = polygon
+        .slice(1)
+        .map((ring) => ring.slice(0, -1).map(([x, z]) => new Vector2(x, z)));
       const vertices = [...contour, ...holes.flat()];
       ShapeUtils.triangulateShape(contour, holes).forEach(([first, second, third]) => {
         const points = [vertices[first], vertices[second], vertices[third]];
@@ -149,10 +179,11 @@ export function buildArchitecturalWallGeometries(
     }
     if (!owner) return fallback;
     const normal = wallData.get(owner.wall)!.frame.normal;
-    const side = visibleNormal[0] * normal[0] + visibleNormal[1] * normal[1] >= 0
-      ? "left"
-      : "right";
-    return customColor(wallFaceFinish(owner.wall, side, outside, outside ? exteriorColor : interiorColor));
+    const side =
+      visibleNormal[0] * normal[0] + visibleNormal[1] * normal[1] >= 0 ? "left" : "right";
+    return customColor(
+      wallFaceFinish(owner.wall, side, outside, outside ? exteriorColor : interiorColor),
+    );
   };
 
   const belowContact = wallLevelContact(neighbors.below, "top");
@@ -163,60 +194,83 @@ export function buildArchitecturalWallGeometries(
     let bottomSurface = previous[0]
       ? differenceClippingGeometry(band.footprint, previous)
       : band.footprint;
-    let topSurface = next[0]
-      ? differenceClippingGeometry(band.footprint, next)
-      : band.footprint;
-    if (band.bottom === 0 && belowContact.length) bottomSurface = differenceClippingGeometry(bottomSurface, belowContact);
-    if (Math.abs(band.top - floor.floorToFloorHeightMeters) < EPSILON && aboveContact.length) topSurface = differenceClippingGeometry(topSurface, aboveContact);
+    let topSurface = next[0] ? differenceClippingGeometry(band.footprint, next) : band.footprint;
+    if (band.bottom === 0 && belowContact.length)
+      bottomSurface = differenceClippingGeometry(bottomSurface, belowContact);
+    if (Math.abs(band.top - floor.floorToFloorHeightMeters) < EPSILON && aboveContact.length)
+      topSurface = differenceClippingGeometry(topSurface, aboveContact);
     addHorizontalSurface(bottomSurface, band.bottom, false, band.activeWalls);
     addHorizontalSurface(topSurface, band.top, true, band.activeWalls);
-    band.footprint.forEach((polygon) => polygon.forEach((ring) => {
-      for (let index = 0; index < ring.length - 1; index += 1) {
-        const start = ring[index];
-        const end = ring[index + 1];
-        const delta: Horizontal = [end[0] - start[0], end[1] - start[1]];
-        const lengthSquared = delta[0] ** 2 + delta[1] ** 2;
-        // Union removes collinear wall boundaries, especially above openings.
-        // Restore them before selecting a face owner and its finish.
-        const splits = uniqueSorted([0, 1, ...band.activeWalls.flatMap((wall) => {
-          const frame = wallData.get(wall)!.frame;
-          const direction = normalize(delta);
-          if (Math.abs(direction[0] * frame.direction[0] + direction[1] * frame.direction[1]) < 0.999) return [];
-          return [frame.from, frame.to].map((point) =>
-            ((point[0] - start[0]) * delta[0] + (point[1] - start[1]) * delta[1]) / lengthSquared
-          ).filter((progress) => progress > EPSILON && progress < 1 - EPSILON);
-        })]);
-        for (let part = 0; part < splits.length - 1; part += 1) {
-          const a: Horizontal = [start[0] + delta[0] * splits[part], start[1] + delta[1] * splits[part]];
-          const b: Horizontal = [start[0] + delta[0] * splits[part + 1], start[1] + delta[1] * splits[part + 1]];
-          const edge = [b[0] - a[0], b[1] - a[1]] as Horizontal;
-          // polygon-clipping orients every ring with solid material on its left:
-          // exterior contours are counter-clockwise and holes are clockwise.
-          // Consequently the visible face is always on the ring's right. Flipping
-          // hole-ring faces hid the upper interior wall band whenever door cuts
-          // closed into a hole above their lintels, exposing the green ground.
-          const candidate = normalize([edge[1], -edge[0]]);
-          const center: Horizontal = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
-          const planSample = worldPointToPlan({ x: center[0] + candidate[0] * 0.08, z: center[1] + candidate[1] * 0.08 }, floor.coordinates);
-          const outside = !pointInsideFloorFootprint(planSample, floor);
-          const buffers = buffersFor(fadeNormalAt(center, band.activeWalls));
-          const color = wallFaceColor(
-            center,
-            edge,
-            candidate,
-            band.activeWalls,
-            outside,
-            outside ? outsideColor : insideColor,
-          );
-          const aBottom = [a[0], band.bottom, a[1]] as const;
-          const bBottom = [b[0], band.bottom, b[1]] as const;
-          const aTop = [a[0], band.top, a[1]] as const;
-          const bTop = [b[0], band.top, b[1]] as const;
-          addTriangle(buffers, aBottom, bTop, bBottom, color);
-          addTriangle(buffers, aBottom, aTop, bTop, color);
+    band.footprint.forEach((polygon) =>
+      polygon.forEach((ring) => {
+        for (let index = 0; index < ring.length - 1; index += 1) {
+          const start = ring[index];
+          const end = ring[index + 1];
+          const delta: Horizontal = [end[0] - start[0], end[1] - start[1]];
+          const lengthSquared = delta[0] ** 2 + delta[1] ** 2;
+          // Union removes collinear wall boundaries, especially above openings.
+          // Restore them before selecting a face owner and its finish.
+          const splits = uniqueSorted([
+            0,
+            1,
+            ...band.activeWalls.flatMap((wall) => {
+              const frame = wallData.get(wall)!.frame;
+              const direction = normalize(delta);
+              if (
+                Math.abs(direction[0] * frame.direction[0] + direction[1] * frame.direction[1]) <
+                0.999
+              )
+                return [];
+              return [frame.from, frame.to]
+                .map(
+                  (point) =>
+                    ((point[0] - start[0]) * delta[0] + (point[1] - start[1]) * delta[1]) /
+                    lengthSquared,
+                )
+                .filter((progress) => progress > EPSILON && progress < 1 - EPSILON);
+            }),
+          ]);
+          for (let part = 0; part < splits.length - 1; part += 1) {
+            const a: Horizontal = [
+              start[0] + delta[0] * splits[part],
+              start[1] + delta[1] * splits[part],
+            ];
+            const b: Horizontal = [
+              start[0] + delta[0] * splits[part + 1],
+              start[1] + delta[1] * splits[part + 1],
+            ];
+            const edge = [b[0] - a[0], b[1] - a[1]] as Horizontal;
+            // polygon-clipping orients every ring with solid material on its left:
+            // exterior contours are counter-clockwise and holes are clockwise.
+            // Consequently the visible face is always on the ring's right. Flipping
+            // hole-ring faces hid the upper interior wall band whenever door cuts
+            // closed into a hole above their lintels, exposing the green ground.
+            const candidate = normalize([edge[1], -edge[0]]);
+            const center: Horizontal = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            const planSample = worldPointToPlan(
+              { x: center[0] + candidate[0] * 0.08, z: center[1] + candidate[1] * 0.08 },
+              floor.coordinates,
+            );
+            const outside = !pointInsideFloorFootprint(planSample, floor);
+            const buffers = buffersFor(fadeNormalAt(center, band.activeWalls));
+            const color = wallFaceColor(
+              center,
+              edge,
+              candidate,
+              band.activeWalls,
+              outside,
+              outside ? outsideColor : insideColor,
+            );
+            const aBottom = [a[0], band.bottom, a[1]] as const;
+            const bBottom = [b[0], band.bottom, b[1]] as const;
+            const aTop = [a[0], band.top, a[1]] as const;
+            const bTop = [b[0], band.top, b[1]] as const;
+            addTriangle(buffers, aBottom, bTop, bBottom, color);
+            addTriangle(buffers, aBottom, aTop, bTop, color);
+          }
         }
-      }
-    }));
+      }),
+    );
   });
 
   return [...buffersByDirection.values()].map((buffers) => {
@@ -242,7 +296,16 @@ export function buildArchitecturalWallGeometries(
 export { JUNCTION_SEAM_OVERLAP_METERS } from "./architecture-geometry/architecture-geometry-contract";
 export { buildContinuousWallGeometry } from "./architecture-geometry/continuous-wall-geometry";
 export { roomInteriorAreaSquareMeters } from "./architecture-geometry/room-interior-area";
-export { junctionArmHalfLength, wallExteriorNormal } from "./architecture-geometry/wall-coordinate-frame";
-export { buildWallJunctionGeometries, junctionFadeNormal } from "./architecture-geometry/wall-junction-geometry";
-export { junctionConnectorInterval, wallSolidFootprintPolygons } from "./architecture-geometry/wall-solid-footprints";
+export {
+  junctionArmHalfLength,
+  wallExteriorNormal,
+} from "./architecture-geometry/wall-coordinate-frame";
+export {
+  buildWallJunctionGeometries,
+  junctionFadeNormal,
+} from "./architecture-geometry/wall-junction-geometry";
+export {
+  junctionConnectorInterval,
+  wallSolidFootprintPolygons,
+} from "./architecture-geometry/wall-solid-footprints";
 export type { ArchitecturalWallGeometryGroup } from "./architecture-geometry/wall-solid-footprints";

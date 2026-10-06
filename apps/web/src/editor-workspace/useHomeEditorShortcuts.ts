@@ -1,7 +1,11 @@
 import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import type { EditorMode } from "../editor-chrome/EditorModeNav";
-import type { useConstructEditor, useConstructMeasure, useFloorZoneDrawing } from "../editor-preview/construct";
+import type {
+  useConstructEditor,
+  useConstructMeasure,
+  useFloorZoneDrawing,
+} from "../editor-preview/construct";
 import type { useFurnishingEditor } from "../editor-preview/furnish";
 
 interface ShortcutContext {
@@ -28,10 +32,26 @@ interface ShortcutContext {
 }
 
 export function useHomeEditorShortcuts({
-  clearConstructionSelection, clearFurnishingSelection, constructEditor, constructMeasure, dragging,
-  duplicateArrangeItem, duplicateConstructionOpening, editingLocked, floorZoneDrawing,
-  furnishingEditor, marqueeSelecting, mode, pendingRoomPaintId, previewOpen, publishOpen, redoProject,
-  selectedOpening, undoProject, setPendingRoomPaintId, setDragging
+  clearConstructionSelection,
+  clearFurnishingSelection,
+  constructEditor,
+  constructMeasure,
+  dragging,
+  duplicateArrangeItem,
+  duplicateConstructionOpening,
+  editingLocked,
+  floorZoneDrawing,
+  furnishingEditor,
+  marqueeSelecting,
+  mode,
+  pendingRoomPaintId,
+  previewOpen,
+  publishOpen,
+  redoProject,
+  selectedOpening,
+  undoProject,
+  setPendingRoomPaintId,
+  setDragging,
 }: ShortcutContext) {
   const dom = useCabaneDom();
   const copiedEditorElement = useRef<{ mode: "construct" | "furnish"; id: string } | null>(null);
@@ -43,12 +63,20 @@ export function useHomeEditorShortcuts({
       // restore project history while that transaction is still in progress.
       if (mode === "furnish" && furnishingEditor.transaction) return;
       const target = event.target;
-      if (target instanceof HTMLElement
-        && (target.closest("input, textarea, select, dialog[open]") || target.isContentEditable)) return;
+      if (
+        target instanceof HTMLElement &&
+        (target.closest("input, textarea, select, dialog[open]") || target.isContentEditable)
+      )
+        return;
       // Labels and tutorial actions own typing/activation keys, while completed
       // naming still permits workspace undo once focus returns to the label.
-      if (target instanceof HTMLElement && target.closest(".construction-room-name, .build-tutorial")
-        && !event.metaKey && !event.ctrlKey) return;
+      if (
+        target instanceof HTMLElement &&
+        target.closest(".construction-room-name, .build-tutorial") &&
+        !event.metaKey &&
+        !event.ctrlKey
+      )
+        return;
       const key = event.key.toLowerCase();
       const historyModifier = (event.metaKey || event.ctrlKey) && !event.altKey;
       if (historyModifier && key === "z") {
@@ -88,8 +116,10 @@ export function useHomeEditorShortcuts({
         if (key === "escape") {
           event.preventDefault();
           clearFurnishingSelection();
-        } else if ((key === "delete" || key === "backspace")
-          && furnishingEditor.selectedIds.length > 0) {
+        } else if (
+          (key === "delete" || key === "backspace") &&
+          furnishingEditor.selectedIds.length > 0
+        ) {
           event.preventDefault();
           furnishingEditor.deleteItems(furnishingEditor.selectedIds);
           clearFurnishingSelection();
@@ -101,7 +131,8 @@ export function useHomeEditorShortcuts({
         if (marqueeSelecting) return;
         if (pendingRoomPaintId) setPendingRoomPaintId(null);
         else if (floorZoneDrawing.active) floorZoneDrawing.cancel();
-        else if (constructEditor.tool === "platform" && constructEditor.poolDrawing.active) constructEditor.poolDrawing.cancel();
+        else if (constructEditor.tool === "platform" && constructEditor.poolDrawing.active)
+          constructEditor.poolDrawing.cancel();
         else if (constructEditor.tool === "platform") constructEditor.setTool("select");
         else if (constructEditor.tool === "floor") constructEditor.setTool("select");
         else if (constructEditor.tool === "measure" && constructMeasure.phase !== "idle") {
@@ -109,7 +140,8 @@ export function useHomeEditorShortcuts({
         } else if (constructEditor.tool === "measure") constructEditor.setTool("select");
         else if (constructEditor.poolDrawing.active) constructEditor.poolDrawing.cancel();
         else if (constructEditor.drawStart) constructEditor.cancelWall();
-        else if (["door", "window", "passage", "hedge", "pool"].includes(constructEditor.tool)) constructEditor.setTool("select");
+        else if (["door", "window", "passage", "hedge", "pool"].includes(constructEditor.tool))
+          constructEditor.setTool("select");
         else clearConstructionSelection();
         setDragging(false);
         return;
@@ -136,7 +168,27 @@ export function useHomeEditorShortcuts({
     };
     dom.events.addEventListener("keydown", handleConstructShortcut, true);
     return () => dom.events.removeEventListener("keydown", handleConstructShortcut, true);
-  }, [clearConstructionSelection, clearFurnishingSelection, constructEditor, constructMeasure, dragging,
-    duplicateArrangeItem, duplicateConstructionOpening, editingLocked, floorZoneDrawing, furnishingEditor, marqueeSelecting, mode,
-    pendingRoomPaintId, previewOpen, publishOpen, redoProject, selectedOpening, undoProject]);
+  }, [
+    clearConstructionSelection,
+    clearFurnishingSelection,
+    constructEditor,
+    constructMeasure,
+    dragging,
+    duplicateArrangeItem,
+    duplicateConstructionOpening,
+    editingLocked,
+    floorZoneDrawing,
+    furnishingEditor,
+    marqueeSelecting,
+    mode,
+    pendingRoomPaintId,
+    previewOpen,
+    publishOpen,
+    redoProject,
+    selectedOpening,
+    undoProject,
+    dom,
+    setPendingRoomPaintId,
+    setDragging,
+  ]);
 }

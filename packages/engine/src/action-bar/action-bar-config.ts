@@ -1,7 +1,10 @@
+import type { WalkToolDefinition } from "../walk-tools/types";
+
 export type ActionBarBuiltIn = "build" | "walk" | "night" | "view" | "all-lights";
 
 export type ActionBarTarget =
   | { kind: "built-in"; action: ActionBarBuiltIn }
+  | { kind: "walk-tool"; toolId: string }
   | { kind: "room"; roomId: string }
   | { kind: "device"; deviceId: string }
   | { kind: "scene" }
@@ -23,32 +26,75 @@ export const defaultActionBarItems: readonly ActionBarItem[] = [
   { id: "default-view", target: { kind: "built-in", action: "view" } },
 ];
 
-export function resolveActionBarItems(config?: ActionBarConfiguration): readonly ActionBarItem[] {
-  return config?.items ?? defaultActionBarItems;
+type DefaultTool = Pick<WalkToolDefinition, "id" | "defaultShortcut">;
+
+export function resolveActionBarItems(
+  config?: ActionBarConfiguration,
+  tools: readonly DefaultTool[] = [],
+): readonly ActionBarItem[] {
+  if (config) return config.items;
+  const defaults = tools.filter((tool) => tool.defaultShortcut);
+  return defaults.length
+    ? [
+        ...defaultActionBarItems,
+        ...defaults.map((tool) => ({
+          id: `default-tool-${tool.id}`,
+          target: { kind: "walk-tool" as const, toolId: tool.id },
+        })),
+      ]
+    : defaultActionBarItems;
 }
 
 const builtInActions = new Set<ActionBarBuiltIn>(["build", "walk", "night", "view", "all-lights"]);
 
 /** Published records can be corrupt even when normal project imports are validated. */
-export function resolvePublishedActionBarItems(config: unknown): readonly ActionBarItem[] {
-  if (config === undefined) return defaultActionBarItems;
-  const rawItems = config !== null && typeof config === "object" && !Array.isArray(config)
-    ? (config as { items?: unknown }).items : undefined;
-  if (!Array.isArray(rawItems)) return [{ id: "unavailable-action-bar", target: { kind: "room", roomId: "unavailable-action-bar" } }];
+export function resolvePublishedActionBarItems(
+  config: unknown,
+  tools: readonly DefaultTool[] = [],
+): readonly ActionBarItem[] {
+  if (config === undefined) return resolveActionBarItems(undefined, tools);
+  const rawItems =
+    config !== null && typeof config === "object" && !Array.isArray(config)
+      ? (config as { items?: unknown }).items
+      : undefined;
+  if (!Array.isArray(rawItems))
+    return [
+      { id: "unavailable-action-bar", target: { kind: "room", roomId: "unavailable-action-bar" } },
+    ];
   const seen = new Set<string>();
   return rawItems.map((raw, index) => {
-    const fallback: ActionBarItem = { id: `unavailable-action-${index}`,
-      target: { kind: "room", roomId: `unavailable-action-${index}` } };
+    const fallback: ActionBarItem = {
+      id: `unavailable-action-${index}`,
+      target: { kind: "room", roomId: `unavailable-action-${index}` },
+    };
     if (raw === null || typeof raw !== "object" || Array.isArray(raw)) return fallback;
     const item = raw as { id?: unknown; target?: unknown };
-    if (typeof item.id !== "string" || !item.id.trim() || seen.has(item.id)
-      || item.target === null || typeof item.target !== "object" || Array.isArray(item.target)) return fallback;
+    if (
+      typeof item.id !== "string" ||
+      !item.id.trim() ||
+      seen.has(item.id) ||
+      item.target === null ||
+      typeof item.target !== "object" ||
+      Array.isArray(item.target)
+    )
+      return fallback;
     seen.add(item.id);
-    const target = item.target as { kind?: unknown; action?: unknown; roomId?: unknown; deviceId?: unknown };
+    const target = item.target as {
+      kind?: unknown;
+      action?: unknown;
+      roomId?: unknown;
+      deviceId?: unknown;
+      toolId?: unknown;
+    };
     if (target.kind === "built-in" && builtInActions.has(target.action as ActionBarBuiltIn))
-      return { id: item.id, target: { kind: "built-in", action: target.action as ActionBarBuiltIn } };
+      return {
+        id: item.id,
+        target: { kind: "built-in", action: target.action as ActionBarBuiltIn },
+      };
     if (target.kind === "scene" || target.kind === "script")
       return { id: item.id, target: { kind: target.kind } };
+    if (target.kind === "walk-tool" && typeof target.toolId === "string" && target.toolId.trim())
+      return { id: item.id, target: { kind: "walk-tool", toolId: target.toolId } };
     if (target.kind === "room" && typeof target.roomId === "string" && target.roomId.trim())
       return { id: item.id, target: { kind: "room", roomId: target.roomId } };
     if (target.kind === "device" && typeof target.deviceId === "string" && target.deviceId.trim())

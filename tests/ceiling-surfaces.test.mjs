@@ -6,14 +6,23 @@ import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
-await withModules(async load => {
-  const { CeilingSurfaces } = await load("/packages/engine/src/architecture-scene/CeilingSurfaces.tsx");
+await withModules(async (load) => {
+  const { CeilingSurfaces } = await load(
+    "/packages/engine/src/architecture-scene/CeilingSurfaces.tsx",
+  );
 
   test("a single-room walk ceiling stays within its floor footprint", async () => {
-    const footprint = [[-3.6, -3.2], [2.2, -3.2], [2.2, 0.2], [-3.6, 0.2]];
+    const footprint = [
+      [-3.6, -3.2],
+      [2.2, -3.2],
+      [2.2, 0.2],
+      [-3.6, 0.2],
+    ];
     const floor = {
-      id: "ground-floor", coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
-      footprint, rooms: [{ id: "room", polygon: footprint }],
+      id: "ground-floor",
+      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+      footprint,
+      rooms: [{ id: "room", polygon: footprint }],
       ceilings: [{ id: "ceiling", kind: "flat", roomIds: ["room"], heightMeters: 2.4 }],
     };
     const renderer = await create(createElement(CeilingSurfaces, { floor }));

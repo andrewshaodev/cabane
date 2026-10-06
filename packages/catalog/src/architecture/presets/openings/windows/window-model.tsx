@@ -31,7 +31,7 @@ export function WindowModel({
     >
       {orientation.leaves.map((leaf, index) => {
         const pivotX = leaf.pivotRatio * placement.widthMeters;
-        const childX = leaf.extentSign * panelWidth / 2;
+        const childX = (leaf.extentSign * panelWidth) / 2;
 
         return (
           <group key={index} position={[pivotX, 0, 0]}>
@@ -51,10 +51,14 @@ export function WindowModel({
                   privacy={opening.glazing === "privacy"}
                   frameDepth={opening.glazing === "privacy" ? 0.105 : 0.09}
                 />
-                {opening.operation === "casement" && <WindowHandle
-                  width={panelWidth} glazing={opening.glazing}
-                  handleSide={leaf.extentSign} faceSide={orientation.sideSign}
-                />}
+                {opening.operation === "casement" && (
+                  <WindowHandle
+                    width={panelWidth}
+                    glazing={opening.glazing}
+                    handleSide={leaf.extentSign}
+                    faceSide={orientation.sideSign}
+                  />
+                )}
               </group>
             </AnimatedOpeningLeaf>
           </group>
@@ -62,11 +66,7 @@ export function WindowModel({
       })}
       <OpeningFrameBox
         size={[placement.widthMeters + 0.08, 0.055, wall.thicknessMeters + 0.06]}
-        position={[
-          placement.widthMeters / 2,
-          -opening.openingHeightMeters / 2 - 0.02,
-          0,
-        ]}
+        position={[placement.widthMeters / 2, -opening.openingHeightMeters / 2 - 0.02, 0]}
       />
     </group>
   );

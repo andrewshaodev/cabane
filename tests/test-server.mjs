@@ -9,7 +9,7 @@ const getServer = () => {
     configFile: false,
     define: { __THUMBNAIL_REVISION__: JSON.stringify("test") },
     optimizeDeps: { noDiscovery: true },
-    server: { middlewareMode: true, hmr: false, ws: false },
+    server: { middlewareMode: true, hmr: false, ws: false, watch: null },
   });
   return serverPromise;
 };

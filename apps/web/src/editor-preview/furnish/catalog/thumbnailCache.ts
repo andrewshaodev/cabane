@@ -24,7 +24,9 @@ export async function readThumbnail(key: string): Promise<Blob | undefined> {
     const blob = await (await (await storage()).match(key))?.blob();
     if (blob) remember(key, blob);
     return blob;
-  } catch { return undefined; }
+  } catch {
+    return undefined;
+  }
 }
 
 export function saveThumbnail(key: string, canvas: HTMLCanvasElement) {
@@ -38,14 +40,23 @@ export function saveThumbnail(key: string, canvas: HTMLCanvasElement) {
         const keys = await cache.keys();
         for (const old of keys.slice(0, Math.max(0, keys.length - limit))) await cache.delete(old);
         for (const name of await caches.keys()) {
-          if (name.startsWith("cabane-model-previews-") && name !== cacheName) await caches.delete(name);
+          if (name.startsWith("cabane-model-previews-") && name !== cacheName)
+            await caches.delete(name);
         }
-      } catch { /* A preview must remain usable when persistence fails. */ }
+      } catch {
+        /* A preview must remain usable when persistence fails. */
+      }
     })();
   }, "image/png");
 }
 
-export async function paintThumbnail(blob: Blob, canvas: HTMLCanvasElement, width: number, height: number, current: () => boolean) {
+export async function paintThumbnail(
+  blob: Blob,
+  canvas: HTMLCanvasElement,
+  width: number,
+  height: number,
+  current: () => boolean,
+) {
   const url = URL.createObjectURL(blob);
   try {
     const image = new Image();
@@ -58,6 +69,9 @@ export async function paintThumbnail(blob: Blob, canvas: HTMLCanvasElement, widt
     canvas.height = height;
     context.drawImage(image, 0, 0, width, height);
     return true;
-  } catch { return false; }
-  finally { URL.revokeObjectURL(url); }
+  } catch {
+    return false;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }

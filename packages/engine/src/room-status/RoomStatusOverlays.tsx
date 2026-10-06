@@ -36,28 +36,22 @@ export const roomStatusOverlayPriority = (summary: RoomStatusSummary) => {
   return 0;
 };
 
-const roomStatusOverlayLabelWidth = (
-  roomName: string,
-  summary: RoomStatusSummary,
-) => {
-  const iconCount = Number(summary.heating)
-    + Number(summary.cooling)
-    + Number(Boolean(summary.lighting))
-    + Number(Boolean(summary.presence))
-    + Number(summary.doorOpen);
+const roomStatusOverlayLabelWidth = (roomName: string, summary: RoomStatusSummary) => {
+  const iconCount =
+    Number(summary.heating) +
+    Number(summary.cooling) +
+    Number(Boolean(summary.lighting)) +
+    Number(Boolean(summary.presence)) +
+    Number(summary.doorOpen);
   const statusWidth = 12 + (summary.temperature ? 58 : 0) + iconCount * 21;
   const nameWidth = 58 + roomName.length * 5.4;
   return Math.min(188, Math.max(88, statusWidth, nameWidth));
 };
 
-const candidatesOverlap = (
-  left: RoomStatusOverlayCandidate,
-  right: RoomStatusOverlayCandidate,
-) => (
-  Math.abs(left.screenX - right.screenX)
-    < (left.labelWidth + right.labelWidth) / 2 + OVERLAY_COLLISION_GAP
-  && Math.abs(left.screenY - right.screenY) < OVERLAY_COLLISION_HEIGHT
-);
+const candidatesOverlap = (left: RoomStatusOverlayCandidate, right: RoomStatusOverlayCandidate) =>
+  Math.abs(left.screenX - right.screenX) <
+    (left.labelWidth + right.labelWidth) / 2 + OVERLAY_COLLISION_GAP &&
+  Math.abs(left.screenY - right.screenY) < OVERLAY_COLLISION_HEIGHT;
 
 export const selectRoomStatusOverlayIds = (
   candidates: readonly RoomStatusOverlayCandidate[],
@@ -67,15 +61,14 @@ export const selectRoomStatusOverlayIds = (
   const selected: RoomStatusOverlayCandidate[] = [];
   const ranked = candidates
     .filter((candidate) => candidate.inViewport)
-    .sort((left, right) => (
-      right.priority - left.priority
-      || (
-        left.distanceFromCenter - (retainedIds.has(left.id) ? RETAINED_DISTANCE_BONUS : 0)
-      ) - (
-        right.distanceFromCenter - (retainedIds.has(right.id) ? RETAINED_DISTANCE_BONUS : 0)
-      )
-      || left.id.localeCompare(right.id)
-    ));
+    .sort(
+      (left, right) =>
+        right.priority - left.priority ||
+        left.distanceFromCenter -
+          (retainedIds.has(left.id) ? RETAINED_DISTANCE_BONUS : 0) -
+          (right.distanceFromCenter - (retainedIds.has(right.id) ? RETAINED_DISTANCE_BONUS : 0)) ||
+        left.id.localeCompare(right.id),
+    );
 
   for (const candidate of ranked) {
     if (selected.length >= limit) break;
@@ -93,9 +86,8 @@ export const roomStatusOverlayPosition = (
   return [x, floor.defaultCeilingHeightMeters + 0.35, z];
 };
 
-export const shouldShowRoomStatusOverlays = (
-  mode: "overview" | "room" | "walk",
-) => mode === "overview";
+export const shouldShowRoomStatusOverlays = (mode: "overview" | "room" | "walk") =>
+  mode === "overview";
 
 export function RoomStatusOverlayButton({
   hovered = false,
@@ -128,7 +120,10 @@ export function RoomStatusOverlayButton({
       onPointerUp={(event) => event.stopPropagation()}
       onClick={visible ? onSelect : undefined}
     >
-      <span className="room-status-overlay__name">{roomName}{summary.connected === false && <RoomDisconnectedIcon />}</span>
+      <span className="room-status-overlay__name">
+        {roomName}
+        {summary.connected === false && <RoomDisconnectedIcon />}
+      </span>
       <RoomStatusBadges summary={summary} variant="compact" includeHumidity={false} />
       <span className="room-status-overlay__stem" aria-hidden="true" />
     </button>
@@ -152,14 +147,18 @@ export function RoomStatusOverlays({
   const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(() => new Set());
   const visibleIdsRef = useRef<ReadonlySet<string>>(visibleIds);
   const projected = useMemo(() => new Vector3(), []);
-  const overlayRooms = useMemo(() => floor.rooms.map((room) => {
-    const roomName = roomNames[room.id] ?? room.name;
-    return {
-      room,
-      roomName,
-      position: roomStatusOverlayPosition(room, floor),
-    };
-  }), [floor, roomNames]);
+  const overlayRooms = useMemo(
+    () =>
+      floor.rooms.map((room) => {
+        const roomName = roomNames[room.id] ?? room.name;
+        return {
+          room,
+          roomName,
+          position: roomStatusOverlayPosition(room, floor),
+        };
+      }),
+    [floor, roomNames],
+  );
 
   useFrame(() => {
     const candidates = overlayRooms.map(({ room, roomName, position }) => {
@@ -167,15 +166,16 @@ export function RoomStatusOverlays({
       projected.set(...position).project(camera);
       return {
         id: room.id,
-        screenX: (projected.x + 1) * size.width / 2,
-        screenY: (1 - projected.y) * size.height / 2,
+        screenX: ((projected.x + 1) * size.width) / 2,
+        screenY: ((1 - projected.y) * size.height) / 2,
         distanceFromCenter: Math.hypot(projected.x, projected.y),
         labelWidth: roomStatusOverlayLabelWidth(roomName, summary),
         priority: roomStatusOverlayPriority(summary),
-        inViewport: projected.z >= -1
-          && projected.z <= 1
-          && Math.abs(projected.x) <= 1.04
-          && Math.abs(projected.y) <= 1.08,
+        inViewport:
+          projected.z >= -1 &&
+          projected.z <= 1 &&
+          Math.abs(projected.x) <= 1.04 &&
+          Math.abs(projected.y) <= 1.08,
       };
     });
     const next = selectRoomStatusOverlayIds(
@@ -184,13 +184,13 @@ export function RoomStatusOverlays({
       visibleIdsRef.current,
     );
     if (
-      next.size === visibleIdsRef.current.size
-      && [...next].every((id) => visibleIdsRef.current.has(id))
-    ) return;
+      next.size === visibleIdsRef.current.size &&
+      [...next].every((id) => visibleIdsRef.current.has(id))
+    )
+      return;
     visibleIdsRef.current = next;
     setVisibleIds(next);
   });
-
 
   return floor.rooms.map((room) => (
     <Html

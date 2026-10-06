@@ -7,9 +7,8 @@ type RoomHeroMotion = {
   foregroundOpacity: number;
 };
 
-const clamp = (value: number, minimum = 0, maximum = 1) => (
-  Math.max(minimum, Math.min(maximum, value))
-);
+const clamp = (value: number, minimum = 0, maximum = 1) =>
+  Math.max(minimum, Math.min(maximum, value));
 
 export const roomHeroParallaxOffsets = (scrollTop: number, travel: number): RoomHeroMotion => {
   const progress = clamp(scrollTop / Math.max(1, travel));
@@ -30,19 +29,26 @@ const stationaryRoomHero: RoomHeroMotion = {
   foregroundOpacity: 1,
 };
 
-const interpolateMotion = (current: RoomHeroMotion, target: RoomHeroMotion, amount: number): RoomHeroMotion => ({
+const interpolateMotion = (
+  current: RoomHeroMotion,
+  target: RoomHeroMotion,
+  amount: number,
+): RoomHeroMotion => ({
   photoPercent: current.photoPercent + (target.photoPercent - current.photoPercent) * amount,
-  foregroundPixels: current.foregroundPixels + (target.foregroundPixels - current.foregroundPixels) * amount,
+  foregroundPixels:
+    current.foregroundPixels + (target.foregroundPixels - current.foregroundPixels) * amount,
   visualOpacity: current.visualOpacity + (target.visualOpacity - current.visualOpacity) * amount,
-  foregroundOpacity: current.foregroundOpacity + (target.foregroundOpacity - current.foregroundOpacity) * amount,
+  foregroundOpacity:
+    current.foregroundOpacity + (target.foregroundOpacity - current.foregroundOpacity) * amount,
 });
 
-const motionDistance = (current: RoomHeroMotion, target: RoomHeroMotion) => Math.max(
-  Math.abs(target.photoPercent - current.photoPercent),
-  Math.abs(target.foregroundPixels - current.foregroundPixels),
-  Math.abs(target.visualOpacity - current.visualOpacity),
-  Math.abs(target.foregroundOpacity - current.foregroundOpacity),
-);
+const motionDistance = (current: RoomHeroMotion, target: RoomHeroMotion) =>
+  Math.max(
+    Math.abs(target.photoPercent - current.photoPercent),
+    Math.abs(target.foregroundPixels - current.foregroundPixels),
+    Math.abs(target.visualOpacity - current.visualOpacity),
+    Math.abs(target.foregroundOpacity - current.foregroundOpacity),
+  );
 
 export const useRoomHeroParallax = ({
   scrollRef,
@@ -59,15 +65,17 @@ export const useRoomHeroParallax = ({
     const scroll = scrollRef.current;
     const hero = heroRef.current;
     if (!scroll || !hero || typeof window === "undefined") return;
-    const reducedMotion = typeof window.matchMedia === "function"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)")
-      : null;
+    const reducedMotion =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
     let frame = 0;
     let lastFrameTime: number | null = null;
 
-    const targetMotion = () => enabled && !reducedMotion?.matches
-      ? roomHeroParallaxOffsets(scroll.scrollTop, hero.offsetHeight)
-      : stationaryRoomHero;
+    const targetMotion = () =>
+      enabled && !reducedMotion?.matches
+        ? roomHeroParallaxOffsets(scroll.scrollTop, hero.offsetHeight)
+        : stationaryRoomHero;
     let target = targetMotion();
     let current = target;
 
@@ -79,9 +87,10 @@ export const useRoomHeroParallax = ({
     };
     const animate = (timestamp: number) => {
       frame = 0;
-      const deltaSeconds = lastFrameTime === null
-        ? 1 / 60
-        : Math.min(0.05, Math.max(0, (timestamp - lastFrameTime) / 1000));
+      const deltaSeconds =
+        lastFrameTime === null
+          ? 1 / 60
+          : Math.min(0.05, Math.max(0, (timestamp - lastFrameTime) / 1000));
       lastFrameTime = timestamp;
       const amount = 1 - Math.exp(-10 * deltaSeconds);
       current = interpolateMotion(current, target, amount);

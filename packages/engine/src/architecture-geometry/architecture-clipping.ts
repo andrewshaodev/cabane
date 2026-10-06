@@ -1,11 +1,12 @@
-import polygonClipping, { type Polygon as ClippingPolygon, type MultiPolygon } from "polygon-clipping";
+import polygonClipping, {
+  type Polygon as ClippingPolygon,
+  type MultiPolygon,
+} from "polygon-clipping";
 
 import { CLIPPING_GRID_METERS, ClippingGeometry } from "./architecture-geometry-contract";
 
-const sameClippingPoint = (
-  left: readonly [number, number],
-  right: readonly [number, number],
-) => left[0] === right[0] && left[1] === right[1];
+const sameClippingPoint = (left: readonly [number, number], right: readonly [number, number]) =>
+  left[0] === right[0] && left[1] === right[1];
 
 const normalizeClippingRing = (
   ring: readonly (readonly [number, number])[],
@@ -32,27 +33,29 @@ const normalizeClippingPolygon = (polygon: ClippingPolygon): ClippingPolygon | n
   if (!exterior) return null;
   return [
     exterior,
-    ...polygon.slice(1)
+    ...polygon
+      .slice(1)
       .map(normalizeClippingRing)
       .filter((ring): ring is [number, number][] => ring !== null),
   ];
 };
 
-const normalizeClippingMultiPolygon = (geometry: MultiPolygon): MultiPolygon => geometry
-  .map(normalizeClippingPolygon)
-  .filter((polygon): polygon is ClippingPolygon => polygon !== null);
+const normalizeClippingMultiPolygon = (geometry: MultiPolygon): MultiPolygon =>
+  geometry
+    .map(normalizeClippingPolygon)
+    .filter((polygon): polygon is ClippingPolygon => polygon !== null);
 
 const normalizeClippingGeometry = (geometry: ClippingGeometry): ClippingGeometry => {
   const isPolygon = typeof geometry[0]?.[0]?.[0] === "number";
   return isPolygon
-    ? normalizeClippingPolygon(geometry as ClippingPolygon) ?? []
+    ? (normalizeClippingPolygon(geometry as ClippingPolygon) ?? [])
     : normalizeClippingMultiPolygon(geometry as MultiPolygon);
 };
 
 const clippingMultiPolygon = (geometry: ClippingGeometry): MultiPolygon =>
   typeof geometry[0]?.[0]?.[0] === "number"
     ? [geometry as ClippingPolygon]
-    : geometry as MultiPolygon;
+    : (geometry as MultiPolygon);
 
 export const unionClippingPolygons = (polygons: readonly ClippingPolygon[]): MultiPolygon => {
   const normalized = polygons
@@ -69,9 +72,7 @@ export const differenceClippingGeometry = (
 ): MultiPolygon => {
   const normalizedSubject = normalizeClippingGeometry(subject);
   if (!normalizedSubject[0]) return [];
-  const normalizedClips = clips
-    .map(normalizeClippingGeometry)
-    .filter((geometry) => geometry[0]);
+  const normalizedClips = clips.map(normalizeClippingGeometry).filter((geometry) => geometry[0]);
   return normalizeClippingMultiPolygon(
     normalizedClips.length
       ? polygonClipping.difference(normalizedSubject, ...normalizedClips)

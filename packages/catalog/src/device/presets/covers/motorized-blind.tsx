@@ -6,8 +6,8 @@ import { BlindFabric } from "./blind-fabric";
 export const MOTORIZED_BLIND_SIZE = [1.2, 1.6, 0.12] as const;
 
 export function MotorizedBlindModel({ state, visualState, reducedMotion }: HomeDeviceModelProps) {
-  const position = visualState === "disconnected" || visualState === "unavailable"
-    ? null : coverPosition(state);
+  const position =
+    visualState === "disconnected" || visualState === "unavailable" ? null : coverPosition(state);
   return (
     <group name="catalog-motorized-blind">
       <mesh name="blind-headbox" position={[0, 1.54, 0.09]} castShadow receiveShadow>

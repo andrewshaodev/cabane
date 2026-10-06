@@ -72,7 +72,9 @@ export function DeviceMappingInspector({
   runtime: HomeAssistantRuntimeSnapshot;
   disabled: boolean;
   state: DeviceMappingInspectorState | "closed";
-  onEntityIdsBySlotIdChange: (entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"]) => void;
+  onEntityIdsBySlotIdChange: (
+    entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"],
+  ) => void;
   onSelectionMade: (targetLabel: string) => void;
   onCollapse: () => void;
   onReopen: () => void;
@@ -81,7 +83,9 @@ export function DeviceMappingInspector({
   preview?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
-  const [optimisticTarget, setOptimisticTarget] = useState<{ id: string; label: string } | null>(null);
+  const [optimisticTarget, setOptimisticTarget] = useState<{ id: string; label: string } | null>(
+    null,
+  );
   const [pendingDevice, setPendingDevice] = useState<{
     relationshipId: string;
     deviceId: string;
@@ -94,24 +98,38 @@ export function DeviceMappingInspector({
   let primaryChoice: MappingChoice;
   let functionChoices: MappingChoice[] = [];
   let relationshipLabel = "Not connected";
-  let connectionDetails: ReactNode = null;
+  let connectionDetails: ReactNode;
 
   if (relationship.kind === "entity-slot") {
     const { descriptor } = relationship;
     const current = profile.entityIdsBySlotId[descriptor.slotId];
-    const candidates = bindingEntityCandidates({ descriptor, roomId: room.id, profile, runtime,
-      scope: descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover" ? "all-areas" : "mapped-area" });
+    const candidates = bindingEntityCandidates({
+      descriptor,
+      roomId: room.id,
+      profile,
+      runtime,
+      scope:
+        descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover"
+          ? "all-areas"
+          : "mapped-area",
+    });
     const currentCandidate = candidates.find((candidate) => candidate.entityId === current);
     const currentState = current ? runtime.entityStates[current] : undefined;
-    relationshipLabel = currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected");
+    relationshipLabel =
+      currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected");
     primaryChoice = {
       id: descriptor.slotId,
       label: descriptor.kind === "opening-contact" ? "Opening sensor" : "Home Assistant entity",
       ariaLabel: `Home Assistant match for ${relationship.label}`,
       value: current ?? "",
-      emptyLabel: candidates.length === 0 && !current ? "No compatible Home Assistant matches" : "Not connected",
+      emptyLabel:
+        candidates.length === 0 && !current
+          ? "No compatible Home Assistant matches"
+          : "Not connected",
       options: [
-        ...(current && !currentCandidate ? [{ value: current, label: "Saved match unavailable" }] : []),
+        ...(current && !currentCandidate
+          ? [{ value: current, label: "Saved match unavailable" }]
+          : []),
         ...candidates.map((candidate) => ({
           value: candidate.entityId,
           label: `${candidate.label}${descriptor.kind === "opening-contact" ? ` · ${candidate.areaLabel}` : ""}${candidate.stateLabel === "Available" ? "" : ` · ${candidate.stateLabel}`}${candidate.claimed ? " · already used" : ""}`,
@@ -119,30 +137,47 @@ export function DeviceMappingInspector({
         })),
       ],
       onChange: (value) => {
-        onEntityIdsBySlotIdChange(replaceEntitySlotMapping(
-          profile,
-          descriptor.slotId,
-          (value || null) as EntityId | null,
-        ).entityIdsBySlotId);
+        onEntityIdsBySlotIdChange(
+          replaceEntitySlotMapping(profile, descriptor.slotId, (value || null) as EntityId | null)
+            .entityIdsBySlotId,
+        );
         return true;
       },
     };
     connectionDetails = (
       <>
-        {current && <p>Entity: <code>{current}</code></p>}
-        <p>Compatible: {descriptor.spec.compatibleDomains.join(", ")}{candidates.some((candidate) => candidate.matchRank > 0) ? "; plugs and switches (on/off only)" : ""}</p>
-        {descriptor.kind !== "opening-contact" && descriptor.spec.compatibleDeviceClasses?.length ? (
+        {current && (
+          <p>
+            Entity: <code>{current}</code>
+          </p>
+        )}
+        <p>
+          Compatible: {descriptor.spec.compatibleDomains.join(", ")}
+          {candidates.some((candidate) => candidate.matchRank > 0)
+            ? "; plugs and switches (on/off only)"
+            : ""}
+        </p>
+        {descriptor.kind !== "opening-contact" &&
+        descriptor.spec.compatibleDeviceClasses?.length ? (
           <p>Device class: {descriptor.spec.compatibleDeviceClasses.join(", ")}</p>
         ) : null}
-        {current && <p>State: {currentState ? (currentState.available ? "Available" : currentState.state) : "Missing"}</p>}
+        {current && (
+          <p>
+            State:{" "}
+            {currentState ? (currentState.available ? "Available" : currentState.state) : "Missing"}
+          </p>
+        )}
       </>
     );
   } else {
     const { device } = relationship;
     const cameraDescriptor = relationship.descriptors.find(isShareableCameraDescriptor);
-    const singleSlotDescriptor = device.entitySlots.length === 1
-      ? relationship.descriptors.find((candidate) => candidate.slotId === device.entitySlots[0].id)
-      : undefined;
+    const singleSlotDescriptor =
+      device.entitySlots.length === 1
+        ? relationship.descriptors.find(
+            (candidate) => candidate.slotId === device.entitySlots[0].id,
+          )
+        : undefined;
     if (cameraDescriptor) {
       const current = profile.entityIdsBySlotId[cameraDescriptor.slotId];
       const candidates = bindingEntityCandidates({
@@ -152,15 +187,21 @@ export function DeviceMappingInspector({
         runtime,
       });
       const currentCamera = candidates.find((candidate) => candidate.entityId === current);
-      relationshipLabel = currentCamera?.label ?? (current ? "Saved match unavailable" : "Not connected");
+      relationshipLabel =
+        currentCamera?.label ?? (current ? "Saved match unavailable" : "Not connected");
       primaryChoice = {
         id: cameraDescriptor.slotId,
         label: "Home Assistant camera",
         ariaLabel: `Home Assistant camera for ${relationship.label}`,
         value: current ?? "",
-        emptyLabel: candidates.length === 0 && !current ? "No compatible Home Assistant cameras" : "Not connected",
+        emptyLabel:
+          candidates.length === 0 && !current
+            ? "No compatible Home Assistant cameras"
+            : "Not connected",
         options: [
-          ...(current && !currentCamera ? [{ value: current, label: "Saved match unavailable" }] : []),
+          ...(current && !currentCamera
+            ? [{ value: current, label: "Saved match unavailable" }]
+            : []),
           ...candidates.map((candidate) => ({
             value: candidate.entityId,
             label: `${candidate.label} · ${candidate.areaLabel}${candidate.stateLabel === "Available" ? "" : ` · ${candidate.stateLabel}`}`,
@@ -168,17 +209,21 @@ export function DeviceMappingInspector({
           })),
         ],
         onChange: (value) => {
-          onEntityIdsBySlotIdChange(replaceEntitySlotMapping(
-            profile,
-            cameraDescriptor.slotId,
-            (value || null) as EntityId | null,
-          ).entityIdsBySlotId);
+          onEntityIdsBySlotIdChange(
+            replaceEntitySlotMapping(
+              profile,
+              cameraDescriptor.slotId,
+              (value || null) as EntityId | null,
+            ).entityIdsBySlotId,
+          );
           return true;
         },
       };
       connectionDetails = current ? (
         <>
-          <p>Camera: <code>{current}</code></p>
+          <p>
+            Camera: <code>{current}</code>
+          </p>
           {currentCamera && <p>Home Assistant area: {currentCamera.areaLabel}</p>}
         </>
       ) : null;
@@ -195,8 +240,12 @@ export function DeviceMappingInspector({
       const currentCandidate = candidates.find((candidate) => candidate.entityId === current);
       const currentState = current ? runtime.entityStates[current] : undefined;
       const roomAreaId = profile.roomAreaIds[room.id];
-      const inRoomCandidates = candidates.filter((candidate) => candidate.matchRank === 0 && candidate.areaId === roomAreaId);
-      const otherCandidates = candidates.filter((candidate) => candidate.matchRank === 0 && candidate.areaId !== roomAreaId);
+      const inRoomCandidates = candidates.filter(
+        (candidate) => candidate.matchRank === 0 && candidate.areaId === roomAreaId,
+      );
+      const otherCandidates = candidates.filter(
+        (candidate) => candidate.matchRank === 0 && candidate.areaId !== roomAreaId,
+      );
       const optionForCandidate = (
         candidate: (typeof candidates)[number],
         showArea: boolean,
@@ -204,20 +253,24 @@ export function DeviceMappingInspector({
         value: candidate.entityId,
         label: [
           candidate.label,
-          ...(showArea ? [candidate.areaLabel, candidate.stateLabel] : (
-            candidate.stateLabel === "Available" ? [] : [candidate.stateLabel]
-          )),
+          ...(showArea
+            ? [candidate.areaLabel, candidate.stateLabel]
+            : candidate.stateLabel === "Available"
+              ? []
+              : [candidate.stateLabel]),
           ...(candidate.claimed ? ["already used"] : []),
         ].join(" · "),
         summaryLabel: candidate.label,
         disabled: !candidate.selectable && candidate.entityId !== current,
       });
-      const savedOptions: MappingOption[] = current && !currentCandidate
-        ? [{ value: current, label: "Saved match unavailable" }]
-        : [];
-      const inRoomOptions = inRoomCandidates.map((candidate) => optionForCandidate(candidate, false));
+      const savedOptions: MappingOption[] =
+        current && !currentCandidate ? [{ value: current, label: "Saved match unavailable" }] : [];
+      const inRoomOptions = inRoomCandidates.map((candidate) =>
+        optionForCandidate(candidate, false),
+      );
       const otherOptions = otherCandidates.map((candidate) => optionForCandidate(candidate, true));
-      const alternativeOptions = candidates.filter((candidate) => candidate.matchRank > 0)
+      const alternativeOptions = candidates
+        .filter((candidate) => candidate.matchRank > 0)
         .map((candidate) => optionForCandidate(candidate, true));
       const options = [...savedOptions, ...inRoomOptions, ...otherOptions, ...alternativeOptions];
       const isLighting = descriptor.spec.compatibleDomains.includes("light");
@@ -225,72 +278,132 @@ export function DeviceMappingInspector({
         const areas = new Map<string, MappingOptionGroup>();
         for (const candidate of entries) {
           const id = candidate.areaId ?? "no-area";
-          const group = areas.get(id) ?? { id, label: candidate.areaLabel, collapsed: true, options: [] };
+          const group = areas.get(id) ?? {
+            id,
+            label: candidate.areaLabel,
+            collapsed: true,
+            options: [],
+          };
           group.options = [...group.options, optionForCandidate(candidate, false)];
           areas.set(id, group);
         }
         return [...areas.values()].sort((a, b) => a.label.localeCompare(b.label));
       };
-      relationshipLabel = currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected");
+      relationshipLabel =
+        currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected");
       primaryChoice = {
         id: descriptor.slotId,
         label: "Home Assistant entity",
         ariaLabel: `Home Assistant entity for ${relationship.label}`,
         value: current ?? "",
-        emptyLabel: candidates.length === 0 && !current
-          ? "No compatible Home Assistant entities"
-          : "Not connected",
+        emptyLabel:
+          candidates.length === 0 && !current
+            ? "No compatible Home Assistant entities"
+            : "Not connected",
         options,
         optionGroups: [
           ...(savedOptions.length > 0 ? [{ label: "Saved selection", options: savedOptions }] : []),
-          ...(inRoomOptions.length > 0 ? [{ label: isLighting ? `Lights in ${room.name}` : `In ${room.name}`, options: inRoomOptions }] : []),
-          ...(otherOptions.length > 0 ? [isLighting
-            ? { label: "Other lights", options: [], collapsed: true, groups: byArea(otherCandidates) }
-            : { label: "Other compatible entities", options: otherOptions }] : []),
-          ...(alternativeOptions.length > 0 ? [{ label: "Other switches · on/off only", options: [],
-            collapsed: true, groups: byArea(candidates.filter((candidate) => candidate.matchRank > 0)) }] : []),
+          ...(inRoomOptions.length > 0
+            ? [
+                {
+                  label: isLighting ? `Lights in ${room.name}` : `In ${room.name}`,
+                  options: inRoomOptions,
+                },
+              ]
+            : []),
+          ...(otherOptions.length > 0
+            ? [
+                isLighting
+                  ? {
+                      label: "Other lights",
+                      options: [],
+                      collapsed: true,
+                      groups: byArea(otherCandidates),
+                    }
+                  : { label: "Other compatible entities", options: otherOptions },
+              ]
+            : []),
+          ...(alternativeOptions.length > 0
+            ? [
+                {
+                  label: "Other switches · on/off only",
+                  options: [],
+                  collapsed: true,
+                  groups: byArea(candidates.filter((candidate) => candidate.matchRank > 0)),
+                },
+              ]
+            : []),
         ],
         onChange: (value) => {
-          onEntityIdsBySlotIdChange(replaceEntitySlotMapping(
-            profile,
-            descriptor.slotId,
-            (value || null) as EntityId | null,
-          ).entityIdsBySlotId);
+          onEntityIdsBySlotIdChange(
+            replaceEntitySlotMapping(profile, descriptor.slotId, (value || null) as EntityId | null)
+              .entityIdsBySlotId,
+          );
           return true;
         },
       };
       connectionDetails = (
         <>
-          {current && <p>Entity: <code>{current}</code></p>}
+          {current && (
+            <p>
+              Entity: <code>{current}</code>
+            </p>
+          )}
           {currentCandidate && <p>Home Assistant area: {currentCandidate.areaLabel}</p>}
-          <p>Compatible: {descriptor.spec.compatibleDomains.join(", ")}{candidates.some((candidate) => candidate.matchRank > 0) ? "; plugs and switches (on/off only)" : ""}</p>
-          {descriptor.kind !== "opening-contact" && descriptor.spec.compatibleDeviceClasses?.length ? (
+          <p>
+            Compatible: {descriptor.spec.compatibleDomains.join(", ")}
+            {candidates.some((candidate) => candidate.matchRank > 0)
+              ? "; plugs and switches (on/off only)"
+              : ""}
+          </p>
+          {descriptor.kind !== "opening-contact" &&
+          descriptor.spec.compatibleDeviceClasses?.length ? (
             <p>Device class: {descriptor.spec.compatibleDeviceClasses.join(", ")}</p>
           ) : null}
-          {current && <p>State: {currentState ? (currentState.available ? "Available" : currentState.state) : "Missing"}</p>}
+          {current && (
+            <p>
+              State:{" "}
+              {currentState
+                ? currentState.available
+                  ? "Available"
+                  : currentState.state
+                : "Missing"}
+            </p>
+          )}
         </>
       );
     } else {
-      const candidates = deviceMappingCandidates({ manifest, roomId: room.id, device, profile, runtime });
+      const candidates = deviceMappingCandidates({
+        manifest,
+        roomId: room.id,
+        device,
+        profile,
+        runtime,
+      });
       const mappedDeviceId = mappedHomeAssistantDeviceId(profile, device, runtime);
-      const pendingDeviceId = pendingDevice?.relationshipId === relationship.id
-        ? pendingDevice.deviceId
-        : null;
+      const pendingDeviceId =
+        pendingDevice?.relationshipId === relationship.id ? pendingDevice.deviceId : null;
       const selectedDeviceId = mappedDeviceId ?? pendingDeviceId;
-      const currentCandidate = candidates.find((candidate) => candidate.deviceId === selectedDeviceId);
+      const currentCandidate = candidates.find(
+        (candidate) => candidate.deviceId === selectedDeviceId,
+      );
       const currentDeviceId = currentCandidate?.deviceId;
       const mappedEntries = device.entitySlots.flatMap((slot) => {
         const entityId = profile.entityIdsBySlotId[slot.id];
         return entityId ? [{ slot, entityId }] : [];
       });
-      relationshipLabel = currentCandidate?.label
-        ?? (mappedEntries.length > 0 ? "Saved match unavailable" : "Not connected");
+      relationshipLabel =
+        currentCandidate?.label ??
+        (mappedEntries.length > 0 ? "Saved match unavailable" : "Not connected");
       primaryChoice = {
         id: device.id,
         label: "Home Assistant device",
         ariaLabel: `Home Assistant device for ${relationship.label}`,
         value: selectedDeviceId ?? "",
-        emptyLabel: candidates.length === 0 && !selectedDeviceId ? "No compatible Home Assistant devices" : "Not connected",
+        emptyLabel:
+          candidates.length === 0 && !selectedDeviceId
+            ? "No compatible Home Assistant devices"
+            : "Not connected",
         options: [
           ...(selectedDeviceId && !currentCandidate
             ? [{ value: selectedDeviceId, label: "Saved device unavailable" }]
@@ -300,66 +413,92 @@ export function DeviceMappingInspector({
         onChange: (value) => {
           const candidate = candidates.find((item) => item.deviceId === value) ?? null;
           const next = applyDeviceMapping(profile, device, candidate);
-          const unresolvedRequired = candidate?.unresolvedSlotIds.some((slotId) =>
-            device.entitySlots.some((slot) => slot.id === slotId && slot.required)
-          ) ?? false;
-          setPendingDevice(candidate && unresolvedRequired
-            ? { relationshipId: relationship.id, deviceId: candidate.deviceId }
-            : null);
+          const unresolvedRequired =
+            candidate?.unresolvedSlotIds.some((slotId) =>
+              device.entitySlots.some((slot) => slot.id === slotId && slot.required),
+            ) ?? false;
+          setPendingDevice(
+            candidate && unresolvedRequired
+              ? { relationshipId: relationship.id, deviceId: candidate.deviceId }
+              : null,
+          );
           onEntityIdsBySlotIdChange(next.entityIdsBySlotId);
           return !unresolvedRequired;
         },
       };
       functionChoices = (currentCandidate?.unresolvedSlotIds ?? []).flatMap((slotId) => {
         const slot = device.entitySlots.find((candidate) => candidate.id === slotId);
-        const descriptor = relationship.descriptors.find((candidate) => candidate.slotId === slotId);
+        const descriptor = relationship.descriptors.find(
+          (candidate) => candidate.slotId === slotId,
+        );
         if (!slot || !descriptor || !currentDeviceId) return [];
         const current = profile.entityIdsBySlotId[slotId];
-        const candidatesForFunction = bindingEntityCandidates({ descriptor, roomId: room.id, profile, runtime })
-          .filter((candidate) => runtime.entityRegistry
-            .find((entry) => entry.entity_id === candidate.entityId)?.device_id === currentDeviceId);
-        const currentFunction = candidatesForFunction.find((candidate) => candidate.entityId === current);
-        return [{
-          id: slotId,
-          label: `${slot.presentation.label} function`,
-          ariaLabel: `Home Assistant function for ${slot.presentation.label}`,
-          value: current ?? "",
-          required: slot.required,
-          emptyLabel: candidatesForFunction.length === 0 && !current
-            ? "No matching function found"
-            : "Not connected",
-          options: [
-            ...(current && !currentFunction ? [{ value: current, label: "Saved function unavailable" }] : []),
-            ...candidatesForFunction.map((candidate) => ({
-              value: candidate.entityId,
-              label: `${candidate.label}${candidate.stateLabel === "Available" ? "" : ` · ${candidate.stateLabel}`}`,
-              disabled: !candidate.selectable && candidate.entityId !== current,
-            })),
-          ],
-          onChange: (value: string) => {
-            onEntityIdsBySlotIdChange(replaceEntitySlotMapping(
-              profile,
-              slotId,
-              (value || null) as EntityId | null,
-            ).entityIdsBySlotId);
-            setPendingDevice(null);
-            return true;
+        const candidatesForFunction = bindingEntityCandidates({
+          descriptor,
+          roomId: room.id,
+          profile,
+          runtime,
+        }).filter(
+          (candidate) =>
+            runtime.entityRegistry.find((entry) => entry.entity_id === candidate.entityId)
+              ?.device_id === currentDeviceId,
+        );
+        const currentFunction = candidatesForFunction.find(
+          (candidate) => candidate.entityId === current,
+        );
+        return [
+          {
+            id: slotId,
+            label: `${slot.presentation.label} function`,
+            ariaLabel: `Home Assistant function for ${slot.presentation.label}`,
+            value: current ?? "",
+            required: slot.required,
+            emptyLabel:
+              candidatesForFunction.length === 0 && !current
+                ? "No matching function found"
+                : "Not connected",
+            options: [
+              ...(current && !currentFunction
+                ? [{ value: current, label: "Saved function unavailable" }]
+                : []),
+              ...candidatesForFunction.map((candidate) => ({
+                value: candidate.entityId,
+                label: `${candidate.label}${candidate.stateLabel === "Available" ? "" : ` · ${candidate.stateLabel}`}`,
+                disabled: !candidate.selectable && candidate.entityId !== current,
+              })),
+            ],
+            onChange: (value: string) => {
+              onEntityIdsBySlotIdChange(
+                replaceEntitySlotMapping(profile, slotId, (value || null) as EntityId | null)
+                  .entityIdsBySlotId,
+              );
+              setPendingDevice(null);
+              return true;
+            },
           },
-        }];
+        ];
       });
-      connectionDetails = mappedEntries.length > 0 ? mappedEntries.map(({ slot, entityId }) => (
-        <p key={slot.id}>{slot.presentation.label}: <code>{entityId}</code></p>
-      )) : null;
+      connectionDetails =
+        mappedEntries.length > 0
+          ? mappedEntries.map(({ slot, entityId }) => (
+              <p key={slot.id}>
+                {slot.presentation.label}: <code>{entityId}</code>
+              </p>
+            ))
+          : null;
     }
   }
 
-  const selectedTargetLabel = optimisticTarget?.id === relationship.id
-    ? optimisticTarget.label
-    : relationshipLabel;
+  const selectedTargetLabel =
+    optimisticTarget?.id === relationship.id ? optimisticTarget.label : relationshipLabel;
   const choose = (choice: MappingChoice, value: string, primary: boolean) => {
     if (disabled && value) return;
-    const chosenOption = value ? choice.options.find((option) => option.value === value) : undefined;
-    const chosenLabel = value ? chosenOption?.summaryLabel ?? chosenOption?.label ?? "Saved match" : "Not connected";
+    const chosenOption = value
+      ? choice.options.find((option) => option.value === value)
+      : undefined;
+    const chosenLabel = value
+      ? (chosenOption?.summaryLabel ?? chosenOption?.label ?? "Saved match")
+      : "Not connected";
     const targetLabel = primary ? chosenLabel : relationshipLabel;
     const selectionComplete = choice.onChange(value);
     setOptimisticTarget({ id: relationship.id, label: targetLabel });
@@ -367,8 +506,14 @@ export function DeviceMappingInspector({
   };
   const renderChoice = (choice: MappingChoice, primary = false) => {
     const groupId = `device-map-${domId(choice.id)}`;
-    const matches = (option: MappingOption) => !inline || !primary || option.value === choice.value
-      || !query.trim() || `${option.label} ${option.value}`.toLocaleLowerCase("en").includes(query.trim().toLocaleLowerCase("en"));
+    const matches = (option: MappingOption) =>
+      !inline ||
+      !primary ||
+      option.value === choice.value ||
+      !query.trim() ||
+      `${option.label} ${option.value}`
+        .toLocaleLowerCase("en")
+        .includes(query.trim().toLocaleLowerCase("en"));
     const visibleOptions = choice.options.filter(matches);
     const renderOption = (option: MappingOption) => {
       const optionId = `${groupId}-${domId(option.value || "empty")}`;
@@ -397,45 +542,87 @@ export function DeviceMappingInspector({
         </label>
       );
     };
-    const groupOptions = (group: MappingOptionGroup): readonly MappingOption[] =>
-      [...group.options, ...(group.groups ?? []).flatMap(groupOptions)];
+    const groupOptions = (group: MappingOptionGroup): readonly MappingOption[] => [
+      ...group.options,
+      ...(group.groups ?? []).flatMap(groupOptions),
+    ];
     const renderGroup = (group: MappingOptionGroup): ReactNode => {
       const visible = groupOptions(group).filter(matches);
       if (!visible.length) return null;
-      const content = <>{group.options.filter(matches).map(renderOption)}{group.groups?.map(renderGroup)}</>;
-      return group.collapsed ? <details key={group.id ?? group.label}
-        className="device-mapping-inspector__option-group"
-        open={Boolean(query.trim()) || visible.some((option) => option.value === choice.value)}>
-        <summary>
-          <span className="device-mapping-inspector__group-label">{group.label}</span>
-          <span className="device-mapping-inspector__group-count">{visible.length}</span>
-          <svg className="device-mapping-inspector__group-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
-        </summary>
-        {content}
-      </details> : <div key={group.id ?? group.label} className="device-mapping-inspector__option-group" role="group" aria-label={group.label}>
-        <p>{group.label}</p>{content}
-      </div>;
+      const content = (
+        <>
+          {group.options.filter(matches).map(renderOption)}
+          {group.groups?.map(renderGroup)}
+        </>
+      );
+      return group.collapsed ? (
+        <details
+          key={group.id ?? group.label}
+          className="device-mapping-inspector__option-group"
+          open={Boolean(query.trim()) || visible.some((option) => option.value === choice.value)}
+        >
+          <summary>
+            <span className="device-mapping-inspector__group-label">{group.label}</span>
+            <span className="device-mapping-inspector__group-count">{visible.length}</span>
+            <svg
+              className="device-mapping-inspector__group-chevron"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m9 5 7 7-7 7" />
+            </svg>
+          </summary>
+          {content}
+        </details>
+      ) : (
+        <div
+          key={group.id ?? group.label}
+          className="device-mapping-inspector__option-group"
+          role="group"
+          aria-label={group.label}
+        >
+          <p>{group.label}</p>
+          {content}
+        </div>
+      );
     };
     return (
       <div key={choice.id} className="device-mapping-inspector__choice">
-        <fieldset
-          aria-label={choice.ariaLabel}
-          disabled={state !== "open"}
-        >
+        <fieldset aria-label={choice.ariaLabel} disabled={state !== "open"}>
           <legend>{choice.label}</legend>
-          {inline && primary && choice.options.length > 0 && <input
-            type="search" className="device-mapping-inspector__search"
-            aria-label="Search compatible matches" placeholder="Search compatible matches…"
-            value={query} onChange={(event) => setQuery(event.target.value)} />}
-          {inline && primary && choice.options.length === 0 && <p className="device-mapping-inspector__empty" role="status">
-            {disabled ? "Reconnect to load compatible matches." : choice.emptyLabel}
-          </p>}
+          {inline && primary && choice.options.length > 0 && (
+            <input
+              type="search"
+              className="device-mapping-inspector__search"
+              aria-label="Search compatible matches"
+              placeholder="Search compatible matches…"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          )}
+          {inline && primary && choice.options.length === 0 && (
+            <p className="device-mapping-inspector__empty" role="status">
+              {disabled ? "Reconnect to load compatible matches." : choice.emptyLabel}
+            </p>
+          )}
           <div className="device-mapping-inspector__options">
             {renderOption({ value: "", label: inline ? "Not connected" : choice.emptyLabel })}
             {choice.optionGroups
               ? choice.optionGroups.map(renderGroup)
               : visibleOptions.map(renderOption)}
-            {inline && primary && query.trim() && !visibleOptions.some((option) => option.value !== choice.value) && <p className="device-mapping-inspector__empty" role="status">No other matching targets. Clear search to see all compatible matches.</p>}
+            {inline &&
+              primary &&
+              query.trim() &&
+              !visibleOptions.some((option) => option.value !== choice.value) && (
+                <p className="device-mapping-inspector__empty" role="status">
+                  No other matching targets. Clear search to see all compatible matches.
+                </p>
+              )}
           </div>
         </fieldset>
       </div>
@@ -468,7 +655,9 @@ export function DeviceMappingInspector({
           tabIndex={state === "open" ? 0 : -1}
           onClick={onCollapse}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 5-7 7 7 7" />
+          </svg>
           <span>{inline ? "Back to devices" : "Devices"}</span>
         </button>
         {preview}
@@ -480,7 +669,9 @@ export function DeviceMappingInspector({
             {requiredFunctionChoices.map((choice) => renderChoice(choice))}
             {optionalFunctionChoices.length > 0 && (
               <details className="device-mapping-inspector__functions">
-                <summary>Optional device functions <span>{optionalFunctionChoices.length}</span></summary>
+                <summary>
+                  Optional device functions <span>{optionalFunctionChoices.length}</span>
+                </summary>
                 <div>{optionalFunctionChoices.map((choice) => renderChoice(choice))}</div>
               </details>
             )}

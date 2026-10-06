@@ -3,5 +3,9 @@ import { PergolaFrame } from "../../../furnishing/presets/outdoor/wrought-iron-p
 import { connectedLightBulbFinish } from "./connected-light-finish";
 
 export function PergolaStringLightsModel({ state, visualState, variant }: HomeDeviceModelProps) {
-  return <PergolaFrame bulbFinish={variant === "plain" ? undefined : connectedLightBulbFinish(visualState, state)} />;
+  return (
+    <PergolaFrame
+      bulbFinish={variant === "plain" ? undefined : connectedLightBulbFinish(visualState, state)}
+    />
+  );
 }

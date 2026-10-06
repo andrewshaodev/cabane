@@ -63,12 +63,18 @@ await withModules(async (load) => {
     });
 
     const colliders = navigation.deriveWalkColliders(passageFloor, new Set());
-    const eastWallColliders = colliders.filter((collider) => collider.id.startsWith("east-wall-walk-"));
+    const eastWallColliders = colliders.filter((collider) =>
+      collider.id.startsWith("east-wall-walk-"),
+    );
     assert.equal(eastWallColliders.length, 2);
-    assert.equal(eastWallColliders.some((collider) =>
-      Math.min(collider.from.z, collider.to.z) < 1.7 &&
-      Math.max(collider.from.z, collider.to.z) > 1.7
-    ), false);
+    assert.equal(
+      eastWallColliders.some(
+        (collider) =>
+          Math.min(collider.from.z, collider.to.z) < 1.7 &&
+          Math.max(collider.from.z, collider.to.z) > 1.7,
+      ),
+      false,
+    );
   });
 
   test("uses hysteresis for unbound automatic doors", () => {
@@ -102,12 +108,22 @@ await withModules(async (load) => {
       coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
       defaultWallHeightMeters: 2.5,
       defaultCeilingHeightMeters: 2.5,
-      footprint: [[0, 0], [6, 0], [6, 3], [0, 3]],
+      footprint: [
+        [0, 0],
+        [6, 0],
+        [6, 3],
+        [0, 3],
+      ],
       rooms: [
         {
           id: "left-room",
           name: "Left room",
-          polygon: [[0.1, 0.1], [2.9, 0.1], [2.9, 2.9], [0.1, 2.9]],
+          polygon: [
+            [0.1, 0.1],
+            [2.9, 0.1],
+            [2.9, 2.9],
+            [0.1, 2.9],
+          ],
           accent: "#aaa",
           dashboardSlots: [],
           devices: [],
@@ -115,7 +131,12 @@ await withModules(async (load) => {
         {
           id: "right-room",
           name: "Right room",
-          polygon: [[3.1, 0.1], [5.9, 0.1], [5.9, 2.9], [3.1, 2.9]],
+          polygon: [
+            [3.1, 0.1],
+            [5.9, 0.1],
+            [5.9, 2.9],
+            [3.1, 2.9],
+          ],
           accent: "#bbb",
           dashboardSlots: [],
           devices: [],
@@ -126,47 +147,53 @@ await withModules(async (load) => {
         { id: "east", from: [6, 0], to: [6, 3], classification: "exterior", thicknessMeters: 0.2 },
         { id: "south", from: [6, 3], to: [0, 3], classification: "exterior", thicknessMeters: 0.2 },
         { id: "west", from: [0, 3], to: [0, 0], classification: "exterior", thicknessMeters: 0.2 },
-        { id: "divider", from: [3, 0], to: [3, 3], classification: "interior", thicknessMeters: 0.2 },
+        {
+          id: "divider",
+          from: [3, 0],
+          to: [3, 3],
+          classification: "interior",
+          thicknessMeters: 0.2,
+        },
       ],
       wallJunctions: [],
-      openings: [{
-        id: "room-door",
-        wallId: "divider",
-        kind: "door",
-        offsetFromWallStartPlanUnits: 1,
-        widthPlanUnits: 1,
-        openingHeightMeters: 2.1,
-        sillHeightMeters: 0,
-        operation: "hinged",
-        variant: "panel",
-        finish: "wood",
-        leafCount: 1,
-      }],
+      openings: [
+        {
+          id: "room-door",
+          wallId: "divider",
+          kind: "door",
+          offsetFromWallStartPlanUnits: 1,
+          widthPlanUnits: 1,
+          openingHeightMeters: 2.1,
+          sillHeightMeters: 0,
+          operation: "hinged",
+          variant: "panel",
+          finish: "wood",
+          leafCount: 1,
+        },
+      ],
       ceilings: [],
     };
 
     const first = navigation.evaluateDerivedWalkNavigation(connectedFloor);
     const second = navigation.evaluateDerivedWalkNavigation(connectedFloor);
     assert.deepEqual(first.rooms, second.rooms);
-    assert.deepEqual(first.connections, [{
-      kind: "opening",
-      id: "room-door",
-      openingId: "room-door",
-      roomIds: ["left-room", "right-room"],
-    }]);
-    assert.deepEqual(first.rooms.map((room) => room.connectedRoomIds), [
-      ["right-room"],
-      ["left-room"],
+    assert.deepEqual(first.connections, [
+      {
+        kind: "opening",
+        id: "room-door",
+        openingId: "room-door",
+        roomIds: ["left-room", "right-room"],
+      },
     ]);
+    assert.deepEqual(
+      first.rooms.map((room) => room.connectedRoomIds),
+      [["right-room"], ["left-room"]],
+    );
     assert.equal(first.diagnostics.length, 0);
     for (const room of first.rooms) {
       assert.ok(room.spawnPose);
       assert.equal(
-        navigation.isWalkPointClear(
-          room.spawnPose,
-          first.colliders,
-          navigation.WALK_PLAYER_RADIUS,
-        ),
+        navigation.isWalkPointClear(room.spawnPose, first.colliders, navigation.WALK_PLAYER_RADIUS),
         true,
       );
     }
@@ -179,13 +206,23 @@ await withModules(async (load) => {
         ...openPlanFloor.rooms[0],
         id: "living",
         name: "Living",
-        polygon: [[0, 0], [2, 0], [2, 3.6], [0, 3.6]],
+        polygon: [
+          [0, 0],
+          [2, 0],
+          [2, 3.6],
+          [0, 3.6],
+        ],
       },
       {
         ...openPlanFloor.rooms[0],
         id: "dining",
         name: "Dining",
-        polygon: [[2, 0], [4.8, 0], [4.8, 3.6], [2, 3.6]],
+        polygon: [
+          [2, 0],
+          [4.8, 0],
+          [4.8, 3.6],
+          [2, 3.6],
+        ],
       },
     ];
     openPlanFloor.walls = [];
@@ -193,85 +230,131 @@ await withModules(async (load) => {
     openPlanFloor.openings = [];
 
     const result = navigation.evaluateDerivedWalkNavigation(openPlanFloor);
-    assert.deepEqual(result.connections, [{
-      kind: "open-boundary",
-      id: "open-boundary:living:dining",
-      roomIds: ["living", "dining"],
-    }]);
-    assert.deepEqual(result.rooms.map((room) => room.connectedRoomIds), [
-      ["dining"],
-      ["living"],
+    assert.deepEqual(result.connections, [
+      {
+        kind: "open-boundary",
+        id: "open-boundary:living:dining",
+        roomIds: ["living", "dining"],
+      },
     ]);
+    assert.deepEqual(
+      result.rooms.map((room) => room.connectedRoomIds),
+      [["dining"], ["living"]],
+    );
     assert.equal(result.diagnostics.length, 0);
   });
 
   test("finds a safe spawn when a concave room centroid is outside", () => {
     const concaveFloor = structuredClone(floor);
-    concaveFloor.rooms = [{
-      ...concaveFloor.rooms[0],
-      id: "concave-room",
-      polygon: [[0, 0], [4, 0], [4, 1], [1, 1], [1, 3], [4, 3], [4, 4], [0, 4]],
-    }];
+    concaveFloor.rooms = [
+      {
+        ...concaveFloor.rooms[0],
+        id: "concave-room",
+        polygon: [
+          [0, 0],
+          [4, 0],
+          [4, 1],
+          [1, 1],
+          [1, 3],
+          [4, 3],
+          [4, 4],
+          [0, 4],
+        ],
+      },
+    ];
     concaveFloor.walls = [];
     concaveFloor.wallJunctions = [];
     concaveFloor.openings = [];
-    const spawn = navigation.safeSpawnPoseForRoom(
-      concaveFloor.rooms[0],
-      concaveFloor,
-      [],
-    );
+    const spawn = navigation.safeSpawnPoseForRoom(concaveFloor.rooms[0], concaveFloor, []);
     assert.ok(spawn);
     assert.equal(navigation.roomAtWorldPoint(spawn, concaveFloor)?.id, "concave-room");
   });
 
-  test("reports blocking spawn failures as errors and disconnected room groups as non-blocking warnings", () => {
+  test("allows rooms without safe spawns and warns about disconnected room groups", () => {
     const singleRoom = navigation.evaluateDerivedWalkNavigation(floor);
     assert.equal(singleRoom.valid, true);
     assert.equal(singleRoom.diagnostics.length, 0);
 
     const isolatedFloor = structuredClone(floor);
-    isolatedFloor.footprint = [[0, 0], [10, 0], [10, 4], [0, 4]];
+    isolatedFloor.footprint = [
+      [0, 0],
+      [10, 0],
+      [10, 4],
+      [0, 4],
+    ];
     isolatedFloor.rooms.push({
       ...isolatedFloor.rooms[0],
       id: "detached-room",
       name: "Detached room",
-      polygon: [[6, 0], [10, 0], [10, 4], [6, 4]],
+      polygon: [
+        [6, 0],
+        [10, 0],
+        [10, 4],
+        [6, 4],
+      ],
     });
     const isolated = navigation.evaluateDerivedWalkNavigation(isolatedFloor);
     assert.equal(isolated.valid, true);
-    assert.deepEqual(isolated.diagnostics.map((diagnostic) => ({
-      code: diagnostic.code,
-      severity: diagnostic.severity,
-      roomId: diagnostic.roomId,
-      suggestion: diagnostic.suggestion,
-    })), [{
-      code: "navigation.room-no-walkable-connection",
-      severity: "warning",
-      roomId: "detached-room",
-      suggestion: "Add a door or passage if this room group should connect to the rest of the floor.",
-    }]);
+    assert.deepEqual(
+      isolated.diagnostics.map((diagnostic) => ({
+        code: diagnostic.code,
+        severity: diagnostic.severity,
+        roomId: diagnostic.roomId,
+        suggestion: diagnostic.suggestion,
+      })),
+      [
+        {
+          code: "navigation.room-no-walkable-connection",
+          severity: "warning",
+          roomId: "detached-room",
+          suggestion:
+            "Add a door or passage if this room group should connect to the rest of the floor.",
+        },
+      ],
+    );
 
     const blocked = navigation.evaluateDerivedWalkNavigation(floor, {
-      furniture: [{
-        kind: "box",
-        id: "room-filling-obstacle",
-        minX: 0,
-        maxX: 4.8,
-        minZ: 0,
-        maxZ: 3.6,
-      }],
+      furniture: [
+        {
+          kind: "box",
+          id: "room-filling-obstacle",
+          minX: 0,
+          maxX: 4.8,
+          minZ: 0,
+          maxZ: 3.6,
+        },
+      ],
     });
-    assert.equal(blocked.valid, false);
+    assert.equal(blocked.valid, true);
     assert.equal(blocked.rooms[0].spawnPose, null);
-    assert.equal(blocked.diagnostics.some((diagnostic) =>
-      diagnostic.code === "navigation.room-no-safe-spawn" &&
-      diagnostic.severity === "error" &&
-      diagnostic.path === "rooms[0].polygon"
-    ), true);
+    assert.deepEqual(blocked.diagnostics, []);
+  });
+
+  test("accepts a cupboard too narrow for a walk spawn", () => {
+    const cupboardFloor = structuredClone(floor);
+    cupboardFloor.rooms = [
+      {
+        ...floor.rooms[0],
+        name: "Cupboard",
+        polygon: [
+          [0, 0],
+          [0.15, 0],
+          [0.15, 1],
+          [0, 1],
+        ],
+      },
+    ];
+    const result = navigation.evaluateDerivedWalkNavigation(cupboardFloor);
+    assert.equal(result.rooms[0].spawnPose, null);
+    assert.equal(result.valid, true);
+    assert.deepEqual(result.diagnostics, []);
   });
 
   test("restores valid scene state and ignores broken storage", () => {
-    const storage = { getItem: () => JSON.stringify({ mode: "room", selectedRoomId: "demo-room", wallFadeEnabled: false }) };
+    const storage = {
+      getItem: () =>
+        JSON.stringify({ mode: "room", selectedRoomId: "demo-room", wallFadeEnabled: false }),
+    };
     assert.deepEqual(navigation.readSceneSession(storage), {
       mode: "room",
       selectedRoomId: "demo-room",

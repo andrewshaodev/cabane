@@ -15,18 +15,16 @@ export interface HomePresenceSummary {
   readonly people: readonly HomePresencePerson[];
 }
 
-const reliablePersonState = (snapshot: EntityStateSnapshot) => (
-  snapshot.available
-  && !snapshot.stale
-  && !["unknown", "unavailable"].includes(snapshot.state)
-);
+const reliablePersonState = (snapshot: EntityStateSnapshot) =>
+  snapshot.available && !snapshot.stale && !["unknown", "unavailable"].includes(snapshot.state);
 
-const readableEntityName = (entityId: EntityId) => entityId
-  .slice(entityId.indexOf(".") + 1)
-  .split("_")
-  .filter(Boolean)
-  .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-  .join(" ");
+const readableEntityName = (entityId: EntityId) =>
+  entityId
+    .slice(entityId.indexOf(".") + 1)
+    .split("_")
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
 
 const personName = (
   snapshot: EntityStateSnapshot,
@@ -59,10 +57,11 @@ export const deriveHomePresence = (
       entityId: snapshot.entityId,
       name: personName(snapshot, registryByEntityId.get(snapshot.entityId)),
     }))
-    .sort((left, right) => (
-      left.name.localeCompare(right.name, "en", { sensitivity: "base" })
-      || left.entityId.localeCompare(right.entityId)
-    ));
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(right.name, "en", { sensitivity: "base" }) ||
+        left.entityId.localeCompare(right.entityId),
+    );
 
   if (people.length > 0) return { state: "present", people };
   if (candidates.every(reliablePersonState)) return { state: "empty", people: [] };

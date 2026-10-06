@@ -63,7 +63,10 @@ export function useOptimisticCommand<T>({
   const confirmed = useRef({ key: confirmedKey, value: confirmedValue });
 
   useLayoutEffect(() => {
-    if (confirmed.current.key !== confirmedKey || !Object.is(confirmed.current.value, confirmedValue)) {
+    if (
+      confirmed.current.key !== confirmedKey ||
+      !Object.is(confirmed.current.value, confirmedValue)
+    ) {
       confirmed.current = { key: confirmedKey, value: confirmedValue };
       sequence.current += 1;
     }
@@ -79,24 +82,27 @@ export function useOptimisticCommand<T>({
     };
   }, []);
 
-  const run = useCallback(async (call: SupportedServiceCall, nextValue: T) => {
-    const currentSequence = ++sequence.current;
-    setValue(nextValue);
-    setPending(true);
-    setError(null);
-    try {
-      await onCallService(call);
-      if (mounted.current && currentSequence === sequence.current) setPending(false);
-      return true;
-    } catch {
-      if (mounted.current && currentSequence === sequence.current) {
-        setValue(confirmed.current.value);
-        setPending(false);
-        setError(safeErrorMessage(label));
+  const run = useCallback(
+    async (call: SupportedServiceCall, nextValue: T) => {
+      const currentSequence = ++sequence.current;
+      setValue(nextValue);
+      setPending(true);
+      setError(null);
+      try {
+        await onCallService(call);
+        if (mounted.current && currentSequence === sequence.current) setPending(false);
+        return true;
+      } catch {
+        if (mounted.current && currentSequence === sequence.current) {
+          setValue(confirmed.current.value);
+          setPending(false);
+          setError(safeErrorMessage(label));
+        }
+        return false;
       }
-      return false;
-    }
-  }, [label, onCallService]);
+    },
+    [label, onCallService],
+  );
 
   return { value, pending, error, run };
 }
@@ -132,7 +138,11 @@ export function CommandToggle({
       >
         Turn {action}
       </button>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -176,7 +186,11 @@ export function CommandRange({
           }}
         />
       </label>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -209,7 +223,9 @@ export function TemperatureStepper({
 
   return (
     <div className="temperature-stepper" data-pending={command.pending ? "true" : "false"}>
-      <output aria-label={label} aria-live="polite">{command.value}</output>
+      <output aria-label={label} aria-live="polite">
+        {command.value}
+      </output>
       <button
         type="button"
         aria-label={`Decrease ${label}`}
@@ -226,7 +242,11 @@ export function TemperatureStepper({
       >
         +
       </button>
-      {command.error && <p role="alert" aria-live="assertive">{command.error}</p>}
+      {command.error && (
+        <p role="alert" aria-live="assertive">
+          {command.error}
+        </p>
+      )}
     </div>
   );
 }
@@ -238,8 +258,16 @@ export function OptionControl({ label, value, options, disabled, onChange }: Opt
   return (
     <label className="option-control">
       <span>{label}</span>
-      <select value={selectedValue} disabled={disabled} onChange={(event) => onChange(event.currentTarget.value)}>
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
+      <select
+        value={selectedValue}
+        disabled={disabled}
+        onChange={(event) => onChange(event.currentTarget.value)}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
       </select>
     </label>
   );

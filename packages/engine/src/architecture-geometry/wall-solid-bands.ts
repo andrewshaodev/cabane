@@ -17,8 +17,8 @@ export function wallSolidBands(floor: FloorSpec) {
   return heights.slice(0, -1).map((bottom, index) => {
     const top = heights[index + 1];
     const middle = (bottom + top) / 2;
-    const activeWalls = floor.walls.filter((wall) =>
-      (wall.heightMeters ?? floor.defaultWallHeightMeters) > middle
+    const activeWalls = floor.walls.filter(
+      (wall) => (wall.heightMeters ?? floor.defaultWallHeightMeters) > middle,
     );
     const solids = wallSolidFootprintPolygons(floor, activeWalls);
     let footprint = unionClippingPolygons(solids);
@@ -33,5 +33,4 @@ export function wallSolidBands(floor: FloorSpec) {
     if (footprint[0] && cuts.length) footprint = differenceClippingGeometry(footprint, ...cuts);
     return { bottom, top, activeWalls, footprint };
   });
-
 }

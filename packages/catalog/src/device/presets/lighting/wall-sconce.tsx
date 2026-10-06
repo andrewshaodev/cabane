@@ -17,8 +17,20 @@ export function WallSconceModel({ state, visualState }: HomeDeviceModelProps) {
         <boxGeometry args={[0.035, 0.035, 0.07]} />
         <ToonMaterial color="#737d78" />
       </mesh>
-      <RoundedBox args={[0.22, 0.22, 0.135]} radius={0.035} smoothness={2} position={[0, 0.17, 0.0925]} castShadow>
-        <ToonMaterial color={finish.color} emissive="#f2c66d" emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)} transparent opacity={0.94} />
+      <RoundedBox
+        args={[0.22, 0.22, 0.135]}
+        radius={0.035}
+        smoothness={2}
+        position={[0, 0.17, 0.0925]}
+        castShadow
+      >
+        <ToonMaterial
+          color={finish.color}
+          emissive="#f2c66d"
+          emissiveIntensity={finish.emissiveIntensity * lightBrightnessRatio(state)}
+          transparent
+          opacity={0.94}
+        />
         <Outlines color="#8b7e64" thickness={0.004} />
       </RoundedBox>
       <StatusBeacon visualState={visualState} position={[0.04, 0.035, 0.023]} scale={0.2} />

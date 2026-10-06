@@ -143,7 +143,6 @@ by explicit cover open/closed state and valid contact state. Unknown or stale
 state retains the last known pose for that binding during the session, or starts
 closed. Changing home, opening, or binding identity discards retained state.
 
-
 Cross-device and dashboard links contain a workspace ID and HA origin only;
 credentials, household mappings, and workspace documents never enter the URL.
 They require HA authentication before storage reads. HA dashboard iframes reuse

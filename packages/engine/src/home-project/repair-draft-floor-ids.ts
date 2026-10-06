@@ -5,22 +5,32 @@ export function repairDraftFloorIds(project: HomeProject): HomeProject {
   const ids = (value: unknown): string[] => {
     if (!value || typeof value !== "object") return [];
     if (Array.isArray(value)) return value.flatMap(ids);
-    return Object.entries(value).flatMap(([key, child]) => key === "id" && typeof child === "string" ? [child] : ids(child));
+    return Object.entries(value).flatMap(([key, child]) =>
+      key === "id" && typeof child === "string" ? [child] : ids(child),
+    );
   };
   const reserved = new Set(ids(project));
   const seen = new Set<string>();
   const remaps = new Map<string, Map<string, string>>();
   const referenceKeys = new Set(["id", "wallId", "wallIds", "roomId", "roomIds"]);
   const rewrite = <T>(value: T, map: Map<string, string>, key = ""): T => {
-    if (typeof value === "string") return (referenceKeys.has(key) ? map.get(value) ?? value : value) as T;
-    if (Array.isArray(value)) return value.map(child => rewrite(child, map, key)) as T;
-    if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, rewrite(child, map, key)])) as T;
+    if (typeof value === "string")
+      return (referenceKeys.has(key) ? (map.get(value) ?? value) : value) as T;
+    if (Array.isArray(value))
+      return (value as unknown[]).map((child) => rewrite(child, map, key)) as T;
+    if (value && typeof value === "object")
+      return Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).map(([key, child]) => [
+          key,
+          rewrite(child, map, key),
+        ]),
+      ) as T;
     return value;
   };
   const roomProfiles = { ...project.roomProfiles };
-  const floors = project.floors.map(floor => {
+  const floors = project.floors.map((floor) => {
     const map = new Map<string, string>();
-    const floorIds = ids(floor).filter(id => id !== floor.id);
+    const floorIds = ids(floor).filter((id) => id !== floor.id);
     for (const id of floorIds) {
       if (!seen.has(id) || map.has(id)) continue;
       let replacement = `${floor.id}:${id}`;
@@ -29,7 +39,7 @@ export function repairDraftFloorIds(project: HomeProject): HomeProject {
       reserved.add(replacement);
       map.set(id, replacement);
     }
-    floorIds.forEach(id => seen.add(id));
+    floorIds.forEach((id) => seen.add(id));
     if (!map.size) return floor;
     remaps.set(floor.id, map);
     for (const room of floor.rooms) {
@@ -40,8 +50,13 @@ export function repairDraftFloorIds(project: HomeProject): HomeProject {
     return rewrite(floor, map);
   });
   if (!remaps.size) return project;
-  return { ...project, floors, roomProfiles, sceneItems: project.sceneItems.map(item => {
-    const map = remaps.get(item.floorId);
-    return map ? { ...item, placement: rewrite(item.placement, map) } : item;
-  }) };
+  return {
+    ...project,
+    floors,
+    roomProfiles,
+    sceneItems: project.sceneItems.map((item) => {
+      const map = remaps.get(item.floorId);
+      return map ? { ...item, placement: rewrite(item.placement, map) } : item;
+    }),
+  };
 }

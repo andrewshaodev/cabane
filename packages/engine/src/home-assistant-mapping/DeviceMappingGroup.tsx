@@ -12,7 +12,12 @@ export function DeviceMappingGroup({
   return (
     <section className="device-mapping-group" data-group={group.id}>
       <header>
-        <h3><span aria-hidden="true"><DeviceCategoryIcon domain={group.iconDomain} size={16} /></span>{group.label}</h3>
+        <h3>
+          <span aria-hidden="true">
+            <DeviceCategoryIcon domain={group.iconDomain} size={16} />
+          </span>
+          {group.label}
+        </h3>
       </header>
       <div className="device-mapping-group__rows">{children}</div>
     </section>

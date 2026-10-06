@@ -9,17 +9,17 @@ names, household IDs, HA backend, or mock configuration is needed. Add supported
 devices to the home and the adapter derives synthetic room/entity relationships.
 Changing the manifest or remounting the provider resets the memory-only state.
 
-| Slot domain | Behavior |
-| --- | --- |
-| light | On/off, brightness, RGB service data; normal dashboard controls remain unchanged |
-| switch | On/off |
-| cover | Open, close, position; moves immediately, with no pretend motor timer |
-| climate | Target temperature, heat/cool/off; current temperature stays fixed |
-| sensor | Fixed temperature, humidity, battery, illuminance, power, energy, CO₂, pressure based on device class |
-| lock | Lock/unlock in memory |
-| alarm_control_panel | Arm home/away and disarm without a code |
-| binary_sensor | Fixed closed/off or occupied/connected state based on device class |
-| media_player | Starts playing the demo playlist; play/pause and volume controls update in memory |
+| Slot domain         | Behavior                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| light               | On/off, brightness, RGB service data; normal dashboard controls remain unchanged                      |
+| switch              | On/off                                                                                                |
+| cover               | Open, close, position; moves immediately, with no pretend motor timer                                 |
+| climate             | Target temperature, heat/cool/off; current temperature stays fixed                                    |
+| sensor              | Fixed temperature, humidity, battery, illuminance, power, energy, CO₂, pressure based on device class |
+| lock                | Lock/unlock in memory                                                                                 |
+| alarm_control_panel | Arm home/away and disarm without a code                                                               |
+| binary_sensor       | Fixed closed/off or occupied/connected state based on device class                                    |
+| media_player        | Starts playing the demo playlist; play/pause and volume controls update in memory                     |
 
 Classless status sensors start idle; unknown sensor classes show unknown; unsupported domains remain unmapped. The
 adapter does not simulate cameras, history, discovery protocols, physical thermal

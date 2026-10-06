@@ -4,10 +4,7 @@ import { JSDOM } from "jsdom";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { withModules } from "./test-server.mjs";
-import {
-  connectedManifestFixture,
-  connectedRuntimeFixture,
-} from "./fixtures/home-assistant.mjs";
+import { connectedManifestFixture, connectedRuntimeFixture } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
@@ -17,15 +14,25 @@ await withModules(async (load) => {
     onboardingStorageKey,
     validateHomeAssistantUrlInput,
   } = await load("/packages/engine/src/CabaneApp.tsx");
-  const { HomeAssistantConnectionFlow } = await load("/packages/engine/src/HomeAssistantConnectionFlow.tsx");
-  const { OnboardingIntroduction } = await load("/packages/engine/src/onboarding/OnboardingIntroduction.tsx");
-  const { createSetupRecord, deriveSetupProgress, loadSetupRecord, setupStorageKey } = await load("/packages/engine/src/setup-progress.ts");
+  const { HomeAssistantConnectionFlow } = await load(
+    "/packages/engine/src/HomeAssistantConnectionFlow.tsx",
+  );
+  const { OnboardingIntroduction } = await load(
+    "/packages/engine/src/onboarding/OnboardingIntroduction.tsx",
+  );
+  const { createSetupRecord, deriveSetupProgress, loadSetupRecord, setupStorageKey } = await load(
+    "/packages/engine/src/setup-progress.ts",
+  );
   const { useSetupRecord } = await load("/packages/engine/src/useSetupRecord.ts");
-  const { createEmptyRuntimeBindingProfile } = await load("/packages/engine/src/runtime-binding-profile.ts");
+  const { createEmptyRuntimeBindingProfile } = await load(
+    "/packages/engine/src/runtime-binding-profile.ts",
+  );
   const manifest = connectedManifestFixture(neutralDemoManifest);
 
   const withDom = async (run) => {
-    const dom = new JSDOM("<!doctype html><div id=\"root\"></div>", { url: "http://dashboard.local/" });
+    const dom = new JSDOM('<!doctype html><div id="root"></div>', {
+      url: "http://dashboard.local/",
+    });
     const previous = {
       window: globalThis.window,
       document: globalThis.document,
@@ -82,26 +89,36 @@ await withModules(async (load) => {
   });
 
   test("validates the browser-owned HA origin and presents the focused connection task", async () => {
-    assert.match(validateHomeAssistantUrlInput("http://ha.local:8123/path").error, /remove any path/);
+    assert.match(
+      validateHomeAssistantUrlInput("http://ha.local:8123/path").error,
+      /remove any path/,
+    );
     assert.deepEqual(validateHomeAssistantUrlInput("http://ha.local:8123"), {
       normalized: "http://ha.local:8123",
       error: null,
     });
     await withDom(async ({ dom, root }) => {
       let deferrals = 0;
-      await act(async () => root.render(React.createElement(HomeAssistantConnectionFlow, {
-        homeAssistantUrl: null,
-        runtime: runtimeValue(),
-        onHomeAssistantUrlChange: () => undefined,
-        onImportBrowserData: () => ({ valid: true, issues: [] }),
-        onDefer: () => { deferrals += 1; },
-        onClose: () => undefined,
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(HomeAssistantConnectionFlow, {
+            homeAssistantUrl: null,
+            runtime: runtimeValue(),
+            onHomeAssistantUrlChange: () => undefined,
+            onImportBrowserData: () => ({ valid: true, issues: [] }),
+            onDefer: () => {
+              deferrals += 1;
+            },
+            onClose: () => undefined,
+          }),
+        ),
+      );
       const text = dom.window.document.body.textContent;
       assert.match(text, /Where does your Home Assistant live/);
       assert.match(text, /Import Cabane browser data/);
-      const later = [...dom.window.document.querySelectorAll("button")]
-        .find((button) => button.textContent === "Do it later");
+      const later = [...dom.window.document.querySelectorAll("button")].find(
+        (button) => button.textContent === "Do it later",
+      );
       await act(async () => later.click());
       assert.equal(deferrals, 1);
       assert.doesNotMatch(text, /Set up my home/);
@@ -128,47 +145,67 @@ await withModules(async (load) => {
   test("introduces the whole product with two immediately available entry paths", async () => {
     await withDom(async ({ dom, root }) => {
       const actions = [];
-      await act(async () => root.render(React.createElement(OnboardingIntroduction, {
-        onExplore: () => actions.push("explore"),
-        onBuild: () => actions.push("build"), onDismiss: () => actions.push("dismiss"), busy: false, error: null,
-      })));
+      await act(async () =>
+        root.render(
+          React.createElement(OnboardingIntroduction, {
+            onExplore: () => actions.push("explore"),
+            onBuild: () => actions.push("build"),
+            onDismiss: () => actions.push("dismiss"),
+            busy: false,
+            error: null,
+          }),
+        ),
+      );
       const text = dom.window.document.body.textContent;
       assert.match(text, /Your home. In 3D/);
       assert.match(text, /Under your control/);
       assert.equal(dom.window.document.querySelectorAll("figure img").length, 3);
       for (const label of ["Explore the demo", "Build my home"]) {
-        const button = [...dom.window.document.querySelectorAll("button")].find((node) => node.textContent.includes(label));
+        const button = [...dom.window.document.querySelectorAll("button")].find((node) =>
+          node.textContent.includes(label),
+        );
         assert.equal(button.disabled, false);
         await act(async () => button.click());
       }
       assert.deepEqual(actions, ["explore", "build"]);
-      assert.doesNotMatch(text, /Connect my Home Assistant|steps complete|Sign in from this browser/);
+      assert.doesNotMatch(
+        text,
+        /Connect my Home Assistant|steps complete|Sign in from this browser/,
+      );
     });
   });
 
-
   test("successful Apply completes the build step and survives a Home remount", async () => {
     await withDom(async ({ dom, root }) => {
-      const deferred = { ...createSetupRecord(), connectionStage: "deferred", buildChoice: "deferred" };
+      const deferred = {
+        ...createSetupRecord(),
+        connectionStage: "deferred",
+        buildChoice: "deferred",
+      };
       dom.window.localStorage.setItem(setupStorageKey(manifest.home.id), JSON.stringify(deferred));
       function SetupProbe({ applied }) {
         const { setupState } = useSetupRecord(manifest.home.id, applied);
         return React.createElement("output", {}, JSON.stringify(setupState.record));
       }
-      const currentRecord = () => JSON.parse(dom.window.document.querySelector("output").textContent);
-      const render = (applied) => act(async () => root.render(React.createElement(SetupProbe, { applied })));
+      const currentRecord = () =>
+        JSON.parse(dom.window.document.querySelector("output").textContent);
+      const render = (applied) =>
+        act(async () => root.render(React.createElement(SetupProbe, { applied })));
 
       // Returning with only a saved draft must not complete a deferred build.
       await render(false);
       assert.deepEqual(currentRecord(), deferred);
       await render(true);
       assert.deepEqual(currentRecord(), { ...deferred, buildChoice: "construction" });
-      assert.equal(deriveSetupProgress({
-        manifest,
-        runtime: runtimeValue(),
-        profile: createEmptyRuntimeBindingProfile(manifest.home.id),
-        record: currentRecord(),
-      }).steps[1].complete, true);
+      assert.equal(
+        deriveSetupProgress({
+          manifest,
+          runtime: runtimeValue(),
+          profile: createEmptyRuntimeBindingProfile(manifest.home.id),
+          record: currentRecord(),
+        }).steps[1].complete,
+        true,
+      );
 
       await act(async () => root.render(null));
       await render(false);
@@ -180,11 +217,17 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       function SetupProbe({ onLeave }) {
         const { updateSetupRecord } = useSetupRecord(manifest.home.id);
-        return React.createElement("button", { onClick: () => {
-          updateSetupRecord((record) => ({ ...record, connectionStage: "deferred" }));
-          updateSetupRecord((record) => ({ ...record, buildChoice: "construction" }));
-          onLeave();
-        } }, "Open Construction");
+        return React.createElement(
+          "button",
+          {
+            onClick: () => {
+              updateSetupRecord((record) => ({ ...record, connectionStage: "deferred" }));
+              updateSetupRecord((record) => ({ ...record, buildChoice: "construction" }));
+              onLeave();
+            },
+          },
+          "Open Construction",
+        );
       }
       function Parent() {
         const [editing, setEditing] = React.useState(false);
@@ -192,7 +235,9 @@ await withModules(async (load) => {
           ? React.createElement("p", {}, "Construction")
           : React.createElement(SetupProbe, { onLeave: () => setEditing(true) });
       }
-      await act(async () => root.render(React.createElement(React.StrictMode, {}, React.createElement(Parent))));
+      await act(async () =>
+        root.render(React.createElement(React.StrictMode, {}, React.createElement(Parent))),
+      );
       await act(async () => dom.window.document.querySelector("button").click());
       assert.equal(dom.window.document.body.textContent, "Construction");
       assert.deepEqual(loadSetupRecord(dom.window.localStorage, manifest.home.id).record, {
@@ -205,12 +250,21 @@ await withModules(async (load) => {
 
   test("keeps Apply completion in memory and warns if setup storage fails", async () => {
     await withDom(async ({ dom, root }) => {
-      const deferred = { ...createSetupRecord(), connectionStage: "connected", buildChoice: "deferred", activated: true };
+      const deferred = {
+        ...createSetupRecord(),
+        connectionStage: "connected",
+        buildChoice: "deferred",
+        activated: true,
+      };
       const stored = JSON.stringify(deferred);
-      Object.defineProperty(dom.window, "localStorage", { value: {
-        getItem: () => stored,
-        setItem: () => { throw new Error("Storage full"); },
-      } });
+      Object.defineProperty(dom.window, "localStorage", {
+        value: {
+          getItem: () => stored,
+          setItem: () => {
+            throw new Error("Storage full");
+          },
+        },
+      });
       function SetupProbe() {
         const { setupState } = useSetupRecord(manifest.home.id, true);
         return React.createElement("output", {}, JSON.stringify(setupState));

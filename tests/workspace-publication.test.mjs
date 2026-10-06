@@ -12,8 +12,11 @@ const transactionalIndexedDb = () => {
   let queue = Promise.resolve();
   let fault;
   const database = {
-    objectStoreNames: { contains: name => created.has(name) },
-    createObjectStore: name => { created.add(name); if (!stores.has(name)) stores.set(name, new Map()); },
+    objectStoreNames: { contains: (name) => created.has(name) },
+    createObjectStore: (name) => {
+      created.add(name);
+      if (!stores.has(name)) stores.set(name, new Map());
+    },
     close: () => {},
     transaction: (_name, mode) => {
       let staged;
@@ -23,18 +26,24 @@ const transactionalIndexedDb = () => {
       let started = false;
       const operations = [];
       const counts = {};
-      const done = new Promise((resolve) => { complete = resolve; });
+      const done = new Promise((resolve) => {
+        complete = resolve;
+      });
       const transaction = {
         mode,
         error: null,
         abort: () => {
           aborted = true;
-          queueMicrotask(() => { transaction.onabort?.(); complete(); });
+          queueMicrotask(() => {
+            transaction.onabort?.();
+            complete();
+          });
         },
         objectStore: (name) => {
           const request = (kind, operation) => {
             const count = name === "home-projects" ? (counts[kind] = (counts[kind] ?? 0) + 1) : -1;
-            const selectedFault = fault?.mode === mode && fault.kind === kind && fault.count === count ? fault : null;
+            const selectedFault =
+              fault?.mode === mode && fault.kind === kind && fault.count === count ? fault : null;
             if (selectedFault) fault = undefined;
             if (selectedFault?.type === "throw") throw new Error("synthetic request throw");
             const request = { error: null, result: undefined };
@@ -70,8 +79,15 @@ const transactionalIndexedDb = () => {
           };
           return {
             get: (key) => request("get", () => staged.get(name).get(key)),
-            put: (value, key) => request("put", () => { staged.get(name).set(key, value); return key; }),
-            delete: (key) => request("delete", () => { staged.get(name).delete(key); }),
+            put: (value, key) =>
+              request("put", () => {
+                staged.get(name).set(key, value);
+                return key;
+              }),
+            delete: (key) =>
+              request("delete", () => {
+                staged.get(name).delete(key);
+              }),
           };
         },
       };
@@ -88,7 +104,9 @@ const transactionalIndexedDb = () => {
   return {
     records,
     transactions,
-    fail: (nextFault) => { fault = { mode: "readwrite", count: 1, ...nextFault }; },
+    fail: (nextFault) => {
+      fault = { mode: "readwrite", count: 1, ...nextFault };
+    },
     open: (name, version) => {
       assert.equal(name, "cabane-projects-v2");
       assert.equal(version, 3);
@@ -104,9 +122,13 @@ const transactionalIndexedDb = () => {
 
 await withModules(async (load) => {
   const {
-    createHomeProjectLifecycle, createHomeProjectRepository,
-    createIndexedDbProjectRecordStore, createMemoryProjectRecordStore,
-    createSeedProjectRecord, parseHomeProjectRecord, removeWorkspaceSlotReferences,
+    createHomeProjectLifecycle,
+    createHomeProjectRepository,
+    createIndexedDbProjectRecordStore,
+    createMemoryProjectRecordStore,
+    createSeedProjectRecord,
+    parseHomeProjectRecord,
+    removeWorkspaceSlotReferences,
     serializeHomeProjectRecord,
   } = await load("/packages/engine/src/home-project/index.ts");
   const { ownerHomeProject, homeExtensions } = await load("/tests/fixtures/bundled-home.ts");
@@ -121,12 +143,22 @@ await withModules(async (load) => {
     const seed = structuredClone(ownerHomeProject);
     const record = createSeedProjectRecord(seed, 1);
     const profile = {
-      schemaVersion: 1, homeId: seed.home.id,
-      roomAreaIds: { [seed.floors[0].rooms[0].id]: "fixture-published-area" }, entityIdsBySlotId: {},
+      schemaVersion: 1,
+      homeId: seed.home.id,
+      roomAreaIds: { [seed.floors[0].rooms[0].id]: "fixture-published-area" },
+      entityIdsBySlotId: {},
     };
-    record.bindings = Object.fromEntries([origin, "https://other-fixture-ha.test"].map((key) => [key, {
-      draft: structuredClone(profile), published: structuredClone(profile), manualRoomIds: [], manualSlotIds: [],
-    }]));
+    record.bindings = Object.fromEntries(
+      [origin, "https://other-fixture-ha.test"].map((key) => [
+        key,
+        {
+          draft: structuredClone(profile),
+          published: structuredClone(profile),
+          manualRoomIds: [],
+          manualSlotIds: [],
+        },
+      ]),
+    );
     const repository = createHomeProjectRepository(store, registries);
     await repository.replace(record);
     const lifecycle = createHomeProjectLifecycle(repository, seed);
@@ -166,10 +198,12 @@ await withModules(async (load) => {
     const mappedBindings = structuredClone(record.bindings);
     for (const state of Object.values(mappedBindings)) {
       state.draft.roomAreaIds["primary-bedroom"] = "fixture-bedroom-area";
-      state.draft.entityIdsBySlotId = Object.fromEntries(device.entitySlots.map((slot, index) => [
-        slot.id,
-        `${slot.compatibleDomains[0]}.fixture_${index}`,
-      ]));
+      state.draft.entityIdsBySlotId = Object.fromEntries(
+        device.entitySlots.map((slot, index) => [
+          slot.id,
+          `${slot.compatibleDomains[0]}.fixture_${index}`,
+        ]),
+      );
       state.published = structuredClone(state.draft);
       state.manualSlotIds = device.entitySlots.map((slot) => slot.id);
     }
@@ -209,7 +243,10 @@ await withModules(async (load) => {
     assert.equal(published.status, "published");
     assert.equal(staleSave.status, "storage-error");
     assert.match(staleSave.error.message, /changed|stale|revision/i);
-    await assert.rejects(other.replace({ ...record, draft: changedHome }, record.revision), /changed|stale|revision/i);
+    await assert.rejects(
+      other.replace({ ...record, draft: changedHome }, record.revision),
+      /changed|stale|revision/i,
+    );
     assert.deepEqual(await repository.load(record.homeId), published.record);
   });
 
@@ -223,7 +260,8 @@ await withModules(async (load) => {
     assert.deepEqual(undone.record.bindings[origin].draft, record.bindings[origin].draft);
     const addedOrigin = "https://new-fixture-ha.test";
     const added = await lifecycle.autosave(undone.record, record.draft, 4, {
-      ...undone.record.bindings, [addedOrigin]: changedBindings[origin],
+      ...undone.record.bindings,
+      [addedOrigin]: changedBindings[origin],
     });
     assert.deepEqual(added.record.bindings[addedOrigin].published.roomAreaIds, {});
     const removed = await lifecycle.autosave(added.record, record.draft, 5, {});
@@ -264,11 +302,22 @@ await withModules(async (load) => {
     assert.equal(blocked.status, "blocked");
     assert.ok(blocked.errors.some((entry) => entry.path.includes("bindings")));
     assert.deepEqual(await repository.load(record.homeId), record);
-    const warning = { code: "binding.offline", path: "bindings", severity: "warning", message: "Home Assistant is offline." };
-    assert.equal((await lifecycle.publish(record, { bindingIssues: [warning] })).status, "confirmation-required");
+    const warning = {
+      code: "binding.offline",
+      path: "bindings",
+      severity: "warning",
+      message: "Home Assistant is offline.",
+    };
+    assert.equal(
+      (await lifecycle.publish(record, { bindingIssues: [warning] })).status,
+      "confirmation-required",
+    );
     const empty = structuredClone(record);
     for (const state of Object.values(empty.bindings)) state.draft.roomAreaIds = {};
-    const published = await lifecycle.publish(empty, { bindingIssues: [warning], confirmWarnings: true });
+    const published = await lifecycle.publish(empty, {
+      bindingIssues: [warning],
+      confirmWarnings: true,
+    });
     assert.equal(published.status, "published");
     assert.deepEqual(published.record.bindings[origin].published.roomAreaIds, {});
   });
@@ -296,7 +345,10 @@ await withModules(async (load) => {
   test("memory CAS compares exact raw content and handles deletion", async () => {
     const store = createMemoryProjectRecordStore({ home: "first" });
     assert.equal(await store.compareAndSwap("home", "stale", "next"), false);
-    const results = await Promise.all([store.compareAndSwap("home", "first", "winner"), store.compareAndSwap("home", "first", "loser")]);
+    const results = await Promise.all([
+      store.compareAndSwap("home", "first", "winner"),
+      store.compareAndSwap("home", "first", "loser"),
+    ]);
     assert.deepEqual(results, [true, false]);
     assert.equal(await store.compareAndSwap("home", "winner", null), true);
     assert.equal(store.snapshot("home"), null);
@@ -311,7 +363,13 @@ await withModules(async (load) => {
     assert.equal(db.transactions.length, start + 1);
     assert.equal(db.transactions[start].mode, "readwrite");
     const other = createIndexedDbProjectRecordStore(db);
-    assert.deepEqual(await Promise.all([store.compareAndSwap("home", "next", "winner"), other.compareAndSwap("home", "next", "loser")]), [true, false]);
+    assert.deepEqual(
+      await Promise.all([
+        store.compareAndSwap("home", "next", "winner"),
+        other.compareAndSwap("home", "next", "loser"),
+      ]),
+      [true, false],
+    );
     assert.equal(await store.read("home"), "winner");
     assert.equal(await store.compareAndSwap("home", "winner", null), true);
     assert.equal(await store.read("home"), null);
@@ -326,7 +384,9 @@ await withModules(async (load) => {
   ]) {
     test(`native publication aborts and preserves both snapshots on ${JSON.stringify(fault)}`, async () => {
       const db = transactionalIndexedDb();
-      const { record, store, lifecycle, changedHome, changedBindings } = await fixture(createIndexedDbProjectRecordStore(db));
+      const { record, store, lifecycle, changedHome, changedBindings } = await fixture(
+        createIndexedDbProjectRecordStore(db),
+      );
       const saved = await lifecycle.autosave(record, changedHome, 2, changedBindings);
       const before = await store.read(record.homeId);
       db.fail(fault);
@@ -356,7 +416,11 @@ await withModules(async (load) => {
         const swapped = await backing.compareAndSwap(homeId, expected, next);
         if (verificationFault && swapped && next !== null) {
           verificationFault = false;
-          winner = serializeHomeProjectRecord({ ...JSON.parse(next), revision: JSON.parse(next).revision + 1, draftUpdatedAt: 999 });
+          winner = serializeHomeProjectRecord({
+            ...JSON.parse(next),
+            revision: JSON.parse(next).revision + 1,
+            draftUpdatedAt: 999,
+          });
           await backing.write(homeId, winner);
         }
         return swapped;
@@ -364,7 +428,10 @@ await withModules(async (load) => {
     };
     const { record, repository } = await fixture(store);
     verificationFault = true;
-    await assert.rejects(repository.replace({ ...record, draftUpdatedAt: 2 }, record.revision), /verification|changed/i);
+    await assert.rejects(
+      repository.replace({ ...record, draftUpdatedAt: 2 }, record.revision),
+      /verification|changed/i,
+    );
     assert.equal(await backing.read(record.homeId), winner);
   });
 
@@ -374,22 +441,33 @@ await withModules(async (load) => {
       let failAfterWrite = false;
       let failRead = false;
       const armReadFailure = () => {
-        if (failAfterWrite) { failAfterWrite = false; failRead = true; }
+        if (failAfterWrite) {
+          failAfterWrite = false;
+          failRead = true;
+        }
       };
       const store = {
         read: async (homeId) => {
-          if (failRead) { failRead = false; throw new Error("synthetic reread failure"); }
+          if (failRead) {
+            failRead = false;
+            throw new Error("synthetic reread failure");
+          }
           return backing.read(homeId);
         },
-        write: async (homeId, raw) => { await backing.write(homeId, raw); armReadFailure(); },
+        write: async (homeId, raw) => {
+          await backing.write(homeId, raw);
+          armReadFailure();
+        },
         delete: backing.delete,
-        ...(cas ? {
-          compareAndSwap: async (...args) => {
-            const swapped = await backing.compareAndSwap(...args);
-            if (swapped) armReadFailure();
-            return swapped;
-          },
-        } : {}),
+        ...(cas
+          ? {
+              compareAndSwap: async (...args) => {
+                const swapped = await backing.compareAndSwap(...args);
+                if (swapped) armReadFailure();
+                return swapped;
+              },
+            }
+          : {}),
       };
       const { record, lifecycle, changedHome, changedBindings } = await fixture(store);
       const saved = await lifecycle.autosave(record, changedHome, 2, changedBindings);
@@ -409,12 +487,17 @@ await withModules(async (load) => {
     let competing;
     const store = {
       read: backing.read,
-      write: async (homeId, raw) => { await backing.write(homeId, competing ?? raw); },
+      write: async (homeId, raw) => {
+        await backing.write(homeId, competing ?? raw);
+      },
       delete: backing.delete,
     };
     const { record, repository } = await fixture(store);
     competing = serializeHomeProjectRecord({ ...record, revision: 2, draftUpdatedAt: 999 });
-    await assert.rejects(repository.replace({ ...record, draftUpdatedAt: 2 }, record.revision), /verification/);
+    await assert.rejects(
+      repository.replace({ ...record, draftUpdatedAt: 2 }, record.revision),
+      /verification/,
+    );
     assert.equal(await backing.read(record.homeId), competing);
   });
 
@@ -496,10 +579,12 @@ await withModules(async (load) => {
         profile.roomAreaIds["primary-bedroom"] = "fixture-bedroom-area";
         profile.entityIdsBySlotId = {
           ...profile.entityIdsBySlotId,
-          ...Object.fromEntries(device.entitySlots.map((slot, index) => [
-            slot.id,
-            `${slot.compatibleDomains[0]}.retired_${index}`,
-          ])),
+          ...Object.fromEntries(
+            device.entitySlots.map((slot, index) => [
+              slot.id,
+              `${slot.compatibleDomains[0]}.retired_${index}`,
+            ]),
+          ),
         };
       }
       state.manualSlotIds = slotIds;
@@ -517,15 +602,30 @@ await withModules(async (load) => {
       recovered.status === "storage-error" ? recovered.error.stack : undefined,
     );
     for (const project of [recovered.record.draft, recovered.record.published]) {
-      assert.equal(project.sceneItems.some((item) => item.id === furnishing.id), false);
-      assert.equal(project.sceneItems.some((item) => item.id === device.id), false);
+      assert.equal(
+        project.sceneItems.some((item) => item.id === furnishing.id),
+        false,
+      );
+      assert.equal(
+        project.sceneItems.some((item) => item.id === device.id),
+        false,
+      );
       assert.ok(project.sceneItems.some((item) => item.id === "open-plan-living-dining-table"));
       assert.ok(project.sceneItems.some((item) => item.id === "open-plan-living-dining-sideboard"));
     }
     for (const state of Object.values(recovered.record.bindings)) {
-      assert.equal(slotIds.some((slotId) => slotId in state.draft.entityIdsBySlotId), false);
-      assert.equal(slotIds.some((slotId) => slotId in state.published.entityIdsBySlotId), false);
-      assert.equal(slotIds.some((slotId) => state.manualSlotIds.includes(slotId)), false);
+      assert.equal(
+        slotIds.some((slotId) => slotId in state.draft.entityIdsBySlotId),
+        false,
+      );
+      assert.equal(
+        slotIds.some((slotId) => slotId in state.published.entityIdsBySlotId),
+        false,
+      );
+      assert.equal(
+        slotIds.some((slotId) => state.manualSlotIds.includes(slotId)),
+        false,
+      );
     }
     assert.equal(recovered.record.draftUpdatedAt, damaged.draftUpdatedAt);
     assert.equal(recovered.record.publishedAt, damaged.publishedAt);

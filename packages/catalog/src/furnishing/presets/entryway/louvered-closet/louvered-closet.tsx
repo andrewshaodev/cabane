@@ -1,12 +1,15 @@
 import { ClosetPanelBlock } from "./closet-panel-block";
 import { SlidingLouverPanel } from "./sliding-louver-panel";
-import { PANEL_COUNT, OPENING_LENGTH, PANEL_WIDTH, PANEL_HEIGHT, WOOD_RECESS } from "./louvered-closet-finish";
+import {
+  PANEL_COUNT,
+  OPENING_LENGTH,
+  PANEL_WIDTH,
+  PANEL_HEIGHT,
+  WOOD_RECESS,
+} from "./louvered-closet-finish";
 
 export function LouveredCloset() {
-  const panelCenters = Array.from(
-    { length: PANEL_COUNT },
-    (_, index) => (index - 1) * PANEL_WIDTH,
-  );
+  const panelCenters = Array.from({ length: PANEL_COUNT }, (_, index) => (index - 1) * PANEL_WIDTH);
   return (
     <group name="portes-coulissantes-placard-entree-custom" userData={{ walkCollider: true }}>
       {[0.0275, PANEL_HEIGHT + 0.0275].map((y) => (
@@ -18,10 +21,7 @@ export function LouveredCloset() {
         />
       ))}
       {panelCenters.map((z, index) => (
-        <SlidingLouverPanel
-          key={z}
-          position={[index === 1 ? 0.018 : 0, 0, z]}
-        />
+        <SlidingLouverPanel key={z} position={[index === 1 ? 0.018 : 0, 0, z]} />
       ))}
     </group>
   );

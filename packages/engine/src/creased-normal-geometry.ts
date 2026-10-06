@@ -45,9 +45,8 @@ export function optimizedCreasedNormalGeometry(
     let normalX = firstY * secondZ - firstZ * secondY;
     let normalY = firstZ * secondX - firstX * secondZ;
     let normalZ = firstX * secondY - firstY * secondX;
-    const normalScale = 1 / (Math.sqrt(
-      normalX * normalX + normalY * normalY + normalZ * normalZ,
-    ) || 1);
+    const normalScale =
+      1 / (Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ) || 1);
     normalX *= normalScale;
     normalY *= normalScale;
     normalZ *= normalScale;
@@ -66,11 +65,12 @@ export function optimizedCreasedNormalGeometry(
 
     for (let offset = 0; offset < 3; offset += 1) {
       const index = vertex + offset;
-      const hash = offset === 0
-        ? vertexHash(ax, ay, az)
-        : offset === 1
-          ? vertexHash(bx, by, bz)
-          : vertexHash(cx, cy, cz);
+      const hash =
+        offset === 0
+          ? vertexHash(ax, ay, az)
+          : offset === 1
+            ? vertexHash(bx, by, bz)
+            : vertexHash(cx, cy, cz);
       vertexHashes[index] = hash;
       const sharedFaces = vertexFaces.get(hash);
       if (sharedFaces) sharedFaces.push(face);
@@ -87,10 +87,10 @@ export function optimizedCreasedNormalGeometry(
         for (let second = first + 1; second < sharedFaces.length; second += 1) {
           const secondOffset = sharedFaces[second] * 3;
           if (
-            faceNormals[firstOffset] * faceNormals[secondOffset]
-              + faceNormals[firstOffset + 1] * faceNormals[secondOffset + 1]
-              + faceNormals[firstOffset + 2] * faceNormals[secondOffset + 2]
-            <= creaseDot
+            faceNormals[firstOffset] * faceNormals[secondOffset] +
+              faceNormals[firstOffset + 1] * faceNormals[secondOffset + 1] +
+              faceNormals[firstOffset + 2] * faceNormals[secondOffset + 2] <=
+            creaseDot
           ) {
             allFacesCompatible = false;
             break;
@@ -108,9 +108,8 @@ export function optimizedCreasedNormalGeometry(
         normalY += faceNormals[sharedOffset + 1];
         normalZ += faceNormals[sharedOffset + 2];
       }
-      const normalScale = 1 / (Math.sqrt(
-        normalX * normalX + normalY * normalY + normalZ * normalZ,
-      ) || 1);
+      const normalScale =
+        1 / (Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ) || 1);
       fullySmoothNormals.set(hash, [
         normalX * normalScale,
         normalY * normalScale,
@@ -156,23 +155,19 @@ export function optimizedCreasedNormalGeometry(
         const sharedX = faceNormals[sharedOffset];
         const sharedY = faceNormals[sharedOffset + 1];
         const sharedZ = faceNormals[sharedOffset + 2];
-        if (
-          faceNormalX * sharedX
-            + faceNormalY * sharedY
-            + faceNormalZ * sharedZ
-          > creaseDot
-        ) {
+        if (faceNormalX * sharedX + faceNormalY * sharedY + faceNormalZ * sharedZ > creaseDot) {
           normalX += sharedX;
           normalY += sharedY;
           normalZ += sharedZ;
         }
       }
 
-      const normalScale = 1 / (Math.sqrt(
-        normalX * normalX + normalY * normalY + normalZ * normalZ,
-      ) || 1);
+      const normalScale =
+        1 / (Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ) || 1);
       const result: [number, number, number] = [
-        normalX * normalScale, normalY * normalScale, normalZ * normalScale,
+        normalX * normalScale,
+        normalY * normalScale,
+        normalZ * normalScale,
       ];
       if (!vertexNormals) {
         vertexNormals = new Map();
@@ -186,4 +181,3 @@ export function optimizedCreasedNormalGeometry(
   resultGeometry.setAttribute("normal", normalAttribute);
   return resultGeometry;
 }
-

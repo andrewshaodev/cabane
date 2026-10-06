@@ -2,29 +2,35 @@ import {
   featureEnabled,
   mediaPlaybackCall,
   mediaVolumeCall,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { ResolvedEntityBinding } from "../types";
 
-import {
-  CommandRange,
-  useOptimisticCommand
-} from "./control-primitives";
+import { CommandRange, useOptimisticCommand } from "./control-primitives";
 
 import { confirmationKey, numberAttribute } from "./entity-field-contract";
 
-export function MediaFields({
-  binding,
-  enabled,
-  onCallService,
-}: {
+export function MediaFields(props: {
   binding: ResolvedEntityBinding;
   enabled: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
 }) {
-  const entity = binding.state;
+  const entity = props.binding.state;
   if (!entity) return null;
+  return <MediaFieldsWithEntity {...props} binding={{ ...props.binding, state: entity }} />;
+}
+
+function MediaFieldsWithEntity({
+  binding,
+  enabled,
+  onCallService,
+}: {
+  binding: ResolvedEntityBinding & { state: NonNullable<ResolvedEntityBinding["state"]> };
+  enabled: boolean;
+  onCallService: (call: SupportedServiceCall) => Promise<unknown>;
+}) {
+  const entity = binding.state;
   const playing = entity.state === "playing";
   const playback = useOptimisticCommand({
     confirmedKey: confirmationKey(entity),
@@ -55,7 +61,11 @@ export function MediaFields({
           >
             {playbackAction}
           </button>
-          {playback.error && <p role="alert" aria-live="assertive">{playback.error}</p>}
+          {playback.error && (
+            <p role="alert" aria-live="assertive">
+              {playback.error}
+            </p>
+          )}
         </div>
       )}
       {featureEnabled(entity, 4) && (

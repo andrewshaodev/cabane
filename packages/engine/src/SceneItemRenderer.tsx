@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "./defined-properties";
 import { useCabaneDom } from "./CabaneDom";
 import { resolveModelVariant } from "./model-variants";
 import { memo, useContext, useEffect, useRef, useState } from "react";
@@ -32,19 +33,24 @@ const deviceSceneItemScaleForSize = (
   const sizeRatios = size.map((dimension, axis) => dimension / definition.defaultSize[axis]);
   const same = (left: number, right: number) => Math.abs(left - right) <= 1e-6;
   const policy = definition.resizePolicy;
-  if (policy.kind === "fixed" && size.some((dimension, axis) =>
-    !same(dimension, definition.defaultSize[axis])
-  )) return null;
-  if (policy.kind === "uniform" && sizeRatios.some((ratio) =>
-    !same(ratio, sizeRatios[0])
-  )) return null;
+  if (
+    policy.kind === "fixed" &&
+    size.some((dimension, axis) => !same(dimension, definition.defaultSize[axis]))
+  )
+    return null;
+  if (policy.kind === "uniform" && sizeRatios.some((ratio) => !same(ratio, sizeRatios[0])))
+    return null;
   if (policy.kind === "planar" && !same(size[1], definition.defaultSize[1])) return null;
   if (policy.kind === "axes") {
     const allowed = new Set(policy.axes);
     const axisNames = ["width", "height", "depth"] as const;
-    if (size.some((dimension, axis) =>
-      !allowed.has(axisNames[axis]) && !same(dimension, definition.defaultSize[axis])
-    )) return null;
+    if (
+      size.some(
+        (dimension, axis) =>
+          !allowed.has(axisNames[axis]) && !same(dimension, definition.defaultSize[axis]),
+      )
+    )
+      return null;
   }
   if (policy.kind === "custom") {
     const normalized = policy.normalize(definition.defaultSize, size);
@@ -56,7 +62,7 @@ const deviceSceneItemScaleForSize = (
   if (extents.some((extent) => !Number.isFinite(extent) || extent <= 0)) return null;
   const scale = size.map((dimension, axis) => dimension / extents[axis]);
   return scale.every((value) => Number.isFinite(value) && value > 0)
-    ? scale as [number, number, number]
+    ? (scale as [number, number, number])
     : null;
 };
 
@@ -91,8 +97,10 @@ function DeviceSceneItem({
     if (!hovered || typeof document === "undefined") return;
     const previousCursor = dom.container.style.cursor;
     dom.container.style.cursor = "pointer";
-    return () => { dom.container.style.cursor = previousCursor; };
-  }, [hovered]);
+    return () => {
+      dom.container.style.cursor = previousCursor;
+    };
+  }, [hovered, dom]);
 
   const renderable = scale !== null;
   useEffect(() => {
@@ -111,12 +119,12 @@ function DeviceSceneItem({
   const walkInteractionTarget = {
     id: item.id,
     label: primarySlot?.presentation.label ?? item.id,
-    slotId: primarySlot?.id,
+    ...(primarySlot ? { slotId: primarySlot.id } : {}),
   } satisfies ExtensionInteractionTarget;
   const interactionTarget = {
     ...walkInteractionTarget,
-    ...(definition.interaction.target === "camera-viewer"
-      && (!primary || primary.entityId.startsWith("camera."))
+    ...(definition.interaction.target === "camera-viewer" &&
+    (!primary || primary.entityId.startsWith("camera."))
       ? { intent: definition.interaction.target }
       : {}),
   } satisfies ExtensionInteractionTarget;
@@ -134,44 +142,75 @@ function DeviceSceneItem({
         visualState,
         walkDeviceInteraction: walkInteractionTarget,
       }}
-      onPointerOver={walkMode ? undefined : (event) => {
-        event.stopPropagation();
-        setHovered(true);
-      }}
-      onPointerOut={walkMode ? undefined : (event) => {
-        event.stopPropagation();
-        setHovered(false);
-      }}
-      onPointerDown={walkMode ? undefined : (event) => {
-        event.stopPropagation();
-        press.current = {
-          pointerId: event.pointerId,
-          x: event.nativeEvent.clientX,
-          y: event.nativeEvent.clientY,
-        };
-      }}
-      onPointerMove={walkMode ? undefined : (event) => {
-        const candidate = press.current;
-        if (!candidate || candidate.pointerId !== event.pointerId) return;
-        if (Math.hypot(
-          event.nativeEvent.clientX - candidate.x,
-          event.nativeEvent.clientY - candidate.y,
-        ) > definition.interaction.tapTolerancePixels) press.current = null;
-      }}
-      onPointerUp={walkMode ? undefined : (event) => {
-        event.stopPropagation();
-        const candidate = press.current;
-        press.current = null;
-        if (candidate?.pointerId === event.pointerId) interact();
-      }}
-      onPointerCancel={walkMode ? undefined : () => { press.current = null; }}
+      {...omitUndefinedProperties({
+        onPointerOver: walkMode
+          ? undefined
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+              event.stopPropagation();
+              setHovered(true);
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerOut: walkMode
+          ? undefined
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+              event.stopPropagation();
+              setHovered(false);
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerDown: walkMode
+          ? undefined
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+              event.stopPropagation();
+              press.current = {
+                pointerId: event.pointerId,
+                x: event.nativeEvent.clientX,
+                y: event.nativeEvent.clientY,
+              };
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerMove: walkMode
+          ? undefined
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+              const candidate = press.current;
+              if (!candidate || candidate.pointerId !== event.pointerId) return;
+              if (
+                Math.hypot(
+                  event.nativeEvent.clientX - candidate.x,
+                  event.nativeEvent.clientY - candidate.y,
+                ) > definition.interaction.tapTolerancePixels
+              )
+                press.current = null;
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerUp: walkMode
+          ? undefined
+          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
+              event.stopPropagation();
+              const candidate = press.current;
+              press.current = null;
+              if (candidate?.pointerId === event.pointerId) interact();
+            },
+      })}
+      {...omitUndefinedProperties({
+        onPointerCancel: walkMode
+          ? undefined
+          : () => {
+              press.current = null;
+            },
+      })}
     >
       <DeviceHoverContext.Provider value={hovered}>
         <Component
           variant={resolveModelVariant(definition, item.variant).id}
           slot={binding}
-          state={state}
-          liveMedia={primary ? liveMediaByEntityId[primary.entityId] : undefined}
+          {...omitUndefinedProperties({ state: state })}
+          {...omitUndefinedProperties({
+            liveMedia: primary ? liveMediaByEntityId[primary.entityId] : undefined,
+          })}
           visualState={visualState}
           reducedMotion={reducedMotion}
           walkMode={walkMode}
@@ -182,18 +221,26 @@ function DeviceSceneItem({
   );
 }
 
-const FurnishingContent = memo(function FurnishingContent({ component: Component, ...props }: SceneModelProps & {
+const FurnishingContent = memo(function FurnishingContent({
+  component: Component,
+  ...props
+}: SceneModelProps & {
   component: FurnishingModelDefinition["component"];
 }) {
   return <Component {...props} />;
 });
 
-function MissingFurnishingFallback({ item }: {
+function MissingFurnishingFallback({
+  item,
+}: {
   item: Extract<SceneItemSpec, { kind: "furnishing" }>;
 }) {
-  const y = item.placement.kind === "ceiling"
-    ? -item.size[1] / 2
-    : item.placement.kind === "wall" ? 0 : item.size[1] / 2;
+  const y =
+    item.placement.kind === "ceiling"
+      ? -item.size[1] / 2
+      : item.placement.kind === "wall"
+        ? 0
+        : item.size[1] / 2;
   return (
     <mesh
       name={`missing-furnishing-model-${item.id}`}
@@ -201,8 +248,8 @@ function MissingFurnishingFallback({ item }: {
       userData={{ missingModelId: item.modelId }}
     >
       <boxGeometry args={item.size} />
-      <ToonMaterial color="#d9a36a" transparent opacity={.72} />
-      <Outlines color="#6f4b2f" thickness={.006} screenspace={false} />
+      <ToonMaterial color="#d9a36a" transparent opacity={0.72} />
+      <Outlines color="#6f4b2f" thickness={0.006} screenspace={false} />
     </mesh>
   );
 }
@@ -243,7 +290,8 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
         rotation={[0, transform.rotationYRadians, 0]}
       >
         {definition ? (
-          <FurnishingContent component={definition.component}
+          <FurnishingContent
+            component={definition.component}
             variant={resolveModelVariant(definition, item.variant).id}
             size={item.size}
             entityStatesBySlotId={entityStatesBySlotId}
@@ -251,7 +299,9 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
             walkMode={walkMode}
             onInteract={onInteract}
           />
-        ) : <MissingFurnishingFallback item={item} />}
+        ) : (
+          <MissingFurnishingFallback item={item} />
+        )}
       </group>
     );
   }
@@ -269,10 +319,7 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
   };
   // The resolved slot is the runtime source of entity states, while the item
   // remains the source of placement and sizing. A mismatched ID is unsafe.
-  if (
-    binding.slot.id !== item.id ||
-    binding.slot.model !== item.modelId
-  ) return null;
+  if (binding.slot.id !== item.id || binding.slot.model !== item.modelId) return null;
   return (
     <DeviceSceneItem
       item={item}
@@ -319,9 +366,7 @@ export function LegacyDeviceItemRenderer({
       elevationMeters: resolvedDevice.slot.placement.elevationMeters,
       rotationYRadians: resolvedDevice.slot.placement.rotationYRadians ?? 0,
     },
-    size: definition.defaultSize.map(
-      (dimension) => dimension * scale,
-    ) as [number, number, number],
+    size: definition.defaultSize.map((dimension) => dimension * scale) as [number, number, number],
     entitySlots: resolvedDevice.slot.entitySlots,
   };
   return (

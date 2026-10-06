@@ -3,9 +3,8 @@ import type { HomeDeviceModelProps } from "@cabane/engine";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
 export function MotorizedCurtainModel({ state, visualState }: HomeDeviceModelProps) {
-  const reported = visualState === "disconnected" || visualState === "unavailable"
-    ? null
-    : coverPosition(state);
+  const reported =
+    visualState === "disconnected" || visualState === "unavailable" ? null : coverPosition(state);
   const openness = (reported ?? 35) / 100;
   const panelWidth = 0.94 - openness * 0.7;
   const panelOffset = 0.48 + openness * 0.35;

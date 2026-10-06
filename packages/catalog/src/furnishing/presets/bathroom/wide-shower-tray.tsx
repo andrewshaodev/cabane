@@ -1,4 +1,3 @@
-import { Outlines, ToonMaterial } from "@cabane/engine";
 import { RoundedSuitePanel } from "../construction/rounded-suite-panel";
 
 export function WideShowerTray() {

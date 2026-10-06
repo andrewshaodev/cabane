@@ -1,4 +1,10 @@
-import { type FloorEditorTool, type FloorSpec, type ManifestIssue, type SceneItemSpec } from "@cabane/engine";
+import { omitUndefinedProperties } from "@cabane/engine";
+import {
+  type FloorEditorTool,
+  type FloorSpec,
+  type ManifestIssue,
+  type SceneItemSpec,
+} from "@cabane/engine";
 
 export type ConstructValidationIssueSource = "topology" | "project" | "dependency" | "navigation";
 
@@ -35,8 +41,19 @@ export interface ConstructContextualIssue extends ManifestIssue {
 }
 
 export interface ConstructContextualValidationInput {
-  floor: Pick<FloorSpec,
-    "footprint" | "footprintRegions" | "walls" | "wallJunctions" | "openings" | "rooms" | "ceilings" | "pools" | "outdoorPlatforms" | "groundZones">;
+  floor: Pick<
+    FloorSpec,
+    | "footprint"
+    | "footprintRegions"
+    | "walls"
+    | "wallJunctions"
+    | "openings"
+    | "rooms"
+    | "ceilings"
+    | "pools"
+    | "outdoorPlatforms"
+    | "groundZones"
+  >;
   sceneItems?: readonly Pick<SceneItemSpec, "id" | "modelId" | "placement">[];
   topologyIssues?: readonly ConstructValidationDiagnostic[];
   projectIssues?: readonly ConstructValidationDiagnostic[];
@@ -65,12 +82,15 @@ const defaultCorrections: Readonly<Record<string, string>> = {
   "floor-zone.polygon": "Move a corner until the floor area is simple and has visible area.",
   "floor-zone.outside-room": "Move or delete the floor area so it stays inside its room.",
   "ground-zone.inside-footprint": "Move the outdoor area so it stays outside the building.",
-  "project.outdoor-placement": "Move the outdoor item outside the building, keeping it on the ground.",
-  "platform.room-overlap": "Move or reshape the platform so its interior stays outside rooms on this level.",
+  "project.outdoor-placement":
+    "Move the outdoor item outside the building, keeping it on the ground.",
+  "platform.room-overlap":
+    "Move or reshape the platform so its interior stays outside rooms on this level.",
   "platform.polygon": "Move a corner until the platform has a simple, closed outline.",
   "platform.overlap": "Move or reshape the platforms so their interiors do not overlap.",
   "pool.polygon": "Move a corner until the outline no longer crosses itself, or undo the edit.",
-  "pool.building-overlap": "Move the pool outdoors, leaving room for its 0.25 m rim beside house walls.",
+  "pool.building-overlap":
+    "Move the pool outdoors, leaving room for its 0.25 m rim beside house walls.",
   "pool.overlap": "Move or reshape a pool so their rims do not touch.",
   "topology.walls-required": "Draw at least three walls around a closed room.",
   "topology.wall-id": "Give every wall a unique, non-empty ID.",
@@ -84,8 +104,10 @@ const defaultCorrections: Readonly<Record<string, string>> = {
   "topology.opening-wall": "Move the opening onto an existing wall or remove it.",
   "topology.opening-containment": "Move or resize the opening so it fits inside its wall.",
   "topology.opening-split": "Move the opening fully onto one homogeneous wall section.",
-  "room.polygon-invalid": "Undo the last structural move, or move the crossing corner until the room outline no longer crosses itself.",
-  "wall-junction.opening-overlap": "Move or resize the opening away from this corner, or move the corner itself.",
+  "room.polygon-invalid":
+    "Undo the last structural move, or move the crossing corner until the room outline no longer crosses itself.",
+  "wall-junction.opening-overlap":
+    "Move or resize the opening away from this corner, or move the corner itself.",
   "editor.ceiling-support-missing": "Move the item into a room or restore its ceiling support.",
   "editor.ceiling-support-ambiguous": "Move the item away from the shared room boundary.",
 };
@@ -93,61 +115,64 @@ const defaultCorrections: Readonly<Record<string, string>> = {
 const collectionFor = (
   name: TargetCollectionName,
   input: ConstructContextualValidationInput,
-): readonly { id: string }[] => name === "sceneItems"
-  ? input.sceneItems ?? []
-  : input.floor[name] ?? [];
+): readonly { id: string }[] =>
+  name === "sceneItems" ? (input.sceneItems ?? []) : (input.floor[name] ?? []);
 
 const pathReference = (
   path: string,
 ): { collection: TargetCollectionName; reference: string } | undefined => {
-  const collectionNames = "walls|wallJunctions|openings|rooms|ceilings|pools|outdoorPlatforms|sceneItems";
+  const collectionNames =
+    "walls|wallJunctions|openings|rooms|ceilings|pools|outdoorPlatforms|sceneItems";
   const dottedOrBracketed = path.match(
-    new RegExp(`(?:^|\\.)(?<collection>${collectionNames})(?:\\[(?<bracket>[^\\]]+)\\]|\\.(?<dotted>[^.\\[]+))`),
+    new RegExp(
+      `(?:^|\\.)(?<collection>${collectionNames})(?:\\[(?<bracket>[^\\]]+)\\]|\\.(?<dotted>[^.\\[]+))`,
+    ),
   );
   if (dottedOrBracketed?.groups) {
     return {
       collection: dottedOrBracketed.groups.collection as TargetCollectionName,
-      reference: (dottedOrBracketed.groups.bracket ?? dottedOrBracketed.groups.dotted)
-        .replace(/^["']|["']$/g, ""),
+      reference: (dottedOrBracketed.groups.bracket ?? dottedOrBracketed.groups.dotted).replace(
+        /^["']|["']$/g,
+        "",
+      ),
     };
   }
   const pointer = path.match(
     new RegExp(`(?:^|/)(?<collection>${collectionNames})/(?<reference>[^/]+)`),
   );
-  return pointer?.groups ? {
-    collection: pointer.groups.collection as TargetCollectionName,
-    reference: pointer.groups.reference,
-  } : undefined;
+  return pointer?.groups
+    ? {
+        collection: pointer.groups.collection as TargetCollectionName,
+        reference: pointer.groups.reference,
+      }
+    : undefined;
 };
 
 export const constructValidationTargetForPath = (
   path: string,
   input: Pick<ConstructContextualValidationInput, "floor" | "sceneItems">,
 ): ConstructValidationTarget | undefined => {
-  const zoneReference = path.match(
-    /(?:^|\.)rooms\[(\d+)\]\.floorZones\[(\d+)\]/,
-  );
+  const zoneReference = path.match(/(?:^|\.)rooms\[(\d+)\]\.floorZones\[(\d+)\]/);
   if (zoneReference) {
     const room = input.floor.rooms[Number(zoneReference[1])];
     const zone = room?.floorZones?.[Number(zoneReference[2])];
     if (zone) return { kind: "floor-zone", id: zone.id };
   }
-  const groundZoneReference = path.match(
-    /(?:^|\.)groundZones\[(\d+)\]/,
-  );
+  const groundZoneReference = path.match(/(?:^|\.)groundZones\[(\d+)\]/);
   if (groundZoneReference) {
     const zone = input.floor.groundZones?.[Number(groundZoneReference[1])];
     if (zone) return { kind: "floor-zone", id: zone.id };
   }
   const reference = pathReference(path);
   if (!reference) return undefined;
-  const collection = collectionFor(reference.collection, input as ConstructContextualValidationInput);
+  const collection = collectionFor(reference.collection, input);
   const numericIndex = /^(?:0|[1-9]\d*)$/.test(reference.reference)
     ? Number(reference.reference)
     : undefined;
-  const item = numericIndex === undefined
-    ? collection.find((candidate) => candidate.id === reference.reference)
-    : collection[numericIndex];
+  const item =
+    numericIndex === undefined
+      ? collection.find((candidate) => candidate.id === reference.reference)
+      : collection[numericIndex];
   if (!item) return undefined;
   return { kind: collectionTargetKinds[reference.collection], id: item.id };
 };
@@ -165,13 +190,10 @@ const sourceRank: Readonly<Record<ConstructValidationIssueSource, number>> = {
   navigation: 3,
 };
 
-const issueKey = (issue: ConstructContextualIssue) => [
-  issue.code,
-  issue.path,
-  issue.message,
-  issue.target?.kind ?? "",
-  issue.target?.id ?? "",
-].join("\u0000");
+const issueKey = (issue: ConstructContextualIssue) =>
+  [issue.code, issue.path, issue.message, issue.target?.kind ?? "", issue.target?.id ?? ""].join(
+    "\u0000",
+  );
 
 const contextualize = (
   issue: ConstructValidationDiagnostic,
@@ -181,10 +203,12 @@ const contextualize = (
   const target = issue.target ?? constructValidationTargetForPath(issue.path, input);
   // Topology uses stable room IDs; schema validation uses array indices and a
   // generic string error. Normalize that one condition before deduplicating.
-  if (target?.kind === "room" && (
-    issue.code === "topology.room-name" || issue.code === "room.name"
-    || (issue.code === "project.string" && /(?:\.name|\/name)$/.test(issue.path))
-  )) {
+  if (
+    target?.kind === "room" &&
+    (issue.code === "topology.room-name" ||
+      issue.code === "room.name" ||
+      (issue.code === "project.string" && /(?:\.name|\/name)$/.test(issue.path)))
+  ) {
     return {
       ...issue,
       code: "room.name",
@@ -192,19 +216,22 @@ const contextualize = (
       message: "This room needs a name.",
       source,
       target,
-      suggestion: "Click “Name room” on the plan, or enter a name in the room panel before applying.",
+      suggestion:
+        "Click “Name room” on the plan, or enter a name in the room panel before applying.",
     };
   }
-  return {
+  return omitUndefinedProperties({
     ...issue,
     source,
     target,
-    suggestion: issue.suggestion
-      ?? (issue.code.startsWith("stair.") && issue.severity === "warning"
-        ? "You can keep this layout and save with warnings." : undefined)
-      ?? defaultCorrections[issue.code]
-      ?? "Review the highlighted context and correct this issue before publishing.",
-  };
+    suggestion:
+      issue.suggestion ??
+      (issue.code.startsWith("stair.") && issue.severity === "warning"
+        ? "You can keep this layout and save with warnings."
+        : undefined) ??
+      defaultCorrections[issue.code] ??
+      "Review the highlighted context and correct this issue before publishing.",
+  });
 };
 
 const wallCompletionIssueCodes = new Set([
@@ -217,9 +244,16 @@ const wallCompletionIssueCodes = new Set([
 
 /** An untouched floor is an invitation to draw, not an editing error. */
 export const isPristineConstructionFloor = (floor: FloorSpec) =>
-  !floor.walls.length && !floor.rooms.length && !floor.footprint.length && !floor.openings.length
-  && !floor.ceilings?.length && !floor.wallJunctions?.length && !floor.pools?.length
-  && !floor.outdoorPlatforms?.length && !floor.groundZones?.length && !floor.hedges?.length;
+  !floor.walls.length &&
+  !floor.rooms.length &&
+  !floor.footprint.length &&
+  !floor.openings.length &&
+  !floor.ceilings?.length &&
+  !floor.wallJunctions?.length &&
+  !floor.pools?.length &&
+  !floor.outdoorPlatforms?.length &&
+  !floor.groundZones?.length &&
+  !floor.hedges?.length;
 
 /** Presentation only: Apply must always use the complete, unfiltered list. */
 export const visibleConstructIssues = (
@@ -227,10 +261,19 @@ export const visibleConstructIssues = (
   tool: FloorEditorTool | null,
   context?: { floor: FloorSpec; floorIndex: number; hasItems: boolean },
 ): readonly ConstructContextualIssue[] => {
-  const visible = issues.filter(issue => {
-    if (tool !== null && context && isPristineConstructionFloor(context.floor) && !context.hasItems) {
+  const visible = issues.filter((issue) => {
+    if (
+      tool !== null &&
+      context &&
+      isPristineConstructionFloor(context.floor) &&
+      !context.hasItems
+    ) {
       if (issue.code === "topology.walls-required" && issue.source === "topology") return false;
-      if (issue.code === "project.floor-empty" && issue.path === `floors[${context.floorIndex}].footprint`) return false;
+      if (
+        issue.code === "project.floor-empty" &&
+        issue.path === `floors[${context.floorIndex}].footprint`
+      )
+        return false;
     }
     return tool !== "wall" || !wallCompletionIssueCodes.has(issue.code);
   });
@@ -260,11 +303,12 @@ export const collectConstructContextualIssues = (
       unique.set(key, candidate);
     }
   }
-  return [...unique.values()].sort((left, right) =>
-    severityRank[left.severity] - severityRank[right.severity]
-    || sourceRank[left.source] - sourceRank[right.source]
-    || left.path.localeCompare(right.path)
-    || left.code.localeCompare(right.code)
-    || left.message.localeCompare(right.message)
+  return [...unique.values()].sort(
+    (left, right) =>
+      severityRank[left.severity] - severityRank[right.severity] ||
+      sourceRank[left.source] - sourceRank[right.source] ||
+      left.path.localeCompare(right.path) ||
+      left.code.localeCompare(right.code) ||
+      left.message.localeCompare(right.message),
   );
 };

@@ -2,45 +2,32 @@ import { cutSurfaceShapes } from "../stairs/surface-apertures";
 import { cutPoolOpenings } from "../pools/pool-shapes";
 import polygonClipping from "polygon-clipping";
 import { BufferAttribute, ShapeGeometry } from "three";
-import {
-  planPointToWorld,
-  pointInsidePolygon,
-  polygonSelfIntersects,
-  polygonSignedArea,
-} from "../geometry";
-import type {
-  FloorCoordinates,
-  FloorSpec,
-  PlanPoint,
-  Polygon,
-} from "../types";
+import { pointInsidePolygon, polygonSelfIntersects, polygonSignedArea } from "../geometry";
+import type { FloorCoordinates, FloorSpec, PlanPoint, Polygon } from "../types";
 
 const EPSILON = 1e-8;
 
-const pointOnPolygonBoundary = (
-  point: PlanPoint,
-  polygon: readonly PlanPoint[],
-) => polygon.some((from, index) => {
-  const to = polygon[(index + 1) % polygon.length];
-  const dx = to[0] - from[0];
-  const dy = to[1] - from[1];
-  const squared = dx * dx + dy * dy;
-  if (squared <= EPSILON) {
-    return Math.hypot(point[0] - from[0], point[1] - from[1]) <= EPSILON;
-  }
-  const progress = Math.max(0, Math.min(1,
-    ((point[0] - from[0]) * dx + (point[1] - from[1]) * dy) / squared,
-  ));
-  return Math.hypot(
-    point[0] - (from[0] + progress * dx),
-    point[1] - (from[1] + progress * dy),
-  ) <= EPSILON;
-});
+const pointOnPolygonBoundary = (point: PlanPoint, polygon: readonly PlanPoint[]) =>
+  polygon.some((from, index) => {
+    const to = polygon[(index + 1) % polygon.length];
+    const dx = to[0] - from[0];
+    const dy = to[1] - from[1];
+    const squared = dx * dx + dy * dy;
+    if (squared <= EPSILON) {
+      return Math.hypot(point[0] - from[0], point[1] - from[1]) <= EPSILON;
+    }
+    const progress = Math.max(
+      0,
+      Math.min(1, ((point[0] - from[0]) * dx + (point[1] - from[1]) * dy) / squared),
+    );
+    return (
+      Math.hypot(point[0] - (from[0] + progress * dx), point[1] - (from[1] + progress * dy)) <=
+      EPSILON
+    );
+  });
 
-export const floorZonePointWithinRoom = (
-  point: PlanPoint,
-  polygon: readonly PlanPoint[],
-) => pointInsidePolygon(point, polygon) || pointOnPolygonBoundary(point, polygon);
+export const floorZonePointWithinRoom = (point: PlanPoint, polygon: readonly PlanPoint[]) =>
+  pointInsidePolygon(point, polygon) || pointOnPolygonBoundary(point, polygon);
 
 const closedRing = (polygon: readonly PlanPoint[]) => [
   ...polygon.map((point) => [point[0], point[1]] as [number, number]),
@@ -51,14 +38,16 @@ const ringArea = (ring: readonly (readonly [number, number])[]) =>
   Math.abs(polygonSignedArea(ring.slice(0, -1)));
 
 export const isFloorZoneOutline = (value: unknown): value is Polygon => {
-  if (!Array.isArray(value) || value.length < 3 || !value.every(
-    (point) => Array.isArray(point)
-      && point.length === 2
-      && point.every(Number.isFinite),
-  )) return false;
+  if (
+    !Array.isArray(value) ||
+    value.length < 3 ||
+    !value.every(
+      (point) => Array.isArray(point) && point.length === 2 && point.every(Number.isFinite),
+    )
+  )
+    return false;
   const points = value as unknown as readonly PlanPoint[];
-  return Math.abs(polygonSignedArea(points)) > EPSILON
-    && !polygonSelfIntersects(points);
+  return Math.abs(polygonSignedArea(points)) > EPSILON && !polygonSelfIntersects(points);
 };
 
 export const floorZoneWithinRoom = (zone: Polygon, room: Polygon) => {
@@ -67,36 +56,30 @@ export const floorZoneWithinRoom = (zone: Polygon, room: Polygon) => {
     return false;
   }
   try {
-    const outside = polygonClipping.difference(
-      [closedRing(zone)],
-      [closedRing(room)],
+    const outside = polygonClipping.difference([closedRing(zone)], [closedRing(room)]);
+    return outside.every(
+      (polygon) => polygon.reduce((area, ring) => area + ringArea(ring), 0) <= EPSILON,
     );
-    return outside.every((polygon) => polygon.reduce(
-      (area, ring) => area + ringArea(ring),
-      0,
-    ) <= EPSILON);
   } catch {
     return false;
   }
 };
 
-const footprintRegions = (
-  floor: Pick<FloorSpec, "footprint" | "footprintRegions">,
-) => floor.footprintRegions ?? [floor.footprint];
+const footprintRegions = (floor: Pick<FloorSpec, "footprint" | "footprintRegions">) =>
+  floor.footprintRegions ?? [floor.footprint];
 
 export const pointStrictlyOutsideFloorFootprint = (
   point: PlanPoint,
   floor: Pick<FloorSpec, "footprint" | "footprintRegions">,
-) => footprintRegions(floor).every((region) =>
-  !floorZonePointWithinRoom(point, region)
-);
+) => footprintRegions(floor).every((region) => !floorZonePointWithinRoom(point, region));
 
 export const groundZonePointOutsideFootprint = (
   point: PlanPoint,
   floor: Pick<FloorSpec, "footprint" | "footprintRegions">,
-) => footprintRegions(floor).every((region) =>
-  pointOnPolygonBoundary(point, region) || !pointInsidePolygon(point, region)
-);
+) =>
+  footprintRegions(floor).every(
+    (region) => pointOnPolygonBoundary(point, region) || !pointInsidePolygon(point, region),
+  );
 
 /** Allows contact with an exterior wall, but never positive-area overlap. */
 export const groundZoneOutsideFootprint = (
@@ -107,14 +90,10 @@ export const groundZoneOutsideFootprint = (
   try {
     return footprintRegions(floor).every((region) => {
       if (!isFloorZoneOutline(region)) return false;
-      const overlap = polygonClipping.intersection(
-        [closedRing(zone)],
-        [closedRing(region)],
+      const overlap = polygonClipping.intersection([closedRing(zone)], [closedRing(region)]);
+      return overlap.every(
+        (polygon) => polygon.reduce((area, ring) => area + ringArea(ring), 0) <= EPSILON,
       );
-      return overlap.every((polygon) => polygon.reduce(
-        (area, ring) => area + ringArea(ring),
-        0,
-      ) <= EPSILON);
     });
   } catch {
     return false;

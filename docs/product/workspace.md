@@ -141,7 +141,6 @@ blobs. Duplicated and imported homes begin without references. Failed local writ
 retain in-memory changes and allow Retry; a rejected image replacement leaves the
 previous reference intact.
 
-
 Availability is independent of device connection. Cards use cached storage state
 and label enabled sync without claiming remote freshness. The open workspace
 reports verified Synced with HA, Changes pending, Sync interrupted, or Sync needs
@@ -158,3 +157,15 @@ Outdoor platforms and their edge IDs/configurations belong to each floor's proje
 slice. Schema-shaped intermediate polygon errors can autosave and reload; geometry
 validation blocks Save until repaired. Portable exports, imports, project
 history, duplication and Apply retain platform finishes and per-edge overrides.
+
+Basement floors persist optional `belowGround: true` in the existing V2 floor records.
+They must form a contiguous prefix with at least one non-basement (ground) floor.
+Omitted classification preserves existing projects. Import/export, drafts, and
+undo/redo retain this flag; derived negative preview elevations are not persisted.
+
+Optional `toolState` is namespaced pure JSON in each home project. Tool packages own
+its versioned contents and validation; the engine only exposes the injected
+`WalkToolStorage` interface. Live tool changes save to both draft and published
+slices through the existing revision-checked repository, preserving unrelated
+draft edits. They survive reload, duplication, portable exports and private
+backups, and use the same workspace sync path. No separate browser store is used.

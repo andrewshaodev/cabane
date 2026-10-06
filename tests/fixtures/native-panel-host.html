@@ -1,57 +1,169 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cabane synthetic HA host</title><style>
-html,body { margin:0; height:100%; font:14px system-ui; background:#e8eff5; }
-#host-header { height:40px; display:flex; align-items:center; padding:0 12px; box-sizing:border-box; }
-#host-body { height:calc(100% - 40px); display:flex; }
-#sidebar { flex:0 0 200px; padding:18px; box-sizing:border-box; }
-#panel-slot { flex:1; min-width:0; height:100%; }
-cabane-panel { height:100%; }
-@media(max-width:600px) { #sidebar { display:none; } }
-</style></head><body>
-<div id="host-header"><label>Home Assistant host <input id="host-input" aria-label="Host input"></label></div>
-<div id="host-body"><aside id="sidebar">Synthetic HA sidebar</aside><main id="panel-slot"></main></div>
-<script type="module">
-const stats = { requests:[], close:0, popup:0, menus:0, authAccess:0, activeRegistrySubscriptions:0 };
-for (const operation of ["getItem", "setItem", "removeItem"]) {
-  const original = Storage.prototype[operation];
-  Storage.prototype[operation] = function(key, ...args) {
-    if (/^(?:cabane:ha-auth|hassTokens)/.test(String(key))) {
-      stats.authAccess++;
-      throw new Error("Native panel must not access token storage");
-    }
-    return original.call(this, key, ...args);
-  };
-}
-const listeners = new Map();
-const copies = new Map();
-const connection = {
-  connected:true, haVersion:"2026.9.0",
-  get auth() { throw new Error("Borrowed connection must not read auth"); },
-  close() { stats.close++; throw new Error("Borrowed connection must not close"); },
-  addEventListener(type, fn) { if(!listeners.has(type)) listeners.set(type,new Set()); listeners.get(type).add(fn); },
-  removeEventListener(type, fn) { listeners.get(type)?.delete(fn); },
-  async sendMessagePromise(message) {
-    stats.requests.push(message.type);
-    if(message.type.startsWith("config/") && message.type.endsWith("/list")) return [];
-    if(message.type === "cabane/workspaces/list") return [...copies].map(([home_id, copy])=>({home_id,name:"Native fixture home",version:copy.version,updated_at:1}));
-    if(message.type === "cabane/workspaces/get") return copies.get(message.home_id) ?? null;
-    if(message.type === "cabane/workspaces/put") { const version=(copies.get(message.home_id)?.version??0)+1; copies.set(message.home_id,{document:message.document,version}); return version; }
-    if(message.type === "cabane/workspaces/delete") { copies.delete(message.home_id); return true; }
-    throw new Error("Unexpected fixture message: " + message.type);
-  },
-  async subscribeEvents(callback, event) { stats.activeRegistrySubscriptions++; let active=true; return ()=>{if(active){active=false;stats.activeRegistrySubscriptions--;}}; },
-  async subscribeMessage(callback, message) { if(message.type!=="subscribe_entities") throw new Error("Unexpected subscription"); queueMicrotask(()=>callback({a:{}})); return ()=>{}; },
-};
-window.open=()=>{ stats.popup++; throw new Error("Native panel must not use popup OAuth"); };
-document.addEventListener("hass-toggle-menu",()=>stats.menus++);
-await import('/fixture-assets/deep/revision/cabane-panel.js');
-const panel=document.createElement('cabane-panel');
-const hass={connection}; Object.defineProperty(hass,"auth",{get(){throw new Error("must not read host auth");}});
-panel.hass=hass;
-document.querySelector('#panel-slot').append(panel);
-window.__hostFixture={stats,panel,connection,
-  repeat(){panel.hass={connection,states:{changed:true}};},
-  away(){panel.remove();}, back(){document.querySelector('#panel-slot').append(panel);},
-  disconnect(){connection.connected=false; for(const fn of listeners.get('disconnected')??[])fn(connection);},
-  reconnect(){connection.connected=true; for(const fn of listeners.get('ready')??[])fn(connection);},
-};
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cabane synthetic HA host</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font: 14px system-ui;
+        background: #e8eff5;
+      }
+      #host-header {
+        height: 40px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        box-sizing: border-box;
+      }
+      #host-body {
+        height: calc(100% - 40px);
+        display: flex;
+      }
+      #sidebar {
+        flex: 0 0 200px;
+        padding: 18px;
+        box-sizing: border-box;
+      }
+      #panel-slot {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+      cabane-panel {
+        height: 100%;
+      }
+      @media (max-width: 600px) {
+        #sidebar {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="host-header">
+      <label>Home Assistant host <input id="host-input" aria-label="Host input" /></label>
+    </div>
+    <div id="host-body">
+      <aside id="sidebar">Synthetic HA sidebar</aside>
+      <main id="panel-slot"></main>
+    </div>
+    <script type="module">
+      const stats = {
+        requests: [],
+        close: 0,
+        popup: 0,
+        menus: 0,
+        authAccess: 0,
+        activeRegistrySubscriptions: 0,
+      };
+      for (const operation of ["getItem", "setItem", "removeItem"]) {
+        const original = Storage.prototype[operation];
+        Storage.prototype[operation] = function (key, ...args) {
+          if (/^(?:cabane:ha-auth|hassTokens)/.test(String(key))) {
+            stats.authAccess++;
+            throw new Error("Native panel must not access token storage");
+          }
+          return original.call(this, key, ...args);
+        };
+      }
+      const listeners = new Map();
+      const copies = new Map();
+      const connection = {
+        connected: true,
+        haVersion: "2026.9.0",
+        get auth() {
+          throw new Error("Borrowed connection must not read auth");
+        },
+        close() {
+          stats.close++;
+          throw new Error("Borrowed connection must not close");
+        },
+        addEventListener(type, fn) {
+          if (!listeners.has(type)) listeners.set(type, new Set());
+          listeners.get(type).add(fn);
+        },
+        removeEventListener(type, fn) {
+          listeners.get(type)?.delete(fn);
+        },
+        async sendMessagePromise(message) {
+          stats.requests.push(message.type);
+          if (message.type.startsWith("config/") && message.type.endsWith("/list")) return [];
+          if (message.type === "cabane/workspaces/list")
+            return [...copies].map(([home_id, copy]) => ({
+              home_id,
+              name: "Native fixture home",
+              version: copy.version,
+              updated_at: 1,
+            }));
+          if (message.type === "cabane/workspaces/get") return copies.get(message.home_id) ?? null;
+          if (message.type === "cabane/workspaces/put") {
+            const version = (copies.get(message.home_id)?.version ?? 0) + 1;
+            copies.set(message.home_id, { document: message.document, version });
+            return version;
+          }
+          if (message.type === "cabane/workspaces/delete") {
+            copies.delete(message.home_id);
+            return true;
+          }
+          throw new Error("Unexpected fixture message: " + message.type);
+        },
+        async subscribeEvents(callback, event) {
+          stats.activeRegistrySubscriptions++;
+          let active = true;
+          return () => {
+            if (active) {
+              active = false;
+              stats.activeRegistrySubscriptions--;
+            }
+          };
+        },
+        async subscribeMessage(callback, message) {
+          if (message.type !== "subscribe_entities") throw new Error("Unexpected subscription");
+          queueMicrotask(() => callback({ a: {} }));
+          return () => {};
+        },
+      };
+      window.open = () => {
+        stats.popup++;
+        throw new Error("Native panel must not use popup OAuth");
+      };
+      document.addEventListener("hass-toggle-menu", () => stats.menus++);
+      await import("/fixture-assets/deep/revision/cabane-panel.js");
+      const panel = document.createElement("cabane-panel");
+      const hass = { connection };
+      Object.defineProperty(hass, "auth", {
+        get() {
+          throw new Error("must not read host auth");
+        },
+      });
+      panel.hass = hass;
+      document.querySelector("#panel-slot").append(panel);
+      window.__hostFixture = {
+        stats,
+        panel,
+        connection,
+        repeat() {
+          panel.hass = { connection, states: { changed: true } };
+        },
+        away() {
+          panel.remove();
+        },
+        back() {
+          document.querySelector("#panel-slot").append(panel);
+        },
+        disconnect() {
+          connection.connected = false;
+          for (const fn of listeners.get("disconnected") ?? []) fn(connection);
+        },
+        reconnect() {
+          connection.connected = true;
+          for (const fn of listeners.get("ready") ?? []) fn(connection);
+        },
+      };
+    </script>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+import { textAttribute } from "./entity-field-contract";
 import {
   HUMIDIFIER_FEATURE_MODES,
   WATER_HEATER_FEATURE_AWAY_MODE,
@@ -38,10 +39,14 @@ export function HumidifierFields({ binding, enabled, onCallService }: DomainFiel
   const target = domainNumberAttribute(entity.attributes.humidity, range.min);
   const current = Number(entity.attributes.current_humidity);
   const modes = stringOptions(entity.attributes.available_modes ?? entity.attributes.modes);
-  const currentMode = String(entity.attributes.mode ?? modes[0] ?? "");
+  const currentMode = textAttribute(entity.attributes.mode ?? modes[0] ?? "");
   return (
     <div className="room-module__controls room-module__controls--humidifier">
-      <output className="room-module__reading" aria-label={`${binding.label} status`} aria-live="polite">
+      <output
+        className="room-module__reading"
+        aria-label={`${binding.label} status`}
+        aria-live="polite"
+      >
         {Number.isFinite(current) ? `${entity.state} · ${current}% current humidity` : entity.state}
       </output>
       <CommandToggle
@@ -84,15 +89,20 @@ export function WaterHeaterFields({ binding, enabled, onCallService }: DomainFie
   const range = waterHeaterTemperatureRange(entity);
   const target = domainNumberAttribute(entity.attributes.temperature, range.min);
   const current = Number(entity.attributes.current_temperature);
-  const unit = typeof entity.attributes.temperature_unit === "string"
-    ? entity.attributes.temperature_unit
-    : "°C";
+  const unit =
+    typeof entity.attributes.temperature_unit === "string"
+      ? entity.attributes.temperature_unit
+      : "°C";
   const operationModes = stringOptions(entity.attributes.operation_list);
-  const operationMode = String(entity.attributes.operation_mode ?? entity.state);
+  const operationMode = textAttribute(entity.attributes.operation_mode ?? entity.state);
   const away = entity.attributes.away_mode === true || entity.attributes.away_mode === "on";
   return (
     <div className="room-module__controls room-module__controls--water-heater">
-      <output className="room-module__reading" aria-label={`${binding.label} status`} aria-live="polite">
+      <output
+        className="room-module__reading"
+        aria-label={`${binding.label} status`}
+        aria-live="polite"
+      >
         {Number.isFinite(current) ? `${current} ${unit} current · ${operationMode}` : operationMode}
       </output>
       {featureEnabled(entity, WATER_HEATER_FEATURE_ON_OFF) && (

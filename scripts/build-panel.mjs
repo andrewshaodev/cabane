@@ -9,10 +9,17 @@ import { scopePanelCss } from "./panel-build-tools.mjs";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const web = join(root, "apps/web");
 const outDir = join(web, "dist-panel");
-const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim();
-const dirty = Boolean(execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" }).trim());
+const sourceCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+  cwd: root,
+  encoding: "utf8",
+}).trim();
+const dirty = Boolean(
+  execFileSync("git", ["status", "--porcelain"], { cwd: root, encoding: "utf8" }).trim(),
+);
 if (dirty && process.env.CABANE_PANEL_ALLOW_DIRTY !== "1") {
-  throw new Error("Native release builds require a clean committed frontend tree. For local tests only, set CABANE_PANEL_ALLOW_DIRTY=1; development artifacts cannot be released.");
+  throw new Error(
+    "Native release builds require a clean committed frontend tree. For local tests only, set CABANE_PANEL_ALLOW_DIRTY=1; development artifacts cannot be released.",
+  );
 }
 const result = await build({
   root: web,
@@ -26,8 +33,15 @@ const result = await build({
     sourcemap: false,
     cssCodeSplit: false,
     minify: true,
-    lib: { entry: join(web, "src/panel/main.tsx"), formats: ["es"], fileName: () => "cabane-panel.js", cssFileName: "cabane-panel" },
-    rolldownOptions: { output: { chunkFileNames: "assets/[name]-[hash].js", assetFileNames: "[name][extname]" } },
+    lib: {
+      entry: join(web, "src/panel/main.tsx"),
+      formats: ["es"],
+      fileName: () => "cabane-panel.js",
+      cssFileName: "cabane-panel",
+    },
+    rolldownOptions: {
+      output: { chunkFileNames: "assets/[name]-[hash].js", assetFileNames: "[name][extname]" },
+    },
   },
 });
 const styles = scopePanelCss(await readFile(join(outDir, "cabane-panel.css"), "utf8"));
@@ -46,33 +60,62 @@ for (const bundle of Array.isArray(result) ? result : [result]) {
       const index = id.lastIndexOf(marker);
       if (index < 0) continue;
       const parts = id.slice(index + marker.length).split("/");
-      packages.add(id.slice(0, index + marker.length) + parts.slice(0, parts[0].startsWith("@") ? 2 : 1).join("/"));
+      packages.add(
+        id.slice(0, index + marker.length) +
+          parts.slice(0, parts[0].startsWith("@") ? 2 : 1).join("/"),
+      );
     }
   }
 }
 const notices = [];
 for (const directory of [...packages].sort()) {
   const metadata = JSON.parse(await readFile(join(directory, "package.json"), "utf8"));
-  const licenses = (await readdir(directory)).filter(name => /^(licen[cs]e|copying|notice)([.-]|$)/i.test(name));
-  notices.push(`${metadata.name} ${metadata.version} (${typeof metadata.license === "string" ? metadata.license : "see notice"})`);
+  const licenses = (await readdir(directory)).filter((name) =>
+    /^(licen[cs]e|copying|notice)([.-]|$)/i.test(name),
+  );
+  notices.push(
+    `${metadata.name} ${metadata.version} (${typeof metadata.license === "string" ? metadata.license : "see notice"})`,
+  );
   for (const name of licenses) {
-    try { notices.push(await readFile(join(directory, name), "utf8")); } catch { /* Some packages use a license directory. */ }
+    try {
+      notices.push(await readFile(join(directory, name), "utf8"));
+    } catch {
+      /* Some packages use a license directory. */
+    }
   }
 }
 await writeFile(join(outDir, "THIRD_PARTY_LICENSES.txt"), notices.join("\n\n---\n\n"));
 await cp(join(root, "LICENSE"), join(outDir, "LICENSE"));
 const files = {};
 async function inventory(directory) {
-  for (const entry of (await readdir(directory, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of (await readdir(directory, { withFileTypes: true })).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  )) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) await inventory(path);
-    else files[path.slice(outDir.length + 1)] = createHash("sha256").update(await readFile(path)).digest("hex");
+    else
+      files[path.slice(outDir.length + 1)] = createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex");
   }
 }
 await inventory(outDir);
-await writeFile(join(outDir, "manifest.json"), JSON.stringify({
-  schema_version: 1, kind: "cabane-native-ha-panel", element: "cabane-panel",
-  entrypoint: "cabane-panel.js", source_commit: sourceCommit,
-  ...(dirty ? { development: true } : {}), files,
-}, null, 2) + "\n");
-console.log(`Native panel: ${Object.keys(files).length} files from ${sourceCommit}${dirty ? " (development only)" : ""}`);
+await writeFile(
+  join(outDir, "manifest.json"),
+  JSON.stringify(
+    {
+      schema_version: 1,
+      kind: "cabane-native-ha-panel",
+      element: "cabane-panel",
+      entrypoint: "cabane-panel.js",
+      source_commit: sourceCommit,
+      ...(dirty ? { development: true } : {}),
+      files,
+    },
+    null,
+    2,
+  ) + "\n",
+);
+console.log(
+  `Native panel: ${Object.keys(files).length} files from ${sourceCommit}${dirty ? " (development only)" : ""}`,
+);

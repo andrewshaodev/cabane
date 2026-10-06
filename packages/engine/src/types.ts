@@ -1,3 +1,5 @@
+import type { StableDeviceModelId } from "./stable-device-model-id";
+export type { StableDeviceModelId } from "./stable-device-model-id";
 import type { ComponentType } from "react";
 import type { RoomType } from "./room-types";
 import type { HomeProject, SceneItemSpec } from "./home-project/types";
@@ -29,81 +31,7 @@ export type DeviceDomain =
   | "sensor"
   | "binary_sensor";
 
-export type ControllableDeviceDomain = Exclude<
-  DeviceDomain,
-  "camera" | "sensor" | "binary_sensor"
->;
-
-export type StableDeviceModelId =
-  | "indoor-ac"
-  | "washing-machine"
-  | "tumble-dryer"
-  | "dishwasher"
-  | "oven"
-  | "microwave"
-  | "coffee-maker"
-  | "electric-kettle"
-  | "freezer"
-  | "pet-feeder"
-  | "water-heater"
-  | "speaker"
-  | "television"
-  | "wall-television"
-  | "camera-screen"
-  | "connected-frame-oak"
-  | "connected-frame-black"
-  | "floor-lamp"
-  | "terracotta-pendant"
-  | "low-garden-lantern"
-  | "garden-lantern-pole"
-  | "pergola-string-lights"
-  | "table-lamp"
-  | "woven-pendant"
-  | "children-pendant"
-  | "wall-switch"
-  | "opening-contact"
-  | "thermometer"
-  | "compact-car"
-  | "electric-sedan"
-  | "pickup-truck"
-  | "weather-station"
-  | "motion-sensor"
-  | "motorized-blind"
-  | "leak-sensor"
-  | "ceiling-fan"
-  | "table-fan"
-  | "pedestal-fan"
-  | "heated-towel-rail"
-  | "smart-panel-radiator"
-  | "smart-thermostat"
-  | "smart-plug"
-  | "ceiling-light"
-  | "recessed-downlight"
-  | "wall-sconce"
-  | "illuminated-round-mirror"
-  | "motorized-curtain"
-  | "video-doorbell"
-  | "indoor-security-camera"
-  | "smoke-alarm"
-  | "carbon-monoxide-alarm"
-  | "humidity-sensor"
-  | "air-quality-monitor"
-  | "energy-monitor"
-  | "air-purifier"
-  | "bathroom-extractor-fan"
-  | "refrigerator"
-  | "smart-power-strip"
-  | "humidifier-dehumidifier"
-  | "robot-vacuum"
-  | "smart-lock"
-  | "alarm-keypad"
-  | "rotating-sprinkler"
-  | "smart-hose-timer"
-  | "soil-moisture-sensor"
-  | "pop-up-sprinkler"
-  | "motorized-valve"
-  | "siren"
-  | "smart-button";
+export type ControllableDeviceDomain = Exclude<DeviceDomain, "camera" | "sensor" | "binary_sensor">;
 
 export interface Assumption {
   id: string;
@@ -163,7 +91,7 @@ export interface EntityBindingSlotSpec {
 
 export interface DeviceSlotSpec {
   id: string;
-  model: StableDeviceModelId | ExtensionKey;
+  model: ExtensionKey;
   entitySlots: readonly EntityBindingSlotSpec[];
   placement: DevicePlacement;
 }
@@ -188,12 +116,10 @@ export const FLOOR_PATTERN_PRESET_IDS = [
   "pebbles",
 ] as const;
 
-export type FloorPatternPresetId =
-  (typeof FLOOR_PATTERN_PRESET_IDS)[number];
+export type FloorPatternPresetId = (typeof FLOOR_PATTERN_PRESET_IDS)[number];
 
 export type FloorFinishSpec =
-  | { kind: "solid"; color: string }
-  | { kind: "preset"; preset: FloorPatternPresetId };
+  { kind: "solid"; color: string } | { kind: "preset"; preset: FloorPatternPresetId };
 
 export interface FloorFinishZoneSpec {
   id: string;
@@ -274,20 +200,43 @@ interface DoorBaseSpec extends OpeningBaseSpec {
   contactSlot?: OpeningContactSlotSpec;
 }
 
-export type DoorSpec = DoorBaseSpec & (
-  | { operation: "hinged"; variant: DoorVariant; leafCount: 1 | 2;
-      hingeSide?: "start" | "end"; slideDirection?: never; coverSlot?: never }
-  | { operation: "sliding"; variant: DoorVariant; leafCount: 1 | 2;
-      hingeSide?: never; slideDirection?: "start" | "end"; coverSlot?: never }
-  | { operation: "roll-up"; variant: "slatted"; leafCount?: never;
-      hingeSide?: never; slideDirection?: never; coverSlot?: OpeningCoverSlotSpec }
-);
+export type DoorSpec = DoorBaseSpec &
+  (
+    | {
+        operation: "hinged";
+        variant: DoorVariant;
+        leafCount: 1 | 2;
+        hingeSide?: "start" | "end";
+        slideDirection?: never;
+        coverSlot?: never;
+      }
+    | {
+        operation: "sliding";
+        variant: DoorVariant;
+        leafCount: 1 | 2;
+        hingeSide?: never;
+        slideDirection?: "start" | "end";
+        coverSlot?: never;
+      }
+    | {
+        operation: "roll-up";
+        variant: "slatted";
+        leafCount?: never;
+        hingeSide?: never;
+        slideDirection?: never;
+        coverSlot?: OpeningCoverSlotSpec;
+      }
+  );
 
 /** Design and dimensions, independent of identity, wall attachment, and bindings. */
-export type DoorConfiguration = DoorSpec extends infer D ? D extends DoorSpec
-  ? Omit<D, keyof OpeningBaseSpec | "contactSlot" | "coverSlot"> & {
-      widthMeters: number; heightMeters: number;
-    } : never : never;
+export type DoorConfiguration = DoorSpec extends infer D
+  ? D extends DoorSpec
+    ? Omit<D, keyof OpeningBaseSpec | "contactSlot" | "coverSlot"> & {
+        widthMeters: number;
+        heightMeters: number;
+      }
+    : never
+  : never;
 
 export type WindowOperation = "fixed" | "casement";
 export type WindowVariant = "plain" | "muntined";
@@ -313,10 +262,11 @@ interface PassageBaseSpec extends OpeningBaseSpec {
   coverSlot?: never;
 }
 
-export type PassageSpec = PassageBaseSpec & (
-  | { variant: "rectangular"; archRiseMeters?: never }
-  | { variant: "arched"; archRiseMeters: number }
-);
+export type PassageSpec = PassageBaseSpec &
+  (
+    | { variant: "rectangular"; archRiseMeters?: never }
+    | { variant: "arched"; archRiseMeters: number }
+  );
 
 export type OpeningSpec = DoorSpec | WindowSpec | PassageSpec;
 
@@ -363,8 +313,7 @@ export interface PoolSpec {
 }
 
 export type OutdoorPlatformEdgeConfiguration =
-  | { kind: "railing" | "low-wall"; heightMeters: number }
-  | { kind: "open" };
+  { kind: "railing" | "low-wall"; heightMeters: number } | { kind: "open" };
 export interface OutdoorPlatformEdgeSpec {
   id: string;
   configuration?: OutdoorPlatformEdgeConfiguration;
@@ -382,6 +331,8 @@ export interface FloorSpec {
   id: string;
   name: string;
   floorToFloorHeightMeters: number;
+  /** Basement floors precede ground in bottom-to-top order. */
+  belowGround?: boolean;
   coordinates: FloorCoordinates;
   defaultWallHeightMeters: number;
   defaultCeilingHeightMeters: number;
@@ -576,12 +527,7 @@ export interface ExtensionInteractionTarget {
 
 export type DeviceInteractionIntent = "device-dashboard" | "camera-viewer";
 
-export type CameraStreamState =
-  | "idle"
-  | "connecting"
-  | "playing"
-  | "unavailable"
-  | "error";
+export type CameraStreamState = "idle" | "connecting" | "playing" | "unavailable" | "error";
 
 export type CameraTransport = "webrtc" | "hls";
 
@@ -626,8 +572,9 @@ export interface ArchitectureModelProps<Opening extends OpeningSpec = OpeningSpe
   reducedMotion: boolean;
 }
 
-export type ArchitectureModelComponent<Opening extends OpeningSpec = OpeningSpec> =
-  ComponentType<ArchitectureModelProps<Opening>>;
+export type ArchitectureModelComponent<Opening extends OpeningSpec = OpeningSpec> = ComponentType<
+  ArchitectureModelProps<Opening>
+>;
 
 export interface ArchitectureModelRegistry {
   door: ArchitectureModelComponent<DoorSpec>;
@@ -663,10 +610,7 @@ export type ResizePolicy =
     };
 
 export type DeviceVisualState =
-  | "disconnected"
-  | "unavailable"
-  | "connected-inactive"
-  | "connected-active";
+  "disconnected" | "unavailable" | "connected-inactive" | "connected-active";
 
 export type DeviceMountKind = "wall" | "surface";
 
@@ -716,9 +660,7 @@ export interface FurnishingModelDefinition extends SceneModelEditorDescriptor {
   component: ComponentType<SceneModelProps>;
 }
 
-export type FurnishingModelRegistry = Readonly<
-  Record<string, FurnishingModelDefinition>
->;
+export type FurnishingModelRegistry = Readonly<Record<string, FurnishingModelDefinition>>;
 
 export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
   component: HomeDeviceModelComponent;
@@ -776,8 +718,13 @@ export type HomeBindingManifest = Omit<HomeManifest, "floors"> & {
   floors: readonly (Omit<FloorSpec, "footprint"> & { footprint: readonly PlanPoint[] })[];
 };
 
-export type LegacyFloorSpec = Omit<FloorSpec, "floorToFloorHeightMeters"> & { floorToFloorHeightMeters?: number };
-export type LegacyHomeManifest = Omit<HomeManifest, "schemaVersion" | "coordinates" | "stairs" | "floors" | "sceneItems"> & {
+export type LegacyFloorSpec = Omit<FloorSpec, "floorToFloorHeightMeters"> & {
+  floorToFloorHeightMeters?: number;
+};
+export type LegacyHomeManifest = Omit<
+  HomeManifest,
+  "schemaVersion" | "coordinates" | "stairs" | "floors" | "sceneItems"
+> & {
   schemaVersion: 1;
   floors: readonly LegacyFloorSpec[];
   sceneItems: readonly import("./home-project/types").LegacySceneItemSpec[];

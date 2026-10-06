@@ -11,4 +11,3 @@ export interface FloorPaintingInspector {
   onTargetChange: (target: FloorPaintTarget) => void;
   onCancelDrawing: () => void;
 }
-

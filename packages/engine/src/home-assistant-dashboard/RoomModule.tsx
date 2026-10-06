@@ -1,29 +1,16 @@
 import { DeviceCategoryIcon } from "../DeviceCategoryIcon";
 
-import {
-  entityDisplayValue,
-  type SupportedServiceCall
-} from "../home-assistant-controls";
+import { entityDisplayValue, type SupportedServiceCall } from "../home-assistant-controls";
 
 import { bindingCanMutate } from "../home-assistant-resolver";
 
 import type { EntityStateSnapshot } from "../types";
 
-import {
-  ButtonFields,
-  NumberFields,
-  SelectFields,
-  VacuumFields,
-} from "./appliance-domain-fields";
+import { ButtonFields, NumberFields, SelectFields, VacuumFields } from "./appliance-domain-fields";
 
 import { HumidifierFields, WaterHeaterFields } from "./climate-domain-fields";
 
-import {
-  AlarmFields,
-  LockFields,
-  SirenFields,
-  ValveFields,
-} from "./security-domain-fields";
+import { AlarmFields, LockFields, SirenFields, ValveFields } from "./security-domain-fields";
 
 import { ClimateDialFields } from "./climate-dial-fields";
 import { CoverFields } from "./cover-fields";
@@ -38,7 +25,7 @@ export interface RoomModuleProps {
   canMutate: boolean;
   focused: boolean;
   onCallService: (call: SupportedServiceCall) => Promise<unknown>;
-  onOpenLiveFeed?: () => void;
+  onOpenLiveFeed?: (() => void) | undefined;
 }
 
 const readableSensorValue = (entity: EntityStateSnapshot) => {
@@ -97,7 +84,12 @@ function EntityFields({ binding, canMutate, focused, onCallService }: EntityFiel
     case "switch":
     case "input_boolean":
       return (
-        <PhysicalToggle binding={binding} enabled={enabled} tone="switch" onCallService={onCallService} />
+        <PhysicalToggle
+          binding={binding}
+          enabled={enabled}
+          tone="switch"
+          onCallService={onCallService}
+        />
       );
     case "sensor":
     case "binary_sensor":
@@ -122,7 +114,9 @@ function EntityFields({ binding, canMutate, focused, onCallService }: EntityFiel
     case "humidifier":
       return <HumidifierFields binding={binding} enabled={enabled} onCallService={onCallService} />;
     case "water_heater":
-      return <WaterHeaterFields binding={binding} enabled={enabled} onCallService={onCallService} />;
+      return (
+        <WaterHeaterFields binding={binding} enabled={enabled} onCallService={onCallService} />
+      );
     case "vacuum":
       return <VacuumFields binding={binding} enabled={enabled} onCallService={onCallService} />;
     case "lock":
@@ -198,9 +192,7 @@ export function RoomModule({
         {module.issues.length > 0 && (
           <div className="room-module__issues" role="status">
             {module.issues.map((issue) => (
-              <p key={`${issue.code}:${issue.path}`}>
-                {safeIssueMessage(module.label, issue)}
-              </p>
+              <p key={`${issue.code}:${issue.path}`}>{safeIssueMessage(module.label, issue)}</p>
             ))}
           </div>
         )}

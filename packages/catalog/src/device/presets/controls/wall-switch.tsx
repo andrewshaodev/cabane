@@ -11,10 +11,7 @@ export function WallSwitchModel({ visualState }: HomeDeviceModelProps) {
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.005} />
       </mesh>
-      <mesh
-        position={[0, 0.077, 0.03]}
-        rotation={[active ? -0.09 : 0.09, 0, 0]}
-      >
+      <mesh position={[0, 0.077, 0.03]} rotation={[active ? -0.09 : 0.09, 0, 0]}>
         <boxGeometry args={[0.064, 0.08, 0.018]} />
         <ToonMaterial color={active ? palette.coral : palette.bodyDark} />
       </mesh>

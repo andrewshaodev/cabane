@@ -21,12 +21,15 @@ export function AnimatedOpeningLeaf({
   const animated = useRef<Group>(null);
   const { invalidate } = useThree();
 
-  useEffect(() => { invalidate(); }, [invalidate, open, operation, reducedMotion, direction, travel]);
+  useEffect(() => {
+    invalidate();
+  }, [invalidate, open, operation, reducedMotion, direction, travel]);
   useFrame((_, delta) => {
     if (!animated.current) return;
-    const targetRotation = open && (operation === "hinged" || operation === "casement")
-      ? direction * (operation === "hinged" ? Math.PI * 0.48 : 0.34)
-      : 0;
+    const targetRotation =
+      open && (operation === "hinged" || operation === "casement")
+        ? direction * (operation === "hinged" ? Math.PI * 0.48 : 0.34)
+        : 0;
     const targetX = open && operation === "sliding" ? direction * travel : 0;
     const response = reducedMotion ? 1 : 1 - Math.exp(-9 * delta);
     animated.current.rotation.y += (targetRotation - animated.current.rotation.y) * response;
@@ -34,8 +37,13 @@ export function AnimatedOpeningLeaf({
     if (
       Math.abs(animated.current.rotation.y - targetRotation) > 0.002 ||
       Math.abs(animated.current.position.x - targetX) > 0.002
-    ) invalidate();
+    )
+      invalidate();
   });
 
-  return <group ref={animated} name="opening-leaf-motion">{children}</group>;
+  return (
+    <group ref={animated} name="opening-leaf-motion">
+      {children}
+    </group>
+  );
 }

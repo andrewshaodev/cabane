@@ -2,18 +2,23 @@ import type { ProjectModelRegistries } from "../types";
 
 import type { HomeProject } from "./types";
 
-import {
-  parseHomeProjectSchema,
-  validateHomeProject
-} from "./validation";
+import { parseHomeProjectSchema, validateHomeProject } from "./validation";
 
 import { isPlainRecord } from "./validation-types";
 
-import { clone, createSeedProjectRecord, parseHomeProjectRecord, serializeHomeProjectRecord } from "./project-record-codec";
-import { HomeProjectRecord, HomeProjectRepository, ProjectRecordStore, WorkspaceConflictError } from "./project-record-contract";
 import {
-  type WorkspaceBindings
-} from "./workspace-bindings";
+  clone,
+  createSeedProjectRecord,
+  parseHomeProjectRecord,
+  serializeHomeProjectRecord,
+} from "./project-record-codec";
+import {
+  HomeProjectRecord,
+  HomeProjectRepository,
+  ProjectRecordStore,
+  WorkspaceConflictError,
+} from "./project-record-contract";
+import { type WorkspaceBindings } from "./workspace-bindings";
 
 const removeMissingSceneItems = (
   project: HomeProject,
@@ -27,9 +32,7 @@ const removeMissingSceneItems = (
     return false;
   });
   return {
-    project: sceneItems.length === project.sceneItems.length
-      ? project
-      : { ...project, sceneItems },
+    project: sceneItems.length === project.sceneItems.length ? project : { ...project, sceneItems },
     removedSlotIds,
     removedCount: project.sceneItems.length - sceneItems.length,
   };
@@ -42,20 +45,31 @@ const removeBindingSlotReferences = (
 ): WorkspaceBindings => {
   const removedFromDraft = new Set(draftSlotIds);
   const removedFromPublished = new Set(publishedSlotIds);
-  return Object.fromEntries(Object.entries(bindings).map(([origin, state]) => [origin, {
-    ...state,
-    draft: {
-      ...state.draft,
-      entityIdsBySlotId: Object.fromEntries(Object.entries(state.draft.entityIdsBySlotId)
-        .filter(([slotId]) => !removedFromDraft.has(slotId))),
-    },
-    published: {
-      ...state.published,
-      entityIdsBySlotId: Object.fromEntries(Object.entries(state.published.entityIdsBySlotId)
-        .filter(([slotId]) => !removedFromPublished.has(slotId))),
-    },
-    manualSlotIds: state.manualSlotIds.filter((slotId) => !removedFromDraft.has(slotId)),
-  }]));
+  return Object.fromEntries(
+    Object.entries(bindings).map(([origin, state]) => [
+      origin,
+      {
+        ...state,
+        draft: {
+          ...state.draft,
+          entityIdsBySlotId: Object.fromEntries(
+            Object.entries(state.draft.entityIdsBySlotId).filter(
+              ([slotId]) => !removedFromDraft.has(slotId),
+            ),
+          ),
+        },
+        published: {
+          ...state.published,
+          entityIdsBySlotId: Object.fromEntries(
+            Object.entries(state.published.entityIdsBySlotId).filter(
+              ([slotId]) => !removedFromPublished.has(slotId),
+            ),
+          ),
+        },
+        manualSlotIds: state.manualSlotIds.filter((slotId) => !removedFromDraft.has(slotId)),
+      },
+    ]),
+  );
 };
 
 const recoveryRevision = (raw: string): number => {
@@ -72,7 +86,8 @@ const recoveryRevision = (raw: string): number => {
   const random = crypto.getRandomValues(new Uint32Array(1))[0] & 0xfffff;
   const epoch = Math.floor(Date.now() / 1000) * 2 ** 20 + random;
   const revision = Math.max(epoch, priorRevision + 1);
-  if (!Number.isSafeInteger(revision)) throw new Error("The workspace recovery revision is exhausted.");
+  if (!Number.isSafeInteger(revision))
+    throw new Error("The workspace recovery revision is exhausted.");
   return revision;
 };
 
@@ -86,7 +101,10 @@ export const createHomeProjectRepository = (
 
   const enqueue = <T>(operation: () => Promise<T>): Promise<T> => {
     const pending = writeQueue.then(operation, operation);
-    writeQueue = pending.then(() => undefined, () => undefined);
+    writeQueue = pending.then(
+      () => undefined,
+      () => undefined,
+    );
     return pending;
   };
 
@@ -95,7 +113,9 @@ export const createHomeProjectRepository = (
     if (raw === null) return null;
     const parsed = parseHomeProjectRecord(raw, registries);
     if (!parsed.valid) {
-      throw new Error(`Stored project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`);
+      throw new Error(
+        `Stored project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`,
+      );
     }
     return clone(parsed.record);
   };
@@ -106,13 +126,13 @@ export const createHomeProjectRepository = (
     let wrote = false;
     try {
       if (store.compareAndSwap) {
-        if (!await store.compareAndSwap(homeId, previous, serialized)) throw changed();
+        if (!(await store.compareAndSwap(homeId, previous, serialized))) throw changed();
         wrote = true;
       } else {
         wrote = true;
         await store.write(homeId, serialized);
       }
-      if (await store.read(homeId) !== serialized) {
+      if ((await store.read(homeId)) !== serialized) {
         throw new Error("Project record verification failed after storage write.");
       }
     } catch (error) {
@@ -121,14 +141,19 @@ export const createHomeProjectRepository = (
     }
   };
 
-  const replace = (record: HomeProjectRecord, expectedRevision?: number): Promise<HomeProjectRecord> => {
+  const replace = (
+    record: HomeProjectRecord,
+    expectedRevision?: number,
+  ): Promise<HomeProjectRecord> => {
     const serialized = serializeHomeProjectRecord({
       ...record,
       revision: expectedRevision === undefined ? record.revision : expectedRevision + 1,
     });
     const parsed = parseHomeProjectRecord(serialized, registries);
     if (!parsed.valid) {
-      return Promise.reject(new Error(`Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`));
+      return Promise.reject(
+        new Error(`Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`),
+      );
     }
     const homeId = parsed.record.homeId;
 
@@ -147,56 +172,67 @@ export const createHomeProjectRepository = (
     homeId: string,
     record: HomeProjectRecord,
     expectedRaw: string,
-  ): Promise<HomeProjectRecord> => enqueue(async () => {
-    if (typeof expectedRaw !== "string" || parseHomeProjectRecord(expectedRaw, registries).valid) {
-      throw new Error("Recovery requires an invalid saved project snapshot.");
-    }
-    if (record.homeId !== homeId) throw new Error("The recovery record belongs to a different home.");
-    if (await store.read(homeId) !== expectedRaw) throw changed();
-    const serialized = serializeHomeProjectRecord({
-      ...record,
-      revision: recoveryRevision(expectedRaw),
+  ): Promise<HomeProjectRecord> =>
+    enqueue(async () => {
+      if (
+        typeof expectedRaw !== "string" ||
+        parseHomeProjectRecord(expectedRaw, registries).valid
+      ) {
+        throw new Error("Recovery requires an invalid saved project snapshot.");
+      }
+      if (record.homeId !== homeId)
+        throw new Error("The recovery record belongs to a different home.");
+      if ((await store.read(homeId)) !== expectedRaw) throw changed();
+      const serialized = serializeHomeProjectRecord({
+        ...record,
+        revision: recoveryRevision(expectedRaw),
+      });
+      const parsed = parseHomeProjectRecord(serialized, registries);
+      if (!parsed.valid) {
+        throw new Error(
+          `Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`,
+        );
+      }
+      await persist(homeId, expectedRaw, serialized);
+      return clone(parsed.record);
     });
-    const parsed = parseHomeProjectRecord(serialized, registries);
-    if (!parsed.valid) {
-      throw new Error(`Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`);
-    }
-    await persist(homeId, expectedRaw, serialized);
-    return clone(parsed.record);
-  });
 
   return {
     load,
-    loadOrCreate: (seed, now = Date.now()) => enqueue(async () => {
-      const raw = await store.read(seed.home.id);
-      if (raw === null) {
-        const record = createSeedProjectRecord(seed, now);
-        const serialized = serializeHomeProjectRecord(record);
-        const parsed = parseHomeProjectRecord(serialized, registries);
-        if (!parsed.valid) throw new Error(`Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`);
-        try {
-          await persist(seed.home.id, null, serialized);
-          return { status: "ready", record: clone(parsed.record), source: "seed" };
-        } catch (error) {
-          // Another tab may have initialized or edited the workspace while this
-          // tab was preparing its seed. Its complete record always wins.
-          const winner = await load(seed.home.id);
-          if (winner) return { status: "ready", record: winner, source: "indexeddb" };
-          throw error;
+    loadOrCreate: (seed, now = Date.now()) =>
+      enqueue(async () => {
+        const raw = await store.read(seed.home.id);
+        if (raw === null) {
+          const record = createSeedProjectRecord(seed, now);
+          const serialized = serializeHomeProjectRecord(record);
+          const parsed = parseHomeProjectRecord(serialized, registries);
+          if (!parsed.valid)
+            throw new Error(
+              `Project record is invalid: ${parsed.issues[0]?.message ?? "unknown error"}`,
+            );
+          try {
+            await persist(seed.home.id, null, serialized);
+            return { status: "ready", record: clone(parsed.record), source: "seed" };
+          } catch (error) {
+            // Another tab may have initialized or edited the workspace while this
+            // tab was preparing its seed. Its complete record always wins.
+            const winner = await load(seed.home.id);
+            if (winner) return { status: "ready", record: winner, source: "indexeddb" };
+            throw error;
+          }
         }
-      }
-      const parsed = parseHomeProjectRecord(raw, registries);
-      if (parsed.valid) {
-        return { status: "ready", record: clone(parsed.record), source: "indexeddb" };
-      }
-      return {
-        status: "recovery",
-        record: createSeedProjectRecord(seed, now),
-        raw,
-        reason: parsed.issues[0]?.message ?? "The stored project record is invalid.",
-        issues: parsed.issues,
-      };
-    }),
+        const parsed = parseHomeProjectRecord(raw, registries);
+        if (parsed.valid) {
+          return { status: "ready", record: clone(parsed.record), source: "indexeddb" };
+        }
+        return {
+          status: "recovery",
+          record: createSeedProjectRecord(seed, now),
+          raw,
+          reason: parsed.issues[0]?.message ?? "The stored project record is invalid.",
+          issues: parsed.issues,
+        };
+      }),
     replace,
     recover: (seed, expectedRaw, now = Date.now()) =>
       recoverRecord(seed.home.id, createSeedProjectRecord(seed, now), expectedRaw),
@@ -205,24 +241,28 @@ export const createHomeProjectRepository = (
       try {
         input = JSON.parse(expectedRaw);
       } catch {
-        return Promise.reject(new Error("This recovery can only repair a structurally valid saved project."));
+        return Promise.reject(
+          new Error("This recovery can only repair a structurally valid saved project."),
+        );
       }
       if (!isPlainRecord(input)) {
-        return Promise.reject(new Error("This recovery can only repair a structurally valid saved project."));
+        return Promise.reject(
+          new Error("This recovery can only repair a structurally valid saved project."),
+        );
       }
       const draft = parseHomeProjectSchema(input.draft);
       const published = parseHomeProjectSchema(input.published);
       if (!draft.valid || !published.valid) {
-        return Promise.reject(new Error("This recovery can only repair a structurally valid saved project."));
+        return Promise.reject(
+          new Error("This recovery can only repair a structurally valid saved project."),
+        );
       }
       const repairedDraft = removeMissingSceneItems(draft.project, registries);
       const repairedPublished = removeMissingSceneItems(published.project, registries);
       if (repairedDraft.removedCount + repairedPublished.removedCount === 0) {
         return Promise.reject(new Error("No unavailable furnishing or device models were found."));
       }
-      const bindings = "bindings" in input
-        ? input.bindings as WorkspaceBindings
-        : {};
+      const bindings = "bindings" in input ? (input.bindings as WorkspaceBindings) : {};
       const record: HomeProjectRecord = {
         homeId: input.homeId as string,
         schemaVersion: 2,
@@ -254,7 +294,7 @@ const rollback = async (
   try {
     if (store.compareAndSwap) {
       await store.compareAndSwap(homeId, attempted, previous);
-    } else if (await store.read(homeId) === attempted) {
+    } else if ((await store.read(homeId)) === attempted) {
       // Best effort for non-CAS stores; this is not a cross-tab guarantee.
       if (previous === null) await store.delete?.(homeId);
       else await store.write(homeId, previous);
@@ -264,10 +304,21 @@ const rollback = async (
     // through the caller's in-memory record and the raw export path.
   }
 };
-export { createSeedProjectRecord, parseHomeProjectRecord, serializeHomeProjectRecord } from "./project-record-codec";
+export {
+  createSeedProjectRecord,
+  parseHomeProjectRecord,
+  serializeHomeProjectRecord,
+} from "./project-record-codec";
 export { WorkspaceConflictError } from "./project-record-contract";
 export type {
-  HomeProjectRecord, HomeProjectRecordParseResult, HomeProjectRepository, MemoryProjectRecordStore,
-  ProjectLoadResult, ProjectRecordStore
+  HomeProjectRecord,
+  HomeProjectRecordParseResult,
+  HomeProjectRepository,
+  MemoryProjectRecordStore,
+  ProjectLoadResult,
+  ProjectRecordStore,
 } from "./project-record-contract";
-export { createIndexedDbProjectRecordStore, createMemoryProjectRecordStore } from "./project-record-stores";
+export {
+  createIndexedDbProjectRecordStore,
+  createMemoryProjectRecordStore,
+} from "./project-record-stores";

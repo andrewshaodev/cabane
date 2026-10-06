@@ -1,8 +1,4 @@
-import {
-  planPointToWorld,
-  pointInsidePolygon,
-  polygonCentroid,
-} from "./geometry";
+import { planPointToWorld, pointInsidePolygon, polygonCentroid } from "./geometry";
 import type {
   DeviceSlotSpec,
   DeviceModelDefinition,
@@ -26,13 +22,7 @@ export const OUTLINED_WALL_CONTACT_MIN_METERS = 0.002;
 export const OUTLINED_WALL_CONTACT_MAX_METERS = 0.005;
 export const WALL_ALIGNMENT_TOLERANCE_RADIANS = Math.PI / 90;
 
-const inactiveStates = new Set([
-  "closed",
-  "idle",
-  "off",
-  "paused",
-  "standby",
-]);
+const inactiveStates = new Set(["closed", "idle", "off", "paused", "standby"]);
 
 export const deviceVisualStateForSnapshot = (
   snapshot: EntityStateSnapshot | undefined,
@@ -41,16 +31,12 @@ export const deviceVisualStateForSnapshot = (
   if (!snapshot.available || ["unknown", "unavailable"].includes(snapshot.state)) {
     return "unavailable";
   }
-  return inactiveStates.has(snapshot.state)
-    ? "connected-inactive"
-    : "connected-active";
+  return inactiveStates.has(snapshot.state) ? "connected-inactive" : "connected-active";
 };
 
-export const defineDeviceModel = <T extends DeviceModelDefinition>(definition: T) =>
-  definition;
+export const defineDeviceModel = <T extends DeviceModelDefinition>(definition: T) => definition;
 
-export const defineDeviceModelRegistry = <T extends DeviceModelRegistry>(registry: T) =>
-  registry;
+export const defineDeviceModelRegistry = <T extends DeviceModelRegistry>(registry: T) => registry;
 
 export const defineHomeExtensionRegistry = <T extends HomeExtensionRegistry>(registry: T) =>
   registry;
@@ -59,26 +45,23 @@ export const resolveDeviceModelDefinition = (
   modelId: string,
   stableModels: DeviceModelRegistry,
   extensionModels: DeviceModelRegistry,
-): DeviceModelDefinition | undefined => Object.hasOwn(stableModels, modelId)
-  ? stableModels[modelId]
-  : Object.hasOwn(extensionModels, modelId)
-    ? extensionModels[modelId]
-    : undefined;
+): DeviceModelDefinition | undefined =>
+  Object.hasOwn(stableModels, modelId)
+    ? stableModels[modelId]
+    : Object.hasOwn(extensionModels, modelId)
+      ? extensionModels[modelId]
+      : undefined;
 
 export const mergeDeviceModelRegistriesStableFirst = (
   stableModels: DeviceModelRegistry,
   extensionModels: DeviceModelRegistry,
 ): DeviceModelRegistry => {
-  const merged: Record<string, DeviceModelDefinition> = Object.create(null);
-  for (const modelId of new Set([
-    ...Object.keys(extensionModels),
-    ...Object.keys(stableModels),
-  ])) {
-    const definition = resolveDeviceModelDefinition(
-      modelId,
-      stableModels,
-      extensionModels,
-    );
+  const merged: Record<string, DeviceModelDefinition> = Object.create(null) as Record<
+    string,
+    DeviceModelDefinition
+  >;
+  for (const modelId of new Set([...Object.keys(extensionModels), ...Object.keys(stableModels)])) {
+    const definition = resolveDeviceModelDefinition(modelId, stableModels, extensionModels);
     if (definition) merged[modelId] = definition;
   }
   return merged;
@@ -95,9 +78,7 @@ export const uniformDeviceScaleForSize = (
   const ratios = size.map((dimension, axis) => dimension / extents[axis]);
   if (ratios.some((ratio) => !Number.isFinite(ratio) || ratio <= 0)) return null;
   const [scale] = ratios;
-  return ratios.every((ratio) => Math.abs(ratio - scale) <= 1e-6)
-    ? scale
-    : null;
+  return ratios.every((ratio) => Math.abs(ratio - scale) <= 1e-6) ? scale : null;
 };
 
 export interface DeviceWorldTransform {
@@ -125,21 +106,24 @@ const issue = (code: string, path: string, message: string): ManifestIssue => ({
   message,
 });
 
-const pointOnRoomBoundary = (
-  point: readonly [number, number],
-  room: RoomSpec,
-) => room.polygon.some((start, index) => {
-  const end = room.polygon[(index + 1) % room.polygon.length];
-  const lengthSquared = (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2;
-  if (lengthSquared < 1e-12) return false;
-  const progress = Math.max(0, Math.min(1,
-    ((point[0] - start[0]) * (end[0] - start[0]) +
-      (point[1] - start[1]) * (end[1] - start[1])) / lengthSquared,
-  ));
-  const x = start[0] + (end[0] - start[0]) * progress;
-  const y = start[1] + (end[1] - start[1]) * progress;
-  return Math.hypot(point[0] - x, point[1] - y) <= 1e-7;
-});
+const pointOnRoomBoundary = (point: readonly [number, number], room: RoomSpec) =>
+  room.polygon.some((start, index) => {
+    const end = room.polygon[(index + 1) % room.polygon.length];
+    const lengthSquared = (end[0] - start[0]) ** 2 + (end[1] - start[1]) ** 2;
+    if (lengthSquared < 1e-12) return false;
+    const progress = Math.max(
+      0,
+      Math.min(
+        1,
+        ((point[0] - start[0]) * (end[0] - start[0]) +
+          (point[1] - start[1]) * (end[1] - start[1])) /
+          lengthSquared,
+      ),
+    );
+    const x = start[0] + (end[0] - start[0]) * progress;
+    const y = start[1] + (end[1] - start[1]) * progress;
+    return Math.hypot(point[0] - x, point[1] - y) <= 1e-7;
+  });
 
 export const validateDevicePlacementContact = ({
   binding,
@@ -158,22 +142,27 @@ export const validateDevicePlacementContact = ({
   const placement = binding.placement;
   const scale = placement.scale ?? 1;
   if (placement.support.kind === "surface") {
-    if (!pointInsidePolygon(placement.at, room.polygon) &&
-      !pointOnRoomBoundary(placement.at, room)) {
-      issues.push(issue(
-        "device.outside-room",
-        `${path}.placement.at`,
-        `Surface-mounted device must be placed inside room "${room.id}".`,
-      ));
+    if (
+      !pointInsidePolygon(placement.at, room.polygon) &&
+      !pointOnRoomBoundary(placement.at, room)
+    ) {
+      issues.push(
+        issue(
+          "device.outside-room",
+          `${path}.placement.at`,
+          `Surface-mounted device must be placed inside room "${room.id}".`,
+        ),
+      );
     }
     const gap = definition.bounds.min[1] * scale;
-    if (gap < SURFACE_CONTACT_MIN_METERS - 1e-8 ||
-      gap > SURFACE_CONTACT_MAX_METERS + 1e-8) {
-      issues.push(issue(
-        "device.surface-contact",
-        `${path}.placement`,
-        `Surface contact gap ${gap.toFixed(4)} m is outside 0–0.002 m.`,
-      ));
+    if (gap < SURFACE_CONTACT_MIN_METERS - 1e-8 || gap > SURFACE_CONTACT_MAX_METERS + 1e-8) {
+      issues.push(
+        issue(
+          "device.surface-contact",
+          `${path}.placement`,
+          `Surface contact gap ${gap.toFixed(4)} m is outside 0–0.002 m.`,
+        ),
+      );
     }
     return issues;
   }
@@ -182,11 +171,13 @@ export const validateDevicePlacementContact = ({
   const supportWallId = wallPlacement.support.wallId;
   const wall = floor.walls.find((candidate) => candidate.id === supportWallId);
   if (!wall) {
-    issues.push(issue(
-      "device.support-wall",
-      `${path}.placement.support.wallId`,
-      `Wall "${supportWallId}" does not exist on this floor.`,
-    ));
+    issues.push(
+      issue(
+        "device.support-wall",
+        `${path}.placement.support.wallId`,
+        `Wall "${supportWallId}" does not exist on this floor.`,
+      ),
+    );
     return issues;
   }
 
@@ -211,19 +202,24 @@ export const validateDevicePlacementContact = ({
   }
 
   const [anchorX, anchorZ] = planPointToWorld(placement.at, floor.coordinates);
-  const along = (anchorX - wallStartX) * directionX +
-    (anchorZ - wallStartZ) * directionZ;
+  const along = (anchorX - wallStartX) * directionX + (anchorZ - wallStartZ) * directionZ;
   if (along < -1e-7 || along > wallLength + 1e-7) {
-    issues.push(issue(
-      "device.wall-span",
-      `${path}.placement.at`,
-      `Wall-mounted device must project onto wall "${wall.id}".`,
-    ));
+    issues.push(
+      issue(
+        "device.wall-span",
+        `${path}.placement.at`,
+        `Wall-mounted device must project onto wall "${wall.id}".`,
+      ),
+    );
   }
-  const finishX = wallStartX + directionX * Math.max(0, Math.min(wallLength, along)) +
-    normalX * wall.thicknessMeters / 2;
-  const finishZ = wallStartZ + directionZ * Math.max(0, Math.min(wallLength, along)) +
-    normalZ * wall.thicknessMeters / 2;
+  const finishX =
+    wallStartX +
+    directionX * Math.max(0, Math.min(wallLength, along)) +
+    (normalX * wall.thicknessMeters) / 2;
+  const finishZ =
+    wallStartZ +
+    directionZ * Math.max(0, Math.min(wallLength, along)) +
+    (normalZ * wall.thicknessMeters) / 2;
   const anchorGap = (anchorX - finishX) * normalX + (anchorZ - finishZ) * normalZ;
   const visibleGap = anchorGap + definition.bounds.min[2] * scale;
   const minimum = definition.outlineContact
@@ -233,32 +229,38 @@ export const validateDevicePlacementContact = ({
     ? OUTLINED_WALL_CONTACT_MAX_METERS
     : WALL_CONTACT_MAX_METERS;
   if (visibleGap < minimum - 1e-8 || visibleGap > maximum + 1e-8) {
-    issues.push(issue(
-      "device.wall-contact",
-      `${path}.placement.at`,
-      `Wall contact gap ${visibleGap.toFixed(4)} m is outside ${minimum.toFixed(3)}–${maximum.toFixed(3)} m.`,
-    ));
+    issues.push(
+      issue(
+        "device.wall-contact",
+        `${path}.placement.at`,
+        `Wall contact gap ${visibleGap.toFixed(4)} m is outside ${minimum.toFixed(3)}–${maximum.toFixed(3)} m.`,
+      ),
+    );
   }
 
   const frontX = Math.sin(wallPlacement.rotationYRadians);
   const frontZ = Math.cos(wallPlacement.rotationYRadians);
   const alignment = Math.max(-1, Math.min(1, frontX * normalX + frontZ * normalZ));
   if (Math.acos(alignment) > WALL_ALIGNMENT_TOLERANCE_RADIANS) {
-    issues.push(issue(
-      "device.wall-rotation",
-      `${path}.placement.rotationYRadians`,
-      `Wall-mounted device must face into room "${room.id}".`,
-    ));
+    issues.push(
+      issue(
+        "device.wall-rotation",
+        `${path}.placement.rotationYRadians`,
+        `Wall-mounted device must face into room "${room.id}".`,
+      ),
+    );
   }
 
   const top = placement.elevationMeters + definition.bounds.max[1] * scale;
   const wallHeight = wall.heightMeters ?? floor.defaultWallHeightMeters;
   if (placement.elevationMeters < 0 || top > wallHeight + 1e-8) {
-    issues.push(issue(
-      "device.wall-height",
-      `${path}.placement.elevationMeters`,
-      `Wall-mounted device must fit between the floor and ${wallHeight.toFixed(3)} m.`,
-    ));
+    issues.push(
+      issue(
+        "device.wall-height",
+        `${path}.placement.elevationMeters`,
+        `Wall-mounted device must fit between the floor and ${wallHeight.toFixed(3)} m.`,
+      ),
+    );
   }
   return issues;
 };

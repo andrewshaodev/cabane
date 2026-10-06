@@ -7,7 +7,7 @@ import {
   FloorEditorTool,
   type FloorSpec,
   PlanPoint,
-  RoomSpec
+  RoomSpec,
 } from "@cabane/engine";
 
 import { OpeningTool } from "./construction-pointer-events";

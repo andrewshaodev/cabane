@@ -22,10 +22,18 @@ await withModules(async (load) => {
   });
 
   test("rejects unknown versions and accessors without reading them", () => {
-    assert.equal(parseHomeProjectSchema({ ...makeLegacyProject(), schemaVersion: 99 }).valid, false);
+    assert.equal(
+      parseHomeProjectSchema({ ...makeLegacyProject(), schemaVersion: 99 }).valid,
+      false,
+    );
     let reads = 0;
     const candidate = makeLegacyProject();
-    Object.defineProperty(candidate, "floor", { get() { reads++; throw new Error("must not execute"); } });
+    Object.defineProperty(candidate, "floor", {
+      get() {
+        reads++;
+        throw new Error("must not execute");
+      },
+    });
     assert.equal(parseHomeProjectSchema(candidate).valid, false);
     assert.equal(reads, 0);
   });
@@ -35,11 +43,21 @@ await withModules(async (load) => {
     assert.equal(result.valid, true);
     const project = result.project;
     const ground = project.floors[0];
-    project.floors.push({ ...ground, id: "first", name: "Floor 1", footprint: [], rooms: [], walls: [], wallJunctions: [], openings: [], ceilings: [] });
+    project.floors.push({
+      ...ground,
+      id: "first",
+      name: "Floor 1",
+      footprint: [],
+      rooms: [],
+      walls: [],
+      wallJunctions: [],
+      openings: [],
+      ceilings: [],
+    });
     assert.equal(parseHomeProjectSchema(project).valid, true);
     project.floors[1].coordinates = { ...ground.coordinates, origin: [1, 0] };
     const invalid = parseHomeProjectSchema(project);
     assert.equal(invalid.valid, false);
-    assert.ok(invalid.issues.some(x => x.path === "floors[1].coordinates"));
+    assert.ok(invalid.issues.some((x) => x.path === "floors[1].coordinates"));
   });
 });

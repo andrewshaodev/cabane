@@ -9,10 +9,20 @@ const raycastHandle: Mesh["raycast"] = function (this: Mesh, raycaster, intersec
   Mesh.prototype.raycast.call(this, raycaster, intersections);
 };
 
-export function ConstructionOutlineHandle({ at, name, handlers }: { at: [number, number, number]; name: string; handlers: {
-  onPointerDown: (event: Pointer) => void; onPointerMove: (event: Pointer) => void;
-  onPointerUp: (event: Pointer) => void; onPointerCancel: (event: Pointer) => void;
-} }) {
+export function ConstructionOutlineHandle({
+  at,
+  name,
+  handlers,
+}: {
+  at: [number, number, number];
+  name: string;
+  handlers: {
+    onPointerDown: (event: Pointer) => void;
+    onPointerMove: (event: Pointer) => void;
+    onPointerUp: (event: Pointer) => void;
+    onPointerCancel: (event: Pointer) => void;
+  };
+}) {
   const ref = useRef<Group>(null);
   const { camera, size } = useThree();
   const syncTarget = () => {
@@ -24,13 +34,21 @@ export function ConstructionOutlineHandle({ at, name, handlers }: { at: [number,
   };
   useLayoutEffect(syncTarget);
   useFrame(syncTarget);
-  return <group ref={ref} position={at}>
-    <mesh name={name} userData={{ constructionEditHandle: true }} raycast={raycastHandle} {...handlers}>
-      <sphereGeometry args={[22, 12, 8]} /><PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} />
-    </mesh>
-    <mesh raycast={noPlanRaycast} renderOrder={32}>
-      <sphereGeometry args={[6, 12, 8]} /><PlanOverlayMaterial color="#fff7f1" depthTest={false} />
-    </mesh>
-  </group>;
+  return (
+    <group ref={ref} position={at}>
+      <mesh
+        name={name}
+        userData={{ constructionEditHandle: true }}
+        raycast={raycastHandle}
+        {...handlers}
+      >
+        <sphereGeometry args={[22, 12, 8]} />
+        <PlanOverlayMaterial visible={false} transparent opacity={0} depthWrite={false} />
+      </mesh>
+      <mesh raycast={noPlanRaycast} renderOrder={32}>
+        <sphereGeometry args={[6, 12, 8]} />
+        <PlanOverlayMaterial color="#fff7f1" depthTest={false} />
+      </mesh>
+    </group>
+  );
 }
-

@@ -14,12 +14,7 @@ export function GuardRail({ z }: { readonly z: number }) {
         />
       ))}
       {slats.map((offset) => (
-        <Timber
-          key={offset}
-          length={0.35}
-          radius={0.018}
-          position={[0, 0.435, offset]}
-        />
+        <Timber key={offset} length={0.35} radius={0.018} position={[0, 0.435, offset]} />
       ))}
     </group>
   );

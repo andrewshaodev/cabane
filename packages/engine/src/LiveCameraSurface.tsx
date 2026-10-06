@@ -47,7 +47,7 @@ export function LiveCameraSurface({
   active = true,
   opacity = 0.82,
 }: {
-  media?: DeviceLiveMedia;
+  media?: DeviceLiveMedia | undefined;
   width: number;
   height: number;
   active?: boolean;
@@ -56,9 +56,8 @@ export function LiveCameraSurface({
   const { invalidate } = useThree();
   const offlineTexture = useMemo(makeOfflineTexture, []);
   const [posterTexture, setPosterTexture] = useState<Texture | null>(null);
-  const liveVideo = media?.state === "playing" && media.previewState === "live"
-    ? media.video
-    : null;
+  const liveVideo =
+    media?.state === "playing" && media.previewState === "live" ? media.video : null;
   const videoTexture = useMemo(() => {
     if (!liveVideo) return null;
     const texture = new VideoTexture(liveVideo);
@@ -93,7 +92,9 @@ export function LiveCameraSurface({
         }
       },
       undefined,
-      () => { if (!cancelled) setPosterTexture(null); },
+      () => {
+        if (!cancelled) setPosterTexture(null);
+      },
     );
     return () => {
       cancelled = true;
@@ -116,12 +117,12 @@ export function LiveCameraSurface({
     const supportsVideoFrameCallback = typeof liveVideo.requestVideoFrameCallback === "function";
     if (supportsVideoFrameCallback) callbackId = liveVideo.requestVideoFrameCallback(update);
     const intervalId = globalThis.setInterval(() => {
-      const callbackStalled = !supportsVideoFrameCallback
-        || performance.now() - lastVideoFrameAt >= VIDEO_FRAME_STALL_MS;
+      const callbackStalled =
+        !supportsVideoFrameCallback || performance.now() - lastVideoFrameAt >= VIDEO_FRAME_STALL_MS;
       if (
-        callbackStalled
-        && !liveVideo.paused
-        && liveVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
+        callbackStalled &&
+        !liveVideo.paused &&
+        liveVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA
       ) {
         videoTexture.needsUpdate = true;
         invalidate();

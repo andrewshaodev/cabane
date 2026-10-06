@@ -23,10 +23,7 @@ export function CanopyRoof({
             castShadow
           >
             <boxGeometry args={[roofBeamLength * 0.96, 0.014, 0.25, 2, 1, 2]} />
-            <ToonMaterial
-              color={index % 2 === 0 ? BLUSH_LIGHT : BLUSH}
-              side={2}
-            />
+            <ToonMaterial color={index % 2 === 0 ? BLUSH_LIGHT : BLUSH} side={2} />
           </mesh>
         );
       })}

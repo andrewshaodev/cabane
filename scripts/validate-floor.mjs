@@ -15,7 +15,7 @@ const writeResult = (result, status) => {
   } else if (result.valid) {
     console.log(
       `Validated layout floor "${result.floorId}": ${result.counts.rooms} rooms, ` +
-      `${result.counts.walls} walls, ${result.counts.openings} openings.`,
+        `${result.counts.walls} walls, ${result.counts.openings} openings.`,
     );
     console.log("FLOOR_VALID");
   } else {
@@ -27,34 +27,44 @@ const writeResult = (result, status) => {
 };
 
 if (!requestedPath || unsupportedFlag) {
-  writeResult({
-    valid: false,
-    file: null,
-    issues: [{
-      code: "floor.arguments",
-      path: "$",
-      message: unsupportedFlag
-        ? `Unsupported option "${unsupportedFlag}". Usage: home:validate-floor -- <floor.json> [--json].`
-        : "Provide exactly one FloorSpec JSON path.",
-      severity: "fatal",
-    }],
-  }, 1);
+  writeResult(
+    {
+      valid: false,
+      file: null,
+      issues: [
+        {
+          code: "floor.arguments",
+          path: "$",
+          message: unsupportedFlag
+            ? `Unsupported option "${unsupportedFlag}". Usage: home:validate-floor -- <floor.json> [--json].`
+            : "Provide exactly one FloorSpec JSON path.",
+          severity: "fatal",
+        },
+      ],
+    },
+    1,
+  );
 } else {
   const file = resolve(process.cwd(), requestedPath);
   let source;
   try {
     source = await readFile(file, "utf8");
   } catch (error) {
-    writeResult({
-      valid: false,
-      file,
-      issues: [{
-        code: "floor.file.read",
-        path: "$",
-        message: error instanceof Error ? error.message : String(error),
-        severity: "fatal",
-      }],
-    }, 1);
+    writeResult(
+      {
+        valid: false,
+        file,
+        issues: [
+          {
+            code: "floor.file.read",
+            path: "$",
+            message: error instanceof Error ? error.message : String(error),
+            severity: "fatal",
+          },
+        ],
+      },
+      1,
+    );
   }
 
   let input;
@@ -62,16 +72,21 @@ if (!requestedPath || unsupportedFlag) {
     try {
       input = JSON.parse(source);
     } catch (error) {
-      writeResult({
-        valid: false,
-        file,
-        issues: [{
-          code: "floor.json.parse",
-          path: "$",
-          message: error instanceof Error ? error.message : String(error),
-          severity: "fatal",
-        }],
-      }, 1);
+      writeResult(
+        {
+          valid: false,
+          file,
+          issues: [
+            {
+              code: "floor.json.parse",
+              path: "$",
+              message: error instanceof Error ? error.message : String(error),
+              severity: "fatal",
+            },
+          ],
+        },
+        1,
+      );
     }
   }
 
@@ -91,18 +106,21 @@ if (!requestedPath || unsupportedFlag) {
       );
       const validation = validateLayoutFloorSpec(input);
       if (validation.valid && validation.floor) {
-        writeResult({
-          valid: true,
-          status: "FLOOR_VALID",
-          file,
-          floorId: validation.floor.id,
-          counts: {
-            rooms: validation.floor.rooms.length,
-            walls: validation.floor.walls.length,
-            openings: validation.floor.openings.length,
+        writeResult(
+          {
+            valid: true,
+            status: "FLOOR_VALID",
+            file,
+            floorId: validation.floor.id,
+            counts: {
+              rooms: validation.floor.rooms.length,
+              walls: validation.floor.walls.length,
+              openings: validation.floor.openings.length,
+            },
+            issues: [],
           },
-          issues: [],
-        }, 0);
+          0,
+        );
       } else {
         writeResult({ valid: false, file, issues: validation.issues }, 1);
       }

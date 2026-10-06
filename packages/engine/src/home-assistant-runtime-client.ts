@@ -2,7 +2,7 @@ import {
   callService as callHomeAssistantService,
   createConnection,
   getAuth,
-  subscribeEntities
+  subscribeEntities,
 } from "home-assistant-js-websocket";
 
 export interface HomeAssistantRuntimeClient {

@@ -19,7 +19,9 @@ export function RoomsMappingView({
     [areas],
   );
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [inspectorState, setInspectorState] = useState<RoomMappingInspectorState | "closed">("closed");
+  const [inspectorState, setInspectorState] = useState<RoomMappingInspectorState | "closed">(
+    "closed",
+  );
   const [announcement, setAnnouncement] = useState("");
   const roomElements = useRef<Record<string, SVGGElement | null>>({});
   const selectElement = useRef<HTMLSelectElement | null>(null);
@@ -31,14 +33,18 @@ export function RoomsMappingView({
   );
   const areaNameById = Object.fromEntries(areas.map((area) => [area.area_id, area.name]));
   const areaIconById = Object.fromEntries(areas.map((area) => [area.area_id, area.icon]));
-  const relationshipLabels = Object.fromEntries(floor.rooms.map((room) => {
-    const areaId = roomAreaIds[room.id];
-    return [room.id, areaId ? (areaNameById[areaId] ?? "Saved area unavailable") : "No HA area"];
-  }));
-  const roomIcons = Object.fromEntries(floor.rooms.map((room) => {
-    const areaId = roomAreaIds[room.id];
-    return [room.id, areaId ? areaIconById[areaId] ?? null : null];
-  }));
+  const relationshipLabels = Object.fromEntries(
+    floor.rooms.map((room) => {
+      const areaId = roomAreaIds[room.id];
+      return [room.id, areaId ? (areaNameById[areaId] ?? "Saved area unavailable") : "No HA area"];
+    }),
+  );
+  const roomIcons = Object.fromEntries(
+    floor.rooms.map((room) => {
+      const areaId = roomAreaIds[room.id];
+      return [room.id, areaId ? (areaIconById[areaId] ?? null) : null];
+    }),
+  );
 
   const activateRoom = (roomId: string, input: "pointer" | "keyboard") => {
     focusSelectOnOpen.current = input === "keyboard";
@@ -72,12 +78,14 @@ export function RoomsMappingView({
         selectedRoomId={selectedRoomId}
         inspectorOpen={inspectorState === "open"}
         onActivateRoom={activateRoom}
-        onRoomElement={(roomId, element) => { roomElements.current[roomId] = element; }}
+        onRoomElement={(roomId, element) => {
+          roomElements.current[roomId] = element;
+        }}
       />
       <RoomMappingInspector
         room={selectedRoom}
         areas={sortedAreas}
-        areaId={selectedRoom ? roomAreaIds[selectedRoom.id] ?? null : null}
+        areaId={selectedRoom ? (roomAreaIds[selectedRoom.id] ?? null) : null}
         roomIdByAreaId={roomIdByAreaId}
         roomNameById={roomNameById}
         state={inspectorState}
@@ -90,15 +98,21 @@ export function RoomsMappingView({
           else delete next[selectedRoom.id];
           onRoomAreaIdsChange(next);
           const areaName = sortedAreas.find((area) => area.area_id === areaId)?.name;
-          setAnnouncement(`${selectedRoom.name} is connected to ${areaName ?? "no Home Assistant area"}.`);
+          setAnnouncement(
+            `${selectedRoom.name} is connected to ${areaName ?? "no Home Assistant area"}.`,
+          );
           setInspectorState("summary");
           focusSelectedRoom();
         }}
         onCollapse={collapseInspector}
         onReopen={() => setInspectorState("open")}
-        onSelectElement={(element) => { selectElement.current = element; }}
+        onSelectElement={(element) => {
+          selectElement.current = element;
+        }}
       />
-      <p className="visually-hidden" aria-live="polite">{announcement}</p>
+      <p className="visually-hidden" aria-live="polite">
+        {announcement}
+      </p>
     </div>
   );
 }

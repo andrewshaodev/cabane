@@ -10,16 +10,29 @@ export function prepareWalkColliders(floor: FloorSpec) {
   let colliders: WalkCollider[];
   return (openIds: ReadonlySet<string>, furniture: readonly BoxWalkCollider[]) => {
     let sameDoors = previousOpen?.size === openIds.size;
-    if (sameDoors) for (const id of openIds) { if (!previousOpen!.has(id)) { sameDoors = false; break; } }
-    const sameFurniture = previousFurniture.length === furniture.length && furniture.every((box, i) => {
-      const previous = previousFurniture[i];
-      return box.id === previous.id && box.minX === previous.minX && box.maxX === previous.maxX
-        && box.minZ === previous.minZ && box.maxZ === previous.maxZ;
-    });
+    if (sameDoors)
+      for (const id of openIds) {
+        if (!previousOpen!.has(id)) {
+          sameDoors = false;
+          break;
+        }
+      }
+    const sameFurniture =
+      previousFurniture.length === furniture.length &&
+      furniture.every((box, i) => {
+        const previous = previousFurniture[i];
+        return (
+          box.id === previous.id &&
+          box.minX === previous.minX &&
+          box.maxX === previous.maxX &&
+          box.minZ === previous.minZ &&
+          box.maxZ === previous.maxZ
+        );
+      });
     if (!sameDoors || !sameFurniture) {
       colliders = deriveWalkColliders(architecture, openIds, furniture);
       previousOpen = new Set(openIds);
-      previousFurniture = furniture.map(box => ({ ...box }));
+      previousFurniture = furniture.map((box) => ({ ...box }));
     }
     return colliders;
   };

@@ -1,3 +1,4 @@
+import { omitUndefinedProperties } from "@cabane/engine";
 import type { FloorEditorDraft, FloorSpec } from "@cabane/engine";
 
 /** An open wall graph must not keep the rooms from its last closed shape. */
@@ -7,15 +8,25 @@ export function incompleteFloorPreview(draft: FloorEditorDraft, previous: FloorS
     id: draft.floorId,
     name: draft.floorName,
     floorToFloorHeightMeters: draft.floorToFloorHeightMeters ?? previous.floorToFloorHeightMeters,
+    ...(draft.belowGround !== undefined ? { belowGround: draft.belowGround } : {}),
     coordinates: draft.coordinates,
     defaultWallHeightMeters: draft.defaultWallHeightMeters,
     defaultCeilingHeightMeters: draft.defaultCeilingHeightMeters,
-    footprint: [], footprintRegions: [], rooms: [], ceilings: [],
-    walls: draft.walls.map(wall => ({ ...wall, classification: "exterior" as const,
-      thicknessMeters: wall.thicknessMeters ?? draft.exteriorWallThicknessMeters })),
+    footprint: [],
+    footprintRegions: [],
+    rooms: [],
+    ceilings: [],
+    walls: draft.walls.map((wall) =>
+      omitUndefinedProperties({
+        ...wall,
+        classification: "exterior" as const,
+        thicknessMeters: wall.thicknessMeters ?? draft.exteriorWallThicknessMeters,
+      }),
+    ),
     wallJunctions: draft.junctions,
     openings: draft.openings.map(({ offsetPlanUnits, ...opening }) => ({
-      ...opening, offsetFromWallStartPlanUnits: offsetPlanUnits,
+      ...opening,
+      offsetFromWallStartPlanUnits: offsetPlanUnits,
     })),
     ...(draft.hedges ? { hedges: draft.hedges } : {}),
     ...(draft.outdoorPlatforms ? { outdoorPlatforms: draft.outdoorPlatforms } : {}),

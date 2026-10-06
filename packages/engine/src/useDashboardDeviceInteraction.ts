@@ -1,0 +1,293 @@
+import { useCallback, useEffect, useState } from "react";
+import { useCabaneDom } from "./CabaneDom";
+import { collectBindingSlots } from "./binding-slot-descriptors";
+import { useDashboardWalk } from "./useDashboardWalk";
+
+import { resolveDeviceModelDefinition } from "./devices";
+
+import { useHomeAssistantRuntime } from "./HomeAssistantRuntime";
+
+import { resolveHomeAssistantBindings } from "./home-assistant-resolver";
+
+import type { EntityId, ExtensionInteractionTarget, SceneMode } from "./types";
+
+import { ValidatedDashboardProps } from "./validated-dashboard-contract";
+
+type Options = {
+  manifest: ValidatedDashboardProps["manifest"];
+  floor: ValidatedDashboardProps["manifest"]["floors"][number];
+  runtime: ReturnType<typeof useHomeAssistantRuntime>;
+  resolvedBindings: ReturnType<typeof resolveHomeAssistantBindings>;
+  deviceModels: ValidatedDashboardProps["deviceModels"];
+  onOpenConnect: ValidatedDashboardProps["onOpenConnect"];
+  walkthrough: ValidatedDashboardProps["walkthrough"];
+  walkMode: boolean;
+  coarsePointer: boolean;
+  equippedToolId: string | null;
+  walk: ReturnType<typeof useDashboardWalk>;
+  setDevicePanelRoomId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedDeviceId: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedRoomId: React.Dispatch<React.SetStateAction<string | null>>;
+  setMode: React.Dispatch<React.SetStateAction<SceneMode>>;
+  setMappingOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  walkDeviceTarget: ExtensionInteractionTarget | null;
+  setWalkDeviceTarget: React.Dispatch<React.SetStateAction<ExtensionInteractionTarget | null>>;
+  selectedDeviceId: string | null;
+};
+export function useDashboardDeviceInteraction({
+  manifest,
+  floor,
+  runtime,
+  resolvedBindings,
+  deviceModels,
+  onOpenConnect,
+  walkthrough,
+  walkMode,
+  coarsePointer,
+  equippedToolId,
+  walk,
+  setDevicePanelRoomId,
+  setSelectedDeviceId,
+  setSelectedRoomId,
+  setMode,
+  setMappingOpen,
+  walkDeviceTarget,
+  setWalkDeviceTarget,
+  selectedDeviceId,
+}: Options) {
+  const dom = useCabaneDom();
+  const {
+    shellRef,
+    walkDevicePanelOpenRef,
+    walkPointerLockPendingRef,
+    movementInputRef,
+    lookInputRef,
+    lookDeltaRef,
+    requestWalkPointerLock,
+  } = walk;
+  const [selectedCamera, setSelectedCamera] = useState<{
+    roomId: string;
+    deviceId: string;
+    entityId: EntityId;
+    label: string;
+  } | null>(null);
+  const closeCameraViewer = useCallback(() => setSelectedCamera(null), []);
+  const openCameraViewer = useCallback(
+    (roomId: string, deviceId: string) => {
+      const resolvedRoom = resolvedBindings.rooms[roomId];
+      const device = resolvedRoom?.devices.find((candidate) => candidate.slot.id === deviceId);
+      if (!device) return;
+      const definition = resolveDeviceModelDefinition(
+        device.slot.model,
+        deviceModels,
+        manifest.extensions.deviceModels,
+      );
+      if (definition?.liveMedia?.kind !== "camera-stream") return;
+      const primarySlot = device.slot.entitySlots.find(
+        (slot) => slot.deviceRole === definition.liveMedia?.slotRole,
+      );
+      const primary = device.entities.find((entity) => entity.slotId === primarySlot?.id);
+      const invalid = device.issues.some((issue) => issue.severity === "error");
+      if (!primary || invalid || !primary.entityId.startsWith("camera.")) {
+        if (onOpenConnect) {
+          onOpenConnect("devices", roomId);
+          return;
+        }
+        setSelectedCamera(null);
+        setSelectedRoomId(roomId);
+        setSelectedDeviceId(deviceId);
+        setMode("room");
+        setMappingOpen(true);
+        if (runtime.status !== "connected") runtime.connect();
+        return;
+      }
+      setSelectedCamera({
+        roomId,
+        deviceId,
+        entityId: primary.entityId,
+        label: primarySlot?.presentation.label ?? device.slot.id,
+      });
+    },
+    [
+      resolvedBindings.rooms,
+      deviceModels,
+      manifest.extensions.deviceModels,
+      onOpenConnect,
+      setSelectedRoomId,
+      setSelectedDeviceId,
+      setMode,
+      setMappingOpen,
+      runtime,
+    ],
+  );
+  const closeDevicePanel = useCallback(
+    (pointerLockTiming: "immediate" | "after-escape" = "immediate") => {
+      setSelectedDeviceId(null);
+      setDevicePanelRoomId(null);
+      if (!walkMode || coarsePointer) {
+        walkDevicePanelOpenRef.current = false;
+        return;
+      }
+      const resumeWalk = () => {
+        walkDevicePanelOpenRef.current = false;
+        requestWalkPointerLock();
+      };
+      if (pointerLockTiming === "after-escape") window.setTimeout(resumeWalk, 0);
+      else resumeWalk();
+    },
+    [
+      coarsePointer,
+      requestWalkPointerLock,
+      setDevicePanelRoomId,
+      setSelectedDeviceId,
+      walkDevicePanelOpenRef,
+      walkMode,
+    ],
+  );
+  const openDevicePanel = useCallback(
+    (roomId: string, deviceId: string) => {
+      setDevicePanelRoomId(roomId);
+      setSelectedDeviceId(deviceId);
+      if (!walkMode) return;
+      movementInputRef.current = { x: 0, y: 0 };
+      lookInputRef.current = { x: 0, y: 0 };
+      lookDeltaRef.current = { x: 0, y: 0 };
+      walkDevicePanelOpenRef.current = true;
+      walkPointerLockPendingRef.current = false;
+      if (dom.root.pointerLockElement === shellRef.current) document.exitPointerLock();
+    },
+    [
+      setDevicePanelRoomId,
+      setSelectedDeviceId,
+      walkMode,
+      movementInputRef,
+      lookInputRef,
+      lookDeltaRef,
+      walkDevicePanelOpenRef,
+      walkPointerLockPendingRef,
+      dom,
+      shellRef,
+    ],
+  );
+  const handleExtensionInteraction = useCallback(
+    (target: ExtensionInteractionTarget) => {
+      if (walkthrough || (walkMode && equippedToolId)) return;
+      const openingDescriptor = collectBindingSlots(manifest).find(
+        (descriptor) => descriptor.kind === "opening-cover" && descriptor.openingId === target.id,
+      );
+      const room = floor.rooms.find(
+        (candidate) =>
+          openingDescriptor?.roomIds.includes(candidate.id) ||
+          candidate.devices.some(
+            (device) =>
+              device.id === target.id ||
+              (target.slotId
+                ? device.entitySlots.some((slot) => slot.id === target.slotId)
+                : false),
+          ) ||
+          (target.slotId
+            ? candidate.dashboardSlots.some((slot) => slot.id === target.slotId)
+            : false),
+      );
+      if (!room) return;
+      const device = room.devices.find(
+        (candidate) =>
+          candidate.id === target.id ||
+          (target.slotId ? candidate.entitySlots.some((slot) => slot.id === target.slotId) : false),
+      );
+      if (device && target.intent === "camera-viewer") {
+        openCameraViewer(room.id, device.id);
+        return;
+      }
+      if (device) {
+        openDevicePanel(room.id, device.id);
+        return;
+      }
+      setSelectedRoomId(room.id);
+      setSelectedDeviceId(null);
+      setDevicePanelRoomId(null);
+      setMode("room");
+    },
+    [
+      walkthrough,
+      walkMode,
+      equippedToolId,
+      manifest,
+      floor.rooms,
+      setSelectedRoomId,
+      setSelectedDeviceId,
+      setDevicePanelRoomId,
+      setMode,
+      openCameraViewer,
+      openDevicePanel,
+    ],
+  );
+  const openWalkDevice = useCallback(() => {
+    if (!walkDeviceTarget) return;
+    if (floor.openings.some((opening) => opening.id === walkDeviceTarget.id && opening.coverSlot)) {
+      handleExtensionInteraction(walkDeviceTarget);
+      setWalkDeviceTarget(null);
+      if (dom.root.pointerLockElement) document.exitPointerLock();
+      return;
+    }
+    const room = floor.rooms.find((candidate) =>
+      candidate.devices.some((device) => device.id === walkDeviceTarget.id),
+    );
+    if (!room) return;
+    setWalkDeviceTarget(null);
+    openDevicePanel(room.id, walkDeviceTarget.id);
+  }, [
+    walkDeviceTarget,
+    floor.openings,
+    floor.rooms,
+    setWalkDeviceTarget,
+    openDevicePanel,
+    handleExtensionInteraction,
+    dom,
+  ]);
+
+  useEffect(() => {
+    if (walkthrough || !walkMode || !walkDeviceTarget || coarsePointer || selectedDeviceId) return;
+    const activateWithKeyboard = (event: KeyboardEvent) => {
+      if (event.code !== "KeyE" && event.code !== "Enter") return;
+      event.preventDefault();
+      openWalkDevice();
+    };
+    const activateWithPointer = (event: PointerEvent) => {
+      if (
+        equippedToolId ||
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        dom.root.pointerLockElement !== shellRef.current
+      )
+        return;
+      openWalkDevice();
+    };
+    dom.events.addEventListener("keydown", activateWithKeyboard);
+    dom.events.addEventListener("pointerdown", activateWithPointer);
+    return () => {
+      dom.events.removeEventListener("keydown", activateWithKeyboard);
+      dom.events.removeEventListener("pointerdown", activateWithPointer);
+    };
+  }, [
+    coarsePointer,
+    equippedToolId,
+    openWalkDevice,
+    selectedDeviceId,
+    walkDeviceTarget,
+    walkMode,
+    walkthrough,
+    dom,
+    shellRef,
+  ]);
+  return {
+    selectedCamera,
+    setSelectedCamera,
+    closeCameraViewer,
+    openCameraViewer,
+    closeDevicePanel,
+    openDevicePanel,
+    handleExtensionInteraction,
+    openWalkDevice,
+  };
+}

@@ -7,10 +7,7 @@ import { RoomStatusBadges } from "./room-status/RoomStatusBadges";
 
 import { type RoomStatusSummary } from "./room-status/model";
 
-import type {
-  HomeAssistantConnectionStatus,
-  SceneMode
-} from "./types";
+import type { HomeAssistantConnectionStatus, SceneMode } from "./types";
 
 export function SceneRoomContext({
   mode,
@@ -23,11 +20,11 @@ export function SceneRoomContext({
 }: {
   mode: SceneMode;
   displayName: string;
-  roomStatus?: RoomStatusSummary;
+  roomStatus?: RoomStatusSummary | undefined;
   homePresence?: HomePresenceSummary | null;
   connectionStatus: HomeAssistantConnectionStatus;
   connectionDescription: string;
-  sessionStatus?: string;
+  sessionStatus?: string | undefined;
 }) {
   return (
     <div className="scene-context" aria-live="polite">
@@ -40,12 +37,13 @@ export function SceneRoomContext({
           role="img"
           aria-label={connectionDescription}
         />
-        <strong>{displayName}{mode !== "overview" && roomStatus?.connected === false && <RoomDisconnectedIcon />}</strong>
+        <strong>
+          {displayName}
+          {mode !== "overview" && roomStatus?.connected === false && <RoomDisconnectedIcon />}
+        </strong>
       </div>
       {sessionStatus && <small className="scene-context__session">{sessionStatus}</small>}
-      {mode === "overview" && homePresence && (
-        <HomePresenceStatus summary={homePresence} />
-      )}
+      {mode === "overview" && homePresence && <HomePresenceStatus summary={homePresence} />}
       {mode === "walk" && roomStatus && (
         <RoomStatusBadges
           summary={roomStatus}

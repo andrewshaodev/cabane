@@ -5,7 +5,10 @@ import type { BufferGeometry } from "three";
 const families = new WeakMap<BufferGeometry, readonly BufferGeometry[]>();
 export function geometryLodFamily(geometry: BufferGeometry): readonly BufferGeometry[] {
   let family = families.get(geometry);
-  if (!family) { family = [geometry]; families.set(geometry, family); }
+  if (!family) {
+    family = [geometry];
+    families.set(geometry, family);
+  }
   return family;
 }
 export function registerGeometryLods(source: BufferGeometry, levels: BufferGeometry[]) {

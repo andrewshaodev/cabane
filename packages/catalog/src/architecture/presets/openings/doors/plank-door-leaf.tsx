@@ -43,9 +43,7 @@ export function PlankDoorLeaf({
         return (
           <group key={index}>
             <mesh position={[x, 0, 0.04]} castShadow>
-              <boxGeometry
-                args={[Math.max(0.01, plankWidth - 0.008), innerHeight, 0.018]}
-              />
+              <boxGeometry args={[Math.max(0.01, plankWidth - 0.008), innerHeight, 0.018]} />
               <ToonMaterial color={index % 3 === 1 ? woodLight : wood} />
             </mesh>
             {index < plankCount - 1 && (
@@ -87,10 +85,7 @@ export function PlankDoorLeaf({
           <Outlines thickness={0.004} color={woodDark} screenspace={false} />
         </RoundedBox>
       ))}
-      <group
-        name="opening-plank-pull"
-        position={[handleSide * (width / 2 - 0.17), 0, 0.135]}
-      >
+      <group name="opening-plank-pull" position={[handleSide * (width / 2 - 0.17), 0, 0.135]}>
         {([-1, 1] as const).map((side) => (
           <OpeningFrameBox
             key={side}
@@ -99,11 +94,7 @@ export function PlankDoorLeaf({
             color="#747a79"
           />
         ))}
-        <OpeningFrameBox
-          size={[0.045, 0.34, 0.045]}
-          position={[0, 0, -0.045]}
-          color="#909695"
-        />
+        <OpeningFrameBox size={[0.045, 0.34, 0.045]} position={[0, 0, -0.045]} color="#909695" />
       </group>
       {([-0.36, 0.36] as const).map((ratio) => (
         <group
@@ -116,11 +107,7 @@ export function PlankDoorLeaf({
             <ToonMaterial color="#242525" />
             <Outlines thickness={0.006} color="#111212" screenspace={false} />
           </mesh>
-          <OpeningFrameBox
-            size={[0.075, 0.34, 0.04]}
-            position={[0, -0.15, 0.02]}
-            color="#242525"
-          />
+          <OpeningFrameBox size={[0.075, 0.34, 0.04]} position={[0, -0.15, 0.02]} color="#242525" />
         </group>
       ))}
     </group>

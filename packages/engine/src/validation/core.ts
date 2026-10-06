@@ -22,13 +22,12 @@ export interface ValidationContext {
   ids: Map<string, string>;
 }
 
-export type ValidationRule<T> = (
-  value: T,
-  context: ValidationContext,
-) => readonly ManifestIssue[];
+export type ValidationRule<T> = (value: T, context: ValidationContext) => readonly ManifestIssue[];
 
-export const combineRules = <T>(...rules: readonly ValidationRule<T>[]): ValidationRule<T> =>
-  (value, context) => rules.flatMap((rule) => rule(value, context));
+export const combineRules =
+  <T>(...rules: readonly ValidationRule<T>[]): ValidationRule<T> =>
+  (value, context) =>
+    rules.flatMap((rule) => rule(value, context));
 
 export const createValidationContext = (
   input: RawObject,
@@ -107,13 +106,16 @@ export const STABLE_MODELS = new Set([
   "water-heater",
   "speaker",
   "television",
+  "compact-wall-television",
   "wall-television",
   "camera-screen",
   "connected-frame-oak",
   "connected-frame-black",
   "floor-lamp",
   "terracotta-pendant",
-  "low-garden-lantern", "pergola-string-lights", "garden-lantern-pole",
+  "low-garden-lantern",
+  "pergola-string-lights",
+  "garden-lantern-pole",
   "table-lamp",
   "woven-pendant",
   "children-pendant",
@@ -172,7 +174,8 @@ export const extensionHas = (
   input: RawObject,
   registry: "furnishingModels" | "roomFurnishings" | "deviceModels" | "openingModels",
   key: string,
-) => isObject(input.extensions) &&
+) =>
+  isObject(input.extensions) &&
   isObject(input.extensions[registry]) &&
   Object.hasOwn(input.extensions[registry], key);
 
@@ -180,23 +183,30 @@ const PLACEMENT_KINDS = new Set(["absolute", "wall", "ceiling"]);
 const RESIZE_AXES = new Set(["width", "height", "depth"]);
 
 const isPositiveSize = (value: unknown): boolean =>
-  Array.isArray(value) && value.length === 3 &&
+  Array.isArray(value) &&
+  value.length === 3 &&
   value.every((dimension) => isFiniteNumber(dimension) && dimension > 0);
 
 const isResizePolicy = (value: unknown): boolean => {
   if (!isObject(value)) return false;
   if (["fixed", "uniform", "planar"].includes(String(value.kind))) return true;
   if (value.kind === "axes") {
-    return Array.isArray(value.axes) && value.axes.length > 0 &&
+    return (
+      Array.isArray(value.axes) &&
+      value.axes.length > 0 &&
       value.axes.every((axis) => RESIZE_AXES.has(String(axis))) &&
-      new Set(value.axes).size === value.axes.length;
+      new Set(value.axes).size === value.axes.length
+    );
   }
   return value.kind === "custom" && typeof value.normalize === "function";
 };
 
 const isSceneModelDefinition = (value: unknown): value is RawObject => {
-  if (!isObject(value) || typeof value.component !== "function" ||
-    !isNonEmptyString(value.label) || !isNonEmptyString(value.category) ||
+  if (
+    !isObject(value) ||
+    typeof value.component !== "function" ||
+    !isNonEmptyString(value.label) ||
+    !isNonEmptyString(value.category) ||
     !isRoomType(value.defaultRoomType) ||
     !isPositiveSize(value.defaultSize) ||
     !PLACEMENT_KINDS.has(String(value.preferredPlacement)) ||
@@ -204,60 +214,76 @@ const isSceneModelDefinition = (value: unknown): value is RawObject => {
       value.placementEnvironment !== "outdoor" &&
       value.placementEnvironment !== "indoor-outdoor") ||
     !isResizePolicy(value.resizePolicy) ||
-    !isObject(value.bounds) || !isObject(value.complexity) ||
-    typeof value.outlineContact !== "boolean") return false;
+    !isObject(value.bounds) ||
+    !isObject(value.complexity) ||
+    typeof value.outlineContact !== "boolean"
+  )
+    return false;
   const min = value.bounds.min;
   const max = value.bounds.max;
   if (value.windowFit !== undefined) {
     const fit = value.windowFit;
-    if (!isObject(fit) ||
-      ![fit.openingWidthRatio, fit.openingHeightRatio].every((ratio) =>
-        isFiniteNumber(ratio) && ratio > 0 && ratio <= 1) ||
-      !isFiniteNumber(fit.depthOffsetMeters) || fit.depthOffsetMeters < 0) return false;
+    if (
+      !isObject(fit) ||
+      ![fit.openingWidthRatio, fit.openingHeightRatio].every(
+        (ratio) => isFiniteNumber(ratio) && ratio > 0 && ratio <= 1,
+      ) ||
+      !isFiniteNumber(fit.depthOffsetMeters) ||
+      fit.depthOffsetMeters < 0
+    )
+      return false;
   }
-  return Array.isArray(min) && min.length === 3 && min.every(isFiniteNumber) &&
-    Array.isArray(max) && max.length === 3 && max.every(isFiniteNumber) &&
-    min.every((coordinate, index) => coordinate <= (max[index] as number)) &&
+  return (
+    Array.isArray(min) &&
+    min.length === 3 &&
+    min.every(isFiniteNumber) &&
+    Array.isArray(max) &&
+    max.length === 3 &&
+    max.every(isFiniteNumber) &&
+    min.every((coordinate, index) => coordinate <= max[index]) &&
     Number.isInteger(value.complexity.visibleMeshes) &&
     (value.complexity.visibleMeshes as number) >= 0 &&
     Number.isInteger(value.complexity.triangles) &&
-    (value.complexity.triangles as number) >= 0;
+    (value.complexity.triangles as number) >= 0
+  );
 };
 
-export const isFurnishingModelDefinition = (
-  value: unknown,
-): value is FurnishingModelDefinition => isSceneModelDefinition(value);
+export const isFurnishingModelDefinition = (value: unknown): value is FurnishingModelDefinition =>
+  isSceneModelDefinition(value);
 
 export const isDeviceModelDefinition = (value: unknown): value is DeviceModelDefinition => {
-  if (!isSceneModelDefinition(value) ||
+  if (
+    !isSceneModelDefinition(value) ||
     !Array.isArray(value.supportedDomains) ||
     value.supportedDomains.length === 0 ||
     !value.supportedDomains.every((domain) => DOMAINS.has(domain as DeviceDomain)) ||
     !["surface", "wall"].includes(String(value.mountKind)) ||
-    !isObject(value.interaction)) return false;
+    !isObject(value.interaction)
+  )
+    return false;
   return (
     (value.interaction.target === undefined ||
-      ["device-dashboard", "camera-viewer"].includes(String(value.interaction.target))) &&
-    (value.liveMedia === undefined || (
-      isObject(value.liveMedia) &&
-      value.liveMedia.kind === "camera-stream" &&
-      value.liveMedia.slotRole === "primary" &&
-      (value.supportedDomains as unknown[]).includes("camera")
-    )) &&
-    (value.sceneLight === undefined || (
-      isObject(value.sceneLight) &&
-      Array.isArray(value.sceneLight.position) &&
-      value.sceneLight.position.length === 3 &&
-      value.sceneLight.position.every(isFiniteNumber) &&
-      isNonEmptyString(value.sceneLight.color) &&
-      isFiniteNumber(value.sceneLight.maxIntensity) &&
-      value.sceneLight.maxIntensity > 0 &&
-      isFiniteNumber(value.sceneLight.distance) &&
-      value.sceneLight.distance > 0 &&
-      (value.supportedDomains as unknown[]).includes("light")
-    )) &&
+      ["device-dashboard", "camera-viewer"].includes(
+        typeof value.interaction.target === "string" ? value.interaction.target : "",
+      )) &&
+    (value.liveMedia === undefined ||
+      (isObject(value.liveMedia) &&
+        value.liveMedia.kind === "camera-stream" &&
+        value.liveMedia.slotRole === "primary" &&
+        (value.supportedDomains as unknown[]).includes("camera"))) &&
+    (value.sceneLight === undefined ||
+      (isObject(value.sceneLight) &&
+        Array.isArray(value.sceneLight.position) &&
+        value.sceneLight.position.length === 3 &&
+        value.sceneLight.position.every(isFiniteNumber) &&
+        isNonEmptyString(value.sceneLight.color) &&
+        isFiniteNumber(value.sceneLight.maxIntensity) &&
+        value.sceneLight.maxIntensity > 0 &&
+        isFiniteNumber(value.sceneLight.distance) &&
+        value.sceneLight.distance > 0 &&
+        (value.supportedDomains as unknown[]).includes("light"))) &&
     isFiniteNumber(value.interaction.tapTolerancePixels) &&
-    (value.interaction.tapTolerancePixels as number) > 0
+    value.interaction.tapTolerancePixels > 0
   );
 };
 

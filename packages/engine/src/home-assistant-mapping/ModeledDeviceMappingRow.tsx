@@ -4,10 +4,7 @@ import {
   collectBindingSlots,
   isShareableCameraDescriptor,
 } from "../runtime-binding-profile";
-import {
-  deviceMappingCandidates,
-  mappedHomeAssistantDeviceId,
-} from "../home-assistant-mapping";
+import { deviceMappingCandidates, mappedHomeAssistantDeviceId } from "../home-assistant-mapping";
 import type {
   DeviceSlotSpec,
   HomeAssistantRuntimeSnapshot,
@@ -21,9 +18,9 @@ import {
 } from "./DeviceMappingRelationshipCard";
 
 const deviceLabel = (device: DeviceSlotSpec) =>
-  device.entitySlots.find((slot) => slot.deviceRole === "primary")?.presentation.label
-  ?? device.entitySlots[0]?.presentation.label
-  ?? device.id;
+  device.entitySlots.find((slot) => slot.deviceRole === "primary")?.presentation.label ??
+  device.entitySlots[0]?.presentation.label ??
+  device.id;
 
 export function ModeledDeviceMappingRow({
   manifest,
@@ -49,9 +46,10 @@ export function ModeledDeviceMappingRow({
   preview?: ReactNode;
 }) {
   const descriptors = collectBindingSlots(manifest);
-  const cameraDescriptor = descriptors.find((descriptor) => (
-    descriptor.deviceSlotId === device.id && isShareableCameraDescriptor(descriptor)
-  ));
+  const cameraDescriptor = descriptors.find(
+    (descriptor) =>
+      descriptor.deviceSlotId === device.id && isShareableCameraDescriptor(descriptor),
+  );
   if (cameraDescriptor) {
     const current = profile.entityIdsBySlotId[cameraDescriptor.slotId];
     const cameraCandidates = bindingEntityCandidates({
@@ -62,12 +60,15 @@ export function ModeledDeviceMappingRow({
     });
     const currentCamera = cameraCandidates.find((candidate) => candidate.entityId === current);
     return (
-      <DeviceMappingRelationshipCard preview={preview}
+      <DeviceMappingRelationshipCard
+        preview={preview}
         relationshipId={device.id}
         domain={cameraDescriptor.spec.compatibleDomains[0] ?? "unknown"}
         connected={Boolean(currentCamera)}
         label={deviceLabel(device)}
-        targetLabel={currentCamera?.label ?? (current ? "Saved match unavailable" : "Not connected")}
+        targetLabel={
+          currentCamera?.label ?? (current ? "Saved match unavailable" : "Not connected")
+        }
         disabled={disabled}
         selected={selected}
         onOpen={onOpen}
@@ -76,9 +77,10 @@ export function ModeledDeviceMappingRow({
     );
   }
 
-  const singleSlotDescriptor = device.entitySlots.length === 1
-    ? descriptors.find((descriptor) => descriptor.slotId === device.entitySlots[0].id)
-    : undefined;
+  const singleSlotDescriptor =
+    device.entitySlots.length === 1
+      ? descriptors.find((descriptor) => descriptor.slotId === device.entitySlots[0].id)
+      : undefined;
   if (singleSlotDescriptor) {
     const current = profile.entityIdsBySlotId[singleSlotDescriptor.slotId];
     const candidates = bindingEntityCandidates({
@@ -90,12 +92,15 @@ export function ModeledDeviceMappingRow({
     });
     const currentCandidate = candidates.find((candidate) => candidate.entityId === current);
     return (
-      <DeviceMappingRelationshipCard preview={preview}
+      <DeviceMappingRelationshipCard
+        preview={preview}
         relationshipId={device.id}
         domain={singleSlotDescriptor.spec.compatibleDomains[0] ?? "unknown"}
         connected={Boolean(currentCandidate)}
         label={deviceLabel(device)}
-        targetLabel={currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected")}
+        targetLabel={
+          currentCandidate?.label ?? (current ? "Saved match unavailable" : "Not connected")
+        }
         disabled={disabled}
         selected={selected}
         onOpen={onOpen}
@@ -104,7 +109,13 @@ export function ModeledDeviceMappingRow({
     );
   }
 
-  const candidates = deviceMappingCandidates({ manifest, roomId: room.id, device, profile, runtime });
+  const candidates = deviceMappingCandidates({
+    manifest,
+    roomId: room.id,
+    device,
+    profile,
+    runtime,
+  });
   const mappedDeviceId = mappedHomeAssistantDeviceId(profile, device, runtime);
   const currentCandidate = candidates.find((candidate) => candidate.deviceId === mappedDeviceId);
   const mappedEntries = device.entitySlots.flatMap((slot) => {
@@ -112,14 +123,20 @@ export function ModeledDeviceMappingRow({
     return entityId ? [{ slot, entityId }] : [];
   });
   return (
-    <DeviceMappingRelationshipCard preview={preview}
+    <DeviceMappingRelationshipCard
+      preview={preview}
       relationshipId={device.id}
-      domain={device.entitySlots.find((slot) => slot.deviceRole === "primary")?.compatibleDomains[0]
-        ?? device.entitySlots[0]?.compatibleDomains[0]
-        ?? "unknown"}
+      domain={
+        device.entitySlots.find((slot) => slot.deviceRole === "primary")?.compatibleDomains[0] ??
+        device.entitySlots[0]?.compatibleDomains[0] ??
+        "unknown"
+      }
       connected={Boolean(currentCandidate)}
       label={deviceLabel(device)}
-      targetLabel={currentCandidate?.label ?? (mappedEntries.length > 0 ? "Saved match unavailable" : "Not connected")}
+      targetLabel={
+        currentCandidate?.label ??
+        (mappedEntries.length > 0 ? "Saved match unavailable" : "Not connected")
+      }
       disabled={disabled}
       selected={selected}
       onOpen={onOpen}

@@ -1,12 +1,7 @@
 import { useCabaneDom } from "./CabaneDom";
-import {
-  useEffect,
-  type MutableRefObject
-} from "react";
+import { useEffect, type MutableRefObject } from "react";
 
-import {
-  type StickVector
-} from "./navigation";
+import { type StickVector } from "./navigation";
 
 export function DesktopLookSurface({
   lookDeltaRef,
@@ -26,7 +21,7 @@ export function DesktopLookSurface({
       dom.events.removeEventListener("mousemove", move);
       lookDeltaRef.current = { x: 0, y: 0 };
     };
-  }, [lookDeltaRef]);
+  }, [lookDeltaRef, dom]);
   return null;
 }
 export { useDesktopWalkInput } from "./desktop-walk-input";

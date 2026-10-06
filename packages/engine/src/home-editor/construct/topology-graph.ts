@@ -6,13 +6,24 @@
 
 import { polygonSignedArea } from "../../geometry";
 
-import type {
-  ManifestIssue,
-  PlanPoint,
-  Polygon
-} from "../../types";
-import { DirectedEdge, EditorWall, FLOOR_EDITOR_EPSILON, Node, Subsegment } from "./topology-contract";
-import { collinearOverlap, issue, point, pointKey, pointOnSegment, progressOnWall, properIntersection, samePoint } from "./topology-plan-math";
+import type { ManifestIssue, PlanPoint, Polygon } from "../../types";
+import {
+  DirectedEdge,
+  EditorWall,
+  FLOOR_EDITOR_EPSILON,
+  Node,
+  Subsegment,
+} from "./topology-contract";
+import {
+  collinearOverlap,
+  issue,
+  point,
+  pointKey,
+  pointOnSegment,
+  progressOnWall,
+  properIntersection,
+  samePoint,
+} from "./topology-plan-math";
 
 export const buildGraph = (walls: readonly EditorWall[], issues: ManifestIssue[]) => {
   const splitPoints = new Map(walls.map((wall) => [wall.id, [wall.from, wall.to] as PlanPoint[]]));
@@ -21,7 +32,13 @@ export const buildGraph = (walls: readonly EditorWall[], issues: ManifestIssue[]
     for (let rightIndex = leftIndex + 1; rightIndex < walls.length; rightIndex += 1) {
       const right = walls[rightIndex];
       if (collinearOverlap(left, right)) {
-        issues.push(issue("topology.wall-overlap", `walls.${right.id}`, `Wall “${right.id}” overlaps collinear wall “${left.id}”.`));
+        issues.push(
+          issue(
+            "topology.wall-overlap",
+            `walls.${right.id}`,
+            `Wall “${right.id}” overlaps collinear wall “${left.id}”.`,
+          ),
+        );
         continue;
       }
       const intersection = properIntersection(left, right);
@@ -48,8 +65,12 @@ export const buildGraph = (walls: readonly EditorWall[], issues: ManifestIssue[]
   };
   const subsegments: Subsegment[] = [];
   for (const wall of walls) {
-    const ordered = splitPoints.get(wall.id)!
-      .filter((candidate, index, all) => !all.slice(0, index).some((other) => samePoint(candidate, other)))
+    const ordered = splitPoints
+      .get(wall.id)!
+      .filter(
+        (candidate, index, all) =>
+          !all.slice(0, index).some((other) => samePoint(candidate, other)),
+      )
       .sort((left, right) => progressOnWall(left, wall) - progressOnWall(right, wall));
     for (let index = 1; index < ordered.length; index += 1) {
       const from = nodeFor(ordered[index - 1]);
@@ -66,11 +87,17 @@ export const traverseFaces = (nodes: readonly Node[], segments: readonly Subsegm
   const outgoing = new Map(nodes.map((node) => [node.key, [] as DirectedEdge[]]));
   for (const segment of segments) {
     const forward: DirectedEdge = {
-      id: `${segment.id}:forward`, segment, from: segment.from, to: segment.to,
+      id: `${segment.id}:forward`,
+      segment,
+      from: segment.from,
+      to: segment.to,
       reverseId: `${segment.id}:reverse`,
     };
     const reverse: DirectedEdge = {
-      id: `${segment.id}:reverse`, segment, from: segment.to, to: segment.from,
+      id: `${segment.id}:reverse`,
+      segment,
+      from: segment.to,
+      to: segment.from,
       reverseId: `${segment.id}:forward`,
     };
     edges.set(forward.id, forward);
@@ -78,10 +105,15 @@ export const traverseFaces = (nodes: readonly Node[], segments: readonly Subsegm
     outgoing.get(forward.from.key)!.push(forward);
     outgoing.get(reverse.from.key)!.push(reverse);
   }
-  for (const list of outgoing.values()) list.sort((left, right) =>
-    Math.atan2(left.to.point[1] - left.from.point[1], left.to.point[0] - left.from.point[0]) -
-    Math.atan2(right.to.point[1] - right.from.point[1], right.to.point[0] - right.from.point[0])
-  );
+  for (const list of outgoing.values())
+    list.sort(
+      (left, right) =>
+        Math.atan2(left.to.point[1] - left.from.point[1], left.to.point[0] - left.from.point[0]) -
+        Math.atan2(
+          right.to.point[1] - right.from.point[1],
+          right.to.point[0] - right.from.point[0],
+        ),
+    );
   const visited = new Set<string>();
   const edgeFace = new Map<string, number>();
   const faces: Polygon[] = [];
@@ -107,8 +139,10 @@ export const traverseFaces = (nodes: readonly Node[], segments: readonly Subsegm
     // A separator is traversed in both directions by the same face. Keep it
     // in edgeFace for classification, but omit its out-and-back excursion
     // from the room polygon so that the boundary stays simple.
-    const walkedIds = new Set(walked.map(edge => edge.id));
-    const polygon = walked.filter(edge => !walkedIds.has(edge.reverseId)).map(edge => edge.from.point);
+    const walkedIds = new Set(walked.map((edge) => edge.id));
+    const polygon = walked
+      .filter((edge) => !walkedIds.has(edge.reverseId))
+      .map((edge) => edge.from.point);
     if (polygon.length < 3) continue;
     const candidate = polygon as [PlanPoint, PlanPoint, PlanPoint, ...PlanPoint[]];
     if (polygonSignedArea(candidate) <= FLOOR_EDITOR_EPSILON) continue;

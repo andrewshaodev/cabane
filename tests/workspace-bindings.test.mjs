@@ -48,7 +48,9 @@ await withModules(async (load) => {
     assert.notEqual(migrated["https://fixture-ha.test"].draft.roomAreaIds, profile.roomAreaIds);
     assert.deepEqual(migrated["https://fixture-ha.test"].manualRoomIds, []);
     assert.deepEqual(migrated["https://fixture-ha.test"].manualSlotIds, []);
-    assert.throws(() => migrateWorkspaceBindingProfile({}, "invalid origin", profile, manifest, manifest));
+    assert.throws(() =>
+      migrateWorkspaceBindingProfile({}, "invalid origin", profile, manifest, manifest),
+    );
   });
 
   test("normalizes V1 records into V2 envelopes without putting bindings in HomeProject JSON", () => {
@@ -73,7 +75,9 @@ await withModules(async (load) => {
       ...room.devices.flatMap((device) => device.entitySlots),
     ]);
     const nonCameraSlot = slots.find((slot) => slot.compatibleDomains.includes("light"));
-    const cameraSlot = slots.find((slot) => slot.compatibleDomains.length === 1 && slot.compatibleDomains[0] === "camera");
+    const cameraSlot = slots.find(
+      (slot) => slot.compatibleDomains.length === 1 && slot.compatibleDomains[0] === "camera",
+    );
     assert.ok(nonCameraSlot);
     assert.ok(cameraSlot);
     const profile = {
@@ -82,8 +86,18 @@ await withModules(async (load) => {
       entityIdsBySlotId: { [nonCameraSlot.id]: "light.fixture" },
     };
     const valid = {
-      "https://one.fixture.test": { draft: structuredClone(profile), published: structuredClone(profile), manualRoomIds: [], manualSlotIds: [] },
-      "https://two.fixture.test": { draft: structuredClone(profile), published: structuredClone(profile), manualRoomIds: [], manualSlotIds: [] },
+      "https://one.fixture.test": {
+        draft: structuredClone(profile),
+        published: structuredClone(profile),
+        manualRoomIds: [],
+        manualSlotIds: [],
+      },
+      "https://two.fixture.test": {
+        draft: structuredClone(profile),
+        published: structuredClone(profile),
+        manualRoomIds: [],
+        manualSlotIds: [],
+      },
     };
     assert.deepEqual(validateWorkspaceBindings(valid, manifest, manifest), []);
 
@@ -97,7 +111,9 @@ await withModules(async (load) => {
     invalid["https://one.fixture.test"].manualRoomIds = [roomId, roomId];
     invalid["https://one.fixture.test"].manualSlotIds = [nonCameraSlot.id, nonCameraSlot.id];
     const issues = validateWorkspaceBindings(invalid, manifest, manifest);
-    assert.ok(issues.some((issue) => issue.code.includes("unknown") || issue.code.includes("profile-key")));
+    assert.ok(
+      issues.some((issue) => issue.code.includes("unknown") || issue.code.includes("profile-key")),
+    );
     assert.ok(issues.some((issue) => issue.code.includes("domain")));
     assert.ok(issues.some((issue) => issue.code.includes("duplicate")));
 
@@ -108,10 +124,12 @@ await withModules(async (load) => {
         rooms: floor.rooms.map((room) => ({ ...room, devices: [...room.devices] })),
       })),
     };
-    const cameraRoom = cameraManifest.floors[0].rooms.find((room) => room.devices.some((device) =>
-      device.entitySlots.some((slot) => slot.id === cameraSlot.id)
-    ));
-    const sourceCamera = cameraRoom.devices.find((device) => device.entitySlots.some((slot) => slot.id === cameraSlot.id));
+    const cameraRoom = cameraManifest.floors[0].rooms.find((room) =>
+      room.devices.some((device) => device.entitySlots.some((slot) => slot.id === cameraSlot.id)),
+    );
+    const sourceCamera = cameraRoom.devices.find((device) =>
+      device.entitySlots.some((slot) => slot.id === cameraSlot.id),
+    );
     const secondCameraSlotId = "fixture-shared-camera-slot";
     cameraRoom.devices.push({
       id: "fixture-shared-camera-screen",
@@ -134,33 +152,39 @@ await withModules(async (load) => {
         manualSlotIds: [],
       },
     };
-    assert.equal(validateWorkspaceBindings(cameraShared, cameraManifest, cameraManifest)
-      .some((issue) => issue.code.includes("duplicate")), false);
+    assert.equal(
+      validateWorkspaceBindings(cameraShared, cameraManifest, cameraManifest).some((issue) =>
+        issue.code.includes("duplicate"),
+      ),
+      false,
+    );
   });
 
   test("removes selected draft slot references across origins without touching published or unrelated mappings", () => {
     const { project, empty } = fixture();
     const roomId = project.floors[0].rooms[0].id;
-    const bindings = Object.fromEntries([
-      "https://one.fixture.test",
-      "https://two.fixture.test",
-    ].map((origin) => [origin, {
-      draft: {
-        ...structuredClone(empty),
-        roomAreaIds: { [roomId]: `${origin}-area` },
-        entityIdsBySlotId: {
-          "removed-primary": "media_player.shared",
-          "removed-secondary": "sensor.removed",
-          "retained-slot": "media_player.shared",
+    const bindings = Object.fromEntries(
+      ["https://one.fixture.test", "https://two.fixture.test"].map((origin) => [
+        origin,
+        {
+          draft: {
+            ...structuredClone(empty),
+            roomAreaIds: { [roomId]: `${origin}-area` },
+            entityIdsBySlotId: {
+              "removed-primary": "media_player.shared",
+              "removed-secondary": "sensor.removed",
+              "retained-slot": "media_player.shared",
+            },
+          },
+          published: {
+            ...structuredClone(empty),
+            entityIdsBySlotId: { "removed-primary": "media_player.published" },
+          },
+          manualRoomIds: [roomId],
+          manualSlotIds: ["removed-primary", "retained-slot", "removed-secondary"],
         },
-      },
-      published: {
-        ...structuredClone(empty),
-        entityIdsBySlotId: { "removed-primary": "media_player.published" },
-      },
-      manualRoomIds: [roomId],
-      manualSlotIds: ["removed-primary", "retained-slot", "removed-secondary"],
-    }]));
+      ]),
+    );
     const original = structuredClone(bindings);
     const next = removeWorkspaceSlotReferences(bindings, ["removed-primary", "removed-secondary"]);
 
@@ -193,14 +217,24 @@ await withModules(async (load) => {
       },
     };
     const reconciled = reconcileWorkspaceBindings(bindings, manifest);
-    assert.deepEqual(reconciled["https://fixture-ha.test"].draft.roomAreaIds, { [roomId]: "fixture-area" });
+    assert.deepEqual(reconciled["https://fixture-ha.test"].draft.roomAreaIds, {
+      [roomId]: "fixture-area",
+    });
     assert.deepEqual(reconciled["https://fixture-ha.test"].draft.entityIdsBySlotId, {});
     assert.deepEqual(reconciled["https://fixture-ha.test"].published, profile);
     assert.deepEqual(reconciled["https://fixture-ha.test"].manualRoomIds, [roomId]);
     assert.deepEqual(reconciled["https://fixture-ha.test"].manualSlotIds, []);
-    assert.throws(() => migrateWorkspaceBindingProfile({}, "https://fixture-ha.test", {
-      ...profile,
-      schemaVersion: 999,
-    }, manifest, manifest));
+    assert.throws(() =>
+      migrateWorkspaceBindingProfile(
+        {},
+        "https://fixture-ha.test",
+        {
+          ...profile,
+          schemaVersion: 999,
+        },
+        manifest,
+        manifest,
+      ),
+    );
   });
 });

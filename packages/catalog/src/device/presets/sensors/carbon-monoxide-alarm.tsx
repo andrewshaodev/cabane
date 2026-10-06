@@ -7,13 +7,23 @@ export function CarbonMonoxideAlarmModel({ visualState }: HomeDeviceModelProps) 
   const alert = visualState === "connected-active";
   return (
     <group name="catalog-carbon-monoxide-alarm">
-      <RoundedBox args={[0.11, 0.11, 0.03]} radius={0.015} smoothness={2} position={[0, 0.055, 0.015]} castShadow>
+      <RoundedBox
+        args={[0.11, 0.11, 0.03]}
+        radius={0.015}
+        smoothness={2}
+        position={[0, 0.055, 0.015]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </RoundedBox>
       <mesh position={[0, 0.068, 0.0325]}>
         <boxGeometry args={[0.052, 0.026, 0.005]} />
-        <ToonMaterial color="#34413f" emissive={alert ? palette.coral : "#6fa096"} emissiveIntensity={0.22} />
+        <ToonMaterial
+          color="#34413f"
+          emissive={alert ? palette.coral : "#6fa096"}
+          emissiveIntensity={0.22}
+        />
       </mesh>
       {[-0.028, -0.014, 0, 0.014, 0.028].map((x) => (
         <mesh key={x} position={[x, 0.034, 0.033]}>

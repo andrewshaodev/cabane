@@ -30,7 +30,9 @@ export function WovenPendantGeometry({ brightness = 0 }: { readonly brightness?:
 
 export function WovenPendantModel({ state, visualState }: HomeDeviceModelProps) {
   const finish = connectedLightFinish(visualState);
-  return <group name={`device-state-${visualState}`}>
-    <WovenPendantGeometry brightness={finish.emissiveIntensity * lightBrightnessRatio(state)} />
-  </group>;
+  return (
+    <group name={`device-state-${visualState}`}>
+      <WovenPendantGeometry brightness={finish.emissiveIntensity * lightBrightnessRatio(state)} />
+    </group>
+  );
 }

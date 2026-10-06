@@ -11,17 +11,29 @@ await withModules(async (load) => {
     assert.equal(flight.baseElevationMeters, 0);
     assert.equal(flight.runMeters, 4);
     assert.deepEqual(api.validateStairs(project), []);
-    assert.deepEqual(api.deriveStairApertures(project).map(x => [x.floorId, x.surface]), [["ground","ceiling"],["first","floor"]]);
+    assert.deepEqual(
+      api.deriveStairApertures(project).map((x) => [x.floorId, x.surface]),
+      [
+        ["ground", "ceiling"],
+        ["first", "floor"],
+      ],
+    );
     project.stairs = [];
     assert.deepEqual(api.deriveStairApertures(project), []);
   });
   test("allows steep stairs and advises on unsupported landings", () => {
     const project = makeStairProject();
     project.stairs[0].runMeters = 1;
-    assert.equal(api.validateStairs(project).some(x => x.code === "stair.slope"), false);
+    assert.equal(
+      api.validateStairs(project).some((x) => x.code === "stair.slope"),
+      false,
+    );
     project.stairs[0].runMeters = 4;
-    project.stairs[0].at = [4,7];
-    assert.equal(api.validateStairs(project).find(x => x.code === "stair.landing").severity, "warning");
+    project.stairs[0].at = [4, 7];
+    assert.equal(
+      api.validateStairs(project).find((x) => x.code === "stair.landing").severity,
+      "warning",
+    );
     project.stairs[0].upperFloorId = "second";
     assert.equal(api.deriveStairFlight(project, project.stairs[0]), null);
   });

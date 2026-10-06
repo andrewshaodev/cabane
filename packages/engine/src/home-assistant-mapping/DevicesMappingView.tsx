@@ -5,10 +5,7 @@ import type {
   RuntimeBindingProfile,
 } from "../types";
 import { DeviceMappingGroup } from "./DeviceMappingGroup";
-import {
-  DeviceMappingInspector,
-  type DeviceMappingInspectorState,
-} from "./DeviceMappingInspector";
+import { DeviceMappingInspector, type DeviceMappingInspectorState } from "./DeviceMappingInspector";
 import type { DeviceMappingActivationInput } from "./DeviceMappingRelationshipCard";
 import { EntitySlotMappingRow } from "./EntitySlotMappingRow";
 import { HomeAssistantAreaIcon } from "./HomeAssistantAreaIcon";
@@ -29,13 +26,17 @@ export function DevicesMappingView({
   roomAreaIds: RuntimeBindingProfile["roomAreaIds"];
   entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"];
   dirtyRoomIds: ReadonlySet<string>;
-  initialRoomId?: string | null;
-  onEntityIdsBySlotIdChange: (entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"]) => void;
+  initialRoomId?: (string | null) | undefined;
+  onEntityIdsBySlotIdChange: (
+    entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"],
+  ) => void;
 }) {
   const floor = manifest.floors[0];
   const [selectedRoomId, setSelectedRoomId] = useState(initialRoomId ?? floor.rooms[0]?.id ?? "");
   const [selectedRelationshipId, setSelectedRelationshipId] = useState<string | null>(null);
-  const [inspectorState, setInspectorState] = useState<DeviceMappingInspectorState | "closed">("closed");
+  const [inspectorState, setInspectorState] = useState<DeviceMappingInspectorState | "closed">(
+    "closed",
+  );
   const [announcement, setAnnouncement] = useState("");
   const relationshipElements = useRef<Record<string, HTMLButtonElement | null>>({});
   const choiceElement = useRef<HTMLInputElement | null>(null);
@@ -55,14 +56,17 @@ export function DevicesMappingView({
     roomAreaIds,
     entityIdsBySlotId,
   };
-  const hasSavedArea = Boolean(roomAreaIds[selectedRoom.id]
-    && runtime.areas.some((area) => area.area_id === roomAreaIds[selectedRoom.id]));
+  const hasSavedArea = Boolean(
+    roomAreaIds[selectedRoom.id] &&
+    runtime.areas.some((area) => area.area_id === roomAreaIds[selectedRoom.id]),
+  );
   const roomDraftIsDirty = dirtyRoomIds.has(selectedRoom.id);
   const disabled = !hasSavedArea || roomDraftIsDirty;
   const groups = groupRoomMappingRelationships(manifest, selectedRoom.id);
-  const selectedRelationship = groups
-    .flatMap((group) => group.relationships)
-    .find((relationship) => relationship.id === selectedRelationshipId) ?? null;
+  const selectedRelationship =
+    groups
+      .flatMap((group) => group.relationships)
+      .find((relationship) => relationship.id === selectedRelationshipId) ?? null;
   const areaContextLabelForRoom = (roomId: string) => {
     const areaId = roomAreaIds[roomId];
     if (!areaId) return "No HA area";
@@ -99,7 +103,10 @@ export function DevicesMappingView({
 
   return (
     <div className="devices-mapping-view" data-inspector-state={inspectorState}>
-      <div className="devices-mapping-view__content" inert={inspectorState === "open" ? true : undefined}>
+      <div
+        className="devices-mapping-view__content"
+        inert={inspectorState === "open" ? true : undefined}
+      >
         <nav className="devices-mapping-view__rooms" role="tablist" aria-label="Rooms">
           {floor.rooms.map((room) => (
             <button
@@ -134,32 +141,38 @@ export function DevicesMappingView({
           <div className="devices-mapping-view__groups">
             {groups.map((group) => (
               <DeviceMappingGroup key={group.id} group={group}>
-                {group.relationships.map((relationship) => relationship.kind === "modeled-device" ? (
-                  <ModeledDeviceMappingRow
-                    key={relationship.id}
-                    manifest={manifest}
-                    room={selectedRoom}
-                    device={relationship.device}
-                    profile={profile}
-                    runtime={runtime}
-                    disabled={disabled}
-                    selected={relationship.id === selectedRelationshipId}
-                    onOpen={(input) => activateRelationship(relationship.id, input)}
-                    onTriggerElement={(element) => { relationshipElements.current[relationship.id] = element; }}
-                  />
-                ) : (
-                  <EntitySlotMappingRow
-                    key={relationship.id}
-                    descriptor={relationship.descriptor}
-                    room={selectedRoom}
-                    profile={profile}
-                    runtime={runtime}
-                    disabled={disabled}
-                    selected={relationship.id === selectedRelationshipId}
-                    onOpen={(input) => activateRelationship(relationship.id, input)}
-                    onTriggerElement={(element) => { relationshipElements.current[relationship.id] = element; }}
-                  />
-                ))}
+                {group.relationships.map((relationship) =>
+                  relationship.kind === "modeled-device" ? (
+                    <ModeledDeviceMappingRow
+                      key={relationship.id}
+                      manifest={manifest}
+                      room={selectedRoom}
+                      device={relationship.device}
+                      profile={profile}
+                      runtime={runtime}
+                      disabled={disabled}
+                      selected={relationship.id === selectedRelationshipId}
+                      onOpen={(input) => activateRelationship(relationship.id, input)}
+                      onTriggerElement={(element) => {
+                        relationshipElements.current[relationship.id] = element;
+                      }}
+                    />
+                  ) : (
+                    <EntitySlotMappingRow
+                      key={relationship.id}
+                      descriptor={relationship.descriptor}
+                      room={selectedRoom}
+                      profile={profile}
+                      runtime={runtime}
+                      disabled={disabled}
+                      selected={relationship.id === selectedRelationshipId}
+                      onOpen={(input) => activateRelationship(relationship.id, input)}
+                      onTriggerElement={(element) => {
+                        relationshipElements.current[relationship.id] = element;
+                      }}
+                    />
+                  ),
+                )}
               </DeviceMappingGroup>
             ))}
             {groups.length === 0 && (
@@ -179,17 +192,23 @@ export function DevicesMappingView({
         onEntityIdsBySlotIdChange={onEntityIdsBySlotIdChange}
         onSelectionMade={(targetLabel) => {
           if (!selectedRelationship) return;
-          setAnnouncement(targetLabel === "Not connected"
-            ? `${selectedRelationship.label} is not connected.`
-            : `${selectedRelationship.label} is connected to ${targetLabel}.`);
+          setAnnouncement(
+            targetLabel === "Not connected"
+              ? `${selectedRelationship.label} is not connected.`
+              : `${selectedRelationship.label} is connected to ${targetLabel}.`,
+          );
           setInspectorState("summary");
           focusSelectedRelationship();
         }}
         onCollapse={collapseInspector}
         onReopen={() => setInspectorState("open")}
-        onChoiceElement={(element) => { choiceElement.current = element; }}
+        onChoiceElement={(element) => {
+          choiceElement.current = element;
+        }}
       />
-      <p className="visually-hidden" aria-live="polite">{announcement}</p>
+      <p className="visually-hidden" aria-live="polite">
+        {announcement}
+      </p>
     </div>
   );
 }

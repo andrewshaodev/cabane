@@ -17,7 +17,11 @@ export function SirenModel({ visualState }: HomeDeviceModelProps) {
       </mesh>
       <mesh position={[0, 0.08, 0.0675]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.028, 0.028, 0.005, 18]} />
-        <ToonMaterial color={sounding ? palette.coral : palette.charcoal} emissive={palette.coral} emissiveIntensity={sounding ? 0.42 : 0.03} />
+        <ToonMaterial
+          color={sounding ? palette.coral : palette.charcoal}
+          emissive={palette.coral}
+          emissiveIntensity={sounding ? 0.42 : 0.03}
+        />
       </mesh>
       {[-0.038, 0.038].map((x) => (
         <mesh key={x} position={[x, 0.08, 0.068]}>

@@ -4,11 +4,7 @@ import { deriveClimateAirflowMode } from "../../climate-airflow";
 import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 import { AirflowWaves } from "../../visuals/airflow-waves";
 
-export function IndoorAcModel({
-  state,
-  visualState,
-  reducedMotion,
-}: HomeDeviceModelProps) {
+export function IndoorAcModel({ state, visualState, reducedMotion }: HomeDeviceModelProps) {
   const active = visualState === "connected-active";
   const airflowMode = active ? deriveClimateAirflowMode(state) : null;
   return (
@@ -22,20 +18,13 @@ export function IndoorAcModel({
         <boxGeometry args={[0.68, 0.055, 0.015]} />
         <ToonMaterial color={palette.charcoal} />
       </mesh>
-      <mesh
-        position={[0, 0.045, 0.19]}
-        rotation={[active ? -0.32 : -0.08, 0, 0]}
-      >
+      <mesh position={[0, 0.045, 0.19]} rotation={[active ? -0.32 : -0.08, 0, 0]}>
         <boxGeometry args={[0.62, 0.018, 0.07]} />
         <ToonMaterial color={palette.bodyDark} />
       </mesh>
       <StatusBeacon visualState={visualState} position={[0.32, 0.16, 0.178]} />
       {airflowMode && (
-        <AirflowWaves
-          mode={airflowMode}
-          width={0.84}
-          reducedMotion={reducedMotion}
-        />
+        <AirflowWaves mode={airflowMode} width={0.84} reducedMotion={reducedMotion} />
       )}
     </group>
   );

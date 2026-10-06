@@ -4,14 +4,12 @@ import {
   coverActionCall,
   coverPositionCall,
   featureEnabled,
-  type SupportedServiceCall
+  type SupportedServiceCall,
 } from "../home-assistant-controls";
 
 import type { ResolvedEntityBinding } from "../types";
 
-import {
-  CommandRange
-} from "./control-primitives";
+import { CommandRange } from "./control-primitives";
 
 import { CommandAction } from "./command-actions";
 import { confirmationKey } from "./entity-field-contract";
@@ -28,14 +26,23 @@ export function CoverFields({
   const entity = binding.state;
   if (!entity) return null;
   const position = coverPosition(entity);
-  const movement = entity.state === "opening" ? "Opening" : entity.state === "closing" ? "Closing" : null;
-  const status = !entity.available || entity.stale || ["unknown", "unavailable"].includes(entity.state)
-    ? "Unavailable"
-    : position === null ? movement ?? "Position unknown"
-      : `${movement ? `${movement} · ` : ""}${Math.round(position)}% open`;
+  const movement =
+    entity.state === "opening" ? "Opening" : entity.state === "closing" ? "Closing" : null;
+  const status =
+    !entity.available || entity.stale || ["unknown", "unavailable"].includes(entity.state)
+      ? "Unavailable"
+      : position === null
+        ? (movement ?? "Position unknown")
+        : `${movement ? `${movement} · ` : ""}${Math.round(position)}% open`;
   return (
     <div className="room-module__controls room-module__controls--cover">
-      <output className="room-module__reading" aria-label={`${binding.label} status`} aria-live="polite">{status}</output>
+      <output
+        className="room-module__reading"
+        aria-label={`${binding.label} status`}
+        aria-live="polite"
+      >
+        {status}
+      </output>
       <div className="room-module__action-row">
         {featureEnabled(entity, 1) && (
           <CommandAction

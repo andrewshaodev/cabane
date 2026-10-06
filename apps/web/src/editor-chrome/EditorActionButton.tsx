@@ -9,16 +9,25 @@ interface EditorActionButtonProps {
   shortcut?: string;
   keyShortcuts?: string;
   showLabel?: boolean;
-  pressed?: boolean;
-  disabled?: boolean;
-  disabledReason?: string;
-  warning?: string;
+  pressed?: boolean | undefined;
+  disabled?: boolean | undefined;
+  disabledReason?: string | undefined;
+  warning?: string | undefined;
   onClick: () => void;
 }
 
 /** Tooltips live outside the scrollable action bar, including on narrow screens. */
 export function EditorActionButton({
-  icon, label, shortcut, keyShortcuts, showLabel = false, pressed, disabled, disabledReason, warning, onClick,
+  icon,
+  label,
+  shortcut,
+  keyShortcuts,
+  showLabel = false,
+  pressed,
+  disabled,
+  disabledReason,
+  warning,
+  onClick,
 }: EditorActionButtonProps) {
   const dom = useCabaneDom();
   const tooltipId = useId();
@@ -30,14 +39,19 @@ export function EditorActionButton({
     const width = portalBounds?.width ?? window.innerWidth;
     const inset = Math.min(112, width / 2);
     setPosition({
-      left: Math.max(inset, Math.min(width - inset, rect.left + rect.width / 2 - (portalBounds?.left ?? 0))),
+      left: Math.max(
+        inset,
+        Math.min(width - inset, rect.left + rect.width / 2 - (portalBounds?.left ?? 0)),
+      ),
       top: rect.bottom + 9 - (portalBounds?.top ?? 0),
     });
   };
   useEffect(() => {
     if (!position) return;
     const dismiss = () => setPosition(null);
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") dismiss(); };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") dismiss();
+    };
     window.addEventListener("resize", dismiss);
     window.addEventListener("scroll", dismiss, true);
     dom.events.addEventListener("keydown", onKeyDown);
@@ -46,27 +60,45 @@ export function EditorActionButton({
       window.removeEventListener("scroll", dismiss, true);
       dom.events.removeEventListener("keydown", onKeyDown);
     };
-  }, [position]);
+  }, [position, dom]);
 
   return (
     <>
-      <button type="button" className="editor-action-button" aria-label={label}
-        title={disabled ? disabledReason : undefined} aria-description={disabled ? disabledReason : warning}
-        aria-pressed={pressed} aria-keyshortcuts={keyShortcuts} disabled={disabled}
+      <button
+        type="button"
+        className="editor-action-button"
+        aria-label={label}
+        title={disabled ? disabledReason : undefined}
+        aria-description={disabled ? disabledReason : warning}
+        aria-pressed={pressed}
+        aria-keyshortcuts={keyShortcuts}
+        disabled={disabled}
         aria-describedby={position && !disabled ? tooltipId : undefined}
-        onClick={onClick} onFocus={showTooltip} onBlur={() => setPosition(null)}
-        onMouseEnter={showTooltip} onMouseLeave={(event) => {
+        onClick={onClick}
+        onFocus={showTooltip}
+        onBlur={() => setPosition(null)}
+        onMouseEnter={showTooltip}
+        onMouseLeave={(event) => {
           if (dom.root.activeElement !== event.currentTarget) setPosition(null);
-        }}>
+        }}
+      >
         <EditorIcon name={icon} />
         {showLabel && <span>{label}</span>}
-        {warning && <span className="editor-action-button__warning"><EditorIcon name="warning" /></span>}
+        {warning && (
+          <span className="editor-action-button__warning">
+            <EditorIcon name="warning" />
+          </span>
+        )}
       </button>
-      {position && !disabled && createPortal(
-        <div role="tooltip" id={tooltipId} className="editor-action-tooltip" style={position}>
-          {warning ?? label}{shortcut && <kbd>{shortcut}</kbd>}
-        </div>, dom.portalContainer,
-      )}
+      {position &&
+        !disabled &&
+        createPortal(
+          <div role="tooltip" id={tooltipId} className="editor-action-tooltip" style={position}>
+            {warning ?? label}
+            {shortcut && <kbd>{shortcut}</kbd>}
+          </div>,
+          dom.portalContainer,
+        )}
     </>
   );
 }

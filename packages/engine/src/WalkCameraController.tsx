@@ -1,26 +1,22 @@
+import { omitUndefinedProperties } from "./defined-properties";
+import { useWalkToolNavigation } from "./walk-tools/useWalkToolNavigation";
+import type { WalkToolNavigation } from "./walk-tools";
 import { passableOpeningIds, type OpeningPositions } from "./opening-pose";
 import { prepareWalkColliders } from "./navigation/prepared-walk-colliders";
-import { moveBuildingWalker, prepareBuildingWalk, type BuildingWalkPoint } from "./stairs/stair-navigation";
+import {
+  moveBuildingWalker,
+  prepareBuildingWalk,
+  type BuildingWalkPoint,
+} from "./stairs/stair-navigation";
 import type { BuildingGeometry } from "./stairs/types";
 import type { StairModelRegistries } from "./stairs/stair-obstacles";
-import {
-  PerspectiveCamera
-} from "@react-three/drei";
+import { PerspectiveCamera } from "@react-three/drei";
 
 import { useFrame, useThree } from "@react-three/fiber";
 
-import {
-  Box3,
-  type Object3D,
-  type PerspectiveCamera as ThreePerspectiveCamera
-} from "three";
+import { Box3, type Object3D, type PerspectiveCamera as ThreePerspectiveCamera } from "three";
 
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  type MutableRefObject
-} from "react";
+import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 
 import {
   clampPitch,
@@ -34,7 +30,7 @@ import {
   WALK_MAX_SPEED,
   type BoxWalkCollider,
   type StickVector,
-  type WalkPose
+  type WalkPose,
 } from "./navigation";
 
 import type { FloorSpec } from "./types";
@@ -44,8 +40,12 @@ const JUMP_LAUNCH_SPEED = 2.8; // 0.4 m peak, approximately 0.57 s airborne.
 
 export function WalkCameraController({
   floor,
-  building, registries, elevation = 0, onFloorChange,
+  building,
+  registries,
+  elevation = 0,
+  onFloorChange,
   poseRef,
+  toolNavigationRef,
   movementInputRef,
   sprintInputRef,
   jumpRequestRef,
@@ -65,6 +65,7 @@ export function WalkCameraController({
   onFloorChange?: (id: string) => void;
 
   poseRef: MutableRefObject<WalkPose>;
+  toolNavigationRef?: MutableRefObject<WalkToolNavigation | null>;
   movementInputRef: MutableRefObject<StickVector>;
   sprintInputRef?: MutableRefObject<boolean>;
   jumpRequestRef?: MutableRefObject<boolean>;
@@ -79,13 +80,25 @@ export function WalkCameraController({
 }) {
   // Compare architecture content at React updates, not on every animation frame.
   // This also catches edits that reuse a FloorSpec object instead of its identity.
-  const navigationKey = JSON.stringify(building
-    ? { floors: building.floors, stairs: building.stairs, coordinates: building.coordinates }
-    : floor);
+  const navigationKey = JSON.stringify(
+    building
+      ? { floors: building.floors, stairs: building.stairs, coordinates: building.coordinates }
+      : floor,
+  );
   const buildingMode = Boolean(building);
-  const navigation = useMemo(() => buildingMode
-    ? { building: prepareBuildingWalk(JSON.parse(navigationKey)), floor: null }
-    : { building: undefined, floor: prepareWalkColliders(JSON.parse(navigationKey)) }, [navigationKey, buildingMode]);
+  const navigation = useMemo(
+    () =>
+      buildingMode
+        ? {
+            building: prepareBuildingWalk(JSON.parse(navigationKey) as BuildingGeometry),
+            floor: null,
+          }
+        : {
+            building: undefined,
+            floor: prepareWalkColliders(JSON.parse(navigationKey) as FloorSpec),
+          },
+    [navigationKey, buildingMode],
+  );
   const cameraRef = useRef<ThreePerspectiveCamera>(null);
   const walker = useRef<BuildingWalkPoint | null>(null);
   const previousFloorId = useRef(floor.id);
@@ -106,28 +119,63 @@ export function WalkCameraController({
     scene.traverse((object: Object3D) => {
       if (object.userData.walkCollider !== true) return;
       box.setFromObject(object);
-      if (!box.isEmpty() && box.max.y > elevation + 0.05 && box.min.y < elevation + WALK_EYE_HEIGHT + 0.2) next.push({
-        kind: "box",
-        id: object.uuid,
-        minX: box.min.x,
-        maxX: box.max.x,
-        minZ: box.min.z,
-        maxZ: box.max.z,
-      });
+      if (
+        !box.isEmpty() &&
+        box.max.y > elevation + 0.05 &&
+        box.min.y < elevation + WALK_EYE_HEIGHT + 0.2
+      )
+        next.push({
+          kind: "box",
+          id: object.uuid,
+          minX: box.min.x,
+          maxX: box.max.x,
+          minZ: box.min.z,
+          maxZ: box.max.z,
+        });
     });
     furniture.current = next;
   }, [box, scene, floor.id, elevation]);
 
+  useWalkToolNavigation(
+    omitUndefinedProperties({
+      ...(building === undefined ? {} : { building: building }),
+      floor,
+      scene,
+      box,
+      ...(toolNavigationRef === undefined ? {} : { toolNavigationRef: toolNavigationRef }),
+      poseRef,
+      cameraRef,
+      walker,
+      velocity,
+      lookVelocity,
+      lookDeltaRef,
+      jumpHeight,
+      jumpVelocity,
+      bobWeight,
+      ...(jumpRequestRef === undefined ? {} : { jumpRequestRef: jumpRequestRef }),
+      lastRoomId,
+      onFloorChange,
+      onRoomChange,
+      invalidate,
+    }),
+  );
+
   useEffect(() => {
     if (!cameraRef.current) return;
     cameraRef.current.rotation.order = "YXZ";
-    cameraRef.current.position.set(poseRef.current.x, elevation + WALK_EYE_HEIGHT, poseRef.current.z);
+    cameraRef.current.position.set(
+      poseRef.current.x,
+      elevation + WALK_EYE_HEIGHT,
+      poseRef.current.z,
+    );
     cameraRef.current.rotation.set(poseRef.current.pitch, poseRef.current.yaw, 0);
     invalidate();
-  }, [invalidate, poseRef]);
+  }, [elevation, invalidate, poseRef]);
 
   const openIdsRef = useRef<ReadonlySet<string>>(new Set());
-  openIdsRef.current = new Set(Object.keys(openingPositions).filter((id) => openingPositions[id] > 0));
+  openIdsRef.current = new Set(
+    Object.keys(openingPositions).filter((id) => openingPositions[id] > 0),
+  );
 
   useFrame((_, rawDelta) => {
     const camera = cameraRef.current;
@@ -138,11 +186,9 @@ export function WalkCameraController({
     pose.pitch = clampPitch(pose.pitch - lookDeltaRef.current.y * (invertYAxis ? -0.002 : 0.002));
     lookDeltaRef.current = { x: 0, y: 0 };
     lookVelocity.current.x +=
-      (lookInputRef.current.x * 2.4 - lookVelocity.current.x) *
-      (1 - Math.exp(-18 * delta));
+      (lookInputRef.current.x * 2.4 - lookVelocity.current.x) * (1 - Math.exp(-18 * delta));
     lookVelocity.current.y +=
-      (lookInputRef.current.y * 1.7 - lookVelocity.current.y) *
-      (1 - Math.exp(-18 * delta));
+      (lookInputRef.current.y * 1.7 - lookVelocity.current.y) * (1 - Math.exp(-18 * delta));
     pose.yaw -= lookVelocity.current.x * delta;
     pose.pitch = clampPitch(pose.pitch - lookVelocity.current.y * delta * (invertYAxis ? -1 : 1));
 
@@ -165,10 +211,7 @@ export function WalkCameraController({
     for (const opening of floor.openings) {
       if (opening.kind !== "door" || boundOpeningIds.has(opening.id)) continue;
       const currentlyOpen = (nextOpen ?? openIdsRef.current).has(opening.id);
-      const shouldOpen = shouldAutoOpenDoor(
-        distanceToOpening(pose, opening, floor),
-        currentlyOpen,
-      );
+      const shouldOpen = shouldAutoOpenDoor(distanceToOpening(pose, opening, floor), currentlyOpen);
       if (shouldOpen !== currentlyOpen) {
         nextOpen ??= new Set(openIdsRef.current);
         if (shouldOpen) nextOpen.add(opening.id);
@@ -183,22 +226,48 @@ export function WalkCameraController({
       jumpRequestRef.current = false;
     }
     if (jumpVelocity.current !== 0 || jumpHeight.current > 0) {
-      jumpHeight.current = Math.max(0, jumpHeight.current + jumpVelocity.current * delta - 0.5 * JUMP_GRAVITY * delta * delta);
-      jumpVelocity.current = jumpHeight.current > 0 ? jumpVelocity.current - JUMP_GRAVITY * delta : 0;
+      jumpHeight.current = Math.max(
+        0,
+        jumpHeight.current + jumpVelocity.current * delta - 0.5 * JUMP_GRAVITY * delta * delta,
+      );
+      jumpVelocity.current =
+        jumpHeight.current > 0 ? jumpVelocity.current - JUMP_GRAVITY * delta : 0;
     }
 
     // Collision consumes the same committed pose as the model. Proximity changes
     // become traversable when React applies them to both on the next render.
-    const passable = passableOpeningIds(building?.floors ?? [floor], openingPositions, jumpHeight.current);
+    const passable = passableOpeningIds(
+      building?.floors ?? [floor],
+      openingPositions,
+      jumpHeight.current,
+    );
     const current = walker.current;
     // Frame updates can outrun React’s floor selection commit at a landing.
     // Keep the physical walker authoritative until a different floor is selected.
     const floorSelectionChanged = previousFloorId.current !== floor.id;
     previousFloorId.current = floor.id;
-    const start = current && (!floorSelectionChanged || current.floorId === floor.id) && current.x === pose.x && current.z === pose.z
-      ? current : { ...pose, floorId: floor.id, elevation };
-    const next = building ? moveBuildingWalker(building, start, movement, passable, furniture.current, navigation.building, registries)
-      : { ...resolveCircleMovement(pose, movement, navigation.floor!(passable, furniture.current)), floorId: floor.id, elevation };
+    const start =
+      current &&
+      (!floorSelectionChanged || current.floorId === floor.id) &&
+      current.x === pose.x &&
+      current.z === pose.z
+        ? current
+        : { ...pose, floorId: floor.id, elevation };
+    const next = building
+      ? moveBuildingWalker(
+          building,
+          start,
+          movement,
+          passable,
+          furniture.current,
+          navigation.building,
+          registries,
+        )
+      : {
+          ...resolveCircleMovement(pose, movement, navigation.floor!(passable, furniture.current)),
+          floorId: floor.id,
+          elevation,
+        };
     walker.current = next;
     if (next.floorId !== start.floorId) onFloorChange?.(next.floorId);
     pose.x = next.x;
@@ -213,7 +282,11 @@ export function WalkCameraController({
       (1 - Math.exp(-(speedRatio > 0.02 ? 10 : 14) * delta));
     bobPhase.current += speedRatio * Math.PI * 2 * 1.7 * delta;
     const bob = jumpHeight.current > 0 ? 0 : Math.sin(bobPhase.current) * 0.015 * bobWeight.current;
-    camera.position.set(pose.x, next.elevation + WALK_EYE_HEIGHT + jumpHeight.current + bob, pose.z);
+    camera.position.set(
+      pose.x,
+      next.elevation + WALK_EYE_HEIGHT + jumpHeight.current + bob,
+      pose.z,
+    );
     camera.rotation.set(pose.pitch, pose.yaw, 0);
 
     const roomId = roomAtWorldPoint(pose, floor)?.id ?? null;
@@ -223,13 +296,5 @@ export function WalkCameraController({
     }
   });
 
-  return (
-    <PerspectiveCamera
-      ref={cameraRef}
-      makeDefault
-      fov={68}
-      near={0.04}
-      far={120}
-    />
-  );
+  return <PerspectiveCamera ref={cameraRef} makeDefault fov={68} near={0.04} far={120} />;
 }

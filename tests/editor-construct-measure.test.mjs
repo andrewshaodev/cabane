@@ -23,7 +23,7 @@ await withModules(async (load) => {
 
   const coordinates = {
     origin: [10, -2],
-    metersPerPlanUnit: .5,
+    metersPerPlanUnit: 0.5,
     scaleBasis: "measured",
   };
 
@@ -37,11 +37,9 @@ await withModules(async (load) => {
     assert.equal(measurement.copyText, measurement.label);
     assert.deepEqual(measurement.world.from, [0, 0]);
     assert.deepEqual(measurement.world.to, [1.5, 2]);
-    assert.deepEqual(measurement.world.center, [.75, 1]);
+    assert.deepEqual(measurement.world.center, [0.75, 1]);
     assert.equal(measurement.world.lengthMeters, 2.5);
-    assert.ok(
-      Math.abs(measurement.world.rotationYRadians + Math.atan2(2, 1.5)) < 1e-12,
-    );
+    assert.ok(Math.abs(measurement.world.rotationYRadians + Math.atan2(2, 1.5)) < 1e-12);
     assert.equal(constructMeasurementIsVisible(measurement), true);
   });
 
@@ -61,7 +59,10 @@ await withModules(async (load) => {
     assert.equal(constructMeasureGuidePoints(state), null);
 
     state = constructMeasureReducer(state, { type: "preview", point: [11, 0] });
-    assert.deepEqual(constructMeasureGuidePoints(state), [[10, -2], [11, 0]]);
+    assert.deepEqual(constructMeasureGuidePoints(state), [
+      [10, -2],
+      [11, 0],
+    ]);
     assert.equal(
       constructMeasurementForState(state, coordinates).label,
       "2.24 plan units · 1.12 m",
@@ -69,7 +70,10 @@ await withModules(async (load) => {
 
     state = constructMeasureReducer(state, { type: "place", point: [13, 2] });
     assert.equal(constructMeasurePhase(state), "complete");
-    assert.deepEqual(constructMeasureGuidePoints(state), [[10, -2], [13, 2]]);
+    assert.deepEqual(constructMeasureGuidePoints(state), [
+      [10, -2],
+      [13, 2],
+    ]);
     const completed = state;
     assert.equal(
       constructMeasureReducer(state, { type: "preview", point: [99, 99] }),
@@ -96,11 +100,13 @@ await withModules(async (load) => {
 
   test("renders a visible controlled guide without owning project state", async () => {
     const measurement = measureConstructPoints([10, -2], [13, 2], coordinates);
-    const renderer = await create(createElement(ConstructionMeasureOverlay, {
-      measurement,
-      preview: true,
-      showLabel: false,
-    }));
+    const renderer = await create(
+      createElement(ConstructionMeasureOverlay, {
+        measurement,
+        preview: true,
+        showLabel: false,
+      }),
+    );
 
     try {
       const guide = renderer.scene.findByProps({ name: "construction-measure-guide" });

@@ -4,7 +4,11 @@ import type { RuntimeBindingProfile } from "../types";
 import type { ActionBarItem } from "./action-bar-config";
 import { haActionShortcutCall } from "./ha-action-shortcuts";
 
-export function useHaActionShortcuts(runtime: HomeAssistantRuntimeValue, profile: RuntimeBindingProfile, onError: (message: string | null) => void) {
+export function useHaActionShortcuts(
+  runtime: HomeAssistantRuntimeValue,
+  profile: RuntimeBindingProfile,
+  onError: (message: string | null) => void,
+) {
   const pendingRef = useRef(new Set<string>());
   const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
   const run = async (item: ActionBarItem) => {
@@ -16,7 +20,11 @@ export function useHaActionShortcuts(runtime: HomeAssistantRuntimeValue, profile
       onError(null);
       await runtime.callService(call);
     } catch (error) {
-      onError(error instanceof Error ? error.message : `Home Assistant could not run this ${item.target.kind}. Try again.`);
+      onError(
+        error instanceof Error
+          ? error.message
+          : `Home Assistant could not run this ${item.target.kind}. Try again.`,
+      );
     } finally {
       pendingRef.current.delete(item.id);
       setPending(new Set(pendingRef.current));

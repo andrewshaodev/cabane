@@ -24,7 +24,7 @@ export function DeviceMappingRelationshipCard({
   disabled: boolean;
   selected: boolean;
   onOpen: (input: DeviceMappingActivationInput) => void;
-  onTriggerElement?: (element: HTMLButtonElement | null) => void;
+  onTriggerElement?: ((element: HTMLButtonElement | null) => void) | undefined;
 }) {
   const pointerActivation = useRef(false);
 
@@ -41,19 +41,23 @@ export function DeviceMappingRelationshipCard({
         className="device-mapping-row__trigger"
         disabled={disabled}
         aria-label={`${label}. Home Assistant: ${targetLabel}. ${disabled ? "Mapping unavailable." : "Select to edit."}`}
-        onPointerDown={() => { pointerActivation.current = true; }}
+        onPointerDown={() => {
+          pointerActivation.current = true;
+        }}
         onClick={() => {
           const input = pointerActivation.current ? "pointer" : "keyboard";
           pointerActivation.current = false;
           onOpen(input);
         }}
       >
-        {preview ?? <span
-          className={`device-mapping-row__icon is-${domain}${connected ? " is-connected" : ""}`}
-          aria-hidden="true"
-        >
-          <DeviceCategoryIcon domain={domain} className="device-mapping-row__glyph" />
-        </span>}
+        {preview ?? (
+          <span
+            className={`device-mapping-row__icon is-${domain}${connected ? " is-connected" : ""}`}
+            aria-hidden="true"
+          >
+            <DeviceCategoryIcon domain={domain} className="device-mapping-row__glyph" />
+          </span>
+        )}
         <span className="device-mapping-row__identity">
           <strong>{label}</strong>
         </span>

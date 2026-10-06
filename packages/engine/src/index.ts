@@ -1,5 +1,6 @@
 export { createBrowserUuid } from "./browser-uuid";
 export * from "./types";
+export * from "./walk-tools";
 export * from "./action-bar/action-bar-config";
 export * from "./action-bar/ha-action-shortcuts";
 export { DEFAULT_ROOF_SETTINGS, type RoofSettings } from "./roof/roof-settings";
@@ -29,10 +30,23 @@ export * from "./browser-data-transfer";
 export * from "./home-assistant-mapping";
 export * from "./HomeAssistantMappingScreen";
 export * from "./RuntimeBindingSetup";
-export { HomeAssistantRuntimeProvider, HomeAssistantRuntimeValueProvider, useHomeAssistantRuntime, type HomeAssistantRuntimeValue } from "./HomeAssistantRuntime";
+export {
+  HomeAssistantRuntimeProvider,
+  HomeAssistantRuntimeValueProvider,
+  useHomeAssistantRuntime,
+  type HomeAssistantRuntimeValue,
+} from "./HomeAssistantRuntime";
 export { HomeAssistantConnectionFlow } from "./HomeAssistantConnectionFlow";
 export { HomeAssistantCorsHelp } from "./HomeAssistantCorsHelp";
-export { loadStoredHomeAssistantUrl, saveStoredHomeAssistantUrl, loadStoredAuthData, saveStoredAuthData, homeAssistantAuthStorageKey, normalizeHomeAssistantUrl, homeAssistantTransportError } from "./home-assistant-auth";
+export {
+  loadStoredHomeAssistantUrl,
+  saveStoredHomeAssistantUrl,
+  loadStoredAuthData,
+  saveStoredAuthData,
+  homeAssistantAuthStorageKey,
+  normalizeHomeAssistantUrl,
+  homeAssistantTransportError,
+} from "./home-assistant-auth";
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
 export { DeviceMappingInspector } from "./home-assistant-mapping/DeviceMappingInspector";
@@ -75,11 +89,25 @@ export { deviceMappingRooms } from "./outside-room-devices";
 export { BUILD_TUTORIAL_STEPS, createBuildTutorialState } from "./onboarding/build-tutorial-state";
 export type { BuildTutorialState, BuildTutorialStep } from "./onboarding/build-tutorial-state";
 export { rollUpDoorGeometry } from "./roll-up-door-geometry";
-export { DEFAULT_DOOR_CONFIGURATION, doorFromConfiguration, doorConfiguration } from "./door-configuration";
+export {
+  DEFAULT_DOOR_CONFIGURATION,
+  doorFromConfiguration,
+  doorConfiguration,
+} from "./door-configuration";
 
-export { HomeAssistantHostSessionProvider, useHomeAssistantHostSession, type HomeAssistantHostSession } from "./HomeAssistantHostSession";
-export { CabaneDomProvider, useCabaneDom, useCabaneAssetUrl, type CabaneDomEnvironment } from "./CabaneDom";
+export {
+  HomeAssistantHostSessionProvider,
+  useHomeAssistantHostSession,
+  type HomeAssistantHostSession,
+} from "./HomeAssistantHostSession";
+export {
+  CabaneDomProvider,
+  useCabaneDom,
+  useCabaneAssetUrl,
+  type CabaneDomEnvironment,
+} from "./CabaneDom";
 
 export { connectedCanvasEvents } from "./connected-canvas-events";
 
 export * from "./outdoor-platforms";
+export { omitUndefinedProperties } from "./defined-properties";

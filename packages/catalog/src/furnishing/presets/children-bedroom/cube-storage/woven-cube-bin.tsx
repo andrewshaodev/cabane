@@ -1,13 +1,7 @@
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import { WICKER, WICKER_LIGHT } from "./cube-storage-finish";
 
-export function WovenCubeBin({
-  x,
-  y,
-}: {
-  readonly x: number;
-  readonly y: number;
-}) {
+export function WovenCubeBin({ x, y }: { readonly x: number; readonly y: number }) {
   return (
     <group position={[x, y, 0.038]}>
       <mesh castShadow>

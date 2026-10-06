@@ -13,7 +13,10 @@ bolt.lineTo(0.027, 0.011);
 bolt.lineTo(0.006, 0.011);
 bolt.closePath();
 
-function PowerIndicator({ visualState, reducedMotion }: Pick<HomeDeviceModelProps, "visualState" | "reducedMotion">) {
+function PowerIndicator({
+  visualState,
+  reducedMotion,
+}: Pick<HomeDeviceModelProps, "visualState" | "reducedMotion">) {
   const symbol = useRef<Group>(null);
   const active = visualState === "connected-active";
 
@@ -24,21 +27,29 @@ function PowerIndicator({ visualState, reducedMotion }: Pick<HomeDeviceModelProp
     if (active && !reducedMotion) invalidate();
   });
 
-  const color = active ? "#f2b45e" : visualState === "connected-inactive" ? "#799b89" : visualState === "unavailable" ? "#d4a04c" : "#8b918c";
+  const color = active
+    ? "#f2b45e"
+    : visualState === "connected-inactive"
+      ? "#799b89"
+      : visualState === "unavailable"
+        ? "#d4a04c"
+        : "#8b918c";
   return (
     <group ref={symbol} name={`water-heater-power-${visualState}`} position={[0, 0.42, 0.218]}>
       <mesh>
         <shapeGeometry args={[bolt]} />
-        <ToonMaterial color={color} emissive={color} emissiveIntensity={active ? 0.55 : 0.04} side={2} />
+        <ToonMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={active ? 0.55 : 0.04}
+          side={2}
+        />
       </mesh>
     </group>
   );
 }
 
-export function WaterHeaterModel({
-  visualState,
-  reducedMotion,
-}: HomeDeviceModelProps) {
+export function WaterHeaterModel({ visualState, reducedMotion }: HomeDeviceModelProps) {
   return (
     <group name="catalog-water-heater">
       <mesh position={[0, 0.79, 0]} castShadow receiveShadow>

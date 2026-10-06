@@ -32,11 +32,7 @@ export function KitchenPeninsula() {
           color="#aaa298"
         />
       ))}
-      <CabinetJoint
-        from={[3.286, 0.63, 0.34]}
-        to={[3.286, 0.63, 1.96]}
-        color="#aaa298"
-      />
+      <CabinetJoint from={[3.286, 0.63, 0.34]} to={[3.286, 0.63, 1.96]} color="#aaa298" />
       {[0.53, 0.95, 1.37, 1.79].map((handleZ) => (
         <group key={handleZ} position={[3.255, 0.7, handleZ]} rotation={[0, Math.PI / 2, 0]}>
           <BrassCabinetHandle position={[0, 0, 0]} />

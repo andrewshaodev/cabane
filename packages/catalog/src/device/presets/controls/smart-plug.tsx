@@ -6,7 +6,13 @@ import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 export function SmartPlugModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-smart-plug">
-      <RoundedBox args={[0.07, 0.07, 0.049]} radius={0.012} smoothness={2} position={[0, 0.035, 0.0245]} castShadow>
+      <RoundedBox
+        args={[0.07, 0.07, 0.049]}
+        radius={0.012}
+        smoothness={2}
+        position={[0, 0.035, 0.0245]}
+        castShadow
+      >
         <ToonMaterial color={palette.body} />
         <Outlines color={palette.charcoal} thickness={0.0025} />
       </RoundedBox>

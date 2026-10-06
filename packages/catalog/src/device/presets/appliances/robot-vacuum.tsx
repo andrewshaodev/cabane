@@ -26,7 +26,11 @@ export function RobotVacuumModel({ visualState }: HomeDeviceModelProps) {
       </mesh>
       <mesh name="robot-vacuum-front-sensor" position={[0, 0.04, 0.172]}>
         <boxGeometry args={[0.08, 0.025, 0.006]} />
-        <ToonMaterial color="#24312f" emissive={active ? palette.paleBlue : "#24312f"} emissiveIntensity={active ? 0.3 : 0} />
+        <ToonMaterial
+          color="#24312f"
+          emissive={active ? palette.paleBlue : "#24312f"}
+          emissiveIntensity={active ? 0.3 : 0}
+        />
       </mesh>
       {[-0.115, 0.115].map((x) => (
         <mesh key={x} position={[x, 0.025, 0]} rotation={[Math.PI / 2, 0, 0]}>

@@ -80,6 +80,10 @@ sheets, room sheets, and camera viewing share the normal dashboard surface.
 Visible scene lights respond to compatible light slots. Bound opening states
 control their visual state; unbound walkable doors can open automatically near
 the player. Missing HA data keeps the architectural scene usable.
+The demo leaves door contacts and door covers unbound so doors, including the
+garage door, open on approach and close on departure in Walk. Other supported
+device controls and window contacts retain their simulated bindings. Real HA
+opening bindings continue to take precedence over proximity.
 
 Televisions accept either a primary media-player binding for controls or a camera
 binding for scene video and the camera viewer. Only camera entity bindings request
@@ -149,3 +153,79 @@ selection, replacement, reordering, removal, history, Save and overflow behavior
 Their Home buttons show pending requests and expose unavailable reasons; they do
 not indicate an on/off state. Portable imports retain unmapped buttons and can be
 reconnected in Shortcuts.
+The web host offers an optional **Laser** action in Shortcuts → Add action,
+alongside Lights off and View. It is absent from the default bar. Save the shortcut,
+enter Walk, and select Laser to equip or unequip a procedural cartoon laser gun.
+Leaving Walk unequips it. Desktop pointer lock enables center-screen aim and
+left-click or F to fire; touch uses the existing sticks and two right-side icon buttons for zap and portal.
+The initiating pointer-lock click does not fire. Overlays, hidden documents, and
+paused mouse control disable firing. Stowing the tool restores ordinary device-panel interaction.
+
+Shots raycast at trigger time. The first visible surface blocks the shot, including
+walls and furniture; gun/effect geometry does not intercept it. Only a single valid,
+available, fresh light binding can toggle, through the normal guarded runtime call
+and demo adapter. Unsupported, ambiguous, or unmapped controls do not highlight the crosshair or issue commands; failed calls do not open a device panel or retry. Shots have a 300 ms
+cooldown and cannot overlap a pending control. Reduced motion retains the targeting crosshair while removing recoil, the traveling pulse, muzzle flash, and impact burst. The experimental package
+owns visuals and firing input; the engine owns generic tool installation and light
+activation.
+
+G equips or stows Laser while walking when its shortcut is on the bar, including
+while the mouse is captured. The key does nothing in a text field or overlay.
+
+Laser visuals use a layered ivory/brass procedural blaster with cyan energy details.
+A short tapered pulse travels to the hit instead of leaving a full-length beam
+suspended in the room. Its muzzle flash follows the gun and its impact burst
+expands and fades at the collision point. The generated toolbar icon matches
+the blaster and the existing sculpted action icons; it is never a scene texture.
+
+Each accepted zap or portal shot also pops a short, ink-outlined **PEW!**, **ZAP!**, or **POW!** above
+the moving muzzle. Procedural vector lettering, jagged cel-color bursts, and
+outward speed marks vary in color, silhouette, tilt, size, and drift between
+shots, with no adjacent palette repeat for primary fire. Portal bursts match the
+blue or gold portal being fired. The compact effect is 30% smaller than its initial
+size. Feedback replaces the previous pop on
+rapid fire and never intercepts input. Reduced motion keeps a stationary,
+briefly fading PEW without the pop, drift, or speed marks.
+
+The blaster includes a matching padded glove. Idle breathing and speed-driven walk/sprint sway move the hand and weapon together; reduced motion disables these offsets. A text-free four-tick crosshair becomes cyan corner brackets only over an eligible light, using the same host-owned authorization guards as firing.
+
+Shots now include a 300 ms flickering blue electrical arc with short branches, a slower bright traveling pulse, and a 550 ms blue impact burst. Surface-normal-aligned scorch patches cool from blue fissures to dark char and fade over 3.2 seconds. Up to twelve recent shots can coexist; these cosmetic marks never modify home geometry or device state.
+
+With Laser equipped and mouse capture active on desktop, right-click alternates
+between a blue and gold portal. A linked pair transports the walker from either
+entrance to the other exit, including between floors when both landings are clear.
+Portals fit on broad flat interior/exterior walls, indoor floors, outdoor slabs,
+and terrain with supported exits; wall portals align to standing height. Terrain
+landings reuse the rendered ground and its cutouts, require support across the
+player radius, and retain obstacle checks. Upper-floor exits still require slabs. Invalid or overlapping placements leave the pair and next color unchanged.
+Once paired, the oval shows a live perspective view through its partner, clipped
+at the exit surface so its supporting wall does not obstruct the view. Unpaired
+portals retain the energy membrane. The destination rim/ripple is excluded from
+its own capture to avoid overlapping fragments during movement. Views are one
+level deep, skip back-facing/off-screen openings, and use targets capped at 1024
+pixels per side; reduced motion preserves perspective tracking. Arrival protection avoids
+immediate return trips, and controls/overlays pause traversal. Stowing Laser or
+leaving Walk hides the pair; equipping restores it from the home, including after reload.
+Either fire action aimed at an existing entrance removes it and plays a short inward
+collapse. Removal immediately disables travel; nearer geometry occludes the shot.
+Reduced motion uses a brief still confirmation. Positions and next color autosave,
+and failed writes restore the prior pair with a storage error. This first version is grounded travel: no ceiling
+portals, retained launch momentum or flinging. Touch supports both actions and portal travel without pointer lock.
+Successful portal placement fires the same electrical zap as primary fire, tinted
+blue or gold to match its destination. Each portal blooms from zero with a brief
+overshoot, settling rim and dissipating energy ripple; replacement replays it.
+Reduced motion shows the completed portal immediately without the zap or bloom.
+Travel between portals briefly covers the view in energy before the position change,
+then eases open in the exit portal's color, with a small bounded lens effect.
+Pausing or stowing cancels pending travel and restores the camera. Reduced motion
+keeps only a short gentle tint and skips the lens/ring animation.
+The desktop gun crosshair includes text-free primary/secondary fire cues: a left
+zap glyph and right portal glyph, with matching highlighted mouse buttons. The
+portal cue shows the next blue/gold placement color. In landscape touch Walk,
+two right-side icon buttons fire zap and portal on contact. The portal button
+shows its next color; the central targeting reticle and movement/look sticks remain.
+
+Laser opts into the default shortcuts through installed-tool metadata. All homes
+using the default bar receive it, and Shortcuts → Restore defaults includes it.
+Explicitly customized bars remain exactly as saved. The engine does not hardcode
+a gun ID or import the optional gun package.

@@ -27,11 +27,7 @@ export function ConstructionMeasureOverlay({
   return (
     <group
       name="construction-measure-guide"
-      position={[
-        measurement.world.center[0],
-        .11,
-        measurement.world.center[1],
-      ]}
+      position={[measurement.world.center[0], 0.11, measurement.world.center[1]]}
       rotation={[0, measurement.world.rotationYRadians, 0]}
       userData={{
         distancePlanUnits: measurement.distancePlanUnits,
@@ -41,11 +37,11 @@ export function ConstructionMeasureOverlay({
       }}
     >
       <mesh name="construction-measure-guide-line" renderOrder={29} raycast={noPlanRaycast}>
-        <boxGeometry args={[measurement.world.lengthMeters, .018, .025]} />
+        <boxGeometry args={[measurement.world.lengthMeters, 0.018, 0.025]} />
         <ToonMaterial
           color="#ff754d"
           transparent
-          opacity={preview ? .72 : .96}
+          opacity={preview ? 0.72 : 0.96}
           depthTest={false}
           depthWrite={false}
         />
@@ -53,18 +49,22 @@ export function ConstructionMeasureOverlay({
       {[-1, 1].map((side) => (
         <ConstructionPointMarker
           key={side}
-          position={[side * measurement.world.lengthMeters / 2, 0, 0]}
+          position={[(side * measurement.world.lengthMeters) / 2, 0, 0]}
           planMode={planMode}
         />
       ))}
       {showLabel && (
         <Html
-          position={[0, .14, 0]}
+          position={[0, 0.14, 0]}
           center
           zIndexRange={[12, 0]}
           pointerEvents={onCopy ? "auto" : "none"}
         >
-          <ConstructionDistanceLabel label={measurement.label} copyText={measurement.copyText} onCopy={onCopy} />
+          <ConstructionDistanceLabel
+            label={measurement.label}
+            copyText={measurement.copyText}
+            onCopy={onCopy}
+          />
         </Html>
       )}
     </group>

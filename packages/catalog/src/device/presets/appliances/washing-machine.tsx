@@ -2,9 +2,7 @@ import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
 import { StatusBeacon } from "../../visuals/device-visual-state";
 
-export function WashingMachineModel({
-  visualState,
-}: HomeDeviceModelProps) {
+export function WashingMachineModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-washing-machine" userData={{ walkCollider: true }}>
       <mesh position={[0, 0.43, 0]} castShadow receiveShadow>

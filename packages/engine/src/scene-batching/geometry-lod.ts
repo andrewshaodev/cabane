@@ -30,11 +30,25 @@ export async function createGeometryLods(source: BufferGeometry): Promise<Geomet
   const indices = Uint32Array.from(welded.index!.array);
   const scale = MeshoptSimplifier.getScale(positions, 3);
   const levels: GeometryLod[] = [];
-  for (const [ratio, limit] of [[.5, .01], [.15, .03], [.04, .08]]) {
-    const [simplified, error] = MeshoptSimplifier.simplifyWithAttributes(indices, positions, 3,
-      attributes, stride, colors ? [.5, .5, .5, 1, 1, 1] : [.5, .5, .5], null,
-      Math.max(12, Math.floor(indices.length * ratio / 3) * 3), limit, ["Permissive"]);
-    if (simplified.length >= (levels.at(-1)?.geometry.index?.count ?? indices.length) * .95) continue;
+  for (const [ratio, limit] of [
+    [0.5, 0.01],
+    [0.15, 0.03],
+    [0.04, 0.08],
+  ]) {
+    const [simplified, error] = MeshoptSimplifier.simplifyWithAttributes(
+      indices,
+      positions,
+      3,
+      attributes,
+      stride,
+      colors ? [0.5, 0.5, 0.5, 1, 1, 1] : [0.5, 0.5, 0.5],
+      null,
+      Math.max(12, Math.floor((indices.length * ratio) / 3) * 3),
+      limit,
+      ["Permissive"],
+    );
+    if (simplified.length >= (levels.at(-1)?.geometry.index?.count ?? indices.length) * 0.95)
+      continue;
     // Keep cached/uploaded levels small rather than copying every unused vertex.
     const [remap, vertexCount] = MeshoptSimplifier.compactMesh(simplified);
     const geometry = new BufferGeometry();
@@ -44,7 +58,8 @@ export async function createGeometryLods(source: BufferGeometry): Promise<Geomet
       for (let vertex = 0; vertex < remap.length; vertex++) {
         if (remap[vertex] === 0xffffffff) continue;
         for (let axis = 0; axis < sourceAttribute.itemSize; axis++) {
-          values[remap[vertex] * sourceAttribute.itemSize + axis] = sourceAttribute.array[vertex * sourceAttribute.itemSize + axis];
+          values[remap[vertex] * sourceAttribute.itemSize + axis] =
+            sourceAttribute.array[vertex * sourceAttribute.itemSize + axis];
         }
       }
       geometry.setAttribute(name, new BufferAttribute(values, sourceAttribute.itemSize));

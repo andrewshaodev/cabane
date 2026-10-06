@@ -13,12 +13,7 @@ export const buildArchedPassageSpandrelShape = (
     widthMeters / 2,
     opening.openingHeightMeters,
   );
-  shape.quadraticCurveTo(
-    widthMeters * 0.78,
-    opening.openingHeightMeters,
-    widthMeters,
-    spring,
-  );
+  shape.quadraticCurveTo(widthMeters * 0.78, opening.openingHeightMeters, widthMeters, spring);
   shape.lineTo(widthMeters, opening.openingHeightMeters);
   shape.lineTo(0, opening.openingHeightMeters);
   shape.closePath();

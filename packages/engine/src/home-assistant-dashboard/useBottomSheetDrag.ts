@@ -5,8 +5,7 @@ export const ROOM_SHEET_EXPANDED_DVH = 94;
 
 export const settleRoomSheetHeight = (height: number): "dismiss" | 68 | 94 => {
   if (height < ROOM_SHEET_COLLAPSED_DVH) return "dismiss";
-  return Math.abs(height - ROOM_SHEET_COLLAPSED_DVH)
-    <= Math.abs(height - ROOM_SHEET_EXPANDED_DVH)
+  return Math.abs(height - ROOM_SHEET_COLLAPSED_DVH) <= Math.abs(height - ROOM_SHEET_EXPANDED_DVH)
     ? ROOM_SHEET_COLLAPSED_DVH
     : ROOM_SHEET_EXPANDED_DVH;
 };
@@ -36,10 +35,7 @@ export function useBottomSheetDrag(onDismiss: () => void) {
     if (drag.current?.pointerId !== event.pointerId) return;
     if (Math.abs(event.clientY - drag.current.startY) > 2) drag.current.moved = true;
     const delta = ((drag.current.startY - event.clientY) / window.innerHeight) * 100;
-    const next = Math.max(
-      0,
-      Math.min(ROOM_SHEET_EXPANDED_DVH, drag.current.startHeight + delta),
-    );
+    const next = Math.max(0, Math.min(ROOM_SHEET_EXPANDED_DVH, drag.current.startHeight + delta));
     heightRef.current = next;
     setHeight(next);
   };
@@ -71,9 +67,10 @@ export function useBottomSheetDrag(onDismiss: () => void) {
       suppressNextClick.current = false;
       return;
     }
-    const next = heightRef.current === ROOM_SHEET_EXPANDED_DVH
-      ? ROOM_SHEET_COLLAPSED_DVH
-      : ROOM_SHEET_EXPANDED_DVH;
+    const next =
+      heightRef.current === ROOM_SHEET_EXPANDED_DVH
+        ? ROOM_SHEET_COLLAPSED_DVH
+        : ROOM_SHEET_EXPANDED_DVH;
     heightRef.current = next;
     setHeight(next);
   };

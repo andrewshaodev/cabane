@@ -19,16 +19,8 @@ export function RoundCoffeeTable() {
       {[0, (Math.PI * 2) / 3, (Math.PI * 4) / 3].map((angle) => (
         <mesh
           key={angle}
-          position={[
-            Math.cos(angle) * 0.16,
-            0.155,
-            Math.sin(angle) * 0.13,
-          ]}
-          rotation={[
-            Math.sin(angle) * 0.08,
-            0,
-            Math.cos(angle) * 0.08,
-          ]}
+          position={[Math.cos(angle) * 0.16, 0.155, Math.sin(angle) * 0.13]}
+          rotation={[Math.sin(angle) * 0.08, 0, Math.cos(angle) * 0.08]}
           castShadow
         >
           <cylinderGeometry args={[0.022, 0.032, 0.307, 10]} />

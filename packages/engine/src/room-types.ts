@@ -11,6 +11,6 @@ export const ROOM_TYPES = [
   { id: "outdoor", label: "Outdoor" },
 ] as const;
 
-export type RoomType = typeof ROOM_TYPES[number]["id"];
+export type RoomType = (typeof ROOM_TYPES)[number]["id"];
 export const isRoomType = (value: unknown): value is RoomType =>
   ROOM_TYPES.some((room) => room.id === value);

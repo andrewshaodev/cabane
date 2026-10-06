@@ -1,15 +1,13 @@
-import {
-  findContainingRoom,
-  openingWorldPlacement,
-  worldPointToPlan
-} from "./geometry";
+import { findContainingRoom, openingWorldPlacement, worldPointToPlan } from "./geometry";
 
-import { LEGACY_SCENE_SESSION_STORAGE_KEY, SCENE_SESSION_STORAGE_KEY, SCENE_TAP_MOVE_TOLERANCE_PX, SceneSessionState, WalkPoint } from "./navigation/walk-navigation-contract";
-import type {
-  FloorSpec,
-  OpeningSpec,
-  SceneMode
-} from "./types";
+import {
+  LEGACY_SCENE_SESSION_STORAGE_KEY,
+  SCENE_SESSION_STORAGE_KEY,
+  SCENE_TAP_MOVE_TOLERANCE_PX,
+  SceneSessionState,
+  WalkPoint,
+} from "./navigation/walk-navigation-contract";
+import type { FloorSpec, OpeningSpec, SceneMode } from "./types";
 
 export const roomAtWorldPoint = (point: WalkPoint, floor: FloorSpec) =>
   findContainingRoom(worldPointToPlan(point, floor.coordinates), floor.rooms);
@@ -21,20 +19,24 @@ export const shouldAutoOpenDoor = (
   closeDistance = 1.55,
 ) => distance <= (currentlyOpen ? closeDistance : openDistance);
 
-export const distanceToOpening = (
-  point: WalkPoint,
-  opening: OpeningSpec,
-  floor: FloorSpec,
-) => {
+export const distanceToOpening = (point: WalkPoint, opening: OpeningSpec, floor: FloorSpec) => {
   const wall = floor.walls.find((candidate) => candidate.id === opening.wallId);
   if (!wall) return Number.POSITIVE_INFINITY;
   const placement = openingWorldPlacement(wall, opening, floor.coordinates);
   const dx = placement.end[0] - placement.start[0];
   const dz = placement.end[1] - placement.start[1];
-  const fraction = Math.max(0, Math.min(1,
-    ((point.x - placement.start[0]) * dx + (point.z - placement.start[1]) * dz) / (dx * dx + dz * dz),
-  ));
-  return Math.hypot(point.x - placement.start[0] - fraction * dx, point.z - placement.start[1] - fraction * dz);
+  const fraction = Math.max(
+    0,
+    Math.min(
+      1,
+      ((point.x - placement.start[0]) * dx + (point.z - placement.start[1]) * dz) /
+        (dx * dx + dz * dz),
+    ),
+  );
+  return Math.hypot(
+    point.x - placement.start[0] - fraction * dx,
+    point.z - placement.start[1] - fraction * dz,
+  );
 };
 
 export const movedBeyondSceneTapTolerance = (
@@ -87,15 +89,36 @@ export const writeSceneSession = (
 };
 export { deriveWalkColliders, isWalkPointClear } from "./navigation/walk-colliders";
 export { evaluateDerivedWalkNavigation } from "./navigation/walk-connectivity";
-export { clampPitch, dampValue, integrateWalkVelocity, normalizeStickInput, resolveCircleMovement } from "./navigation/walk-motion";
 export {
-  LEGACY_SCENE_SESSION_STORAGE_KEY, SCENE_SESSION_STORAGE_KEY, SCENE_TAP_MOVE_TOLERANCE_PX,
-  WALK_CRUISE_SPEED, WALK_EDGE_BOOST_START, WALK_EYE_HEIGHT, WALK_MAX_SPEED, WALK_PITCH_LIMIT,
-  WALK_PLAYER_RADIUS
+  clampPitch,
+  dampValue,
+  integrateWalkVelocity,
+  normalizeStickInput,
+  resolveCircleMovement,
+} from "./navigation/walk-motion";
+export {
+  LEGACY_SCENE_SESSION_STORAGE_KEY,
+  SCENE_SESSION_STORAGE_KEY,
+  SCENE_TAP_MOVE_TOLERANCE_PX,
+  WALK_CRUISE_SPEED,
+  WALK_EDGE_BOOST_START,
+  WALK_EYE_HEIGHT,
+  WALK_MAX_SPEED,
+  WALK_PITCH_LIMIT,
+  WALK_PLAYER_RADIUS,
 } from "./navigation/walk-navigation-contract";
 export type {
-  BoxWalkCollider, DerivedWalkNavigationEvaluation, DerivedWalkNavigationOptions, SceneSessionState,
-  SegmentWalkCollider, StickVector, WalkCollider, WalkNavigationDiagnostic, WalkPoint, WalkPose,
-  WalkRoomConnection, WalkRoomNavigation
+  BoxWalkCollider,
+  DerivedWalkNavigationEvaluation,
+  DerivedWalkNavigationOptions,
+  SceneSessionState,
+  SegmentWalkCollider,
+  StickVector,
+  WalkCollider,
+  WalkNavigationDiagnostic,
+  WalkPoint,
+  WalkPose,
+  WalkRoomConnection,
+  WalkRoomNavigation,
 } from "./navigation/walk-navigation-contract";
 export { safeSpawnPoseForRoom, spawnPoseForRoom } from "./navigation/walk-spawn";

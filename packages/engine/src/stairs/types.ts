@@ -2,6 +2,8 @@ import type { FloorCoordinates, FloorSpec, PlanPoint } from "../types";
 import type { SceneItemSpec } from "../home-project/types";
 
 interface StairConnection {
+  /** Sides when ascending; omitted means both. */
+  railings?: "both" | "left" | "right" | "none";
   id: string;
   lowerFloorId: string;
   upperFloorId: string;
@@ -34,8 +36,15 @@ export interface SpiralStairSpec extends StairConnection {
 }
 export type StairSpec = StraightStairSpec | LShapedStairSpec | UShapedStairSpec | SpiralStairSpec;
 export type StairShape = NonNullable<StairSpec["shape"]>;
-export interface StairPathPoint { x: number; z: number; elevation: number }
-export interface StairTread { polygon: readonly (readonly [number, number])[]; elevation: number }
+export interface StairPathPoint {
+  x: number;
+  z: number;
+  elevation: number;
+}
+export interface StairTread {
+  polygon: readonly (readonly [number, number])[];
+  elevation: number;
+}
 export interface StairShapeGeometry {
   path: StairPathPoint[];
   footprint: readonly (readonly [number, number])[];

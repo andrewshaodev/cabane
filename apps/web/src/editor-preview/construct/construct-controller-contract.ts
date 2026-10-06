@@ -1,7 +1,5 @@
 import {
-  availableOpeningOffsetRanges,
   deriveFloorTopology,
-  nearestAvailableOpeningOffset,
   type DerivedWallRun,
   type EditorOpening,
   type EditorWall,
@@ -15,7 +13,7 @@ import {
   type FloorFinishZoneSpec,
   type FloorSpec,
   type PlanPoint,
-  type Polygon
+  type Polygon,
 } from "@cabane/engine";
 
 import { usePoolDrawing } from "./usePoolDrawing";
@@ -37,12 +35,15 @@ export type ConstructEditorAction =
   | { type: "replace-floor"; floor: FloorSpec }
   | { type: "move-wall-endpoint"; wallId: string; endpoint: "from" | "to"; point: PlanPoint }
   | {
-    type: "update-selected-opening"; patch: Partial<Pick<EditorOpening,
-      "offsetPlanUnits" | "widthPlanUnits" | "openingHeightMeters" | "sillHeightMeters">>
-  }
+      type: "update-selected-opening";
+      patch: Partial<
+        Pick<
+          EditorOpening,
+          "offsetPlanUnits" | "widthPlanUnits" | "openingHeightMeters" | "sillHeightMeters"
+        >
+      >;
+    }
   | { type: "replace-selected-opening"; opening: EditorOpening };
-
-export { availableOpeningOffsetRanges, nearestAvailableOpeningOffset };
 
 export interface ConstructEditorController extends ConstructEditorState {
   doorConfiguration: import("@cabane/engine").DoorConfiguration;
@@ -50,30 +51,25 @@ export interface ConstructEditorController extends ConstructEditorState {
   openingError: string | null;
   hedgeSettings: Pick<import("@cabane/engine").HedgeSpec, "style" | "heightMeters" | "widthMeters">;
   setHedgeSettings: (settings: ConstructEditorController["hedgeSettings"]) => void;
-  platformSettings: { finish: FloorFinishSpec; defaultEdge: import("@cabane/engine").OutdoorPlatformEdgeConfiguration };
+  platformSettings: {
+    finish: FloorFinishSpec;
+    defaultEdge: import("@cabane/engine").OutdoorPlatformEdgeConfiguration;
+  };
   setPlatformSettings: (settings: ConstructEditorController["platformSettings"]) => void;
   selectedPlatformEdgeId: string | null;
   selectPlatformEdge: (platformId: string, edgeId: string) => void;
   selectPlatform: (id: string) => void;
-  updatePlatform: (id: string, changes: Partial<Omit<import("@cabane/engine").OutdoorPlatformSpec, "id">>) => void;
+  updatePlatform: (
+    id: string,
+    changes: Partial<Omit<import("@cabane/engine").OutdoorPlatformSpec, "id">>,
+  ) => void;
   poolDrawing: ReturnType<typeof usePoolDrawing>;
   selectPool: (id: string) => void;
   selectFloorZone: (id: string) => void;
   updatePool: (poolId: string, polygon: Polygon) => void;
-  paintRoomFloor: (
-    roomId: string,
-    finish: FloorFinishSpec,
-    clearZones: boolean,
-  ) => void;
-  addFloorZone: (
-    roomId: string,
-    polygon: Polygon,
-    finish: FloorFinishSpec,
-  ) => void;
-  addGroundZone: (
-    polygon: Polygon,
-    finish: FloorFinishSpec,
-  ) => void;
+  paintRoomFloor: (roomId: string, finish: FloorFinishSpec, clearZones: boolean) => void;
+  addFloorZone: (roomId: string, polygon: Polygon, finish: FloorFinishSpec) => void;
+  addGroundZone: (polygon: Polygon, finish: FloorFinishSpec) => void;
   updateFloorZone: (
     zoneId: string,
     changes: Partial<Pick<FloorFinishZoneSpec, "polygon" | "finish">>,
@@ -103,13 +99,29 @@ export interface ConstructEditorController extends ConstructEditorState {
   clearSelection: () => void;
   setExteriorWallColor: (color: string) => void;
   updateWallEndpoint: (wallId: string, endpoint: "from" | "to", point: PlanPoint) => void;
-  updateSelectedWallMetadata: (changes: Partial<Pick<EditorWall,
-    "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">>) => void;
+  updateSelectedWallMetadata: (
+    changes: Partial<
+      Pick<EditorWall, "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">
+    >,
+  ) => void;
   updateFloorSettings: (settings: FloorEditorFloorSettings) => void;
-  updateRoom: (roomId: string, changes: Partial<Pick<FloorEditorHistory["present"]["rooms"][number],
-    "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters">>) => void;
-  updateSelectedRoom: (changes: Partial<Pick<FloorEditorHistory["present"]["rooms"][number],
-    "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters">>) => void;
+  updateRoom: (
+    roomId: string,
+    changes: Partial<
+      Pick<
+        FloorEditorHistory["present"]["rooms"][number],
+        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+      >
+    >,
+  ) => void;
+  updateSelectedRoom: (
+    changes: Partial<
+      Pick<
+        FloorEditorHistory["present"]["rooms"][number],
+        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+      >
+    >,
+  ) => void;
   resolveRoomMerge: (survivorId: string) => void;
   translateWall: (wallId: string, delta: PlanPoint) => void;
   beginWall: (from: PlanPoint) => void;
@@ -117,9 +129,19 @@ export interface ConstructEditorController extends ConstructEditorState {
   addWall: (to: PlanPoint) => void;
   cancelWall: () => void;
   addOpening: (kind: "door" | "window" | "passage") => void;
-  placeOpening: (kind: "door" | "window" | "passage", wallId: string, offsetPlanUnits: number) => void;
-  updateSelectedOpening: (patch: Partial<Pick<EditorOpening,
-    "offsetPlanUnits" | "widthPlanUnits" | "openingHeightMeters" | "sillHeightMeters">>) => void;
+  placeOpening: (
+    kind: "door" | "window" | "passage",
+    wallId: string,
+    offsetPlanUnits: number,
+  ) => void;
+  updateSelectedOpening: (
+    patch: Partial<
+      Pick<
+        EditorOpening,
+        "offsetPlanUnits" | "widthPlanUnits" | "openingHeightMeters" | "sillHeightMeters"
+      >
+    >,
+  ) => void;
   replaceSelectedOpening: (opening: EditorOpening) => void;
   resizeSelectedOpening: (offsetPlanUnits: number, widthPlanUnits: number) => void;
   moveOpening: (openingId: string, wallId: string, offsetPlanUnits: number) => void;

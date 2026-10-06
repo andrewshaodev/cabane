@@ -6,14 +6,20 @@ export interface EditorWorkspaceSnapshot {
   bindings: WorkspaceBindings;
 }
 
-export interface EditorWorkspaceHistory<T extends EditorWorkspaceSnapshot = EditorWorkspaceSnapshot> {
+export interface EditorWorkspaceHistory<
+  T extends EditorWorkspaceSnapshot = EditorWorkspaceSnapshot,
+> {
   present: T;
   past: readonly T[];
   future: readonly T[];
 }
 
-export const createWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(snapshot: T): EditorWorkspaceHistory<T> => ({
-  present: structuredClone(snapshot), past: [], future: [],
+export const createWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(
+  snapshot: T,
+): EditorWorkspaceHistory<T> => ({
+  present: structuredClone(snapshot),
+  past: [],
+  future: [],
 });
 
 export const commitWorkspaceSnapshot = <T extends EditorWorkspaceSnapshot>(
@@ -28,20 +34,28 @@ export const commitWorkspaceSnapshot = <T extends EditorWorkspaceSnapshot>(
   };
 };
 
-export const undoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(history: EditorWorkspaceHistory<T>): EditorWorkspaceHistory<T> => {
+export const undoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(
+  history: EditorWorkspaceHistory<T>,
+): EditorWorkspaceHistory<T> => {
   const previous = history.past.at(-1);
-  return previous ? {
-    present: structuredClone(previous),
-    past: history.past.slice(0, -1),
-    future: [structuredClone(history.present), ...history.future],
-  } : history;
+  return previous
+    ? {
+        present: structuredClone(previous),
+        past: history.past.slice(0, -1),
+        future: [structuredClone(history.present), ...history.future],
+      }
+    : history;
 };
 
-export const redoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(history: EditorWorkspaceHistory<T>): EditorWorkspaceHistory<T> => {
+export const redoWorkspaceHistory = <T extends EditorWorkspaceSnapshot>(
+  history: EditorWorkspaceHistory<T>,
+): EditorWorkspaceHistory<T> => {
   const next = history.future[0];
-  return next ? {
-    present: structuredClone(next),
-    past: [...history.past, structuredClone(history.present)].slice(-DEFAULT_HISTORY_LIMIT),
-    future: history.future.slice(1),
-  } : history;
+  return next
+    ? {
+        present: structuredClone(next),
+        past: [...history.past, structuredClone(history.present)].slice(-DEFAULT_HISTORY_LIMIT),
+        future: history.future.slice(1),
+      }
+    : history;
 };

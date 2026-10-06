@@ -1,6 +1,4 @@
-import type {
-  SceneMode
-} from "../types";
+import type { SceneMode } from "../types";
 
 export const SCENE_TAP_MOVE_TOLERANCE_PX = 10;
 
@@ -70,9 +68,7 @@ export interface WalkRoomNavigation {
 }
 
 export interface WalkNavigationDiagnostic {
-  code:
-  | "navigation.room-no-safe-spawn"
-  | "navigation.room-no-walkable-connection";
+  code: "navigation.room-no-walkable-connection";
   severity: "error" | "warning";
   path: string;
   message: string;

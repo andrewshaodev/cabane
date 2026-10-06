@@ -7,28 +7,22 @@ import {
   resolveDeviceModelDefinition,
   uniformDeviceScaleForSize,
 } from "./devices";
-import { findContainingRoom, planPointToWorld, polygonCentroid, worldPointToPlan } from "./geometry";
-import { resolveItemTransform, type SceneItemSpec } from "./home-project";
 import {
-  lightBrightnessRatio,
-  lightColorForSnapshot,
-} from "./home-assistant-controls";
-import type {
-  DeviceModelRegistry,
-  FloorSpec,
-  ResolvedHomeBindings,
-  RoomSpec,
-} from "./types";
+  findContainingRoom,
+  planPointToWorld,
+  polygonCentroid,
+  worldPointToPlan,
+} from "./geometry";
+import { resolveItemTransform, type SceneItemSpec } from "./home-project";
+import { lightBrightnessRatio, lightColorForSnapshot } from "./home-assistant-controls";
+import type { DeviceModelRegistry, FloorSpec, ResolvedHomeBindings, RoomSpec } from "./types";
 
 const defaultRoomLight = (room: RoomSpec, floor: FloorSpec) => {
   const [x, z] = planPointToWorld(polygonCentroid(room.polygon), floor.coordinates);
   const worldPoints = room.polygon.map((point) => planPointToWorld(point, floor.coordinates));
   const xs = worldPoints.map(([worldX]) => worldX);
   const zs = worldPoints.map(([, worldZ]) => worldZ);
-  const span = Math.max(
-    Math.max(...xs) - Math.min(...xs),
-    Math.max(...zs) - Math.min(...zs),
-  );
+  const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs));
   return {
     position: [x, floor.defaultCeilingHeightMeters - 0.35, z] as const,
     color: "#ffd99b",
@@ -74,19 +68,24 @@ const inwardDirectionAtWall = (
     const dz = endZ - startZ;
     const lengthSquared = dx * dx + dz * dz;
     if (lengthSquared === 0) continue;
-    const fraction = Math.max(0, Math.min(1,
-      ((position[0] - startX) * dx + (position[2] - startZ) * dz) / lengthSquared));
+    const fraction = Math.max(
+      0,
+      Math.min(1, ((position[0] - startX) * dx + (position[2] - startZ) * dz) / lengthSquared),
+    );
     const awayX = position[0] - (startX + fraction * dx);
     const awayZ = position[2] - (startZ + fraction * dz);
     const separation = Math.hypot(awayX, awayZ);
     if (separation < 0.01 || separation >= nearestDistance) continue;
     const wallPlanLength = Math.hypot(wall.to[0] - wall.from[0], wall.to[1] - wall.from[1]);
-    const throughOpening = floor.openings.some((opening) =>
-      opening.wallId === wall.id &&
-      fraction * wallPlanLength >= opening.offsetFromWallStartPlanUnits &&
-      fraction * wallPlanLength <= opening.offsetFromWallStartPlanUnits + opening.widthPlanUnits &&
-      position[1] >= opening.sillHeightMeters &&
-      position[1] <= opening.sillHeightMeters + opening.openingHeightMeters);
+    const throughOpening = floor.openings.some(
+      (opening) =>
+        opening.wallId === wall.id &&
+        fraction * wallPlanLength >= opening.offsetFromWallStartPlanUnits &&
+        fraction * wallPlanLength <=
+          opening.offsetFromWallStartPlanUnits + opening.widthPlanUnits &&
+        position[1] >= opening.sillHeightMeters &&
+        position[1] <= opening.sillHeightMeters + opening.openingHeightMeters,
+    );
     if (throughOpening) continue;
     nearestDistance = separation;
     nearest = [awayX / separation, awayZ / separation];
@@ -94,7 +93,14 @@ const inwardDirectionAtWall = (
   return nearest;
 };
 
-function PhysicalSceneLight({ floor, name, position, color, intensity, distance }: {
+function PhysicalSceneLight({
+  floor,
+  name,
+  position,
+  color,
+  intensity,
+  distance,
+}: {
   floor: FloorSpec;
   name: string;
   position: readonly [number, number, number];
@@ -102,19 +108,42 @@ function PhysicalSceneLight({ floor, name, position, color, intensity, distance 
   intensity: number;
   distance: number;
 }) {
-  const direction = useMemo(() => inwardDirectionAtWall(floor, position, distance), [
-    floor, position[0], position[1], position[2], distance,
-  ]);
+  const [x, y, z] = position;
+  const direction = useMemo(
+    () => inwardDirectionAtWall(floor, [x, y, z], distance),
+    [floor, x, y, z, distance],
+  );
   const target = useMemo(() => new Object3D(), []);
-  if (!direction) return <pointLight name={name} position={position} color={color}
-    intensity={intensity} distance={distance} decay={2} castShadow={false} />;
+  if (!direction)
+    return (
+      <pointLight
+        name={name}
+        position={position}
+        color={color}
+        intensity={intensity}
+        distance={distance}
+        decay={2}
+        castShadow={false}
+      />
+    );
   target.position.set(position[0] + direction[0], position[1], position[2] + direction[1]);
-  return <>
-    <spotLight name={name} position={position} target={target} color={color}
-      intensity={intensity} distance={distance} decay={2}
-      angle={Math.PI / 2} penumbra={0.15} castShadow={false} />
-    <primitive object={target} />
-  </>;
+  return (
+    <>
+      <spotLight
+        name={name}
+        position={position}
+        target={target}
+        color={color}
+        intensity={intensity}
+        distance={distance}
+        decay={2}
+        angle={Math.PI / 2}
+        penumbra={0.15}
+        castShadow={false}
+      />
+      <primitive object={target} />
+    </>
+  );
 }
 
 export function HomeAssistantSceneLighting({
@@ -130,23 +159,31 @@ export function HomeAssistantSceneLighting({
   deviceModels: DeviceModelRegistry;
   extensionDeviceModels: DeviceModelRegistry;
   sceneItems?: readonly SceneItemSpec[];
-  enabled?: boolean;
+  enabled?: boolean | undefined;
 }) {
   const nightLighting = useContext(SceneNightContext);
   if (!enabled) return <group name="home-assistant-scene-lighting" />;
-  const resolvedDevices = Object.values(resolvedBindings.rooms).flatMap((room) => room.devices);
+  // Bindings cover the whole building; fallback emitters belong only to this floor.
+  const resolvedDevices = floor.rooms.flatMap(
+    (room) => resolvedBindings.rooms[room.id]?.devices ?? [],
+  );
   const resolvedById = new Map(resolvedDevices.map((device) => [device.slot.id, device]));
   // Scene items exist independently of room assignment and HA connectivity.
   const deviceItems = sceneItems.filter((item) => item.kind === "device");
   const deviceItemIds = new Set(deviceItems.map((item) => item.id));
   const lightDevices = [
     ...deviceItems.map((item) => ({
-      id: item.id, modelId: item.modelId, item,
+      id: item.id,
+      modelId: item.modelId,
+      item,
       resolved: resolvedById.get(item.id),
     })),
-    ...resolvedDevices.filter((device) => !deviceItemIds.has(device.slot.id))
+    ...resolvedDevices
+      .filter((device) => !deviceItemIds.has(device.slot.id))
       .map((resolved) => ({
-        id: resolved.slot.id, modelId: resolved.slot.model, item: undefined,
+        id: resolved.slot.id,
+        modelId: resolved.slot.model,
+        item: undefined,
         resolved,
       })),
   ];
@@ -155,60 +192,81 @@ export function HomeAssistantSceneLighting({
       {floor.rooms.flatMap((room) => {
         const resolvedRoom = resolvedBindings.rooms[room.id];
         if (!resolvedRoom) return [];
-        const roomLights = Object.values(resolvedRoom.sections).flat().flatMap((entity) => {
-          const slot = room.dashboardSlots.find((candidate) => candidate.id === entity.slotId);
-          if (entity.domain !== "light" && !(entity.domain === "switch" && slot?.compatibleDomains.includes("light"))) return [];
-          const brightness = lightBrightnessRatio(entity.state);
-          if (brightness <= 0) return [];
-          const configured = slot?.sceneLight;
-          const fallback = defaultRoomLight(room, floor);
-          const configuredPosition = configured
-            ? planPointToWorld(configured.at, floor.coordinates)
-            : null;
-          const resolvedPosition = configured
-            ? [
-              configuredPosition![0],
-              configured.elevationMeters,
-              configuredPosition![1],
-            ] as const
-            : fallback.position;
-          return [(
-            <PhysicalSceneLight
-              floor={floor}
-              key={`room-light-${entity.slotId}`}
-              name={`ha-room-light-${entity.slotId}`}
-              position={resolvedPosition}
-              color={lightColorForSnapshot(
-                entity.state,
-                configured?.color ?? fallback.color,
-              )}
-              intensity={(configured?.maxIntensity ?? fallback.maxIntensity) * brightness}
-              distance={configured?.distance ?? fallback.distance}
-            />
-          )];
-        });
+        const roomLights = Object.values(resolvedRoom.sections)
+          .flat()
+          .flatMap((entity) => {
+            const slot = room.dashboardSlots.find((candidate) => candidate.id === entity.slotId);
+            if (
+              entity.domain !== "light" &&
+              !(entity.domain === "switch" && slot?.compatibleDomains.includes("light"))
+            )
+              return [];
+            const brightness = lightBrightnessRatio(entity.state);
+            // Keep light counts stable: toggles update uniforms instead of recompiling shaders.
+            const configured = slot?.sceneLight;
+            const fallback = defaultRoomLight(room, floor);
+            const configuredPosition = configured
+              ? planPointToWorld(configured.at, floor.coordinates)
+              : null;
+            const resolvedPosition = configured
+              ? ([
+                  configuredPosition![0],
+                  configured.elevationMeters,
+                  configuredPosition![1],
+                ] as const)
+              : fallback.position;
+            return [
+              <PhysicalSceneLight
+                floor={floor}
+                key={`room-light-${entity.slotId}`}
+                name={`ha-room-light-${entity.slotId}`}
+                position={resolvedPosition}
+                color={lightColorForSnapshot(entity.state, configured?.color ?? fallback.color)}
+                intensity={(configured?.maxIntensity ?? fallback.maxIntensity) * brightness}
+                distance={configured?.distance ?? fallback.distance}
+              />,
+            ];
+          });
         return roomLights;
       })}
       {lightDevices.flatMap(({ id, modelId, item: sceneItem, resolved }) => {
-        const definition = resolveDeviceModelDefinition(modelId, deviceModels, extensionDeviceModels);
-        if (!definition?.sceneLight || resolveModelVariant(definition, sceneItem?.variant).sceneLight === false) return [];
-        const primaryLightSlot = (sceneItem?.entitySlots ?? resolved?.slot.entitySlots)?.find((slot) =>
-          slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"));
-        const entity = resolved?.slot.model === modelId ? resolved.entities.find((candidate) =>
-          (candidate.domain === "light" || (candidate.domain === "switch" && Boolean(primaryLightSlot)))
-          && (!primaryLightSlot || candidate.slotId === primaryLightSlot.id)) : undefined;
-        const transform = sceneItem ? resolveItemTransform(sceneItem.placement, floor)
-          : deviceWorldTransform(resolved!.slot, floor.coordinates);
+        const definition = resolveDeviceModelDefinition(
+          modelId,
+          deviceModels,
+          extensionDeviceModels,
+        );
+        if (
+          !definition?.sceneLight ||
+          resolveModelVariant(definition, sceneItem?.variant).sceneLight === false
+        )
+          return [];
+        const primaryLightSlot = (sceneItem?.entitySlots ?? resolved?.slot.entitySlots)?.find(
+          (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
+        );
+        const entity =
+          resolved?.slot.model === modelId
+            ? resolved.entities.find(
+                (candidate) =>
+                  (candidate.domain === "light" ||
+                    (candidate.domain === "switch" && Boolean(primaryLightSlot))) &&
+                  (!primaryLightSlot || candidate.slotId === primaryLightSlot.id),
+              )
+            : undefined;
+        const transform = sceneItem
+          ? resolveItemTransform(sceneItem.placement, floor)
+          : deviceWorldTransform(resolved.slot, floor.coordinates);
         const state = sceneLightState(sceneItem?.lightState, entity?.state, nightLighting);
         const brightness = lightBrightnessRatio(state);
-        if (brightness <= 0) return [];
+        // Zero-intensity emitters retain the shader layout while devices are off.
         const sceneItemScale = sceneItem
           ? uniformDeviceScaleForSize(sceneItem.size, definition)
           : null;
         if (sceneItem && sceneItemScale === null) return [];
-        const scale = sceneItem ? sceneItemScale! : deviceWorldTransform(resolved!.slot, floor.coordinates).scale;
+        const scale = sceneItem
+          ? sceneItemScale!
+          : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
         const source = definition.sceneLight;
-        return [(
+        return [
           <PhysicalSceneLight
             floor={floor}
             key={`device-light-${id}`}
@@ -222,8 +280,8 @@ export function HomeAssistantSceneLighting({
             color={lightColorForSnapshot(state, source.color)}
             intensity={source.maxIntensity * brightness}
             distance={source.distance * scale}
-          />
-        )];
+          />,
+        ];
       })}
     </group>
   );

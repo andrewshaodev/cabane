@@ -1,0 +1,7 @@
+.walk-laser {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  color: #fffdf3;
+  font-family: Roboto, sans-serif;
+}

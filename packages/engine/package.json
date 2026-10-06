@@ -18,7 +18,8 @@
     "meshoptimizer": "1.1.1",
     "polygon-clipping": "0.15.7",
     "react": "19.2.8",
-    "three": "0.182.0"
+    "three": "0.182.0",
+    "three-stdlib": "2.36.1"
   },
   "license": "PolyForm-Noncommercial-1.0.0"
 }

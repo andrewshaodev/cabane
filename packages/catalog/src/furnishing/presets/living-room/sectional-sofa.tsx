@@ -3,26 +3,108 @@ import { RoundedFurniturePanel } from "../construction";
 import { CozySofaCushions, TailoredCushion } from "./sofa-upholstery";
 
 /** Existing sectional envelope and offset origin retained for saved placements. */
-export function CustomSectionalSofa({ variant = "default" }: { variant?: string } = {}) {
+export function CustomSectionalSofa({
+  variant = "default",
+}: { variant?: string | undefined } = {}) {
   const mirrored = variant === "right" || variant === "cozy-right";
   const cozy = variant === "cozy" || variant === "cozy-right";
-  return <group name="canape-salon-custom" scale={[mirrored ? -1 : 1, 1, 1]} userData={{ walkCollider: true }}>
-    <RoundedFurniturePanel size={[2.72, .32, .72]} position={[0, .31, .02]} color="#d2ccbd" radius={.055} />
-    <RoundedFurniturePanel size={[.88, .32, 1.56]} position={[-.91, .31, .43]} color="#d2ccbd" radius={.055} />
-    <RoundedFurniturePanel name="upholstered-back-frame" size={[2.55, .65, .16]} position={[0, .675, -.33]} color="#d2ccbd" radius={.045} />
-    <RoundedFurniturePanel name="oak-front-rail" size={[1.77, .055, .64]} position={[.455, .1575, .02]} color="#ad895b" radius={.012} />
-    <RoundedFurniturePanel name="oak-chaise-rail" size={[.82, .055, 1.48]} position={[-.91, .1575, .43]} color="#ad895b" radius={.012} />
-    <TailoredCushion name="chaise-seat-cushion" size={[.84, .2, 1.39]} position={[-.91, .57, .39]} color="#eee7d8" />
-    {[-.02, .84].map(x => <TailoredCushion key={x} name="sectional-seat-cushion" size={[.8, .2, .63]} position={[x, .57, .08]} color="#e9e4d7" />)}
-    {[-.91, -.02, .84].map(x => <TailoredCushion key={x} name="sectional-back-cushion" size={[.81, .2, .60]} position={[x, .927, -.29]} rotation={[Math.PI / 2, 0, 0]} color="#e9e4d7" />)}
-    {[-1.37, 1.37].map(x => <group key={x}>
-      <RoundedFurniturePanel name="sectional-arm" size={[.19, .59, .86]} position={[x, .455, .01]} color="#ded9ca" radius={.065} />
-      <TailoredCushion name="sectional-arm-pad" size={[.18, .13, .84]} position={[x, .765, .01]} color="#eee7d8" />
-    </group>)}
-    {cozy && <CozySofaCushions />}
-    {[[-1.23,-.25],[-.55,-.25],[.48,-.25],[1.23,-.25],[-1.23,1.04],[-.58,1.04],[.48,.27],[1.23,.27]].map(([x,z]) =>
-      <mesh key={`${x}-${z}`} position={[x,.085,z]} castShadow>
-        <cylinderGeometry args={[.05,.035,.17,10]} /><ToonMaterial color="#b38d59" />
-      </mesh>)}
-  </group>;
+  return (
+    <group
+      name="canape-salon-custom"
+      scale={[mirrored ? -1 : 1, 1, 1]}
+      userData={{ walkCollider: true }}
+    >
+      <RoundedFurniturePanel
+        size={[2.72, 0.32, 0.72]}
+        position={[0, 0.31, 0.02]}
+        color="#d2ccbd"
+        radius={0.055}
+      />
+      <RoundedFurniturePanel
+        size={[0.88, 0.32, 1.56]}
+        position={[-0.91, 0.31, 0.43]}
+        color="#d2ccbd"
+        radius={0.055}
+      />
+      <RoundedFurniturePanel
+        name="upholstered-back-frame"
+        size={[2.55, 0.65, 0.16]}
+        position={[0, 0.675, -0.33]}
+        color="#d2ccbd"
+        radius={0.045}
+      />
+      <RoundedFurniturePanel
+        name="oak-front-rail"
+        size={[1.77, 0.055, 0.64]}
+        position={[0.455, 0.1575, 0.02]}
+        color="#ad895b"
+        radius={0.012}
+      />
+      <RoundedFurniturePanel
+        name="oak-chaise-rail"
+        size={[0.82, 0.055, 1.48]}
+        position={[-0.91, 0.1575, 0.43]}
+        color="#ad895b"
+        radius={0.012}
+      />
+      <TailoredCushion
+        name="chaise-seat-cushion"
+        size={[0.84, 0.2, 1.39]}
+        position={[-0.91, 0.57, 0.39]}
+        color="#eee7d8"
+      />
+      {[-0.02, 0.84].map((x) => (
+        <TailoredCushion
+          key={x}
+          name="sectional-seat-cushion"
+          size={[0.8, 0.2, 0.63]}
+          position={[x, 0.57, 0.08]}
+          color="#e9e4d7"
+        />
+      ))}
+      {[-0.91, -0.02, 0.84].map((x) => (
+        <TailoredCushion
+          key={x}
+          name="sectional-back-cushion"
+          size={[0.81, 0.2, 0.6]}
+          position={[x, 0.927, -0.29]}
+          rotation={[Math.PI / 2, 0, 0]}
+          color="#e9e4d7"
+        />
+      ))}
+      {[-1.37, 1.37].map((x) => (
+        <group key={x}>
+          <RoundedFurniturePanel
+            name="sectional-arm"
+            size={[0.19, 0.59, 0.86]}
+            position={[x, 0.455, 0.01]}
+            color="#ded9ca"
+            radius={0.065}
+          />
+          <TailoredCushion
+            name="sectional-arm-pad"
+            size={[0.18, 0.13, 0.84]}
+            position={[x, 0.765, 0.01]}
+            color="#eee7d8"
+          />
+        </group>
+      ))}
+      {cozy && <CozySofaCushions />}
+      {[
+        [-1.23, -0.25],
+        [-0.55, -0.25],
+        [0.48, -0.25],
+        [1.23, -0.25],
+        [-1.23, 1.04],
+        [-0.58, 1.04],
+        [0.48, 0.27],
+        [1.23, 0.27],
+      ].map(([x, z]) => (
+        <mesh key={`${x}-${z}`} position={[x, 0.085, z]} castShadow>
+          <cylinderGeometry args={[0.05, 0.035, 0.17, 10]} />
+          <ToonMaterial color="#b38d59" />
+        </mesh>
+      ))}
+    </group>
+  );
 }

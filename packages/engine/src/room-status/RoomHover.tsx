@@ -1,20 +1,38 @@
 import { useCabaneDom } from "./../CabaneDom";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 function createRoomHoverStore() {
   let roomId: string | null = null;
   let owner: symbol | null = null;
   const listeners = new Set<() => void>();
   return {
-    reset: () => { owner = null; roomId = null; listeners.forEach(listener => listener()); },
-    subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
+    reset: () => {
+      owner = null;
+      roomId = null;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     getSnapshot: () => roomId,
     set: (source: symbol, next: string | null) => {
       if (next === null && owner !== source) return;
       owner = next === null ? null : source;
       if (roomId === next) return;
       roomId = next;
-      listeners.forEach(listener => listener());
+      listeners.forEach((listener) => listener());
     },
   };
 }
@@ -28,7 +46,11 @@ export function useRoomHoverEnabled() {
 
 export function useHoveredRoom() {
   const store = useContext(RoomHoverContext);
-  return useSyncExternalStore(store?.subscribe ?? emptySubscribe, store?.getSnapshot ?? emptySnapshot, emptySnapshot);
+  return useSyncExternalStore(
+    store?.subscribe ?? emptySubscribe,
+    store?.getSnapshot ?? emptySnapshot,
+    emptySnapshot,
+  );
 }
 
 export function useRoomHoverTarget() {
@@ -45,13 +67,20 @@ function RoomHoverCursor() {
     if (!hovered) return;
     const previous = dom.container.style.cursor;
     dom.container.style.cursor = "pointer";
-    return () => { dom.container.style.cursor = previous; };
-  }, [hovered]);
+    return () => {
+      dom.container.style.cursor = previous;
+    };
+  }, [hovered, dom]);
   return null;
 }
 
 export function RoomHoverProvider({ children, scope }: { children: ReactNode; scope: string }) {
   const store = useMemo(createRoomHoverStore, []);
   useEffect(() => store.reset(), [store, scope]);
-  return <RoomHoverContext.Provider value={store}><RoomHoverCursor />{children}</RoomHoverContext.Provider>;
+  return (
+    <RoomHoverContext.Provider value={store}>
+      <RoomHoverCursor />
+      {children}
+    </RoomHoverContext.Provider>
+  );
 }

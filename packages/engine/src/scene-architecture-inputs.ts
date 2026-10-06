@@ -8,12 +8,18 @@ export function useSceneArchitectureFloor<T extends FloorSpec>(floor: T): T {
   // deliberately excludes runtime entities, scene items, and UI selection.
   const key = JSON.stringify({
     ...floor,
-    rooms: floor.rooms.map(({ devices: _devices, dashboardSlots: _slots, furnishings: _furnishings, ...room }) => room),
-    openings: floor.openings.map(({ contactSlot: _contactSlot, coverSlot: _coverSlot, ...opening }) => opening),
+    rooms: floor.rooms.map(
+      ({ devices: _devices, dashboardSlots: _slots, furnishings: _furnishings, ...room }) => room,
+    ),
+    openings: floor.openings.map(
+      ({ contactSlot: _contactSlot, coverSlot: _coverSlot, ...opening }) => opening,
+    ),
   });
   // Give downstream geometry memos a new identity whenever the structural
   // key changes, even if an editor updated the supplied FloorSpec in place.
   // Reusing `floor` directly left the previous solid wall mesh mounted while
   // the new opening model rendered inside it.
+  // Structural key excludes runtime bindings; including floor would rebuild architectural meshes on entity updates.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => ({ ...floor }), [key]);
 }

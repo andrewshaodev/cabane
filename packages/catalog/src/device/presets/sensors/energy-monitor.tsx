@@ -6,7 +6,13 @@ import { palette, StatusBeacon } from "../../visuals/device-visual-state";
 export function EnergyMonitorModel({ visualState }: HomeDeviceModelProps) {
   return (
     <group name="catalog-energy-monitor">
-      <RoundedBox args={[0.2, 0.3, 0.08]} radius={0.018} smoothness={2} position={[0, 0.15, 0.04]} castShadow>
+      <RoundedBox
+        args={[0.2, 0.3, 0.08]}
+        radius={0.018}
+        smoothness={2}
+        position={[0, 0.15, 0.04]}
+        castShadow
+      >
         <ToonMaterial color="#d8ddd7" />
         <Outlines color={palette.charcoal} thickness={0.004} />
       </RoundedBox>

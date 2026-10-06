@@ -1,10 +1,6 @@
 import { wallFrame } from "../architecture-geometry/wall-coordinate-frame";
 import { wallFaceFinish } from "../architecture-geometry/wall-face-finish";
-import {
-  BufferGeometry,
-  Color,
-  Float32BufferAttribute
-} from "three";
+import { BufferGeometry, Color, Float32BufferAttribute } from "three";
 
 import { useEffect, useMemo } from "react";
 import { useWallRoomSelection } from "./useWallRoomSelection";
@@ -17,21 +13,23 @@ import {
 
 import { CameraFacingFade, ToonMaterial } from "../rendering";
 
-import type {
-  FloorSpec,
-  OpeningSpec,
-  WallSpec
-} from "../types";
+import type { FloorSpec, OpeningSpec, WallSpec } from "../types";
 
 const splitArchitectureGeometry = (source: BufferGeometry) => {
   const sourcePositions = source.getAttribute("position");
   const extract = (materialIndex: number) => {
     const positions: number[] = [];
-    source.groups.filter((group) => group.materialIndex === materialIndex).forEach((group) => {
-      for (let index = group.start; index < group.start + group.count; index += 1) {
-        positions.push(sourcePositions.getX(index), sourcePositions.getY(index), sourcePositions.getZ(index));
-      }
-    });
+    source.groups
+      .filter((group) => group.materialIndex === materialIndex)
+      .forEach((group) => {
+        for (let index = group.start; index < group.start + group.count; index += 1) {
+          positions.push(
+            sourcePositions.getX(index),
+            sourcePositions.getY(index),
+            sourcePositions.getZ(index),
+          );
+        }
+      });
     if (!positions.length) return null;
     const geometry = new BufferGeometry();
     geometry.setAttribute("position", new Float32BufferAttribute(positions, 3));
@@ -64,48 +62,74 @@ export function ArchitecturalWall({
   const geometry = useMemo(() => {
     const result = splitArchitectureGeometry(buildContinuousWallGeometry(wall, floor, openings));
     const frame = wallFrame(wall, floor);
-    for (const [outside, geometry] of [[false, result.interior], [true, result.exterior]] as const) {
+    for (const [outside, geometry] of [
+      [false, result.interior],
+      [true, result.exterior],
+    ] as const) {
       if (!geometry) continue;
       const normals = geometry.getAttribute("normal");
       const colors: number[] = [];
       for (let index = 0; index < normals.count; index++) {
-        const alignment = normals.getX(index) * frame.normal[0] + normals.getZ(index) * frame.normal[1];
+        const alignment =
+          normals.getX(index) * frame.normal[0] + normals.getZ(index) * frame.normal[1];
         const fallback = outside ? exteriorColor : interiorColor;
         // Caps and opening reveals keep their existing finish; only the two
         // longitudinal faces inherit authored left/right overrides.
-        const color = new Color(Math.abs(alignment) > .999
-          ? wallFaceFinish(wall, alignment >= 0 ? "left" : "right", outside, fallback)
-          : fallback);
+        const color = new Color(
+          Math.abs(alignment) > 0.999
+            ? wallFaceFinish(wall, alignment >= 0 ? "left" : "right", outside, fallback)
+            : fallback,
+        );
         colors.push(color.r, color.g, color.b);
       }
       geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
     }
     return result;
   }, [floor, openings, wall, interiorColor, exteriorColor]);
-  useEffect(() => () => { geometry.interior?.dispose(); geometry.exterior?.dispose(); }, [geometry]);
-  const normal = wallExteriorNormal(wall, floor) ?? [0, 0] as const;
+  useEffect(
+    () => () => {
+      geometry.interior?.dispose();
+      geometry.exterior?.dispose();
+    },
+    [geometry],
+  );
+  const normal = wallExteriorNormal(wall, floor) ?? ([0, 0] as const);
   return (
     <CameraFacingFade
       enabled={fade && wall.classification === "exterior"}
       normal={normal}
       reducedMotion={reducedMotion}
     >
-      {geometry.interior && <mesh name={`wall-${wall.id}`} geometry={geometry.interior} castShadow>
-        <ToonMaterial color="white" vertexColors />
-      </mesh>}
-      {geometry.exterior && <mesh name={`wall-${wall.id}-exterior-face`} geometry={geometry.exterior} castShadow>
-        <ToonMaterial color="white" vertexColors />
-      </mesh>}
+      {geometry.interior && (
+        <mesh name={`wall-${wall.id}`} geometry={geometry.interior} castShadow>
+          <ToonMaterial color="white" vertexColors />
+        </mesh>
+      )}
+      {geometry.exterior && (
+        <mesh name={`wall-${wall.id}-exterior-face`} geometry={geometry.exterior} castShadow>
+          <ToonMaterial color="white" vertexColors />
+        </mesh>
+      )}
     </CameraFacingFade>
   );
 }
 
-export function ArchitecturalWalls({ floor, interiorColor, exteriorColor, fade, reducedMotion, baseElevationMeters, below, above, onSelectRoom }: {
+export function ArchitecturalWalls({
+  floor,
+  interiorColor,
+  exteriorColor,
+  fade,
+  reducedMotion,
+  baseElevationMeters,
+  below,
+  above,
+  onSelectRoom,
+}: {
   floor: FloorSpec;
-  onSelectRoom?: (roomId: string) => void;
-  baseElevationMeters?: number;
-  below?: FloorSpec;
-  above?: FloorSpec;
+  onSelectRoom?: ((roomId: string) => void) | undefined;
+  baseElevationMeters?: number | undefined;
+  below?: FloorSpec | undefined;
+  above?: FloorSpec | undefined;
   interiorColor: string;
   exteriorColor: string;
   fade: boolean;
@@ -113,26 +137,36 @@ export function ArchitecturalWalls({ floor, interiorColor, exteriorColor, fade, 
 }) {
   const selectionHandlers = useWallRoomSelection(floor, onSelectRoom);
   const groups = useMemo(
-    () => buildArchitecturalWallGeometries(floor, interiorColor, exteriorColor, baseElevationMeters, { below, above }),
+    () =>
+      buildArchitecturalWallGeometries(floor, interiorColor, exteriorColor, baseElevationMeters, {
+        ...(below === undefined ? {} : { below: below }),
+        ...(above === undefined ? {} : { above: above }),
+      }),
     [exteriorColor, floor, interiorColor, baseElevationMeters, below, above],
   );
   useEffect(() => () => groups.forEach(({ geometry }) => geometry.dispose()), [groups]);
-  return <>{groups.map(({ geometry, outwardNormal, fadeNormals }, index) => {
-    const wall = <mesh key={`mesh-${index}`} geometry={geometry} castShadow {...selectionHandlers}>
-      <ToonMaterial color="white" vertexColors />
-    </mesh>;
-    const normals = fadeNormals.length
-      ? fadeNormals
-      : outwardNormal ? [outwardNormal] : [];
-    return normals.length ? (
-      <CameraFacingFade
-        key={`wall-group-${index}`}
-        enabled={fade}
-        normals={normals}
-        reducedMotion={reducedMotion}
-      >
-        {wall}
-      </CameraFacingFade>
-    ) : <group key={`wall-group-${index}`}>{wall}</group>;
-  })}</>;
+  return (
+    <>
+      {groups.map(({ geometry, outwardNormal, fadeNormals }, index) => {
+        const wall = (
+          <mesh key={`mesh-${index}`} geometry={geometry} castShadow {...selectionHandlers}>
+            <ToonMaterial color="white" vertexColors />
+          </mesh>
+        );
+        const normals = fadeNormals.length ? fadeNormals : outwardNormal ? [outwardNormal] : [];
+        return normals.length ? (
+          <CameraFacingFade
+            key={`wall-group-${index}`}
+            enabled={fade}
+            normals={normals}
+            reducedMotion={reducedMotion}
+          >
+            {wall}
+          </CameraFacingFade>
+        ) : (
+          <group key={`wall-group-${index}`}>{wall}</group>
+        );
+      })}
+    </>
+  );
 }

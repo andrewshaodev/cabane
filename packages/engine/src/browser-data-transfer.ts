@@ -57,20 +57,18 @@ type BrowserStorageWriter = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 const isObject = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
-export const exportCabaneBrowserData = (
-  storage: BrowserStorageReader,
-  manifest: HomeManifest,
-) => {
+export const exportCabaneBrowserData = (storage: BrowserStorageReader, manifest: HomeManifest) => {
   const homeAssistantUrl = loadStoredHomeAssistantUrl(storage);
   const runtimeBindingProfile = homeAssistantUrl
-    ? loadRuntimeBindingProfile(storage, homeAssistantUrl, manifest) ?? undefined
+    ? (loadRuntimeBindingProfile(storage, homeAssistantUrl, manifest) ?? undefined)
     : undefined;
   const active = loadActiveFloorLayout(storage, manifest.home.id);
   const activeFloor = active.status === "valid" ? active.floor : undefined;
-  const draftRaw = storage.getItem(draftFloorLayoutStorageKey(manifest.home.id))
-    ?? storage.getItem(legacyDraftFloorLayoutStorageKey(manifest.home.id));
+  const draftRaw =
+    storage.getItem(draftFloorLayoutStorageKey(manifest.home.id)) ??
+    storage.getItem(legacyDraftFloorLayoutStorageKey(manifest.home.id));
   const floorDraft = draftRaw
-    ? parseFloorLayoutDraft(draftRaw, activeFloor?.id ?? manifest.floors[0].id) ?? undefined
+    ? (parseFloorLayoutDraft(draftRaw, activeFloor?.id ?? manifest.floors[0].id) ?? undefined)
     : undefined;
   const transfer: CabaneBrowserDataTransfer = {
     type: CABANE_BROWSER_DATA_TYPE,
@@ -101,15 +99,21 @@ const validateTransfer = (
     add("transfer.schema", "schemaVersion", "This Cabane browser-data version is not supported.");
   }
   if (input.homeId !== manifest.home.id) {
-    add("transfer.home", "homeId", `This export belongs to a different home, not "${manifest.home.id}".`);
+    add(
+      "transfer.home",
+      "homeId",
+      `This export belongs to a different home, not "${manifest.home.id}".`,
+    );
   }
 
   let homeAssistantUrl: string | undefined;
   if (input.homeAssistantUrl !== undefined) {
-    homeAssistantUrl = typeof input.homeAssistantUrl === "string"
-      ? normalizeHomeAssistantUrl(input.homeAssistantUrl) ?? undefined
-      : undefined;
-    if (!homeAssistantUrl) add("transfer.ha-url", "homeAssistantUrl", "The Home Assistant URL is invalid.");
+    homeAssistantUrl =
+      typeof input.homeAssistantUrl === "string"
+        ? (normalizeHomeAssistantUrl(input.homeAssistantUrl) ?? undefined)
+        : undefined;
+    if (!homeAssistantUrl)
+      add("transfer.ha-url", "homeAssistantUrl", "The Home Assistant URL is invalid.");
   }
 
   let activeFloor: FloorSpec | undefined;
@@ -127,12 +131,23 @@ const validateTransfer = (
   let runtimeBindingProfile: RuntimeBindingProfile | undefined;
   if (input.runtimeBindingProfile !== undefined) {
     if (!homeAssistantUrl) {
-      add("transfer.profile-origin", "runtimeBindingProfile", "A binding profile requires a valid Home Assistant URL.");
+      add(
+        "transfer.profile-origin",
+        "runtimeBindingProfile",
+        "A binding profile requires a valid Home Assistant URL.",
+      );
     }
     let profileManifest = manifest;
     if (activeFloor) {
-      try { profileManifest = composeManifestWithBrowserFloor(manifest, activeFloor); }
-      catch (error) { add("transfer.floor-building", "activeFloor", error instanceof Error ? error.message : "The floor does not fit this building."); }
+      try {
+        profileManifest = composeManifestWithBrowserFloor(manifest, activeFloor);
+      } catch (error) {
+        add(
+          "transfer.floor-building",
+          "activeFloor",
+          error instanceof Error ? error.message : "The floor does not fit this building.",
+        );
+      }
     }
     const result = validateRuntimeBindingProfile(input.runtimeBindingProfile, profileManifest);
     if (!result.valid || !result.profile) {
@@ -148,7 +163,8 @@ const validateTransfer = (
   if (input.floorDraft !== undefined) {
     const raw = JSON.stringify(input.floorDraft);
     floorDraft = parseFloorLayoutDraft(raw, activeFloor?.id ?? manifest.floors[0].id) ?? undefined;
-    if (!floorDraft) add("transfer.floor-draft", "floorDraft", "The saved floor draft is invalid for this home.");
+    if (!floorDraft)
+      add("transfer.floor-draft", "floorDraft", "The saved floor draft is invalid for this home.");
   }
 
   if (issues.length > 0) return { issues };
@@ -177,14 +193,21 @@ export const importCabaneBrowserData = (
   } catch {
     return {
       valid: false,
-      issues: [{ code: "transfer.json", path: "$", message: "The selected Cabane browser-data file is not valid JSON." }],
+      issues: [
+        {
+          code: "transfer.json",
+          path: "$",
+          message: "The selected Cabane browser-data file is not valid JSON.",
+        },
+      ],
     };
   }
   const validation = validateTransfer(parsed, manifest);
   if (!validation.transfer) return { valid: false, issues: validation.issues };
   const transfer = validation.transfer;
   try {
-    if (transfer.activeFloor) saveActiveFloorLayout(storage, manifest.home.id, transfer.activeFloor);
+    if (transfer.activeFloor)
+      saveActiveFloorLayout(storage, manifest.home.id, transfer.activeFloor);
     if (transfer.floorDraft) saveFloorLayoutDraft(storage, manifest.home.id, transfer.floorDraft);
     if (transfer.runtimeBindingProfile && transfer.homeAssistantUrl) {
       saveRuntimeBindingProfile(storage, transfer.homeAssistantUrl, transfer.runtimeBindingProfile);
@@ -198,11 +221,16 @@ export const importCabaneBrowserData = (
   } catch (error) {
     return {
       valid: false,
-      issues: [{
-        code: "transfer.storage",
-        path: "$",
-        message: error instanceof Error ? error.message : "The browser could not store the imported data.",
-      }],
+      issues: [
+        {
+          code: "transfer.storage",
+          path: "$",
+          message:
+            error instanceof Error
+              ? error.message
+              : "The browser could not store the imported data.",
+        },
+      ],
     };
   }
   return {

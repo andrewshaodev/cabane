@@ -56,12 +56,12 @@ centerline.
 
 Targets:
 
-| Contact | Target gap |
-|---|---:|
-| Wall-backed, no world outline | 0–2 mm |
-| Wall-backed, outline expands toward wall | 2–5 mm |
-| Visible overlay/panel separation | 1–3 mm |
-| Hidden seam or rounding compensation | no more than 1 mm negative |
+| Contact                                  |                 Target gap |
+| ---------------------------------------- | -------------------------: |
+| Wall-backed, no world outline            |                     0–2 mm |
+| Wall-backed, outline expands toward wall |                     2–5 mm |
+| Visible overlay/panel separation         |                     1–3 mm |
+| Hidden seam or rounding compensation     | no more than 1 mm negative |
 
 Never accept visible wall penetration. A negative hidden seam is not a license
 to bury handles, screens, frames, or outlines.

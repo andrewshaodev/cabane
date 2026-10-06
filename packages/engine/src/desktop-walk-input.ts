@@ -1,12 +1,7 @@
 import { useCabaneDom } from "./CabaneDom";
-import {
-  useEffect,
-  type MutableRefObject
-} from "react";
+import { useEffect, type MutableRefObject } from "react";
 
-import {
-  type StickVector
-} from "./navigation";
+import { type StickVector } from "./navigation";
 
 export const useDesktopWalkInput = (
   active: boolean,
@@ -31,14 +26,31 @@ export const useDesktopWalkInput = (
     };
     const down = (event: KeyboardEvent) => {
       const target = event.composedPath()[0] ?? event.target;
-      if (target instanceof HTMLElement && (target.isContentEditable || target.closest("input, textarea, select"))) return;
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || target.closest("input, textarea, select"))
+      )
+        return;
       if (event.code === "Space") {
         event.preventDefault();
         if (!event.repeat && !keys.has("Space") && jumpRequestRef) jumpRequestRef.current = true;
         keys.add("Space");
         return;
       }
-      if (["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"].includes(event.code)) {
+      if (
+        [
+          "KeyW",
+          "KeyA",
+          "KeyS",
+          "KeyD",
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "ShiftLeft",
+          "ShiftRight",
+        ].includes(event.code)
+      ) {
         event.preventDefault();
         keys.add(event.code);
         update();
@@ -54,7 +66,8 @@ export const useDesktopWalkInput = (
       update();
     };
     const focusOut = (event: FocusEvent) => {
-      if (!(event.relatedTarget instanceof HTMLElement) || !dom.root.contains(event.relatedTarget)) reset();
+      if (!(event.relatedTarget instanceof HTMLElement) || !dom.root.contains(event.relatedTarget))
+        reset();
     };
     dom.events.addEventListener("focusout", focusOut);
     dom.events.addEventListener("keydown", down);
@@ -67,5 +80,5 @@ export const useDesktopWalkInput = (
       window.removeEventListener("blur", reset);
       reset();
     };
-  }, [active, movementRef, sprintRef, jumpRequestRef]);
+  }, [active, movementRef, sprintRef, jumpRequestRef, dom]);
 };

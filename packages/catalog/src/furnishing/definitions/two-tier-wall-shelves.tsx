@@ -3,7 +3,17 @@ import { TwoTierWallShelves } from "../presets/children-bedroom/two-tier-wall-sh
 
 export const twoTierWallShelvesDefinition = defineFurnishingModel({
   defaultRoomType: "bedroom",
-  component: ({ size }) => <group scale={[size[0] / .325, size[1] / .568, size[2] / .86]}><TwoTierWallShelves /></group>,
-  label: "Two-tier wall shelves", category: "Children", defaultSize: [.325, .568, .86], bounds: { min: [-.15, -.023, -.29], max: [.175, .545, .57] },
-  resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] }, preferredPlacement: "wall", outlineContact: true, complexity: { visibleMeshes: 4, triangles: 1_000 },
+  component: ({ size }) => (
+    <group scale={[size[0] / 0.325, size[1] / 0.568, size[2] / 0.86]}>
+      <TwoTierWallShelves />
+    </group>
+  ),
+  label: "Two-tier wall shelves",
+  category: "Children",
+  defaultSize: [0.325, 0.568, 0.86],
+  bounds: { min: [-0.15, -0.023, -0.29], max: [0.175, 0.545, 0.57] },
+  resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+  preferredPlacement: "wall",
+  outlineContact: true,
+  complexity: { visibleMeshes: 4, triangles: 1_000 },
 });

@@ -4,9 +4,7 @@ import { withModules } from "./test-server.mjs";
 import { connectedRuntimeFixture } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
-  const { deriveHomePresence } = await load(
-    "/packages/engine/src/home-presence/model.ts",
-  );
+  const { deriveHomePresence } = await load("/packages/engine/src/home-presence/model.ts");
 
   const addPerson = (runtime, id, state, overrides = {}) => {
     const entityId = `person.${id}`;
@@ -66,10 +64,11 @@ await withModules(async (load) => {
     for (const prepare of [
       (runtime) => addPerson(runtime, "alex", "unknown", { name: "Alex" }),
       (runtime) => addPerson(runtime, "alex", "unavailable", { name: "Alex" }),
-      (runtime) => addPerson(runtime, "alex", "not_home", {
-        name: "Alex",
-        snapshot: { stale: true },
-      }),
+      (runtime) =>
+        addPerson(runtime, "alex", "not_home", {
+          name: "Alex",
+          snapshot: { stale: true },
+        }),
       (runtime) => {
         addPerson(runtime, "alex", "not_home", { name: "Alex" });
         addPerson(runtime, "marc", "unknown", { name: "Marc" });
