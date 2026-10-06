@@ -63,7 +63,6 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
   const observedRuntime = useFirstControlConfirmation(runtime,
     personalSetup && !setupState.record.activated && !launch.firstControlConfirmed, confirmed, manifest.home.id, targetEntityId);
   const connect = () => {
-    if (isDemo && onboarding) { void onboarding.start("build"); return; }
     if (onOpenConnect) onOpenConnect("devices", target?.roomId);
     else setSurface("connection");
   };
@@ -79,9 +78,9 @@ export function CabaneAppExperience({ manifest, architectureModels, deviceModels
       : personalSetup && !setupState.record.activated ? { label: "Continue setup", detail: "Connect a device in this home", attention: false, onOpen: connect } : undefined}
     setupOpen={surface !== null} onWorkspaces={onWorkspaces}
     focusRoomId={personalSetup && targetEntityId && !setupState.record.activated ? target?.roomId : undefined}
-    onEditHome={onEditHome ? mode => { if (mode === "connect" && isDemo) connect(); else onEditHome(mode); } : undefined}
+    onEditHome={onEditHome}
     onCustomizeActionBar={onCustomizeActionBar}
-    onOpenConnect={onOpenConnect ? (view, roomId) => { if (isDemo) connect(); else onOpenConnect(view, roomId); } : undefined}
+    onOpenConnect={onOpenConnect}
     onExportBrowserData={onExportBrowserData} />;
   const nudge = isDemo && interacted && !onboarding?.nudgeDismissed;
   const targetState = targetEntityId ? runtime.entityStates[targetEntityId] : undefined;

@@ -279,7 +279,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     <span>Retry connection</span>
                   </button>
                 )}
-                <a href="https://tally.so/r/pbQv8B" target="_blank" rel="noopener noreferrer"
+                <a href="https://tally.so/r/QK6dMA" target="_blank" rel="noopener noreferrer"
                   aria-label="Send feedback (opens in a new tab)"
                   onClick={event => event.currentTarget.closest("details")?.removeAttribute("open")}>
                   <SceneMenuIcon name="feedback" />

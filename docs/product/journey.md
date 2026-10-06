@@ -15,6 +15,7 @@ Home renders published data; the editor reads the draft. Routes are:
 | `/workspaces/:workspaceId` | Published Home; unapplied homes open Construct |
 | `/workspaces/:workspaceId/construct` | 2D architecture editing |
 | `/workspaces/:workspaceId/arrange` | Furniture and device placement |
+| `/workspaces/:workspaceId/mobile-editor?mode=construct` or `?mode=arrange` | Phone editor guidance before Construct or Arrange |
 | `/workspaces/:workspaceId/connect` | Resolves the initial mapping view |
 | `/workspaces/:workspaceId/connect/rooms` | Room-to-area mapping |
 | `/workspaces/:workspaceId/connect/devices` | Device and entity-slot mapping |
@@ -96,3 +97,10 @@ returns guidance to drawing walls. The tutorial scrolls with the properties pane
 on phones so the complete catalog and inspector remain accessible.
 
 Every editor mode keeps the workspace sidebar with a consistent mode title and short task description. Contextual headings and form labels sit below that introduction. On narrow screens the sidebar becomes a scrollable bottom panel.
+
+On phone-sized screens, entering Construct or Arrange first opens a full-screen guidance route. It offers the demo, the browser's native share sheet for `cabane.my` (with a copy-link fallback), and a choice to keep editing on mobile. Dismissing the guidance permits editor entry for the current browser session. The guidance route is directly addressable for review.
+
+On desktop, active build tutorial guidance floats at the editor canvas’s top right,
+below the toolbar; on compact screens it stays in the properties panel. The
+2D/3D and Explore controls sit at the canvas’s bottom left, above the properties
+panel on portrait mobile layouts.

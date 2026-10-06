@@ -61,7 +61,11 @@
   pointer-events: auto;
 }
 .direction-modes { grid-column: 2; grid-row: 1; justify-self: center; }
-.direction-camera { grid-column: 1; grid-row: 1; justify-self: start; }
+.direction-camera {
+  position: fixed;
+  left: calc(var(--editor-rail-width) + 16px);
+  bottom: max(16px, env(safe-area-inset-bottom));
+}
 .direction-project-actions { grid-column: 3; grid-row: 1; justify-self: end; }
 .editor-header button {
   display: inline-flex;
@@ -424,7 +428,6 @@
   .editor-header { grid-template-columns: minmax(0, 1fr) auto; gap: 10px 8px; }
   .direction-modes { grid-column: 1 / -1; grid-row: 1; }
   .editor-action-bar { grid-row: 2; }
-  .direction-camera { grid-column: 1; grid-row: 3; }
   .direction-project-actions { grid-column: 2; grid-row: 3; }
   .direction-preview__model { top: 190px; }
 }
@@ -439,7 +442,8 @@
   .direction-modes { justify-self: stretch; min-width: 0; max-width: 100%; }
   .direction-modes button { flex: 1 1 0; min-width: 0; padding-inline: 3px; gap: 3px; font-size: .72rem; }
   .direction-modes .editor-icon { width: 14px; height: 14px; }
-  .direction-status { right: 10px; bottom: calc(40dvh + 10px); }
+  .direction-camera { left: max(10px, env(safe-area-inset-left)); bottom: calc(40dvh + 10px); }
+  .direction-status { right: 10px; bottom: calc(40dvh + 68px); }
   .editor-mode-introduction { margin-bottom: 18px; }
   .direction-rail > .construction-inspector, .direction-rail > .connect-inspector, .direction-rail > .shortcuts-guide { flex: none; overflow: visible; }
   .direction-rail > .arrange-catalog-mount { flex: none; min-height: 300px; }
@@ -463,9 +467,9 @@
   .direction-rail__brand h1 { font-size: var(--editor-text-heading, 1.5rem); }
   .editor-header { left: calc(var(--editor-rail-width) + 10px); top: max(10px, env(safe-area-inset-top)); gap: 8px; grid-template-columns: minmax(0, 1fr) auto; }
   .direction-modes { grid-column: 1 / -1; grid-row: 1; }
-  .direction-camera { grid-column: 1; grid-row: 3; }
   .direction-project-actions { grid-column: 2; grid-row: 3; }
-  .direction-status { bottom: 10px; }
+  .direction-camera { left: calc(var(--editor-rail-width) + 10px); bottom: max(10px, env(safe-area-inset-bottom)); }
+  .direction-status { bottom: 68px; }
 }
 @media (pointer: coarse) {
   .editor-header button, .direction-rail :is(button, summary, input:not([type="checkbox"]), select) { min-height: 44px; }

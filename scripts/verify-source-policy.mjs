@@ -64,9 +64,13 @@ for (const file of files) {
     if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/onboarding-config.ts") {
       inspectedSource = inspectedSource.replace(/https:\/\/github\.com\/cabane-app\/cabane(?:#readme)?/g, "public-source-navigation");
     }
+    if (rule.reason === "runtime remote URL" && relativePath === "apps/web/src/mobile-editor/MobileEditorPrompt.tsx") {
+      // This is the user-requested URL passed to the native share sheet, not a runtime asset fetch.
+      inspectedSource = inspectedSource.replace("https://cabane.my", "cabane-share-destination");
+    }
     if (rule.reason === "runtime remote URL" && relativePath === "packages/engine/src/ValidatedDashboardView.tsx") {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
-      inspectedSource = inspectedSource.replace("https://tally.so/r/pbQv8B", "feedback-navigation");
+      inspectedSource = inspectedSource.replace("https://tally.so/r/QK6dMA", "feedback-navigation");
     }
     if (rule.reason === "external visual asset reference" && relativePath === "packages/engine/src/onboarding/OnboardingIntroduction.tsx") {
       inspectedSource = inspectedSource.replace('`/onboarding/${name}.png`', '"bundled-onboarding-preview"');

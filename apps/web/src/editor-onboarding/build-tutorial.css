@@ -29,3 +29,20 @@
 .editor-tutorial-restart { margin-bottom: 16px; padding: 8px 12px; border: 1px solid var(--editor-line); border-radius: 7px; color: var(--preview-ink); background: transparent; font: inherit; cursor: pointer; }
 .editor-tutorial-restart:hover:not(:disabled) { background: #eae5d9; }
 .build-tutorial button:focus-visible { outline: 2px solid #934c2e; outline-offset: 2px; }
+
+/* Keep desktop guidance visible beside the canvas, clear of the top toolbar. */
+@media (min-width: 761px) and (min-height: 501px) {
+  .build-tutorial {
+    position: fixed;
+    top: max(140px, calc(env(safe-area-inset-top) + 124px));
+    right: max(16px, env(safe-area-inset-right));
+    width: min(300px, calc(100vw - var(--editor-rail-width) - 32px));
+    margin: 0;
+    padding: 16px;
+    border-color: #a9b49c;
+    max-height: calc(100dvh - 220px);
+  }
+}
+@media (min-width: 761px) and (max-width: 1240px) and (min-height: 501px) {
+  .build-tutorial { top: max(190px, calc(env(safe-area-inset-top) + 174px)); max-height: calc(100dvh - 270px); }
+}

@@ -64,7 +64,8 @@ export function WorkspaceApplication() {
       {onboarding.deleted && <button disabled={onboarding.busy} onClick={() => void onboarding.start(onboarding.deleted!.path, onboarding.deleted!.id)}>Create a new home</button>}
       <button onClick={() => void navigate("/workspaces")}>Workspaces</button><button onClick={onboarding.clearError}>Dismiss</button>
     </div>}
-    {onboarding.loaded ? <WorkspaceHost key={id} id={id} repository={repository} onboarding={onboarding} /> : <main className="direction-project-loading">Loading your home…</main>}
+    {onboarding.loaded ? <WorkspaceHost key={id} id={id} repository={repository} onboarding={onboarding}
+      demoWorkspaceId={entries.some(entry => entry.metadata.id === onboarding.state?.demoWorkspaceId) ? onboarding.state?.demoWorkspaceId ?? null : null} /> : <main className="direction-project-loading">Loading your home…</main>}
   </>;
   if (location.pathname !== "/workspaces") return <Navigate to="/" replace />;
   const selected = (id: string) => {
