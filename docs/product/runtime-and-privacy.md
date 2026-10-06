@@ -21,7 +21,10 @@ Native initialization skips standalone legacy URL and authentication migration.
 It does not read, copy, remove, or persist legacy OAuth material, write OAuth
 return state, or consume the host URL's callback parameters. Ordinary workspace
 initialization and browser-local project storage remain available. Demo providers
-explicitly disable the host session. Native settings and import offer a safe
+explicitly disable the host session. Before the first native welcome screen, a
+read-only workspace-list request checks the host for saved homes; it does not
+subscribe to devices, dispatch controls, read tokens, or create a connection.
+Native settings and import offer a safe
 connection retry without starting OAuth.
 
 Embedded first-time sign-in opens HA authorization in a popup so HA does not

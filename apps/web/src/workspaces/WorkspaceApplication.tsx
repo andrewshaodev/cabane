@@ -1,3 +1,4 @@
+import { NativeWorkspaceWelcome } from "./NativeWorkspaceWelcome";
 import { WorkspaceOpenPage } from "./WorkspaceOpenPage";
 import { deleteReferenceHome } from "../editor-reference-plan/reference-storage";
 import { enrollBuildTutorial, forgetBuildTutorial } from "../editor-onboarding/build-tutorial-storage";
@@ -21,6 +22,10 @@ export function WorkspaceApplication() {
   const location = useLocation();
   const hostSession = useHomeAssistantHostSession();
   const navigate = useNavigate();
+  // Keep an explicit startup choice authoritative while router transitions and
+  // IndexedDB/onboarding state updates commit at different React priorities.
+  const [startupDestination, setStartupDestination] = useState<string | null>(null);
+  useEffect(() => { if (location.pathname !== "/") setStartupDestination(null); }, [location.pathname]);
   const [repository, setRepository] = useState<WorkspaceRepository | null>(null);
   const onboarding = useWorkspaceOnboarding(repository);
   const [entries, setEntries] = useState<WorkspaceEntry[] | null>(null);
@@ -61,7 +66,16 @@ export function WorkspaceApplication() {
     }
   }
   if (location.pathname === "/") {
+    if (startupDestination) return <Navigate to={startupDestination} replace />;
     if (!onboarding.loaded) return <main className="direction-project-loading">Loading your home…</main>;
+    if (hostSession && onboarding.state && !onboarding.state.welcomeDismissed
+      && entries.length === 1 && entries[0].metadata.id === onboarding.state.demoWorkspaceId) {
+      return <NativeWorkspaceWelcome session={hostSession} repository={repository}
+        onRestored={async id => { setStartupDestination(workspaceHomePath(id)); await refresh(); await onboarding.dismiss("welcome"); }}
+        onBuild={async () => { setStartupDestination("/build"); }}
+        onExplore={async () => { setStartupDestination("/demo"); await onboarding.dismiss("welcome"); }}
+        onCancel={async () => { setStartupDestination("/workspaces"); await onboarding.dismiss("welcome"); }} />;
+    }
     const latest = entries.find(entry => entry.metadata.id === lastOpenedWorkspace());
     const destination = latest ?? (entries.length === 1 ? entries[0] : undefined);
     if (destination && onboarding.state && destination.metadata.id === onboarding.state.demoWorkspaceId) {
