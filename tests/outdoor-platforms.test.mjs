@@ -87,6 +87,30 @@ await withModules(async load => {
     assert.deepEqual(result.floor.ceilings,[]);
     assert.equal(e.validateLayoutFloorSpec(result.floor).valid,true,JSON.stringify(e.validateLayoutFloorSpec(result.floor).issues));
   });
+  test('a platform-only floor envelope provides no invisible walking or placement support', () => {
+    const ground=roomFloor(), upper={...roomFloor(),id:'upper',rooms:[],walls:[],wallJunctions:[],openings:[],ceilings:[],outdoorPlatforms:[{...platform(),defaultEdge:{kind:'open'}}]};
+    assert.equal(e.validateLayoutFloorSpec(upper).valid,true);
+    assert.deepEqual(e.floorSupportPolygons(upper),[platform().polygon]);
+    const building={coordinates:ground.coordinates,floors:[ground,upper],stairs:[],sceneItems:[]};
+    assert.equal(e.safeBuildingSpawn(building,'upper',[2,2]),null);
+    assert.ok(e.safeBuildingSpawn(building,'upper',[5,2]));
+    assert.equal(e.moveBuildingWalker(building,{floorId:'upper',elevation:2.6,x:4.1,z:2},{x:-.3,z:0},new Set()).x,4.1);
+    const definition=Object.values(stableFurnishingRegistry).find(d=>d.placementEnvironment==='outdoor');
+    assert.equal(placementCandidate({definition},{...upper,elevationMeters:2.6},{at:[2,2],kind:'absolute',raw:true}).placement,null);
+    assert.ok(placementCandidate({definition},{...upper,elevationMeters:2.6},{at:[5,2],kind:'absolute',raw:true}).placement);
+    const indoor=Object.values(stableFurnishingRegistry).find(d=>d.placementEnvironment!=='outdoor'&&d.preferredPlacement==='absolute');
+    assert.equal(placementCandidate({definition:indoor},{...upper,elevationMeters:2.6},{at:[2,2],kind:'absolute',raw:true}).placement,null);
+    const seed=e.parseHomeProjectSchema({schemaVersion:1,seedRevision:'support-gap',home:e.neutralDemoManifest.home,floor:layoutFloorFromEditorFloor(ground),sceneItems:[],roomProfiles:{},openingProfiles:{},shortcuts:[],assumptions:[]}).project;
+    const modelId=Object.entries(stableFurnishingRegistry).find(([,d])=>d===definition)[0];
+    const project={...seed,floors:[seed.floors[0],layoutFloorFromEditorFloor(upper)],sceneItems:[{id:'gap-item',floorId:'upper',kind:'furnishing',modelId,size:definition.defaultSize,placement:{kind:'absolute',at:[2,2],elevationMeters:.001,rotationYRadians:0}}]};
+    assert.ok(e.validateHomeProject(project,{furnishingModels:stableFurnishingRegistry,deviceModels:{}}).issues.some(i=>i.code==='project.item-support'));
+  });
+  test('a stair landing in a platform-only envelope gap is unsupported', () => {
+    const building=makeStairProject(); const upper=building.floors[1];
+    upper.rooms=[];upper.walls=[];upper.wallJunctions=[];upper.ceilings=[];upper.openings=[];
+    upper.outdoorPlatforms=[platform([[20,0],[22,0],[22,4],[20,4]])];
+    assert.ok(e.validateStairs(building).some(i=>i.code==='stair.landing'&&i.message.includes(upper.name)));
+  });
   test('inserting a corner keeps downstream edge overrides and creates a default edge', () => {
     const before=platform(); before.edges[1].configuration={kind:'low-wall',heightMeters:.42};
     const next=e.platformWithPolygon(before,[before.polygon[0],[5,0],...before.polygon.slice(1)]);

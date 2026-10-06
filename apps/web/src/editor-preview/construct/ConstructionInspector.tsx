@@ -157,7 +157,7 @@ export function ConstructionInspector({
         <div className="floor-finish-palette__targets" role="group" aria-label="Paint target">
           {(["room", "custom-area", "outdoor-platform"] as const).map(target=><button type="button" key={target}
             aria-label={target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
-            aria-pressed={target === "outdoor-platform"} onClick={()=>{editor.setTool(target === "outdoor-platform" ? "platform" : "floor");floorPainting.onTargetChange(target);}}>
+            aria-pressed={target === "outdoor-platform"} onClick={()=>floorPainting.onTargetChange(target)}>
             {target === "room" ? "Whole room" : target === "custom-area" ? "Custom area" : "Outdoor platform"}
           </button>)}
         </div>
@@ -202,7 +202,7 @@ export function ConstructionInspector({
             value={floorPainting.finish}
             onChange={floorPainting.onFinishChange}
             target={floorPainting.target}
-            onTargetChange={target=>{floorPainting.onTargetChange(target);if(target === "outdoor-platform") {editor.setPlatformSettings({...editor.platformSettings,finish:floorPainting.finish});editor.setTool("platform");}}}
+            onTargetChange={target=>{floorPainting.onTargetChange(target);if(target === "outdoor-platform") editor.setPlatformSettings({...editor.platformSettings,finish:floorPainting.finish});}}
           />
           {floorPainting.target === "custom-area" && <p role="status">
             Start inside a room for an inset, or outside the building for a path or ground patch. Return to the first point to close it.
@@ -343,7 +343,7 @@ export function ConstructionInspector({
                   : floorFinishPreset(finish.preset).label;
               })()}</strong>
             </div>
-            <button type="button" onClick={() => editor.setTool("floor")}>
+            <button type="button" onClick={() => floorPainting ? floorPainting.onTargetChange("room") : editor.setFloorPaintTarget("room")}>
               Paint floor
             </button>
             <label>Ceiling<CommittedNumberInput label="Room ceiling height" min={.3} step={.05} value={roomCeilingHeight} onCommit={(ceilingHeightMeters) => editor.updateSelectedRoom({ ceilingHeightMeters })} /></label>

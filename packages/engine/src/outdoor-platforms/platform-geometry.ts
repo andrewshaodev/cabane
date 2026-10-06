@@ -2,11 +2,15 @@ import polygonClipping from "polygon-clipping";
 import { pointInsidePolygon, polygonSignedArea } from "../geometry";
 import { pointOnPolygonBoundary } from "../validation/geometry";
 import { isPoolOutline } from "../pools/pool-footprint";
-import type { FloorSpec, OutdoorPlatformSpec, PlanPoint } from "../types";
+import type { FloorSpec, OutdoorPlatformSpec, PlanPoint, Polygon } from "../types";
 
 export const isOutdoorPlatformOutline = isPoolOutline;
-export const floorSupportPolygons = (floor: Pick<FloorSpec, "footprint" | "footprintRegions" | "outdoorPlatforms">) => [
-  ...(floor.footprintRegions ?? [floor.footprint]).filter(p => p.length >= 3),
+type SupportFloor = Pick<FloorSpec, "rooms" | "footprint" | "footprintRegions" | "outdoorPlatforms">;
+/** The footprint is only an envelope on a floor made entirely of platforms. */
+export const floorSlabPolygons = (floor: SupportFloor) =>
+  (floor.rooms.length || !floor.outdoorPlatforms?.length ? floor.footprintRegions ?? [floor.footprint] : []).filter((p): p is Polygon => p.length >= 3);
+export const floorSupportPolygons = (floor: SupportFloor) => [
+  ...floorSlabPolygons(floor),
   ...(floor.outdoorPlatforms ?? []).filter(p => isOutdoorPlatformOutline(p.polygon)).map(p => p.polygon),
 ];
 export const pointOnFloorSupport = (point: PlanPoint, floor: Parameters<typeof floorSupportPolygons>[0]) =>

@@ -184,7 +184,7 @@ export function HomeEditorScene({
             selection={marqueeSelecting ? null : constructEditor.selection}
             deletionTargets={marqueeSelecting ? [] : constructEditor.deletionTargets}
             tool={constructEditor.tool}
-            paintTarget={floorPaintTarget === "outdoor-platform" ? "room" : floorPaintTarget}
+            paintTarget={floorPaintTarget}
             drawingPoints={floorZoneDrawing.points}
             drawingPreview={floorZoneDrawing.preview}
             drawingRoomId={floorZoneDrawing.roomId}
@@ -214,7 +214,7 @@ export function HomeEditorScene({
             drawAngleReferenceRadians={constructEditor.tool === "wall" ? constructEditor.drawAngleReferenceRadians : null}
             wallExteriorColor={constructEditor.exteriorWallColor}
             poolPoints={poolDrawing.points}
-            floorPaintTarget={floorPaintTarget === "outdoor-platform" ? "room" : floorPaintTarget}
+            floorPaintTarget={floorPaintTarget}
             floorZonePoints={floorZoneDrawing.points}
               floorZonePreview={floorZoneDrawing.preview}
               onCancelFloorZone={floorZoneDrawing.cancel}

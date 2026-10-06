@@ -66,6 +66,7 @@ export const useConstructEditor = (
     finish: { kind: "solid", color: "#c8b79b" }, defaultEdge: { kind: "railing", heightMeters: 1 },
   });
   const [selectedPlatformEdgeId, setSelectedPlatformEdgeId] = useState<string | null>(null);
+  const [floorPaintTarget, rememberFloorPaintTarget] = useState<ConstructEditorController["floorPaintTarget"]>(initialTool === "platform" ? "outdoor-platform" : "room");
   const drawingTool = useRef(history.present.tool); drawingTool.current = history.present.tool;
   const poolDrawing = useClosedOutlineDrawing((polygon) => dispatch(drawingTool.current === "platform"
     ? { type: "add-outdoor-platform", polygon, ...platformSettings }
@@ -134,7 +135,17 @@ export const useConstructEditor = (
     setDrawStart(null);
     setDrawPreview(null);
     setDrawAngleReferenceRadians(null);
-    dispatch({ type: "set-tool", tool });
+    if (tool === "platform") rememberFloorPaintTarget("outdoor-platform");
+    dispatch({ type: "set-tool", tool: tool === "floor" && floorPaintTarget === "outdoor-platform" ? "platform" : tool });
+  }, [poolDrawing.cancel, floorPaintTarget]);
+  const setFloorPaintTarget = useCallback((target: ConstructEditorController["floorPaintTarget"]) => {
+    rememberFloorPaintTarget(target);
+    poolDrawing.cancel();
+    drawStartRef.current = null;
+    setDrawStart(null);
+    setDrawPreview(null);
+    setDrawAngleReferenceRadians(null);
+    dispatch({ type: "set-tool", tool: target === "outdoor-platform" ? "platform" : "floor" });
   }, [poolDrawing.cancel]);
   const select = useCallback((selection: FloorEditorSelection) => {
     setOpeningError(null);
@@ -347,6 +358,8 @@ export const useConstructEditor = (
     canRedo: history.future.length > 0,
     dispatch,
     setTool,
+    floorPaintTarget,
+    setFloorPaintTarget,
     selectWall: (id) => select({ kind: "wall", id }),
     selectOpening: (id) => select({ kind: "opening", id }),
     selectRoom: (id) => select({ kind: "room", id }),

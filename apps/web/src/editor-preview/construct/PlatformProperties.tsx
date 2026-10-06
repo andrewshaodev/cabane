@@ -14,7 +14,7 @@ export function PlatformDrawingProperties({editor}:{editor:ConstructEditorContro
     <EdgeFields value={settings.defaultEdge} onChange={defaultEdge=>editor.setPlatformSettings({...settings,defaultEdge})} />
     <FloorFinishPalette value={settings.finish} onChange={finish=>editor.setPlatformSettings({...settings,finish})} target="outdoor-platform" showTarget={false} onTargetChange={()=>{}} />
     {editor.poolDrawing.error && <p role="alert">{editor.poolDrawing.error}</p>}
-    <button type="button" onClick={()=>{editor.poolDrawing.cancel();editor.setTool("floor");}}>Cancel platform</button>
+    <button type="button" onClick={()=>editor.setTool("select")}>Cancel platform</button>
   </div>;
 }
 export function PlatformProperties({platform,editor}:{platform:OutdoorPlatformSpec;editor:ConstructEditorController}) {

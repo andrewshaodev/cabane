@@ -19,6 +19,7 @@ import {
 } from "@cabane/engine";
 
 import { usePoolDrawing } from "./usePoolDrawing";
+import type { FloorPaintTarget } from "./FloorFinishPalette";
 
 export interface ConstructEditorState {
   history: FloorEditorHistory;
@@ -93,6 +94,8 @@ export interface ConstructEditorController extends ConstructEditorState {
   canRedo: boolean;
   dispatch: (action: ConstructEditorAction) => void;
   setTool: (tool: FloorEditorTool) => void;
+  floorPaintTarget: FloorPaintTarget;
+  setFloorPaintTarget: (target: FloorPaintTarget) => void;
   selectWall: (id: string) => void;
   selectOpening: (id: string) => void;
   selectRoom: (id: string) => void;

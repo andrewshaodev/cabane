@@ -37,8 +37,7 @@ import {
   useConstructEditor,
   useConstructMeasure,
   useFloorZoneDrawing,
-  type ConstructContextualIssue,
-  type FloorPaintTarget
+  type ConstructContextualIssue
 } from "../editor-preview/construct";
 
 import { useSceneItemDependencies } from "../editor-preview/construct/useSceneItemDependencies";
@@ -182,8 +181,7 @@ export function useHomeEditorController({
     kind: "preset",
     preset: "light-oak",
   });
-  const [floorPaintTarget, setFloorPaintTarget] =
-    useState<FloorPaintTarget>("room");
+  const { floorPaintTarget, setFloorPaintTarget } = constructEditor;
   const [pendingRoomPaintId, setPendingRoomPaintId] =
     useState<string | null>(null);
   const floorZoneDrawing = useFloorZoneDrawing(

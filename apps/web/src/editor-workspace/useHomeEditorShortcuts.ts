@@ -102,7 +102,7 @@ export function useHomeEditorShortcuts({
         if (pendingRoomPaintId) setPendingRoomPaintId(null);
         else if (floorZoneDrawing.active) floorZoneDrawing.cancel();
         else if (constructEditor.tool === "platform" && constructEditor.poolDrawing.active) constructEditor.poolDrawing.cancel();
-        else if (constructEditor.tool === "platform") constructEditor.setTool("floor");
+        else if (constructEditor.tool === "platform") constructEditor.setTool("select");
         else if (constructEditor.tool === "floor") constructEditor.setTool("select");
         else if (constructEditor.tool === "measure" && constructMeasure.phase !== "idle") {
           constructMeasure.cancel();
