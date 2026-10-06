@@ -166,6 +166,19 @@ await withModules(async (load) => {
     assert.ok(result.issues.some((issue) => issue.path === "floors"));
   });
 
+  test("validates optional custom wall edge color at its exact path", () => {
+    const manifest = structuredClone(neutralDemoManifest);
+    manifest.floors[0].walls[0].edgeColor = "#bcb99b";
+    assert.deepEqual(validateHomeManifest(manifest).issues, []);
+    manifest.floors[0].walls[0].edgeColor = "";
+    assert.ok(
+      validateHomeManifest(manifest).issues.some(
+        (issue) =>
+          issue.code === "wall.edge-color" && issue.path === "floors[0].walls[0].edgeColor",
+      ),
+    );
+  });
+
   test("validates optional floor finishes and wall colors at exact paths", () => {
     const valid = structuredClone(neutralDemoManifest);
     valid.floors[0].rooms[0].floorFinish = { kind: "solid", color: "#c8bca8" };

@@ -29,6 +29,7 @@ import { wallMeasurement } from "./drag-geometry";
 import { constructIssueShortLabel } from "./validation-visuals";
 
 import { CommittedTextInput } from "./CommittedTextInput";
+import { WallFinishFields } from "./WallFinishFields";
 import { DebouncedColorInput } from "./DebouncedColorInput";
 import { FloorFinishPalette } from "./FloorFinishPalette";
 import type { FloorPaintingInspector } from "./floor-painting-contract";
@@ -378,22 +379,11 @@ export function ConstructionInspector({
                 />
               </label>
             </fieldset>
-            {editor.tool !== "wall" && selectedWallIsExterior && (
-              <fieldset>
-                <legend>Finish</legend>
-                <label>
-                  Exterior
-                  <DebouncedColorInput
-                    label="Wall exterior color"
-                    value={selectedWall.exteriorColor ?? editor.defaultExteriorWallColor}
-                    onCommit={(exteriorColor) => {
-                      editor.setExteriorWallColor(exteriorColor);
-                      editor.updateSelectedWallMetadata({ exteriorColor });
-                    }}
-                  />
-                </label>
-              </fieldset>
-            )}
+            <WallFinishFields
+              editor={editor}
+              wall={selectedWall}
+              isExterior={!!selectedWallIsExterior}
+            />
             <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
               Delete wall
             </EditorButton>

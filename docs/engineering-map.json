@@ -72,7 +72,11 @@
       "apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx",
       "apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx",
       "apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx",
-      "apps/web/src/editor-preview/construct/HedgeProperties.tsx"
+      "apps/web/src/editor-preview/construct/HedgeProperties.tsx",
+      "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
+      "apps/web/src/editor-preview/construct/wall-finish-sides.ts",
+      "apps/web/src/editor-preview/construct/WallFinishPreview.tsx",
+      "apps/web/src/editor-preview/construct/WallFinishHighlight.tsx"
     ],
     "interfaces": [
       {
@@ -80,7 +84,7 @@
         "symbols": ["FloorSpec"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {
@@ -210,7 +214,10 @@
       "packages/engine/src/solar-shadow-frame.ts",
       "packages/engine/src/hedges",
       "packages/engine/src/boundaries",
-      "packages/engine/src/floor-finishes"
+      "packages/engine/src/floor-finishes",
+      "packages/engine/src/architecture-geometry/wall-face-finish.ts",
+      "packages/engine/src/architecture-geometry/wall-cap-finishes.ts",
+      "packages/engine/src/wall-colors.ts"
     ],
     "interfaces": [
       {
@@ -219,11 +226,12 @@
           "ArchitectureScene",
           "StylizedScene",
           "deriveSolarLighting",
-          "resolveSolarLighting"
+          "resolveSolarLighting",
+          "DEFAULT_WALL_COLORS"
         ]
       }
     ],
-    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout.",
+    "invariant": "Trace derived geometry and collision from floor architecture; native geometry uses procedural toon rendering; personal GLBs preserve materials through their dedicated import owner. Active-floor emitters retain zero-intensity lights across state changes to avoid shader recompilation. Room emphasis updates floor materials and wall vertex colors without rebuilding geometry or changing device lights. Solar direction follows geographic north; one resolved source drives Auto lighting and its label, with building-sized solar shadows and unshadowed luminaires. Interior right-angle endpoint corners share a filled footprint across batched and standalone geometry. Architectural planes retain exact geometry during LOD selection. Orbit wall cutaways retain cast shadows during opacity transitions. Boundary styles retain the hedges wire format and continuous segment collision, including open fences. Floor preset colors are portable optional hex values; procedural tile patterns retain neutral grout. Standalone and batched wall caps and opening reveals share edge-finish precedence; shared horizontal junction surfaces retain the general finish when owners disagree. Horizontal caps are partitioned by finish before triangulation to prevent color bleeding across adjacent walls. DEFAULT_WALL_COLORS is the single source of production wall palette defaults; authored finishes take precedence. Interior Auto edges ignore stale exterior paint metadata.",
     "checks": [
       "test:unit",
       "verify:policy",

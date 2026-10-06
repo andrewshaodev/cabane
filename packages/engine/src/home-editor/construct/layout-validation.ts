@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS } from "../../wall-colors";
 import { omitUndefinedProperties } from "../../defined-properties";
 import { legacyFloorHeight } from "../../building/floor-levels";
 import type { LegacyHomeManifest, ManifestIssue } from "../../types";
@@ -19,8 +20,8 @@ const validationEnvelope = (floor: unknown): LegacyHomeManifest => ({
     palette: {
       accent: "#c97555",
       secondary: "#718b7f",
-      exterior: "#c97570",
-      interior: "#e4e0d8",
+      exterior: DEFAULT_WALL_COLORS.exterior,
+      interior: DEFAULT_WALL_COLORS.interior,
       ground: "#91a06a",
     },
   },

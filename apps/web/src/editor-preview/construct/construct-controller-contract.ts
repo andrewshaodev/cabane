@@ -101,7 +101,10 @@ export interface ConstructEditorController extends ConstructEditorState {
   updateWallEndpoint: (wallId: string, endpoint: "from" | "to", point: PlanPoint) => void;
   updateSelectedWallMetadata: (
     changes: Partial<
-      Pick<EditorWall, "thicknessMeters" | "heightMeters" | "exteriorColor" | "faceColors">
+      Pick<
+        EditorWall,
+        "thicknessMeters" | "heightMeters" | "exteriorColor" | "edgeColor" | "faceColors"
+      >
     >,
   ) => void;
   updateFloorSettings: (settings: FloorEditorFloorSettings) => void;

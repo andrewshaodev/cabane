@@ -28,7 +28,8 @@ export interface EditorWall {
   to: PlanPoint;
   thicknessMeters?: number;
   heightMeters?: number;
-  exteriorColor?: string;
+  exteriorColor?: string | undefined;
+  edgeColor?: string | undefined;
   faceColors?: WallSpec["faceColors"];
 }
 

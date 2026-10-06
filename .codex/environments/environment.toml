@@ -9,9 +9,9 @@ script = "npm ci --prefer-offline --no-audit --no-fund"
 script = "npm run clean --if-present"
 
 [[actions]]
-name = "Run"
+name = "Dev server in Chrome"
 icon = "run"
-command = "npm run dev"
+command = "BROWSER='Google Chrome' npm run dev --workspace=@cabane/web -- --port 0 --open"
 
 [[actions]]
 name = "Typecheck"

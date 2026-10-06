@@ -1,3 +1,4 @@
+import { DEFAULT_WALL_COLORS, type FloorEditorTool } from "@cabane/engine";
 import { incompleteFloorPreview } from "./incomplete-floor-preview";
 import {
   DEFAULT_DOOR_CONFIGURATION,
@@ -13,7 +14,6 @@ import {
   roomAnchorForPolygon,
   type FloorEditorHistory,
   type FloorEditorSelection,
-  type FloorEditorTool,
   type FloorFinishSpec,
   type FloorSpec,
   type PlanPoint,
@@ -38,8 +38,8 @@ import { closesWallLoop } from "./wall-loop-closure";
 export const useConstructEditor = (
   initialFloor: FloorSpec,
   acceptedFloor = initialFloor,
-  defaultExteriorWallColor = "#c97370",
-  initialTool: import("@cabane/engine").FloorEditorTool = "select",
+  defaultExteriorWallColor: string = DEFAULT_WALL_COLORS.exterior,
+  initialTool: FloorEditorTool = "select",
   otherFloorRoomNames: readonly string[] = [],
 ): ConstructEditorController => {
   const reservedNamesKey = JSON.stringify(otherFloorRoomNames);

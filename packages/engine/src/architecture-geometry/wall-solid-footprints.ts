@@ -258,3 +258,16 @@ export const createWallAssemblyPointTest = (wall: WallSpec, floor: FloorSpec) =>
   return (point: Horizontal) =>
     pointCoveredByWall(point, wall, frame) || arms.some((arm) => pointInsideRing(point, arm));
 };
+
+/** Footprints used to assign finishes to a wall and its junction arms. */
+export const wallAssemblyFootprintPolygons = (
+  wall: WallSpec,
+  floor: FloorSpec,
+): ClippingPolygon[] => [
+  orientedWallPolygon(wall, floor),
+  ...floor.wallJunctions.flatMap((junction) => {
+    if (!junction.wallIds.includes(wall.id)) return [];
+    const arm = junctionEndpointArmPolygon(wall, junction, floor);
+    return arm ? [arm] : [];
+  }),
+];
