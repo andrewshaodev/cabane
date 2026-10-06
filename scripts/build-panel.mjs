@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "vite";
 import { scopePanelCss } from "./panel-build-tools.mjs";
 import { contractFingerprint, validateContractRelease } from "./ha-contract/source-contract.mjs";
+import { bundledDependencyNotices } from "./distribution-notices.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const web = join(root, "apps/web");
@@ -54,41 +55,11 @@ await writeFile(join(outDir, "cabane-fonts.css"), styles.fonts);
 await cp(join(web, "public/cabane-icon.png"), join(outDir, "cabane-icon.png"));
 await cp(join(web, "public/onboarding"), join(outDir, "onboarding"), { recursive: true });
 
-// Retain dependency license notices for the actual modules bundled by Vite.
-const packages = new Set();
-for (const bundle of Array.isArray(result) ? result : [result]) {
-  for (const chunk of bundle.output ?? []) {
-    for (const id of Object.keys(chunk.modules ?? {})) {
-      const marker = "/node_modules/";
-      const index = id.lastIndexOf(marker);
-      if (index < 0) continue;
-      const parts = id.slice(index + marker.length).split("/");
-      packages.add(
-        id.slice(0, index + marker.length) +
-          parts.slice(0, parts[0].startsWith("@") ? 2 : 1).join("/"),
-      );
-    }
-  }
-}
-const notices = [];
-for (const directory of [...packages].sort()) {
-  const metadata = JSON.parse(await readFile(join(directory, "package.json"), "utf8"));
-  const licenses = (await readdir(directory)).filter((name) =>
-    /^(licen[cs]e|copying|notice)([.-]|$)/i.test(name),
-  );
-  notices.push(
-    `${metadata.name} ${metadata.version} (${typeof metadata.license === "string" ? metadata.license : "see notice"})`,
-  );
-  for (const name of licenses) {
-    try {
-      notices.push(await readFile(join(directory, name), "utf8"));
-    } catch {
-      /* Some packages use a license directory. */
-    }
-  }
-}
-await writeFile(join(outDir, "THIRD_PARTY_LICENSES.txt"), notices.join("\n\n---\n\n"));
+// Retain the same dependency and CSS-font notices as standalone builds.
+const chunks = (Array.isArray(result) ? result : [result]).flatMap((bundle) => bundle.output ?? []);
+await writeFile(join(outDir, "THIRD_PARTY_LICENSES.txt"), bundledDependencyNotices(chunks));
 await cp(join(root, "LICENSE"), join(outDir, "LICENSE"));
+await cp(join(root, "THIRD_PARTY_NOTICES.md"), join(outDir, "THIRD_PARTY_NOTICES.md"));
 const files = {};
 async function inventory(directory) {
   for (const entry of (await readdir(directory, { withFileTypes: true })).sort((a, b) =>

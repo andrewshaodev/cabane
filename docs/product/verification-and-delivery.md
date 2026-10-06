@@ -16,8 +16,16 @@ The root package defines the executable checks. Run `npm run verify:fast` for
 Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
 package-boundary/source-policy checks. `npm run verify` also runs all tests,
 furnishing-surface checks, and the production build. The contract-release workflow
-builds and publishes the matching panel; full verification runs locally before
-pushing, not on GitHub Actions.
+builds and publishes the matching panel. Full verification runs locally before
+pushing and in the `Verification` GitHub workflow on pull requests and pushes to
+main. That workflow uses pinned tooling and synthetic local fixtures without
+household credentials. Configure the `Verify` check and maintainer review as
+required branch rules when the public repository is created; a workflow file
+alone does not enforce merge protection.
+
+Standalone and native panel distributions include the Cabane licence,
+project third-party notices, and licences for bundled dependencies and CSS-loaded
+fonts. See [publication](../publication.md) for the import and release boundaries.
 
 `npm ci` installs the tracked `.githooks/pre-push` hook through `prepare` (CI and
 source archives skip installation). The hook runs `npm run verify` before pushes
@@ -237,7 +245,7 @@ reference checks, and delayed cleanup. These checks use synthetic data and do no
 contact household devices. Cabane and the integration must be delivered together;
 publishing and deployment remain separate actions.
 
-The subsequent scope reduction deliberately removes browser journeys for model-pack
+Browser coverage omits journeys for model-pack
 replacement, reference-plan tracing, six weather previews, standalone navigation and
 OAuth, north/solar preview, rug dimensions, room-control reordering, and imported
 basement viewing/walking. GLB import no longer includes publication, reload, gestures

@@ -49,10 +49,21 @@ Open the local URL printed by the development server. For automated checks, inst
 Playwright-pinned browser once with `npm run browser:install` (Linux hosts may need
 `npm run browser:install -- --with-deps`). Run `npm run verify:fast` for formatting,
 typed ESLint, TypeScript, Knip, and repository rules; run `npm run verify` for the
-full tests, furnishing checks, and production build. These are local commands; no hosted CI is configured.
+full tests, furnishing checks, and production build. The Verification workflow runs
+the same full gate on pull requests and pushes to main, using synthetic local data.
 
 Use `npm run format` to format changes and `npm run lint:fix` for safe lint fixes.
 Build the standalone app with `npm run build`.
+
+## Measure scene rendering performance
+
+`npm run measure:scene` records draw calls and submitted triangles for the bundled
+home's Orbit, Walk, Construct and Arrange views. Save reports under ignored
+`test-results/`; compare runs on the same machine and browser configuration.
+The optional `--check` gate requires peaks below 50 calls and 100,000 triangles.
+It is separate from `verify`; passing tests do not establish those performance
+budgets or real-device frame rates. See the [delivery contract](./docs/product/verification-and-delivery.md)
+for coverage and limits.
 
 Cabane also runs as the native `cabane-panel` custom element inside Home
 Assistant. It borrows the signed-in host connection; each personal workspace
@@ -90,6 +101,9 @@ and [agent rules](./AGENTS.md).
   checks, deployment status, and known limits.
 - [Catalog](./packages/catalog/README.md) — available reusable models.
 - [Home Assistant workspace storage setup](./docs/ha-workspace-storage-setup.md) — install the optional HA integration and save or restore workspaces.
+- [Contributing](./CONTRIBUTING.md) — changes and verification.
+- [Security](./SECURITY.md) — private vulnerability reporting and safe reproductions.
+- [Publication](./docs/publication.md) — import history and publication prerequisites.
 
 ## Related repositories
 
@@ -98,5 +112,5 @@ and [agent rules](./AGENTS.md).
 
 ## License
 
-Source-available under PolyForm Noncommercial License 1.0.0. See [LICENSE](./LICENSE).
-Third-party material retains its own licences.
+[PolyForm Noncommercial 1.0.0](./LICENSE).
+Third-party dependencies and assets retain their own [licences](./THIRD_PARTY_NOTICES.md).

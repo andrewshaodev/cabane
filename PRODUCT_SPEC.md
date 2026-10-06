@@ -33,4 +33,3 @@ runtime, not generated home code. Browser editing is an implemented feature.
 Private deployment hardening, complete household runtime acceptance, and final
 cross-browser/accessibility acceptance must not be represented as complete merely
 because the app builds or fixture tests pass.
-

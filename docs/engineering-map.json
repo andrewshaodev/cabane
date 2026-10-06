@@ -367,6 +367,10 @@
       "scripts/ha-contract/source-contract.mjs",
       "scripts/release-ha-contract.mjs",
       ".github/workflows/ha-contract-release.yml",
+      ".github/workflows/verify.yml",
+      "apps/web/vite.config.ts",
+      "apps/web/distribution-notices.mjs",
+      "scripts/distribution-notices.mjs",
       ".codex/hooks.json",
       "docs/ha-contract.json",
       "docs/ha-compatibility.json",
@@ -380,7 +384,7 @@
       "scripts/layered-surface-contract.mjs"
     ],
     "interfaces": [],
-    "invariant": "The delivery contract defines local verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery requires the full gate. Native panel verification permits only the documented pinned weather texture outside the host origin.",
+    "invariant": "The delivery contract defines local and hosted verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery and PR CI require the full gate. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin.",
     "checks": [
       "verify:help",
       "verify:fast",

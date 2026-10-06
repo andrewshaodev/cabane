@@ -1,6 +1,7 @@
 import { thumbnailRevision } from "./thumbnail-revision.mjs";
 import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { distributionNotices } from "./distribution-notices.mjs";
 
 const woff2MaterialDesignIcons = (): Plugin => ({
   name: "cabane-mdi-woff2-only",
@@ -16,7 +17,7 @@ const woff2MaterialDesignIcons = (): Plugin => ({
 
 export default defineConfig({
   define: { __THUMBNAIL_REVISION__: JSON.stringify(thumbnailRevision()) },
-  plugins: [woff2MaterialDesignIcons(), react()],
+  plugins: [woff2MaterialDesignIcons(), react(), distributionNotices()],
   // The worker imports this lazily; discover it before the first camera render.
   optimizeDeps: { include: ["meshoptimizer/simplifier"] },
   // Keep Vite's default project-local cache isolated between checkouts/worktrees.

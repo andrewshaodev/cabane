@@ -32,7 +32,8 @@ publication only runs after a push to `main` or a manual workflow dispatch.
 Keep incompatible imports blocked. Never strip unknown data to make them load.
 
 Full producer, panel and integration tests run locally before pushing a contract
-change. GitHub Actions only validates the contract, builds and packages the clean native
+change. The separate Verification workflow also runs the full producer gate on
+pull requests and main. The contract-release workflow validates the contract, builds and packages the clean native
 panel, adds the contract revision to its artifact metadata, and checks out the
 integration with a repository-scoped SSH deploy key. It advances the integration
 patch version, vendors the complete bundle, commits upgrade notes under `docs/releases/`, and pushes the commit and
@@ -52,7 +53,7 @@ If a tag was pushed but publication failed, rerun the integration's failed
 `Package release` workflow first, then rerun the producer workflow. The build is
 not considered delivered while the public release is missing.
 
-The private producer repository needs `CABANE_INTEGRATION_DEPLOY_KEY`. Its public
+The producer repository needs `CABANE_INTEGRATION_DEPLOY_KEY`. Its public
 key belongs to the integration repository's write-enabled deploy keys; the
 private key belongs only to that Actions secret. This grants Git access to the
 integration alone and does not copy a maintainer's personal GitHub token.
