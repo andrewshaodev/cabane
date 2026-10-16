@@ -2,12 +2,17 @@
 
 ## Install the integration
 
-The integration repository is currently private. You need GitHub access to view the guide and download it.
+Requires Home Assistant 2024.7 or newer, HACS, and HTTPS.
 
-Follow the short [installation guide in the integration repository](https://github.com/cabane-app/cabane-home-assistant#installation).
-It covers HACS and manual installation, adding `cabane:` to `configuration.yaml`, and restarting Home Assistant.
+1. In **HACS → ⋮ → Custom repositories**, add `https://github.com/cabane-app/cabane-home-assistant` as an **Integration**.
+2. Download **Cabane**, then restart Home Assistant.
+3. Open **Settings → Devices & services → Add integration → Cabane** and confirm.
+4. Open **Cabane** from the sidebar.
 
-You only need this integration to store workspaces on Home Assistant. Connecting rooms and devices works without it.
+The integration registers the native sidebar panel and provides instance-local
+workspace storage. Standalone device connections work without it. See the
+[integration guide](https://github.com/cabane-app/cabane-home-assistant#install)
+for manual installation and troubleshooting.
 
 ## Open your workspace settings
 
@@ -24,14 +29,24 @@ The page is specific to the workspace named at the top.
 Enter your Home Assistant HTTPS URL and click **Connect**. Sign in on Home Assistant and return to Cabane.
 Use **Change URL** to choose another instance or **Disconnect** to remove this workspace’s configured connection.
 
+Inside the native panel, choose **Use this Home Assistant** to use the existing
+host session. The demo remains simulated; create a personal workspace to connect
+your devices.
+
 ## Save across devices
 
-Click **Enable HA storage**. Cabane checks that the integration is installed before offering storage controls.
-If it is missing, follow **Setup guide**, restart Home Assistant, then click **Check again**.
+Cabane checks that the integration is installed before offering storage controls.
+If it is missing, follow the installation steps, restart Home Assistant, then click **Check again**.
 
-- **Save** uploads this workspace’s published home, draft, and device mappings.
-- **Load** replaces this browser’s workspace with the Home Assistant copy. Cabane downloads a backup first.
-- **Sync automatically** keeps copies in sync while this workspace is open. Save once before turning it on.
+Click **Enable sync** to save the workspace’s published home, draft, device
+mappings and personal models, and synchronize changes while it is open. Offline
+changes remain in the browser until it reconnects.
+
+Under **Manage saved copy**:
+
+- **Save a copy now** uploads the current workspace.
+- **Load saved copy** replaces this browser’s workspace with the Home Assistant copy. Cabane downloads a backup first.
+- **Sync automatically** turns off ongoing synchronization when disabled.
 - **Delete saved copy** removes the Home Assistant copy and disables sync. The browser copy remains.
 
 Everyone signed in to the same Home Assistant instance shares its saved workspaces.
@@ -39,9 +54,14 @@ If both copies change, Cabane asks which one to keep and downloads the replaced 
 
 ## Open a saved home on another device
 
-Open **Workspaces → Import → From Home Assistant**. Enter the same URL, sign in, and choose **Load workspace**.
-The home appears in the ordinary workspace grid with a small saved/sync indicator.
-Automatic sync is enabled separately in each browser; loading a workspace does not turn it on automatically.
+Open **Workspaces → Import workspace → From Home Assistant**. On the website,
+sign in to the same instance; the native panel uses its host session. Choose the
+saved home to open it with sync enabled. Saved homes missing from the native
+panel’s local library also appear as dotted cards that you can open directly.
+
+The website and native panel have separate browser storage. Save your home to
+Home Assistant, then open it from the other client, or transfer a private file
+backup.
 
 ## Keep a file backup
 
