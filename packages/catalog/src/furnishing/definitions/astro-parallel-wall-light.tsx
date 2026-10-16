@@ -4,6 +4,7 @@ import {
   ASTRO_PARALLEL_WALL_LIGHT_SIZE,
 } from "../presets/living-room/astro-parallel-wall-light";
 export const astroParallelWallLightDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: AstroParallelWallLight,
   label: "Astro Parallel wall light",
   category: "Lighting",

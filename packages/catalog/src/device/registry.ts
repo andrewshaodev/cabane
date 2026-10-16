@@ -3,6 +3,13 @@ import { underCabinetLedStripDefinition } from "./definitions/under-cabinet-led-
 import { builtInMicrowaveDefinition, microwaveDefinition } from "./definitions/microwaves";
 import { terracottaPendantDefinition, whiteDomePendantDefinition } from "./definitions/pendants";
 import { rattanBellPendantDeviceDefinition } from "./definitions/rattan-bell-pendant";
+import { astroParallelWallLightDeviceDefinition } from "./definitions/astro-parallel-wall-light";
+import { clipReadingLampDeviceDefinition } from "./definitions/clip-reading-lamp";
+import { oakWallUplightDeviceDefinition } from "./definitions/oak-wall-uplight";
+import { roundGlobeWallLampDeviceDefinition } from "./definitions/round-globe-wall-lamp";
+import { sixGlobeCeilingLampDeviceDefinition } from "./definitions/six-globe-ceiling-lamp";
+import { tubularWallLampDeviceDefinition } from "./definitions/tubular-wall-lamp";
+import { wallReadingSpotDeviceDefinition } from "./definitions/wall-reading-spot";
 import {
   compactWallTelevisionDefinition,
   wallTelevisionDefinition,
@@ -291,6 +298,13 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     complexity: { visibleMeshes: 5, triangles: 420 },
   }),
   "rattan-bell-pendant": rattanBellPendantDeviceDefinition,
+  "round-globe-wall-lamp": roundGlobeWallLampDeviceDefinition,
+  "wall-reading-spot": wallReadingSpotDeviceDefinition,
+  "oak-wall-uplight": oakWallUplightDeviceDefinition,
+  "six-globe-ceiling-lamp": sixGlobeCeilingLampDeviceDefinition,
+  "astro-parallel-wall-light": astroParallelWallLightDeviceDefinition,
+  "tubular-wall-lamp": tubularWallLampDeviceDefinition,
+  "clip-reading-lamp": clipReadingLampDeviceDefinition,
   "terracotta-pendant": terracottaPendantDefinition,
   "white-dome-pendant": whiteDomePendantDefinition,
   "low-garden-lantern": defineDeviceModel({

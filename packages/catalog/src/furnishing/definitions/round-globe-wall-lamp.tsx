@@ -1,6 +1,7 @@
 import { defineFurnishingModel } from "@cabane/engine";
 import { RoundGlobeWallLamp } from "../presets/bedroom/round-globe-wall-lamp";
 export const roundGlobeWallLampDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: RoundGlobeWallLamp,
   label: "Round globe wall lamp",
   category: "Lighting",

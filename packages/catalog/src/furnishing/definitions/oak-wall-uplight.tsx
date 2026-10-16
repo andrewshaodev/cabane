@@ -2,6 +2,7 @@ import { defineFurnishingModel } from "@cabane/engine";
 import { OakWallUplight, OAK_WALL_UPLIGHT_SIZE } from "../presets/bedroom/oak-wall-uplight";
 
 export const oakWallUplightDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: OakWallUplight,
   label: "Oak wall uplight",
   category: "Lighting",

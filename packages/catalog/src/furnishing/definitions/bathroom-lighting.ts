@@ -3,6 +3,7 @@ import { TUBULAR_WALL_LAMP_SIZE, TubularWallLamp } from "../presets/compact-sani
 
 export const bathroomLightingDefinitions = {
   "tubular-wall-lamp": defineFurnishingModel({
+    legacyOnly: true,
     component: TubularWallLamp,
     label: "Tubular wall lamp",
     category: "Bathroom",

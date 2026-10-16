@@ -292,6 +292,7 @@
       "packages/catalog/src/architecture",
       "packages/catalog/src/furnishing",
       "packages/catalog/src/device",
+      "packages/engine/src/stable-device-model-id.ts",
       "home/src/extensions",
       "packages/catalog/src/architecture/presets/openings/doors/framed-hinged-door-mount.ts",
       "packages/catalog/src/architecture/presets/openings/doors/white-lever-door-handles.tsx",
@@ -310,6 +311,14 @@
       {
         "module": "packages/catalog/src/furnishing/index.ts",
         "symbols": ["stableFurnishingRegistry"]
+      },
+      {
+        "module": "packages/catalog/src/device/index.ts",
+        "symbols": ["stableDeviceRegistry", "STABLE_DEVICE_MODEL_IDS"]
+      },
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["StableDeviceModelId"]
       }
     ],
     "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry. Mandatory surface verification covers all furnishing and device variants, including all four device connection states; flat artwork uses the engine LayeredSurface contract. Reusable additions exclude tiny standalone props and fitted apartment parts; square storage variants share one frame, and wall-mounted awnings retain wall support. Ordinary preset coverage uses shared catalog/surface checks and UI review.",

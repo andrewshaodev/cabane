@@ -47,6 +47,12 @@ compatibility. Arrange offers their current device replacements for new items.
 This includes `rattan-bell-pendant`, with a primary light slot, dimming-aware
 bulb emission and an engine-owned scene light. Inactive, unavailable and
 disconnected states leave its bulb emission at zero.
+The same furnishing-to-device migration is used for `round-globe-wall-lamp`,
+`wall-reading-spot`, `oak-wall-uplight`, `six-globe-ceiling-lamp`,
+`astro-parallel-wall-light`, `tubular-wall-lamp`, and `clip-reading-lamp`.
+Their device definitions reuse the existing procedural geometry and add a
+primary `light` slot plus an engine-owned scene light; existing furnishing
+instances remain read-compatible through their `legacyOnly` entries.
 
 The deciduous tree uses a layered, irregular procedural crown with a graduated
 green palette and curved, tapered wood branches and root flares. Wood and foliage
