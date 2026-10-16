@@ -5,7 +5,7 @@ import { createBrowserTestSession, getBrowserTestServer } from "./browser-test-e
 
 // Keep one real input/rendering smoke. Placement, traversal, persistence,
 // closing and reduced-motion matrices belong to the Node portal tests.
-const fixture = `<!doctype html><div id="root"></div><script type="module">
+const fixture = `<!doctype html><style>.cabane-shell .scene-canvas{width:240px;height:180px}</style><div id="root"></div><script type="module">
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {useFrame,useThree} from '@react-three/fiber';

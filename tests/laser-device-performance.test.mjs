@@ -5,7 +5,7 @@ import { createBrowserTestSession, getBrowserTestServer } from "./browser-test-e
 
 // Synthetic service state, real gun input, activation resolver and scene lighting.
 // Reduced motion isolates the device update from first-use effect shaders.
-const fixture = `<!doctype html><div id="root"></div><script type="module">
+const fixture = `<!doctype html><style>.cabane-shell .scene-canvas{width:240px;height:180px}</style><div id="root"></div><script type="module">
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import {useFrame,useThree} from '@react-three/fiber';

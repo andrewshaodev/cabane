@@ -1,11 +1,11 @@
 {
-  "personal-models-browser.test.mjs": 17367,
-  "gun-portals-browser.test.mjs": 2451,
-  "basement-browser.test.mjs": 9161,
-  "workspace-ha-storage-ui.test.mjs": 17791,
-  "laser-device-performance.test.mjs": 11839,
-  "native-first-launch.test.mjs": 6702,
-  "wall-face-colors-browser.test.mjs": 7222,
-  "workspace-open-ui.test.mjs": 3581,
-  "workspace-backup-browser.test.mjs": 3395
+  "personal-models-browser.test.mjs": 16119,
+  "gun-portals-browser.test.mjs": 4202,
+  "basement-browser.test.mjs": 10013,
+  "workspace-ha-storage-ui.test.mjs": 15278,
+  "laser-device-performance.test.mjs": 10467,
+  "native-first-launch.test.mjs": 6339,
+  "wall-face-colors-browser.test.mjs": 6724,
+  "workspace-open-ui.test.mjs": 3743,
+  "workspace-backup-browser.test.mjs": 1702
 }

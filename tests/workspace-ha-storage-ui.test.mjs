@@ -11,8 +11,28 @@ test(
     try {
       browser = await createBrowserTestSession();
       const page = await browser.newPage();
-      await page.goto(server.resolvedUrls.local[0]);
+      const url = server.resolvedUrls.local[0];
+      // Exercise demo identity and the complete storage journey with one room;
+      // furnishing the bundled villa is an unrelated software-rendering load.
+      await page.route("**/storage-fixture", (route) =>
+        route.fulfill({ contentType: "text/html", body: "<!doctype html><title>Storage</title>" }),
+      );
+      await page.goto(`${url}storage-fixture`);
+      await page.evaluate(async (root) => {
+        const { createWorkspaceRepository, parseHomeProjectSchema } = await import(
+          `/@fs${root}/packages/engine/src/home-project/index.ts`
+        );
+        const { makeLegacyProject } = await import(`/@fs${root}/tests/fixtures/multiple-floors.ts`);
+        const { ownerProjectRegistries } = await import("/src/project-runtime.ts");
+        const schema = parseHomeProjectSchema(makeLegacyProject());
+        if (!schema.valid) throw new Error(JSON.stringify(schema.issues));
+        await createWorkspaceRepository(indexedDB, ownerProjectRegistries).initialize(
+          schema.project,
+        );
+      }, process.cwd());
+      await page.goto(url);
       await page.getByRole("button", { name: /^Explore the demo/ }).click();
+      await page.waitForURL("**/demo");
       assert.equal(await page.getByRole("button", { name: "Set up Cabane" }).count(), 0);
       const demoId = await page.evaluate(async (root) => {
         const { createWorkspaceRepository } = await import(

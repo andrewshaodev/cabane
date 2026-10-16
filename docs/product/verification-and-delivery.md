@@ -148,6 +148,10 @@ GLB import starts from the library, avoiding an unrelated villa render. The
 representative personal-model scene retains 20 rooms and 100 bindings in a smaller
 viewport. Gun input waits for pointer lock and the Walk toolbar before equipping;
 shader checks wait for rendered pulse/impact completion rather than 45 frames.
+Gun fixtures keep a 240-by-180 scene canvas inside the desktop UI so software
+graphics exercise the same shaders and normal input without a full-window pixel
+workload. The complete HA storage journey seeds a one-room demo through the real
+repository; bundled-villa furnishing is outside that test's storage risk.
 
 The optional portal gun has exactly one Chromium smoke: enter Walk, equip the
 installed gun and create a visible portal. Placement, targeting, traversal at
