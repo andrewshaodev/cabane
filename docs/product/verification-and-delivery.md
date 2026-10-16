@@ -92,6 +92,10 @@ processes so Node cannot buffer a later shard's failures behind an earlier shard
 Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
 workers on constrained local machines. All four
 shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
+Hosted CI runs one shard at a time to prevent software-rendered scenes from
+starving each other's input and shader warmup. It retains the test report and
+any browser failure screenshots, traces and errors as `verification-diagnostics`
+artifacts for seven days.
 Set `CABANE_TEST_PROGRESS=1` to print each starting test when diagnosing slow work.
 `npm run test:unit` runs the Node/DOM tests without Chromium or listening HTTP servers;
 `npm run test:browser` runs the browser journeys. Individual files remain available
@@ -139,6 +143,11 @@ console warnings/errors and uncaught page errors. The reporter prints the absolu
 artifact directory. Successful traces are discarded; failure evidence stays local
 until removed. A manually closed page/context cannot be captured afterward. Open a
 trace with `npx playwright-core show-trace <path-to-trace.zip>`.
+
+GLB import starts from the library, avoiding an unrelated villa render. The
+representative personal-model scene retains 20 rooms and 100 bindings in a smaller
+viewport. Gun input waits for pointer lock and the Walk toolbar before equipping;
+shader checks wait for rendered pulse/impact completion rather than 45 frames.
 
 The optional portal gun has exactly one Chromium smoke: enter Walk, equip the
 installed gun and create a visible portal. Placement, targeting, traversal at

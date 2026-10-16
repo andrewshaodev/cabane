@@ -173,7 +173,10 @@ await withModules(async (load) => {
     });
     dom.window.HTMLCanvasElement.prototype.getContext = function getContext() {
       return new Proxy(
-        { canvas: this },
+        {
+          canvas: this,
+          createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+        },
         {
           set(target, property, value) {
             target[property] = value;

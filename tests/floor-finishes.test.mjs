@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
@@ -234,7 +235,17 @@ await withModules(async (load) => {
     );
     const operations = [];
     const context = new Proxy(
-      { canvas: { width: 128, height: 128 } },
+      {
+        canvas: { width: 128, height: 128 },
+        createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+        putImageData: (image, x, y) =>
+          operations.push([
+            "putImageData",
+            createHash("sha256").update(image.data).digest("hex"),
+            x,
+            y,
+          ]),
+      },
       {
         set(target, property, value) {
           target[property] = value;
@@ -250,7 +261,10 @@ await withModules(async (load) => {
     for (const preset of engine.FLOOR_PATTERN_PRESET_IDS) {
       operations.length = 0;
       engine.paintFloorPattern(context, preset, "scene");
-      assert.ok(operations.length > 4, preset);
+      assert.ok(
+        operations.some(([operation]) => operation !== "set"),
+        preset,
+      );
       const first = JSON.stringify(operations);
       operations.length = 0;
       engine.paintFloorPattern(context, preset, "scene");
@@ -264,7 +278,10 @@ await withModules(async (load) => {
     const makeCanvas = () => {
       const canvas = { width: 0, height: 0, getContext: () => context };
       const context = new Proxy(
-        { canvas },
+        {
+          canvas,
+          createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+        },
         {
           set(target, property, value) {
             target[property] = value;

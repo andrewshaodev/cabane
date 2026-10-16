@@ -276,7 +276,7 @@
         ]
       }
     ],
-    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner. Outline smoothing owns its derived geometry and preserves authored source normals.",
+    "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner. Procedural wood preserves its pixels and batches canvas writes into one texture upload. Outline smoothing owns its derived geometry and preserves authored source normals.",
     "checks": [
       "test:unit",
       "verify:policy",
@@ -384,7 +384,7 @@
       "scripts/layered-surface-contract.mjs"
     ],
     "interfaces": [],
-    "invariant": "The delivery contract defines local and hosted verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery and PR CI require the full gate. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin.",
+    "invariant": "The delivery contract defines local and hosted verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery and PR CI require the full gate. Hosted CI serializes software-rendered test shards and retains timing reports and browser failure evidence. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin.",
     "checks": [
       "verify:help",
       "verify:fast",

@@ -264,7 +264,8 @@
       "walk-jump.test.mjs",
       "walk-sky.test.mjs",
       "walk-tool-shortcuts.test.mjs",
-      "walk-tools.test.mjs"
+      "walk-tools.test.mjs",
+      "wood-planks.test.mjs"
     ]
   }
 }

@@ -36,7 +36,7 @@ test(
     const { server } = await getBrowserTestServer("app");
     const session = await createBrowserTestSession();
     const page = await session.newPage({
-      viewport: { width: 1024, height: 768 },
+      viewport: { width: 800, height: 600 },
       reducedMotion: "reduce",
     });
     const errors = [];
@@ -49,6 +49,8 @@ test(
     );
     await page.goto(server.resolvedUrls.local[0] + "portal-smoke");
     await page.getByRole("button", { name: "Walk mode", exact: true }).click();
+    await page.waitForFunction(() => document.pointerLockElement);
+    await page.getByRole("button", { name: "Exit walk mode", exact: true }).waitFor();
     await page.keyboard.press("g");
     await page.waitForFunction(() => document.pointerLockElement && window.portalVisible === false);
     await page.mouse.down({ button: "right" });

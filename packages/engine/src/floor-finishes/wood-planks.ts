@@ -7,6 +7,9 @@ export const paintWoodPlanks = (
 ) => {
   const base = species === "oak" ? [201, 169, 126] : [119, 88, 63];
   const size = context.canvas.width;
+  // One pixel upload avoids hundreds of thousands of canvas commands, which
+  // otherwise block startup on software-rendered browsers.
+  const image = context.createImageData(size, size);
   const boards = 16;
   const width = size / boards;
   const tau = Math.PI * 2;
@@ -38,8 +41,12 @@ export const paintWoodPlanks = (
       // Fine, low-contrast joints stay quiet in overview instead of black stripes.
       const seam = Math.max(0, 1 - Math.min(edgeDistance, endDistance) / (size * 0.0007));
       const tone = variation + grain * (quiet ? 0.45 : 1) + pore - seam * 13;
-      context.fillStyle = `rgb(${Math.round(base[0] + tone)}, ${Math.round(base[1] + tone * 0.85)}, ${Math.round(base[2] + tone * 0.7)})`;
-      context.fillRect(horizontal ? y : x, horizontal ? x : y, 1, 1);
+      const pixel = (horizontal ? x * size + y : y * size + x) * 4;
+      image.data[pixel] = Math.round(base[0] + tone);
+      image.data[pixel + 1] = Math.round(base[1] + tone * 0.85);
+      image.data[pixel + 2] = Math.round(base[2] + tone * 0.7);
+      image.data[pixel + 3] = 255;
     }
   }
+  context.putImageData(image, 0, 0);
 };

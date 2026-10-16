@@ -86,6 +86,9 @@ Floor finishes support solid
 colors and the preset IDs exported by `FLOOR_PATTERN_PRESET_IDS`, including wood,
 stone/tile, dirt, bark, and outdoor stone treatments. Ordered room/ground zones
 compose finishes; implementation belongs to the engine finish modules.
+Procedural wood retains its deterministic grain, palette and joints while
+uploading the completed pixel buffer once per texture. Per-pixel canvas draw
+commands must not block editor startup on software-rendered browsers.
 
 Native and repository-generated home content uses procedural geometry, toon materials, and restrained
 outlines. Engine-owned in-memory floor finish textures remain part of the stable

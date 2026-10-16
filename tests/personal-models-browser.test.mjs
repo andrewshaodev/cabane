@@ -14,14 +14,15 @@ test(
     let browser;
     try {
       browser = await createBrowserTestSession();
-      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
       await page.addInitScript(() => {
         Object.defineProperty(crypto, "subtle", { configurable: true, value: undefined });
       });
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       const url = server.resolvedUrls.local[0];
-      await page.goto(url);
+      // Seed from the library without rendering the unrelated furnished demo.
+      await page.goto(`${url}workspaces`);
       const rootPath = process.cwd();
       const id = await page.evaluate(async (rootPath) => {
         const engine = await import(`/@fs${rootPath}/packages/engine/src/index.ts`);
@@ -73,7 +74,7 @@ test(
     let browser;
     try {
       browser = await createBrowserTestSession();
-      const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+      const page = await browser.newPage({ viewport: { width: 960, height: 640 } });
       const errors = [];
       let moduleUrl;
       page.on("pageerror", (error) => errors.push(error.message));

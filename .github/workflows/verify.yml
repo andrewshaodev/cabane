@@ -20,7 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      CABANE_TEST_CONCURRENCY: 2
+      # Hosted Chromium uses software graphics; competing scene workers can
+      # starve input and shader warmup even when individual tests are healthy.
+      CABANE_TEST_CONCURRENCY: 1
+      CABANE_TEST_REPORT: test-results/ci-report.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,3 +36,12 @@ jobs:
       - run: npm ci
       - run: npm run browser:install -- --with-deps
       - run: npm run verify
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-diagnostics
+          path: |
+            test-results/ci-report.json
+            test-results/browser/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,11 +1,7 @@
 import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createServer } from "vite";
-import { createBrowserTestSession } from "./browser-test-environment.mjs";
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { createBrowserTestSession, getBrowserTestServer } from "./browser-test-environment.mjs";
 
 const fixture = `<!doctype html><div id="root"></div><script type="module">
 import React from 'react';
@@ -46,34 +42,26 @@ createRoot(document.getElementById('root')).render(React.createElement(React.Str
 test(
   "native first launch imports a saved home through the real host and preserves it on reload",
   withBrowserDiagnostics(async () => {
-    const cacheDir = await mkdtemp(join(tmpdir(), "cabane-first-launch-vite-"));
-    const server = await createServer({
-      cacheDir,
-      root: `${process.cwd()}/apps/web`,
-      configFile: `${process.cwd()}/apps/web/vite.config.ts`,
-      server: { host: "127.0.0.1", port: 0, hmr: false, watch: null },
-      plugins: [
-        {
-          name: "first-launch-fixture",
-          configureServer(server) {
-            server.middlewares.use("/native-first-launch", async (req, res) => {
-              res.setHeader("Content-Type", "text/html");
-              res.end(await server.transformIndexHtml("/native-first-launch", fixture));
-            });
-          },
-        },
-      ],
-    });
+    const { server } = await getBrowserTestServer("app");
     let browser;
     try {
-      await server.listen();
       browser = await createBrowserTestSession();
       const open = async (mode) => {
         const context = await browser.newContext();
         const page = await context.newPage();
         page.setDefaultTimeout(15000);
         if (mode === "timeout") await page.clock.install();
-        await page.goto(server.resolvedUrls.local[0] + "native-first-launch?mode=" + mode);
+        await page.route(
+          (url) => url.pathname === "/native-first-launch",
+          async (route) =>
+            route.fulfill({
+              contentType: "text/html",
+              body: await server.transformIndexHtml("/native-first-launch", fixture),
+            }),
+        );
+        await page.goto(server.resolvedUrls.local[0] + "native-first-launch?mode=" + mode, {
+          waitUntil: "domcontentloaded",
+        });
         return page;
       };
       const saved = await open("saved");
@@ -109,8 +97,6 @@ test(
       await saved.context().close();
     } finally {
       await browser?.close();
-      await server.close();
-      await rm(cacheDir, { recursive: true, force: true });
     }
   }),
 );
