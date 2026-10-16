@@ -4,7 +4,7 @@ import { defineFurnishingModel } from "@cabane/engine";
 export const wallArtFurnishingDefinitions = {
   "abstract-relief-wall-art": defineFurnishingModel({
     component: AbstractReliefWallArt,
-    label: "Abstract relief wall art",
+    label: "Weird relief wall art",
     category: "Decor",
     defaultRoomType: "living-room",
     defaultSize: ABSTRACT_RELIEF_WALL_ART_SIZE,

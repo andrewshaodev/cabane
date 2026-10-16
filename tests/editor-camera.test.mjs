@@ -277,6 +277,36 @@ await withModules(async (load) => {
     }
   });
 
+  test("a compact Properties drawer centers the visible scene without changing the camera pose", async () => {
+    const props = cameraProps();
+    const renderer = await create(createElement(PreviewCamera, props), {
+      ...options,
+      beforeReturn(canvas) {
+        options.beforeReturn(canvas);
+        canvas.ownerDocument.defaultView = { matchMedia: () => ({ matches: true }) };
+      },
+    });
+    try {
+      const controls = controlsFor(renderer);
+      controls.object.zoom = 65;
+      controls.object.position.x += 2;
+      controls.target.x += 2;
+      controls.update();
+      const before = pose(controls);
+      await renderer.update(createElement(PreviewCamera, { ...props, rightPanelOpen: true }));
+      assert.deepEqual(pose(controls), before);
+      assert.equal(controls.object.view.enabled, true);
+      assert.equal(controls.object.view.offsetX, 160);
+      controls.object.updateMatrixWorld(true);
+      assert.ok(Math.abs(controls.target.clone().project(controls.object).x + 0.32) < 0.0001);
+      await renderer.update(createElement(PreviewCamera, props));
+      assert.deepEqual(pose(controls), before);
+      assert.equal(controls.object.view.enabled, false);
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("pool edits preserve the camera until overview is explicitly reset to include the rim", async () => {
     const props = cameraProps();
     const renderer = await create(createElement(PreviewCamera, props), options);

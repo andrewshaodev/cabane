@@ -19,6 +19,19 @@ await withModules(async (load) => {
   const { ConstructionInspector } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
   );
+  const { ConstructionSelectionProperties } = await load(
+    "/apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx",
+  );
+  function ConstructionPanels(props) {
+    return React.createElement(
+      React.Fragment,
+      null,
+      React.createElement(ConstructionInspector, props),
+      props.editor.selection &&
+        props.editor.selection.kind !== "opening" &&
+        React.createElement(ConstructionSelectionProperties, { ...props, onClose() {} }),
+    );
+  }
   const { EditorValidationPanel } = await load(
     "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
   );
@@ -210,14 +223,14 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: editor({ kind: "wall", id: wall.id }),
           }),
         ),
       );
 
       const document = dom.window.document;
-      assert.match(document.body.textContent, /Selected wall/);
+      assert.equal(document.querySelector(".selection-details h2").textContent, "Wall");
       assert.match(document.body.textContent, /4\.25 m/);
       assert.doesNotMatch(
         document.body.textContent,
@@ -247,7 +260,7 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: controller,
           }),
         ),
@@ -274,7 +287,7 @@ await withModules(async (load) => {
       controller.exteriorWallColor = "#b86f58";
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: controller,
           }),
         ),
@@ -307,7 +320,7 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: controller,
             floorPainting: {
               finish: { kind: "preset", preset: "travertine" },
@@ -363,7 +376,7 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: editor(null),
             planImportControls: React.createElement(
               "section",
@@ -376,7 +389,7 @@ await withModules(async (load) => {
       assert.match(dom.window.document.body.textContent, /Hold Shift and drag to select several/);
       assert.match(dom.window.document.body.textContent, /Delete or Backspace/);
       assert.ok(
-        dom.window.document.body.textContent.indexOf("Edit the plan") <
+        dom.window.document.body.textContent.indexOf("Hold Shift and drag") <
           dom.window.document.body.textContent.indexOf("Have a floor plan?"),
       );
     });
@@ -407,7 +420,7 @@ await withModules(async (load) => {
     };
     await withDom(async ({ dom, root }) => {
       await act(async () =>
-        root.render(React.createElement(ConstructionInspector, { editor: state })),
+        root.render(React.createElement(ConstructionPanels, { editor: state })),
       );
       const area = dom.window.document.querySelector('[title="Interior floor area"]');
       assert.equal(area.textContent, "10.6 m²");
@@ -442,7 +455,7 @@ await withModules(async (load) => {
     ];
     await withDom(async ({ dom, root }) => {
       await act(async () =>
-        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+        root.render(React.createElement(ConstructionPanels, { editor: controller })),
       );
       const document = dom.window.document;
       assert.match(document.body.textContent, /5 elements selected/);
@@ -595,7 +608,7 @@ await withModules(async (load) => {
         );
       controller.draft.walls[0].faceColors = { left: "#bcb99b", right: "#bcb99b" };
       await act(async () =>
-        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+        root.render(React.createElement(ConstructionPanels, { editor: controller })),
       );
       let mode = dom.window.document.querySelector('[aria-label="Wall edge color mode"]');
       assert.equal(mode.value, "auto");
@@ -607,7 +620,7 @@ await withModules(async (load) => {
       assert.deepEqual(changes.pop(), { edgeColor: "#bcb99b" });
       controller.draft.walls[0].edgeColor = "#bcb99b";
       await act(async () =>
-        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+        root.render(React.createElement(ConstructionPanels, { editor: controller })),
       );
       assert.equal(
         dom.window.document.querySelector('[aria-label="Wall edge color"]').value,
@@ -626,7 +639,7 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       await act(async () =>
         root.render(
-          React.createElement(ConstructionInspector, {
+          React.createElement(ConstructionPanels, {
             editor: editor({ kind: "wall", id: wall.id }),
             onRoofChange: () => {},
           }),
@@ -654,11 +667,11 @@ await withModules(async (load) => {
     });
   });
 
-  test("window properties move from the sidebar into floating Details", async () => {
+  test("window properties use the shared inspector instead of sidebar tool settings", async () => {
     await withDom(async ({ dom, root }) => {
       const controller = editor({ kind: "opening", id: opening.id });
       await act(async () =>
-        root.render(React.createElement(ConstructionInspector, { editor: controller })),
+        root.render(React.createElement(ConstructionPanels, { editor: controller })),
       );
       assert.equal(dom.window.document.querySelector('[aria-label="Opening width"]'), null);
       assert.ok(dom.window.document.querySelector(".construction-inspector__floor-disclosure"));
@@ -686,7 +699,7 @@ await withModules(async (load) => {
       assert.deepEqual(changes, [
         { type: "reorient-opening", openingId: opening.id, change: "hinge" },
       ]);
-      await act(async () => document.querySelector('[aria-label="Close details"]').click());
+      await act(async () => document.querySelector('[aria-label="Collapse properties"]').click());
       assert.equal(closed, 1);
     });
   });
@@ -809,10 +822,8 @@ await withModules(async (load) => {
     await withDom(async ({ dom, root }) => {
       const calls = [];
       const actions = {
-        detailsOpen: false,
         disabled: false,
         canDuplicate: true,
-        onDetails: () => calls.push("details"),
         onChange: (change) => calls.push(change),
         onDuplicate: () => calls.push("duplicate"),
         onDelete: () => calls.push("delete"),
@@ -823,7 +834,7 @@ await withModules(async (load) => {
       let buttons = [...dom.window.document.querySelectorAll("button")];
       assert.deepEqual(
         buttons.map((button) => button.getAttribute("aria-label")),
-        ["Details", "Duplicate", "Swap hinge side", "Reverse opening direction", "Delete"],
+        ["Duplicate", "Swap hinge side", "Reverse opening direction", "Delete"],
       );
       await act(async () => dom.window.document.querySelector('[aria-label="Duplicate"]').click());
       assert.deepEqual(calls, ["duplicate"]);
@@ -847,14 +858,13 @@ await withModules(async (load) => {
       buttons = [...dom.window.document.querySelectorAll("button")];
       assert.deepEqual(
         buttons.map((button) => button.getAttribute("aria-label")),
-        ["Details", "Duplicate", "Delete"],
+        ["Duplicate", "Delete"],
       );
-      assert.equal(buttons[0].disabled, false);
-      assert.equal(buttons[1].disabled, true);
-      assert.equal(buttons[1].title, "No free space on this wall.");
-      assert.equal(buttons[2].disabled, false);
+      assert.equal(buttons[0].disabled, true);
+      assert.equal(buttons[0].title, "No free space on this wall.");
+      assert.equal(buttons[1].disabled, false);
       await act(async () => buttons[0].click());
-      assert.deepEqual(calls, ["duplicate", "details"]);
+      assert.deepEqual(calls, ["duplicate"]);
     });
   });
 
@@ -886,13 +896,14 @@ await withModules(async (load) => {
         ),
       );
       const panel = dom.window.document.querySelector('[aria-label="Editor validation"]');
-      assert.match(panel.textContent, /3 issues/);
-      assert.match(panel.textContent, /2 errors · 1 warning/);
+      assert.equal(panel.querySelectorAll("li").length, 3);
+      assert.match(panel.textContent, /2 errors.*1 warning/);
       for (const issue of issues) assert.ok(panel.textContent.includes(issue.message));
       assert.ok(panel.textContent.includes(issues[0].suggestion));
       assert.equal(panel.querySelectorAll("li").length, 3);
       assert.equal(panel.querySelectorAll("li > div").length, 1);
-      for (const button of panel.querySelectorAll("button")) await act(async () => button.click());
+      for (const button of panel.querySelectorAll("li button"))
+        await act(async () => button.click());
       assert.deepEqual(focused, issues.slice(0, 2));
     });
   });
@@ -929,11 +940,11 @@ await withModules(async (load) => {
         ),
       );
       const buttons = dom.window.document.querySelectorAll(
-        ".construction-inspector__validation button",
+        ".construction-inspector__validation li button",
       );
       assert.equal(buttons.length, issues.length);
       for (const button of buttons) {
-        assert.match(button.textContent, /Locate →/);
+        assert.match(button.textContent, /Locate/);
         await act(async () => button.click());
       }
       assert.deepEqual(focused, issues);

@@ -61,7 +61,7 @@ export function NumericField({
       <label htmlFor={id}>
         <span>
           {label}
-          {unit ? ` · ${unit}` : ""}
+          {unit && <span className="arrange-numeric-field__unit"> · {unit}</span>}
         </span>
         <input
           id={id}

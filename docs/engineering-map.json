@@ -14,7 +14,7 @@
         "symbols": ["CabaneApp", "CabaneDomProvider", "HomeAssistantHostSessionProvider"]
       }
     ],
-    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA\u2019s auto-height wrapper while preserving sidebar flow and safe-area padding.",
+    "invariant": "Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.",
     "checks": ["test:browser", "build", "build:panel"]
   },
   {
@@ -62,7 +62,13 @@
       "apps/web/src/editor-preview/useEditorWorkspace.ts",
       "apps/web/src/editor-workspace/useNorthOrientation.ts",
       "apps/web/src/editor-workspace/HomeEditorHeader.tsx",
-      "apps/web/src/editor-workspace/useHomeEditorShortcuts.ts"
+      "apps/web/src/editor-workspace/useHomeEditorShortcuts.ts",
+      "apps/web/src/editor-workspace/useEditorPanels.ts",
+      "apps/web/src/editor-workspace/EditorSelectionDetails.tsx",
+      "apps/web/src/editor-workspace/EditorPanelControls.tsx",
+      "apps/web/src/editor-workspace/editor-panels.css",
+      "apps/web/src/editor-chrome/SelectionDetailsPanel.tsx",
+      "apps/web/src/editor-preview/PreviewCamera.tsx"
     ],
     "interfaces": [
       {
@@ -70,7 +76,7 @@
         "symbols": ["ConnectWorkspaceProps", "HomeEditorExitReason"]
       }
     ],
-    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock.",
+    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel reflow waits for active gestures. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time; panel state stays outside project persistence. Compact Properties drawers offset camera projection to the unobscured canvas without changing its pan or zoom.",
     "checks": ["test:unit", "test:browser"]
   },
   {
@@ -97,7 +103,9 @@
       "packages/engine/src/home-editor/construct/niche-editor-actions.ts",
       "packages/engine/src/home-editor/construct/wall-attachments.ts",
       "packages/engine/src/home-project/schema-wall-niches.ts",
-      "packages/engine/src/validation/wall-niche-rules.ts"
+      "packages/engine/src/validation/wall-niche-rules.ts",
+      "apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
+      "apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx"
     ],
     "interfaces": [
       {
@@ -115,7 +123,7 @@
         "symbols": ["resizeWallAttachmentAtPoint"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool. ConstructionInspector owns tool and building settings; ConstructionSelectionProperties owns selected-object attribute bodies in the shared inspector.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {

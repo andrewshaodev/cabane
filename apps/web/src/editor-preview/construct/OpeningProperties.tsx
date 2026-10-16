@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { OpeningColorControls } from "./OpeningColorControls";
 import { omitUndefinedProperties } from "@cabane/engine";
 import { doorConfiguration, doorFromConfiguration } from "@cabane/engine";
@@ -11,10 +12,12 @@ export function OpeningProperties({
   opening: selectedOpening,
   editor,
   advanced,
+  orientationControls,
 }: {
   opening: EditorOpening;
   editor: ConstructEditorController;
   advanced?: boolean;
+  orientationControls?: ReactNode;
 }) {
   const wallPosition = (
     <fieldset>
@@ -41,11 +44,8 @@ export function OpeningProperties({
   );
   return (
     <>
-      {selectedOpening.kind !== "passage" && (
-        <OpeningColorControls opening={selectedOpening} onChange={editor.replaceSelectedOpening} />
-      )}
       <fieldset>
-        <legend>Size</legend>
+        <legend>Dimensions</legend>
         <label>
           Width
           <CommittedNumberInput
@@ -73,6 +73,10 @@ export function OpeningProperties({
           />
         </label>
       </fieldset>
+      {orientationControls}
+      {selectedOpening.kind !== "passage" && (
+        <OpeningColorControls opening={selectedOpening} onChange={editor.replaceSelectedOpening} />
+      )}
       {selectedOpening.kind === "window" && (
         <label className="construction-inspector__single-control">
           Height from floor

@@ -3,9 +3,15 @@ import { HedgeStyleGrid } from "./HedgeStyleGrid";
 import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 import type { ConstructEditorController } from "./construct-controller-contract";
 
-export function HedgeProperties({ editor }: { editor: ConstructEditorController }) {
+export function HedgeProperties({
+  editor,
+  editingSelection = true,
+}: {
+  editor: ConstructEditorController;
+  editingSelection?: boolean;
+}) {
   const hedge =
-    editor.selection?.kind === "hedge"
+    editingSelection && editor.selection?.kind === "hedge"
       ? editor.draft.hedges?.find(
           (hedge) => editor.selection?.kind === "hedge" && hedge.id === editor.selection.id,
         )
@@ -24,10 +30,12 @@ export function HedgeProperties({ editor }: { editor: ConstructEditorController 
           <strong>Boundary</strong>
         </div>
       </header>
-      <p className="construction-inspector__tool-hint">
-        Drag to draw a boundary. Continue from its endpoint for a connected row. Escape finishes
-        drawing.
-      </p>
+      {!hedge && (
+        <p className="construction-inspector__tool-hint">
+          Drag to draw a boundary. Continue from its endpoint for a connected row. Escape finishes
+          drawing.
+        </p>
+      )}
       <p className="construction-inspector__tool-hint">
         All styles block walking across the full width, including open rails. Leave gaps for
         entrances.

@@ -854,10 +854,8 @@ test("furnish rail is an add catalog while existing selection stays in the scene
     "apps/web/src/editor-preview/furnish/catalog/ArrangeCatalog.tsx",
     "utf8",
   );
-  const editor = await readEditorSource();
   assert.match(catalog, /aria-label="Catalog room types"/);
   assert.match(catalog, /onClick=\{\(\) => onChoose\(entry\)/);
-  assert.match(editor, /detailsItemId === selectedItem.id/);
   const panel = await readFile("apps/web/src/editor-chrome/SelectionDetailsPanel.tsx", "utf8");
   const properties = await readFile(
     "apps/web/src/editor-preview/furnish/FurnishingProperties.tsx",
@@ -878,6 +876,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
     await Promise.all(
       [
         "apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
+        "apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx",
         "apps/web/src/editor-preview/construct/DebouncedColorInput.tsx",
         "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
       ].map((path) => readFile(path, "utf8")),
@@ -908,7 +907,6 @@ test("selected walls expose friendly facts before exact expert controls", async 
   assert.match(openingProperties, /aria-label="Passage shape"/);
   assert.match(openingProperties, /replaceSelectedOpening/);
   assert.doesNotMatch(inspector, /Move over a wall, then click the highlighted position/);
-  assert.match(inspector, /Selected room/);
   assert.match(inspector, /label="Room name"/);
   assert.match(inspector, /label="Room ceiling height"/);
   assert.match(inspector, /Choose the room to keep/);

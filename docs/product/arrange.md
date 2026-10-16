@@ -4,9 +4,13 @@ Arrange edits declarative furnishing/device items in 3D or top view. In 2D,
 two-finger trackpad scrolling pans the plan and pinch (Ctrl/Cmd-wheel) zooms
 around the cursor, matching Construct. Its catalog
 supports searching and room-category browsing, visual model previews, and
-creation from supported registry entries. Clicking furniture or a device on a visible
+creation from supported registry entries. Non-empty searches cover all items,
+including devices and personal models, regardless of the selected category.
+Clearing the search restores that category. Clicking furniture or a device on a visible
 lower floor in 3D switches to that floor and selects the item. Selection exposes rotate, duplicate,
-delete, details, and, for devices with slots, Connect actions. Properties edit
+delete and, for devices with slots, Connect actions. Selection automatically opens
+the shared right Properties inspector while the catalog remains available on the
+left. Properties edit
 dimensions and placement. In 3D, a matching elevation button beside the rotation
 controls raises or lowers the selected item while dragged vertically. Release
 commits one undo step; Escape, pointer cancellation, or focus loss restores its
@@ -19,7 +23,7 @@ All built-in furnishings expose independent width, height,
 and depth controls, including previously fixed-size presets. Resizing scales the
 procedural model, so extreme dimensions can stretch its details. Device and
 home-local extension controls follow their declared resize policies. Variant is a standard saved attribute for both
-furniture and devices. Details shows a Variant selector only when the model has
+furniture and devices. Properties shows a Variant selector only when the model has
 multiple choices; the first choice is the default for older items.
 An unavailable saved variant renders using that default with a warning while
 retaining the original variant ID for a later catalog update. It does not block Save.
@@ -100,7 +104,7 @@ Implementation: [catalog UI](../../apps/web/src/editor-preview/furnish/catalog/A
 
 Curtain presets (single-window, children's paired, and motorized), the 3-seat
 sofa, and the sectional sofa offer a Fabric color picker and Reset color in
-Arrange Details. A six-digit hex `color` override is optional item data and
+Arrange Properties. A six-digit hex `color` override is optional item data and
 survives undo/redo, duplication, Apply, and project import/export. Omission
 preserves each model's original multi-tone palette. Overrides recolor fabric;
 tracks, wood, motor housings, and decorative throw cushions retain their finishes.

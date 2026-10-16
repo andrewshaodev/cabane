@@ -1,10 +1,12 @@
+import type { ManifestIssue } from "@cabane/engine";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
-
+import { ConstructionSelectionProperties } from "../editor-preview/construct/ConstructionSelectionProperties";
 import { FloorPaintConfirmation } from "../editor-preview/construct";
-
 import { FurnishingInspector } from "../editor-preview/furnish";
-
-import { useHomeEditorController } from "./useHomeEditorController";
+import { SelectionDetailsPanel } from "../editor-chrome/SelectionDetailsPanel";
+import { EditorButton } from "../editor-chrome/EditorButton";
+import { StairDetails } from "../editor-floors/StairDetails";
+import type { useHomeEditorController } from "./useHomeEditorController";
 
 type Props = Pick<
   ReturnType<typeof useHomeEditorController>,
@@ -17,20 +19,29 @@ type Props = Pick<
   | "placementFloor"
   | "furnishingModels"
   | "deviceModels"
-  | "marqueeSelecting"
   | "selectedOpening"
-  | "detailsOpeningId"
-  | "setDetailsOpeningId"
   | "visualSceneItems"
   | "furnishingEditor"
   | "selectedItem"
-  | "detailsItemId"
-  | "setDetailsItemId"
   | "arrangeAnnouncement"
   | "pendingRoomPaintId"
   | "confirmRoomPaint"
   | "setPendingRoomPaintId"
->;
+  | "stairDialog"
+  | "snapshot"
+  | "commit"
+  | "floorZoneDrawing"
+  | "floorFinish"
+  | "floorPaintTarget"
+  | "setFloorFinish"
+  | "setFloorPaintTarget"
+> & {
+  open: boolean;
+  onCollapse: () => void;
+  liveStairIssues: readonly ManifestIssue[] | null;
+  disabled: boolean;
+};
+
 export function EditorSelectionDetails({
   mode,
   editingLocked,
@@ -41,59 +52,127 @@ export function EditorSelectionDetails({
   placementFloor,
   furnishingModels,
   deviceModels,
-  marqueeSelecting,
   selectedOpening,
-  detailsOpeningId,
-  setDetailsOpeningId,
   visualSceneItems,
   furnishingEditor,
   selectedItem,
-  detailsItemId,
-  setDetailsItemId,
   arrangeAnnouncement,
   pendingRoomPaintId,
   confirmRoomPaint,
   setPendingRoomPaintId,
+  stairDialog,
+  snapshot,
+  commit,
+  floorZoneDrawing,
+  floorFinish,
+  floorPaintTarget,
+  setFloorFinish,
+  setFloorPaintTarget,
+  open,
+  onCollapse,
+  liveStairIssues,
+  disabled,
 }: Props) {
+  const selectedStair =
+    stairDialog && snapshot.project.stairs.find((stair) => stair.id === stairDialog.id);
   return (
     <>
-      {mode === "furnish" && selectedItem && detailsItemId === selectedItem.id && (
-        <div inert={editingLocked || publishOpen || previewOpen}>
-          <FurnishingInspector
-            items={visualSceneItems}
-            selectedId={furnishingEditor.selectedId}
-            floor={placementFloor}
-            onWindowFit={(id, placement, size, definition) => {
-              furnishingEditor.beginTransaction();
-              furnishingEditor.updatePlacement(id, placement);
-              furnishingEditor.updateSize(id, size, definition);
-              furnishingEditor.commitTransaction();
-            }}
-            furnishingModels={furnishingModels}
-            deviceModels={deviceModels}
-            onPlacementChange={furnishingEditor.updatePlacement}
-            onSizeChange={furnishingEditor.updateSize}
-            onLightStateChange={furnishingEditor.updateLightState}
-            onVariantChange={furnishingEditor.updateVariant}
-            onColorChange={furnishingEditor.updateColor}
-            onClose={() => setDetailsItemId(null)}
-          />
+      {open && (
+        <div
+          className="editor-properties-host"
+          inert={editingLocked || publishOpen || previewOpen || dragging || disabled}
+        >
+          {mode === "construct" &&
+            (selectedStair ? (
+              <StairDetails
+                key={selectedStair.id}
+                project={snapshot.project}
+                stair={selectedStair}
+                registries={{ furnishingModels, deviceModels }}
+                liveIssues={liveStairIssues}
+                onCancel={onCollapse}
+                onSave={(stair) =>
+                  commit({
+                    ...snapshot,
+                    project: {
+                      ...snapshot.project,
+                      stairs: snapshot.project.stairs.map((existing) =>
+                        existing.id === stair.id ? stair : existing,
+                      ),
+                    },
+                  })
+                }
+              />
+            ) : selectedOpening ? (
+              <OpeningDetails
+                key={selectedOpening.id}
+                opening={selectedOpening}
+                editor={constructEditor}
+                disabled={disabled}
+                onClose={onCollapse}
+              />
+            ) : constructEditor.selection ? (
+              <ConstructionSelectionProperties
+                key={
+                  constructEditor.selection.kind === "multiple"
+                    ? "multiple"
+                    : constructEditor.selection.id
+                }
+                editor={constructEditor}
+                onClose={onCollapse}
+                floorPainting={{
+                  finish: floorFinish,
+                  target: floorPaintTarget,
+                  drawingActive: floorZoneDrawing.active,
+                  drawingError: floorZoneDrawing.error,
+                  onFinishChange: setFloorFinish,
+                  onTargetChange: (target) => {
+                    floorZoneDrawing.cancel();
+                    setFloorPaintTarget(target);
+                  },
+                  onCancelDrawing: floorZoneDrawing.cancel,
+                }}
+              />
+            ) : null)}
+          {mode === "furnish" &&
+            (furnishingEditor.selectedIds.length > 1 ? (
+              <SelectionDetailsPanel
+                title={`${furnishingEditor.selectedIds.length} items`}
+                subtitle={placementFloor.name}
+                label="Selected items"
+                onClose={onCollapse}
+              >
+                <p className="editor-properties-note">Drag any selected item to move the group.</p>
+                <EditorButton
+                  variant="text"
+                  onClick={() => furnishingEditor.deleteItems(furnishingEditor.selectedIds)}
+                >
+                  Delete selection
+                </EditorButton>
+              </SelectionDetailsPanel>
+            ) : selectedItem ? (
+              <FurnishingInspector
+                items={visualSceneItems}
+                selectedId={furnishingEditor.selectedId}
+                floor={placementFloor}
+                furnishingModels={furnishingModels}
+                deviceModels={deviceModels}
+                onWindowFit={(id, placement, size, definition) => {
+                  furnishingEditor.beginTransaction();
+                  furnishingEditor.updatePlacement(id, placement);
+                  furnishingEditor.updateSize(id, size, definition);
+                  furnishingEditor.commitTransaction();
+                }}
+                onPlacementChange={furnishingEditor.updatePlacement}
+                onSizeChange={furnishingEditor.updateSize}
+                onLightStateChange={furnishingEditor.updateLightState}
+                onVariantChange={furnishingEditor.updateVariant}
+                onColorChange={furnishingEditor.updateColor}
+                onClose={onCollapse}
+              />
+            ) : null)}
         </div>
       )}
-      {mode === "construct" &&
-        !marqueeSelecting &&
-        selectedOpening &&
-        detailsOpeningId === selectedOpening.id && (
-          <div inert={editingLocked || publishOpen || previewOpen}>
-            <OpeningDetails
-              key={selectedOpening.id}
-              opening={selectedOpening}
-              editor={constructEditor}
-              disabled={dragging || editingLocked}
-              onClose={() => setDetailsOpeningId(null)}
-            />
-          </div>
-        )}
       <div className="arrange-announcement" role="status">
         {arrangeAnnouncement}
       </div>

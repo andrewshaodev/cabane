@@ -34,29 +34,32 @@ export function PoolProperties({
         </div>
       </dl>
       <p>Drag the pool to move it, or drag a corner to reshape it.</p>
-      {pool.polygon.map((point, index) => (
-        <fieldset key={index}>
-          <legend>Corner {index + 1} · plan units</legend>
-          {([0, 1] as const).map((axis) => (
-            <label key={axis}>
-              {axis === 0 ? "X" : "Y"}
-              <CommittedNumberInput
-                label={`Pool corner ${index + 1} ${axis === 0 ? "X" : "Y"}`}
-                step={0.1}
-                value={Number(point[axis].toPrecision(15))}
-                onCommit={(value) =>
-                  editor.updatePool(
-                    pool.id,
-                    mapPoolOutline(pool.polygon, (p, i) =>
-                      i === index ? (axis === 0 ? [value, p[1]] : [p[0], value]) : p,
-                    ),
-                  )
-                }
-              />
-            </label>
-          ))}
-        </fieldset>
-      ))}
+      <details className="selection-details-advanced">
+        <summary>Outline coordinates</summary>
+        {pool.polygon.map((point, index) => (
+          <fieldset key={index}>
+            <legend>Corner {index + 1} · plan units</legend>
+            {([0, 1] as const).map((axis) => (
+              <label key={axis}>
+                {axis === 0 ? "X" : "Y"}
+                <CommittedNumberInput
+                  label={`Pool corner ${index + 1} ${axis === 0 ? "X" : "Y"}`}
+                  step={0.1}
+                  value={Number(point[axis].toPrecision(15))}
+                  onCommit={(value) =>
+                    editor.updatePool(
+                      pool.id,
+                      mapPoolOutline(pool.polygon, (p, i) =>
+                        i === index ? (axis === 0 ? [value, p[1]] : [p[0], value]) : p,
+                      ),
+                    )
+                  }
+                />
+              </label>
+            ))}
+          </fieldset>
+        ))}
+      </details>
       <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
         Delete pool
       </EditorButton>

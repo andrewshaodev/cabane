@@ -157,16 +157,9 @@ export function useHomeEditorController({
     setSelectedRoomId(null);
     setActiveIssueKey(null);
   }, [setSelectedRoomId, setActiveIssueKey]);
-  const {
-    detailsItemId,
-    setDetailsItemId,
-    clearFurnishingSelection,
-    deleteSceneItem,
-    duplicateArrangeItem,
-  } = useEditorItemActions({
+  const { clearFurnishingSelection, deleteSceneItem, duplicateArrangeItem } = useEditorItemActions({
     furnishingEditor,
     projection,
-    mode,
     clearFocus: clearItemFocus,
     floor: constructEditorPreviewFloor,
   });
@@ -196,7 +189,6 @@ export function useHomeEditorController({
     stairPlacement,
     setStairDialog,
     selectedOpening,
-    setDetailsOpeningId,
     constructMeasure,
     pendingRoomPaintId,
     setPendingRoomPaintId,
@@ -227,7 +219,6 @@ export function useHomeEditorController({
     commit,
   });
   const unsettled = constructionUnsettled || reference.adjusting || northOrientation.active;
-  const closeAddedItemDetails = useCallback(() => setDetailsItemId(null), [setDetailsItemId]);
   const {
     catalogBrowsing,
     setCatalogBrowsing,
@@ -240,7 +231,6 @@ export function useHomeEditorController({
     projection,
     furnishingEditor,
     disabled: editingLocked || unsettled,
-    onAdded: closeAddedItemDetails,
   });
   const clearConstructionSelection = useCallback(() => {
     setStairDialog(null);
@@ -250,18 +240,16 @@ export function useHomeEditorController({
 
   const duplicateConstructionOpening = useCallback(
     (id: string) => {
-      setDetailsOpeningId(null);
       return constructEditorDuplicateOpening(id);
     },
-    [constructEditorDuplicateOpening, setDetailsOpeningId],
+    [constructEditorDuplicateOpening],
   );
 
   const resetRestoredSelection = useCallback(() => {
-    setDetailsItemId(null);
     setSelectedRoomId(null);
     setDragging(false);
     setMarqueeSelecting(false);
-  }, [setSelectedRoomId, setDetailsItemId]);
+  }, [setSelectedRoomId]);
   const {
     setActionBarItems,
     replaceEditorsFromProject,
@@ -289,8 +277,6 @@ export function useHomeEditorController({
   useEffect(() => {
     if (constructEditorDraft.floorId === activeFloorId) return;
     replaceEditorsFromProject(snapshot.project);
-    setDetailsOpeningId(null);
-    setDetailsItemId(null);
     setCameraFocusPoint(null);
     setCameraFocusRoomId(null);
   }, [
@@ -300,8 +286,6 @@ export function useHomeEditorController({
     snapshot.project,
     setCameraFocusPoint,
     setCameraFocusRoomId,
-    setDetailsOpeningId,
-    setDetailsItemId,
   ]);
 
   useHomeEditorShortcuts({
@@ -365,7 +349,6 @@ export function useHomeEditorController({
       if (editingLocked) return;
       setCatalogError(null);
       if (furnishingEditorTransaction) furnishingEditorCancelTransaction();
-      setDetailsItemId(null);
       if (nextMode !== "construct") {
         constructEditorCancelWall();
         cancelPoolDrawing();
@@ -393,7 +376,6 @@ export function useHomeEditorController({
       connectDefaultView,
       setCatalogError,
       setPendingRoomPaintId,
-      setDetailsItemId,
     ],
   );
 
@@ -469,8 +451,6 @@ export function useHomeEditorController({
     furnishingEditor,
     selectedItem,
     selectedDefinition,
-    detailsItemId,
-    setDetailsItemId,
     unsettled,
     selectMode,
     duplicateArrangeItem,

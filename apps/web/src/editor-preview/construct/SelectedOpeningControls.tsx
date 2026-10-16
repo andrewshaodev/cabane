@@ -18,27 +18,18 @@ export const SelectedOpeningActionBar = forwardRef<
   HTMLDivElement,
   {
     opening: EditorOpening;
-    detailsOpen: boolean;
     disabled: boolean;
     canDuplicate: boolean;
-    onDetails: () => void;
     onChange: (action: OpeningOrientationAction) => void;
     onDuplicate: () => void;
     onDelete: () => void;
   }
 >(function SelectedOpeningActionBar(
-  { opening, detailsOpen, disabled, canDuplicate, onDetails, onChange, onDuplicate, onDelete },
+  { opening, disabled, canDuplicate, onChange, onDuplicate, onDelete },
   ref,
 ) {
   return (
     <SelectionActionBar ref={ref} mode="construct" label="Selected opening actions">
-      <EditorActionButton
-        icon="details"
-        label="Details"
-        pressed={detailsOpen}
-        disabled={disabled}
-        onClick={onDetails}
-      />
       <EditorActionButton
         icon="duplicate"
         label="Duplicate"
@@ -56,20 +47,16 @@ export const SelectedOpeningActionBar = forwardRef<
 export function SelectedOpeningControls({
   opening,
   draft,
-  detailsOpen,
   disabled,
   canDuplicate,
-  onDetails,
   onChange,
   onDuplicate,
   onDelete,
 }: {
   opening: EditorOpening;
   draft: FloorEditorDraft;
-  detailsOpen: boolean;
   disabled: boolean;
   canDuplicate: boolean;
-  onDetails: () => void;
   onChange: (action: OpeningOrientationAction) => void;
   onDuplicate: () => void;
   onDelete: () => void;
@@ -81,7 +68,7 @@ export function SelectedOpeningControls({
   const wall = draft.walls.find((candidate) => candidate.id === opening.wallId);
   useLayoutEffect(() => {
     invalidate();
-  }, [invalidate, opening, wall, size, detailsOpen]);
+  }, [invalidate, opening, wall, size]);
   useFrame(() => {
     if (!toolbar.current || !overlay.current) return;
     overlay.current.style.visibility = "hidden";
@@ -148,10 +135,8 @@ export function SelectedOpeningControls({
         <SelectedOpeningActionBar
           ref={toolbar}
           opening={opening}
-          detailsOpen={detailsOpen}
           disabled={disabled}
           canDuplicate={canDuplicate}
-          onDetails={onDetails}
           onChange={onChange}
           onDuplicate={onDuplicate}
           onDelete={onDelete}

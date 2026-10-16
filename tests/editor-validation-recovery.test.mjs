@@ -342,7 +342,7 @@ await withModules(async (load) => {
       await act(async () => editor.setTool("select"));
       assert.equal(editor.topologyIssues.length, 0);
       assert.equal(
-        document.querySelectorAll(".construction-inspector__validation button").length,
+        document.querySelectorAll(".construction-inspector__validation li button").length,
         0,
       );
       const recovered = structuredClone(editor.previewFloor);
@@ -354,7 +354,7 @@ await withModules(async (load) => {
         0,
       );
       assert.equal(
-        document.querySelectorAll(".construction-inspector__validation button").length,
+        document.querySelectorAll(".construction-inspector__validation li button").length,
         0,
         "recovered separators remain valid in Select",
       );
@@ -393,7 +393,9 @@ await withModules(async (load) => {
         document.querySelector('[aria-label="Editor validation"]'),
         "the naming prompt appears after automatic return to Select",
       );
-      const namingButtons = document.querySelectorAll(".construction-inspector__validation button");
+      const namingButtons = document.querySelectorAll(
+        ".construction-inspector__validation li button",
+      );
       assert.equal(namingButtons.length, 1);
       assert.match(namingButtons[0].textContent, /This room needs a name/);
       assert.doesNotMatch(namingButtons[0].textContent, /Expected a non-empty string/);

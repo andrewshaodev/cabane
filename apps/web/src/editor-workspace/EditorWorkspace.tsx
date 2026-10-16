@@ -17,12 +17,14 @@ import {
 } from "@cabane/engine";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FloorManagementDialog } from "../editor-floors";
-import { StairDetails } from "../editor-floors/StairDetails";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { installedWalkTools } from "../walk-tools";
 import { EditorCompletionDialogs } from "./EditorCompletionDialogs";
 import { EditorSelectionDetails } from "./EditorSelectionDetails";
 import { EditorSidebar } from "./EditorSidebar";
+import { EditorValidationPanel } from "./EditorValidationPanel";
+import { EditorPanelControls } from "./EditorPanelControls";
+import { editorPanelSelection, useEditorPanels } from "./useEditorPanels";
 
 import { ownerProjectRegistries } from "../project-runtime";
 
@@ -46,7 +48,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     activeFloorId,
     stairPlacement,
     stairDialog,
-    setStairDialog,
     floorDialog,
     setFloorDialog,
     floorReferences,
@@ -57,7 +58,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     connect,
     constructEditor,
     displayedContextualIssues,
-    furnishingModels,
     deviceModels,
     furnishingEditor,
     unsettled,
@@ -75,22 +75,9 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     editedManifest,
   } = controller;
   const [stairLiveIssues, setStairLiveIssues] = useState<readonly ManifestIssue[] | null>(null);
-  const stairRegistries = useMemo(
-    () => ({ furnishingModels, deviceModels }),
-    [furnishingModels, deviceModels],
-  );
   useEffect(() => {
     setStairLiveIssues(null);
   }, [mode, activeFloorId, stairDialog?.id, stairPlacement?.shape]);
-  const selectedStairPath = stairDialog
-    ? `stairs[${snapshot.project.stairs.findIndex((stair) => stair.id === stairDialog.id)}]`
-    : null;
-  const sidebarIssues = selectedStairPath
-    ? displayedContextualIssues.filter(
-        (issue) =>
-          issue.path !== selectedStairPath && !issue.path.startsWith(`${selectedStairPath}.`),
-      )
-    : displayedContextualIssues;
   const tutorial = useBuildTutorial(
     editorProject,
     mode,
@@ -120,6 +107,26 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       setActionBarPanelOpen(false);
       selectMode(next);
     }
+  };
+  const panelBusy = unsettled || controller.marqueeSelecting || Boolean(constructEditor.drawStart);
+  const panels = useEditorPanels(
+    editorPanelSelection(controller, shortcutsMode),
+    panelBusy,
+    displayedContextualIssues.length > 0,
+  );
+  const panelIssues = displayedContextualIssues;
+  const panelsDisabled =
+    editingLocked || publishOpen || previewOpen || northOrientation.active || panelBusy;
+  const issuesExpanded = panels.issuesOpen;
+  const collapseProperties = () => {
+    panels.collapseProperties();
+    requestAnimationFrame(() =>
+      dom.root
+        .querySelector<HTMLButtonElement>(
+          ".editor-properties-toggle, .editor-panel-switcher button",
+        )
+        ?.focus(),
+    );
   };
   const bindingOrigin = homeAssistantUrl ? normalizeWorkspaceBindingOrigin(homeAssistantUrl) : null;
   const roomAreaIds = bindingOrigin
@@ -265,9 +272,16 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       <main
         className={`direction-preview${northOrientation.active ? " is-orienting-north" : ""}${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
         data-editor-mode={shortcutsMode ? "shortcuts" : mode}
+        data-properties-open={panels.propertiesOpen}
+        data-has-issues={panelIssues.length > 0}
+        data-issues-expanded={issuesExpanded}
+        data-mobile-panel={
+          panels.mobileSurface === "issues" && !panelIssues.length ? "tools" : panels.mobileSurface
+        }
       >
         {!shortcutsMode && (
           <HomeEditorScene
+            rightPanelOpen={panels.propertiesOpen}
             onStairIssuesChange={setStairLiveIssues}
             onNameFocusHandled={() => setNameFocusRequest(null)}
             nameFocusRequest={nameFocusRequest}
@@ -307,27 +321,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
               </label>
             ))}
         </div>
-        {mode === "construct" && stairDialog && (
-          <StairDetails
-            key={`${activeFloorId}:${stairDialog.id}`}
-            registries={stairRegistries}
-            liveIssues={stairLiveIssues}
-            project={snapshot.project}
-            stair={
-              snapshot.project.stairs.find((stair) => stair.id === stairDialog.id) ?? stairDialog
-            }
-            onCancel={() => setStairDialog(null)}
-            onSave={(stair) => {
-              commit({
-                ...snapshot,
-                project: {
-                  ...snapshot.project,
-                  stairs: [...snapshot.project.stairs.filter((s) => s.id !== stair.id), stair],
-                },
-              });
-            }}
-          />
-        )}
         {floorDialog && (
           <FloorManagementDialog
             action={floorDialog}
@@ -394,10 +387,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
         <EditorSidebar
           {...controller}
-          focusIssue={(issue) => {
-            setActionBarPanelOpen(false);
-            controller.focusIssue(issue);
-          }}
           sidebar={sidebar}
           iconUrl={iconUrl}
           shortcutsMode={shortcutsMode}
@@ -411,10 +400,33 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           importWorkspace={importWorkspace}
           placingWalkStart={placingWalkStart}
           setWalkStartFloor={setWalkStartFloor}
-          sidebarIssues={sidebarIssues}
           onHomeAssistantSettings={props.onHomeAssistantSettings}
         />
-        <EditorSelectionDetails {...controller} />
+        <EditorSelectionDetails
+          {...controller}
+          open={panels.propertiesOpen && !shortcutsMode}
+          onCollapse={collapseProperties}
+          liveStairIssues={stairLiveIssues}
+          disabled={panelsDisabled}
+        />
+        <div inert={editingLocked || publishOpen || previewOpen || northOrientation.active}>
+          <EditorValidationPanel
+            issues={panelIssues}
+            expanded={panels.issuesExpanded}
+            onToggle={panels.toggleIssues}
+            disabled={panelBusy}
+            onSelect={(issue) => {
+              setActionBarPanelOpen(false);
+              panels.openProperties();
+              controller.focusIssue(issue);
+            }}
+          />
+          <EditorPanelControls
+            panels={panels}
+            issueCount={panelIssues.length}
+            disabled={panelsDisabled}
+          />
+        </div>
         {autosaveStatus !== "saved" && (
           <div className={`direction-status is-${autosaveStatus}`}>
             <span />

@@ -59,12 +59,9 @@ export function PlatformProperties({
 
   return (
     <div className="construction-inspector__selection">
-      <header>
-        <div>
-          <small>Selected outdoor platform</small>
-          <strong>Outdoor platform · {area.toFixed(1)} m²</strong>
-        </div>
-      </header>
+      <p className="editor-property-fact">
+        Area <strong>{area.toFixed(1)} m²</strong>
+      </p>
       <p className="construction-inspector__tool-hint">
         Drag the platform to move it, or a corner to reshape it. Select an edge to change its style.
       </p>

@@ -15,7 +15,7 @@ export function NicheProperties({
   return (
     <>
       <fieldset>
-        <legend>Size · m</legend>
+        <legend>Dimensions · m</legend>
         <label>
           Width
           <CommittedNumberInput
@@ -62,25 +62,28 @@ export function NicheProperties({
           />
         </label>
       </fieldset>
-      <label className="construction-inspector__single-control">
-        Height from floor
-        <CommittedNumberInput
-          label="Niche height from floor"
-          value={niche.sillHeightMeters}
-          min={0.012}
-          step={0.01}
-          commitOnChange
-          onCommit={(sillHeightMeters) => editor.updateSelectedOpening({ sillHeightMeters })}
-        />
-      </label>
-      <EditorButton
-        variant="text"
-        onClick={() =>
-          editor.dispatch({ type: "reorient-opening", openingId: niche.id, change: "side" })
-        }
-      >
-        Switch wall face
-      </EditorButton>
+      <fieldset>
+        <legend>Placement</legend>
+        <label className="construction-inspector__single-control">
+          Height from floor
+          <CommittedNumberInput
+            label="Niche height from floor"
+            value={niche.sillHeightMeters}
+            min={0.012}
+            step={0.01}
+            commitOnChange
+            onCommit={(sillHeightMeters) => editor.updateSelectedOpening({ sillHeightMeters })}
+          />
+        </label>
+        <EditorButton
+          variant="text"
+          onClick={() =>
+            editor.dispatch({ type: "reorient-opening", openingId: niche.id, change: "side" })
+          }
+        >
+          Switch wall face
+        </EditorButton>
+      </fieldset>
       <details className="selection-details-advanced">
         <summary>Shelves</summary>
         <label className="construction-inspector__single-control">

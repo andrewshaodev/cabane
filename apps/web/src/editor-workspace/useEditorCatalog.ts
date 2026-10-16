@@ -20,9 +20,8 @@ type Options = {
   projection: ReturnType<typeof useEditorSceneProjection>;
   furnishingEditor: ReturnType<typeof useFurnishingEditor>;
   disabled: boolean;
-  onAdded: () => void;
 };
-export function useEditorCatalog({ projection, furnishingEditor, disabled, onAdded }: Options) {
+export function useEditorCatalog({ projection, furnishingEditor, disabled }: Options) {
   const { placementFloor, visualSceneItems, furnishingModels, deviceModels, editorProject } =
     projection;
   const { items: furnishingEditorItems, addItem: furnishingEditorAddItem } = furnishingEditor;
@@ -61,7 +60,6 @@ export function useEditorCatalog({ projection, furnishingEditor, disabled, onAdd
       placementFloor.id,
     );
     furnishingEditorAddItem(candidate.size ? { ...item, size: candidate.size } : item);
-    onAdded();
     setArrangeAnnouncement(
       `${entry.definition.label} added. Drag to move it; use Undo to remove it.`,
     );

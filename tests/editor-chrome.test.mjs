@@ -229,8 +229,6 @@ await withModules(async (load) => {
     await withDom(async ({ root, document }) => {
       const calls = [];
       const actions = {
-        detailsOpen: false,
-        onDetails: () => calls.push("details"),
         onDuplicate: () => calls.push("duplicate"),
         onDelete: () => calls.push("delete"),
       };
@@ -240,11 +238,11 @@ await withModules(async (load) => {
       let buttons = [...document.querySelectorAll("button")];
       assert.deepEqual(
         buttons.map((b) => b.getAttribute("aria-label")),
-        ["Details", "Duplicate", "Delete"],
+        ["Duplicate", "Delete"],
       );
       assert.ok(buttons.every((button) => button.textContent === ""));
       await act(async () => buttons.forEach((button) => button.click()));
-      assert.deepEqual(calls, ["details", "duplicate", "delete"]);
+      assert.deepEqual(calls, ["duplicate", "delete"]);
       await act(async () =>
         root.render(
           React.createElement(SelectedItemActionBar, {
@@ -271,7 +269,7 @@ await withModules(async (load) => {
     });
   });
 
-  test("item properties appear only on demand and the catalog keeps its search", async () => {
+  test("collapsing item properties preserves catalog search", async () => {
     await withDom(async ({ root, document, window }) => {
       const definition = {
         label: "Chair",
@@ -327,7 +325,7 @@ await withModules(async (load) => {
       assert.ok(document.querySelector('[aria-label="Selected furnishing"]'));
       assert.equal(document.querySelector('[aria-label="Add Chair"]').closest("[hidden]"), null);
       assert.equal(document.querySelectorAll('input[inputmode="decimal"]').length, 7);
-      await act(async () => document.querySelector('[aria-label="Close details"]').click());
+      await act(async () => document.querySelector('[aria-label="Collapse properties"]').click());
       assert.equal(closed, 1);
       await act(async () => root.render(React.createElement(Harness, { detailsOpen: false })));
       assert.equal(document.querySelector('input[placeholder="Search all items…"]'), search);

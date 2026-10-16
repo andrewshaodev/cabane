@@ -59,11 +59,12 @@ export function ArrangeCatalog({
     () => catalogEntries(furnishingModels, deviceModels),
     [furnishingModels, deviceModels],
   );
+  const resultRoom = browsing.query.trim() ? "all" : browsing.room;
   const results = useMemo(
-    () => filterCatalog(entries, browsing.room, browsing.query),
-    [entries, browsing],
+    () => filterCatalog(entries, resultRoom, browsing.query),
+    [entries, resultRoom, browsing.query],
   );
-  const filterLabel = filters.find((filter) => filter.id === browsing.room)?.label ?? "All items";
+  const filterLabel = filters.find((filter) => filter.id === resultRoom)?.label ?? "All items";
   const chooseFilter = (room: CatalogRoom) => {
     onBrowse({ room, query: "" });
     if (scrollRoot.current) scrollRoot.current.scrollTop = 0;
@@ -126,9 +127,9 @@ export function ArrangeCatalog({
             <EditorIcon name="search" />
             <input
               type="search"
-              aria-label={`Search ${filterLabel.toLowerCase()}`}
+              aria-label="Search all items"
               value={browsing.query}
-              placeholder={`Search ${filterLabel.toLowerCase()}…`}
+              placeholder="Search all items…"
               onChange={(event) => onBrowse({ ...browsing, query: event.target.value })}
             />
             {browsing.query && (
@@ -144,7 +145,9 @@ export function ArrangeCatalog({
           <ModelThumbnailRenderer scrollRoot={scrollRoot} enabled={enabled}>
             <div className="catalog-grid" ref={scrollRoot} aria-label={`${filterLabel} catalog`}>
               {results.map((entry) =>
-                browsing.room === "my-models" && renderCustomModel ? (
+                browsing.room === "my-models" &&
+                entry.modelId.startsWith("custom:") &&
+                renderCustomModel ? (
                   <Fragment key={entry.key}>{renderCustomModel(entry)}</Fragment>
                 ) : (
                   <button

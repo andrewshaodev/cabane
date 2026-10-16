@@ -46,6 +46,7 @@ import type { useHomeEditorController } from "./useHomeEditorController";
 
 const NO_INTERACTION = () => undefined;
 type Props = {
+  rightPanelOpen: boolean;
   onStairIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
   reference: ReferencePlanController;
   onNameFocusHandled?: () => void;
@@ -103,21 +104,18 @@ type Props = {
   | "setSelectedRoomId"
   | "setMarqueeSelecting"
   | "selectedOpening"
-  | "detailsOpeningId"
-  | "setDetailsOpeningId"
   | "duplicateConstructionOpening"
   | "visualSceneItems"
   | "furnishingEditor"
   | "selectedItem"
   | "selectedDefinition"
-  | "detailsItemId"
-  | "setDetailsItemId"
   | "unsettled"
   | "selectMode"
   | "duplicateArrangeItem"
   | "deleteSceneItem"
 >;
 export function HomeEditorScene({
+  rightPanelOpen,
   reference,
   northOrientation,
   onStairIssuesChange,
@@ -172,15 +170,11 @@ export function HomeEditorScene({
   setSelectedRoomId,
   setMarqueeSelecting,
   selectedOpening,
-  detailsOpeningId,
-  setDetailsOpeningId,
   duplicateConstructionOpening,
   visualSceneItems,
   furnishingEditor,
   selectedItem,
   selectedDefinition,
-  detailsItemId,
-  setDetailsItemId,
   unsettled,
   selectMode,
   duplicateArrangeItem,
@@ -284,6 +278,7 @@ export function HomeEditorScene({
               )}
               {mode === "construct" && !referenceCanvas.visible && <ConstructionGrid />}
               <PreviewCamera
+                rightPanelOpen={rightPanelOpen}
                 northOrientation={northOrientation.active}
                 planWheelNavigation={mode === "construct" || mode === "furnish"}
                 view={mode === "construct" ? "top" : cameraView}
@@ -561,14 +556,8 @@ export function HomeEditorScene({
                   key={selectedOpening.id}
                   opening={selectedOpening}
                   draft={constructEditor.draft}
-                  detailsOpen={detailsOpeningId === selectedOpening.id}
                   disabled={dragging || editingLocked}
                   canDuplicate={constructEditor.canDuplicateOpening(selectedOpening.id)}
-                  onDetails={() =>
-                    setDetailsOpeningId((id) =>
-                      id === selectedOpening.id ? null : selectedOpening.id,
-                    )
-                  }
                   onChange={(change) =>
                     constructEditor.dispatch({
                       type: "reorient-opening",
@@ -664,9 +653,6 @@ export function HomeEditorScene({
                     setDragging(false);
                   }}
                   actions={{
-                    detailsOpen: detailsItemId === selectedItem.id,
-                    onDetails: () =>
-                      setDetailsItemId((id) => (id === selectedItem.id ? null : selectedItem.id)),
                     onMap:
                       selectedItem.kind === "device" &&
                       selectedItem.entitySlots.length > 0 &&

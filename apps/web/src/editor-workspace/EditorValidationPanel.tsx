@@ -1,34 +1,68 @@
+import { useId, useState } from "react";
 import type { ConstructValidationDiagnostic } from "../editor-preview/construct/contextual-validation";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 
-/** Shared draft diagnostics stay available beside every editor mode. */
+/** Draft diagnostics live outside the tools and properties surfaces. */
 export function EditorValidationPanel<Issue extends ConstructValidationDiagnostic>({
   issues,
   onSelect,
+  expanded: controlledExpanded,
+  onToggle,
+  disabled = false,
 }: {
   issues: readonly Issue[];
   onSelect: (issue: Issue) => void;
+  expanded?: boolean;
+  onToggle?: () => void;
+  disabled?: boolean;
 }) {
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const expanded = controlledExpanded ?? localExpanded;
+  const contentId = useId();
   if (!issues.length) return null;
   const errorCount = issues.filter((issue) => issue.severity !== "warning").length;
   const warningCount = issues.length - errorCount;
   return (
     <section
-      className="construction-inspector__validation"
+      className="editor-issues construction-inspector__validation"
+      data-expanded={expanded}
       aria-label="Editor validation"
-      aria-live="polite"
     >
-      <header>
-        <strong>
-          {issues.length} {issues.length === 1 ? "issue" : "issues"}
-        </strong>
-        <span>
-          {errorCount > 0 && `${errorCount} ${errorCount === 1 ? "error" : "errors"}`}
-          {errorCount > 0 && warningCount > 0 && " · "}
-          {warningCount > 0 && `${warningCount} ${warningCount === 1 ? "warning" : "warnings"}`}
+      <button
+        type="button"
+        className="editor-issues__disclosure"
+        aria-label={`Issues: ${[errorCount ? `${errorCount} ${errorCount === 1 ? "error" : "errors"}` : "", warningCount ? `${warningCount} ${warningCount === 1 ? "warning" : "warnings"}` : ""].filter(Boolean).join(", ")}`}
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        disabled={disabled}
+        onClick={onToggle ?? (() => setLocalExpanded((current) => !current))}
+      >
+        <strong>Issues</strong>
+        <span className="editor-issues__counts" aria-live="polite" aria-atomic="true">
+          {errorCount > 0 && (
+            <span data-severity="error">
+              <EditorIcon name="warning" />
+              {errorCount}
+              <span className="editor-issues__count-label">
+                {" "}
+                {errorCount === 1 ? "error" : "errors"}
+              </span>
+            </span>
+          )}
+          {warningCount > 0 && (
+            <span data-severity="warning">
+              <EditorIcon name="warning" />
+              {warningCount}
+              <span className="editor-issues__count-label">
+                {" "}
+                {warningCount === 1 ? "warning" : "warnings"}
+              </span>
+            </span>
+          )}
         </span>
-      </header>
-      <ul>
+        <EditorIcon name="chevron" />
+      </button>
+      <ul id={contentId} hidden={!expanded}>
         {issues.map((issue, index) => {
           const content = (
             <>
@@ -40,8 +74,8 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
                 {issue.suggestion && <small>{issue.suggestion}</small>}
               </span>
               {issue.target && (
-                <span className="construction-inspector__validation-arrow" aria-hidden="true">
-                  Locate →
+                <span className="editor-issues__locate" aria-hidden="true">
+                  <EditorIcon name="spawn" /> Locate
                 </span>
               )}
             </>
@@ -51,6 +85,7 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
               {issue.target ? (
                 <button
                   type="button"
+                  disabled={disabled}
                   aria-label={`Locate ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
                   onClick={() => onSelect(issue)}
                 >

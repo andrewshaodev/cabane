@@ -40,55 +40,55 @@ export function OpeningDetails({
         : opening.kind === "niche"
           ? "Niche"
           : "Passage";
+  const orientationControls = orientable ? (
+    <fieldset className="opening-direction">
+      <legend>Opening direction</legend>
+      <svg
+        className="opening-direction__diagram"
+        viewBox={`${minX} ${-extentZ} ${maxX - minX} ${extentZ * 2}`}
+        role="img"
+        aria-label={`${name} opening direction in plan view`}
+      >
+        <path d={`M${minX} 0H0M${width} 0H${maxX}`} stroke="#596057" strokeWidth={thickness} />
+        {strokes.map((stroke, index) => (
+          <line
+            key={index}
+            x1={stroke.from[0]}
+            y1={stroke.from[1]}
+            x2={stroke.to[0]}
+            y2={stroke.to[1]}
+            stroke={stroke.color}
+            strokeWidth={stroke.width ?? 0.025}
+          />
+        ))}
+      </svg>
+      <OpeningOrientationControls
+        opening={opening}
+        showLabel
+        disabled={disabled}
+        onChange={(change) =>
+          editor.dispatch({ type: "reorient-opening", openingId: opening.id, change })
+        }
+      />
+    </fieldset>
+  ) : null;
   return (
     <SelectionDetailsPanel
       mode="construct"
-      title={`${name} properties`}
-      subtitle="Selected opening"
+      title={name}
+      subtitle={editor.previewFloor.name}
       label={`${name} properties`}
       onClose={onClose}
     >
       <div inert={disabled}>
-        {orientable && (
-          <fieldset className="opening-direction">
-            <legend>Opening direction</legend>
-            <svg
-              className="opening-direction__diagram"
-              viewBox={`${minX} ${-extentZ} ${maxX - minX} ${extentZ * 2}`}
-              role="img"
-              aria-label={`${name} opening direction in plan view`}
-            >
-              <path
-                d={`M${minX} 0H0M${width} 0H${maxX}`}
-                stroke="#596057"
-                strokeWidth={thickness}
-              />
-              {strokes.map((stroke, index) => (
-                <line
-                  key={index}
-                  x1={stroke.from[0]}
-                  y1={stroke.from[1]}
-                  x2={stroke.to[0]}
-                  y2={stroke.to[1]}
-                  stroke={stroke.color}
-                  strokeWidth={stroke.width ?? 0.025}
-                />
-              ))}
-            </svg>
-            <OpeningOrientationControls
-              opening={opening}
-              showLabel
-              disabled={disabled}
-              onChange={(change) =>
-                editor.dispatch({ type: "reorient-opening", openingId: opening.id, change })
-              }
-            />
-          </fieldset>
-        )}
         {opening.kind === "niche" ? (
           <NicheProperties niche={opening} editor={editor} />
         ) : (
-          <OpeningProperties opening={opening} editor={editor} />
+          <OpeningProperties
+            opening={opening}
+            editor={editor}
+            orientationControls={orientationControls}
+          />
         )}
       </div>
     </SelectionDetailsPanel>

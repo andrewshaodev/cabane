@@ -7,7 +7,7 @@ Window, Passage, Floor, Measure, Pan, and Decorations (Niche, Boundary, Pool). U
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
 also controls default wall/ceiling settings. Select a door, window, or passage and
-open its on-canvas Details action to edit width and height. Passage Details also
+its shared Properties inspector opens automatically to edit width and height. Passage Properties also
 controls rectangular/arched shape and arch rise. Valid width and height edits update
 the scene immediately. Sizes that do not fit report an error; leaving the field
 restores the accepted value. These edits use the ordinary
@@ -18,7 +18,7 @@ width handles, marquee, duplication and deletion system as doors/windows.
 Decorations groups Niche, Boundary and Pool in a floating disclosure outside the
 scrolling tool strip. Mouse hover, click/tap and keyboard activation open it;
 Escape or clicking outside closes it. Select Niche, then click the desired wall
-face. Details exposes width, height, depth and height from floor, with a wall-face
+face. Properties exposes width, height, depth and height from floor, with a wall-face
 switch and optional shelf settings. Depth is capped at the current wall thickness
 minus 20 mm so the backing remains solid, including when moving to a thinner wall
 or reducing its thickness. Resizing a wall removes niches whose width or height
@@ -117,7 +117,8 @@ a dedicated drag controller and outline measurement presentation.
 
 Implementation: [construction controller](../../apps/web/src/editor-preview/construct/useConstructEditor.ts),
 [pointer interaction](../../apps/web/src/editor-preview/construct/ConstructionEditLayer.tsx),
-[inspector](../../apps/web/src/editor-preview/construct/ConstructionInspector.tsx),
+[tool settings](../../apps/web/src/editor-preview/construct/ConstructionInspector.tsx),
+[selected-object properties](../../apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx),
 [topology](../../packages/engine/src/home-editor/construct/topology.ts),
 [floor drawing](../../apps/web/src/editor-preview/construct/useFloorZoneDrawing.ts),
 [contextual validation](../../apps/web/src/editor-preview/construct/contextual-validation.ts).
@@ -198,9 +199,9 @@ Selected outline handles take pointer priority over overlapping plan objects. Ou
 the handle hit targets, ordinary scene picking keeps its distance order.
 
 The canvas shows measurements, never paragraphs of stair errors. Placement warnings
-are collapsed behind a count in the sidebar; selected-stair warnings appear in its
-properties rather than duplicated in the general diagnostics. Warning-only stairs
-remain publishable through the existing Save review. This tool models a home; its
+are collapsed behind a count in the placement panel. Selected-stair warnings also
+appear in Properties; the shared Issues tray retains all contextual draft diagnostics. Warning-only stairs
+remain publishable directly through Save. This tool models a home; its
 warnings are not construction-code certification.
 
 Resizing a wall deletes doors and windows whose full width or height no longer
@@ -242,8 +243,9 @@ side but no hinge, slide direction, or leaf count.
 
 ## Reference plans
 
-Construct offers a persistent Reference plan disclosure below the Edit the plan
-introduction or active tool/selection properties and contextual diagnostics.
+Construct offers a persistent Reference plan disclosure below the introduction
+and active tool settings. Selected-object properties occupy the right inspector;
+contextual diagnostics occupy the shared Issues tray.
 Its expanded contents include a Show reference plan checkbox and opacity slider. Roof, Spawn area, Scale & heights, and Tutorial remain below those properties. The
 active tutorial retains its floating desktop placement. New or restarted
 tutorials begin with an optional Add a reference plan step; Skip proceeds to
@@ -316,7 +318,7 @@ the preset default. Optional six-digit hex `color` on these preset finishes surv
 history, draft reload, Save, duplication, and import/export; omitted color preserves
 existing projects. Patterns are generated in memory and rendered with toon materials.
 
-Selected doors and windows expose Finish color in Details, including garage,
+Selected doors and windows expose Finish color in Properties, including garage,
 sliding, glass, and steel-arched designs. The optional six-digit hex `color`
 override paints the door leaf and frame or window frame/muntins; glass and
 hardware retain their original finishes. Reset color removes the override and

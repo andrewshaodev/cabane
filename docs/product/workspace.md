@@ -66,6 +66,31 @@ transfer precedes the revision-checked document write; see
 Arrange → My models can exchange a model-only ZIP pack (`manifest.json` plus
 `assets/<sha256>.glb`) independently of a workspace JSON or `.cabane` backup.
 
+Construct and Arrange use a shared panel layout. The left sidebar holds tools,
+placement choices, catalog and home settings. Selecting architecture, stairs,
+furniture or devices opens the same right Properties inspector automatically,
+without moving keyboard focus. Changing selection replaces its fields; clicking
+empty canvas clears it. Collapse retains selection and exposes a reopen button;
+a different selection opens it again. Group selection offers its count and existing
+group actions. Tool defaults and selected-object attributes use separate surfaces.
+Panels use continuous warm surfaces, aligned fields and spaced semantic groups,
+without nested cards or decorative section rules. Relevant fields group dimensions,
+placement and appearance; advanced controls remain accessible through one disclosure level.
+
+Above 1240px, Properties reserves canvas width. Compact windows use a right drawer;
+mobile uses one active bottom sheet for tools, Properties or Issues. Short mobile
+landscape windows put that shared surface on the left to retain canvas height. Canvas picking,
+framing, floor controls and view controls use the available region. Panel changes
+that resize the canvas wait for active drawing, dragging and marquee gestures to
+settle. Panel state is presentation-only and is not exported or added to history.
+
+Draft Issues lives in a separate tray below the canvas in every editor mode.
+It starts collapsed with error/warning counts, expands to a scrollable list capped
+at 30% of the desktop viewport height, and disappears when empty. Messages retain
+full recovery guidance and Locate actions. New issues update counts quietly;
+expansion persists across mode changes during the editor session. Locate opens the
+affected object's Properties, including when that inspector was collapsed.
+
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
 can remain visible while editing. The shared validation panel stays available in
 Construct, Arrange, Connect, and Shortcuts whenever the draft has visible issues.

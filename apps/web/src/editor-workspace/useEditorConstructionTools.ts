@@ -46,7 +46,6 @@ export function useEditorConstructionTools(
     );
   }, [activeFloorId, mode]);
   const [floorDialog, setFloorDialog] = useState<"rename" | "remove" | null>(null);
-  const [detailsOpeningId, setDetailsOpeningId] = useState<string | null>(null);
   const selectedOpeningId =
     constructEditorSelection?.kind === "opening" ? constructEditorSelection.id : null;
   const selectedOpening = selectedOpeningId
@@ -54,9 +53,6 @@ export function useEditorConstructionTools(
         (opening) => opening.id === selectedOpeningId,
       )
     : undefined;
-  useEffect(() => {
-    setDetailsOpeningId(null);
-  }, [mode, selectedOpening?.id]);
   const constructMeasure = useConstructMeasure(constructEditorPreviewFloor.coordinates);
   const { cancel: constructMeasureCancel } = constructMeasure;
   const [floorFinish, setFloorFinish] = useState<FloorFinishSpec>({
@@ -135,8 +131,6 @@ export function useEditorConstructionTools(
     floorDialog,
     setFloorDialog,
     selectedOpening,
-    detailsOpeningId,
-    setDetailsOpeningId,
     constructMeasure,
     floorFinish,
     setFloorFinish,

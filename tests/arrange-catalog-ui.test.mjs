@@ -239,8 +239,10 @@ await withModules(async (load) => {
   test("room navigation scopes the rendered catalog and selections emit reusable model entries", async () => {
     await withDom(async ({ root, document }) => {
       const chosen = [];
+      let browse;
       function Harness() {
         const [browsing, onBrowse] = useState({ room: "all", query: "" });
+        browse = onBrowse;
         return React.createElement(ArrangeCatalog, {
           ...ownerProjectRegistries,
           browsing,
@@ -258,7 +260,7 @@ await withModules(async (load) => {
           (button) => button.textContent === name,
         );
       await act(async () => room("Living room").click());
-      assert.equal(document.querySelector("input").placeholder, "Search living room…");
+      assert.equal(document.querySelector("input").placeholder, "Search all items…");
       assert.equal(document.querySelector('[aria-label="Add Wooden crib · 70 × 140"]'), null);
       await act(async () => document.querySelector('[aria-label="Add Television"]').click());
       assert.equal(chosen[0].kind, "device");
@@ -306,7 +308,7 @@ await withModules(async (load) => {
       assert.ok(document.querySelector('[aria-label="Add Wooden crib · 70 × 140"]'));
       assert.ok(document.querySelector('[aria-label="Add Weather station"]'));
       await act(async () => room("Devices").click());
-      assert.equal(document.querySelector("input").placeholder, "Search devices…");
+      assert.equal(document.querySelector("input").placeholder, "Search all items…");
       assert.equal(document.querySelector('[aria-label="Add Wooden crib · 70 × 140"]'), null);
       assert.ok(document.querySelector('[aria-label="Add Television"]'));
       assert.equal(
@@ -318,10 +320,23 @@ await withModules(async (load) => {
           (label) => label.textContent === "Device",
         ),
       );
+      for (const selectedRoom of ["bedroom", "devices", "my-models"]) {
+        await act(async () => browse({ room: selectedRoom, query: "weird relief wall art" }));
+        const artwork = document.querySelector('[aria-label="Add Weird relief wall art"]');
+        assert.ok(artwork, `search crosses the ${selectedRoom} category`);
+        await act(async () => artwork.click());
+        assert.equal(chosen.at(-1).modelId, "abstract-relief-wall-art");
+        assert.ok(document.querySelector('[aria-label="All items catalog"]'));
+      }
+      await act(async () => browse({ room: "bedroom", query: "abstract relief wall art" }));
+      assert.ok(document.querySelector('[aria-label="Add Weird relief wall art"]'));
+      await act(async () => document.querySelector('[aria-label="Clear search"]').click());
+      assert.equal(document.querySelector('[aria-label="Add Weird relief wall art"]'), null);
+      assert.ok(document.querySelector('[aria-label="Add Wooden crib · 70 × 140"]'));
     });
   });
 
-  test("fitting a blind from Details updates size and placement as one undoable edit", async () => {
+  test("fitting a blind from Properties updates size and placement as one undoable edit", async () => {
     await withDom(async ({ root, document, window }) => {
       const definition = ownerProjectRegistries.deviceModels["motorized-blind"];
       const wall = ownerHomeProject.floors[0].walls[0];
@@ -372,7 +387,7 @@ await withModules(async (load) => {
       assert.equal(editor.past.length, 1);
       assert.equal(
         document.querySelector("input[disabled]").closest("label").textContent,
-        "depth · m",
+        "Depth · m",
       );
       await act(async () => editor.undo());
       assert.deepEqual(editor.items[0], item);

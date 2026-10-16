@@ -11,6 +11,7 @@ import "./home-editor.css";
 import "./editor-connect/connect-editor.css";
 
 import { EditorWorkspace } from "./editor-workspace/EditorWorkspace";
+import "./editor-workspace/editor-panels.css";
 
 const downloadProjectRecovery = (homeId: string, raw: string) => {
   const href = URL.createObjectURL(new Blob([raw], { type: "application/json" }));

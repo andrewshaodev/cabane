@@ -1,4 +1,3 @@
-import { EditorValidationPanel } from "./EditorValidationPanel";
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
 import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
@@ -43,7 +42,6 @@ type Props = Pick<
   | "clearConstructionSelection"
   | "constructEditor"
   | "floorZoneDrawing"
-  | "focusIssue"
   | "furnishingModels"
   | "deviceModels"
   | "floorPaintTarget"
@@ -76,7 +74,6 @@ type Props = Pick<
   importWorkspace: (json: string) => void;
   placingWalkStart: boolean;
   setWalkStartFloor: React.Dispatch<React.SetStateAction<string | null>>;
-  sidebarIssues: ReturnType<typeof useHomeEditorController>["displayedContextualIssues"];
   onHomeAssistantSettings: Parameters<typeof useHomeEditorController>[0]["onHomeAssistantSettings"];
 };
 export function EditorSidebar({
@@ -95,7 +92,6 @@ export function EditorSidebar({
   clearConstructionSelection,
   constructEditor,
   floorZoneDrawing,
-  focusIssue,
   furnishingModels,
   deviceModels,
   floorPaintTarget,
@@ -127,7 +123,6 @@ export function EditorSidebar({
   importWorkspace,
   placingWalkStart,
   setWalkStartFloor,
-  sidebarIssues,
   onHomeAssistantSettings,
 }: Props) {
   return (
@@ -358,7 +353,6 @@ export function EditorSidebar({
             />
           </div>
         </div>
-        <EditorValidationPanel issues={sidebarIssues} onSelect={focusIssue} />
       </aside>
     </>
   );
