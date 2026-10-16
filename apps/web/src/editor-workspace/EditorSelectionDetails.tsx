@@ -30,11 +30,6 @@ type Props = Pick<
   | "stairDialog"
   | "snapshot"
   | "commit"
-  | "floorZoneDrawing"
-  | "floorFinish"
-  | "floorPaintTarget"
-  | "setFloorFinish"
-  | "setFloorPaintTarget"
 > & {
   open: boolean;
   onCollapse: () => void;
@@ -63,11 +58,6 @@ export function EditorSelectionDetails({
   stairDialog,
   snapshot,
   commit,
-  floorZoneDrawing,
-  floorFinish,
-  floorPaintTarget,
-  setFloorFinish,
-  setFloorPaintTarget,
   open,
   onCollapse,
   liveStairIssues,
@@ -120,18 +110,6 @@ export function EditorSelectionDetails({
                 }
                 editor={constructEditor}
                 onClose={onCollapse}
-                floorPainting={{
-                  finish: floorFinish,
-                  target: floorPaintTarget,
-                  drawingActive: floorZoneDrawing.active,
-                  drawingError: floorZoneDrawing.error,
-                  onFinishChange: setFloorFinish,
-                  onTargetChange: (target) => {
-                    floorZoneDrawing.cancel();
-                    setFloorPaintTarget(target);
-                  },
-                  onCancelDrawing: floorZoneDrawing.cancel,
-                }}
               />
             ) : null)}
           {mode === "furnish" &&

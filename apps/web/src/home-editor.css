@@ -1225,31 +1225,6 @@
   justify-content: space-between;
   gap: 10px;
 }
-.construction-inspector__surface-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.construction-inspector__room-surfaces > button {
-  display: inline-flex;
-  width: 100%;
-  min-height: 38px;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border: 1px solid #d1c7b8;
-  border-radius: 7px;
-  color: var(--preview-ink);
-  background: #ebe2d4;
-  font-size: var(--editor-text-control, 0.875rem);
-  font-weight: 600;
-  cursor: pointer;
-}
-.construction-inspector__room-surfaces > button:hover {
-  border-color: #c3b6a4;
-  background: #e2d7c8;
-}
 .floor-paint-confirmation {
   max-width: min(390px, calc(100vw - 32px));
   padding: 0;

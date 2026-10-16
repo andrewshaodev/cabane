@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import {
-  floorFinishPreset,
   pointInsidePolygon,
   resolveRoomFloorFinish,
   roomInteriorAreaSquareMeters,
@@ -20,9 +19,8 @@ import { wallMeasurement } from "./drag-geometry";
 
 export function ConstructionSelectionProperties({
   editor,
-  floorPainting,
   onClose,
-}: Pick<ConstructionInspectorProps, "editor" | "floorPainting"> & { onClose: () => void }) {
+}: Pick<ConstructionInspectorProps, "editor"> & { onClose: () => void }) {
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
   const selectedPoolId = editor.selection?.kind === "pool" ? editor.selection.id : null;
   const selectedRoomId = editor.selection?.kind === "room" ? editor.selection.id : null;
@@ -284,30 +282,15 @@ export function ConstructionSelectionProperties({
                 />
               </label>
             </fieldset>
-            <fieldset className="construction-inspector__room-surfaces">
-              <legend>Surfaces</legend>
-              <div className="construction-inspector__surface-summary">
-                <span>Floor</span>
-                <strong>
-                  {(() => {
-                    const finish = resolveRoomFloorFinish(selectedRoom);
-                    return finish.kind === "solid"
-                      ? "Solid color"
-                      : floorFinishPreset(finish.preset).label;
-                  })()}
-                </strong>
-              </div>
-              <EditorButton
-                variant="secondary"
-                type="button"
-                onClick={() =>
-                  floorPainting
-                    ? floorPainting.onTargetChange("room")
-                    : editor.setFloorPaintTarget("room")
-                }
-              >
-                Paint floor
-              </EditorButton>
+            <fieldset>
+              <legend>Floor finish</legend>
+              <FloorFinishPalette
+                value={resolveRoomFloorFinish(selectedRoom)}
+                onChange={(finish) => editor.paintRoomFloor(selectedRoom.id, finish, false)}
+              />
+            </fieldset>
+            <fieldset>
+              <legend>Ceiling</legend>
               <label>
                 Ceiling
                 <CommittedNumberInput

@@ -89,8 +89,11 @@ Tool shortcuts include V/W/D/N/A/F/P/M; Escape cancels the active drawing
 or selection state. Measure displays lengths and supports copying a result.
 
 Floor painting supports a whole room, a custom room zone, and outdoor ground
-zones. Repainting a room with existing zones asks whether to keep or replace
-those zones. Polygon drawing has local undo/redo and cancel behavior. Pools are
+zones. Selected rooms and outdoor platforms expose the same floor finish palette
+directly in Properties. Changing a room's finish there applies immediately,
+preserves custom floor zones, and supports ordinary undo/redo. Repainting a room
+with the Floor tool asks whether to keep or replace existing zones.
+Polygon drawing has local undo/redo and cancel behavior. Pools are
 outdoor polygon basins with validation, collision, and rendered cutouts.
 
 Diagnostics are contextual to the current tool and share the editor-wide issue
