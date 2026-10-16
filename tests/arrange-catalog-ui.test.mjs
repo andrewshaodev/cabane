@@ -363,6 +363,9 @@ await withModules(async (load) => {
       await act(async () => root.render(React.createElement(Harness)));
       const select = document.querySelector("select");
       assert.ok(select.options.length > 1);
+      const optionLabels = [...select.options].map((option) => option.textContent);
+      assert.ok(optionLabels.some((label) => label.includes("living-terrace-slider")));
+      assert.ok(optionLabels.some((label) => label.includes("dining-terrace-slider")));
       await act(async () => {
         select.value = "0";
         select.dispatchEvent(new window.Event("change", { bubbles: true }));

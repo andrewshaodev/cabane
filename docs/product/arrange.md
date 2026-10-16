@@ -36,8 +36,10 @@ bound entity. Changes participate in draft history and take effect in Home on Ap
 Placement resolves a feasible start near the camera target (or floor center),
 using model support and outdoor-only model constraints. Furnishings and devices
 may be placed outside the house or in areas without a room; neither condition
-creates a validation issue. Absolute, wall, window-aware,
-and ceiling placement have dedicated resolution paths. Dragging previews a
+creates a validation issue. Absolute, wall, window-aware, and ceiling placement
+have dedicated resolution paths. Window-aware models may opt into full-glass
+sliding doors as well as windows; the architecture keeps those glazed doors
+classified as doors. Dragging previews a
 transaction; release commits it, cancel restores it, and history records the
 finished operation. Cmd-drag (Mac) or Ctrl-drag (Windows/Linux) draws a selection rectangle in either view and selects
 items whose placement anchors lie inside it. Shift-drag remains available for

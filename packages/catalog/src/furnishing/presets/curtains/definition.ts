@@ -19,6 +19,7 @@ export const singleWindowCurtainDefinition = defineFurnishingModel({
     openingWidthRatio: 0.95,
     openingHeightRatio: 2.32 / 2.4,
     depthOffsetMeters: 0.003,
+    openingTypes: ["window", "sliding-glass-door"],
   },
   outlineContact: true,
   complexity: { visibleMeshes: 6, triangles: 72 },

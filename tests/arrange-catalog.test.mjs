@@ -128,6 +128,15 @@ await withModules(async (load) => {
   test("window covers fit real windows, retain manual sizing on drag, and receive HA cover slots", () => {
     const entry = get("motorized-blind");
     assert.equal(filterCatalog(entries, "living-room", "motorized blind")[0], entry);
+    const fittingOpenings = new Set(
+      windowPlacements(entry.definition, ownerHomeProject.floors[0], [10, 4]).map(
+        (candidate) => candidate.openingId,
+      ),
+    );
+    assert.ok(fittingOpenings.has("living-terrace-slider"));
+    assert.ok(fittingOpenings.has("dining-terrace-slider"));
+    assert.ok(!fittingOpenings.has("front-entry-door"));
+    assert.ok(!fittingOpenings.has("garage-motorized-vehicle-door"));
     const original = JSON.stringify(ownerHomeProject);
     const candidate = catalogStartPlacement(entry, ownerHomeProject.floors[0], [10, 4]);
     assert.ok(candidate.placement, candidate.error);

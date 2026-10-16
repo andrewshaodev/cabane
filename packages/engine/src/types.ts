@@ -697,11 +697,13 @@ export interface SceneModelEditorDescriptor {
   preferredPlacement: "absolute" | "wall" | "ceiling";
   /** Outdoor-only models stay outside; indoor-outdoor models may also belong to a room. */
   placementEnvironment?: "outdoor" | "indoor-outdoor";
-  /** Window alignment uses the closed covering's width/height within the full envelope. */
+  /** Window/opening alignment uses the closed covering's width/height within the full envelope. */
   windowFit?: {
     openingWidthRatio: number;
     openingHeightRatio: number;
     depthOffsetMeters: number;
+    /** Defaults to windows only; glazed sliding doors are opt-in because they are doors architecturally. */
+    openingTypes?: readonly ("window" | "sliding-glass-door")[];
   };
   outlineContact: boolean;
   complexity: DeviceModelComplexity;

@@ -9,6 +9,19 @@ import {
 } from "@cabane/engine";
 import { placementCandidate } from "./placement-candidate";
 
+const isWindowFitOpening = (
+  opening: FloorSpec["openings"][number],
+  openingTypes: readonly ("window" | "sliding-glass-door")[],
+) => {
+  if (opening.kind === "window") return openingTypes.includes("window");
+  return (
+    openingTypes.includes("sliding-glass-door") &&
+    opening.kind === "door" &&
+    opening.operation === "sliding" &&
+    opening.variant === "full-glass"
+  );
+};
+
 export interface WindowPlacement {
   openingId: string;
   roomName: string;
@@ -27,9 +40,10 @@ export function windowPlacements(
   const fit = definition.windowFit;
   if (!fit) return [];
   const scale = floor.coordinates.metersPerPlanUnit;
+  const openingTypes = fit.openingTypes ?? ["window"];
   const candidates: WindowPlacement[] = [];
   for (const opening of floor.openings) {
-    if (opening.kind !== "window") continue;
+    if (!isWindowFitOpening(opening, openingTypes)) continue;
     const size: SceneItemSize = requestedSize ?? [
       (opening.widthPlanUnits * scale) / fit.openingWidthRatio,
       opening.openingHeightMeters / fit.openingHeightRatio,
