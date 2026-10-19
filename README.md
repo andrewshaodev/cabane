@@ -137,7 +137,8 @@ Before browser or full verification, install the pinned Chromium with
 `npm run browser:install` (`-- --with-deps` on Linux if needed). Native panel
 release builds require a clean, committed tree. See
 [verification and delivery](docs/product/verification-and-delivery.md) for focused
-checks, panel verification and deployment requirements.
+checks, panel verification and deployment requirements. Choose local checks by task
+scope and risk; pre-push only checks the checkout, while CI runs the full gate.
 
 ### Measure scene rendering performance
 

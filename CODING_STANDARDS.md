@@ -43,3 +43,6 @@ compatibility, and verification coverage across the diff. The engineering-map
 checker validates paths and exports, not the accuracy of its prose. Update the
 routing and authoritative contract together when their responsibilities change.
 Automated lint, type, boundary, and behavior checks complement this review.
+
+For test changes, apply the [test guidelines](docs/test-guidelines.md), including
+the judgment about whether a flaky test needs its current boundary and scope.

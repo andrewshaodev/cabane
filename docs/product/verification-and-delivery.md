@@ -18,9 +18,9 @@ package-boundary checks. Rendering and asset ownership conventions are reviewed
 against [coding standards](../../CODING_STANDARDS.md#rendering-and-asset-ownership).
 `npm run verify` also runs all tests,
 furnishing-surface checks, and the production build. The contract-release workflow
-builds and publishes the matching panel. Full verification runs locally before
-pushing and in the `Verification` GitHub workflow on pull requests and pushes to
-main. That workflow uses pinned tooling and synthetic local fixtures without
+builds and publishes the matching panel. The `Verification` GitHub workflow runs
+the full gate on pull requests and pushes to main. Local verification depends on
+the task's scope and risk, as described below. CI uses pinned tooling and synthetic local fixtures without
 household credentials. Configure the `Verify` check and maintainer review as
 required branch rules when the public repository is created; a workflow file
 alone does not enforce merge protection.
@@ -30,16 +30,17 @@ project third-party notices, and licences for bundled dependencies and CSS-loade
 fonts. See [publication](../publication.md) for the import and release boundaries.
 
 `npm ci` installs the tracked `.githooks/pre-push` hook through `prepare` (CI and
-source archives skip installation). The hook runs `npm run verify` before pushes
-and blocks on failure. It requires a clean checkout matching the pushed commit;
-deletion-only pushes need no verification. Existing custom hook configurations
+source archives skip installation). The hook only requires a clean checkout
+matching the pushed commit; it launches no tests or builds. Deletion-only pushes
+skip these checkout checks. Choose and run local checks before committing according
+to the task; a push does not trigger another verification run. Existing custom hook configurations
 are preserved and must be integrated explicitly. Linked worktrees share the Git
 configuration; each checkout must contain the tracked hooks. Git hooks are local
 and can be bypassed, so this is a developer guardrail, not server enforcement.
 
-For Codex execution, full verification, focused verification, browser tests and
-pushes (which invoke this hook) require localhost listening and Chromium child
-processes. In a restricted session, request approved execution for the complete
+For Codex execution, full verification, focused domain verification, and browser tests
+require localhost listening and Chromium child processes. Pushes require network
+and Git write access. In a restricted session, request approved execution for the complete
 command from the first invocation (`sandbox_permissions: "require_escalated"`
 when that tool option is available). Keep ordinary reads and edits sandboxed.
 Use the existing Verify local-environment action for a user-run terminal check.
@@ -52,13 +53,31 @@ and pinned Chromium launch once. Restricted agent environments need approved
 local-server and browser-process permissions; a failed preflight stops before
 shards start. Unit-only runs do not need these capabilities.
 
-For the smallest sufficient iteration check, run `npm run verify:help`. Its
-selection guidance comes from the maintained test inventory, rather than a second
-script list in documentation. Focused checks retain the static gate and both Node
-and browser coverage. Shared or uncertain impact requires the complete gate;
-focused checks never replace `npm run verify` before product delivery. When adding
+## Choose local verification
+
+Default to the smallest checks that cover the task: affected unit/DOM tests and
+relevant lint, type, boundary, surface, or contract checks. Documentation-only edits
+need formatting and relevant link/map checks. Use `verify:fast` when the complete
+static gate is useful; it is not mandatory for every small edit.
+
+Reserve `npm run verify` locally for broad side effects or uncertain impact, such
+as shared rendering changes, persistence/migrations, dependency/toolchain changes,
+or changes spanning interacting domains. A small catalog, UI, tooling, or test edit
+can finish with focused verification when its effects are understood. CI always
+runs the full gate.
+
+Reuse passing results until relevant inputs change. A commit, push retry, or
+unrelated upstream merge does not require a full rerun. Inspect merged changes,
+run only checks affected by the integration, and report which results were reused
+and which checks were omitted.
+
+`npm run verify:help` lists the maintained domain groups. These optional broader
+checks include the static gate and their Node and browser tests. Individual test
+files are available for smaller changes. When adding
 or renaming tests, maintain `tests/verification-groups.json`: unclassified tests
 conservatively trigger the full suite, and stale entries fail visibly.
+
+## Toolchain and test execution
 
 Node 24.11.1 and npm 11.6.2 are the pinned local baseline. The `engines` and
 `devEngines` checks accept Node `>=24.11.1 <25` and npm `>=11.6.2 <12`, so managed
@@ -285,8 +304,9 @@ removed; pointer picking and rendered highlight appearance remain manual review.
 
 ### Coplanar surface checks
 
-`verify:furnishing-surfaces` runs during `verify` and therefore the mandatory
-pre-push hook. It checks every furnishing variant (including retired entries)
+`verify:furnishing-surfaces` runs during `verify`. Run it locally for changes to
+furnishing/device geometry or surface layering; CI includes it in the full gate.
+It checks every furnishing variant (including retired entries)
 and every device variant in active, inactive, unavailable, and disconnected
 states. Devices without layered artwork are included automatically. The checker
 also validates declared layers even when their material settings are invalid.

@@ -19,9 +19,9 @@ export function verificationHelp() {
   return [
     "Choose a focused check only for changes confined to the named domain:",
     ...focusedGroups.map((name) => `  npm run verify:${name} — ${groups[name].description}`),
-    "Unknown impact, shared schemas/public exports, rendering, catalog, tooling, or changes spanning domains: npm run verify.",
-    "Focused checks run verify:fast plus their Node AND browser tests; they are iteration checks, not delivery gates.",
-    "Before delivering shared product changes, always run npm run verify (complete gate).",
+    "Default to affected test files and relevant static checks for bounded changes; reuse passing results until relevant inputs change.",
+    "Broad side effects or uncertain impact (shared rendering, persistence/migrations, dependencies/toolchain, or interacting domains): npm run verify.",
+    "Domain groups run verify:fast plus their Node AND browser tests and can complete local verification for bounded changes. CI runs the full gate.",
     "Inventory: tests/verification-groups.json. New unclassified tests fall back to the full suite; removed/renamed inventory entries fail until maintained.",
   ].join("\n");
 }

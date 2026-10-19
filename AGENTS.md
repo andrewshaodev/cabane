@@ -20,6 +20,8 @@ or checks change.
 - **Review or model decomposition:** Read [coding standards](CODING_STANDARDS.md).
 - **Rendering or model authoring:** Read [rendering and asset ownership](CODING_STANDARDS.md#rendering-and-asset-ownership).
 - **Tests or verification tooling:** Read [test guidelines](docs/test-guidelines.md).
+- **Flaky tests:** Assess whether the test belongs at its current boundary before
+  tuning timing; apply [flaky-test review](docs/test-guidelines.md#flaky-test-review).
 - **Verification or delivery:** Read [verification and delivery](docs/product/verification-and-delivery.md)
   for commands, prerequisites, execution permissions, and evidence requirements.
 
@@ -40,15 +42,18 @@ before committing or opening a PR and summarize visual evidence in the PR.
 ## Execution and handoff
 
 Use the pinned Node/npm baseline and `npm ci`; install the pinned browser before
-browser checks. Run `npm run format` after edits. Iterate with focused checks;
-finish shared product changes with one `npm run verify` (including `verify:fast`).
-Other code changes need `verify:fast` and applicable surface checks. Run checks
-sequentially and reuse passing results until relevant inputs change. After a
-failure, rerun affected checks and complete skipped stages; report retries.
-Fix failures without weakening checks.
+browser checks. Run `npm run format` after edits. Choose local verification by the
+task's scope and risk; default to affected tests and relevant static checks.
+Reserve full local runs for changes with broad side effects or uncertain impact,
+such as shared rendering, persistence/migrations, or dependency/toolchain changes.
+Reuse passing results until relevant inputs change; commits, push retries, and
+unrelated upstream merges do not by themselves justify a full rerun. After merging,
+inspect the incoming changes and run only affected checks. Run checks sequentially
+and report what ran, what was omitted, and any retries. CI retains the full gate.
 
-In restricted Codex sessions, run browser/full verification and pushes through
-approved execution with localhost and browser-process access from the outset.
+In restricted Codex sessions, run browser/full verification through approved
+execution with localhost and browser-process access from the outset. Pushes need
+network and Git write access; the pre-push hook only checks the checkout.
 Use `sandbox_permissions: "require_escalated"` when available; ordinary reads,
 edits, and static checks stay sandboxed. The preflight diagnoses missing access;
 it cannot grant permissions.

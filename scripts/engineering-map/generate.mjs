@@ -136,8 +136,9 @@ architecture review must catch that even when freshness validation passes.
 
 ## Area routes
 
-Run \`npm run verify:fast\` for all changes and \`npm run verify\` for shared product
-changes. The area checks below add focused evidence; invoke each with \`npm run\`.
+Choose local checks by task scope and risk; reuse passing results until relevant
+inputs change. Reserve \`npm run verify\` locally for broad side effects or uncertain
+impact. The area checks below add focused evidence; invoke each with \`npm run\`.
 Read the delivery contract for prerequisites and evidence flags; \`home:evidence\`
 needs a running preview, and panel builds normally require a committed tree.
 

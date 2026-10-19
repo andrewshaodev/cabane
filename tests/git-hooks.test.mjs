@@ -1,11 +1,19 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync, copyFileSync, chmodSync } from "node:fs";
+import {
+  mkdtempSync,
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+  copyFileSync,
+  chmodSync,
+  existsSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { test } from "node:test";
 
-test("pre-push verifies the pushed clean commit and propagates failures", () => {
+test("pre-push checks the clean commit without running verification commands", () => {
   const root = mkdtempSync(join(tmpdir(), "cabane-hooks-"));
   const git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
   const run = (input, env = {}) =>
@@ -22,7 +30,10 @@ test("pre-push verifies the pushed clean commit and propagates failures", () => 
     writeFileSync(
       join(root, "package.json"),
       JSON.stringify({
-        scripts: { verify: 'node -e "process.exit(Number(process.env.HOOK_TEST_EXIT || 0))"' },
+        scripts: {
+          verify:
+            "node -e \"require('node:fs').writeFileSync('verification-ran', 'yes'); process.exit(Number(process.env.HOOK_TEST_EXIT || 0))\"",
+        },
       }),
     );
     mkdirSync(join(root, "scripts"));
@@ -35,8 +46,9 @@ test("pre-push verifies the pushed clean commit and propagates failures", () => 
     git("commit", "-qm", "fixture");
     const head = git("rev-parse", "HEAD");
     const update = `HEAD ${head} refs/heads/main ${"0".repeat(40)}\n`;
-    assert.equal(run(update).status, 0);
-    assert.equal(run(update, { HOOK_TEST_EXIT: "7" }).status, 7);
+    const checked = run(update, { HOOK_TEST_EXIT: "7" });
+    assert.equal(checked.status, 0, checked.stderr);
+    assert.equal(existsSync(join(root, "verification-ran")), false);
     const remote = join(root, ".git", "remote.git");
     git("init", "--bare", "-q", remote);
     const push = (code) =>
@@ -45,10 +57,9 @@ test("pre-push verifies the pushed clean commit and propagates failures", () => 
         encoding: "utf8",
         env: { ...process.env, HOOK_TEST_EXIT: code },
       });
-    assert.notEqual(push("7").status, 0);
-    assert.equal(git("--git-dir", remote, "for-each-ref"), "");
-    const accepted = push("0");
+    const accepted = push("7");
     assert.equal(accepted.status, 0, accepted.stderr);
+    assert.equal(existsSync(join(root, "verification-ran")), false);
     assert.equal(git("--git-dir", remote, "rev-parse", "refs/heads/main"), head);
     writeFileSync(join(root, "dirty"), "uncommitted");
     assert.match(run(update).stderr, /Commit or stash/);

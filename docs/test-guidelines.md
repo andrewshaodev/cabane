@@ -20,13 +20,23 @@ commands. Command setup and required delivery gates live in
   Record intentional coverage removals in the PR; unit coverage is not equivalent
   to end-to-end browser coverage.
 
+## Flaky-test review
+
+Before repairing a flaky test, question its value, scope, and boundary. Compare its
+assertions with existing coverage. Use judgment: delete low-value duplicates, move
+behavior to unit/DOM tests, or retain a small browser case for a concrete browser-only
+risk. Preserve meaningful behavior coverage and document intentional removals.
+Diagnose timing or synchronization only after deciding that the test belongs there.
+
 ## Browser time budget
 
 - Never introduce a browser test that takes more than **10 seconds**. Measure the
-  complete case, including its setup and teardown, in the normal four-worker suite.
+  complete case, including its setup and teardown, in a focused run; assess
+  representative worker contention when relevant.
   Require every observed run to stay below the budget, with room for variation.
-- Measure new or expanded browser coverage with at least three full-suite profile
-  runs. Set new browser cases' test timeout to at most `10_000` milliseconds as a
+- Measure new or expanded browser coverage under its relevant workload. Use full-suite
+  profiles when investigating contention or suite-wide performance. Set new browser
+  cases' test timeout to at most `10_000` milliseconds as a
   backstop; a timeout alone is not measurement evidence.
 - If a case exceeds the budget, simplify it or move assertions to Node. Do not split
   the same long journey into several browser tests merely to evade the limit, raise
@@ -48,7 +58,8 @@ commands. Command setup and required delivery gates live in
 
 ## Measure and maintain the suite
 
-- Use `npm run test:profile -- --runs 3 --output test-results/profile.json`.
+- For suite-wide performance work, use
+  `npm run test:profile -- --runs 3 --output test-results/profile.json`.
   Capture a baseline before changes and report median wall time, browser/Node case
   counts, and summed execution costs. Sum of test durations is not elapsed time.
 - Compare on the same machine, runtime and worker count without competing work.

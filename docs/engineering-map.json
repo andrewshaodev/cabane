@@ -384,7 +384,7 @@
       "scripts/run-tests.mjs"
     ],
     "interfaces": [],
-    "invariant": "The delivery contract defines local and hosted verification, execution permissions, pre-push enforcement, and HA release provenance. Route iteration checks through verify:help; shared product delivery and PR CI require the full gate. Hosted CI serializes software-rendered test shards and retains timing reports and browser failure evidence. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin. Lint enforces panel-scoped focus and input listeners. Test diagnostics preserve wrapper errors, causes, the last started test and worker exit codes/signals.",
+    "invariant": "The delivery contract defines task-based local verification, execution permissions, lightweight pre-push checkout checks, and HA release provenance. Default to affected checks and reuse passing results; reserve full local runs for broad side effects or uncertain impact. CI retains the full gate, serializes software-rendered test shards, and retains timing reports and browser failure evidence. Review flaky tests for value, scope, and boundary before tuning timing. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin. Lint enforces panel-scoped focus and input listeners. Test diagnostics preserve wrapper errors, causes, the last started test and worker exit codes/signals.",
     "checks": [
       "verify:help",
       "verify:fast",

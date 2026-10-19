@@ -22,5 +22,5 @@ if (process.env.CI !== "true" && existsSync(".git")) {
   )
     throw new Error("Existing Git hooks must be integrated before installing Cabane hooks.");
   git("config", "--local", "core.hooksPath", ".githooks");
-  console.log("Installed Cabane pre-push verification.");
+  console.log("Installed Cabane pre-push checkout checks.");
 }
