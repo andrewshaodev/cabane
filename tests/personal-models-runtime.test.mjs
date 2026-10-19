@@ -44,7 +44,7 @@ await withModules(async (load) => {
     };
     const registries = api.resolveProjectModels(project, fixture.registries);
     const oldWindow = globalThis.window;
-    globalThis.window = { indexedDB: new IDBFactory() };
+    globalThis.window = Object.assign(new EventTarget(), { indexedDB: new IDBFactory() });
     let renderer, lighting;
     try {
       await api.createModelAssetRepository(window.indexedDB).restore([asset]);
