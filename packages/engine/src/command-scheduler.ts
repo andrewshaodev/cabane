@@ -3,6 +3,7 @@ import type { SupportedServiceCall } from "./home-assistant-controls";
 
 export const VALUE_DEBOUNCE_MS = 500;
 export const DEVICE_THROTTLE_MS = 2_000;
+export const CONTINUOUS_VALUE_THROTTLE_MS = 250;
 
 type TimerHandle = ReturnType<typeof globalThis.setTimeout>;
 
@@ -65,7 +66,7 @@ export class DeviceCommandScheduler {
       return Promise.reject(new Error("A service call requires an exact entity target."));
     const queue = this.queueFor(this.resolveDeviceKey(entityId));
 
-    if (call.delivery?.mode !== "coalesced-value") {
+    if (!call.delivery) {
       this.cancelQueue(queue);
       queue.lastDispatchAt = this.now();
       try {
@@ -136,10 +137,10 @@ export class DeviceCommandScheduler {
       (left, right) => left.sequence - right.sequence,
     )[0];
     if (!next) return;
-    const dueAt = Math.max(
-      queue.lastDispatchAt + this.throttleMs,
-      next.updatedAt + this.debounceMs,
-    );
+    const continuous = next.call.delivery?.mode === "continuous-value";
+    const dueAt = continuous
+      ? queue.lastDispatchAt + CONTINUOUS_VALUE_THROTTLE_MS
+      : Math.max(queue.lastDispatchAt + this.throttleMs, next.updatedAt + this.debounceMs);
     queue.timer = this.setTimer(
       () => {
         queue.timer = null;

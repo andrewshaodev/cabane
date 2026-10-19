@@ -1,7 +1,9 @@
 import { omitUndefinedProperties } from "./defined-properties";
 import { useCabaneDom } from "./CabaneDom";
 import { resolveModelVariant } from "./model-variants";
-import { memo, useContext, useEffect, useRef, useState } from "react";
+import { memo, useContext, useEffect, useState } from "react";
+import { orbitLightEntity } from "./orbit-light-control";
+import { useOrbitDevicePress } from "./useOrbitDevicePress";
 import { SceneNightContext, sceneLightState } from "./scene-light-state";
 import { deviceVisualStateForSnapshot } from "./devices";
 import {
@@ -89,7 +91,6 @@ function DeviceSceneItem({
 }) {
   const dom = useCabaneDom();
   const scale = deviceSceneItemScaleForSize(item.size, definition);
-  const press = useRef<{ pointerId: number; x: number; y: number } | null>(null);
   const [hovered, setHovered] = useState(false);
   const nightLighting = useContext(SceneNightContext);
 
@@ -105,11 +106,9 @@ function DeviceSceneItem({
   const renderable = scale !== null;
   useEffect(() => {
     if (!walkMode && renderable) return;
-    press.current = null;
     setHovered(false);
   }, [renderable, walkMode]);
 
-  if (scale === null) return null;
   const Component = definition.component;
   const binding = resolvedDevice.slot;
   const primarySlot = binding.entitySlots.find((slot) => slot.deviceRole === "primary");
@@ -128,7 +127,14 @@ function DeviceSceneItem({
       ? { intent: definition.interaction.target }
       : {}),
   } satisfies ExtensionInteractionTarget;
-  const interact = () => onInteract(interactionTarget);
+  const pressHandlers = useOrbitDevicePress({
+    enabled: !walkMode && renderable,
+    target: interactionTarget,
+    light: orbitLightEntity(resolvedDevice),
+    tapTolerancePixels: definition.interaction.tapTolerancePixels,
+    onInteract,
+  });
+  if (scale === null) return null;
 
   return (
     <group
@@ -159,50 +165,7 @@ function DeviceSceneItem({
               setHovered(false);
             },
       })}
-      {...omitUndefinedProperties({
-        onPointerDown: walkMode
-          ? undefined
-          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              press.current = {
-                pointerId: event.pointerId,
-                x: event.nativeEvent.clientX,
-                y: event.nativeEvent.clientY,
-              };
-            },
-      })}
-      {...omitUndefinedProperties({
-        onPointerMove: walkMode
-          ? undefined
-          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
-              const candidate = press.current;
-              if (!candidate || candidate.pointerId !== event.pointerId) return;
-              if (
-                Math.hypot(
-                  event.nativeEvent.clientX - candidate.x,
-                  event.nativeEvent.clientY - candidate.y,
-                ) > definition.interaction.tapTolerancePixels
-              )
-                press.current = null;
-            },
-      })}
-      {...omitUndefinedProperties({
-        onPointerUp: walkMode
-          ? undefined
-          : (event: import("@react-three/fiber").ThreeEvent<PointerEvent>) => {
-              event.stopPropagation();
-              const candidate = press.current;
-              press.current = null;
-              if (candidate?.pointerId === event.pointerId) interact();
-            },
-      })}
-      {...omitUndefinedProperties({
-        onPointerCancel: walkMode
-          ? undefined
-          : () => {
-              press.current = null;
-            },
-      })}
+      {...(!walkMode ? pressHandlers : {})}
     >
       <DeviceHoverContext.Provider value={hovered}>
         <Component

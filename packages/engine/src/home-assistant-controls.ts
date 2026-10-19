@@ -9,7 +9,7 @@ export interface SupportedServiceCall {
   data?: Readonly<Record<string, unknown>> | undefined;
   target: { entity_id: EntityId | EntityId[] };
   delivery?: {
-    mode: "coalesced-value";
+    mode: "coalesced-value" | "continuous-value";
     channel: CoalescedControlChannel;
   };
 }

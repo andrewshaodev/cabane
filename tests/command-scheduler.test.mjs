@@ -153,6 +153,55 @@ await withModules(async (load) => {
     scheduler.dispose();
   });
 
+  test("held dimming streams the latest value at a bounded rate without waiting for release", async () => {
+    const clock = fakeClock();
+    const dispatched = [];
+    const scheduler = new DeviceCommandScheduler({
+      dispatch: async (call) => dispatched.push(call),
+      resolveDeviceKey: () => "device-light",
+      now: clock.now,
+      setTimer: clock.setTimer,
+      clearTimer: clock.clearTimer,
+    });
+    const continuous = (value) => ({
+      ...brightnessCall(value),
+      delivery: { mode: "continuous-value", channel: "brightness" },
+    });
+    const scheduled = [scheduler.schedule(continuous(20))];
+    await clock.advance(0);
+    assert.deepEqual(
+      dispatched.map((call) => call.data.brightness_pct),
+      [20],
+    );
+    scheduled.push(scheduler.schedule(continuous(25)));
+    await clock.advance(200);
+    scheduled.push(scheduler.schedule(continuous(30)));
+    await clock.advance(49);
+    assert.equal(dispatched.length, 1);
+    await clock.advance(1);
+    assert.deepEqual(
+      dispatched.map((call) => call.data.brightness_pct),
+      [20, 30],
+    );
+    scheduled.push(scheduler.schedule(continuous(35)));
+    await clock.advance(250);
+    assert.equal(
+      dispatched.at(-1).data.brightness_pct,
+      35,
+      "deliver the final level after release",
+    );
+    const cancelled = scheduler.schedule(continuous(40));
+    await scheduler.schedule({
+      domain: "light",
+      service: "turn_off",
+      target: { entity_id: "light.demo" },
+    });
+    await clock.advance(1000);
+    await Promise.all([...scheduled, cancelled]);
+    assert.equal(dispatched.at(-1).service, "turn_off", "power off cancels pending dimming");
+    scheduler.dispose();
+  });
+
   test("propagates dispatch failures and rejects scheduling after disposal", async () => {
     const scheduler = new DeviceCommandScheduler({
       dispatch: async () => {

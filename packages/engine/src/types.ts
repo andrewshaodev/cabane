@@ -571,7 +571,8 @@ export interface ExtensionInteractionTarget {
   id: string;
   label: string;
   slotId?: string;
-  intent?: DeviceInteractionIntent;
+  intent?: DeviceInteractionIntent | "light-toggle" | "light-dim";
+  brightnessPercent?: number;
 }
 
 export type DeviceInteractionIntent = "device-dashboard" | "camera-viewer";

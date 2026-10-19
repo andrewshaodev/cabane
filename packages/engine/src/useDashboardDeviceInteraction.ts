@@ -8,6 +8,7 @@ import { resolveDeviceModelDefinition } from "./devices";
 import { useHomeAssistantRuntime } from "./HomeAssistantRuntime";
 
 import { resolveHomeAssistantBindings } from "./home-assistant-resolver";
+import { orbitLightCall } from "./orbit-light-control";
 
 import type { EntityId, ExtensionInteractionTarget, SceneMode } from "./types";
 
@@ -172,6 +173,17 @@ export function useDashboardDeviceInteraction({
   const handleExtensionInteraction = useCallback(
     (target: ExtensionInteractionTarget) => {
       if (walkthrough || (walkMode && equippedToolId)) return;
+      if (!walkMode && (target.intent === "light-toggle" || target.intent === "light-dim")) {
+        if (!runtime.canMutate || selectedDeviceId) return;
+        const room = Object.values(resolvedBindings.rooms).find((candidate) =>
+          candidate.devices.some((device) => device.slot.id === target.id),
+        );
+        const device = room?.devices.find((candidate) => candidate.slot.id === target.id);
+        const call = device && orbitLightCall(device, target);
+        if (call && room)
+          void runtime.callService(call).catch(() => openDevicePanel(room.room.id, target.id));
+        return;
+      }
       const openingDescriptor = collectBindingSlots(manifest).find(
         (descriptor) => descriptor.kind === "opening-cover" && descriptor.openingId === target.id,
       );
@@ -220,6 +232,9 @@ export function useDashboardDeviceInteraction({
       setMode,
       openCameraViewer,
       openDevicePanel,
+      runtime,
+      resolvedBindings.rooms,
+      selectedDeviceId,
     ],
   );
   const openWalkDevice = useCallback(() => {

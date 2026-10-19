@@ -63,6 +63,13 @@ guarded by the active connection and binding availability. Real commands belong
 to explicit runtime controls. The command scheduler manages pending work; demo
 and editor walkthrough contexts prevent real service mutation.
 
+Held orbital dimming uses a continuous-value brightness channel: the scheduler
+delivers the latest requested value at most once every 250 ms, including the
+final level after release. Power actions cancel pending values. Other value
+controls retain their 500 ms debounce and 2 s device throttle. Both real and
+demo controls resolve one fresh, available primary light and recheck binding
+errors and mutation permission before issuing commands.
+
 Demo simulation is isolated under `packages/engine/src/onboarding/demo/`, behind
 the existing `DemoHomeAssistantSession` entry point and runtime value interface.
 It derives synthetic IDs from local slots, handles supported commands only in

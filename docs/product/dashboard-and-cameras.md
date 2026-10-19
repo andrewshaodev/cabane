@@ -35,6 +35,16 @@ space above wrapping room titles and status badges. The mobile room sheet occupi
 viewport, leaving the scene visible above it. Compact landscape keeps a side panel.
 Dedicated device controls retain their existing modal layout.
 
+In Orbit, clicking or tapping a connected light toggles its power directly.
+Holding a dimmable light for 500 ms ramps its brightness between 1% and 100%,
+reversing at either limit. Release stops the ramp without toggling power; the
+next hold reverses direction. Dragging beyond the device's tap tolerance,
+multi-touch camera gestures, cancellation, loss of focus, and leaving Orbit
+cancel the press. Non-dimmable lights retain a simple power toggle. Unmapped or
+unavailable lights and other devices keep their existing control-sheet behavior.
+The same gestures control indoor and outdoor demo lights through the normal
+in-memory runtime. Walk and draft Explore retain their existing interactions.
+
 Interactive Orbit floors and wall faces use gently subdued base colors. Selecting
 a room lifts its finishes and softens the others, without altering device lighting,
 rebuilding geometry or adding render passes. Wall faces are associated with rooms
