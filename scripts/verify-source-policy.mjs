@@ -210,7 +210,7 @@ for (const file of files) {
     ) {
       // This user-activated feedback link opens a new tab; it is not a runtime asset fetch.
       inspectedSource = inspectedSource.replace(
-        "https://github.com/cabane-app/cabane-home-assistant/issues",
+        "https://github.com/cabane-app/cabane/issues/new/choose",
         "feedback-navigation",
       );
     }

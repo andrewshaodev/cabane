@@ -1,6 +1,6 @@
 import { ImportedContourMask } from "./imported-models/contour-mask";
 import { contourFragmentShader } from "./scene-contour-shader";
-import { createContext, useEffect, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
   Color,
@@ -16,6 +16,7 @@ import { FullScreenQuad } from "three/addons/postprocessing/Pass.js";
 import { ShadowMapCache } from "./shadow-map-cache";
 import { SceneGeometryLod } from "./scene-batching/SceneGeometryLod";
 import { SceneToonBatcher } from "./scene-batching/SceneToonBatcher";
+import { SceneLightWallMask, SceneLightWallMaskContext } from "./scene-light-wall-mask";
 
 /** Decorative mesh shells are replaced by a single visible-depth contour pass. */
 export const SceneContourContext = createContext(false);
@@ -23,6 +24,7 @@ export const SceneContourContext = createContext(false);
 function SceneContourPass({ antialias, active }: { antialias: boolean; active: boolean }) {
   const gl = useThree((state) => state.gl);
   const invalidate = useThree((state) => state.invalidate);
+  const lightWalls = useContext(SceneLightWallMaskContext)!;
   const resources = useMemo(() => {
     const target = new WebGLRenderTarget(1, 1, {
       type: HalfFloatType,
@@ -102,7 +104,7 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
       gl.setRenderTarget(target);
       resources.shadows.render(gl, scene, camera, () =>
         resources.lod.render(scene, camera, size.y / gl.getPixelRatio(), () =>
-          resources.batches.render(gl, scene, camera),
+          resources.batches.render(gl, scene, camera, () => lightWalls.render(gl, scene, camera)),
         ),
       );
       material.uniforms.hasImportedModels.value = resources.importedMask.render(
@@ -134,10 +136,14 @@ export function StylizedScene({
   /** Suspend postprocessing without disposing its resources or changing model outlines. */
   active?: boolean;
 }) {
+  const lightWalls = useMemo(() => new SceneLightWallMask(), []);
+  useEffect(() => () => lightWalls.dispose(), [lightWalls]);
   return (
-    <SceneContourContext.Provider value={enabled}>
-      {children}
-      {enabled && <SceneContourPass antialias={antialias} active={active} />}
-    </SceneContourContext.Provider>
+    <SceneLightWallMaskContext.Provider value={lightWalls}>
+      <SceneContourContext.Provider value={enabled}>
+        {children}
+        {enabled && <SceneContourPass antialias={antialias} active={active} />}
+      </SceneContourContext.Provider>
+    </SceneLightWallMaskContext.Provider>
   );
 }

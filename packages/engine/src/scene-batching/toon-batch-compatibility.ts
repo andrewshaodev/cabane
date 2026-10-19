@@ -8,6 +8,7 @@ import {
   NormalBlending,
   Object3D,
 } from "three";
+import { sceneLightMaterialHooks } from "../scene-light-wall-mask";
 
 /** Conservative eligibility: preserve custom shaders, transparency and deformation. */
 export function toonBatchKey(
@@ -22,6 +23,7 @@ export function toonBatchKey(
   if (instances.isInstancedMesh && (!allowInstances || instances.morphTexture)) return null;
   const material = mesh.material as MeshToonMaterial;
   if (Array.isArray(material) || !material.isMeshToonMaterial) return null;
+  const hooks = sceneLightMaterialHooks(material);
   const fade = material.userData;
   const transparent = cacheMembership
     ? ((fade.cameraFadeBaseTransparent as boolean | undefined) ?? material.transparent)
@@ -56,8 +58,8 @@ export function toonBatchKey(
     mesh.onAfterRender !== Object3D.prototype.onAfterRender ||
     mesh.onBeforeShadow !== Object3D.prototype.onBeforeShadow ||
     mesh.onAfterShadow !== Object3D.prototype.onAfterShadow ||
-    material.onBeforeCompile !== Material.prototype.onBeforeCompile ||
-    material.customProgramCacheKey !== Material.prototype.customProgramCacheKey ||
+    hooks.onBeforeCompile !== Material.prototype.onBeforeCompile ||
+    hooks.customProgramCacheKey !== Material.prototype.customProgramCacheKey ||
     material.map ||
     material.alphaMap ||
     material.normalMap ||

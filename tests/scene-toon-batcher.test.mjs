@@ -6,6 +6,11 @@ import {
   Matrix4,
   Mesh,
   MeshToonMaterial,
+  MeshStandardMaterial,
+  Group,
+  PointLight,
+  Vector3,
+  Vector4,
   PerspectiveCamera,
   Scene,
 } from "three";
@@ -17,6 +22,7 @@ await withModules(async (load) => {
   const { registerGeometryLods } = await load(
     "/packages/engine/src/scene-batching/geometry-lod-family.ts",
   );
+  const { SceneLightWallMask } = await load("/packages/engine/src/scene-light-wall-mask.ts");
   function fixture() {
     const scene = new Scene(),
       camera = new PerspectiveCamera(),
@@ -147,5 +153,100 @@ await withModules(async (load) => {
     f.renderer.render = (scene) => assert.equal(scene.children.length, 2);
     f.batcher.render(f.renderer, f.scene, f.camera);
     f.batcher.dispose();
+  });
+
+  test("wall lighting masks follow floor and camera transforms and isolate shared previews", () => {
+    const mask = new SceneLightWallMask(),
+      otherMask = new SceneLightWallMask();
+    const scene = new Scene(),
+      floor = new Group(),
+      camera = new PerspectiveCamera();
+    floor.position.y = 2.6;
+    floor.rotation.y = 0.7;
+    const light = new PointLight();
+    light.position.set(0.5, 1, 1);
+    light.userData.cabaneLightWallPlane = [1, 0, 0, -0.05];
+    floor.add(light);
+    scene.add(floor);
+    const material = new MeshStandardMaterial(),
+      mesh = new Mesh(new BoxGeometry(), material);
+    scene.add(mesh);
+    const original = material.onBeforeCompile;
+    let shader;
+    const renderer = {
+      info: { render: { frame: 0 } },
+      render(currentScene, currentCamera) {
+        currentScene.updateMatrixWorld(true);
+        currentCamera.updateMatrixWorld(true);
+        material.onBeforeRender(this, currentScene, currentCamera, mesh.geometry, mesh, null);
+        shader = {
+          uniforms: {},
+          vertexShader: "",
+          fragmentShader: "#include <lights_fragment_begin>",
+        };
+        material.onBeforeCompile(shader, this);
+        this.info.render.frame++;
+      },
+    };
+    for (const x of [0, 3]) {
+      camera.position.set(x, 4, 5);
+      camera.lookAt(0, 2.6, 0);
+      mask.render(renderer, scene, camera);
+      const plane = shader.uniforms.cabaneLightWallPlanes.value[0];
+      const distance = (x) => {
+        const point = new Vector3(x, 1, 1)
+          .applyMatrix4(floor.matrixWorld)
+          .applyMatrix4(camera.matrixWorldInverse);
+        return plane.dot(new Vector4(point.x, point.y, point.z, 1));
+      };
+      assert.ok(distance(0.1) > 0, "wall-side shade remains illuminated");
+      assert.ok(distance(-0.1) < 0, "receivers behind the wall are masked");
+    }
+    const preview = new Scene();
+    preview.add(new Mesh(mesh.geometry, material), new PointLight());
+    otherMask.render(renderer, preview, camera);
+    assert.deepEqual(shader.uniforms.cabaneLightWallPlanes.value[0].toArray(), [0, 0, 0, 1]);
+    mask.dispose();
+    assert.notEqual(
+      material.onBeforeCompile,
+      original,
+      "another canvas still owns the shared material",
+    );
+    otherMask.dispose();
+    assert.equal(material.onBeforeCompile, original);
+    const reopened = new SceneLightWallMask();
+    reopened.render(renderer, scene, camera);
+    material.dispose();
+    assert.equal(material.onBeforeCompile, original, "disposed materials retain no lighting hooks");
+    reopened.render(renderer, scene, camera);
+    assert.equal(shader.fragmentShader.match(/uniform vec4 cabaneLightWallPlanes/g).length, 1);
+    reopened.dispose();
+  });
+
+  test("wall lighting preserves static toon buffers and the existing batching shader", () => {
+    const f = fixture(),
+      mask = new SceneLightWallMask();
+    mask.render(f.renderer, f.scene, f.camera);
+    let previous;
+    f.renderer.render = (scene) => {
+      const batch = scene.children.find((object) => object.isBatchedMesh);
+      assert.ok(batch, "engine lighting hooks must not disable batching");
+      if (previous) assert.equal(batch, previous);
+      previous = batch;
+      const shader = {
+        uniforms: {},
+        vertexShader: "#include <batching_vertex>",
+        fragmentShader: "#include <lights_fragment_begin>",
+      };
+      batch.material.onBeforeCompile(shader, f.renderer);
+      assert.match(shader.vertexShader, /batchingMatrix = mat4\(1.0\)/);
+      assert.match(shader.fragmentShader, /directLight.color \*= step/);
+    };
+    for (let i = 0; i < 3; i++)
+      f.batcher.render(f.renderer, f.scene, f.camera, () =>
+        mask.render(f.renderer, f.scene, f.camera),
+      );
+    f.batcher.dispose();
+    mask.dispose();
   });
 });
