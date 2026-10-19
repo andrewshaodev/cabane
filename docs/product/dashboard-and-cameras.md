@@ -183,8 +183,8 @@ sun state or local time. The smart bar lighting action remains available and
 updates the same local preference.
 
 The More options menu uses aligned action rows for Switch workspace, Send feedback,
-and contextual connection actions. Send feedback opens the Cabane Home Assistant
-GitHub issues page in a new tab. Disconnect identifies Home Assistant in secondary
+and contextual connection actions. Send feedback opens the Cabane
+GitHub issue template chooser in a new tab. Disconnect identifies Home Assistant in secondary
 text. Browser-data export remains in Connect. The trigger and actions use pointer
 cursors, visible keyboard focus, and 44px minimum action targets.
 
