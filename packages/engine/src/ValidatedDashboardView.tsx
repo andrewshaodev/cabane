@@ -508,7 +508,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     )}
                     {preferencesMenuItem}
                     <a
-                      href="https://github.com/cabane-app/cabane-home-assistant/issues"
+                      href="https://github.com/cabane-app/cabane/issues/new/choose"
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="Send feedback (opens in a new tab)"
