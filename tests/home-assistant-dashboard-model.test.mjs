@@ -12,9 +12,8 @@ await withModules(async (load) => {
   const { resolveHomeAssistantBindings } = await load(
     "/packages/engine/src/home-assistant-resolver.ts",
   );
-  const { buildRoomModules, focusedDeviceModule, safeIssueMessage } = await load(
-    "/packages/engine/src/home-assistant-dashboard/module-model.ts",
-  );
+  const { buildRoomModules, focusedDeviceModule, roomOverviewModules, safeIssueMessage } =
+    await load("/packages/engine/src/home-assistant-dashboard/module-model.ts");
 
   const resolvedRoom = () =>
     resolveHomeAssistantBindings(
@@ -22,6 +21,38 @@ await withModules(async (load) => {
       connectedProfileFixture(),
       connectedRuntimeFixture(),
     ).rooms["demo-room"];
+
+  test("room light deduplication preserves distinct entities, extra functions, errors and device focus", () => {
+    const modules = buildRoomModules(resolvedRoom());
+    const light = modules[0];
+    const duplicate = { ...light, id: "shared", deviceSlotId: "second-pendant" };
+    const independent = {
+      ...light,
+      id: "independent",
+      entities: [{ ...light.entities[0], entityId: "light.independent" }],
+    };
+    const multifunction = {
+      ...light,
+      id: "multifunction",
+      entities: [...light.entities, modules[1].entities[0]],
+    };
+    const broken = {
+      ...light,
+      id: "broken",
+      issues: [{ severity: "error", code: "binding.domain-incompatible" }],
+    };
+    const all = [light, duplicate, independent, multifunction, broken];
+    assert.deepEqual(
+      roomOverviewModules(all).map(({ id }) => id),
+      [light.id, "independent", "multifunction", "broken"],
+    );
+    assert.equal(focusedDeviceModule(all, "second-pendant"), duplicate);
+    assert.equal(
+      all.length,
+      5,
+      "overview filtering never changes bindings or the full device list",
+    );
+  });
 
   test("normalizes device and dashboard bindings into one ordered module list", () => {
     const modules = buildRoomModules(resolvedRoom());

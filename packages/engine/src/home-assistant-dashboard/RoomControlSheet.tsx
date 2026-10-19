@@ -7,7 +7,7 @@ import type { RoomStatusSummary } from "../room-status/model";
 import { RoomModuleReorder, ReorderIcon } from "./RoomModuleReorder";
 import { useRoomModuleOrder } from "./useRoomModuleOrder";
 import { RoomModule } from "./RoomModule";
-import { buildRoomModules, focusedDeviceModule } from "./module-model";
+import { buildRoomModules, focusedDeviceModule, roomOverviewModules } from "./module-model";
 import { useBottomSheetDrag } from "./useBottomSheetDrag";
 import { useRoomHeroParallax } from "./useRoomHeroParallax";
 
@@ -125,7 +125,8 @@ export function RoomControlSheet({
 }: RoomControlSheetProps) {
   const dom = useCabaneDom();
   const modules = useMemo(() => buildRoomModules(resolved), [resolved]);
-  const { ordered, move } = useRoomModuleOrder(homeId, resolved.room.id, modules);
+  const overviewModules = useMemo(() => roomOverviewModules(modules), [modules]);
+  const { ordered, move } = useRoomModuleOrder(homeId, resolved.room.id, overviewModules);
   const [reorderingRoom, setReorderingRoom] = useState<string | null>(null);
   const reordering = reorderingRoom === resolved.room.id && !selectedDeviceId && !deviceOverlay;
   const selectedModule = useMemo(
@@ -273,7 +274,7 @@ export function RoomControlSheet({
         >
           {returnsToRoom && navigationButton}
           <div className="room-control-sheet__actions">
-            {!deviceOverlay && !focused && modules.length > 1 && (
+            {!deviceOverlay && !focused && overviewModules.length > 1 && (
               <button
                 type="button"
                 className="room-control-sheet__walk"
@@ -383,7 +384,7 @@ export function RoomControlSheet({
                   }
                 />
               </div>
-            ) : modules.length > 0 ? (
+            ) : overviewModules.length > 0 ? (
               <div className="room-control-sheet__grid">
                 {ordered.map((module) => (
                   <RoomModule
