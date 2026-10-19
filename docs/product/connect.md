@@ -35,6 +35,17 @@ and area ownership constrain candidates. Automatic mapping remains one-to-one.
 Explicit manual mapping may share a compatible entity across several slots; each
 relationship is retained and follows the same entity state. Camera slots can use
 the supported cross-area exception.
+
+HA Light Group helpers (`light.*`) use the normal light picker and controls;
+they do not need a physical HA device. Create and manage membership in
+[Home Assistant](https://www.home-assistant.io/integrations/group/), then map each
+modeled pendant to the same group entity in Connect. Helpers without an area
+appear under **Other lights → No area** for single-slot light devices. Cabane
+keeps each pendant in the scene; all mapped pendants follow the group's reported
+state and brightness. Separate member bindings remain independent. Cabane does
+not create groups or infer membership. Legacy `group.*` entities are not lights;
+use a Light Group exposing a `light.*` entity.
+
 Devices placed outside every room appear under **Outside rooms** in the Devices
 location picker, separately for each floor. This is a device group, not an
 architectural room, and does not require a room-to-area mapping. Its devices can

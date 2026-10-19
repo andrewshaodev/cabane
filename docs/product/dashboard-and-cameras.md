@@ -110,6 +110,14 @@ Domain controls inspect supported features and state attributes; not every HA
 entity supports every possible action. Sensor-only content is read-only.
 Optimistic commands reconcile with confirmed state and expose pending/error
 feedback. Invalid or stale bindings limit mutation.
+
+When multiple single-entity light modules share the exact same HA light entity,
+the room overview shows its first module once. Individual scene devices and
+their focused controls remain available. This also works for HA Light Groups
+without discovering or storing group membership; distinct member entities and
+modules with additional functions retain their own controls. Blocking connection
+diagnostics remain visible.
+
 Versatile Thermostat modules place a circular power button between the temperature
 step controls when the entity supports the off HVAC mode. It toggles off/on;
 turning on selects cool above the target temperature and heat otherwise, falling

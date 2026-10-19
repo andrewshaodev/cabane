@@ -104,3 +104,20 @@ export const focusedDeviceModule = (
   modules: readonly RoomModuleViewModel[],
   deviceSlotId: string | null | undefined,
 ) => (deviceSlotId ? modules.find((module) => module.deviceSlotId === deviceSlotId) : undefined);
+
+/** A shared HA light needs one room control; every modeled device remains focusable. */
+export const roomOverviewModules = (modules: readonly RoomModuleViewModel[]) => {
+  const seenLights = new Set<string>();
+  return modules.filter((module) => {
+    const [entity] = module.entities;
+    if (
+      module.entities.length !== 1 ||
+      entity.domain !== "light" ||
+      module.issues.some((issue) => issue.severity === "error")
+    )
+      return true;
+    if (seenLights.has(entity.entityId)) return false;
+    seenLights.add(entity.entityId);
+    return true;
+  });
+};
