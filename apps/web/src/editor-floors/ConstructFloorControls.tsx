@@ -1,3 +1,4 @@
+import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useId, useRef, useState } from "react";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
@@ -21,6 +22,7 @@ export function ConstructFloorControls({
   onAddBelow?: () => void;
   onSettings: () => void;
 }) {
+  const dom = useCabaneDom();
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -37,9 +39,9 @@ export function ConstructFloorControls({
     const outside = (event: PointerEvent) => {
       if (!root.current?.contains(event.target as Node)) setOpen(false);
     };
-    document.addEventListener("pointerdown", outside);
-    return () => document.removeEventListener("pointerdown", outside);
-  }, [expanded]);
+    dom.events.addEventListener("pointerdown", outside);
+    return () => dom.events.removeEventListener("pointerdown", outside);
+  }, [dom, expanded]);
   useEffect(() => {
     setOpen(false);
   }, [selectedId, disabled]);
@@ -104,7 +106,7 @@ export function ConstructFloorControls({
             const buttons = Array.from(
               menu.current?.querySelectorAll<HTMLButtonElement>("button") ?? [],
             );
-            const index = buttons.indexOf(document.activeElement as HTMLButtonElement);
+            const index = buttons.indexOf(dom.root.activeElement as HTMLButtonElement);
             const next =
               event.key === "ArrowDown"
                 ? (index + 1) % buttons.length

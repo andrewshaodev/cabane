@@ -9,6 +9,9 @@ await withModules(async (load) => {
   const { CabaneDomProvider, useCabaneDom } = await load("/packages/engine/src/CabaneDom.tsx");
   const { useDesktopWalkInput } = await load("/packages/engine/src/desktop-walk-input.ts");
   const { FloorPicker } = await load("/packages/engine/src/building/FloorPicker.tsx");
+  const { ConstructFloorControls } = await load(
+    "/apps/web/src/editor-floors/ConstructFloorControls.tsx",
+  );
   const { EditorActionButton } = await load("/apps/web/src/editor-chrome/EditorActionButton.tsx");
   const { CameraViewer } = await load("/packages/engine/src/CameraViewer.tsx");
   const { makeVideo, closeVideo } = await load(
@@ -57,6 +60,81 @@ await withModules(async (load) => {
       assert.equal(values[1].root, shadow);
     });
   });
+  test("panel floor menu keeps internal pointer clicks open until selection", async () =>
+    fixture(async ({ browser, shadow, render }) => {
+      const selected = [];
+      await render(
+        h(ConstructFloorControls, {
+          floors: [
+            { id: "g", name: "Ground" },
+            { id: "u", name: "Upper" },
+          ],
+          selectedId: "g",
+          disabled: false,
+          onSelect: (id) => selected.push(id),
+          onAdd() {},
+          onAddBelow() {},
+          onSettings() {},
+        }),
+      );
+      const trigger = shadow.querySelector('[aria-label="Current floor"]');
+      await act(async () => trigger.click());
+      const upper = shadow.querySelector('[role="menuitemradio"]');
+      await act(async () =>
+        upper.dispatchEvent(
+          new browser.window.MouseEvent("pointerdown", { bubbles: true, composed: true }),
+        ),
+      );
+      assert.ok(upper.isConnected, "pointerdown on a floor must not dismiss its menu");
+      await act(async () => upper.click());
+      assert.deepEqual(selected, ["u"]);
+      assert.equal(shadow.querySelector('[role="menu"]'), null);
+      assert.equal(shadow.activeElement, trigger);
+    }));
+  test("panel floor menu navigates every entry using local keyboard focus", async () =>
+    fixture(async ({ browser, shadow, render }) => {
+      await render(
+        h(ConstructFloorControls, {
+          floors: [
+            { id: "g", name: "Ground" },
+            { id: "u", name: "Upper" },
+          ],
+          selectedId: "g",
+          disabled: false,
+          onSelect() {},
+          onAdd() {},
+          onAddBelow() {},
+          onSettings() {},
+        }),
+      );
+      const trigger = shadow.querySelector('[aria-label="Current floor"]');
+      const key = async (value) =>
+        act(async () =>
+          shadow.activeElement.dispatchEvent(
+            new browser.window.KeyboardEvent("keydown", {
+              key: value,
+              bubbles: true,
+              composed: true,
+              cancelable: true,
+            }),
+          ),
+        );
+      await act(async () => trigger.click());
+      assert.equal(shadow.activeElement.textContent, "Ground");
+      await key("Home");
+      assert.equal(shadow.activeElement.textContent, "Upper");
+      for (const label of ["Ground", "Add floor above", "Add floor below", "Upper"]) {
+        await key("ArrowDown");
+        assert.equal(shadow.activeElement.textContent, label);
+      }
+      await key("ArrowUp");
+      assert.equal(shadow.activeElement.textContent, "Add floor below");
+      await key("End");
+      assert.equal(shadow.activeElement.textContent, "Add floor below");
+      await key("Escape");
+      assert.equal(shadow.querySelector('[role="menu"]'), null);
+      assert.equal(shadow.activeElement, trigger);
+    }));
   test("panel keyboard shortcuts ignore host events and host dialogs while respecting local inputs", async () =>
     fixture(async ({ browser, shadow, render }) => {
       const selected = [];
