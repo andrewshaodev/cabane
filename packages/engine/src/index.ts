@@ -109,6 +109,7 @@ export {
 } from "./CabaneDom";
 
 export { connectedCanvasEvents } from "./connected-canvas-events";
+export { useCameraWheelZoom } from "./useCameraWheelZoom";
 
 export * from "./outdoor-platforms";
 export { omitUndefinedProperties } from "./defined-properties";

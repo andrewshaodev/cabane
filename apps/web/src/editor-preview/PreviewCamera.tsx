@@ -4,6 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import {
   worldBoundsForFloorScene,
   worldBoundsForPolygon,
+  useCameraWheelZoom,
   type FloorSpec,
   type PlanPoint,
 } from "@cabane/engine";
@@ -94,6 +95,7 @@ function PreviewCameraRig({
     invalidate();
   }, [camera, width, height, rightInset, invalidate]);
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
+  useCameraWheelZoom(controls, !planWheelNavigation || view !== "top");
   const {
     origin: [originX, originZ],
     metersPerPlanUnit,

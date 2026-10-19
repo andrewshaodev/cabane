@@ -146,6 +146,7 @@
       "demo-door-walk.test.mjs",
       "demo-provider.test.mjs",
       "demo-session.test.mjs",
+      "editor-camera.test.mjs",
       "editor-connect.test.mjs",
       "editor-panels.test.mjs",
       "first-control-confirmation.test.mjs",

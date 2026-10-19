@@ -13,6 +13,7 @@ import { worldBoundsForFloorScene } from "./pools/pool-footprint";
 import type { FloorSpec, RoomSpec } from "./types";
 import { ROOF_MAX_RISE_METERS, ROOF_THICKNESS_METERS } from "./roof/roof-settings";
 import { RoomCameraTransition, type RoomFocusFrame } from "./room-navigation";
+import { useCameraWheelZoom } from "./useCameraWheelZoom";
 
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
@@ -148,6 +149,7 @@ function OrbitCameraRig({
   reducedMotion = false,
 }: OrbitCameraProps) {
   const orbitRef = useRef<OrbitControlsImpl | null>(null);
+  useCameraWheelZoom(orbitRef);
   const interruptRoomFlight = useRef<(() => void) | null>(null);
   const attachControls = useCallback(
     (controls: OrbitControlsImpl | null) => {

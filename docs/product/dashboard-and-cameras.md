@@ -1,6 +1,9 @@
 # Home dashboard, controls, and cameras
 
-Home presents an orbital overview, room details, and walk mode. In Orbit, selecting
+Home presents an orbital overview, room details, and walk mode. Orbital and editor 3D
+wheel zoom responds immediately to normalized scroll distance, preserving the point
+under the cursor. Small trackpad deltas stay precise; mouse-wheel steps use a
+faster response. Pinch zoom retains its own sensitivity. In Orbit, selecting
 a room smoothly centers its projected floor and wall bounds in the visible space
 beside the controls, with fitted zoom and the same three-quarter angle for every
 room. A critically damped transition retains velocity when another room is chosen

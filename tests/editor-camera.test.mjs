@@ -54,6 +54,135 @@ await withModules(async (load) => {
     ...overrides,
   });
 
+  const createWheelCamera = async (element) => {
+    const listeners = new Map();
+    const renderer = await create(element, {
+      ...options,
+      beforeReturn(canvas) {
+        options.beforeReturn(canvas);
+        canvas.clientWidth = 1000;
+        canvas.clientHeight = 800;
+        canvas.getBoundingClientRect = () => ({ left: 0, top: 0, width: 1000, height: 800 });
+        canvas.addEventListener = (type, listener, options) => {
+          if (!listeners.has(type)) listeners.set(type, new Set());
+          listeners.get(type).add({ listener, capture: options?.capture === true });
+        };
+        canvas.removeEventListener = (type, listener) => {
+          for (const entry of listeners.get(type) ?? [])
+            if (entry.listener === listener) listeners.get(type).delete(entry);
+        };
+      },
+    });
+    await renderer.advanceFrames(1, 1 / 60);
+    const wheel = async (deltaY, overrides = {}) => {
+      await act(async () => {
+        let stopped = false;
+        const ordered = [...(listeners.get("wheel") ?? [])].sort(
+          (a, b) => Number(b.capture) - Number(a.capture),
+        );
+        for (const { listener } of ordered) {
+          if (stopped) break;
+          listener({
+            deltaY,
+            deltaX: 0,
+            deltaMode: 0,
+            clientX: 500,
+            clientY: 400,
+            preventDefault() {},
+            stopImmediatePropagation() {
+              stopped = true;
+            },
+            ...overrides,
+          });
+        }
+      });
+    };
+    return { renderer, wheel, listeners, controls: controlsFor(renderer) };
+  };
+
+  for (const [name, element] of [
+    ["orbit", createElement(OrbitCamera, { floor, resetKey: 0 })],
+    ["editor 3D", createElement(PreviewCamera, cameraProps({ view: "3d" }))],
+  ]) {
+    test(`${name} wheel zoom responds immediately and follows scroll distance, not event count`, async () => {
+      const { renderer, controls, wheel } = await createWheelCamera(element);
+      try {
+        const initial = controls.object.zoom;
+        await wheel(100);
+        const coarse = controls.object.zoom;
+        assert.ok(coarse < initial * 0.9, "a mouse step must produce a useful immediate response");
+        await wheel(-100);
+        assert.ok(Math.abs(controls.object.zoom - initial) < 1e-8, "opposite scroll reverses zoom");
+        for (let index = 0; index < 10; index++) await wheel(10);
+        assert.ok(
+          Math.abs(controls.object.zoom - coarse) < 1e-8,
+          "equal distances yield equal zoom",
+        );
+        await renderer.advanceFrames(10, 1 / 60);
+        assert.ok(
+          Math.abs(controls.object.zoom - coarse) < 1e-8,
+          "wheel zoom must not have a damping tail",
+        );
+        await wheel(0, { deltaX: 20 });
+        assert.ok(Math.abs(controls.object.zoom - coarse) < 1e-8, "horizontal input does not zoom");
+        await wheel(-10, { ctrlKey: true });
+        assert.ok(controls.object.zoom > coarse * 1.09, "trackpad pinch retains its sensitivity");
+      } finally {
+        await renderer.unmount();
+      }
+    });
+
+    test(`${name} wheel zoom preserves its cursor anchor, normalizes units and respects limits`, async () => {
+      const { renderer, controls, wheel, listeners } = await createWheelCamera(element);
+      try {
+        const camera = controls.object;
+        camera.updateMatrixWorld();
+        const anchor = controls.target.clone().set(0.5, 0.2, 0.5);
+        const projected = anchor.clone().project(camera);
+        const targetHeight = controls.target.y;
+        const cursor = { clientX: (projected.x + 1) * 500, clientY: (1 - projected.y) * 400 };
+        await wheel(-30, cursor);
+        await renderer.advanceFrames(1, 1 / 60);
+        camera.updateMatrixWorld();
+        const after = anchor.clone().project(camera);
+        assert.ok(Math.hypot(after.x - projected.x, after.y - projected.y) < 1e-8);
+        assert.ok(
+          Math.abs(controls.target.y - targetHeight) < 1e-8,
+          "orbit pivot stays on its plane",
+        );
+        const initial = camera.zoom;
+        await wheel(1, { deltaMode: 1 });
+        const line = camera.zoom;
+        await wheel(-16);
+        assert.ok(Math.abs(camera.zoom - initial) < 1e-8);
+        await wheel(16);
+        assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one line equals 16 pixels");
+        await wheel(1, { deltaMode: 2 });
+        const page = camera.zoom;
+        await wheel(-800);
+        assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one page uses viewport height");
+        assert.ok(page < line);
+        await wheel(-10000);
+        assert.equal(camera.zoom, controls.maxZoom);
+        const atLimit = pose(controls);
+        await wheel(-10, cursor);
+        assert.deepEqual(pose(controls), atLimit, "clamping must not move the cursor anchor");
+        await wheel(10000);
+        assert.equal(camera.zoom, controls.minZoom);
+        controls.enabled = false;
+        await wheel(-100);
+        assert.equal(camera.zoom, controls.minZoom, "disabled controls ignore wheel input");
+        controls.enabled = true;
+        controls.enableZoom = false;
+        await wheel(-100);
+        assert.equal(camera.zoom, controls.minZoom, "disabled zoom ignores wheel input");
+      } finally {
+        await renderer.unmount();
+      }
+      assert.equal(listeners.get("wheel").size, 0, "unmount removes wheel listeners");
+    });
+  }
+
   test("construction wheel pans without clicking even when pointer controls are disabled, and pinch zooms", async () => {
     const listeners = new Map();
     const props = cameraProps({ planWheelNavigation: true, controlsEnabled: false });
@@ -102,8 +231,13 @@ await withModules(async (load) => {
       assert.ok(controls.object.zoom > before.zoom);
       assert.deepEqual(controls.target.toArray(), panned.target, "center pinch preserves target");
       assert.equal(prevented, 2);
+      const planWheel = listeners.get("wheel");
       await renderer.update(createElement(PreviewCamera, { ...props, planWheelNavigation: false }));
-      assert.equal(listeners.size, 0, "leaving Construct removes the wheel override");
+      assert.notEqual(
+        listeners.get("wheel"),
+        planWheel,
+        "leaving Construct removes the plan override",
+      );
     } finally {
       await renderer.unmount();
     }
