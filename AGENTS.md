@@ -18,6 +18,7 @@ or checks change.
   geometry and hosted assets follow the visual-asset contract; personal GLB
   imports use their dedicated validated engine owner.
 - **Review or model decomposition:** Read [coding standards](CODING_STANDARDS.md).
+- **Rendering or model authoring:** Read [rendering and asset ownership](CODING_STANDARDS.md#rendering-and-asset-ownership).
 - **Tests or verification tooling:** Read [test guidelines](docs/test-guidelines.md).
 - **Verification or delivery:** Read [verification and delivery](docs/product/verification-and-delivery.md)
   for commands, prerequisites, execution permissions, and evidence requirements.

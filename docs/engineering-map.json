@@ -190,13 +190,7 @@
       }
     ],
     "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
-    "checks": [
-      "verify:workspace",
-      "verify:runtime",
-      "verify:policy",
-      "fixture:verify:scale",
-      "build:panel"
-    ]
+    "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {
     "title": "Home Assistant runtime and controls",
@@ -286,13 +280,7 @@
       }
     ],
     "invariant": "Architecture owns derived geometry and collision; the linked rendering contract defines finish, lighting, fade, shadow, and contour invariants. Near-wall lights retain point emission; the beauty pass masks receivers behind the wall's inner face in native batches and imported lit materials. Toon material preparation retains extension shader warmup. Authored geometry and hosted assets follow the visual-asset contract; personal GLBs use their dedicated import owner. Procedural wood preserves its pixels and batches canvas writes into one texture upload. Outline smoothing owns its derived geometry and preserves authored source normals.",
-    "checks": [
-      "test:unit",
-      "verify:policy",
-      "verify:scene-contours",
-      "fixture:verify:scale",
-      "measure:scene"
-    ]
+    "checks": ["test:unit", "verify:scene-contours", "fixture:verify:scale", "measure:scene"]
   },
   {
     "title": "Catalog and model extensions",
@@ -322,7 +310,7 @@
       }
     ],
     "invariant": "Inspect stable registries first and consume public catalog subpaths. The linked catalog contract owns model placement, variants, activity, animation, and saved-project compatibility; home extensions own bespoke geometry. Mandatory surface verification covers all furnishing and device variants, including all four device connection states; flat artwork uses the engine LayeredSurface contract. Reusable additions exclude tiny standalone props and fitted apartment parts; square storage variants share one frame, and wall-mounted awnings retain wall support. Ordinary preset coverage uses shared catalog/surface checks and UI review.",
-    "checks": ["test:unit", "verify:boundaries", "verify:policy", "verify:furnishing-surfaces"]
+    "checks": ["test:unit", "verify:boundaries", "verify:furnishing-surfaces"]
   },
   {
     "title": "Optional walk tools",

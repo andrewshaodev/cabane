@@ -242,8 +242,8 @@ Before visual review:
    loader.
 3. Run `npm run home:verify -- --stage layout` and require
    `LAYOUT_REVIEW_REQUIRED`.
-4. Run the repository type, import-boundary, source-policy, and production
-   build checks applicable to the change.
+4. Run the repository type, import-boundary, and production build checks
+   applicable to the change.
 5. Review overview, walk, solid, faded, and grazing-angle evidence through the
    normal UI.
 

@@ -240,8 +240,8 @@ await withModules(async (load) => {
   });
 });
 
-test("boundary and source-policy commands reject generated-home violations", async () => {
-  const root = await mkdtemp(join(tmpdir(), "cabane-policy-"));
+test("import-boundary command rejects generated-home deep imports", async () => {
+  const root = await mkdtemp(join(tmpdir(), "cabane-boundaries-"));
   try {
     for (const directory of ["apps", "packages", "home/src"]) {
       await mkdir(join(root, directory), { recursive: true });
@@ -257,113 +257,6 @@ test("boundary and source-policy commands reject generated-home violations", asy
     );
     assert.equal(boundary.status, 1);
     assert.match(boundary.stderr, /deep stable-package import/);
-
-    await writeFile(
-      join(root, "home/src/bad-material.tsx"),
-      "const gradientMap = new DataTexture();\nexport const Bad = () => <><meshStandardMaterial /><meshToonMaterial gradientMap={gradientMap} /><directionalLight /></>;\n",
-    );
-    const policy = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
-      cwd: root,
-      encoding: "utf8",
-    });
-    assert.equal(policy.status, 1);
-    assert.match(policy.stderr, /non-toon visible material/);
-    assert.match(policy.stderr, /local toon material/);
-    assert.match(policy.stderr, /local toon gradient/);
-    assert.match(policy.stderr, /shared scene lighting/);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
-test("source policy permits bundled and hosted visual assets", async () => {
-  const root = await mkdtemp(join(tmpdir(), "cabane-stable-ui-assets-"));
-  try {
-    for (const directory of [
-      "apps/web/src/editor-workspace",
-      "apps/web/src/workspaces",
-      "packages/engine/src",
-      "home",
-    ]) {
-      await mkdir(join(root, directory), { recursive: true });
-    }
-    await writeFile(
-      join(root, "packages/engine/src/SceneActionBar.tsx"),
-      'import walkMode from "./assets/scene-actions/walk-mode.png";\nexport const icon = walkMode;\n',
-    );
-    await writeFile(
-      join(root, "packages/engine/src/styles.css"),
-      '.brand { background: url("/cabane-icon.png") center / contain no-repeat; }\n',
-    );
-    await writeFile(
-      join(root, "apps/web/src/editor-workspace/EditorWorkspace.tsx"),
-      'export const brand = <img src="/cabane-icon.png" alt="" />;\n',
-    );
-    await writeFile(
-      join(root, "apps/web/src/workspaces/WorkspaceLibrary.tsx"),
-      'export const brand = <img src="/cabane-icon.png" alt="" />;\n',
-    );
-    const policy = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
-      cwd: root,
-      encoding: "utf8",
-    });
-    assert.equal(policy.status, 0, policy.stderr);
-    await writeFile(
-      join(root, "apps/web/src/editor-workspace/EditorWorkspace.tsx"),
-      'export const model = useGLTF("https://assets.example/tree.glb"); export const texture = useTexture("https://assets.example/cloud.png");\n',
-    );
-    const rejected = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
-      cwd: root,
-      encoding: "utf8",
-    });
-    assert.equal(rejected.status, 0, rejected.stderr);
-    await writeFile(
-      join(root, "apps/web/src/workspaces/WorkspaceLibrary.tsx"),
-      'export const model = useGLTF("https://assets.example/tree.glb"); export const texture = useTexture("https://assets.example/cloud.png");\n',
-    );
-    const rejectedLibrary = spawnSync(
-      process.execPath,
-      [resolve("scripts/verify-source-policy.mjs")],
-      {
-        cwd: root,
-        encoding: "utf8",
-      },
-    );
-    assert.equal(rejectedLibrary.status, 0, rejectedLibrary.stderr);
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
-test("source policy reserves CanvasTexture for floor-finish ownership", async () => {
-  const root = await mkdtemp(join(tmpdir(), "cabane-floor-texture-policy-"));
-  try {
-    for (const directory of ["apps/web/src", "packages/engine/src/floor-finishes", "home"]) {
-      await mkdir(join(root, directory), { recursive: true });
-    }
-    await writeFile(
-      join(root, "packages/engine/src/floor-finishes/textures.ts"),
-      "export const texture = new CanvasTexture();\n",
-    );
-    const accepted = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
-      cwd: root,
-      encoding: "utf8",
-    });
-    assert.equal(accepted.status, 0, accepted.stderr);
-
-    await writeFile(
-      join(root, "apps/web/src/ad-hoc-floor.ts"),
-      "export const texture = new CanvasTexture();\n",
-    );
-    const rejected = spawnSync(process.execPath, [resolve("scripts/verify-source-policy.mjs")], {
-      cwd: root,
-      encoding: "utf8",
-    });
-    assert.equal(rejected.status, 1);
-    assert.match(
-      rejected.stderr,
-      /ad-hoc procedural texture outside the engine floor-finish owner/,
-    );
   } finally {
     await rm(root, { recursive: true, force: true });
   }

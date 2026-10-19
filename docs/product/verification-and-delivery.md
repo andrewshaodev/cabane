@@ -14,7 +14,9 @@ for the source coverage, Codex reminder hook, credential and retry behavior.
 
 The root package defines the executable checks. Run `npm run verify:fast` for
 Prettier, typed ESLint with React Hooks rules, strict TypeScript, Knip, and
-package-boundary/source-policy checks. `npm run verify` also runs all tests,
+package-boundary checks. Rendering and asset ownership conventions are reviewed
+against [coding standards](../../CODING_STANDARDS.md#rendering-and-asset-ownership).
+`npm run verify` also runs all tests,
 furnishing-surface checks, and the production build. The contract-release workflow
 builds and publishes the matching panel. Full verification runs locally before
 pushing and in the `Verification` GitHub workflow on pull requests and pushes to
@@ -235,7 +237,6 @@ Uncompleted acceptance/deployment concerns remain explicit:
 Implementation: [commands](../../package.json),
 [test harness](../../tests/test-server.mjs),
 [home verifier](../../scripts/verify-home.mjs),
-[source policy](../../scripts/verify-source-policy.mjs),
 [bundle report](../../scripts/verify-bundle-budget.mjs),
 [hosting configuration](../../vercel.json).
 

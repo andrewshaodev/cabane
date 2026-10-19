@@ -10,8 +10,7 @@ of the public skill through the Skills CLI in Codex or Claude Code, and generati
 photo or description, with an illustrative photo-to-model image. A GitHub repository link and a copyable installation command appear in that
 guide, not in the general Arrange catalog. No skill ZIP is bundled in the app. Its bundled
 UI illustration and exact public repository navigation URL are owned by
-`ModelGenerationGuide`; these narrowly scoped source policy exceptions do not
-permit images in native scene geometry or remote model fetches. The catalog
+`ModelGenerationGuide`. The catalog
 belongs to the active home. Import asks for Name, Preferred placement
 (Floor, Wall, Ceiling), and Profile (Furniture by default). The preview permits
 orientation corrections and uniform resizing in metres. Floor models contact

@@ -116,7 +116,6 @@ baseline is:
 ```sh
 npm run typecheck
 npm run verify:boundaries
-npm run verify:policy
 npm run verify:furnishing-surfaces
 node --test --test-concurrency=1 tests/owner-home-project.test.mjs tests/arrange-catalog.test.mjs tests/arrange-catalog-ui.test.mjs tests/catalog-structure.test.mjs tests/editor-furnish-preview.test.mjs tests/home-project.test.mjs
 npm run build
