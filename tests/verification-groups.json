@@ -165,6 +165,7 @@
       "home-presence-status.test.mjs",
       "onboarding.test.mjs",
       "opening-connect.test.mjs",
+      "panel-dom-lint.test.mjs",
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",

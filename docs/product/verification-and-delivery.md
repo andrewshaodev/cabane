@@ -82,6 +82,13 @@ explicit overrides, complete return paths, and switch fallthrough protection.
 `noUncheckedIndexedAccess` remains a separate migration; geometry algorithms need
 real length invariants, not blanket non-null assertions.
 
+Panel-capable web and engine UI use `useCabaneDom().root` for focus and
+`useCabaneDom().events` for application input listeners. The `cabane/panel-dom`
+ESLint rule rejects direct global document focus and global input listeners,
+including computed property access. Host bootstrapping is exempt. Browser-wide
+lifecycle notifications (such as resize, visibility and pointer lock) retain their
+global targets; explicitly injected local targets remain supported.
+
 Knip tracks the workspace exports and Vite harness imports as entry points.
 Keep those entry points explicit when adding runtime-loaded modules. The engine's
 Roboto font dependency is retained because CSS imports are outside this analysis.
@@ -115,7 +122,10 @@ output path. `tests/test-costs.json` contains reviewed scheduling weights; use t
 profile's per-file costs to refresh it after a major suite change. Unknown files
 retain deterministic source-size weights and are never dropped. Failures are printed as soon
 as Node emits completion, including the original test/file, error and a shell-safe
-focused rerun command; successful tests remain dots.
+focused rerun command; successful tests remain dots. Failure output retains the complete wrapper error
+and its cause, including exit codes and signals. Worker failures name the last
+started test when available. JSON worker reports retain the failure diagnostics;
+the launcher also reports and records each worker's exit code and signal.
 
 Storage, migration, restore, native startup states, and HA settings/sync cases run against the real
 repository and React components in Node, with an isolated `fake-indexeddb` factory

@@ -8,6 +8,87 @@ import reporter from "../scripts/agent-test-reporter.mjs";
 
 const details = (passed, error) => ({ type: "test", passed, duration_ms: 1, error });
 
+test("worker failures preserve wrapper metadata, a primitive cause, and the last started test", async () => {
+  const error = Object.assign(new Error("worker stopped", { cause: "test failed" }), {
+    code: "ERR_TEST_FAILURE",
+    failureType: "testCodeFailure",
+    exitCode: null,
+    signal: "SIGKILL",
+  });
+  async function* events() {
+    yield {
+      type: "test:dequeue",
+      data: {
+        name: "floor menu pointer input",
+        file: resolve("tests/panel-dom.test.mjs"),
+        line: 61,
+      },
+    };
+    const data = {
+      name: "shard-3",
+      file: resolve("tests/shards/shard-3.test.mjs"),
+      details: details(false, error),
+    };
+    yield { type: "test:complete", data };
+    yield { type: "test:fail", data };
+  }
+  const chunks = [];
+  for await (const chunk of reporter(events())) chunks.push(chunk);
+  const output = chunks.join("");
+  for (const evidence of [
+    "worker stopped",
+    "test failed",
+    "ERR_TEST_FAILURE",
+    "testCodeFailure",
+    "SIGKILL",
+    "exitCode",
+    "Last started: floor menu pointer input",
+    "tests/panel-dom.test.mjs:61",
+  ])
+    assert.ok(output.includes(evidence), evidence);
+});
+
+test(
+  "real early process exits retain diagnostics in output and JSON reports",
+  { timeout: 10_000 },
+  async () => {
+    const directory = await mkdtemp(join(tmpdir(), "cabane-reporter-exit-"));
+    const fixture = join(directory, "exit.test.mjs");
+    const reportPath = join(directory, "report.json");
+    const environment = { ...process.env, CABANE_TEST_REPORT: reportPath };
+    delete environment.NODE_TEST_CONTEXT;
+    delete environment.CABANE_TEST_SHARED_MODULES;
+    await writeFile(
+      fixture,
+      "import test from 'node:test'; test('exits during input', async () => { await new Promise(setImmediate); process.exit(7); });",
+    );
+    try {
+      const child = spawn(process.execPath, ["scripts/run-tests.mjs", fixture], {
+        env: environment,
+      });
+      let output = "";
+      child.stdout.on("data", (chunk) => (output += chunk));
+      child.stderr.on("data", (chunk) => (output += chunk));
+      assert.equal(
+        await new Promise((resolve, reject) => {
+          child.on("error", reject);
+          child.on("close", resolve);
+        }),
+        1,
+      );
+      assert.match(output, /exitCode: 7/);
+      assert.match(output, /Test worker .* exited: code=1, signal=none/);
+      const report = JSON.parse(await readFile(reportPath, "utf8"));
+      assert.equal(report.passed, false);
+      assert.equal(report.workers[0].code, 1);
+      assert.equal(report.workers[0].signal, null);
+      assert.match(report.workers[0].failures[0].diagnostic, /exitCode: 7/);
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  },
+);
+
 test("reporter emits a failure before requesting another event and avoids aggregate duplicates", async () => {
   const error = new Error("expected two rooms");
   const data = {

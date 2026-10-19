@@ -3,6 +3,7 @@ import tseslint from "typescript-eslint";
 import hooks from "eslint-plugin-react-hooks";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
+import panelDom from "./scripts/eslint-panel-dom.mjs";
 
 // Existing oversized files may shrink, but must not grow. Lower or remove each
 // ceiling when refactoring; split by responsibility rather than padding exceptions.
@@ -117,5 +118,11 @@ export default [
     files: [file],
     rules: { "max-lines": fileLineLimit(max) },
   })),
+  {
+    files: ["apps/web/src/**/*.{ts,tsx}", "packages/engine/src/**/*.{ts,tsx}"],
+    ignores: ["apps/web/src/main.tsx", "apps/web/src/panel/panel-element.ts"],
+    plugins: { cabane: panelDom },
+    rules: { "cabane/panel-dom": "error" },
+  },
   prettier,
 ];

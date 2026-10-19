@@ -5,21 +5,23 @@ import { inspect } from "node:util";
 const quote = (value) => `'${value.replaceAll("'", "'\"'\"'")}'`;
 const escapePattern = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-function failure(data) {
+function failure(data, lastStarted) {
   const file = data.file ? relative(process.cwd(), data.file) : null;
   const error = data.details?.error;
   const command = file
     ? `node --no-experimental-global-navigator --test --test-reporter=./scripts/agent-test-reporter.mjs --test-name-pattern=${quote(escapePattern(data.name))} ${quote(file)}`
     : null;
-  return `\nFAIL ${data.name}\n  ${file ?? "unknown file"}:${data.line ?? "?"}:${data.column ?? "?"}\n${inspect(error?.cause ?? error, { colors: false, depth: 8 })}\n${command ? `Rerun: ${command}\n` : ""}`;
+  return `\nFAIL ${data.name}\n  ${file ?? "unknown file"}:${data.line ?? "?"}:${data.column ?? "?"}\n${inspect(error, { colors: false, depth: 8, customInspect: false, maxArrayLength: 20, maxStringLength: 8000 })}\n${lastStarted && lastStarted.name !== data.name ? `Last started: ${lastStarted.name} (${lastStarted.file ? relative(process.cwd(), lastStarted.file) : "unknown file"}:${lastStarted.line ?? "?"})\n` : ""}${command ? `Rerun: ${command}\n` : ""}`;
 }
 
 export default async function* agentTestReporter(source) {
   const startedAt = performance.now();
-  const summary = { passed: 0, failed: 0, skipped: 0, todo: 0, durations: [] };
+  const summary = { passed: 0, failed: 0, skipped: 0, todo: 0, durations: [], failures: [] };
   let dots = 0;
+  let lastStarted;
   const output = new Map();
   for await (const { type, data } of source) {
+    if (type === "test:dequeue") lastStarted = data;
     if (type === "test:dequeue" && process.env.CABANE_TEST_PROGRESS === "1") {
       yield `\nRUN ${data.name}\n`;
       dots = 0;
@@ -38,7 +40,9 @@ export default async function* agentTestReporter(source) {
           yield `\n${captured}`;
           output.delete(data.file);
         }
-        yield failure(data);
+        const diagnostic = failure(data, lastStarted);
+        summary.failures.push({ name: data.name, file: data.file, diagnostic });
+        yield diagnostic;
         dots = 0;
       }
     }

@@ -69,9 +69,13 @@ try {
             console.error(error);
             resolve(1);
           });
-          child.on("close", (code) => {
+          child.on("close", (code, signal) => {
             children.delete(child);
-            workers.push({ pid: child.pid, shardIndex, file, code });
+            workers.push({ pid: child.pid, shardIndex, file, code, signal });
+            if (code !== 0 || signal)
+              console.error(
+                `Test worker ${file} (pid ${child.pid}) exited: code=${code ?? "null"}, signal=${signal ?? "none"}`,
+              );
             resolve(code ?? 1);
           });
         });
