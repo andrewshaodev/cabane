@@ -20,7 +20,7 @@ against [coding standards](../../CODING_STANDARDS.md#rendering-and-asset-ownersh
 furnishing-surface checks, and the production build. The contract-release workflow
 builds and publishes the matching panel. The `Verification` GitHub workflow runs
 the full gate on pull requests and pushes to main. Local verification depends on
-the task's scope and risk, as described below. CI uses pinned tooling and synthetic local fixtures without
+the [repository workflow](../../AGENTS.md#workflow). CI uses pinned tooling and synthetic local fixtures without
 household credentials. Configure the `Verify` check and maintainer review as
 required branch rules when the public repository is created; a workflow file
 alone does not enforce merge protection.
@@ -55,21 +55,8 @@ shards start. Unit-only runs do not need these capabilities.
 
 ## Choose local verification
 
-Default to the smallest checks that cover the task: affected unit/DOM tests and
-relevant lint, type, boundary, surface, or contract checks. Documentation-only edits
-need formatting and relevant link/map checks. Use `verify:fast` when the complete
-static gate is useful; it is not mandatory for every small edit.
-
-Reserve `npm run verify` locally for broad side effects or uncertain impact, such
-as shared rendering changes, persistence/migrations, dependency/toolchain changes,
-or changes spanning interacting domains. A small catalog, UI, tooling, or test edit
-can finish with focused verification when its effects are understood. CI always
-runs the full gate.
-
-Reuse passing results until relevant inputs change. A commit, push retry, or
-unrelated upstream merge does not require a full rerun. Inspect merged changes,
-run only checks affected by the integration, and report which results were reused
-and which checks were omitted.
+Local check selection and result reuse follow [AGENTS.md](../../AGENTS.md#workflow).
+This document describes available commands and their execution requirements.
 
 `npm run verify:help` lists the maintained domain groups. These optional broader
 checks include the static gate and their Node and browser tests. Individual test

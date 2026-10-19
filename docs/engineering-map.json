@@ -376,6 +376,7 @@
       "scripts/test-profile-report.mjs",
       "tests/test-costs.json",
       ".githooks",
+      "AGENTS.md",
       "CODING_STANDARDS.md",
       "scripts/surface-overlaps.mjs",
       "scripts/layered-surface-contract.mjs",
@@ -384,7 +385,7 @@
       "scripts/run-tests.mjs"
     ],
     "interfaces": [],
-    "invariant": "The delivery contract defines task-based local verification, execution permissions, lightweight pre-push checkout checks, and HA release provenance. Default to affected checks and reuse passing results; reserve full local runs for broad side effects or uncertain impact. CI retains the full gate, serializes software-rendered test shards, and retains timing reports and browser failure evidence. Review flaky tests for value, scope, and boundary before tuning timing. Both frontend distributions retain project, dependency and CSS-font licence notices. Native panel verification permits only the documented pinned weather texture outside the host origin. Lint enforces panel-scoped focus and input listeners. Test diagnostics preserve wrapper errors, causes, the last started test and worker exit codes/signals.",
+    "invariant": "AGENTS.md owns task sizing and local verification policy; the linked delivery contract documents command execution, CI, and HA release provenance. Test review follows docs/test-guidelines.md.",
     "checks": [
       "verify:help",
       "verify:fast",
