@@ -105,9 +105,16 @@ light updates change uniforms without changing shader light counts, avoiding
 synchronous scene shader compilation during interaction. Device emitters, including
 fallbacks from resolved bindings, are scoped to their owning floor so stair
 transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
-opaque wall emit into their room through an unshadowed spotlight; sources at
-openings and sources farther from walls retain point lighting. This avoids
-lighting through the wall without allocating point-light shadow maps.
+opaque wall retain their unshadowed point source at the bulb. The beauty pass
+masks that source's contribution beyond the nearest wall's inner face, preserving
+upward illumination and the space between the bulb and wall. Native toon batches
+and imported lit materials share the mask; camera and floor transforms move its
+plane with the wall. Toon materials prepare their shader hook before extension
+effect warmup so first use retains the precompiled programs. Sources at openings, above low walls, and farther from walls
+remain unrestricted. Moving across the near-wall threshold changes a uniform,
+without changing the light type or shader light count. This avoids lighting
+through the wall without allocating point-light shadow maps. The nearest-plane
+mask remains an approximation rather than full shadow or finite-wall ray tracing.
 Explore and Arrange use four flat toon bands, warm key light and cool sky fill.
 The shared in-memory gradient repeats each band across 64 texels and linearly
 filters only the narrow boundaries. This keeps stationary surfaces from flashing

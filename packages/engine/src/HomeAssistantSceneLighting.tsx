@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { Object3D } from "three";
+import type { SceneLightWallPlane } from "./scene-light-wall-mask";
 import { resolveModelVariant } from "./model-variants";
 import { SceneNightContext, sceneLightState } from "./scene-light-state";
 import {
@@ -48,20 +48,19 @@ const deviceLightPosition = (
   ];
 };
 
-// A nearby opaque wall occupies the rear hemisphere of an indoor fixture.
-// Aim an unshadowed spotlight into the room rather than paying for six point
-// shadow maps per lamp. Openings keep the omnidirectional source.
-const inwardDirectionAtWall = (
+// Restrict receivers behind the wall, never the hemisphere behind the bulb.
+const lightWallPlane = (
   floor: FloorSpec,
   position: readonly [number, number, number],
   distance: number,
-): readonly [number, number] | null => {
+): SceneLightWallPlane | null => {
   const point = worldPointToPlan({ x: position[0], z: position[2] }, floor.coordinates);
   if (!findContainingRoom(point, floor.rooms)) return null;
   const threshold = Math.min(0.6, distance * 0.25);
-  let nearest: readonly [number, number] | null = null;
+  let nearest: SceneLightWallPlane | null = null;
   let nearestDistance = threshold;
   for (const wall of floor.walls) {
+    if (position[1] > (wall.heightMeters ?? floor.defaultWallHeightMeters)) continue;
     const [startX, startZ] = planPointToWorld(wall.from, floor.coordinates);
     const [endX, endZ] = planPointToWorld(wall.to, floor.coordinates);
     const dx = endX - startX;
@@ -88,7 +87,11 @@ const inwardDirectionAtWall = (
     );
     if (throughOpening) continue;
     nearestDistance = separation;
-    nearest = [awayX / separation, awayZ / separation];
+    const nx = awayX / separation,
+      nz = awayZ / separation;
+    const innerX = startX + fraction * dx + (nx * wall.thicknessMeters) / 2;
+    const innerZ = startZ + fraction * dz + (nz * wall.thicknessMeters) / 2;
+    nearest = [nx, 0, nz, -(nx * innerX + nz * innerZ)];
   }
   return nearest;
 };
@@ -109,40 +112,21 @@ function PhysicalSceneLight({
   distance: number;
 }) {
   const [x, y, z] = position;
-  const direction = useMemo(
-    () => inwardDirectionAtWall(floor, [x, y, z], distance),
+  const plane = useMemo(
+    () => lightWallPlane(floor, [x, y, z], distance),
     [floor, x, y, z, distance],
   );
-  const target = useMemo(() => new Object3D(), []);
-  if (!direction)
-    return (
-      <pointLight
-        name={name}
-        position={position}
-        color={color}
-        intensity={intensity}
-        distance={distance}
-        decay={2}
-        castShadow={false}
-      />
-    );
-  target.position.set(position[0] + direction[0], position[1], position[2] + direction[1]);
   return (
-    <>
-      <spotLight
-        name={name}
-        position={position}
-        target={target}
-        color={color}
-        intensity={intensity}
-        distance={distance}
-        decay={2}
-        angle={Math.PI / 2}
-        penumbra={0.15}
-        castShadow={false}
-      />
-      <primitive object={target} />
-    </>
+    <pointLight
+      name={name}
+      position={position}
+      color={color}
+      intensity={intensity}
+      distance={distance}
+      decay={2}
+      castShadow={false}
+      userData={{ cabaneLightWallPlane: plane }}
+    />
   );
 }
 

@@ -123,7 +123,12 @@ export class SceneToonBatcher {
     (batch.mesh.material as MeshToonMaterial).dispose();
   }
 
-  render(renderer: WebGLRenderer, scene: Scene, camera: Camera) {
+  render(
+    renderer: WebGLRenderer,
+    scene: Scene,
+    camera: Camera,
+    render: () => void = () => renderer.render(scene, camera),
+  ) {
     // Without native multi-draw, Three falls back to individual calls. Avoid
     // paying the batching overhead on those devices.
     if (
@@ -132,7 +137,7 @@ export class SceneToonBatcher {
       renderer.localClippingEnabled ||
       renderer.clippingPlanes.length
     ) {
-      renderer.render(scene, camera);
+      render();
       return;
     }
     if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
@@ -202,7 +207,7 @@ export class SceneToonBatcher {
         batch.mesh.matrixWorld.copy(scene.matrixWorld);
         attached.push(batch.mesh);
       }
-      renderer.render(scene, camera);
+      render();
     } finally {
       for (const [source, material] of originals) source.material = material;
       for (const mesh of attached) scene.remove(mesh);

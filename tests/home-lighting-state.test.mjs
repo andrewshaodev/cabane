@@ -249,6 +249,87 @@ await withModules(async (load) => {
     await renderer.unmount();
   });
 
+  test("near-wall table lamps retain upward and wall-side emission as elevation changes", async () => {
+    const floor = {
+      ...homeManifest.floors[0],
+      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+      rooms: [
+        {
+          ...homeManifest.floors[0].rooms[0],
+          polygon: [
+            [0, 0],
+            [4, 0],
+            [4, 4],
+            [0, 4],
+          ],
+        },
+      ],
+      walls: [
+        {
+          id: "exterior",
+          from: [0, 0],
+          to: [4, 0],
+          thicknessMeters: 0.1,
+          classification: "exterior",
+        },
+      ],
+      openings: [],
+    };
+    const definition = stableDeviceRegistry["table-lamp"];
+    const render = (elevationMeters, wallDistance) =>
+      createElement(engine.HomeAssistantSceneLighting, {
+        floor,
+        resolvedBindings: { rooms: {}, openings: {}, issues: [] },
+        deviceModels: stableDeviceRegistry,
+        extensionDeviceModels: {},
+        sceneItems: [
+          {
+            id: "near-wall-lamp",
+            floorId: floor.id,
+            kind: "device",
+            modelId: "table-lamp",
+            size: definition.defaultSize,
+            lightState: "always-on",
+            entitySlots: [],
+            placement: {
+              kind: "absolute",
+              at: [2, wallDistance],
+              elevationMeters,
+              rotationYRadians: 0,
+            },
+          },
+        ],
+      });
+    const renderer = await create(render(0.6, 0.59));
+    try {
+      for (const elevationMeters of [0.6, 1.25, 0]) {
+        for (const wallDistance of [0.59, 0.6]) {
+          await renderer.update(render(elevationMeters, wallDistance));
+          const light = renderer.scene.findByProps({
+            name: "ha-device-light-near-wall-lamp",
+          }).instance;
+          assert.equal(
+            light.isPointLight,
+            true,
+            "the shade's upper and wall-facing sides must receive light before the wall",
+          );
+          assert.ok(Math.abs(light.position.y - elevationMeters - 0.42) < 1e-9);
+          const plane = light.userData.cabaneLightWallPlane;
+          if (wallDistance < 0.6) {
+            assert.deepEqual(plane, [0, 0, 1, -0.05]);
+            assert.ok(
+              plane[2] * 0.1 + plane[3] > 0,
+              "the space between the bulb and wall remains lit",
+            );
+            assert.ok(plane[2] * -0.1 + plane[3] < 0, "the wall still blocks receivers behind it");
+          } else assert.equal(plane, null);
+        }
+      }
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("primary bedroom bedside lamps cannot illuminate the gallery behind their wall", async () => {
     const floor = homeManifest.floors.find((candidate) => candidate.id === "first-floor");
     const items = ownerHomeProject.sceneItems
@@ -269,12 +350,14 @@ await withModules(async (load) => {
     );
     for (const item of items) {
       const light = renderer.scene.findByProps({ name: `ha-device-light-${item.id}` }).instance;
-      assert.equal(light.isSpotLight, true, `${item.id} should emit into the bedroom`);
+      assert.equal(light.isPointLight, true);
+      const plane = light.userData.cabaneLightWallPlane;
+      assert.ok(plane, `${item.id} should keep its room's wall mask`);
+      assert.ok(plane[0] * light.position.x + plane[2] * light.position.z + plane[3] > 0);
       assert.ok(
-        light.target.position.x < light.position.x,
-        `${item.id} must point away from the gallery`,
+        plane[0] * 10.5 + plane[2] * light.position.z + plane[3] < 0,
+        `${item.id} must not illuminate the gallery`,
       );
-      assert.ok((10.08 - light.position.x) * (light.target.position.x - light.position.x) < 0);
       assert.equal(light.castShadow, false);
     }
     await renderer.update(
@@ -298,6 +381,11 @@ await withModules(async (load) => {
       renderer.scene.findByProps({ name: `ha-device-light-${items[0].id}` }).instance.isPointLight,
       true,
       "the bedroom doorway must remain an opening for light",
+    );
+    assert.equal(
+      renderer.scene.findByProps({ name: `ha-device-light-${items[0].id}` }).instance.userData
+        .cabaneLightWallPlane,
+      null,
     );
     await renderer.unmount();
   });

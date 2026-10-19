@@ -9,6 +9,7 @@ import {
   RedFormat,
   type Group,
   type Mesh,
+  type MeshToonMaterial,
 } from "three";
 import {
   createContext,
@@ -21,6 +22,7 @@ import {
 import { cameraFacingWallOpacityForNormals } from "./wall-fade";
 import { SceneContourContext } from "./StylizedScene";
 import { SceneOutlines } from "./SceneOutlines";
+import { SceneLightWallMaskContext } from "./scene-light-wall-mask";
 
 export const TOON_GRADIENT_DATA = [55, 115, 185, 255] as const;
 // Wide constant bands retain cel shading. Linear filtering only blends their
@@ -41,13 +43,27 @@ toonGradient.magFilter = LinearFilter;
 toonGradient.generateMipmaps = false;
 toonGradient.needsUpdate = true;
 
-export type ToonMaterialProps = Omit<ComponentProps<"meshToonMaterial">, "gradientMap">;
+export type ToonMaterialProps = Omit<
+  ComponentProps<"meshToonMaterial">,
+  "gradientMap" | "onUpdate"
+> & {
+  onUpdate?: (material: MeshToonMaterial) => void;
+};
 
 /** Local colour lift for interactive device models, preserving their live state. */
 export const DeviceHoverContext = createContext(false);
 
 export function ToonMaterial(props: ToonMaterialProps) {
   const hovered = useContext(DeviceHoverContext);
+  const lightWalls = useContext(SceneLightWallMaskContext);
+  const { onUpdate: authoredUpdate } = props;
+  const onUpdate = useCallback(
+    (material: MeshToonMaterial) => {
+      authoredUpdate?.(material);
+      lightWalls?.prepareMaterial(material);
+    },
+    [authoredUpdate, lightWalls],
+  );
   let color = props.color;
   if (hovered) {
     const source = props.color ?? "white";
@@ -61,6 +77,7 @@ export function ToonMaterial(props: ToonMaterialProps) {
   return (
     <meshToonMaterial
       {...props}
+      onUpdate={onUpdate}
       {...omitUndefinedProperties({ color: color })}
       gradientMap={toonGradient}
     />
