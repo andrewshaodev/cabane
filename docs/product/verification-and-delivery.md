@@ -278,6 +278,11 @@ archive, reference-plan, weather and startup behavior; they do not establish equ
 end-to-end UI coverage. No replacement browser journeys or duplicate unit matrices
 are added. Basement editing and the representative-scale GLB scene remain.
 
+Wall face editing uses Node/DOM tests for labels, preview targeting, color edits,
+reset and history, renderer tests for face colors, and isolated IndexedDB tests for
+publication and reopening. The coordinate-driven wall-color browser journey is
+removed; pointer picking and rendered highlight appearance remain manual review.
+
 ### Coplanar surface checks
 
 `verify:furnishing-surfaces` runs during `verify` and therefore the mandatory

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { IDBFactory } from "fake-indexeddb";
 import { withModules } from "./test-server.mjs";
 
 // Requests execute in order, writes remain staged until completion, and abort
@@ -189,6 +190,29 @@ await withModules(async (load) => {
     assert.deepEqual(await repository.load(record.homeId), published.record);
     changedBindings[origin].draft.roomAreaIds = {};
     assert.notDeepEqual(published.record.bindings[origin].published.roomAreaIds, {});
+  });
+
+  test("wall face colors survive draft autosave, publication, and reopening IndexedDB", async () => {
+    const indexedDB = new IDBFactory();
+    const { record, lifecycle, changedHome } = await fixture(
+      createIndexedDbProjectRecordStore(indexedDB),
+    );
+    const colors = { left: "#aabbcc", right: "#223344" };
+    changedHome.floors[0].walls[0].faceColors = colors;
+    const reopen = () =>
+      createHomeProjectRepository(createIndexedDbProjectRecordStore(indexedDB), registries).load(
+        record.homeId,
+      );
+    const saved = await lifecycle.autosave(record, changedHome, 2);
+    assert.equal(saved.status, "saved");
+    const draft = await reopen();
+    assert.deepEqual(draft.draft.floors[0].walls[0].faceColors, colors);
+    assert.deepEqual(draft.published, record.published);
+    const published = await lifecycle.publish(saved.record, { confirmWarnings: true, now: 3 });
+    assert.equal(published.status, "published");
+    const reopened = await reopen();
+    assert.deepEqual(reopened.published.floors[0].walls[0].faceColors, colors);
+    assert.deepEqual(reopened.draft.floors[0].walls[0].faceColors, colors);
   });
 
   test("publishing a deleted device promotes its cleaned draft mappings only on Apply", async () => {

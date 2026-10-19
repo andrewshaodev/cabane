@@ -125,9 +125,9 @@
       "validate-floor-cli.test.mjs",
       "wall-cap-fade.test.mjs",
       "wall-edge-colors.test.mjs",
-      "wall-face-colors-browser.test.mjs",
       "wall-niche-properties.test.mjs",
-      "wall-niches.test.mjs"
+      "wall-niches.test.mjs",
+      "workspace-publication.test.mjs"
     ]
   },
   "runtime": {

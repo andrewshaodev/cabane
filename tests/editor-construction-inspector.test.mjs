@@ -12,7 +12,7 @@ await withModules(async (load) => {
   const { WallFinishFields } = await load(
     "/apps/web/src/editor-preview/construct/WallFinishFields.tsx",
   );
-  const { WallFinishPreviewProvider } = await load(
+  const { WallFinishPreviewProvider, useWallFinishPreview } = await load(
     "/apps/web/src/editor-preview/construct/WallFinishPreview.tsx",
   );
 
@@ -517,7 +517,7 @@ await withModules(async (load) => {
     }
   });
 
-  test("wall face controls use the home palette, preserve the opposite face, and reset through history", async (context) => {
+  test("wall face controls use the home palette, target the previewed face, and reset through history", async (context) => {
     context.mock.timers.enable({ apis: ["setTimeout"] });
     for (const isExterior of [true, false])
       await withDom(async ({ dom, root }) => {
@@ -531,7 +531,11 @@ await withModules(async (load) => {
             classification: "interior",
             thicknessMeters: 0.12,
           });
-        let controller;
+        let controller, highlight;
+        function PreviewProbe() {
+          highlight = useWallFinishPreview().highlight;
+          return null;
+        }
         function Harness() {
           controller = useConstructEditor(floor);
           return React.createElement(
@@ -542,6 +546,7 @@ await withModules(async (load) => {
               wall: controller.draft.walls.find((w) => w.id === id),
               isExterior,
             }),
+            React.createElement(PreviewProbe),
           );
         }
         await act(async () => root.render(React.createElement(Harness)));
@@ -578,6 +583,11 @@ await withModules(async (load) => {
             dom.window.document.querySelector('input[type="checkbox"]').click(),
           );
           await paint("Side B color", "#223344");
+          const resetSide = dom.window.document.querySelector('[aria-label="Reset side b color"]');
+          await act(async () => resetSide.focus());
+          assert.deepEqual(highlight, { floorId: floor.id, wallId: id, sides: ["right"] });
+          await act(async () => resetSide.blur());
+          assert.equal(highlight, null);
           assert.deepEqual(wallNow().faceColors, { left: "#aabbcc", right: "#223344" });
           await act(async () => controller.undo());
           assert.equal(wallNow().faceColors.right, "#aabbcc");
