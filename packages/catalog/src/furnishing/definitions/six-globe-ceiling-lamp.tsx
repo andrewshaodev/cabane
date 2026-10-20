@@ -4,6 +4,7 @@ import {
   SIX_GLOBE_CEILING_LAMP_SIZE,
 } from "../presets/living-room/six-globe-ceiling-lamp";
 export const sixGlobeCeilingLampDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: SixGlobeCeilingLamp,
   label: "Six globe ceiling lamp",
   category: "Lighting",

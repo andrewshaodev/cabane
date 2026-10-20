@@ -2,6 +2,7 @@ import { defineFurnishingModel } from "@cabane/engine";
 import { WallReadingSpot, WALL_READING_SPOT_SIZE } from "../presets/bedroom/wall-reading-spot";
 
 export const wallReadingSpotDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: WallReadingSpot,
   label: "Wall reading spot",
   category: "Lighting",

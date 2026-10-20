@@ -49,6 +49,26 @@ await withModules(async (load) => {
     assert.equal(ownerProjectRegistries.furnishingModels["rattan-bell-pendant"].legacyOnly, true);
   });
 
+  test("retired furnishing lights are offered only as bindable light devices", () => {
+    const modelIds = [
+      "round-globe-wall-lamp",
+      "wall-reading-spot",
+      "oak-wall-uplight",
+      "six-globe-ceiling-lamp",
+      "astro-parallel-wall-light",
+      "tubular-wall-lamp",
+      "clip-reading-lamp",
+    ];
+    for (const modelId of modelIds) {
+      const matches = entries.filter((entry) => entry.modelId === modelId);
+      assert.equal(matches.length, 1, modelId);
+      assert.equal(matches[0].kind, "device", modelId);
+      assert.equal(matches[0].definition.supportedDomains[0], "light", modelId);
+      assert.ok(matches[0].definition.sceneLight, modelId);
+      assert.equal(ownerProjectRegistries.furnishingModels[modelId].legacyOnly, true, modelId);
+    }
+  });
+
   test("UUID allocation retries an occupied identity without changing existing IDs", (t) => {
     const occupied = "00000000-0000-4000-8000-000000000001";
     const fresh = "00000000-0000-4000-8000-000000000002";

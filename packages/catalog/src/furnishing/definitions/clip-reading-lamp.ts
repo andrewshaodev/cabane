@@ -1,6 +1,7 @@
 import { defineFurnishingModel } from "@cabane/engine";
 import { ClipReadingLamp, CLIP_READING_LAMP_SIZE } from "../presets/bedroom";
 export const clipReadingLampDefinition = defineFurnishingModel({
+  legacyOnly: true,
   component: ClipReadingLamp,
   label: "Clip reading lamp",
   category: "Lighting",
