@@ -12,6 +12,28 @@
   align-items: center;
   gap: 7px;
   min-width: 0;
+}
+.room-navigation__rooms {
+  --room-navigation-edge: 24px;
+  position: relative;
+  padding: 18px var(--room-navigation-edge);
+  margin: -18px 0 -18px calc(0px - var(--room-navigation-edge));
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--room-navigation-edge);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--room-navigation-edge),
+    #000 calc(100% - var(--room-navigation-edge)),
+    transparent
+  );
+}
+.room-navigation__rooms::-webkit-scrollbar {
+  display: none;
+}
+.room-navigation__floors {
   padding: 18px;
   margin: -18px;
   overflow-x: auto;
@@ -19,11 +41,6 @@
   scrollbar-width: thin;
   scrollbar-color: #7c8879 transparent;
   scroll-padding-inline: 18px;
-}
-.room-navigation__rooms {
-  position: relative;
-}
-.room-navigation__floors {
   margin-top: -6px;
   width: fit-content;
   max-width: calc(100% + 36px);
