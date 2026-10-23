@@ -354,3 +354,12 @@ area-cleaning support retain their existing vacuum device controls.
 
 Demo vacuum slots expose synthetic area coverage and accept the same command in
 memory. Neither coverage nor real HA IDs are added to the portable home project.
+
+Mapped robot-vacuum models float 1.5 model-space meters while their confirmed,
+available state is cleaning, with a rotating hull, ascending beam rings and dust.
+Reduced motion freezes the effect. A successful Cabane room-clean request records
+its destination in session memory so the modeled robot moves to that room on its
+rendered floor. It returns to its authored placement when cleaning stops. This is
+a decorative status visualization, not robot localization: external cleaning has
+no inferred destination and remains at the authored location. The destination is
+not persisted or written to HA. The activity studio includes a simulated vacuum.

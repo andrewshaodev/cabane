@@ -51,6 +51,7 @@
       "room-status-overlays.test.mjs",
       "runtime-binding-profile.test.mjs",
       "setup-progress.test.mjs",
+      "vacuum-flight.test.mjs",
       "weather.test.mjs",
       "workspace-startup-routing.test.mjs"
     ]
@@ -184,6 +185,7 @@
       "scene-action-bar.test.mjs",
       "scene-systems.test.mjs",
       "setup-progress.test.mjs",
+      "vacuum-flight.test.mjs",
       "weather.test.mjs"
     ]
   },

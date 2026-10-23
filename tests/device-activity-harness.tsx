@@ -21,11 +21,13 @@ const runtime = {
       id,
       {
         ...state,
-        state: id.startsWith("switch.")
-          ? "on"
-          : id.startsWith("sensor.") && state.state === "idle"
-            ? "running"
-            : state.state,
+        state: id.startsWith("vacuum.")
+          ? "cleaning"
+          : id.startsWith("switch.")
+            ? "on"
+            : id.startsWith("sensor.") && state.state === "idle"
+              ? "running"
+              : state.state,
       },
     ]),
   ),

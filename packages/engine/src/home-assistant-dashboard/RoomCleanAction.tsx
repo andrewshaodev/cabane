@@ -1,9 +1,10 @@
+import { rememberVacuumRoom } from "../vacuum-cleaning-location";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useHomeAssistantRuntime } from "../HomeAssistantRuntimeContext";
 import type { EntityId } from "../types";
 import { areaCleaningVacuums, mappedCleaningAreas, roomCleanCall } from "./room-cleaning";
 
-export function RoomCleanAction({ areaId }: { areaId: string }) {
+export function RoomCleanAction({ areaId, roomId }: { areaId: string; roomId?: string }) {
   const runtime = useHomeAssistantRuntime();
   const candidates = areaCleaningVacuums(runtime);
   const ids = candidates
@@ -72,6 +73,7 @@ export function RoomCleanAction({ areaId }: { areaId: string }) {
     setSent(false);
     try {
       await runtime.callService(roomCleanCall(target.entity_id, areaId));
+      if (roomId) rememberVacuumRoom(runtime.callService, target.entity_id, roomId);
       setSent(true);
     } catch {
       setError("Cleaning request failed. Try again.");

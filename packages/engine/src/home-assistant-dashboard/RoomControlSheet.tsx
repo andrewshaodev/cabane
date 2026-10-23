@@ -291,7 +291,11 @@ export function RoomControlSheet({
               </button>
             )}
             {!deviceOverlay && !focused && cleaningAreaId && (
-              <RoomCleanAction key={cleaningAreaId} areaId={cleaningAreaId} />
+              <RoomCleanAction
+                key={cleaningAreaId}
+                areaId={cleaningAreaId}
+                roomId={resolved.room.id}
+              />
             )}
             {!deviceOverlay && (
               <button
