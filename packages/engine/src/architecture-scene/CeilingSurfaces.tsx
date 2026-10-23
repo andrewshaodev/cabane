@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { planPointToWorld, slopedCeilingHeightAtPoint } from "../geometry";
 
 import { ToonMaterial } from "../rendering";
+import { CEILING_SURFACE_COLOR } from "./surface-colors";
 
 import type { FloorSpec, Polygon, SlopedCeilingSpec } from "../types";
 
@@ -26,7 +27,7 @@ function FlatCeilingSlab({
   return (
     <mesh position={[0, height, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow={false}>
       <extrudeGeometry args={[shape, { depth: 0.16, bevelEnabled: false }]} />
-      <ToonMaterial color="#f2efe6" side={DoubleSide} />
+      <ToonMaterial color={CEILING_SURFACE_COLOR} side={DoubleSide} />
     </mesh>
   );
 }
@@ -105,7 +106,7 @@ function SlopedCeilingSurface({
 
   return (
     <mesh geometry={geometry} receiveShadow={false}>
-      <ToonMaterial color="#f2efe6" side={DoubleSide} />
+      <ToonMaterial color={CEILING_SURFACE_COLOR} side={DoubleSide} />
     </mesh>
   );
 }

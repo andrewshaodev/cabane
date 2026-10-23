@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { create } from "@react-three/test-renderer";
+import { Raycaster, Vector3 } from "three";
 import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -10,6 +11,7 @@ await withModules(async (load) => {
   const { CeilingSurfaces } = await load(
     "/packages/engine/src/architecture-scene/CeilingSurfaces.tsx",
   );
+  const { PlatformSlab } = await load("/packages/engine/src/outdoor-platforms/PlatformSlab.tsx");
 
   test("a single-room walk ceiling stays within its floor footprint", async () => {
     const footprint = [
@@ -36,6 +38,55 @@ await withModules(async (load) => {
       assert.ok(box.max.y - box.min.y <= 3.41, `ceiling depth: ${box.max.y - box.min.y}`);
     } finally {
       await renderer.unmount();
+    }
+  });
+
+  test("an upper outdoor platform retains the lower room ceiling underside", async () => {
+    const polygon = [
+      [0, 0],
+      [4, 0],
+      [4, 4],
+      [0, 4],
+    ];
+    const below = {
+      id: "lower",
+      coordinates: { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+      footprint: polygon,
+      rooms: [{ id: "living", polygon }],
+      ceilings: [{ id: "living-ceiling", kind: "flat", roomIds: ["living"], heightMeters: 3 }],
+      defaultCeilingHeightMeters: 3,
+      floorToFloorHeightMeters: 3.2,
+    };
+    const platform = {
+      id: "upper-balcony",
+      polygon,
+      finish: { kind: "preset", preset: "travertine" },
+      defaultEdge: { kind: "railing", heightMeters: 1 },
+      edges: polygon.map((_, index) => ({ id: `upper-balcony:edge-${index}` })),
+    };
+    const upper = { ...below, id: "upper", outdoorPlatforms: [platform] };
+    const ceilingRenderer = await create(createElement(CeilingSurfaces, { floor: below }));
+    const platformRenderer = await create(
+      createElement(PlatformSlab, { platform, floor: upper, below }),
+    );
+    try {
+      const ceilingMaterial = ceilingRenderer.scene.findByType("Mesh").instance.material;
+      const slab = platformRenderer.scene.findByType("Mesh").instance;
+      slab.updateMatrixWorld(true);
+      const [undersideHit] = new Raycaster(
+        new Vector3(2, -2, 2),
+        new Vector3(0, 1, 0),
+      ).intersectObject(slab);
+      assert.ok(undersideHit, "an upward view must hit the platform underside");
+      const slabMaterials = Array.isArray(slab.material) ? slab.material : [slab.material];
+      const undersideMaterial = slabMaterials[undersideHit.face.materialIndex];
+      assert.equal(
+        `#${undersideMaterial.color.getHexString()}`,
+        `#${ceilingMaterial.color.getHexString()}`,
+      );
+    } finally {
+      await ceilingRenderer.unmount();
+      await platformRenderer.unmount();
     }
   });
 });

@@ -6,6 +6,10 @@ import polygonClipping from "polygon-clipping";
 import { planPointToWorld } from "../geometry";
 import type { FloorSpec, OutdoorPlatformSpec } from "../types";
 import { derivePlatformSlabPieces } from "./platform-slab-coverage";
+import { CEILING_SURFACE_COLOR } from "../architecture-scene/surface-colors";
+
+const PLATFORM_SLAB_EDGE_COLOR = "#d4c6ae";
+
 /** One slab, with its underside matching any authored room ceiling below. */
 export function PlatformSlab({
   platform,
@@ -61,7 +65,8 @@ export function PlatformSlab({
           castShadow
           receiveShadow
         >
-          <ToonMaterial color="#d4c6ae" />
+          <ToonMaterial attach="material-0" color={CEILING_SURFACE_COLOR} />
+          <ToonMaterial attach="material-1" color={PLATFORM_SLAB_EDGE_COLOR} />
         </mesh>
       ))}
     </group>
