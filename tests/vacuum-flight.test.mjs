@@ -26,6 +26,18 @@ await withModules(async (load) => {
       );
       await renderer.advanceFrames(10, 0.1);
       assert.notEqual(hull.instance.rotation.y, 0);
+      const drift = renderer.scene.findByProps({ name: "catalog-robot-vacuum" }).instance;
+      assert.notEqual(drift.position.x, 0);
+      assert.notEqual(drift.position.z, 0);
+      for (let frame = 0; frame < 400; frame++) {
+        await renderer.advanceFrames(1, 0.05);
+        assert.ok(Math.abs(drift.position.x) <= 0.75);
+        assert.ok(Math.abs(drift.position.z) <= 0.75);
+      }
+      await renderer.update(React.createElement(RobotVacuumModel, props));
+      assert.equal(drift.position.length(), 0);
+      await renderer.advanceFrames(10, 0.05);
+      assert.equal(drift.position.length(), 0);
       await renderer.update(
         React.createElement(RobotVacuumModel, {
           ...props,
@@ -35,6 +47,7 @@ await withModules(async (load) => {
       );
       assert.equal(renderer.scene.findAllByProps({ name: "vacuum-tractor-beam" }).length, 0);
       assert.equal(hull.instance.position.y, 0);
+      assert.equal(drift.position.length(), 0);
     } finally {
       await renderer.unmount();
     }

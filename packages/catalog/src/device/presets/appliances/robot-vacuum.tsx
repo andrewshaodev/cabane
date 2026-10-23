@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import { VacuumTractorBeam } from "./vacuum-tractor-beam";
@@ -12,10 +12,22 @@ export function RobotVacuumModel({ visualState, reducedMotion, state }: HomeDevi
   const active = visualState === "connected-active";
   const flying = active && state?.state === "cleaning";
   const hull = useRef<Group>(null);
+  const drift = useRef<Group>(null);
+  useEffect(() => {
+    if (drift.current) drift.current.position.set(0, 0, 0);
+  }, [flying, reducedMotion]);
   const time = useRef(0);
   useFrame(({ invalidate }, delta) => {
     if (!flying || reducedMotion || !hull.current) return;
     time.current += Math.min(delta, 0.05);
+    // Incommensurate waves give a smooth wandering path without random jumps.
+    // The hull stays within a 2 m square at its native catalog size.
+    if (drift.current) {
+      drift.current.position.x =
+        Math.sin(time.current * 0.23) * 0.55 + Math.sin(time.current * 0.61) * 0.2;
+      drift.current.position.z =
+        Math.sin(time.current * 0.31) * 0.55 + Math.sin(time.current * 0.47) * 0.2;
+    }
     hull.current.position.y = 1.5 + Math.sin(time.current * 1.6) * 0.045;
     hull.current.rotation.set(
       Math.sin(time.current) * 0.06,
@@ -25,7 +37,7 @@ export function RobotVacuumModel({ visualState, reducedMotion, state }: HomeDevi
     invalidate();
   });
   return (
-    <group name="catalog-robot-vacuum" userData={{ walkCollider: !flying }}>
+    <group ref={drift} name="catalog-robot-vacuum" userData={{ walkCollider: !flying }}>
       {flying && <VacuumTractorBeam reducedMotion={reducedMotion} />}
       <group ref={hull} position={[0, flying ? 1.5 : 0, 0]} rotation={[0, 0, 0]}>
         <mesh position={[0, 0.035, 0]} castShadow receiveShadow>
