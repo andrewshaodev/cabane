@@ -16,6 +16,9 @@ await withModules(async (load) => {
   const { DoubleBed } = await load(
     "/packages/catalog/src/furnishing/presets/bedroom/double-bed.tsx",
   );
+  const { RectangularCoffeeTable } = await load(
+    "/packages/catalog/src/furnishing/presets/living-room/rectangular-coffee-table.tsx",
+  );
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { WALK_JUMP_APEX, WALK_JUMP_GRAVITY, WALK_JUMP_LAUNCH_SPEED, walkJumpVerticalRange } =
     await load("/packages/engine/src/navigation/walk-jump.ts");
@@ -80,10 +83,11 @@ await withModules(async (load) => {
     for (const variant of ["default", "cozy-white-blue"]) {
       const renderer = await create(createElement(DoubleBed, { variant }));
       try {
+        const colliderNodes = renderer.scene.findAll(
+          (node) => node.props.userData?.walkCollider === true,
+        );
         const colliders = Object.fromEntries(
-          renderer.scene
-            .findAll((node) => node.props.userData?.walkCollider === true)
-            .map((node) => [node.props.name, new Box3().setFromObject(node.instance)]),
+          colliderNodes.map((node) => [node.props.name, new Box3().setFromObject(node.instance)]),
         );
         assert.deepEqual(Object.keys(colliders).sort(), [
           "double-bed-headboard-collider",
@@ -94,9 +98,32 @@ await withModules(async (load) => {
           `${variant} low max ${colliders["double-bed-low-collider"].max.y}`,
         );
         assert.ok(colliders["double-bed-headboard-collider"].max.y > 1);
+        assert.equal(
+          colliderNodes.find((node) => node.props.name === "double-bed-low-collider").props.userData
+            .walkSupport,
+          true,
+        );
+        assert.equal(
+          colliderNodes.find((node) => node.props.name === "double-bed-headboard-collider").props
+            .userData.walkSupport,
+          undefined,
+        );
       } finally {
         await renderer.unmount();
       }
+    }
+  });
+
+  test("the coffee table opts its flat top into walk support", async () => {
+    const renderer = await create(createElement(RectangularCoffeeTable));
+    try {
+      const table = renderer.scene.findAll(
+        (node) => node.props.name === "rectangular-coffee-table",
+      )[0];
+      assert.equal(table.props.userData.walkCollider, true);
+      assert.equal(table.props.userData.walkSupport, true);
+    } finally {
+      await renderer.unmount();
     }
   });
 
@@ -301,6 +328,80 @@ await withModules(async (load) => {
     };
     assert.ok((await walk(false)) < -0.35);
     assert.ok((await walk(true)) > 0.35);
+  });
+
+  test("landing on a walkable furniture top does not eject the player", async () => {
+    const floor = {
+      ...structuredClone(neutralDemoManifest.floors[0]),
+      rooms: [],
+      walls: [],
+      wallJunctions: [],
+      openings: [],
+      ceilings: [],
+      hedges: [],
+      pools: [],
+      outdoorPlatforms: [],
+    };
+    const poseRef = { current: { x: 0, z: -0.65, yaw: 0, pitch: 0 } };
+    const movementInputRef = { current: { x: 0, y: 1 } };
+    const jumpRequestRef = { current: true };
+    const renderer = await create(
+      createElement(
+        "group",
+        null,
+        createElement(
+          "mesh",
+          {
+            position: [0, 0.2, 0.45],
+            userData: { walkCollider: true, walkSupport: true },
+          },
+          createElement("boxGeometry", { args: [0.8, 0.4, 1.6] }),
+        ),
+        createElement(WalkCameraController, {
+          floor,
+          poseRef,
+          jumpRequestRef,
+          movementInputRef,
+          sprintInputRef: { current: true },
+          lookInputRef: { current: { x: 0, y: 0 } },
+          lookDeltaRef: { current: { x: 0, y: 0 } },
+          reducedMotion: true,
+          openingPositions: {},
+          boundOpeningIds: new Set(),
+          onOpeningsChange() {},
+          onRoomChange() {},
+        }),
+      ),
+    );
+    try {
+      await renderer.advanceFrames(14, 1 / 60);
+      movementInputRef.current = { x: 0, y: 0 };
+      await renderer.advanceFrames(46, 1 / 60);
+      const camera = renderer.scene.findByType("PerspectiveCamera").instance;
+      assert.ok(Math.abs(poseRef.current.x) < 0.2, `x ${poseRef.current.x}`);
+      assert.ok(poseRef.current.z > -0.2, `z ${poseRef.current.z}`);
+      assert.ok(Math.abs(camera.position.y - (0.4 + 1.52)) < 1e-8, `camera y ${camera.position.y}`);
+      const landedZ = poseRef.current.z;
+      movementInputRef.current = { x: 0, y: 1 };
+      await renderer.advanceFrames(6, 1 / 60);
+      movementInputRef.current = { x: 0, y: 0 };
+      assert.ok(poseRef.current.z > landedZ, `walk z ${poseRef.current.z}`);
+      assert.ok(
+        Math.abs(camera.position.y - (0.4 + 1.52)) < 1e-8,
+        `walk camera y ${camera.position.y}`,
+      );
+      jumpRequestRef.current = true;
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.ok(camera.position.y > 0.4 + 1.52, `jump camera y ${camera.position.y}`);
+      await renderer.advanceFrames(54, 1 / 60);
+      assert.ok(Math.abs(camera.position.y - (0.4 + 1.52)) < 1e-8, `reland y ${camera.position.y}`);
+      movementInputRef.current = { x: 1, y: 0 };
+      await renderer.advanceFrames(30, 1 / 60);
+      assert.ok(poseRef.current.x > 0.6, `step-off x ${poseRef.current.x}`);
+      assert.ok(Math.abs(camera.position.y - 1.52) < 1e-8, `floor y ${camera.position.y}`);
+    } finally {
+      await renderer.unmount();
+    }
   });
 
   test("the controller clears a balcony railing and begins falling to terrain", async () => {

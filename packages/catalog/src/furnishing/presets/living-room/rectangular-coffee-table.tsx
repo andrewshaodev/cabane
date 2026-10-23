@@ -13,7 +13,7 @@ export function RectangularCoffeeTable({
     <group
       name="rectangular-coffee-table"
       scale={[size[0] / 1.1, size[1] / 0.4, size[2] / 0.6]}
-      userData={{ walkCollider: true }}
+      userData={{ walkCollider: true, walkSupport: true }}
     >
       <RoundedFurniturePanel
         name="coffee-table-top"

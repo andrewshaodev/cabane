@@ -50,6 +50,8 @@ export interface BoxWalkCollider {
   /** World-space vertical extent. Omitted colliders block at every walk height. */
   minY?: number;
   maxY?: number;
+  /** World-space top elevation when this collider can support a standing walker. */
+  supportY?: number;
 }
 
 export type WalkCollider = SegmentWalkCollider | BoxWalkCollider;

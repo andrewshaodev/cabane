@@ -9,6 +9,11 @@ import {
   WALK_JUMP_LAUNCH_SPEED,
   walkJumpVerticalRange,
 } from "./navigation/walk-jump";
+import {
+  crossedWalkSupport,
+  retainedWalkSupport,
+  type WalkSupport,
+} from "./navigation/walk-support";
 import { createTerrainSupportQuery } from "./navigation/terrain-support";
 import {
   moveBuildingWalker,
@@ -109,6 +114,7 @@ export function WalkCameraController({
   const lookVelocity = useRef<StickVector>({ x: 0, y: 0 });
   const jumpHeight = useRef(0);
   const jumpVelocity = useRef(0);
+  const standingSupport = useRef<WalkSupport | null>(null);
   const bobPhase = useRef(0);
   const bobWeight = useRef(0);
   const furniture = useRef<BoxWalkCollider[]>([]);
@@ -137,6 +143,7 @@ export function WalkCameraController({
           maxZ: box.max.z,
           minY: box.min.y,
           maxY: box.max.y,
+          ...(object.userData.walkSupport === true ? { supportY: box.max.y } : {}),
         });
     });
     furniture.current = next;
@@ -157,6 +164,7 @@ export function WalkCameraController({
       lookDeltaRef,
       jumpHeight,
       jumpVelocity,
+      standingSupport,
       bobWeight,
       ...(jumpRequestRef === undefined ? {} : { jumpRequestRef: jumpRequestRef }),
       lastRoomId,
@@ -226,27 +234,6 @@ export function WalkCameraController({
       onOpeningsChange(nextOpen);
     }
 
-    // Consume every request, including airborne presses, so landing cannot queue a hop.
-    if (jumpRequestRef?.current) {
-      if (jumpHeight.current === 0) jumpVelocity.current = WALK_JUMP_LAUNCH_SPEED;
-      jumpRequestRef.current = false;
-    }
-    if (jumpVelocity.current !== 0 || jumpHeight.current > 0) {
-      jumpHeight.current = Math.max(
-        0,
-        jumpHeight.current + jumpVelocity.current * delta - 0.5 * WALK_JUMP_GRAVITY * delta * delta,
-      );
-      jumpVelocity.current =
-        jumpHeight.current > 0 ? jumpVelocity.current - WALK_JUMP_GRAVITY * delta : 0;
-    }
-
-    // Collision consumes the same committed pose as the model. Proximity changes
-    // become traversable when React applies them to both on the next render.
-    const passable = passableOpeningIds(
-      building?.floors ?? [floor],
-      openingPositions,
-      jumpHeight.current,
-    );
     const current = walker.current;
     // Frame updates can outrun React’s floor selection commit at a landing.
     // Keep the physical walker authoritative until a different floor is selected.
@@ -259,7 +246,36 @@ export function WalkCameraController({
       current.z === pose.z
         ? current
         : { ...pose, floorId: floor.id, elevation };
-    const verticalRange = walkJumpVerticalRange(start.elevation, jumpHeight.current);
+    if (standingSupport.current)
+      jumpHeight.current = Math.max(0, standingSupport.current.elevation - start.elevation);
+    const previousFeetElevation = start.elevation + jumpHeight.current;
+
+    // Consume every request, including airborne presses, so landing cannot queue a hop.
+    if (jumpRequestRef?.current) {
+      if (
+        standingSupport.current !== null ||
+        (jumpHeight.current === 0 && jumpVelocity.current === 0)
+      ) {
+        standingSupport.current = null;
+        jumpVelocity.current = WALK_JUMP_LAUNCH_SPEED;
+      }
+      jumpRequestRef.current = false;
+    }
+    let airborne =
+      standingSupport.current === null && (jumpVelocity.current !== 0 || jumpHeight.current > 0);
+    if (airborne) {
+      jumpHeight.current += jumpVelocity.current * delta - 0.5 * WALK_JUMP_GRAVITY * delta * delta;
+      jumpVelocity.current -= WALK_JUMP_GRAVITY * delta;
+    }
+
+    // Collision consumes the same committed pose as the model. Proximity changes
+    // become traversable when React applies them to both on the next render.
+    const passable = passableOpeningIds(
+      building?.floors ?? [floor],
+      openingPositions,
+      jumpHeight.current,
+    );
+    const verticalRange = walkJumpVerticalRange(start.elevation, jumpHeight.current, airborne);
     let next = building
       ? moveBuildingWalker(
           building,
@@ -271,7 +287,7 @@ export function WalkCameraController({
           registries,
           {
             verticalRange,
-            allowUnsupported: jumpHeight.current > 0,
+            allowUnsupported: airborne,
           },
         )
       : {
@@ -286,7 +302,7 @@ export function WalkCameraController({
           floorId: floor.id,
           elevation,
         };
-    if (building && jumpHeight.current > 0) {
+    if (building && airborne) {
       const fall = resolveWalkFall(
         building,
         next,
@@ -300,6 +316,33 @@ export function WalkCameraController({
         next = start;
       }
     }
+    if (standingSupport.current) {
+      const retained = retainedWalkSupport(furniture.current, next, standingSupport.current.id);
+      if (retained) {
+        standingSupport.current = retained;
+        jumpHeight.current = Math.max(0, retained.elevation - next.elevation);
+      } else {
+        jumpHeight.current = Math.max(0, standingSupport.current.elevation - next.elevation);
+        standingSupport.current = null;
+      }
+    } else if (airborne && jumpVelocity.current <= 0) {
+      const feetElevation = next.elevation + jumpHeight.current;
+      const support = crossedWalkSupport(
+        furniture.current,
+        next,
+        previousFeetElevation,
+        feetElevation,
+      );
+      if (support && support.elevation >= next.elevation) {
+        standingSupport.current = support;
+        jumpHeight.current = support.elevation - next.elevation;
+        jumpVelocity.current = 0;
+      } else if (jumpHeight.current <= 0) {
+        jumpHeight.current = jumpVelocity.current = 0;
+      }
+    }
+    airborne =
+      standingSupport.current === null && (jumpVelocity.current !== 0 || jumpHeight.current > 0);
     walker.current = next;
     if (next.floorId !== start.floorId) onFloorChange?.(next.floorId);
     pose.x = next.x;
@@ -313,7 +356,7 @@ export function WalkCameraController({
       ((reducedMotion ? 0 : speedRatio) - bobWeight.current) *
       (1 - Math.exp(-(speedRatio > 0.02 ? 10 : 14) * delta));
     bobPhase.current += speedRatio * Math.PI * 2 * 1.7 * delta;
-    const bob = jumpHeight.current > 0 ? 0 : Math.sin(bobPhase.current) * 0.015 * bobWeight.current;
+    const bob = airborne ? 0 : Math.sin(bobPhase.current) * 0.015 * bobWeight.current;
     camera.position.set(
       pose.x,
       next.elevation + WALK_EYE_HEIGHT + jumpHeight.current + bob,
