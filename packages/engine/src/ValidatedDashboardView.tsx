@@ -113,7 +113,6 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     lookDeltaRef,
     reducedMotion,
     openingPositions,
-    boundOpeningIds,
     resolvedBindings,
     handleAutomaticOpeningsChange,
     setWalkRoomId,
@@ -311,7 +310,6 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                         invertYAxis={invertYAxis}
                         reducedMotion={reducedMotion}
                         openingPositions={openingPositions}
-                        boundOpeningIds={boundOpeningIds}
                         onOpeningsChange={handleAutomaticOpeningsChange}
                         onRoomChange={setWalkRoomId}
                       />

@@ -9,6 +9,7 @@ import { withModules } from "./test-server.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
+  const { resolveOpeningPositions } = await load("/packages/engine/src/opening-pose.ts");
   const { useDesktopWalkInput } = await load("/packages/engine/src/desktop-walk-input.ts");
   const { WalkCameraController } = await load("/packages/engine/src/WalkCameraController.tsx");
   const { DioramaGround } = await load("/packages/engine/src/architecture-scene/DioramaGround.tsx");
@@ -129,60 +130,57 @@ await withModules(async (load) => {
     );
   });
 
-  test("walk opens unbound doors locally and never overrides bound doors", async () => {
+  test("walk opens detector-bound doors locally, crosses them, and restores their sensor pose", async () => {
     const floor = neutralDemoManifest.floors[0];
-    const poseRef = { current: { x: 3.5, z: 2.7, yaw: 0, pitch: 0 } };
-    const changes = [];
-    const props = {
-      floor,
-      building: neutralDemoManifest,
-      poseRef,
-      movementInputRef: { current: { x: 0, y: 0 } },
-      lookInputRef: { current: { x: 0, y: 0 } },
-      lookDeltaRef: { current: { x: 0, y: 0 } },
-      reducedMotion: true,
-      openingPositions: {},
-      boundOpeningIds: new Set(),
-      onOpeningsChange(ids) {
-        changes.push([...ids]);
-      },
-      onRoomChange() {},
-    };
-    const renderer = await create(createElement(WalkCameraController, props));
-    try {
-      await renderer.advanceFrames(1, 1 / 60);
-      assert.ok(changes.some((ids) => ids.includes("demo-door")));
-      changes.length = 0;
-      poseRef.current.x = 2;
-      poseRef.current.z = 1;
-      await renderer.update(
-        createElement(WalkCameraController, { ...props, openingPositions: { "demo-door": 1 } }),
-      );
-      await renderer.advanceFrames(1, 1 / 60);
-      assert.deepEqual(changes.at(-1), []);
-      changes.length = 0;
-      await renderer.update(
+    for (const sensorPosition of [0, 1, undefined]) {
+      const bindings = {
+        "demo-door": { bound: true, bindingKey: "contact", position: sensorPosition },
+      };
+      const retained = new Map();
+      let automatic = new Set();
+      const poseRef = { current: { x: 3.5, z: 2.7, yaw: 0, pitch: 0 } };
+      const props = {
+        floor,
+        building: neutralDemoManifest,
+        poseRef,
+        movementInputRef: { current: { x: 0, y: 1 } },
+        lookInputRef: { current: { x: 0, y: 0 } },
+        lookDeltaRef: { current: { x: 0, y: 0 } },
+        reducedMotion: true,
+        boundOpeningIds: new Set(["demo-door"]),
+        onOpeningsChange(ids) {
+          automatic = ids;
+        },
+        onRoomChange() {},
+      };
+      const render = () =>
         createElement(WalkCameraController, {
           ...props,
-          openingPositions: { "demo-door": 1 },
-          boundOpeningIds: new Set(["demo-door"]),
-        }),
-      );
-      await renderer.advanceFrames(1, 1 / 60);
-      assert.deepEqual(changes, []);
-      poseRef.current.x = 3.5;
-      poseRef.current.z = 2.7;
-      await renderer.update(
-        createElement(WalkCameraController, {
-          ...props,
-          openingPositions: { "demo-door": 0 },
-          boundOpeningIds: new Set(["demo-door"]),
-        }),
-      );
-      await renderer.advanceFrames(1, 1 / 60);
-      assert.deepEqual(changes, [], "proximity must not open a bound closed door");
-    } finally {
-      await renderer.unmount();
+          openingPositions: resolveOpeningPositions(automatic, bindings, retained),
+        });
+      const renderer = await create(render());
+      try {
+        await renderer.advanceFrames(1, 1 / 60);
+        assert.ok(automatic.has("demo-door"), "approach opens even a bound closed or unknown door");
+        assert.equal(resolveOpeningPositions(automatic, bindings, retained)["demo-door"], 1);
+        for (let frame = 0; frame < 40; frame++) {
+          await renderer.update(render());
+          await renderer.advanceFrames(1, 1 / 60);
+        }
+        assert.ok(poseRef.current.z > 3.8, "walker crosses the doorway");
+        poseRef.current.x = 2;
+        poseRef.current.z = 1;
+        await renderer.update(render());
+        await renderer.advanceFrames(1, 1 / 60);
+        assert.equal(automatic.has("demo-door"), false);
+        assert.equal(
+          resolveOpeningPositions(automatic, bindings, retained)["demo-door"],
+          sensorPosition ?? 0,
+          "departure restores the sensor pose without retaining the local override",
+        );
+      } finally {
+        await renderer.unmount();
+      }
     }
   });
 

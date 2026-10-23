@@ -152,7 +152,7 @@ await withModules(async (load) => {
       assert.equal(bindings.openings[garage.id].position, value / 100);
       assert.equal(
         resolveOpeningPositions(new Set([garage.id]), bindings.openings, retained)[garage.id],
-        value / 100,
+        1,
       );
       assert.ok(
         Object.values(bindings.rooms).some((room) =>

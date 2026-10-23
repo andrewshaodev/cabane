@@ -144,12 +144,14 @@ panel. Compact layouts retain their upward-opening menus.
 Presence and room-status summaries derive from runtime entities. Device-specific
 sheets, room sheets, and camera viewing share the normal dashboard surface.
 Visible scene lights respond to compatible light slots. Bound opening states
-control their visual state; unbound walkable doors can open automatically near
-the player. Missing HA data keeps the architectural scene usable.
+control their visual state outside Walk proximity. Every door opens locally near
+the walker regardless of detector or cover state, so that state never blocks passage.
+On departure or leaving Walk, the door resumes its bound state. Proximity never
+sends a Home Assistant command. Missing HA data keeps the architectural scene usable.
 The demo leaves door contacts and door covers unbound so doors, including the
 garage door, open on approach and close on departure in Walk. Other supported
 device controls and window contacts retain their simulated bindings. Real HA
-opening bindings continue to take precedence over proximity.
+opening bindings use the same local proximity override.
 
 Televisions accept either a primary media-player binding for controls or a camera
 binding for scene video and the camera viewer. Only camera entity bindings request

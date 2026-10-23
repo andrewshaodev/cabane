@@ -207,8 +207,10 @@ jambs fit inside the opening envelope, and slats retract upward using normalized
 opening position. Geometry and Walk share the header, travel, and clear-width
 calculation. Walk requires eye height plus a 0.18 m head margin and current jump
 elevation; jambs remain collidable. Reported positions apply directly, without
-an independent animation timeline. Unbound doors open locally on approach;
-bound doors follow reported/retained state, even when closed or unavailable.
+an independent animation timeline. All doors open locally on approach in Walk,
+including bound doors reporting closed or unavailable. This temporary visual and
+collision override never commands the real device or replaces its retained state.
+Departure or leaving Walk restores the reported/retained pose.
 
 L-shaped stair elevation rises along each flight and remains constant across its
 square landing; the risers are split proportionally between the two runs. Spiral

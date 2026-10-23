@@ -183,15 +183,6 @@ export function useDashboardController({
     requestMobileLandscape,
   } = walk;
   const { quality, canvasDpr, adjustQuality } = useAdaptiveSceneQuality(coarsePointer, walkMode);
-  const boundOpeningIds = useMemo(
-    () =>
-      new Set(
-        Object.values(resolvedBindings.openings)
-          .filter((opening) => opening.bound)
-          .map((opening) => opening.openingId),
-      ),
-    [resolvedBindings.openings],
-  );
   const openingPositions = useMemo(
     () =>
       resolveOpeningPositions(
@@ -454,7 +445,6 @@ export function useDashboardController({
     lookDeltaRef,
     reducedMotion,
     openingPositions,
-    boundOpeningIds,
     resolvedBindings,
     handleAutomaticOpeningsChange,
     setWalkRoomId,

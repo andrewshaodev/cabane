@@ -5,7 +5,7 @@ export const WALK_HEAD_MARGIN = 0.18;
 export type OpeningPositions = Readonly<Record<string, number>>;
 export type RetainedOpeningPositions = Map<string, { bindingKey: string; position: number }>;
 
-/** Bound state wins over local proximity; retained poses belong to one binding identity. */
+/** Walk proximity overrides the display only; retained poses always track the binding state. */
 export function resolveOpeningPositions(
   automatic: ReadonlySet<string>,
   bindings: ResolvedHomeBindings["openings"],
@@ -23,7 +23,7 @@ export function resolveOpeningPositions(
     const position =
       binding.position ?? (previous?.bindingKey === binding.bindingKey ? previous.position : 0);
     retained.set(id, { bindingKey: binding.bindingKey, position });
-    result[id] = position;
+    result[id] = automatic.has(id) ? 1 : position;
   }
   for (const id of automatic) if (!(id in result)) result[id] = 1;
   return result;

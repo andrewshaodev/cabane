@@ -193,7 +193,7 @@ await withModules(async (load) => {
     );
   });
 
-  test("bound contact state overrides local proximity", async () => {
+  test("local proximity overrides a closed contact without changing its reported state", async () => {
     const manifest = connectedManifestFixture(neutralDemoManifest);
     const profile = connectedProfileFixture();
     const runtime = connectedRuntimeFixture();
@@ -207,8 +207,10 @@ await withModules(async (load) => {
     const closed = resolver.resolveHomeAssistantBindings(manifest, profile, runtime);
     assert.deepEqual(
       resolveOpeningPositions(automatic, closed.openings, lastKnown)["demo-window"],
-      0,
+      1,
     );
+    assert.equal(closed.openings["demo-window"].position, 0);
+    assert.equal(resolveOpeningPositions(new Set(), closed.openings, lastKnown)["demo-window"], 0);
 
     runtime.entityStates["binary_sensor.demo_window"] = {
       ...runtime.entityStates["binary_sensor.demo_window"],

@@ -30,8 +30,7 @@ export function deriveDemoSessionDefinition(
     ),
   );
   const slots = collectBindingSlots(manifest).flatMap((descriptor) => {
-    // Simulated closed contacts/covers would override Walk's proximity opening.
-    // Leave demo doors unbound so visitors can explore every room.
+    // Demo doors use local proximity without simulated contact/cover controls.
     if (
       (descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover") &&
       descriptor.openingId &&

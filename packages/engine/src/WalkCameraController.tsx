@@ -59,7 +59,6 @@ export function WalkCameraController({
   invertYAxis = false,
   reducedMotion,
   openingPositions,
-  boundOpeningIds,
   onOpeningsChange,
   onRoomChange,
 }: {
@@ -79,7 +78,6 @@ export function WalkCameraController({
   invertYAxis?: boolean;
   reducedMotion: boolean;
   openingPositions: OpeningPositions;
-  boundOpeningIds: ReadonlySet<string>;
   onOpeningsChange: (next: ReadonlySet<string>) => void;
   onRoomChange: (roomId: string | null) => void;
 }) {
@@ -181,9 +179,6 @@ export function WalkCameraController({
   }, [elevation, invalidate, poseRef]);
 
   const openIdsRef = useRef<ReadonlySet<string>>(new Set());
-  openIdsRef.current = new Set(
-    Object.keys(openingPositions).filter((id) => openingPositions[id] > 0),
-  );
 
   useFrame((_, rawDelta) => {
     const camera = cameraRef.current;
@@ -217,7 +212,7 @@ export function WalkCameraController({
 
     let nextOpen: Set<string> | null = null;
     for (const opening of floor.openings) {
-      if (opening.kind !== "door" || boundOpeningIds.has(opening.id)) continue;
+      if (opening.kind !== "door") continue;
       const currentlyOpen = (nextOpen ?? openIdsRef.current).has(opening.id);
       const shouldOpen = shouldAutoOpenDoor(distanceToOpening(pose, opening, floor), currentlyOpen);
       if (shouldOpen !== currentlyOpen) {
@@ -226,7 +221,10 @@ export function WalkCameraController({
         else nextOpen.delete(opening.id);
       }
     }
-    if (nextOpen) onOpeningsChange(nextOpen);
+    if (nextOpen) {
+      openIdsRef.current = nextOpen;
+      onOpeningsChange(nextOpen);
+    }
 
     // Consume every request, including airborne presses, so landing cannot queue a hop.
     if (jumpRequestRef?.current) {
