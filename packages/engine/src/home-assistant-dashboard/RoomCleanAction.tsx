@@ -105,13 +105,28 @@ export function RoomCleanAction({ areaId, roomId }: { areaId: string; roomId?: s
       )}
       <button
         type="button"
-        className="room-control-sheet__walk"
+        className="room-control-sheet__walk room-control-sheet__walk-entry"
         disabled={disabled}
         aria-label="Clean room"
+        aria-busy={pending}
         title="Clean room"
         onClick={() => void clean()}
       >
-        {pending ? "Sending…" : "Clean"}
+        <svg
+          viewBox="0 0 24 24"
+          width="22"
+          height="22"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="8" />
+          <circle cx="12" cy="9" r="2" />
+          <path d="M8 16h8M4 18l-2 2m18-2 2 2" />
+        </svg>
       </button>
       {sent && <span role="status">Cleaning requested</span>}
       {error && (
