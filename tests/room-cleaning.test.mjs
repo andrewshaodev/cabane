@@ -118,7 +118,7 @@ await withModules(async (load) => {
             ),
           ),
         );
-      const clean = () => document.querySelector('[aria-label="Clean room"]');
+      const clean = () => document.querySelector(".room-clean-action > button");
       try {
         await render();
         assert.deepEqual(reads[0], { type: "config/entity_registry/get", entity_id: "vacuum.a" });
@@ -139,7 +139,8 @@ await withModules(async (load) => {
         assert.match(document.querySelector('[role="alert"]').textContent, /failed/);
         await act(async () => clean().click());
         await act(async () => finish.resolve());
-        assert.match(document.querySelector('[role="status"]').textContent, /requested/);
+        assert.equal(clean().getAttribute("aria-label"), "Cleaning requested");
+        assert.equal(document.querySelector('[role="status"]'), null);
         runtime = { ...runtime, canMutate: false };
         await render();
         assert.equal(clean().disabled, true);

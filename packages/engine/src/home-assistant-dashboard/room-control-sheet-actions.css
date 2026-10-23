@@ -46,3 +46,8 @@
 .room-clean-action select ~ span {
   top: calc(100% + 52px);
 }
+
+.room-clean-action button[data-confirmed="true"] {
+  background: #35594b;
+  color: #caffdf;
+}

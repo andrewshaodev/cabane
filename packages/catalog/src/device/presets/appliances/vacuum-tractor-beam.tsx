@@ -1,23 +1,44 @@
-import { useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { ToonMaterial } from "@cabane/engine";
-import type { Group } from "three";
+import { Object3D, type Group, type InstancedMesh } from "three";
 
 export function VacuumTractorBeam({ reducedMotion }: { reducedMotion: boolean }) {
-  const dust = useRef<Group>(null);
+  const earth = useRef<InstancedMesh>(null);
+  const sparks = useRef<InstancedMesh>(null);
+  const particle = useMemo(() => new Object3D(), []);
+  const updateDust = (elapsed: number, still: boolean) => {
+    let earthIndex = 0;
+    let sparkIndex = 0;
+    for (let index = 0; index < 24; index++) {
+      const progress = (elapsed * 0.32 + index / 24) % 1;
+      const angle = index * 2.4 + progress * 5;
+      const radius = 0.62 * (1 - progress) + 0.04;
+      if (still) {
+        particle.position.set(Math.sin(index) * 0.4, index / 17, Math.cos(index) * 0.4);
+        particle.rotation.set(0, 0, 0);
+        particle.scale.setScalar(1);
+      } else {
+        particle.position.set(Math.cos(angle) * radius, progress * 1.46, Math.sin(angle) * radius);
+        particle.rotation.set(progress * 8, angle, 0);
+        particle.scale.setScalar(Math.sin(progress * Math.PI));
+      }
+      particle.updateMatrix();
+      if (index % 3 === 0) earth.current?.setMatrixAt(earthIndex++, particle.matrix);
+      else sparks.current?.setMatrixAt(sparkIndex++, particle.matrix);
+    }
+    if (earth.current) earth.current.instanceMatrix.needsUpdate = true;
+    if (sparks.current) sparks.current.instanceMatrix.needsUpdate = true;
+  };
+  useLayoutEffect(() => {
+    updateDust(0, true);
+  });
   const time = useRef(0);
   const waves = useRef<Group>(null);
   useFrame(({ invalidate }, delta) => {
-    if (reducedMotion || !dust.current) return;
+    if (reducedMotion || !earth.current) return;
     time.current += Math.min(delta, 0.05);
-    dust.current.children.forEach((particle, index) => {
-      const progress = (time.current * 0.32 + index / 24) % 1;
-      const angle = index * 2.4 + progress * 5;
-      const radius = 0.62 * (1 - progress) + 0.04;
-      particle.position.set(Math.cos(angle) * radius, progress * 1.46, Math.sin(angle) * radius);
-      particle.rotation.set(progress * 8, angle, 0);
-      particle.scale.setScalar(Math.sin(progress * Math.PI));
-    });
+    updateDust(time.current, false);
     waves.current?.children.forEach((wave, index) => {
       const progress = (time.current * 0.24 + index / 5) % 1;
       wave.position.y = 0.04 + progress * 1.41;
@@ -59,22 +80,24 @@ export function VacuumTractorBeam({ reducedMotion }: { reducedMotion: boolean })
           </mesh>
         ))}
       </group>
-      <group ref={dust}>
-        {Array.from({ length: 24 }, (_, index) => (
-          <mesh
-            key={index}
-            position={[Math.sin(index) * 0.4, index / 17, Math.cos(index) * 0.4]}
-            raycast={() => undefined}
-          >
-            <octahedronGeometry args={[index % 3 === 0 ? 0.025 : 0.013]} />
-            <ToonMaterial
-              color={index % 3 === 0 ? "#c8a278" : "#b1ffee"}
-              emissive="#78c9b1"
-              emissiveIntensity={0.35}
-            />
-          </mesh>
-        ))}
-      </group>
+      <instancedMesh
+        ref={earth}
+        args={[undefined, undefined, 8]}
+        frustumCulled={false}
+        raycast={() => undefined}
+      >
+        <octahedronGeometry args={[0.025]} />
+        <ToonMaterial color="#c8a278" emissive="#78c9b1" emissiveIntensity={0.35} />
+      </instancedMesh>
+      <instancedMesh
+        ref={sparks}
+        args={[undefined, undefined, 16]}
+        frustumCulled={false}
+        raycast={() => undefined}
+      >
+        <octahedronGeometry args={[0.013]} />
+        <ToonMaterial color="#b1ffee" emissive="#78c9b1" emissiveIntensity={0.35} />
+      </instancedMesh>
     </group>
   );
 }

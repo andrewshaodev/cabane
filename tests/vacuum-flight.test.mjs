@@ -17,6 +17,11 @@ await withModules(async (load) => {
     const renderer = await create(React.createElement(RobotVacuumModel, props));
     try {
       assert.ok(renderer.scene.findByProps({ name: "vacuum-tractor-beam" }));
+      const batches = renderer.scene.findAll((node) => node.instance.isInstancedMesh);
+      assert.deepEqual(
+        batches.map((node) => node.instance.count).sort((a, b) => a - b),
+        [8, 16],
+      );
       const hull = renderer.scene.findByProps({ name: "robot-vacuum-lidar" }).parent;
       assert.equal(hull.instance.position.y, 1.5);
       await renderer.advanceFrames(10, 0.1);

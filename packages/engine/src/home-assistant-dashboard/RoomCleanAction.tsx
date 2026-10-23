@@ -68,9 +68,12 @@ export function RoomCleanAction({ areaId, roomId }: { areaId: string; roomId?: s
         type="button"
         className="room-control-sheet__walk room-control-sheet__walk-entry"
         disabled={disabled}
-        aria-label="Clean room"
+        aria-label={
+          pending ? "Sending cleaning request" : sent ? "Cleaning requested" : "Clean room"
+        }
         aria-busy={pending}
-        title="Clean room"
+        title={pending ? "Sending cleaning request" : sent ? "Cleaning requested" : "Clean room"}
+        data-confirmed={sent ? "true" : undefined}
         onClick={() => void clean()}
       >
         <svg
@@ -84,12 +87,18 @@ export function RoomCleanAction({ areaId, roomId }: { areaId: string; roomId?: s
           strokeLinejoin="round"
           aria-hidden="true"
         >
-          <circle cx="12" cy="12" r="8" />
-          <circle cx="12" cy="9" r="2" />
-          <path d="M8 16h8M4 18l-2 2m18-2 2 2" />
+          {sent ? (
+            <path d="m5 12 4 4L19 6" />
+          ) : (
+            <>
+              <circle cx="12" cy="12" r="8" />
+              <circle cx="12" cy="9" r="2" />
+              <path d="M8 16h8M4 18l-2 2m18-2 2 2" />
+            </>
+          )}
         </svg>
       </button>
-      {sent && <span role="status">Cleaning requested</span>}
+
       {(error || mappingError) && (
         <span role="alert">
           {error || mappingError}
