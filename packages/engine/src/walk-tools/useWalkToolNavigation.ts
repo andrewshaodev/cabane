@@ -9,6 +9,7 @@ import {
   type BoxWalkCollider,
 } from "../navigation";
 import { resolveWalkLanding } from "../navigation/walk-landing";
+import type { WalkSupport } from "../navigation/walk-support";
 import { createTerrainSupportQuery } from "../navigation/terrain-support";
 import type { BuildingGeometry } from "../stairs/types";
 import type { BuildingWalkPoint } from "../stairs/stair-navigation";
@@ -30,6 +31,7 @@ export function useWalkToolNavigation({
   lookDeltaRef,
   jumpHeight,
   jumpVelocity,
+  standingSupport,
   bobWeight,
   jumpRequestRef,
   lastRoomId,
@@ -50,6 +52,7 @@ export function useWalkToolNavigation({
   lookDeltaRef: MutableRefObject<StickVector>;
   jumpHeight: MutableRefObject<number>;
   jumpVelocity: MutableRefObject<number>;
+  standingSupport: MutableRefObject<WalkSupport | null>;
   bobWeight: MutableRefObject<number>;
   jumpRequestRef?: MutableRefObject<boolean>;
   lastRoomId: MutableRefObject<string | null>;
@@ -119,6 +122,7 @@ export function useWalkToolNavigation({
         lookVelocity.current = { x: 0, y: 0 };
         lookDeltaRef.current = { x: 0, y: 0 };
         jumpHeight.current = jumpVelocity.current = bobWeight.current = 0;
+        standingSupport.current = null;
         if (jumpRequestRef) jumpRequestRef.current = false;
         camera.position.set(checked.x, checked.elevation + WALK_EYE_HEIGHT, checked.z);
         camera.rotation.set(poseRef.current.pitch, poseRef.current.yaw, 0);
@@ -150,6 +154,7 @@ export function useWalkToolNavigation({
     lookDeltaRef,
     jumpHeight,
     jumpVelocity,
+    standingSupport,
     bobWeight,
     jumpRequestRef,
     lastRoomId,

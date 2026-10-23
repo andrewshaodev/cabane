@@ -37,7 +37,7 @@ export function DoubleBed({
           </>
         )}
       </group>
-      <group name="double-bed-low-collider" userData={{ walkCollider: true }}>
+      <group name="double-bed-low-collider" userData={{ walkCollider: true, walkSupport: true }}>
         {[-0.7, 0.7].flatMap((x) =>
           [-0.9, 0.9].map((z) => (
             <mesh key={`${x}-${z}`} position={[x, 0.085, z]} castShadow>

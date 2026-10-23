@@ -180,8 +180,9 @@ pressing it while airborne does not trigger another jump. The jump follows floor
 and stair elevation. Its tucked-leg clearance can pass over low furniture, hedges,
 and authored balcony railings or low walls while full walls and pool edges remain
 solid. Leaving an elevated outdoor platform over rendered terrain transitions into
-a fall to the ground floor. Furniture does not become a landing surface. Mobile
-controls remain unchanged.
+a fall to the ground floor. Catalog furniture can opt a flat top into Walk support;
+the walker lands without horizontal correction, can move and jump on the top, and
+falls naturally after stepping off. Mobile controls remain unchanged.
 Escape or Back to editor exits the draft walkthrough.
 
 Room selection updates finish emphasis independently of procedural architecture

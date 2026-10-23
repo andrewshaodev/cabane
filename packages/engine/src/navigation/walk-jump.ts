@@ -13,10 +13,8 @@ const WALK_GROUND_CLEARANCE = 0.05;
 export const walkJumpVerticalRange = (
   supportElevation: number,
   jumpHeight: number,
+  airborne = jumpHeight > 0,
 ): WalkVerticalRange => ({
-  minY:
-    supportElevation +
-    jumpHeight +
-    (jumpHeight > 0 ? WALK_JUMP_TUCK_HEIGHT : WALK_GROUND_CLEARANCE),
+  minY: supportElevation + jumpHeight + (airborne ? WALK_JUMP_TUCK_HEIGHT : WALK_GROUND_CLEARANCE),
   maxY: supportElevation + jumpHeight + WALK_EYE_HEIGHT + WALK_HEAD_MARGIN,
 });
