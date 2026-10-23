@@ -89,15 +89,18 @@ export function RoomCameraTransition({
     }
     if (!enabled) return;
     if (room && !frame) return;
+    const roomId = room?.id ?? null;
+    const selectionChanged = currentRoom.current !== roomId;
+    const retargetingActiveMotion = motion.current !== null && !selectionChanged;
+    if (!selectionChanged && !requested && !retargetingActiveMotion) return;
     const from = readPose(orbit);
     let destination: OrbitPose;
     if (room && frame) {
       destination = roomCameraFraming(floor, room, elevation, size, frame);
     } else {
-      if (!currentRoom.current && !requested) return;
       destination = overviewPose();
     }
-    currentRoom.current = room?.id ?? null;
+    currentRoom.current = roomId;
     const values = valuesFor(from);
     const next = valuesFor(destination);
     next[5] = nearestOrbitAngle(values[5], next[5]);

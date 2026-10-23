@@ -196,6 +196,32 @@ await withModules(async (load) => {
     }
   });
 
+  test("a refreshed selected room does not override the user's camera after the initial focus", async () => {
+    const props = { floor, resetKey: 0, roomFrame: frame, reducedMotion: true };
+    const renderer = await create(createElement(OrbitCamera, { ...props, room }), options);
+    try {
+      const controls = controlsFor(renderer);
+      controls.object.position.x += 2;
+      controls.target.x += 2;
+      controls.object.zoom = 8;
+      controls.update();
+      const userPose = pose(controls);
+
+      await renderer.update(
+        createElement(OrbitCamera, {
+          ...props,
+          floor: { ...floor },
+          room: { ...room },
+          roomFrame: { ...frame },
+        }),
+      );
+
+      close(pose(controls), userPose, 0.000001);
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("wall emphasis assigns interior faces to rooms without changing geometry or scene lighting", () => {
     const groups = buildArchitecturalWallGeometries(floor);
     try {
