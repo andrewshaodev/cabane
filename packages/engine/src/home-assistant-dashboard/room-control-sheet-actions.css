@@ -6,3 +6,43 @@
   outline: 2px solid #9b5939;
   outline-offset: 2px;
 }
+
+.room-clean-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.room-clean-action select {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 180px;
+  border-radius: 8px;
+  padding: 6px;
+  font: inherit;
+}
+
+.room-clean-action > span {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: min(220px, calc(100vw - 120px));
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  color: #263238;
+  box-shadow: 0 4px 16px #0002;
+  font-size: 12px;
+}
+
+.room-clean-action .room-control-sheet__walk:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.room-clean-action select ~ span {
+  top: calc(100% + 52px);
+}

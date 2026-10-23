@@ -333,3 +333,33 @@ not exposed in the compact preview menu. The active
 selection lasts through camera/floor changes but resets when leaving or reloading
 the home. Sunny uses clear weather and never changes time of day. Weather is removable/reorderable; saved
 custom bars, including empty bars, retain their layout. There is no weather hotkey.
+
+### Room cleaning
+
+The room sheet offers **Clean** beside Walk when an enabled, visible HA vacuum
+supports `CLEAN_AREA` and maps that room's HA area to nonempty vacuum segments.
+Cabane uses the explicit Connect room-to-area binding, never room-name matching
+or the vacuum's dock area. No modeled vacuum device or per-room vacuum slot is required.
+It reads `options.vacuum.area_mapping` with `config/entity_registry/get` on demand;
+registry updates and reconnects invalidate those readings. Mapping failures show a
+retry action and cannot issue a cleaning command. Missing mappings hide Clean.
+
+One matching robot can be started directly; multiple matches require choosing one.
+Disconnected, unavailable, stale, or pending controls cannot dispatch. The command is
+`vacuum.clean_area`, targeting only the chosen vacuum, with
+`cleaning_area_id: [areaId]`. HA owns translation to segments and robot integration
+behavior. Acceptance shows “Cleaning requested”; failures remain visible for retry.
+There is no whole-home or manufacturer-specific fallback. Older integrations without
+area-cleaning support retain their existing vacuum device controls.
+
+Demo vacuum slots expose synthetic area coverage and accept the same command in
+memory. Neither coverage nor real HA IDs are added to the portable home project.
+
+Mapped robot-vacuum models float 1.5 model-space meters while their confirmed,
+available state is cleaning, with a rotating hull, ascending beam rings and dust.
+Reduced motion freezes the effect. A successful Cabane room-clean request records
+its destination in session memory so the modeled robot moves to that room on its
+rendered floor. It returns to its authored placement when cleaning stops. This is
+a decorative status visualization, not robot localization: external cleaning has
+no inferred destination and remains at the authored location. The destination is
+not persisted or written to HA. The activity studio includes a simulated vacuum.

@@ -4,6 +4,7 @@ import type { EntityBindingSlotSpec, EntityId, EntityStateSnapshot } from "../..
 const supportedDomains = [
   "light",
   "fan",
+  "vacuum",
   "valve",
   "switch",
   "climate",
@@ -41,6 +42,10 @@ export function createDemoDeviceState(
   };
   let state = "off";
   switch (domain) {
+    case "vacuum":
+      state = "docked";
+      Object.assign(attributes, { supported_features: 16384 | 8192 | 4096 | 16 | 8 | 4 });
+      break;
     case "fan":
       state = "on";
       Object.assign(attributes, { percentage: 50, supported_features: 49 });
@@ -125,6 +130,22 @@ export function applyDemoServiceCall(
   let next = state.state;
   let allowed: readonly string[] = [];
   switch (call.domain) {
+    case "vacuum":
+      if (call.service === "clean_area") {
+        allowed = ["cleaning_area_id"];
+        if (
+          !Array.isArray(data.cleaning_area_id) ||
+          data.cleaning_area_id.length === 0 ||
+          !data.cleaning_area_id.every((area) => typeof area === "string" && area.length > 0)
+        )
+          return invalid();
+        next = "cleaning";
+      } else if (call.service === "start") next = "cleaning";
+      else if (call.service === "pause") next = "paused";
+      else if (call.service === "stop") next = "idle";
+      else if (call.service === "return_to_base") next = "returning";
+      else return invalid();
+      break;
     case "fan":
       if (call.service === "turn_off") next = "off";
       else if (call.service === "turn_on") {

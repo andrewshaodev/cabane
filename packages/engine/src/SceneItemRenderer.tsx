@@ -1,3 +1,6 @@
+import { useVacuumRoom } from "./vacuum-cleaning-location";
+import { useHomeAssistantRuntime } from "./HomeAssistantRuntimeContext";
+import { planPointToWorld } from "./geometry";
 import { omitUndefinedProperties } from "./defined-properties";
 import { useCabaneDom } from "./CabaneDom";
 import { resolveModelVariant } from "./model-variants";
@@ -78,6 +81,7 @@ function DeviceSceneItem({
   onInteract,
   liveMediaByEntityId,
   groupName,
+  floor,
 }: {
   item: Extract<SceneItemSpec, { kind: "device" }>;
   transform: ResolvedItemTransform;
@@ -88,6 +92,7 @@ function DeviceSceneItem({
   onInteract: (target: ExtensionInteractionTarget) => void;
   liveMediaByEntityId: Readonly<Partial<Record<EntityId, DeviceLiveMedia>>>;
   groupName: string;
+  floor: FloorSpec;
 }) {
   const dom = useCabaneDom();
   const scale = deviceSceneItemScaleForSize(item.size, definition);
@@ -115,6 +120,27 @@ function DeviceSceneItem({
   const primary = resolvedDevice.entities.find((entity) => entity.slotId === primarySlot?.id);
   const state = sceneLightState(item.lightState, primary?.state, nightLighting);
   const visualState = deviceVisualStateForSnapshot(state);
+  const runtime = useHomeAssistantRuntime();
+  const cleaningRoom = useVacuumRoom(
+    runtime.callService,
+    primary?.entityId,
+    state?.state === "cleaning",
+  );
+  const room = floor.rooms.find((candidate) => candidate.id === cleaningRoom);
+  const cleaning =
+    item.modelId === "robot-vacuum" &&
+    state?.available &&
+    !state.stale &&
+    state.state === "cleaning";
+  const points =
+    cleaning && room ? room.polygon.map((point) => planPointToWorld(point, floor.coordinates)) : [];
+  const position = points.length
+    ? ([
+        points.reduce((sum, p) => sum + p[0], 0) / points.length,
+        transform.position[1],
+        points.reduce((sum, p) => sum + p[1], 0) / points.length,
+      ] as [number, number, number])
+    : transform.position;
   const walkInteractionTarget = {
     id: item.id,
     label: primarySlot?.presentation.label ?? item.id,
@@ -139,7 +165,7 @@ function DeviceSceneItem({
   return (
     <group
       name={groupName}
-      position={transform.position}
+      position={position}
       rotation={[0, transform.rotationYRadians, 0]}
       scale={scale}
       userData={{
@@ -305,6 +331,7 @@ export const SceneItemRenderer = memo(function SceneItemRenderer({
       walkMode={walkMode}
       onInteract={onInteract}
       liveMediaByEntityId={liveMediaByEntityId}
+      floor={floor}
       groupName={`scene-item-${item.id}`}
     />
   );
@@ -354,6 +381,7 @@ export function LegacyDeviceItemRenderer({
       walkMode={walkMode}
       onInteract={onInteract}
       liveMediaByEntityId={liveMediaByEntityId}
+      floor={floor}
       groupName={`device-${item.id}`}
     />
   );

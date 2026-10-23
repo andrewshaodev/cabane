@@ -61,6 +61,29 @@ export function DemoHomeAssistantSession({
     [definition, onInteraction],
   );
 
+  const sendStorageMessage = useCallback(
+    async <T,>(message: { type: string; [key: string]: unknown }): Promise<T> => {
+      if (
+        message.type === "config/entity_registry/get" &&
+        definition.runtime.entityRegistry.some(
+          (entry) => entry.entity_id === message.entity_id && entry.entity_id.startsWith("vacuum."),
+        )
+      ) {
+        return {
+          options: {
+            vacuum: {
+              area_mapping: Object.fromEntries(
+                definition.runtime.areas.map((area, index) => [area.area_id, [String(index + 1)]]),
+              ),
+            },
+          },
+        } as T;
+      }
+      throw new Error("The demo cannot access Home Assistant storage.");
+    },
+    [definition],
+  );
+
   const runtime = useMemo<HomeAssistantRuntimeValue>(
     () => ({
       ...definition.runtime,
@@ -73,11 +96,9 @@ export function DemoHomeAssistantSession({
       refresh: async () => undefined,
       callService,
       cameraClient: null,
-      sendStorageMessage: async () => {
-        throw new Error("The demo cannot access Home Assistant storage.");
-      },
+      sendStorageMessage,
     }),
-    [callService, definition, snapshot],
+    [callService, definition, snapshot, sendStorageMessage],
   );
 
   const manager = useMemo<RuntimeBindingProfileManager>(

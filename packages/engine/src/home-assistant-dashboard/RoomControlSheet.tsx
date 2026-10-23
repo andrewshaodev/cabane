@@ -11,7 +11,10 @@ import { buildRoomModules, focusedDeviceModule, roomOverviewModules } from "./mo
 import { useBottomSheetDrag } from "./useBottomSheetDrag";
 import { useRoomHeroParallax } from "./useRoomHeroParallax";
 
+import { RoomCleanAction } from "./RoomCleanAction";
+
 export interface RoomControlSheetProps {
+  cleaningAreaId?: string | undefined;
   homeId?: string;
   resolved: ResolvedRoomBindings;
   roomStatus: RoomStatusSummary;
@@ -106,6 +109,7 @@ function ConnectionProblem({
 
 export function RoomControlSheet({
   homeId = "default",
+  cleaningAreaId,
   resolved,
   roomStatus,
   status,
@@ -285,6 +289,13 @@ export function RoomControlSheet({
               >
                 {reordering ? "Done" : <ReorderIcon />}
               </button>
+            )}
+            {!deviceOverlay && !focused && cleaningAreaId && (
+              <RoomCleanAction
+                key={cleaningAreaId}
+                areaId={cleaningAreaId}
+                roomId={resolved.room.id}
+              />
             )}
             {!deviceOverlay && (
               <button

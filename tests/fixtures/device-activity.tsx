@@ -21,6 +21,7 @@ function ActivityKitchenFurniture() {
   );
 }
 const devices: DeviceSlotSpec[] = [
+  ["robot-vacuum", 2.4, 1.8, 0],
   ["washing-machine", 0.55, 0.5, 0],
   ["tumble-dryer", 1.25, 0.5, 0],
   ["dishwasher", 1.95, 0.55, 0],
@@ -42,7 +43,13 @@ const devices: DeviceSlotSpec[] = [
   entitySlots: [
     {
       id: `activity-${model}-power`,
-      compatibleDomains: [model === "compact-wall-television" ? "media_player" : "switch"],
+      compatibleDomains: [
+        model === "robot-vacuum"
+          ? "vacuum"
+          : model === "compact-wall-television"
+            ? "media_player"
+            : "switch",
+      ],
       required: true,
       autoMap: "manual",
       deviceRole: "primary",
