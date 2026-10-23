@@ -126,6 +126,28 @@ await withModules(async (load) => {
       );
       await act(async () => root.render(render(manifest, 1)));
       assert.equal(runtimes.first.entityStates[id].state, "off");
+      const vacuum = Object.values(runtimes.first.entityStates).find((state) =>
+        state.entityId.startsWith("vacuum."),
+      );
+      assert.ok(vacuum);
+      const readRegistry = runtimes.first.sendStorageMessage;
+      const entry = await readRegistry({
+        type: "config/entity_registry/get",
+        entity_id: vacuum.entityId,
+      });
+      const areaId = runtimes.first.areas[0].area_id;
+      assert.ok(entry.options.vacuum.area_mapping[areaId].length);
+      await act(async () =>
+        runtimes.first.callService({
+          domain: "vacuum",
+          service: "clean_area",
+          target: { entity_id: vacuum.entityId },
+          data: { cleaning_area_id: [areaId] },
+        }),
+      );
+      assert.equal(runtimes.first.entityStates[vacuum.entityId].state, "cleaning");
+      assert.equal(runtimes.second.entityStates[vacuum.entityId].state, "docked");
+      assert.equal(runtimes.first.sendStorageMessage, readRegistry);
       const disposedCall = runtimes.first.callService;
       await act(async () => root.unmount());
       await assert.rejects(
