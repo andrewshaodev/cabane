@@ -25,6 +25,49 @@ await withModules(async (load) => {
     state: "docked",
     attributes: { supported_features: 16384 },
   });
+  test("room Clean stays hidden during discovery and reuses cached mapping after remount", async () => {
+    await withStorageDom(async ({ document }) => {
+      const root = createRoot(document.body.appendChild(document.createElement("div")));
+      let resolve;
+      let reads = 0;
+      const runtime = {
+        status: "connected",
+        canMutate: true,
+        areas: [{ area_id: "kitchen" }],
+        entityRegistry: [{ entity_id: "vacuum.a" }],
+        entityStates: { "vacuum.a": entity("vacuum.a") },
+        sendStorageMessage: () => {
+          reads++;
+          return new Promise((done) => {
+            resolve = done;
+          });
+        },
+      };
+      const render = async (key) =>
+        act(async () =>
+          root.render(
+            React.createElement(
+              HomeAssistantRuntimeValueProvider,
+              { value: runtime },
+              React.createElement(RoomCleanAction, { key, areaId: "kitchen" }),
+            ),
+          ),
+        );
+      try {
+        await render("first");
+        assert.equal(document.querySelector('[aria-label="Clean room"]'), null);
+        await act(async () =>
+          resolve({ options: { vacuum: { area_mapping: { kitchen: ["7"] } } } }),
+        );
+        assert.ok(document.querySelector('[aria-label="Clean room"]'));
+        await render("second");
+        assert.ok(document.querySelector('[aria-label="Clean room"]'));
+        assert.equal(reads, 1);
+      } finally {
+        await act(async () => root.unmount());
+      }
+    });
+  });
   test("HA area mapping requires nonempty segment lists", () => {
     assert.deepEqual(
       mappedCleaningAreas({

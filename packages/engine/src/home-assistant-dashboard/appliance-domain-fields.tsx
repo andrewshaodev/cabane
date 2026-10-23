@@ -1,3 +1,4 @@
+import { VacuumMappedAreas } from "./VacuumMappedAreas";
 import { textAttribute } from "./entity-field-contract";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -138,11 +139,18 @@ export function VacuumFields({ binding, enabled, onCallService }: DomainFieldsPr
             />
           )}
       </div>
-      {rooms.length > 0 && (
+      {featureEnabled(entity, 16384) && (
+        <VacuumMappedAreas
+          entityId={entity.entityId}
+          enabled={enabled && !moving}
+          onCallService={onCallService}
+        />
+      )}
+      {!featureEnabled(entity, 16384) && rooms.length > 0 && (
         <section className="vacuum-rooms" aria-labelledby={`${binding.slotId}-vacuum-rooms-title`}>
           <div className="vacuum-rooms__heading">
             <h3 id={`${binding.slotId}-vacuum-rooms-title`}>Clean a room</h3>
-            <span>Direct from Home Assistant</span>
+            <span>Vacuum segments (no HA area support)</span>
           </div>
           <div className="vacuum-rooms__grid">
             {rooms.map((room) => (
