@@ -35,6 +35,9 @@ export interface SegmentWalkCollider {
   from: WalkPoint;
   to: WalkPoint;
   halfThickness: number;
+  /** World-space vertical extent. Omitted colliders block at every walk height. */
+  minY?: number;
+  maxY?: number;
 }
 
 export interface BoxWalkCollider {
@@ -44,9 +47,17 @@ export interface BoxWalkCollider {
   maxX: number;
   minZ: number;
   maxZ: number;
+  /** World-space vertical extent. Omitted colliders block at every walk height. */
+  minY?: number;
+  maxY?: number;
 }
 
 export type WalkCollider = SegmentWalkCollider | BoxWalkCollider;
+
+export interface WalkVerticalRange {
+  minY: number;
+  maxY: number;
+}
 
 export interface DerivedWalkNavigationOptions {
   openOpeningIds?: ReadonlySet<string>;

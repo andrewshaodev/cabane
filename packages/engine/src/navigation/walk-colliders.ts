@@ -15,6 +15,7 @@ import {
   WALK_PLAYER_RADIUS,
   WalkCollider,
   WalkPoint,
+  WalkVerticalRange,
 } from "./walk-navigation-contract";
 
 const wallPointAtDistance = (
@@ -80,6 +81,7 @@ export const deriveWalkColliders = (
   floor: FloorSpec,
   openOpeningIds: ReadonlySet<string> = new Set(),
   furniture: readonly BoxWalkCollider[] = [],
+  elevation = 0,
 ): WalkCollider[] => [
   ...deriveOutdoorPlatformBarriers(floor).map((barrier, index): SegmentWalkCollider => ({
     kind: "segment",
@@ -87,6 +89,8 @@ export const deriveWalkColliders = (
     from: { x: barrier.from[0], z: barrier.from[1] },
     to: { x: barrier.to[0], z: barrier.to[1] },
     halfThickness: barrier.configuration.kind === "low-wall" ? 0.075 : 0.035,
+    minY: elevation,
+    maxY: elevation + barrier.configuration.heightMeters,
   })),
   ...(floor.hedges ?? [])
     .filter((hedge) => validHedge(hedge, floor.coordinates.metersPerPlanUnit))
@@ -99,6 +103,8 @@ export const deriveWalkColliders = (
         from: { x, z },
         to: { x: tx, z: tz },
         halfThickness: hedge.widthMeters / 2,
+        minY: elevation,
+        maxY: elevation + hedge.heightMeters,
       };
     }),
   ...(floor.pools ?? []).flatMap((pool): SegmentWalkCollider[] => {
@@ -139,6 +145,19 @@ export const deriveWalkColliders = (
   }),
   ...furniture,
 ];
+
+export const walkCollidersForVerticalRange = (
+  colliders: readonly WalkCollider[],
+  range?: WalkVerticalRange,
+): readonly WalkCollider[] =>
+  range
+    ? colliders.filter(
+        (collider) =>
+          collider.minY === undefined ||
+          collider.maxY === undefined ||
+          (collider.maxY > range.minY + 1e-7 && collider.minY < range.maxY - 1e-7),
+      )
+    : colliders;
 
 const distanceToWalkCollider = (point: WalkPoint, collider: WalkCollider) => {
   if (collider.kind === "segment") {

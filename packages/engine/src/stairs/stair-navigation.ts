@@ -9,8 +9,10 @@ import {
   isWalkPointClear,
   resolveCircleMovement,
   safeSpawnPoseForRoom,
+  walkCollidersForVerticalRange,
   type WalkPoint,
   type BoxWalkCollider,
+  type WalkVerticalRange,
 } from "../navigation";
 import { projectStairPath, stairEndCoordinates } from "./path-projection";
 import { pointOnPolygonBoundary } from "../validation/geometry";
@@ -25,14 +27,26 @@ export interface BuildingWalkPoint extends WalkPoint {
   stairId?: string;
 }
 /** Prepared once per architecture revision, with content-aware door/furniture updates. */
-export const prepareBuildingWalk = (building: BuildingGeometry) => ({
-  colliders: new Map(building.floors.map((floor) => [floor.id, prepareWalkColliders(floor)])),
-  flights: building.stairs.map((stair) => deriveStairFlight(building, stair)),
-});
+export const prepareBuildingWalk = (building: BuildingGeometry) => {
+  const levels = deriveFloorLevels(building.floors);
+  return {
+    colliders: new Map(
+      building.floors.map((floor) => [
+        floor.id,
+        prepareWalkColliders(
+          floor,
+          levels.find((level) => level.floorId === floor.id)!.elevationMeters,
+        ),
+      ]),
+    ),
+    flights: building.stairs.map((stair) => deriveStairFlight(building, stair)),
+  };
+};
 /** Item bounds on a landing must be checked before the selected floor changes. */
 const landingItemColliders = (
   building: BuildingGeometry,
   floor: BuildingGeometry["floors"][number],
+  floorElevation: number,
   registries: StairModelRegistries = {},
 ): BoxWalkCollider[] =>
   building.sceneItems.flatMap((item) => {
@@ -49,6 +63,8 @@ const landingItemColliders = (
             maxX: bounds.maxX,
             minZ: bounds.minZ,
             maxZ: bounds.maxZ,
+            minY: floorElevation + bounds.bottom,
+            maxY: floorElevation + bounds.top,
           },
         ];
       }
@@ -67,6 +83,8 @@ const landingItemColliders = (
           maxX: x + halfX,
           minZ: z - halfZ,
           maxZ: z + halfZ,
+          minY: floorElevation + y,
+          maxY: floorElevation + y + item.size[1],
         },
       ];
     } catch {
@@ -103,14 +121,19 @@ export const moveBuildingWalker = (
   furniture: readonly BoxWalkCollider[] = [],
   prepared?: ReturnType<typeof prepareBuildingWalk>,
   registries: StairModelRegistries = {},
+  options: { verticalRange?: WalkVerticalRange; allowUnsupported?: boolean } = {},
 ) => {
   const floor = building.floors.find((f) => f.id === pose.floorId);
   if (!floor) return pose;
+  const levels = deriveFloorLevels(building.floors);
+  const floorElevation = levels.find((level) => level.floorId === floor.id)!.elevationMeters;
+  const floorColliders =
+    prepared?.colliders.get(floor.id)?.(openIds, furniture) ??
+    deriveWalkColliders(floor, openIds, furniture, floorElevation);
   const next = resolveCircleMovement(
     pose,
     movement,
-    prepared?.colliders.get(floor.id)?.(openIds, furniture) ??
-      deriveWalkColliders(floor, openIds, furniture),
+    walkCollidersForVerticalRange(floorColliders, options.verticalRange),
   );
   const candidate = { ...pose, ...next };
   const flights =
@@ -137,10 +160,14 @@ export const moveBuildingWalker = (
       const destination = building.floors.find((f) => f.id === destinationId);
       if (!destination || !pointOnFloorSupport(plan, destination)) return pose;
       if (hasUnsupportedStairAperture(flights, destinationId, plan, flight.id)) return pose;
-      const items = landingItemColliders(building, destination, registries);
-      const colliders =
+      const destinationElevation = levels.find(
+        (level) => level.floorId === destinationId,
+      )!.elevationMeters;
+      const items = landingItemColliders(building, destination, destinationElevation, registries);
+      const allColliders =
         prepared?.colliders.get(destinationId)?.(openIds, items) ??
-        deriveWalkColliders(destination, openIds, items);
+        deriveWalkColliders(destination, openIds, items, destinationElevation);
+      const colliders = walkCollidersForVerticalRange(allColliders, options.verticalRange);
       const resolved = resolveCircleMovement(
         pose,
         { x: next.x - pose.x, z: next.z - pose.z },
@@ -201,7 +228,8 @@ export const moveBuildingWalker = (
   if (blockedByFootprint || hasUnsupportedStairAperture(flights, floor.id, plan)) return pose;
   if (
     floor.id !== building.floors.find((floor) => !floor.belowGround)?.id &&
-    !pointOnFloorSupport(plan, floor)
+    !pointOnFloorSupport(plan, floor) &&
+    !options.allowUnsupported
   )
     return pose;
   return candidate;
@@ -229,11 +257,11 @@ export const safeBuildingSpawn = (
       },
     ];
   });
-  const items = landingItemColliders(building, floor);
-  const colliders = [...deriveWalkColliders(floor), ...holes, ...items];
   const elevation = deriveFloorLevels(building.floors).find(
     (f) => f.floorId === floorId,
   )!.elevationMeters;
+  const items = landingItemColliders(building, floor, elevation);
+  const colliders = [...deriveWalkColliders(floor, new Set(), [], elevation), ...holes, ...items];
   if (start) {
     const [x, z] = planPointToWorld(start, building.coordinates);
     const supported =

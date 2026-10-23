@@ -88,6 +88,8 @@ export function useWalkToolNavigation({
                 maxX: box.max.x,
                 minZ: box.min.z,
                 maxZ: box.max.z,
+                minY: box.min.y,
+                maxY: box.max.y,
               });
           });
           return obstacles;

@@ -174,11 +174,14 @@ Implementation: [dashboard](../../packages/engine/src/CabaneDashboard.tsx),
 Desktop Walk requires pointer lock. Explore requests it directly from the entry
 click; if the browser refuses it, the editor shows a permission error. Mouse
 motion turns the view and keyboard input moves only while the pointer is locked.
-Space triggers a short hop on desktop while pointer lock is active and device
-controls are closed. Walking and sprinting continue during a hop; holding Space
-or pressing it while airborne does not trigger another hop. The hop follows floor
-and stair elevation and preserves existing horizontal obstacle collisions; it does
-not enable jumping onto furniture. Mobile controls remain unchanged.
+Space triggers a jump on desktop while pointer lock is active and device controls
+are closed. Walking and sprinting continue during a jump; holding Space or
+pressing it while airborne does not trigger another jump. The jump follows floor
+and stair elevation. Its tucked-leg clearance can pass over low furniture, hedges,
+and authored balcony railings or low walls while full walls and pool edges remain
+solid. Leaving an elevated outdoor platform over rendered terrain transitions into
+a fall to the ground floor. Furniture does not become a landing surface. Mobile
+controls remain unchanged.
 Escape or Back to editor exits the draft walkthrough.
 
 Room selection updates finish emphasis independently of procedural architecture

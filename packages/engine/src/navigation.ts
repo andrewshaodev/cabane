@@ -87,7 +87,11 @@ export const writeSceneSession = (
     // Scene navigation must remain usable if storage is blocked or full.
   }
 };
-export { deriveWalkColliders, isWalkPointClear } from "./navigation/walk-colliders";
+export {
+  deriveWalkColliders,
+  isWalkPointClear,
+  walkCollidersForVerticalRange,
+} from "./navigation/walk-colliders";
 export { evaluateDerivedWalkNavigation } from "./navigation/walk-connectivity";
 export {
   clampPitch,
@@ -120,5 +124,6 @@ export type {
   WalkPose,
   WalkRoomConnection,
   WalkRoomNavigation,
+  WalkVerticalRange,
 } from "./navigation/walk-navigation-contract";
 export { safeSpawnPoseForRoom, spawnPoseForRoom } from "./navigation/walk-spawn";

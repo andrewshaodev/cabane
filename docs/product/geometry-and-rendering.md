@@ -153,7 +153,7 @@ and without HA bindings; other unbound devices show their disconnected state.
 Garden lanterns use a short, warm inverse-square falloff to softly illuminate
 nearby ground in night mode.
 
-Walk collision derives from walls, openings, junctions, pools, and boundaries. Boundary styles (including open fences) use the existing continuous hedge segment collider at their authored width; visible rail gaps do not create walk apertures. Navigation
+Walk collision derives from walls, openings, junctions, pools, and boundaries. Boundary styles (including open fences) use the existing continuous hedge segment collider at their authored width; visible rail gaps do not create walk apertures. Furniture, hedge, and outdoor-platform barrier colliders retain their world vertical extent so a sufficiently high jump can clear them. Walls and pool edges remain full-height blockers. Navigation
 derives optional clear spawn points and checks room connectivity; rooms without
 a safe spawn (such as small cupboards) do not produce a validation diagnostic.
 Walk entry still requires a safe spawn and skips rooms without one. Navigation

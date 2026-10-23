@@ -3,7 +3,7 @@ import { deriveWalkColliders } from "./walk-colliders";
 import type { BoxWalkCollider, WalkCollider } from "./walk-navigation-contract";
 
 /** Own the architecture snapshot; door sets and furniture may change in place. */
-export function prepareWalkColliders(floor: FloorSpec) {
+export function prepareWalkColliders(floor: FloorSpec, elevation = 0) {
   const architecture = structuredClone(floor);
   let previousOpen: Set<string> | undefined;
   let previousFurniture: BoxWalkCollider[] = [];
@@ -26,11 +26,13 @@ export function prepareWalkColliders(floor: FloorSpec) {
           box.minX === previous.minX &&
           box.maxX === previous.maxX &&
           box.minZ === previous.minZ &&
-          box.maxZ === previous.maxZ
+          box.maxZ === previous.maxZ &&
+          box.minY === previous.minY &&
+          box.maxY === previous.maxY
         );
       });
     if (!sameDoors || !sameFurniture) {
-      colliders = deriveWalkColliders(architecture, openIds, furniture);
+      colliders = deriveWalkColliders(architecture, openIds, furniture, elevation);
       previousOpen = new Set(openIds);
       previousFurniture = furniture.map((box) => ({ ...box }));
     }

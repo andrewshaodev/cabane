@@ -3,6 +3,13 @@ import { useWalkToolNavigation } from "./walk-tools/useWalkToolNavigation";
 import type { WalkToolNavigation } from "./walk-tools";
 import { passableOpeningIds, type OpeningPositions } from "./opening-pose";
 import { prepareWalkColliders } from "./navigation/prepared-walk-colliders";
+import { resolveWalkFall } from "./navigation/walk-fall";
+import {
+  WALK_JUMP_GRAVITY,
+  WALK_JUMP_LAUNCH_SPEED,
+  walkJumpVerticalRange,
+} from "./navigation/walk-jump";
+import { createTerrainSupportQuery } from "./navigation/terrain-support";
 import {
   moveBuildingWalker,
   prepareBuildingWalk,
@@ -25,6 +32,7 @@ import {
   resolveCircleMovement,
   roomAtWorldPoint,
   shouldAutoOpenDoor,
+  walkCollidersForVerticalRange,
   WALK_CRUISE_SPEED,
   WALK_EYE_HEIGHT,
   WALK_MAX_SPEED,
@@ -34,9 +42,6 @@ import {
 } from "./navigation";
 
 import type { FloorSpec } from "./types";
-
-const JUMP_GRAVITY = 9.8;
-const JUMP_LAUNCH_SPEED = 2.8; // 0.4 m peak, approximately 0.57 s airborne.
 
 export function WalkCameraController({
   floor,
@@ -95,9 +100,9 @@ export function WalkCameraController({
           }
         : {
             building: undefined,
-            floor: prepareWalkColliders(JSON.parse(navigationKey) as FloorSpec),
+            floor: prepareWalkColliders(JSON.parse(navigationKey) as FloorSpec, elevation),
           },
-    [navigationKey, buildingMode],
+    [navigationKey, buildingMode, elevation],
   );
   const cameraRef = useRef<ThreePerspectiveCamera>(null);
   const walker = useRef<BuildingWalkPoint | null>(null);
@@ -112,6 +117,7 @@ export function WalkCameraController({
   const lastRoomId = useRef<string | null>(null);
   const box = useMemo(() => new Box3(), []);
   const { scene, invalidate } = useThree();
+  const supportsTerrain = useMemo(() => createTerrainSupportQuery(scene), [scene]);
 
   useEffect(() => {
     scene.updateMatrixWorld(true);
@@ -122,7 +128,7 @@ export function WalkCameraController({
       if (
         !box.isEmpty() &&
         box.max.y > elevation + 0.05 &&
-        box.min.y < elevation + WALK_EYE_HEIGHT + 0.2
+        box.min.y < elevation + WALK_EYE_HEIGHT + 1
       )
         next.push({
           kind: "box",
@@ -131,6 +137,8 @@ export function WalkCameraController({
           maxX: box.max.x,
           minZ: box.min.z,
           maxZ: box.max.z,
+          minY: box.min.y,
+          maxY: box.max.y,
         });
     });
     furniture.current = next;
@@ -222,16 +230,16 @@ export function WalkCameraController({
 
     // Consume every request, including airborne presses, so landing cannot queue a hop.
     if (jumpRequestRef?.current) {
-      if (jumpHeight.current === 0) jumpVelocity.current = JUMP_LAUNCH_SPEED;
+      if (jumpHeight.current === 0) jumpVelocity.current = WALK_JUMP_LAUNCH_SPEED;
       jumpRequestRef.current = false;
     }
     if (jumpVelocity.current !== 0 || jumpHeight.current > 0) {
       jumpHeight.current = Math.max(
         0,
-        jumpHeight.current + jumpVelocity.current * delta - 0.5 * JUMP_GRAVITY * delta * delta,
+        jumpHeight.current + jumpVelocity.current * delta - 0.5 * WALK_JUMP_GRAVITY * delta * delta,
       );
       jumpVelocity.current =
-        jumpHeight.current > 0 ? jumpVelocity.current - JUMP_GRAVITY * delta : 0;
+        jumpHeight.current > 0 ? jumpVelocity.current - WALK_JUMP_GRAVITY * delta : 0;
     }
 
     // Collision consumes the same committed pose as the model. Proximity changes
@@ -253,7 +261,8 @@ export function WalkCameraController({
       current.z === pose.z
         ? current
         : { ...pose, floorId: floor.id, elevation };
-    const next = building
+    const verticalRange = walkJumpVerticalRange(start.elevation, jumpHeight.current);
+    let next = building
       ? moveBuildingWalker(
           building,
           start,
@@ -262,12 +271,37 @@ export function WalkCameraController({
           furniture.current,
           navigation.building,
           registries,
+          {
+            verticalRange,
+            allowUnsupported: jumpHeight.current > 0,
+          },
         )
       : {
-          ...resolveCircleMovement(pose, movement, navigation.floor!(passable, furniture.current)),
+          ...resolveCircleMovement(
+            pose,
+            movement,
+            walkCollidersForVerticalRange(
+              navigation.floor!(passable, furniture.current),
+              verticalRange,
+            ),
+          ),
           floorId: floor.id,
           elevation,
         };
+    if (building && jumpHeight.current > 0) {
+      const fall = resolveWalkFall(
+        building,
+        next,
+        start.elevation + jumpHeight.current,
+        supportsTerrain,
+      );
+      if (fall.kind === "fall") {
+        next = fall.point;
+        jumpHeight.current = fall.jumpHeight;
+      } else if (fall.kind === "blocked") {
+        next = start;
+      }
+    }
     walker.current = next;
     if (next.floorId !== start.floorId) onFloorChange?.(next.floorId);
     pose.x = next.x;
