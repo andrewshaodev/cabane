@@ -71,19 +71,26 @@ await withModules(async (load) => {
     );
     try {
       const ceilingMaterial = ceilingRenderer.scene.findByType("Mesh").instance.material;
-      const slab = platformRenderer.scene.findByType("Mesh").instance;
-      slab.updateMatrixWorld(true);
+      const structure = platformRenderer.scene.findByProps({
+        name: "platform-slab-upper-balcony-structure-0",
+      }).instance;
+      const liner = platformRenderer.scene.findByProps({
+        name: "platform-slab-upper-balcony-ceiling-0",
+      }).instance;
+      structure.updateMatrixWorld(true);
+      liner.updateMatrixWorld(true);
       const [undersideHit] = new Raycaster(
         new Vector3(2, -2, 2),
         new Vector3(0, 1, 0),
-      ).intersectObject(slab);
+      ).intersectObject(liner);
       assert.ok(undersideHit, "an upward view must hit the platform underside");
-      const slabMaterials = Array.isArray(slab.material) ? slab.material : [slab.material];
-      const undersideMaterial = slabMaterials[undersideHit.face.materialIndex];
       assert.equal(
-        `#${undersideMaterial.color.getHexString()}`,
+        `#${liner.material.color.getHexString()}`,
         `#${ceilingMaterial.color.getHexString()}`,
       );
+      assert.equal(liner.receiveShadow, false);
+      assert.equal(structure.receiveShadow, true);
+      assert.ok(liner.position.y < structure.position.y);
     } finally {
       await ceilingRenderer.unmount();
       await platformRenderer.unmount();
