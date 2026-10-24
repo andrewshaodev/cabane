@@ -28,6 +28,17 @@ export function TeakLoungeFrame({
       <RoundedFurniturePanel size={[width, 0.08, 0.8]} position={[0, 0.32, 0]} color="#bc9567" />
       {[-1, 1].map((side) => (
         <group key={side}>
+          {Array.from({ length: 7 }, (_, i) => (
+            <RoundedFurniturePanel
+              key={i}
+              name="open-arm-spindle"
+              size={[0.025, 0.27, 0.025]}
+              position={[side * (width / 2 - 0.04), 0.485, -0.27 + i * 0.09]}
+              color="#b78c5c"
+              radius={0.008}
+            />
+          ))}
+
           <RoundedFurniturePanel
             size={[0.06, 0.48, 0.06]}
             position={[side * (width / 2 - 0.04), 0.6, -0.36]}
@@ -71,12 +82,21 @@ export function TeakLoungeFrame({
               color="#e8ddc7"
               outlineColor="#b1a48c"
             />
+            {seats > 1 && i !== 1 && (
+              <TailoredCushion
+                name="secondary-lounge-cushion"
+                size={[0.3, 0.13, 0.3]}
+                position={[x + (i === 0 ? 0.2 : -0.2), 0.62, 0.04]}
+                rotation={[1.15, 0, i === 0 ? -0.13 : 0.13]}
+                color={i === 0 ? "#a96e4e" : "#c3936a"}
+              />
+            )}
             <TailoredCushion
               name="lounge-accent-cushion"
-              size={[0.3, 0.12, 0.3]}
-              position={[x, 0.61, -0.12]}
+              size={[0.36, 0.14, 0.36]}
+              position={[x + (i === 0 ? -0.07 : 0.06), 0.63, -0.1]}
               rotation={[1.2, 0, i % 2 ? 0.12 : -0.12]}
-              color={variant === "sage" ? "#8f9e7d" : "#bd8063"}
+              color={variant === "sage" || i === 2 ? "#8f9e7d" : "#bd8063"}
             />
           </group>
         );

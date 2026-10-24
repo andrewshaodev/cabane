@@ -3,6 +3,7 @@ import { RoundedFurniturePanel } from "../construction";
 export const WOODEN_GARDEN_SWING_SIZE = [2.2, 2.1, 1.4] as const;
 export function WoodenGardenSwing({
   size = WOODEN_GARDEN_SWING_SIZE,
+  variant = "default",
 }: {
   size?: SceneItemSize;
   variant?: string;
@@ -13,6 +14,28 @@ export function WoodenGardenSwing({
       scale={[size[0] / 2.2, size[1] / 2.1, size[2] / 1.4]}
       userData={{ walkCollider: true }}
     >
+      {variant === "cozy" && (
+        <group>
+          <RoundedFurniturePanel
+            name="swing-linen-seat-pad"
+            size={[1.18, 0.075, 0.4]}
+            position={[0, 0.5975, 0]}
+            color="#dfcfb1"
+            radius={0.03}
+          />
+          {[-0.36, 0, 0.36].map((x, i) => (
+            <RoundedFurniturePanel
+              key={x}
+              name="swing-throw-cushion"
+              size={[0.29, 0.12, 0.3]}
+              position={[x, 0.76, -0.06]}
+              rotation={[1.25, 0, i === 1 ? 0 : 0.1]}
+              color={i === 1 ? "#bc8366" : "#92a181"}
+              radius={0.05}
+            />
+          ))}
+        </group>
+      )}
       {[-1, 1].flatMap((x) =>
         [-1, 1].map((side) => (
           <mesh
@@ -143,3 +166,8 @@ export function WoodenGardenSwing({
     </group>
   );
 }
+
+export const GARDEN_SWING_VARIANTS = [
+  { id: "default", label: "Bare timber" },
+  { id: "cozy", label: "Linen, sage and clay cushions" },
+];

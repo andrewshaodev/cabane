@@ -1,6 +1,7 @@
 type ColorfulRugVariant =
   | "terracotta"
   | "sage"
+  | "sage-woven"
   | "ocean"
   | "playful"
   | "jute"
@@ -45,6 +46,7 @@ export const COLORFUL_RUG_VARIANTS: Readonly<
       [0.5, -0.78, 0.26, 0.3, "#eddcc6"],
     ],
   },
+  "sage-woven": { field: "#8e9b79", outline: "#667455", border: "#a6ae8d", blocks: [] },
   sage: {
     field: "#d7d5bd",
     outline: "#5f6c59",

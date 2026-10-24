@@ -255,6 +255,8 @@
       "catalog-bedroom-modules.test.mjs",
       "catalog-device.test.mjs",
       "catalog-structure.test.mjs",
+      "framed-wall-art.test.mjs",
+      "showcase-placement.test.mjs",
       "editor-furnish-preview.test.mjs",
       "git-hooks.test.mjs",
       "gun-portals-browser.test.mjs",

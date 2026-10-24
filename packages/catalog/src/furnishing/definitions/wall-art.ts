@@ -15,10 +15,16 @@ export const wallArtFurnishingDefinitions = {
     outlineContact: true,
     complexity: { visibleMeshes: 24, triangles: 2_500 },
     variants: [
+      { id: "atlantic-village", label: "Atlantic village" },
+      { id: "riviera-cliffs", label: "French Riviera cliffs" },
+      { id: "breton-harbor", label: "Breton harbor" },
+      { id: "provence-village", label: "Provence village" },
       { id: "default", label: "Abstract earth" },
       { id: "olive", label: "Olive branch" },
-      { id: "fern", label: "Fern study" },
-      { id: "clay", label: "Terracotta botanical" },
+      { id: "fern", label: "Rosemary pitcher" },
+      { id: "clay", label: "Mediterranean pottery" },
+      { id: "lemons", label: "Lemons and cream bowl" },
+      { id: "figs", label: "Fig leaf study" },
     ],
   }),
 

@@ -16,7 +16,7 @@ export const teakLoungeDefinitions = {
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "absolute",
     outlineContact: true,
-    complexity: { visibleMeshes: 26, triangles: 11000 },
+    complexity: { visibleMeshes: 44, triangles: 20000 },
     variants: [
       { id: "clay", label: "Ivory and terracotta" },
       { id: "sage", label: "Ivory and sage" },
@@ -32,7 +32,7 @@ export const teakLoungeDefinitions = {
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "absolute",
     outlineContact: true,
-    complexity: { visibleMeshes: 18, triangles: 8000 },
+    complexity: { visibleMeshes: 32, triangles: 13000 },
     variants: [
       { id: "clay", label: "Ivory and terracotta" },
       { id: "sage", label: "Ivory and sage" },
