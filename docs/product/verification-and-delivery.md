@@ -203,7 +203,10 @@ a whole-building worst case. See the [README measurement instructions](../../REA
 
 `npm run dev` starts Vite on loopback port 4173. Production builds produce
 `apps/web/dist`. The repository includes a Vercel configuration with SPA rewrites.
-There is no checked-in Dockerfile or Compose stack. A build or hosting
+The [local HA test stack](../local-home-assistant.md) provides a loopback-only
+Docker Compose server with official demo entities and persistent test data.
+It is development infrastructure; the Cabane companion integration is installed
+separately when testing native hosting or sync. A build or hosting
 configuration does not prove a deployed service, secured private access, or a
 working network route from every client to HA.
 

@@ -125,6 +125,12 @@ editors work locally without Home Assistant. A real Home Assistant connection
 requires HTTPS for both endpoints; paired HTTP loopback origins are supported
 for local development.
 
+For a real local HA server with many fake devices, run `npm run ha:up`, then
+complete onboarding at <http://127.0.0.1:8123> and connect your Cabane workspace
+to that URL. Docker Compose is required. See the
+[local Home Assistant guide](docs/local-home-assistant.md) for setup, lifecycle,
+and the distinction between device testing and native panel/sync testing.
+
 | Command               | Purpose                                                             |
 | --------------------- | ------------------------------------------------------------------- |
 | `npm run format`      | Format the workspace                                                |
