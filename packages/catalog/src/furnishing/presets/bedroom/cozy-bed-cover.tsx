@@ -11,6 +11,7 @@ export function CozyBedCover({
   thickness,
   color,
   plush = false,
+  soft = false,
 }: {
   name: string;
   back: number;
@@ -19,6 +20,7 @@ export function CozyBedCover({
   thickness: number;
   color: string;
   plush?: boolean;
+  soft?: boolean;
 }) {
   const geometry = useMemo(() => {
     const columns = 32;
@@ -33,12 +35,15 @@ export function CozyBedCover({
         for (let column = 0; column <= columns; column++) {
           const u = (column / columns) * 2 - 1;
           const x = u * 0.838;
-          const side = Math.max(0, (Math.abs(x) - 0.75) / 0.088);
+          const side = Math.max(0, (Math.abs(x) - (soft ? 0.62 : 0.75)) / (soft ? 0.218 : 0.088));
           const foot = Math.max(0, (z - 0.93) / 0.13);
-          const folds = 0.007 * Math.sin(u * 19 + z * 5) + 0.004 * Math.cos(z * 24 - u * 7);
+          const folds = soft
+            ? 0.003 * Math.sin(u * 10 + z * 5)
+            : 0.007 * Math.sin(u * 19 + z * 5) + 0.004 * Math.cos(z * 24 - u * 7);
           const pile = plush ? 0.004 * Math.sin(u * 67 + z * 39) ** 2 : 0;
           // All layers use the same drape field; lift separates their exposed faces.
-          const y = 0.605 + lift - 0.19 * side ** 1.5 - 0.19 * foot ** 1.5 + folds + pile;
+          const crown = soft ? 0.11 * (1 - u * u) : 0;
+          const y = 0.605 + lift + crown - 0.19 * side ** 1.5 - 0.19 * foot ** 1.5 + folds + pile;
           positions.push(x, y - layer * thickness, z);
         }
       }
@@ -69,7 +74,7 @@ export function CozyBedCover({
     result.setIndex(indices);
     result.computeVertexNormals();
     return result;
-  }, [back, front, lift, thickness, plush]);
+  }, [back, front, lift, thickness, plush, soft]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return (
     <mesh name={name} geometry={geometry} dispose={null} castShadow receiveShadow>

@@ -13,3 +13,6 @@ export { LinePortraitWallArt, LINE_PORTRAIT_WALL_ART_SIZE } from "./line-portrai
 
 export { LooseThrowCushion, LOOSE_THROW_CUSHION_SIZE } from "./loose-throw-cushion";
 export { TabletopCandle, TABLETOP_CANDLE_SIZE } from "./tabletop-candle";
+
+export { RoundJuteRug, ROUND_JUTE_RUG_SIZE } from "./round-jute-rug";
+export { LeafyPlanter, LEAFY_PLANTER_SIZE } from "./leafy-planter";

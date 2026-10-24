@@ -13,8 +13,10 @@ play/pause and volume without producing audio.
 
 Import furniture from `@cabane/catalog/furnishing`. Every registered furnishing
 is available in Arrange, with the same geometry in its thumbnail and placed
-instance. Models use procedural geometry, the engine's toon materials, and no
-external assets. Home-generation agents can use the same exports.
+instance. Models use procedural geometry and the engine's toon materials.
+Framed wall art also offers four bundled French landscape illustrations; see the
+[image assets and prompts](assets/wall-art/README.md) for variants and custom image usage.
+Home-generation agents can use the same exports.
 
 Every furnishing and device declares `preferredPlacement` (`absolute`, `wall`,
 or `ceiling`) to choose its starting support in Arrange. Instances can use any
@@ -264,7 +266,7 @@ they do not claim to reproduce a particular manufacturer. Dimensions are
 | `wall-coat-rack`           | 80 × 22 × 32            | Light oak back and shelf with five supported grey hooks                                                           | Entryway     |
 | `hallway-console-table`    | 110 × 35 × 80           | Narrow light oak table with two drawers and four legs                                                             | Hallway      |
 | `floating-wall-shelf`      | 80 × 25 × 22            | Light oak shelf and back lip with two visible grey brackets                                                       | Hallway      |
-| `framed-wall-art`          | 80 × 4 × 60             | Oak frame with texture-free cream, terracotta, sage and earth relief planes                                       | Living room  |
+| `framed-wall-art`          | 80 × 4 × 60             | Oak frame with abstract relief or four bundled French landscape prints                                       | Living room  |
 | `wooden-crib`              | 76 × 146 × 95           | Light oak slatted cot with a 70 × 140 mattress and ivory bedding                                                  | Bedroom      |
 | `counter-stool`            | 48 × 50 × 92            | Light oak four-leg frame, 65 cm beige seat, low back and foot rail                                                | Kitchen      |
 | `upholstered-ottoman`      | 70 × 55 × 42            | Beige upholstered cushion, perimeter seam and four short oak feet                                                 | Living room  |
@@ -864,3 +866,23 @@ no reference screenshot or private home data is bundled.
 
 Single bed also offers Sage and clay and Dusty rose and clay, with an accent
 cushion and folded throw, preserving its 100 × 95 × 210 cm envelope.
+
+## Reference-led cozy refinements
+
+The terrace lounge now has open spindle arms and staggered, larger accent
+cushions; the sofa mixes sage and clay accents. Single-bed Sage and Rose variants
+use a curved timber headboard, draped cloth and layered pillows.
+Botanical frame variants depict several leafy stems rather than one diagrammatic sprig.
+
+New public presets: RoundJuteRug / round-jute-rug (2 × .018 × 2 m) and
+LeafyPlanter / leafy-planter (.8 × 1.25 × .8 m). The rug has coiled rope relief;
+the planter uses 540 individually shaped leaves batched into three foliage meshes.
+Both support independent axis resizing; dimensions are inferred from the reference,
+not manufacturer measurements. The planter offers Terracotta and Ivory stone pots.
+
+Rug also offers Sage woven (sage-woven), a plain sage field with a pale border,
+resizable independently along its width and length. Casa Solstice uses a
+1.3 × 11 m runner beside the stair opening.
+
+The garden swing offers a Cozy variant with a linen seat pad and three sage/clay
+cushions. Its original bare-timber variant remains available.

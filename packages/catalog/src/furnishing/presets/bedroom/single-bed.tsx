@@ -1,3 +1,4 @@
+import { CozySingleHeadboard, CozySingleBedding } from "./cozy-single-bed-details";
 import { ToonMaterial, type SceneItemSize } from "@cabane/engine";
 import { RoundedFurniturePanel } from "../construction";
 
@@ -31,20 +32,26 @@ export function SingleBed({
         color="#d0ae7c"
         radius={0.012}
       />
-      <RoundedFurniturePanel
-        name="single-bed-headboard"
-        size={[1, 0.78, 0.055]}
-        position={[0, 0.56, -1.0225]}
-        color="#d3b484"
-        radius={0.017}
-      />
-      <RoundedFurniturePanel
-        name="single-bed-padded-headboard"
-        size={[0.9, 0.49, 0.06]}
-        position={[0, 0.67, -0.975]}
-        color="#cfc0a8"
-        radius={0.027}
-      />
+      {variant !== "default" ? (
+        <CozySingleHeadboard />
+      ) : (
+        <>
+          <RoundedFurniturePanel
+            name="single-bed-headboard"
+            size={[1, 0.78, 0.055]}
+            position={[0, 0.56, -1.0225]}
+            color="#d3b484"
+            radius={0.017}
+          />
+          <RoundedFurniturePanel
+            name="single-bed-padded-headboard"
+            size={[0.9, 0.49, 0.06]}
+            position={[0, 0.67, -0.975]}
+            color="#cfc0a8"
+            radius={0.027}
+          />
+        </>
+      )}
       <RoundedFurniturePanel
         name="single-bed-90x200-mattress"
         size={[0.9, 0.19, 2]}
@@ -53,40 +60,36 @@ export function SingleBed({
         radius={0.036}
         outlineColor="#a8a08e"
       />
-      <RoundedFurniturePanel
-        name="single-bed-duvet"
-        size={[0.94, 0.085, 1.48]}
-        position={[0, 0.5525, 0.285]}
-        color={variant === "sage" ? "#9ba888" : variant === "rose" ? "#caa39a" : "#e3d8c4"}
-        radius={0.035}
-        outlineColor="#a99c85"
-      />
-      <RoundedFurniturePanel
-        name="single-bed-pillow"
-        size={[0.61, 0.105, 0.36]}
-        position={[0, 0.59, -0.69]}
-        color="#f2eee4"
-        radius={0.045}
-        outlineColor="#b5ac9b"
-      />
-      {variant !== "default" && (
-        <RoundedFurniturePanel
-          name="single-bed-accent-cushion"
-          size={[0.34, 0.14, 0.34]}
-          position={[0, 0.72, -0.4]}
-          rotation={[0.8, 0, 0.12]}
-          color="#bd8368"
-          radius={0.055}
-        />
+      {variant !== "default" ? (
+        <CozySingleBedding variant={variant} />
+      ) : (
+        <>
+          <RoundedFurniturePanel
+            name="single-bed-duvet"
+            size={[0.94, 0.085, 1.48]}
+            position={[0, 0.5525, 0.285]}
+            color="#e3d8c4"
+            radius={0.035}
+            outlineColor="#a99c85"
+          />
+          <RoundedFurniturePanel
+            name="single-bed-pillow"
+            size={[0.61, 0.105, 0.36]}
+            position={[0, 0.59, -0.69]}
+            color="#f2eee4"
+            radius={0.045}
+            outlineColor="#b5ac9b"
+          />
+          <RoundedFurniturePanel
+            name="single-bed-folded-throw"
+            size={[0.942, 0.035, 0.38]}
+            position={[0, 0.6135, 0.62]}
+            color="#afa88d"
+            radius={0.012}
+            outlineColor="#817e6b"
+          />
+        </>
       )}
-      <RoundedFurniturePanel
-        name="single-bed-folded-throw"
-        size={[0.942, 0.035, 0.38]}
-        position={[0, 0.6135, 0.62]}
-        color={variant === "default" ? "#afa88d" : "#bd8368"}
-        radius={0.012}
-        outlineColor="#817e6b"
-      />
     </group>
   );
 }

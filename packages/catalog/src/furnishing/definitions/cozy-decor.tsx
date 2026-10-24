@@ -1,3 +1,9 @@
+import {
+  RoundJuteRug,
+  ROUND_JUTE_RUG_SIZE,
+  LeafyPlanter,
+  LEAFY_PLANTER_SIZE,
+} from "../presets/decor";
 import { defineFurnishingModel } from "@cabane/engine";
 import {
   LooseThrowCushion,
@@ -7,6 +13,34 @@ import {
 } from "../presets/decor";
 import { FlowerPot, FLOWER_POT_SIZE } from "../presets/outdoor";
 export const cozyDecorDefinitions = {
+  "round-jute-rug": defineFurnishingModel({
+    component: RoundJuteRug,
+    label: "Round braided jute rug",
+    category: "Decor",
+    defaultRoomType: "bedroom",
+    defaultSize: ROUND_JUTE_RUG_SIZE,
+    bounds: { min: [-1, 0, -1], max: [1, 0.018, 1] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: false,
+    complexity: { visibleMeshes: 49, triangles: 57000 },
+  }),
+  "leafy-planter": defineFurnishingModel({
+    component: LeafyPlanter,
+    label: "Leafy myrtle planter",
+    category: "Decor",
+    defaultRoomType: "living-room",
+    defaultSize: LEAFY_PLANTER_SIZE,
+    bounds: { min: [-0.4, 0, -0.4], max: [0.4, 1.25, 0.4] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: false,
+    complexity: { visibleMeshes: 6, triangles: 21000 },
+    variants: [
+      { id: "terracotta", label: "Terracotta" },
+      { id: "ivory", label: "Ivory stone" },
+    ],
+  }),
   "loose-throw-cushion": defineFurnishingModel({
     component: LooseThrowCushion,
     label: "Throw cushion",

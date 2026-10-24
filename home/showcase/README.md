@@ -20,7 +20,12 @@ balcony connects the south bedrooms and gallery. The garden includes mature
 olive trees, shrubs, perimeter mixed hedges, a fire-pit seating area, swing,
 vegetable bed, outdoor dining, barbecue and four loungers.
 
-There are 209 scene items: 59 modeled devices and 150 furnishings/decorations.
+Bedrooms use wall-aligned beds and round jute rugs. All six picture frames use
+wall-relative placement with 2 mm clearance and stay clear of openings. The
+frames mix the four French coastal/village illustrations only.
+The pool terrace includes a woven-rug lounge with matching seating and plants.
+
+There are 239 scene items: 59 modeled devices and 180 furnishings/decorations.
 The 59 devices declare 61 entity slots; the motorized garage opening adds one
 cover slot. All 62 slots have mappings in the separate private local-HA backup.
 The car exposes battery, estimated range and charging power as simulated sensors.
@@ -84,3 +89,12 @@ code, public deployment or real household HA was changed.
 
 Local evidence and the private synced backup are under ignored
 `test-results/showcase/`. They are not part of this portable design.
+
+## Cozy furnishing revision
+
+The portable furnished project now includes a poolside teak lounge with two
+chairs, a jute rug, coffee table, candles and leafy planters. Bedrooms have
+layered bedding, botanical pictures and round jute rugs; the junior bedroom
+uses a rose single bed. The upper gallery has a 1.3 × 11 m Sage woven runner,
+clear of the staircase. Architecture, device slots and private mappings are
+preserved. The unfurnished layout checkpoint is unchanged.

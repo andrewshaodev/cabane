@@ -1,3 +1,4 @@
+import { GARDEN_SWING_VARIANTS } from "./presets/outdoor/wooden-garden-swing";
 import { childrenCurtainDefinition } from "./presets/children-bedroom/curtain-definition";
 import { singleWindowCurtainDefinition } from "./presets/curtains/definition";
 import { DryingRack, DRYING_RACK_SIZE } from "./presets/laundry";
@@ -778,7 +779,7 @@ const stableFurnishingDefinitions = {
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "absolute",
     outlineContact: true,
-    complexity: { visibleMeshes: 12, triangles: 4000 },
+    complexity: { visibleMeshes: 25, triangles: 16000 },
   }),
   "double-bed": defineFurnishingModel({
     component: DoubleBed,
@@ -856,6 +857,7 @@ const stableFurnishingDefinitions = {
       { id: "default", label: "Natural woven" },
       { id: "terracotta", label: "Terracotta" },
       { id: "sage", label: "Sage" },
+      { id: "sage-woven", label: "Sage woven" },
       { id: "ocean", label: "Ocean blue" },
       { id: "playful", label: "Playful colors" },
       { id: "jute", label: "Jute rug" },
@@ -1379,6 +1381,7 @@ const stableFurnishingDefinitions = {
     complexity: { visibleMeshes: 14, triangles: 4700 },
   }),
   "wooden-garden-swing": defineFurnishingModel({
+    variants: GARDEN_SWING_VARIANTS,
     component: WoodenGardenSwing,
     label: "Wooden garden swing",
     category: "Garden structures",
@@ -1389,7 +1392,7 @@ const stableFurnishingDefinitions = {
     preferredPlacement: "absolute",
     placementEnvironment: "outdoor",
     outlineContact: true,
-    complexity: { visibleMeshes: 23, triangles: 6300 },
+    complexity: { visibleMeshes: 27, triangles: 8000 },
   }),
 };
 
