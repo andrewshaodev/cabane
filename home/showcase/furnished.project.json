@@ -1,0 +1,5357 @@
+{
+  "schemaVersion": 2,
+  "seedRevision": "solstice-showcase-v1",
+  "home": {
+    "id": "251368c4-5da7-4f3e-8e16-c184f31a8158",
+    "name": "Casa Solstice · Mediterranean showcase",
+    "locale": "en",
+    "palette": {
+      "accent": "#bc7654",
+      "secondary": "#849783",
+      "exterior": "#eee5d8",
+      "interior": "#f3eadf",
+      "ground": "#84966a"
+    },
+    "walkStart": {
+      "floorId": "ground",
+      "at": [10.5, 2]
+    },
+    "roof": {
+      "direction": "flat",
+      "color": "#d4c2a7",
+      "edgeColor": "#eee5d8"
+    }
+  },
+  "coordinates": {
+    "origin": [0, 0],
+    "metersPerPlanUnit": 1,
+    "scaleBasis": "inferred"
+  },
+  "floors": [
+    {
+      "id": "ground",
+      "name": "Ground floor",
+      "coordinates": {
+        "origin": [0, 0],
+        "metersPerPlanUnit": 1,
+        "scaleBasis": "inferred"
+      },
+      "defaultWallHeightMeters": 3,
+      "defaultCeilingHeightMeters": 3,
+      "floorToFloorHeightMeters": 3.2,
+      "footprint": [
+        [0, 0],
+        [18, 0],
+        [18, 14],
+        [0, 14]
+      ],
+      "rooms": [
+        {
+          "id": "garage",
+          "name": "Garage & workshop",
+          "polygon": [
+            [0, 0],
+            [6, 0],
+            [6, 6],
+            [0, 6]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "limestone"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "laundry",
+          "name": "Laundry & pantry",
+          "polygon": [
+            [6, 0],
+            [9, 0],
+            [9, 6],
+            [6, 6]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "terrazzo"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "hall",
+          "name": "Entrance & stair gallery",
+          "polygon": [
+            [9, 0],
+            [12, 0],
+            [12, 8],
+            [9, 8]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "terrazzo"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "office",
+          "name": "Garden studio",
+          "polygon": [
+            [12, 0],
+            [18, 0],
+            [18, 6],
+            [12, 6]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "kitchen",
+          "name": "Kitchen & dining",
+          "polygon": [
+            [0, 6],
+            [9, 6],
+            [9, 14],
+            [0, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "living",
+          "name": "Sunken-tone lounge",
+          "polygon": [
+            [12, 6],
+            [18, 6],
+            [18, 14],
+            [12, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "salon",
+          "name": "Garden passage",
+          "polygon": [
+            [9, 8],
+            [12, 8],
+            [12, 14],
+            [9, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        }
+      ],
+      "walls": [
+        {
+          "id": "ground-wall-1",
+          "from": [0, 0],
+          "to": [6, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-2",
+          "from": [6, 0],
+          "to": [6, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-3",
+          "from": [0, 6],
+          "to": [6, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-4",
+          "from": [0, 0],
+          "to": [0, 6],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-5",
+          "from": [6, 0],
+          "to": [9, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-6",
+          "from": [9, 0],
+          "to": [9, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-7",
+          "from": [6, 6],
+          "to": [9, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-8",
+          "from": [9, 0],
+          "to": [12, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-9",
+          "from": [12, 0],
+          "to": [12, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-10",
+          "from": [12, 6],
+          "to": [12, 8],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-11",
+          "from": [9, 8],
+          "to": [12, 8],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-12",
+          "from": [9, 6],
+          "to": [9, 8],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-13",
+          "from": [12, 0],
+          "to": [18, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-14",
+          "from": [18, 0],
+          "to": [18, 6],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-15",
+          "from": [12, 6],
+          "to": [18, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-16",
+          "from": [9, 8],
+          "to": [9, 14],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-17",
+          "from": [0, 14],
+          "to": [9, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-18",
+          "from": [0, 6],
+          "to": [0, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-19",
+          "from": [18, 6],
+          "to": [18, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-20",
+          "from": [12, 14],
+          "to": [18, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-21",
+          "from": [12, 8],
+          "to": [12, 14],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "ground-wall-22",
+          "from": [9, 14],
+          "to": [12, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        }
+      ],
+      "wallJunctions": [
+        {
+          "id": "ground-junction-1",
+          "at": [0, 0],
+          "wallIds": ["ground-wall-1", "ground-wall-4"]
+        },
+        {
+          "id": "ground-junction-2",
+          "at": [6, 0],
+          "wallIds": ["ground-wall-1", "ground-wall-2", "ground-wall-5"]
+        },
+        {
+          "id": "ground-junction-3",
+          "at": [6, 6],
+          "wallIds": ["ground-wall-2", "ground-wall-3", "ground-wall-7"]
+        },
+        {
+          "id": "ground-junction-4",
+          "at": [0, 6],
+          "wallIds": ["ground-wall-3", "ground-wall-4", "ground-wall-18"]
+        },
+        {
+          "id": "ground-junction-5",
+          "at": [9, 0],
+          "wallIds": ["ground-wall-5", "ground-wall-6", "ground-wall-8"]
+        },
+        {
+          "id": "ground-junction-6",
+          "at": [9, 6],
+          "wallIds": ["ground-wall-6", "ground-wall-7", "ground-wall-12"]
+        },
+        {
+          "id": "ground-junction-7",
+          "at": [12, 0],
+          "wallIds": ["ground-wall-8", "ground-wall-9", "ground-wall-13"]
+        },
+        {
+          "id": "ground-junction-8",
+          "at": [12, 8],
+          "wallIds": ["ground-wall-10", "ground-wall-11", "ground-wall-21"]
+        },
+        {
+          "id": "ground-junction-9",
+          "at": [9, 8],
+          "wallIds": ["ground-wall-11", "ground-wall-12", "ground-wall-16"]
+        },
+        {
+          "id": "ground-junction-10",
+          "at": [18, 0],
+          "wallIds": ["ground-wall-13", "ground-wall-14"]
+        },
+        {
+          "id": "ground-junction-11",
+          "at": [18, 6],
+          "wallIds": ["ground-wall-14", "ground-wall-15", "ground-wall-19"]
+        },
+        {
+          "id": "ground-junction-12",
+          "at": [12, 6],
+          "wallIds": ["ground-wall-9", "ground-wall-10", "ground-wall-15"]
+        },
+        {
+          "id": "ground-junction-13",
+          "at": [9, 14],
+          "wallIds": ["ground-wall-16", "ground-wall-17", "ground-wall-22"]
+        },
+        {
+          "id": "ground-junction-14",
+          "at": [0, 14],
+          "wallIds": ["ground-wall-17", "ground-wall-18"]
+        },
+        {
+          "id": "ground-junction-15",
+          "at": [18, 14],
+          "wallIds": ["ground-wall-19", "ground-wall-20"]
+        },
+        {
+          "id": "ground-junction-16",
+          "at": [12, 14],
+          "wallIds": ["ground-wall-20", "ground-wall-21", "ground-wall-22"]
+        }
+      ],
+      "openings": [
+        {
+          "id": "ground-door-1",
+          "wallId": "ground-wall-8",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 0.8000000000000007,
+          "widthPlanUnits": 1.4,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "full-glass",
+          "finish": "wood",
+          "leafCount": 2
+        },
+        {
+          "id": "ground-door-2",
+          "wallId": "ground-wall-1",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 4,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "roll-up",
+          "variant": "slatted",
+          "finish": "white"
+        },
+        {
+          "id": "ground-door-3",
+          "wallId": "ground-wall-2",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 3.8,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "ground-door-4",
+          "wallId": "ground-wall-6",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "ground-door-5",
+          "wallId": "ground-wall-7",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "ground-door-6",
+          "wallId": "ground-wall-9",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "ground-passage-7",
+          "wallId": "ground-wall-12",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 0.5,
+          "widthPlanUnits": 1.1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "variant": "arched",
+          "archRiseMeters": 0.3
+        },
+        {
+          "id": "ground-passage-8",
+          "wallId": "ground-wall-11",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 0.5999999999999996,
+          "widthPlanUnits": 1.8,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "variant": "arched",
+          "archRiseMeters": 0.3
+        },
+        {
+          "id": "ground-passage-9",
+          "wallId": "ground-wall-10",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 0.5,
+          "widthPlanUnits": 1.1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "variant": "arched",
+          "archRiseMeters": 0.3
+        },
+        {
+          "id": "ground-passage-10",
+          "wallId": "ground-wall-16",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "variant": "arched",
+          "archRiseMeters": 0.3
+        },
+        {
+          "id": "ground-passage-11",
+          "wallId": "ground-wall-21",
+          "kind": "passage",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "variant": "arched",
+          "archRiseMeters": 0.3
+        },
+        {
+          "id": "ground-door-12",
+          "wallId": "ground-wall-17",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2.8,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "sliding",
+          "variant": "full-glass",
+          "finish": "wood",
+          "leafCount": 2
+        },
+        {
+          "id": "ground-door-13",
+          "wallId": "ground-wall-22",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 0.5999999999999996,
+          "widthPlanUnits": 1.8,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "sliding",
+          "variant": "full-glass",
+          "finish": "wood",
+          "leafCount": 2
+        },
+        {
+          "id": "ground-door-14",
+          "wallId": "ground-wall-20",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2.8,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "sliding",
+          "variant": "full-glass",
+          "finish": "wood",
+          "leafCount": 2
+        },
+        {
+          "id": "ground-window-15",
+          "wallId": "ground-wall-18",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "ground-window-16",
+          "wallId": "ground-wall-18",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 5,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "ground-window-17",
+          "wallId": "ground-wall-19",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "ground-window-18",
+          "wallId": "ground-wall-19",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 5,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "ground-window-19",
+          "wallId": "ground-wall-13",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2.5,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "ground-window-20",
+          "wallId": "ground-wall-14",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        }
+      ],
+      "ceilings": [
+        {
+          "id": "ground-ceiling",
+          "kind": "flat",
+          "roomIds": ["garage", "laundry", "hall", "office", "kitchen", "living", "salon"],
+          "heightMeters": 3
+        }
+      ],
+      "groundZones": [
+        {
+          "id": "rear-travertine",
+          "polygon": [
+            [-1, 14],
+            [19, 14],
+            [19, 18.5],
+            [-1, 18.5]
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          }
+        },
+        {
+          "id": "pool-deck",
+          "polygon": [
+            [5, 18.5],
+            [19, 18.5],
+            [19, 27.5],
+            [5, 27.5]
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          }
+        },
+        {
+          "id": "arrival-path",
+          "polygon": [
+            [8.8, -6],
+            [12.3, -6],
+            [12.3, 0],
+            [8.8, 0]
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "limestone"
+          }
+        },
+        {
+          "id": "garage-drive",
+          "polygon": [
+            [0.3, -6],
+            [5.8, -6],
+            [5.8, 0],
+            [0.3, 0]
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "limestone"
+          }
+        }
+      ],
+      "pools": [
+        {
+          "id": "solstice-pool",
+          "polygon": [
+            [7, 20],
+            [16, 20],
+            [16, 24.5],
+            [7, 24.5]
+          ]
+        }
+      ],
+      "hedges": [
+        {
+          "id": "garden-boundary-0",
+          "from": [-4, -6],
+          "to": [-4, 30],
+          "heightMeters": 1.6,
+          "widthMeters": 0.7,
+          "style": "mixed"
+        },
+        {
+          "id": "garden-boundary-1",
+          "from": [22, -6],
+          "to": [22, 30],
+          "heightMeters": 1.6,
+          "widthMeters": 0.7,
+          "style": "mixed"
+        },
+        {
+          "id": "garden-boundary-2",
+          "from": [-4, 30],
+          "to": [22, 30],
+          "heightMeters": 1.6,
+          "widthMeters": 0.7,
+          "style": "mixed"
+        },
+        {
+          "id": "garden-boundary-3",
+          "from": [-4, -6],
+          "to": [0, -6],
+          "heightMeters": 1.6,
+          "widthMeters": 0.7,
+          "style": "mixed"
+        },
+        {
+          "id": "garden-boundary-4",
+          "from": [14, -6],
+          "to": [22, -6],
+          "heightMeters": 1.6,
+          "widthMeters": 0.7,
+          "style": "mixed"
+        }
+      ]
+    },
+    {
+      "id": "upper",
+      "name": "First floor",
+      "coordinates": {
+        "origin": [0, 0],
+        "metersPerPlanUnit": 1,
+        "scaleBasis": "inferred"
+      },
+      "defaultWallHeightMeters": 3,
+      "defaultCeilingHeightMeters": 3,
+      "floorToFloorHeightMeters": 3.2,
+      "footprint": [
+        [0, 0],
+        [18, 0],
+        [18, 14],
+        [0, 14]
+      ],
+      "rooms": [
+        {
+          "id": "bed-primary",
+          "name": "Primary suite",
+          "polygon": [
+            [0, 0],
+            [7, 0],
+            [7, 6],
+            [0, 6]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "bath-primary",
+          "name": "Spa bathroom",
+          "polygon": [
+            [0, 6],
+            [4, 6],
+            [4, 9],
+            [0, 9]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "square-tile"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "dressing",
+          "name": "Dressing room",
+          "polygon": [
+            [4, 6],
+            [7, 6],
+            [7, 9],
+            [4, 9]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "dark-walnut"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "bed-guest",
+          "name": "Guest bedroom",
+          "polygon": [
+            [0, 9],
+            [7, 9],
+            [7, 14],
+            [0, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "gallery",
+          "name": "Upper gallery",
+          "polygon": [
+            [7, 0],
+            [12, 0],
+            [12, 14],
+            [7, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "bed-junior",
+          "name": "Junior bedroom",
+          "polygon": [
+            [12, 0],
+            [18, 0],
+            [18, 5],
+            [12, 5]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "bath-family",
+          "name": "Family bathroom",
+          "polygon": [
+            [12, 5],
+            [18, 5],
+            [18, 9],
+            [12, 9]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "square-tile"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        },
+        {
+          "id": "bed-twin",
+          "name": "Twin bedroom",
+          "polygon": [
+            [12, 9],
+            [18, 9],
+            [18, 14],
+            [12, 14]
+          ],
+          "accent": "#b78e70",
+          "floorFinish": {
+            "kind": "preset",
+            "preset": "light-oak"
+          },
+          "dashboardSlots": [],
+          "devices": []
+        }
+      ],
+      "walls": [
+        {
+          "id": "upper-wall-1",
+          "from": [0, 0],
+          "to": [7, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-2",
+          "from": [7, 0],
+          "to": [7, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-3",
+          "from": [0, 6],
+          "to": [4, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-4",
+          "from": [4, 6],
+          "to": [7, 6],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-5",
+          "from": [0, 0],
+          "to": [0, 6],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-6",
+          "from": [4, 6],
+          "to": [4, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-7",
+          "from": [0, 9],
+          "to": [4, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-8",
+          "from": [0, 6],
+          "to": [0, 9],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-9",
+          "from": [7, 6],
+          "to": [7, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-10",
+          "from": [4, 9],
+          "to": [7, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-11",
+          "from": [7, 9],
+          "to": [7, 14],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-12",
+          "from": [0, 14],
+          "to": [7, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-13",
+          "from": [0, 9],
+          "to": [0, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-14",
+          "from": [7, 0],
+          "to": [12, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-15",
+          "from": [12, 0],
+          "to": [12, 5],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-16",
+          "from": [12, 5],
+          "to": [12, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-17",
+          "from": [12, 9],
+          "to": [12, 14],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-18",
+          "from": [7, 14],
+          "to": [12, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-19",
+          "from": [12, 0],
+          "to": [18, 0],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-20",
+          "from": [18, 0],
+          "to": [18, 5],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-21",
+          "from": [12, 5],
+          "to": [18, 5],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-22",
+          "from": [18, 5],
+          "to": [18, 9],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-23",
+          "from": [12, 9],
+          "to": [18, 9],
+          "classification": "interior",
+          "thicknessMeters": 0.16,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-24",
+          "from": [18, 9],
+          "to": [18, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        },
+        {
+          "id": "upper-wall-25",
+          "from": [12, 14],
+          "to": [18, 14],
+          "classification": "exterior",
+          "thicknessMeters": 0.3,
+          "faceColors": {
+            "left": "#eee5d8",
+            "right": "#eee5d8"
+          }
+        }
+      ],
+      "wallJunctions": [
+        {
+          "id": "upper-junction-1",
+          "at": [0, 0],
+          "wallIds": ["upper-wall-1", "upper-wall-5"]
+        },
+        {
+          "id": "upper-junction-2",
+          "at": [7, 0],
+          "wallIds": ["upper-wall-1", "upper-wall-2", "upper-wall-14"]
+        },
+        {
+          "id": "upper-junction-3",
+          "at": [7, 6],
+          "wallIds": ["upper-wall-2", "upper-wall-4", "upper-wall-9"]
+        },
+        {
+          "id": "upper-junction-4",
+          "at": [0, 6],
+          "wallIds": ["upper-wall-3", "upper-wall-5", "upper-wall-8"]
+        },
+        {
+          "id": "upper-junction-5",
+          "at": [4, 6],
+          "wallIds": ["upper-wall-3", "upper-wall-4", "upper-wall-6"]
+        },
+        {
+          "id": "upper-junction-6",
+          "at": [4, 9],
+          "wallIds": ["upper-wall-6", "upper-wall-7", "upper-wall-10"]
+        },
+        {
+          "id": "upper-junction-7",
+          "at": [0, 9],
+          "wallIds": ["upper-wall-7", "upper-wall-8", "upper-wall-13"]
+        },
+        {
+          "id": "upper-junction-8",
+          "at": [7, 9],
+          "wallIds": ["upper-wall-9", "upper-wall-10", "upper-wall-11"]
+        },
+        {
+          "id": "upper-junction-9",
+          "at": [7, 14],
+          "wallIds": ["upper-wall-11", "upper-wall-12", "upper-wall-18"]
+        },
+        {
+          "id": "upper-junction-10",
+          "at": [0, 14],
+          "wallIds": ["upper-wall-12", "upper-wall-13"]
+        },
+        {
+          "id": "upper-junction-11",
+          "at": [12, 0],
+          "wallIds": ["upper-wall-14", "upper-wall-15", "upper-wall-19"]
+        },
+        {
+          "id": "upper-junction-12",
+          "at": [12, 14],
+          "wallIds": ["upper-wall-17", "upper-wall-18", "upper-wall-25"]
+        },
+        {
+          "id": "upper-junction-13",
+          "at": [18, 0],
+          "wallIds": ["upper-wall-19", "upper-wall-20"]
+        },
+        {
+          "id": "upper-junction-14",
+          "at": [18, 5],
+          "wallIds": ["upper-wall-20", "upper-wall-21", "upper-wall-22"]
+        },
+        {
+          "id": "upper-junction-15",
+          "at": [12, 5],
+          "wallIds": ["upper-wall-15", "upper-wall-16", "upper-wall-21"]
+        },
+        {
+          "id": "upper-junction-16",
+          "at": [18, 9],
+          "wallIds": ["upper-wall-22", "upper-wall-23", "upper-wall-24"]
+        },
+        {
+          "id": "upper-junction-17",
+          "at": [12, 9],
+          "wallIds": ["upper-wall-16", "upper-wall-17", "upper-wall-23"]
+        },
+        {
+          "id": "upper-junction-18",
+          "at": [18, 14],
+          "wallIds": ["upper-wall-24", "upper-wall-25"]
+        }
+      ],
+      "openings": [
+        {
+          "id": "upper-door-1",
+          "wallId": "upper-wall-2",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 3.5,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-2",
+          "wallId": "upper-wall-11",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1.1999999999999993,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-3",
+          "wallId": "upper-wall-15",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2.5,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-4",
+          "wallId": "upper-wall-16",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1.2999999999999998,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-5",
+          "wallId": "upper-wall-17",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1.5,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-6",
+          "wallId": "upper-wall-4",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 0.7999999999999998,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-7",
+          "wallId": "upper-wall-6",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-door-8",
+          "wallId": "upper-wall-9",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 1,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "panel",
+          "finish": "wood",
+          "leafCount": 1
+        },
+        {
+          "id": "upper-window-9",
+          "wallId": "upper-wall-1",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "upper-door-10",
+          "wallId": "upper-wall-12",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "french",
+          "finish": "white",
+          "leafCount": 2
+        },
+        {
+          "id": "upper-window-11",
+          "wallId": "upper-wall-14",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.5,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "upper-door-12",
+          "wallId": "upper-wall-18",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 1.5,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "french",
+          "finish": "white",
+          "leafCount": 2
+        },
+        {
+          "id": "upper-window-13",
+          "wallId": "upper-wall-19",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "upper-door-14",
+          "wallId": "upper-wall-25",
+          "kind": "door",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 2.4,
+          "sillHeightMeters": 0,
+          "operation": "hinged",
+          "variant": "french",
+          "finish": "white",
+          "leafCount": 2
+        },
+        {
+          "id": "upper-window-15",
+          "wallId": "upper-wall-5",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "upper-window-16",
+          "wallId": "upper-wall-8",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 0.5999999999999996,
+          "widthPlanUnits": 1.8,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "privacy"
+        },
+        {
+          "id": "upper-window-17",
+          "wallId": "upper-wall-22",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "privacy"
+        },
+        {
+          "id": "upper-window-18",
+          "wallId": "upper-wall-20",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.2,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        },
+        {
+          "id": "upper-window-19",
+          "wallId": "upper-wall-24",
+          "kind": "window",
+          "offsetFromWallStartPlanUnits": 1.1999999999999993,
+          "widthPlanUnits": 2,
+          "openingHeightMeters": 1.6,
+          "sillHeightMeters": 0.85,
+          "operation": "fixed",
+          "variant": "plain",
+          "panelCount": 2,
+          "glazing": "clear"
+        }
+      ],
+      "ceilings": [
+        {
+          "id": "upper-ceiling",
+          "kind": "flat",
+          "roomIds": [
+            "bed-primary",
+            "bath-primary",
+            "dressing",
+            "bed-guest",
+            "gallery",
+            "bed-junior",
+            "bath-family",
+            "bed-twin"
+          ],
+          "heightMeters": 3
+        }
+      ],
+      "outdoorPlatforms": [
+        {
+          "id": "south-balcony",
+          "polygon": [
+            [0, 14],
+            [18, 14],
+            [18, 16.3],
+            [0, 16.3]
+          ],
+          "finish": {
+            "kind": "preset",
+            "preset": "travertine"
+          },
+          "defaultEdge": {
+            "kind": "railing",
+            "heightMeters": 1
+          },
+          "edges": [
+            {
+              "id": "balcony-edge-0"
+            },
+            {
+              "id": "balcony-edge-1"
+            },
+            {
+              "id": "balcony-edge-2"
+            },
+            {
+              "id": "balcony-edge-3"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stairs": [
+    {
+      "id": "gallery-stair",
+      "shape": "straight",
+      "lowerFloorId": "ground",
+      "upperFloorId": "upper",
+      "at": [10.5, 3.4],
+      "rotationYRadians": 0,
+      "widthMeters": 1.25,
+      "runMeters": 4.8,
+      "railings": "both"
+    }
+  ],
+  "sceneItems": [
+    {
+      "id": "solstice-neutral-area-rug-1",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "neutral-area-rug",
+      "size": [4.8, 0.025, 4.2],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 10.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "color": "#c18d70"
+    },
+    {
+      "id": "solstice-curved-three-seat-sofa-2",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "curved-three-seat-sofa",
+      "size": [2.6, 0.88, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 11.6],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      },
+      "color": "#eee1cc"
+    },
+    {
+      "id": "solstice-rectangular-coffee-table-3",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "rectangular-coffee-table",
+      "size": [1.5, 0.38, 0.75],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 10],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-sage-tub-armchair-4",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "sage-tub-armchair",
+      "size": [0.78, 0.86, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.8, 9.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": -1.1
+      }
+    },
+    {
+      "id": "solstice-pedestal-side-table-5",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "pedestal-side-table",
+      "size": [0.5, 0.55, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.7, 10.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-low-media-console-6",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "low-media-console",
+      "size": [2.5, 0.5, 0.45],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 6.6],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-wall-television-7",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "wall-television",
+      "size": [2.4, 1.36, 0.07],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-15",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 3,
+        "elevationMeters": 1.2,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-wall-television-7-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["media_player"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Wall television · 110 inch",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-indoor-ac-8",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "indoor-ac",
+      "size": [0.86, 0.28, 0.206],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-15",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 5,
+        "elevationMeters": 2.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-indoor-ac-8-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["climate"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Indoor AC",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-speaker-9",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "speaker",
+      "size": [0.26, 0.39, 0.26],
+      "placement": {
+        "kind": "absolute",
+        "at": [13, 7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-speaker-9-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["media_player"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Speaker",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-floor-lamp-10",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "floor-lamp",
+      "size": [0.652, 1.796, 0.652],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.3, 12.9],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-floor-lamp-10-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Floor lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-tall-ficus-11",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "tall-ficus",
+      "size": [0.901, 1.643, 0.503],
+      "placement": {
+        "kind": "absolute",
+        "at": [13, 12.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-robot-vacuum-12",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "robot-vacuum",
+      "size": [0.35, 0.09, 0.35],
+      "placement": {
+        "kind": "absolute",
+        "at": [12.5, 12.9],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-robot-vacuum-12-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["vacuum"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Robot vacuum",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-living-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "living",
+        "at": [15, 9.5],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-living-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-kitchen-base-cabinet-13",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-base-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [0.65, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-base-cabinet-14",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-base-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [1.4, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-base-cabinet-15",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-base-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [2.15, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-sink-cabinet-16",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-sink-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [2.9, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-base-cabinet-17",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-base-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.65, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-hob-cabinet-18",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-hob-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.4, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-kitchen-base-cabinet-19",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-base-cabinet",
+      "size": [0.75, 0.9, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.15, 6.49],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "variant": "wood"
+    },
+    {
+      "id": "solstice-refrigerator-20",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "refrigerator",
+      "size": [0.7, 1.85, 0.72],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.9, 6.6],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-refrigerator-20-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Refrigerator",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["temperature"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-kitchen-pantry-cabinet-21",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-pantry-cabinet",
+      "size": [0.6, 2.1, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.2, 6.6],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-kitchen-island-22",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "kitchen-island",
+      "size": [2.8, 0.92, 1],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.3, 8.9],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-counter-stool-23",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "counter-stool",
+      "size": [0.48, 0.92, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [2.4, 9.85],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-counter-stool-24",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "counter-stool",
+      "size": [0.48, 0.92, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.3, 9.85],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-counter-stool-25",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "counter-stool",
+      "size": [0.48, 0.92, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.2, 9.85],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-capsule-coffee-machine-26",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "capsule-coffee-machine",
+      "size": [0.2, 0.3, 0.35],
+      "placement": {
+        "kind": "absolute",
+        "at": [1.4, 6.5],
+        "elevationMeters": 0.902,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-dishwasher-27",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "dishwasher",
+      "size": [0.6, 0.85, 0.65],
+      "placement": {
+        "kind": "absolute",
+        "at": [6, 6.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-dishwasher-27-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["switch"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Dishwasher",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-oven-28",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "oven",
+      "size": [0.6, 0.6, 0.62],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.9, 8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-oven-28-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["switch"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Oven",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-rectangular-dining-table-29",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "rectangular-dining-table",
+      "size": [2.8, 0.75, 1],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.8, 12.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-30",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.9, 11.4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-31",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.9, 13],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-32",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.8, 11.4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-33",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.8, 13],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-34",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.7, 11.4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-dining-chair-35",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-dining-chair",
+      "size": [0.49, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.7, 13],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-ring-ceramic-vase-36",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "ring-ceramic-vase",
+      "size": [0.18, 0.3, 0.06],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.8, 12.2],
+        "elevationMeters": 0.752,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-kitchen-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "terracotta-pendant",
+      "size": [0.66, 0.64, 0.66],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "kitchen",
+        "at": [4.8, 12.2],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-kitchen-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Terracotta pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-tall-ficus-37",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "tall-ficus",
+      "size": [0.901, 1.643, 0.503],
+      "placement": {
+        "kind": "absolute",
+        "at": [0.8, 13.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-three-door-sideboard-38",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "three-door-sideboard",
+      "size": [1.6, 0.82, 0.45],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.5, 11.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-entryway-shoe-bench-39",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "entryway-shoe-bench",
+      "size": [1.5, 0.5, 0.45],
+      "placement": {
+        "kind": "absolute",
+        "at": [11.55, 1.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-alarm-keypad-40",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "alarm-keypad",
+      "size": [0.18, 0.25, 0.035],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-6",
+        "face": "left",
+        "offsetFromWallStartPlanUnits": 1.2,
+        "elevationMeters": 1.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-alarm-keypad-40-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["alarm_control_panel"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Alarm keypad",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-smart-lock-41",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "smart-lock",
+      "size": [0.07, 0.18, 0.06],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-8",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 0.40000000000000036,
+        "elevationMeters": 1.1,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-smart-lock-41-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["lock"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Smart lock",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-camera-screen-42",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "camera-screen",
+      "size": [0.98, 0.62, 0.061],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-9",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 1.3,
+        "elevationMeters": 1.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-camera-screen-42-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["camera"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Camera screen",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-hall-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "terracotta-pendant",
+      "size": [0.66, 0.64, 0.66],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "hall",
+        "at": [10.5, 1.5],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-hall-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Terracotta pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-potted-plant-43",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "potted-plant",
+      "size": [0.615, 1.105, 0.44],
+      "placement": {
+        "kind": "absolute",
+        "at": [11.6, 12.9],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-salon-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "salon",
+        "at": [10.5, 11.7],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-salon-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-washing-machine-44",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "washing-machine",
+      "size": [0.632, 0.865, 0.63],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.6, 1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-washing-machine-44-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["switch"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Washing machine",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-tumble-dryer-45",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "tumble-dryer",
+      "size": [0.6, 0.85, 0.65],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.5, 1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-tumble-dryer-45-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["switch"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Tumble dryer",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-utility-shelving-46",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "utility-shelving",
+      "size": [0.9, 1.8, 0.45],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.5, 4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-laundry-carry-basket-47",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "laundry-carry-basket",
+      "size": [0.6, 0.35, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.4, 2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-ironing-board-48",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "ironing-board",
+      "size": [1.2, 0.9, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.2, 4.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-water-heater-49",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "water-heater",
+      "size": [0.572, 1.456, 0.43],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-5",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 2,
+        "elevationMeters": 1.2,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-water-heater-49-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["water_heater"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Water heater",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-leak-sensor-50",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "leak-sensor",
+      "size": [0.2, 0.14, 0.2],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.5, 1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-leak-sensor-50-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["binary_sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Leak sensor",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["moisture"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-laundry-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "ceiling-light",
+      "size": [0.4, 0.12, 0.4],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "laundry",
+        "at": [7.5, 3],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-laundry-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling light",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-electric-sedan",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "electric-sedan",
+      "size": [2.08, 1.45, 4.7],
+      "placement": {
+        "kind": "absolute",
+        "at": [2.3, 3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-electric-sedan-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Tesla-like electric sedan",
+            "dashboardRole": "primary"
+          }
+        },
+        {
+          "id": "solstice_car_range-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "secondary",
+          "presentation": {
+            "label": "Estimated range",
+            "dashboardRole": "secondary"
+          }
+        },
+        {
+          "id": "solstice_car_charge_power-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "secondary",
+          "presentation": {
+            "label": "Charging power",
+            "dashboardRole": "secondary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-workbench-51",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "workbench",
+      "size": [1.5, 0.9, 0.65],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.9, 5.3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-toolbox-52",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "toolbox",
+      "size": [0.45, 0.3, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.9, 5.3],
+        "elevationMeters": 0.902,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-utility-shelving-53",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "utility-shelving",
+      "size": [0.9, 1.8, 0.45],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.5, 1.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-energy-monitor-54",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "energy-monitor",
+      "size": [0.2, 0.3, 0.09],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-2",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 1.5,
+        "elevationMeters": 1.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-energy-monitor-54-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Energy monitor",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["power", "energy", "current", "voltage"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-garage-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "ceiling-light",
+      "size": [0.4, 0.12, 0.4],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "garage",
+        "at": [3, 3],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-garage-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling light",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-oak-desk-55",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-desk",
+      "size": [1.8, 0.75, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-ergonomic-office-chair-56",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "ergonomic-office-chair",
+      "size": [0.68, 1.04, 0.68],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-open-laptop-57",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "open-laptop",
+      "size": [0.34, 0.24, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 1],
+        "elevationMeters": 0.752,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-bookshelf-58",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "oak-bookshelf",
+      "size": [0.8, 1.9, 0.3],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.3, 3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": -1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-portable-digital-piano-59",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "portable-digital-piano",
+      "size": [1.3, 0.84, 0.34],
+      "placement": {
+        "kind": "absolute",
+        "at": [13.5, 5.4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-piano-bench-60",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "piano-bench",
+      "size": [0.6, 0.48, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [13.5, 4.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-tall-ficus-61",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "tall-ficus",
+      "size": [0.901, 1.643, 0.503],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.2, 5.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-office-light",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "office",
+        "at": [15, 3],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-office-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-table-lamp-62",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "table-lamp",
+      "size": [0.32, 0.52, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [14.3, 1],
+        "elevationMeters": 0.752,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-table-lamp-62-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Table lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-neutral-area-rug-63",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "neutral-area-rug",
+      "size": [4, 0.025, 3.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.5, 2.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "color": "#c99a79"
+    },
+    {
+      "id": "solstice-double-bed-64",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "double-bed",
+      "size": [1.7, 1.1, 2.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.5, 1.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-nightstand-65",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "oak-nightstand",
+      "size": [0.45, 0.5, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 1.1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-primary-reading",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "table-lamp",
+      "size": [0.32, 0.52, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 1.1],
+        "elevationMeters": 0.502,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-primary-reading-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Table lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-66",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.8, 2.3, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [0.6, 3.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-potted-plant-67",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "potted-plant",
+      "size": [0.615, 1.105, 0.44],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.3, 4.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-primary-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bed-primary",
+        "at": [3.5, 3.2],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-primary-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-upholstered-ottoman-68",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "upholstered-ottoman",
+      "size": [0.7, 0.42, 0.55],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.5, 3.3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-indoor-ac-69",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "indoor-ac",
+      "size": [0.86, 0.28, 0.206],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-1",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 3,
+        "elevationMeters": 2.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-indoor-ac-69-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["climate"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Indoor AC",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-neutral-area-rug-70",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "neutral-area-rug",
+      "size": [4, 0.025, 3.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.5, 11.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "color": "#9da994"
+    },
+    {
+      "id": "solstice-double-bed-71",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "double-bed",
+      "size": [1.7, 1.1, 2.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.5, 10.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-nightstand-72",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "oak-nightstand",
+      "size": [0.45, 0.5, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 10.1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-guest-reading",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "table-lamp",
+      "size": [0.32, 0.52, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 10.1],
+        "elevationMeters": 0.502,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-guest-reading-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Table lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-73",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.8, 2.3, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [0.6, 12.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-potted-plant-74",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "potted-plant",
+      "size": [0.615, 1.105, 0.44],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.3, 13.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-guest-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bed-guest",
+        "at": [3.5, 12.2],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-guest-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-neutral-area-rug-75",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "neutral-area-rug",
+      "size": [4, 0.025, 3.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 2.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "color": "#cbb378"
+    },
+    {
+      "id": "solstice-cabin-bed-76",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "cabin-bed",
+      "size": [1.183, 1.696, 2.432],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 1.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-nightstand-77",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "oak-nightstand",
+      "size": [0.45, 0.5, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.5, 1.1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-junior-reading",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "table-lamp",
+      "size": [0.32, 0.52, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.5, 1.1],
+        "elevationMeters": 0.502,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-junior-reading-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Table lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-78",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.8, 2.3, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [12.6, 3.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-potted-plant-79",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "potted-plant",
+      "size": [0.615, 1.105, 0.44],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.3, 4.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-junior-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "children-pendant",
+      "size": [0.58, 0.479, 0.58],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bed-junior",
+        "at": [15, 3.2],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-junior-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Children's pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-children-table-set-80",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "children-table-set",
+      "size": [1.08, 0.838, 1.12],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.2, 3.6],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-children-toy-shelf-81",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "children-toy-shelf",
+      "size": [0.505, 1.065, 0.285],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 4.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-neutral-area-rug-82",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "neutral-area-rug",
+      "size": [4, 0.025, 3.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 11.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "color": "#a5b2bc"
+    },
+    {
+      "id": "solstice-single-bed-83",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "single-bed",
+      "size": [1, 0.95, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [15, 10.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-single-bed-84",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "single-bed",
+      "size": [1, 0.95, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [13.3, 10.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-oak-nightstand-85",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "oak-nightstand",
+      "size": [0.45, 0.5, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.5, 10.1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-twin-reading",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "table-lamp",
+      "size": [0.32, 0.52, 0.32],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.5, 10.1],
+        "elevationMeters": 0.502,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-twin-reading-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Table lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-86",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.8, 2.3, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [12.6, 12.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-potted-plant-87",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "potted-plant",
+      "size": [0.615, 1.105, 0.44],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.3, 13.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-bed-twin-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "woven-pendant",
+      "size": [0.847, 0.58, 0.86],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bed-twin",
+        "at": [15, 12.2],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bed-twin-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Woven pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-88",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.1, 2.4, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.5, 7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-flat-door-wardrobe-89",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "flat-door-wardrobe",
+      "size": [1.1, 2.4, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [4.5, 8.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-arched-mirror-90",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "arched-mirror",
+      "size": [0.54, 1.05, 0.06],
+      "placement": {
+        "kind": "absolute",
+        "at": [6.6, 8.4],
+        "elevationMeters": 0.001,
+        "rotationYRadians": -1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-dressing-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "ceiling-light",
+      "size": [0.4, 0.12, 0.4],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "dressing",
+        "at": [5.8, 7.5],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-dressing-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling light",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-sage-tub-armchair-91",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "sage-tub-armchair",
+      "size": [0.78, 0.86, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.2, 11.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-pedestal-side-table-92",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "pedestal-side-table",
+      "size": [0.5, 0.55, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.3, 12.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-floor-lamp-93",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "floor-lamp",
+      "size": [0.652, 1.796, 0.652],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.6, 13.1],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-floor-lamp-93-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Floor lamp",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-robot-vacuum-94",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "robot-vacuum",
+      "size": [0.35, 0.09, 0.35],
+      "placement": {
+        "kind": "absolute",
+        "at": [11.6, 12.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-robot-vacuum-94-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["vacuum"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Robot vacuum",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-gallery-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "terracotta-pendant",
+      "size": [0.66, 0.64, 0.66],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "gallery",
+        "at": [9, 10.5],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-gallery-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Terracotta pendant",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-freestanding-bathtub-95",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "freestanding-bathtub",
+      "size": [1.8, 0.65, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [1.3, 6.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-compact-toilet-96",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "compact-toilet",
+      "size": [0.39, 0.724, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.4, 8.35],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-dark-oak-vessel-vanity-97",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "dark-oak-vessel-vanity",
+      "size": [1.35, 0.88, 0.55],
+      "placement": {
+        "kind": "absolute",
+        "at": [1.2, 8.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-wicker-towel-basket-98",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "wicker-towel-basket",
+      "size": [0.38, 0.315, 0.31],
+      "placement": {
+        "kind": "absolute",
+        "at": [3.4, 6.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-humidity-sensor-99",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "humidity-sensor",
+      "size": [0.085, 0.085, 0.03],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-6",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 1.5,
+        "elevationMeters": 1.5,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-humidity-sensor-99-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Humidity sensor",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["humidity"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-bath-primary-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "ceiling-light",
+      "size": [0.4, 0.12, 0.4],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bath-primary",
+        "at": [2, 7.5],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bath-primary-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling light",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-freestanding-bathtub-100",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "freestanding-bathtub",
+      "size": [1.8, 0.65, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [13.3, 5.8],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-compact-toilet-101",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "compact-toilet",
+      "size": [0.39, 0.724, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.4, 8.35],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-dark-oak-vessel-vanity-102",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "dark-oak-vessel-vanity",
+      "size": [1.35, 0.88, 0.55],
+      "placement": {
+        "kind": "absolute",
+        "at": [13.2, 8.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-wicker-towel-basket-103",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "wicker-towel-basket",
+      "size": [0.38, 0.315, 0.31],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.4, 5.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-humidity-sensor-104",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "humidity-sensor",
+      "size": [0.085, 0.085, 0.03],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-22",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 1.5,
+        "elevationMeters": 1.5,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-humidity-sensor-104-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Humidity sensor",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["humidity"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-bath-family-light",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "ceiling-light",
+      "size": [0.4, 0.12, 0.4],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "bath-family",
+        "at": [15, 7],
+        "dropMeters": 0.05,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bath-family-light-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling light",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-shower-assembly-105",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "shower-assembly",
+      "size": [2.018, 2.3, 0.908],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.7, 6.2],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-pergola",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "pergola-string-lights",
+      "size": [6, 2.7, 3.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [4, 16.2],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-pergola-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Wrought-iron pergola",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-outdoor-dining-table-106",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-table",
+      "size": [2.8, 0.75, 1],
+      "placement": {
+        "kind": "absolute",
+        "at": [4, 16.2],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-107",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [3, 15.4],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-108",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [3, 17],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-109",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [4, 15.4],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-110",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [4, 17],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-111",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 15.4],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-outdoor-dining-chair-112",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-dining-chair",
+      "size": [0.56, 0.85, 0.58],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 17],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-outdoor-bbq-113",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-bbq",
+      "size": [1.2, 1.1, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [0.2, 18.1],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-pool-chaise-longue-114",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "pool-chaise-longue",
+      "size": [0.8, 0.85, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [7.8, 26],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-pool-chaise-longue-115",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "pool-chaise-longue",
+      "size": [0.8, 0.85, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [10, 26],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-pool-chaise-longue-116",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "pool-chaise-longue",
+      "size": [0.8, 0.85, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [12.2, 26],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-pool-chaise-longue-117",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "pool-chaise-longue",
+      "size": [0.8, 0.85, 2.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [14.4, 26],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-patio-parasol-118",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "patio-parasol",
+      "size": [2.4, 2.5, 2.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.7, 25.7],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-outdoor-fire-pit-119",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "outdoor-fire-pit",
+      "size": [0.8, 0.4, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [1, 24],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-bench-120",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-bench",
+      "size": [1.5, 0.9, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [-1, 24],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-garden-bench-121",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-bench",
+      "size": [1.5, 0.9, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [1, 26],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 3.141592653589793
+      }
+    },
+    {
+      "id": "solstice-garden-bench-122",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-bench",
+      "size": [1.5, 0.9, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [3, 24],
+        "elevationMeters": -0.049,
+        "rotationYRadians": -1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-wooden-garden-swing-123",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "wooden-garden-swing",
+      "size": [2.2, 2.1, 1.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [1, 20.5],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-124",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2, 3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-125",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2, 10],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-126",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2, 18],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-127",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2, 28],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-128",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-129",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 11],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-130",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 19],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-131",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 28],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-olive-tree-132",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "olive-tree",
+      "size": [3, 3.6, 2.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [4, 28],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-133",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, -3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-134",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, -3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-135",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, -0.10000000000000009],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-136",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, -0.10000000000000009],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-137",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 2.8],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-138",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 2.8],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-139",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 5.699999999999999],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-140",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 5.699999999999999],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-141",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 8.6],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-142",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 8.6],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-143",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 11.5],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-144",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 11.5],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-145",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 14.399999999999999],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-146",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 14.399999999999999],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-147",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 17.3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-148",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 17.3],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-149",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 20.2],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-150",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 20.2],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-151",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 23.099999999999998],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-152",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 23.099999999999998],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-153",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [-2.5, 26],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-154",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.3, 0.75, 1.1],
+      "placement": {
+        "kind": "absolute",
+        "at": [20.5, 26],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-155",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.35, 0.92, 1.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 28.4],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-156",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.35, 0.92, 1.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [8.2, 28.4],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-157",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.35, 0.92, 1.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [11.4, 28.4],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-158",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.35, 0.92, 1.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [14.600000000000001, 28.4],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-shrub-159",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-shrub",
+      "size": [1.35, 0.92, 1.15],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.8, 28.4],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-160",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [-1, 15],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-161",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [18.9, 15],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-162",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [5, 19],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-163",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [18, 19],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-raised-garden-bed-164",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "raised-garden-bed",
+      "size": [1.2, 0.4, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [19.8, 7],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-garden-compost-bin-165",
+      "floorId": "ground",
+      "kind": "furnishing",
+      "modelId": "garden-compost-bin",
+      "size": [0.8, 1, 0.8],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 0],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-rotating-sprinkler-166",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "rotating-sprinkler",
+      "size": [0.28, 0.164, 0.28],
+      "placement": {
+        "kind": "absolute",
+        "at": [3, 28],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-rotating-sprinkler-166-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["valve"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Rotating sprinkler",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-smart-hose-timer-167",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "smart-hose-timer",
+      "size": [0.09, 0.2, 0.063],
+      "placement": {
+        "kind": "absolute",
+        "at": [20, 9],
+        "elevationMeters": -0.049,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-smart-hose-timer-167-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["valve"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Smart hose timer",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-garden-lantern-0",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "low-garden-lantern",
+      "size": [0.24, 0.35, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [-1, 16],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-garden-lantern-0-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Low garden lantern",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-garden-lantern-1",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "low-garden-lantern",
+      "size": [0.24, 0.35, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [18, 17],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-garden-lantern-1-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Low garden lantern",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-garden-lantern-2",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "low-garden-lantern",
+      "size": [0.24, 0.35, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.5, 25],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-garden-lantern-2-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Low garden lantern",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-garden-lantern-3",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "low-garden-lantern",
+      "size": [0.24, 0.35, 0.24],
+      "placement": {
+        "kind": "absolute",
+        "at": [18, 25],
+        "elevationMeters": -0.043,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-garden-lantern-3-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["light"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Low garden lantern",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-slatted-folding-table-168",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "slatted-folding-table",
+      "size": [0.6, 0.72, 0.6],
+      "placement": {
+        "kind": "absolute",
+        "at": [8, 15.3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-slatted-folding-chair-169",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "slatted-folding-chair",
+      "size": [0.4, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [7, 15.3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-slatted-folding-chair-170",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "slatted-folding-chair",
+      "size": [0.4, 0.82, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [9, 15.3],
+        "elevationMeters": 0.001,
+        "rotationYRadians": -1.5707963267948966
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-171",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [1, 15.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-172",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [5.5, 15.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-173",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [12.5, 15.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-terracotta-planter-174",
+      "floorId": "upper",
+      "kind": "furnishing",
+      "modelId": "terracotta-planter",
+      "size": [0.5, 0.5, 0.5],
+      "placement": {
+        "kind": "absolute",
+        "at": [17, 15.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      }
+    },
+    {
+      "id": "solstice-ceiling-fan-175",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "ceiling-fan",
+      "size": [1.2, 0.4, 1.2],
+      "placement": {
+        "kind": "ceiling",
+        "roomId": "living",
+        "at": [15, 11],
+        "dropMeters": 0.02,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-ceiling-fan-175-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["fan"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Ceiling fan",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-pedestal-fan-176",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "pedestal-fan",
+      "size": [0.45, 1.35, 0.4],
+      "placement": {
+        "kind": "absolute",
+        "at": [16.7, 4.7],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-pedestal-fan-176-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["fan"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Pedestal fan",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-indoor-security-camera-177",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "indoor-security-camera",
+      "size": [0.1, 0.16, 0.1],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-14",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 2,
+        "elevationMeters": 2.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-indoor-security-camera-177-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["camera"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Indoor security camera",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-bathroom-extractor-fan-178",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "bathroom-extractor-fan",
+      "size": [0.18, 0.18, 0.09],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-22",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 2.5,
+        "elevationMeters": 2.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-bathroom-extractor-fan-178-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["fan"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Bathroom extractor fan",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-motion-sensor-179",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "motion-sensor",
+      "size": [0.14, 0.135, 0.081],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-6",
+        "face": "left",
+        "offsetFromWallStartPlanUnits": 1,
+        "elevationMeters": 2.2,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-motion-sensor-179-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["binary_sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Motion sensor",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["motion", "occupancy", "presence"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-thermometer-180",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "thermometer",
+      "size": [0.16, 0.16, 0.056],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-19",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 3.5,
+        "elevationMeters": 1.5,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-thermometer-180-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["sensor"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Thermometer",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["temperature"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-smart-plug-181",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "smart-plug",
+      "size": [0.07, 0.07, 0.055],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-2",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 2.5,
+        "elevationMeters": 0.4,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-smart-plug-181-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["switch"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Smart plug",
+            "dashboardRole": "primary"
+          },
+          "compatibleDeviceClasses": ["outlet"]
+        }
+      ]
+    },
+    {
+      "id": "solstice-air-purifier-182",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "air-purifier",
+      "size": [0.27, 0.52, 0.27],
+      "placement": {
+        "kind": "absolute",
+        "at": [17.3, 7.5],
+        "elevationMeters": 0.001,
+        "rotationYRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-air-purifier-182-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["fan"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Air purifier",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-motorized-blind-183",
+      "floorId": "ground",
+      "kind": "device",
+      "modelId": "motorized-blind",
+      "size": [1.85, 1.6, 0.12],
+      "placement": {
+        "kind": "wall",
+        "wallId": "ground-wall-18",
+        "face": "left",
+        "offsetFromWallStartPlanUnits": 2,
+        "elevationMeters": 1,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-motorized-blind-183-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["cover"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Motorized blind",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    },
+    {
+      "id": "solstice-motorized-blind-184",
+      "floorId": "upper",
+      "kind": "device",
+      "modelId": "motorized-blind",
+      "size": [1.85, 1.6, 0.12],
+      "placement": {
+        "kind": "wall",
+        "wallId": "upper-wall-19",
+        "face": "right",
+        "offsetFromWallStartPlanUnits": 3,
+        "elevationMeters": 1,
+        "depthOffsetMeters": 0.004,
+        "rotationOffsetRadians": 0
+      },
+      "entitySlots": [
+        {
+          "id": "solstice-motorized-blind-184-state",
+          "autoMap": "manual",
+          "compatibleDomains": ["cover"],
+          "required": true,
+          "deviceRole": "primary",
+          "presentation": {
+            "label": "Motorized blind",
+            "dashboardRole": "primary"
+          }
+        }
+      ]
+    }
+  ],
+  "roomProfiles": {},
+  "openingProfiles": {
+    "ground-door-2": {
+      "coverSlot": {
+        "id": "solstice-garage-cover",
+        "autoMap": "manual"
+      }
+    }
+  },
+  "shortcuts": [
+    {
+      "action": "construct-mode",
+      "context": "overview",
+      "id": "villa-construct-mode",
+      "order": 0
+    },
+    {
+      "action": "arrange-mode",
+      "context": "overview",
+      "id": "villa-arrange-mode",
+      "order": 1
+    },
+    {
+      "action": "connect-mode",
+      "context": "overview",
+      "id": "villa-connect-mode",
+      "order": 2
+    },
+    {
+      "action": "walk-mode",
+      "context": "both",
+      "id": "villa-walk-mode",
+      "order": 3
+    },
+    {
+      "action": "lighting-mode",
+      "context": "both",
+      "id": "villa-lighting-mode",
+      "order": 4
+    },
+    {
+      "action": "wall-fade",
+      "context": "both",
+      "id": "villa-wall-fade",
+      "order": 5
+    },
+    {
+      "action": "all-lights",
+      "context": "both",
+      "id": "villa-all-lights",
+      "order": 6
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "design",
+      "basis": "inferred",
+      "subjectId": "251368c4-5da7-4f3e-8e16-c184f31a8158",
+      "summary": "Original synthetic Mediterranean villa. Dimensions inferred in metres: 18 x 14 m shell, two levels 3.2 m apart, four upstairs bedrooms and two bathrooms. North is plan -Y; garden faces south. Cream plaster, pale oak, terracotta accents, travertine terraces and mature planted margins. Architecture and furnishings are generated directly as JSON; no household data."
+    }
+  ]
+}

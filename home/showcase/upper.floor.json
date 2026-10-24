@@ -1,0 +1,824 @@
+{
+  "id": "upper",
+  "name": "First floor",
+  "coordinates": {
+    "origin": [0, 0],
+    "metersPerPlanUnit": 1,
+    "scaleBasis": "inferred"
+  },
+  "defaultWallHeightMeters": 3,
+  "defaultCeilingHeightMeters": 3,
+  "floorToFloorHeightMeters": 3.2,
+  "footprint": [
+    [0, 0],
+    [18, 0],
+    [18, 14],
+    [0, 14]
+  ],
+  "rooms": [
+    {
+      "id": "bed-primary",
+      "name": "Primary suite",
+      "polygon": [
+        [0, 0],
+        [7, 0],
+        [7, 6],
+        [0, 6]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "bath-primary",
+      "name": "Spa bathroom",
+      "polygon": [
+        [0, 6],
+        [4, 6],
+        [4, 9],
+        [0, 9]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "square-tile"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "dressing",
+      "name": "Dressing room",
+      "polygon": [
+        [4, 6],
+        [7, 6],
+        [7, 9],
+        [4, 9]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "dark-walnut"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "bed-guest",
+      "name": "Guest bedroom",
+      "polygon": [
+        [0, 9],
+        [7, 9],
+        [7, 14],
+        [0, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "gallery",
+      "name": "Upper gallery",
+      "polygon": [
+        [7, 0],
+        [12, 0],
+        [12, 14],
+        [7, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "bed-junior",
+      "name": "Junior bedroom",
+      "polygon": [
+        [12, 0],
+        [18, 0],
+        [18, 5],
+        [12, 5]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "bath-family",
+      "name": "Family bathroom",
+      "polygon": [
+        [12, 5],
+        [18, 5],
+        [18, 9],
+        [12, 9]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "square-tile"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "bed-twin",
+      "name": "Twin bedroom",
+      "polygon": [
+        [12, 9],
+        [18, 9],
+        [18, 14],
+        [12, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    }
+  ],
+  "walls": [
+    {
+      "id": "upper-wall-1",
+      "from": [0, 0],
+      "to": [7, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-2",
+      "from": [7, 0],
+      "to": [7, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-3",
+      "from": [0, 6],
+      "to": [4, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-4",
+      "from": [4, 6],
+      "to": [7, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-5",
+      "from": [0, 0],
+      "to": [0, 6],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-6",
+      "from": [4, 6],
+      "to": [4, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-7",
+      "from": [0, 9],
+      "to": [4, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-8",
+      "from": [0, 6],
+      "to": [0, 9],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-9",
+      "from": [7, 6],
+      "to": [7, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-10",
+      "from": [4, 9],
+      "to": [7, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-11",
+      "from": [7, 9],
+      "to": [7, 14],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-12",
+      "from": [0, 14],
+      "to": [7, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-13",
+      "from": [0, 9],
+      "to": [0, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-14",
+      "from": [7, 0],
+      "to": [12, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-15",
+      "from": [12, 0],
+      "to": [12, 5],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-16",
+      "from": [12, 5],
+      "to": [12, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-17",
+      "from": [12, 9],
+      "to": [12, 14],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-18",
+      "from": [7, 14],
+      "to": [12, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-19",
+      "from": [12, 0],
+      "to": [18, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-20",
+      "from": [18, 0],
+      "to": [18, 5],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-21",
+      "from": [12, 5],
+      "to": [18, 5],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-22",
+      "from": [18, 5],
+      "to": [18, 9],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-23",
+      "from": [12, 9],
+      "to": [18, 9],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-24",
+      "from": [18, 9],
+      "to": [18, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "upper-wall-25",
+      "from": [12, 14],
+      "to": [18, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    }
+  ],
+  "wallJunctions": [
+    {
+      "id": "upper-junction-1",
+      "at": [0, 0],
+      "wallIds": ["upper-wall-1", "upper-wall-5"]
+    },
+    {
+      "id": "upper-junction-2",
+      "at": [7, 0],
+      "wallIds": ["upper-wall-1", "upper-wall-2", "upper-wall-14"]
+    },
+    {
+      "id": "upper-junction-3",
+      "at": [7, 6],
+      "wallIds": ["upper-wall-2", "upper-wall-4", "upper-wall-9"]
+    },
+    {
+      "id": "upper-junction-4",
+      "at": [0, 6],
+      "wallIds": ["upper-wall-3", "upper-wall-5", "upper-wall-8"]
+    },
+    {
+      "id": "upper-junction-5",
+      "at": [4, 6],
+      "wallIds": ["upper-wall-3", "upper-wall-4", "upper-wall-6"]
+    },
+    {
+      "id": "upper-junction-6",
+      "at": [4, 9],
+      "wallIds": ["upper-wall-6", "upper-wall-7", "upper-wall-10"]
+    },
+    {
+      "id": "upper-junction-7",
+      "at": [0, 9],
+      "wallIds": ["upper-wall-7", "upper-wall-8", "upper-wall-13"]
+    },
+    {
+      "id": "upper-junction-8",
+      "at": [7, 9],
+      "wallIds": ["upper-wall-9", "upper-wall-10", "upper-wall-11"]
+    },
+    {
+      "id": "upper-junction-9",
+      "at": [7, 14],
+      "wallIds": ["upper-wall-11", "upper-wall-12", "upper-wall-18"]
+    },
+    {
+      "id": "upper-junction-10",
+      "at": [0, 14],
+      "wallIds": ["upper-wall-12", "upper-wall-13"]
+    },
+    {
+      "id": "upper-junction-11",
+      "at": [12, 0],
+      "wallIds": ["upper-wall-14", "upper-wall-15", "upper-wall-19"]
+    },
+    {
+      "id": "upper-junction-12",
+      "at": [12, 14],
+      "wallIds": ["upper-wall-17", "upper-wall-18", "upper-wall-25"]
+    },
+    {
+      "id": "upper-junction-13",
+      "at": [18, 0],
+      "wallIds": ["upper-wall-19", "upper-wall-20"]
+    },
+    {
+      "id": "upper-junction-14",
+      "at": [18, 5],
+      "wallIds": ["upper-wall-20", "upper-wall-21", "upper-wall-22"]
+    },
+    {
+      "id": "upper-junction-15",
+      "at": [12, 5],
+      "wallIds": ["upper-wall-15", "upper-wall-16", "upper-wall-21"]
+    },
+    {
+      "id": "upper-junction-16",
+      "at": [18, 9],
+      "wallIds": ["upper-wall-22", "upper-wall-23", "upper-wall-24"]
+    },
+    {
+      "id": "upper-junction-17",
+      "at": [12, 9],
+      "wallIds": ["upper-wall-16", "upper-wall-17", "upper-wall-23"]
+    },
+    {
+      "id": "upper-junction-18",
+      "at": [18, 14],
+      "wallIds": ["upper-wall-24", "upper-wall-25"]
+    }
+  ],
+  "openings": [
+    {
+      "id": "upper-door-1",
+      "wallId": "upper-wall-2",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 3.5,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-2",
+      "wallId": "upper-wall-11",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.1999999999999993,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-3",
+      "wallId": "upper-wall-15",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2.5,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-4",
+      "wallId": "upper-wall-16",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.2999999999999998,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-5",
+      "wallId": "upper-wall-17",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.5,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-6",
+      "wallId": "upper-wall-4",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 0.7999999999999998,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-7",
+      "wallId": "upper-wall-6",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-door-8",
+      "wallId": "upper-wall-9",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "upper-window-9",
+      "wallId": "upper-wall-1",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "upper-door-10",
+      "wallId": "upper-wall-12",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "french",
+      "finish": "white",
+      "leafCount": 2
+    },
+    {
+      "id": "upper-window-11",
+      "wallId": "upper-wall-14",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1.5,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "upper-door-12",
+      "wallId": "upper-wall-18",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1.5,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "french",
+      "finish": "white",
+      "leafCount": 2
+    },
+    {
+      "id": "upper-window-13",
+      "wallId": "upper-wall-19",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "upper-door-14",
+      "wallId": "upper-wall-25",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "french",
+      "finish": "white",
+      "leafCount": 2
+    },
+    {
+      "id": "upper-window-15",
+      "wallId": "upper-wall-5",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "upper-window-16",
+      "wallId": "upper-wall-8",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 0.5999999999999996,
+      "widthPlanUnits": 1.8,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "privacy"
+    },
+    {
+      "id": "upper-window-17",
+      "wallId": "upper-wall-22",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "privacy"
+    },
+    {
+      "id": "upper-window-18",
+      "wallId": "upper-wall-20",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1.2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "upper-window-19",
+      "wallId": "upper-wall-24",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1.1999999999999993,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    }
+  ],
+  "ceilings": [
+    {
+      "id": "upper-ceiling",
+      "kind": "flat",
+      "roomIds": [
+        "bed-primary",
+        "bath-primary",
+        "dressing",
+        "bed-guest",
+        "gallery",
+        "bed-junior",
+        "bath-family",
+        "bed-twin"
+      ],
+      "heightMeters": 3
+    }
+  ],
+  "outdoorPlatforms": [
+    {
+      "id": "south-balcony",
+      "polygon": [
+        [0, 14],
+        [18, 14],
+        [18, 16.3],
+        [0, 16.3]
+      ],
+      "finish": {
+        "kind": "preset",
+        "preset": "travertine"
+      },
+      "defaultEdge": {
+        "kind": "railing",
+        "heightMeters": 1
+      },
+      "edges": [
+        {
+          "id": "balcony-edge-0"
+        },
+        {
+          "id": "balcony-edge-1"
+        },
+        {
+          "id": "balcony-edge-2"
+        },
+        {
+          "id": "balcony-edge-3"
+        }
+      ]
+    }
+  ]
+}

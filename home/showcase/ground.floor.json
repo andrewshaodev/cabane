@@ -1,0 +1,831 @@
+{
+  "id": "ground",
+  "name": "Ground floor",
+  "coordinates": {
+    "origin": [0, 0],
+    "metersPerPlanUnit": 1,
+    "scaleBasis": "inferred"
+  },
+  "defaultWallHeightMeters": 3,
+  "defaultCeilingHeightMeters": 3,
+  "floorToFloorHeightMeters": 3.2,
+  "footprint": [
+    [0, 0],
+    [18, 0],
+    [18, 14],
+    [0, 14]
+  ],
+  "rooms": [
+    {
+      "id": "garage",
+      "name": "Garage & workshop",
+      "polygon": [
+        [0, 0],
+        [6, 0],
+        [6, 6],
+        [0, 6]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "limestone"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "laundry",
+      "name": "Laundry & pantry",
+      "polygon": [
+        [6, 0],
+        [9, 0],
+        [9, 6],
+        [6, 6]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "terrazzo"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "hall",
+      "name": "Entrance & stair gallery",
+      "polygon": [
+        [9, 0],
+        [12, 0],
+        [12, 8],
+        [9, 8]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "terrazzo"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "office",
+      "name": "Garden studio",
+      "polygon": [
+        [12, 0],
+        [18, 0],
+        [18, 6],
+        [12, 6]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen & dining",
+      "polygon": [
+        [0, 6],
+        [9, 6],
+        [9, 14],
+        [0, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "living",
+      "name": "Sunken-tone lounge",
+      "polygon": [
+        [12, 6],
+        [18, 6],
+        [18, 14],
+        [12, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    },
+    {
+      "id": "salon",
+      "name": "Garden passage",
+      "polygon": [
+        [9, 8],
+        [12, 8],
+        [12, 14],
+        [9, 14]
+      ],
+      "accent": "#b78e70",
+      "floorFinish": {
+        "kind": "preset",
+        "preset": "light-oak"
+      },
+      "dashboardSlots": [],
+      "devices": []
+    }
+  ],
+  "walls": [
+    {
+      "id": "ground-wall-1",
+      "from": [0, 0],
+      "to": [6, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-2",
+      "from": [6, 0],
+      "to": [6, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-3",
+      "from": [0, 6],
+      "to": [6, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-4",
+      "from": [0, 0],
+      "to": [0, 6],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-5",
+      "from": [6, 0],
+      "to": [9, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-6",
+      "from": [9, 0],
+      "to": [9, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-7",
+      "from": [6, 6],
+      "to": [9, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-8",
+      "from": [9, 0],
+      "to": [12, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-9",
+      "from": [12, 0],
+      "to": [12, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-10",
+      "from": [12, 6],
+      "to": [12, 8],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-11",
+      "from": [9, 8],
+      "to": [12, 8],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-12",
+      "from": [9, 6],
+      "to": [9, 8],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-13",
+      "from": [12, 0],
+      "to": [18, 0],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-14",
+      "from": [18, 0],
+      "to": [18, 6],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-15",
+      "from": [12, 6],
+      "to": [18, 6],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-16",
+      "from": [9, 8],
+      "to": [9, 14],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-17",
+      "from": [0, 14],
+      "to": [9, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-18",
+      "from": [0, 6],
+      "to": [0, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-19",
+      "from": [18, 6],
+      "to": [18, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-20",
+      "from": [12, 14],
+      "to": [18, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-21",
+      "from": [12, 8],
+      "to": [12, 14],
+      "classification": "interior",
+      "thicknessMeters": 0.16,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    },
+    {
+      "id": "ground-wall-22",
+      "from": [9, 14],
+      "to": [12, 14],
+      "classification": "exterior",
+      "thicknessMeters": 0.3,
+      "faceColors": {
+        "left": "#eee5d8",
+        "right": "#eee5d8"
+      }
+    }
+  ],
+  "wallJunctions": [
+    {
+      "id": "ground-junction-1",
+      "at": [0, 0],
+      "wallIds": ["ground-wall-1", "ground-wall-4"]
+    },
+    {
+      "id": "ground-junction-2",
+      "at": [6, 0],
+      "wallIds": ["ground-wall-1", "ground-wall-2", "ground-wall-5"]
+    },
+    {
+      "id": "ground-junction-3",
+      "at": [6, 6],
+      "wallIds": ["ground-wall-2", "ground-wall-3", "ground-wall-7"]
+    },
+    {
+      "id": "ground-junction-4",
+      "at": [0, 6],
+      "wallIds": ["ground-wall-3", "ground-wall-4", "ground-wall-18"]
+    },
+    {
+      "id": "ground-junction-5",
+      "at": [9, 0],
+      "wallIds": ["ground-wall-5", "ground-wall-6", "ground-wall-8"]
+    },
+    {
+      "id": "ground-junction-6",
+      "at": [9, 6],
+      "wallIds": ["ground-wall-6", "ground-wall-7", "ground-wall-12"]
+    },
+    {
+      "id": "ground-junction-7",
+      "at": [12, 0],
+      "wallIds": ["ground-wall-8", "ground-wall-9", "ground-wall-13"]
+    },
+    {
+      "id": "ground-junction-8",
+      "at": [12, 8],
+      "wallIds": ["ground-wall-10", "ground-wall-11", "ground-wall-21"]
+    },
+    {
+      "id": "ground-junction-9",
+      "at": [9, 8],
+      "wallIds": ["ground-wall-11", "ground-wall-12", "ground-wall-16"]
+    },
+    {
+      "id": "ground-junction-10",
+      "at": [18, 0],
+      "wallIds": ["ground-wall-13", "ground-wall-14"]
+    },
+    {
+      "id": "ground-junction-11",
+      "at": [18, 6],
+      "wallIds": ["ground-wall-14", "ground-wall-15", "ground-wall-19"]
+    },
+    {
+      "id": "ground-junction-12",
+      "at": [12, 6],
+      "wallIds": ["ground-wall-9", "ground-wall-10", "ground-wall-15"]
+    },
+    {
+      "id": "ground-junction-13",
+      "at": [9, 14],
+      "wallIds": ["ground-wall-16", "ground-wall-17", "ground-wall-22"]
+    },
+    {
+      "id": "ground-junction-14",
+      "at": [0, 14],
+      "wallIds": ["ground-wall-17", "ground-wall-18"]
+    },
+    {
+      "id": "ground-junction-15",
+      "at": [18, 14],
+      "wallIds": ["ground-wall-19", "ground-wall-20"]
+    },
+    {
+      "id": "ground-junction-16",
+      "at": [12, 14],
+      "wallIds": ["ground-wall-20", "ground-wall-21", "ground-wall-22"]
+    }
+  ],
+  "openings": [
+    {
+      "id": "ground-door-1",
+      "wallId": "ground-wall-8",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 0.8000000000000007,
+      "widthPlanUnits": 1.4,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "full-glass",
+      "finish": "wood",
+      "leafCount": 2
+    },
+    {
+      "id": "ground-door-2",
+      "wallId": "ground-wall-1",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 4,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "roll-up",
+      "variant": "slatted",
+      "finish": "white"
+    },
+    {
+      "id": "ground-door-3",
+      "wallId": "ground-wall-2",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 3.8,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "ground-door-4",
+      "wallId": "ground-wall-6",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "ground-door-5",
+      "wallId": "ground-wall-7",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "ground-door-6",
+      "wallId": "ground-wall-9",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "hinged",
+      "variant": "panel",
+      "finish": "wood",
+      "leafCount": 1
+    },
+    {
+      "id": "ground-passage-7",
+      "wallId": "ground-wall-12",
+      "kind": "passage",
+      "offsetFromWallStartPlanUnits": 0.5,
+      "widthPlanUnits": 1.1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "variant": "arched",
+      "archRiseMeters": 0.3
+    },
+    {
+      "id": "ground-passage-8",
+      "wallId": "ground-wall-11",
+      "kind": "passage",
+      "offsetFromWallStartPlanUnits": 0.5999999999999996,
+      "widthPlanUnits": 1.8,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "variant": "arched",
+      "archRiseMeters": 0.3
+    },
+    {
+      "id": "ground-passage-9",
+      "wallId": "ground-wall-10",
+      "kind": "passage",
+      "offsetFromWallStartPlanUnits": 0.5,
+      "widthPlanUnits": 1.1,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "variant": "arched",
+      "archRiseMeters": 0.3
+    },
+    {
+      "id": "ground-passage-10",
+      "wallId": "ground-wall-16",
+      "kind": "passage",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "variant": "arched",
+      "archRiseMeters": 0.3
+    },
+    {
+      "id": "ground-passage-11",
+      "wallId": "ground-wall-21",
+      "kind": "passage",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "variant": "arched",
+      "archRiseMeters": 0.3
+    },
+    {
+      "id": "ground-door-12",
+      "wallId": "ground-wall-17",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2.8,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "sliding",
+      "variant": "full-glass",
+      "finish": "wood",
+      "leafCount": 2
+    },
+    {
+      "id": "ground-door-13",
+      "wallId": "ground-wall-22",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 0.5999999999999996,
+      "widthPlanUnits": 1.8,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "sliding",
+      "variant": "full-glass",
+      "finish": "wood",
+      "leafCount": 2
+    },
+    {
+      "id": "ground-door-14",
+      "wallId": "ground-wall-20",
+      "kind": "door",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2.8,
+      "openingHeightMeters": 2.4,
+      "sillHeightMeters": 0,
+      "operation": "sliding",
+      "variant": "full-glass",
+      "finish": "wood",
+      "leafCount": 2
+    },
+    {
+      "id": "ground-window-15",
+      "wallId": "ground-wall-18",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "ground-window-16",
+      "wallId": "ground-wall-18",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 5,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "ground-window-17",
+      "wallId": "ground-wall-19",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 1,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "ground-window-18",
+      "wallId": "ground-wall-19",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 5,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "ground-window-19",
+      "wallId": "ground-wall-13",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2.5,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    },
+    {
+      "id": "ground-window-20",
+      "wallId": "ground-wall-14",
+      "kind": "window",
+      "offsetFromWallStartPlanUnits": 2,
+      "widthPlanUnits": 2,
+      "openingHeightMeters": 1.6,
+      "sillHeightMeters": 0.85,
+      "operation": "fixed",
+      "variant": "plain",
+      "panelCount": 2,
+      "glazing": "clear"
+    }
+  ],
+  "ceilings": [
+    {
+      "id": "ground-ceiling",
+      "kind": "flat",
+      "roomIds": ["garage", "laundry", "hall", "office", "kitchen", "living", "salon"],
+      "heightMeters": 3
+    }
+  ],
+  "groundZones": [
+    {
+      "id": "rear-travertine",
+      "polygon": [
+        [-1, 14],
+        [19, 14],
+        [19, 18.5],
+        [-1, 18.5]
+      ],
+      "finish": {
+        "kind": "preset",
+        "preset": "travertine"
+      }
+    },
+    {
+      "id": "pool-deck",
+      "polygon": [
+        [5, 18.5],
+        [19, 18.5],
+        [19, 27.5],
+        [5, 27.5]
+      ],
+      "finish": {
+        "kind": "preset",
+        "preset": "travertine"
+      }
+    },
+    {
+      "id": "arrival-path",
+      "polygon": [
+        [8.8, -6],
+        [12.3, -6],
+        [12.3, 0],
+        [8.8, 0]
+      ],
+      "finish": {
+        "kind": "preset",
+        "preset": "limestone"
+      }
+    },
+    {
+      "id": "garage-drive",
+      "polygon": [
+        [0.3, -6],
+        [5.8, -6],
+        [5.8, 0],
+        [0.3, 0]
+      ],
+      "finish": {
+        "kind": "preset",
+        "preset": "limestone"
+      }
+    }
+  ],
+  "pools": [
+    {
+      "id": "solstice-pool",
+      "polygon": [
+        [7, 20],
+        [16, 20],
+        [16, 24.5],
+        [7, 24.5]
+      ]
+    }
+  ],
+  "hedges": [
+    {
+      "id": "garden-boundary-0",
+      "from": [-4, -6],
+      "to": [-4, 30],
+      "heightMeters": 1.6,
+      "widthMeters": 0.7,
+      "style": "mixed"
+    },
+    {
+      "id": "garden-boundary-1",
+      "from": [22, -6],
+      "to": [22, 30],
+      "heightMeters": 1.6,
+      "widthMeters": 0.7,
+      "style": "mixed"
+    },
+    {
+      "id": "garden-boundary-2",
+      "from": [-4, 30],
+      "to": [22, 30],
+      "heightMeters": 1.6,
+      "widthMeters": 0.7,
+      "style": "mixed"
+    },
+    {
+      "id": "garden-boundary-3",
+      "from": [-4, -6],
+      "to": [0, -6],
+      "heightMeters": 1.6,
+      "widthMeters": 0.7,
+      "style": "mixed"
+    },
+    {
+      "id": "garden-boundary-4",
+      "from": [14, -6],
+      "to": [22, -6],
+      "heightMeters": 1.6,
+      "widthMeters": 0.7,
+      "style": "mixed"
+    }
+  ]
+}

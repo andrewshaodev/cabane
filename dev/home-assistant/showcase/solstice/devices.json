@@ -1,0 +1,323 @@
+[
+  {
+    "key": "solstice_floor_lamp_10",
+    "name": "solstice floor lamp 10",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_living_light",
+    "name": "solstice living light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_refrigerator_20",
+    "name": "solstice refrigerator 20",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "value": 4,
+    "unit": "\u00b0C"
+  },
+  {
+    "key": "solstice_dishwasher_27",
+    "name": "solstice dishwasher 27",
+    "domain": "switch"
+  },
+  {
+    "key": "solstice_oven_28",
+    "name": "solstice oven 28",
+    "domain": "switch"
+  },
+  {
+    "key": "solstice_kitchen_light",
+    "name": "solstice kitchen light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_hall_light",
+    "name": "solstice hall light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_salon_light",
+    "name": "solstice salon light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_washing_machine_44",
+    "name": "solstice washing machine 44",
+    "domain": "switch"
+  },
+  {
+    "key": "solstice_tumble_dryer_45",
+    "name": "solstice tumble dryer 45",
+    "domain": "switch"
+  },
+  {
+    "key": "solstice_laundry_light",
+    "name": "solstice laundry light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_electric_sedan",
+    "name": "solstice electric sedan",
+    "domain": "sensor",
+    "device_class": "battery",
+    "value": 82,
+    "unit": "%"
+  },
+  {
+    "key": "solstice_garage_light",
+    "name": "solstice garage light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_office_light",
+    "name": "solstice office light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_table_lamp_62",
+    "name": "solstice table lamp 62",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_primary_reading",
+    "name": "solstice bed primary reading",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_primary_light",
+    "name": "solstice bed primary light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_guest_reading",
+    "name": "solstice bed guest reading",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_guest_light",
+    "name": "solstice bed guest light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_junior_reading",
+    "name": "solstice bed junior reading",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_junior_light",
+    "name": "solstice bed junior light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_twin_reading",
+    "name": "solstice bed twin reading",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_bed_twin_light",
+    "name": "solstice bed twin light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_dressing_light",
+    "name": "solstice dressing light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_floor_lamp_93",
+    "name": "solstice floor lamp 93",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_gallery_light",
+    "name": "solstice gallery light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_humidity_sensor_99",
+    "name": "solstice humidity sensor 99",
+    "domain": "sensor",
+    "device_class": "humidity",
+    "value": 48,
+    "unit": "%"
+  },
+  {
+    "key": "solstice_bath_primary_light",
+    "name": "solstice bath primary light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_humidity_sensor_104",
+    "name": "solstice humidity sensor 104",
+    "domain": "sensor",
+    "device_class": "humidity",
+    "value": 48,
+    "unit": "%"
+  },
+  {
+    "key": "solstice_bath_family_light",
+    "name": "solstice bath family light",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_pergola",
+    "name": "solstice pergola",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_garden_lantern_0",
+    "name": "solstice garden lantern 0",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_garden_lantern_1",
+    "name": "solstice garden lantern 1",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_garden_lantern_2",
+    "name": "solstice garden lantern 2",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_garden_lantern_3",
+    "name": "solstice garden lantern 3",
+    "domain": "light"
+  },
+  {
+    "key": "solstice_car_range",
+    "name": "solstice car range",
+    "domain": "sensor",
+    "value": 360,
+    "unit": "km"
+  },
+  {
+    "key": "solstice_car_charge_power",
+    "name": "solstice car charge power",
+    "domain": "sensor",
+    "value": 7.2,
+    "unit": "kW"
+  },
+  {
+    "key": "solstice_ambient_garage",
+    "name": "Solstice Garage & workshop ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_laundry",
+    "name": "Solstice Laundry & pantry ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_hall",
+    "name": "Solstice Entrance & stair gallery ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_office",
+    "name": "Solstice Garden studio ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_kitchen",
+    "name": "Solstice Kitchen & dining ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_living",
+    "name": "Solstice Sunken-tone lounge ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_salon",
+    "name": "Solstice Garden passage ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bed_primary",
+    "name": "Solstice Primary suite ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bath_primary",
+    "name": "Solstice Spa bathroom ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_dressing",
+    "name": "Solstice Dressing room ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bed_guest",
+    "name": "Solstice Guest bedroom ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_gallery",
+    "name": "Solstice Upper gallery ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bed_junior",
+    "name": "Solstice Junior bedroom ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bath_family",
+    "name": "Solstice Family bathroom ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  },
+  {
+    "key": "solstice_ambient_bed_twin",
+    "name": "Solstice Twin bedroom ambient temperature",
+    "domain": "sensor",
+    "device_class": "temperature",
+    "unit": "\u00b0C",
+    "value": 22
+  }
+]

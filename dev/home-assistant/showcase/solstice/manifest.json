@@ -1,0 +1,9 @@
+{
+  "domain": "solstice",
+  "name": "Casa Solstice synthetic devices",
+  "version": "1.0.0",
+  "documentation": "https://www.home-assistant.io/integrations/demo/",
+  "dependencies": ["demo"],
+  "codeowners": [],
+  "iot_class": "local_push"
+}
