@@ -9,6 +9,8 @@ export const sectionalSofaDefinition = defineFurnishingModel({
     </group>
   ),
   variants: [
+    { id: "sage", label: "Sage cushions — left chaise (front view)" },
+    { id: "sage-right", label: "Sage cushions — right chaise (front view)" },
     { id: "default", label: "Classic — left chaise (front view)" },
     { id: "cozy", label: "Cozy — left chaise (front view)" },
     { id: "right", label: "Classic — right chaise (front view)" },

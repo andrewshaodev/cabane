@@ -18,9 +18,27 @@ export const CHAISE_BACK_CENTER = [0, 0.85 - backVerticalExtent, -1.05 + backDep
 const sage = "#94a58c";
 const sageOutline = "#687662";
 
-export function PoolChaiseUpholstery() {
+export function PoolChaiseUpholstery({ cozy = false }: { cozy?: boolean }) {
   return (
     <group name="pool-chaise-upholstery">
+      {cozy && (
+        <>
+          <RoundedFurniturePanel
+            name="folded-clay-towel"
+            size={[0.53, 0.035, 0.36]}
+            position={[0, 0.3175, 0.65]}
+            color="#bc8064"
+            radius={0.014}
+          />
+          <RoundedFurniturePanel
+            name="ivory-lumbar-cushion"
+            size={[0.48, 0.12, 0.24]}
+            position={[0, 0.36, -0.24]}
+            color="#e8ddc4"
+            radius={0.05}
+          />
+        </>
+      )}
       <RoundedFurniturePanel
         name="pool-chaise-seat-cushion"
         size={[0.68, 0.09, 1.5]}

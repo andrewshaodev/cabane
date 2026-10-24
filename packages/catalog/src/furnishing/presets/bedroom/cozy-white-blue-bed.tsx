@@ -21,7 +21,15 @@ export function CozyBedHeadboard() {
 }
 
 /** Layered ivory linen, navy throws and plump cushions inferred from the reference photo. */
-export function CozyWhiteBlueBedding() {
+export function CozyWhiteBlueBedding({ variant = "cozy-white-blue" }: { variant?: string }) {
+  const palette =
+    variant === "cozy-sage"
+      ? ["#8e9b78", "#bd8064"]
+      : variant === "cozy-rose"
+        ? ["#c99e96", "#a37863"]
+        : variant === "cozy-oat"
+          ? ["#b9a586", "#e3d2b7"]
+          : ["#242e43", "#f6f0e5"];
   // Shared drape field: navy underside clears ivory by .033-.018 = .015 m;
   // white underside clears navy by .074-.026-.033 = .015 m.
   return (
@@ -40,7 +48,7 @@ export function CozyWhiteBlueBedding() {
         front={1.063}
         lift={0.033}
         thickness={0.018}
-        color="#242e43"
+        color={palette[0]}
       />
       <CozyBedCover
         name="cozy-plush-white-blanket"
@@ -48,7 +56,7 @@ export function CozyWhiteBlueBedding() {
         front={1.066}
         lift={0.074}
         thickness={0.026}
-        color="#f6f0e5"
+        color={palette[1]}
         plush
       />
       {[-0.39, 0.39].map((x) => (
@@ -75,9 +83,9 @@ export function CozyWhiteBlueBedding() {
             size={[0.4, 0.15, 0.4]}
             position={[x * 1.18, 0.738, -0.27]}
             rotation={[0.98, x < 0 ? -0.16 : 0.16, x < 0 ? -0.13 : 0.13]}
-            color="#283249"
+            color={palette[0]}
             radius={0.065}
-            outlineColor="#1c2435"
+            outlineColor="#74685b"
           />
         </group>
       ))}

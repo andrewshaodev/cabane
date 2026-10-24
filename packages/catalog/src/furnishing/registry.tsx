@@ -84,7 +84,6 @@ import {
   WoodenCrib,
   WOODEN_CRIB_SIZE,
 } from "./presets/children-bedroom";
-import { FramedWallArt, FRAMED_WALL_ART_SIZE } from "./presets/decor";
 import {
   LowMediaConsole,
   LOW_MEDIA_CONSOLE_SIZE,
@@ -488,6 +487,11 @@ const stableFurnishingDefinitions = {
     complexity: { visibleMeshes: 17, triangles: 7500 },
   }),
   "garden-bench": defineFurnishingModel({
+    variants: [
+      { id: "default", label: "Bare teak" },
+      { id: "sage", label: "Sage seat pad" },
+      { id: "linen", label: "Linen seat pad" },
+    ],
     component: GardenBench,
     label: "Garden bench",
     category: "Seating",
@@ -498,7 +502,7 @@ const stableFurnishingDefinitions = {
     preferredPlacement: "absolute",
     placementEnvironment: "outdoor",
     outlineContact: true,
-    complexity: { visibleMeshes: 18, triangles: 7900 },
+    complexity: { visibleMeshes: 25, triangles: 10000 },
   }),
   "outdoor-side-table": defineFurnishingModel({
     component: OutdoorSideTable,
@@ -760,6 +764,11 @@ const stableFurnishingDefinitions = {
     complexity: { visibleMeshes: 10, triangles: 5_000 },
   }),
   "single-bed": defineFurnishingModel({
+    variants: [
+      { id: "default", label: "Neutral linen" },
+      { id: "sage", label: "Sage and clay" },
+      { id: "rose", label: "Dusty rose and clay" },
+    ],
     component: SingleBed,
     label: "Single bed · 90 × 200",
     category: "Beds",
@@ -769,7 +778,7 @@ const stableFurnishingDefinitions = {
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "absolute",
     outlineContact: true,
-    complexity: { visibleMeshes: 11, triangles: 4_000 },
+    complexity: { visibleMeshes: 12, triangles: 4000 },
   }),
   "double-bed": defineFurnishingModel({
     component: DoubleBed,
@@ -778,7 +787,10 @@ const stableFurnishingDefinitions = {
     defaultRoomType: "bedroom",
     variants: [
       { id: "default", label: "Classic" },
-      { id: "cozy-white-blue", label: "Cozy white a blue" },
+      { id: "cozy-white-blue", label: "Cozy white and blue" },
+      { id: "cozy-sage", label: "Sage linen and clay throw" },
+      { id: "cozy-rose", label: "Dusty rose and cocoa" },
+      { id: "cozy-oat", label: "Oatmeal and ivory" },
     ],
     defaultSize: DOUBLE_BED_SIZE,
     bounds: { min: [-0.85, 0, -1.075], max: [0.85, 1.1, 1.075] },
@@ -1011,18 +1023,6 @@ const stableFurnishingDefinitions = {
     preferredPlacement: "wall",
     outlineContact: true,
     complexity: { visibleMeshes: 6, triangles: 2_500 },
-  }),
-  "framed-wall-art": defineFurnishingModel({
-    component: FramedWallArt,
-    label: "Framed wall art",
-    category: "Decor",
-    defaultRoomType: "living-room",
-    defaultSize: FRAMED_WALL_ART_SIZE,
-    bounds: { min: [-0.4, 0, 0], max: [0.4, 0.6, 0.04] },
-    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
-    preferredPlacement: "wall",
-    outlineContact: true,
-    complexity: { visibleMeshes: 5, triangles: 2_500 },
   }),
   "wooden-crib": defineFurnishingModel({
     component: WoodenCrib,
@@ -1298,6 +1298,10 @@ const stableFurnishingDefinitions = {
     complexity: { visibleMeshes: 4, triangles: 700 },
   }),
   "pool-chaise-longue": defineFurnishingModel({
+    variants: [
+      { id: "default", label: "Sage upholstery" },
+      { id: "cozy", label: "Cushion and clay towel" },
+    ],
     component: PoolChaiseLongue,
     label: "Pool chaise longue",
     category: "Seating",
@@ -1307,7 +1311,7 @@ const stableFurnishingDefinitions = {
     resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
     preferredPlacement: "absolute",
     outlineContact: true,
-    complexity: { visibleMeshes: 13, triangles: 4_900 },
+    complexity: { visibleMeshes: 15, triangles: 6000 },
   }),
   "garden-hedge": defineFurnishingModel({
     component: GardenHedge,

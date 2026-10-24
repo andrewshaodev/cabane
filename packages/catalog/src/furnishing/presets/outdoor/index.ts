@@ -29,3 +29,12 @@ export {
   SLATTED_FOLDING_CHAIR_SIZE,
 } from "./bistro";
 export { RetractableAwning, RETRACTABLE_AWNING_SIZE } from "./retractable-awning";
+
+export { FlowerPot, FLOWER_POT_SIZE } from "./flower-pot";
+
+export {
+  TeakLoungeSofa,
+  TeakLoungeChair,
+  TEAK_LOUNGE_SOFA_SIZE,
+  TEAK_LOUNGE_CHAIR_SIZE,
+} from "./teak-lounge";

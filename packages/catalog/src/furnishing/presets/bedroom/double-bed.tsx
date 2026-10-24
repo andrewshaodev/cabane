@@ -12,7 +12,7 @@ export function DoubleBed({
   size?: SceneItemSize;
   variant?: string | undefined;
 }) {
-  const cozy = variant === "cozy-white-blue";
+  const cozy = ["cozy-white-blue", "cozy-sage", "cozy-rose", "cozy-oat"].includes(variant);
   return (
     <group name="double-bed" scale={[size[0] / 1.7, size[1] / 1.1, size[2] / 2.15]}>
       <group name="double-bed-headboard-collider" userData={{ walkCollider: true }}>
@@ -84,7 +84,7 @@ export function DoubleBed({
           </>
         )}
       </group>
-      {cozy && <CozyWhiteBlueBedding />}
+      {cozy && <CozyWhiteBlueBedding variant={variant} />}
     </group>
   );
 }

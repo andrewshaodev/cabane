@@ -1,0 +1,41 @@
+import { defineFurnishingModel } from "@cabane/engine";
+import {
+  TeakLoungeSofa,
+  TeakLoungeChair,
+  TEAK_LOUNGE_SOFA_SIZE,
+  TEAK_LOUNGE_CHAIR_SIZE,
+} from "../presets/outdoor";
+export const teakLoungeDefinitions = {
+  "teak-lounge-sofa": defineFurnishingModel({
+    component: TeakLoungeSofa,
+    label: "Teak lounge sofa",
+    category: "Outdoor",
+    defaultRoomType: "outdoor",
+    defaultSize: TEAK_LOUNGE_SOFA_SIZE,
+    bounds: { min: [-1.0, 0, -0.4], max: [1.0, 0.84, 0.4] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: true,
+    complexity: { visibleMeshes: 26, triangles: 11000 },
+    variants: [
+      { id: "clay", label: "Ivory and terracotta" },
+      { id: "sage", label: "Ivory and sage" },
+    ],
+  }),
+  "teak-lounge-chair": defineFurnishingModel({
+    component: TeakLoungeChair,
+    label: "Teak lounge chair",
+    category: "Outdoor",
+    defaultRoomType: "outdoor",
+    defaultSize: TEAK_LOUNGE_CHAIR_SIZE,
+    bounds: { min: [-0.4, 0, -0.4], max: [0.4, 0.84, 0.4] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: true,
+    complexity: { visibleMeshes: 18, triangles: 8000 },
+    variants: [
+      { id: "clay", label: "Ivory and terracotta" },
+      { id: "sage", label: "Ivory and sage" },
+    ],
+  }),
+};

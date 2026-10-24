@@ -114,6 +114,8 @@ await withModules(async (load) => {
       assert.deepEqual(
         [...select.options].map((option) => option.textContent),
         [
+          "Sage cushions — left chaise (front view)",
+          "Sage cushions — right chaise (front view)",
           "Classic — left chaise (front view)",
           "Cozy — left chaise (front view)",
           "Classic — right chaise (front view)",

@@ -823,3 +823,44 @@ furniture stay in the active home's personal model collection.
 Ordinary model geometry is reviewed visually and through shared catalog and
 surface checks. This split adds no item-specific test files. The shared outline
 regression protects non-indexed source normals from outline smoothing.
+
+## Cozy Mediterranean variants
+
+Eleven additional Details variants reuse existing shared catalog IDs and envelopes:
+
+- Bedroom → Double bed: Sage linen and clay throw, Dusty rose and cocoa,
+  and Oatmeal and ivory. Each uses the existing timber headboard, draped layers,
+  sleeping pillows, two pairs of accent cushions and lumbar cushion.
+- Living room → Sectional sofa: Sage cushions with either left or right chaise.
+- Living room → Decor → Framed wall art: Olive branch, Fern study and
+  Terracotta botanical, with procedural leaves and a slender stem.
+- Living room → Decor → Potted plant: Sage ceramic, Sandstone and Charcoal pots.
+
+Dimensions remain the existing inferred generic dimensions. Botanical ink sits
+at Z=40 mm, 3 mm ahead of the canvas face (37 mm); coplanar ink shapes describe
+one continuous print. Bedding retains its existing 15 mm layer clearances.
+These are reusable variants, not new household placements or manufacturer products.
+
+The outdoor bench adds Sage and Linen seat pads; the pool lounger adds an ivory
+lumbar cushion and folded clay towel. Existing bare/default variants remain.
+
+Five new independently placeable models use generic inferred dimensions
+(width × height × depth, metres), support independent axis resizing and expose
+Y=0 at the supporting surface:
+
+| ID                  | Dimensions      | Arrange              | Variants                               |
+| ------------------- | --------------- | -------------------- | -------------------------------------- |
+| loose-throw-cushion | .45 × .16 × .45 | Living room / Decor  | Sage, Terracotta, Ivory                |
+| tabletop-candle     | .12 × .18 × .12 | Living room / Decor  | Ivory wax, Clay wax                    |
+| flower-pot          | .5 × .8 × .5    | Outdoor / Vegetation | Lavender, White flowers, Coral flowers |
+| teak-lounge-sofa    | 2 × .84 × .8    | Outdoor              | Ivory and terracotta, Ivory and sage   |
+| teak-lounge-chair   | .8 × .84 × .8   | Outdoor              | Ivory and terracotta, Ivory and sage   |
+
+Cushions and candles need explicit elevation onto their supporting furniture.
+Candles are static, unlit decor with no light or HA slot. Lounge seats use three
+or one seat/back cushion pairs with accent cushions, connected teak rails and
+legs. Flower pots include soil, stems, leaves and flower heads. All are procedural;
+no reference screenshot or private home data is bundled.
+
+Single bed also offers Sage and clay and Dusty rose and clay, with an accent
+cushion and folded throw, preserving its 100 × 95 × 210 cm envelope.

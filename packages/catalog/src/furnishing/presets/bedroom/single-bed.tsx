@@ -4,7 +4,13 @@ import { RoundedFurniturePanel } from "../construction";
 /** A 90 × 200 cm mattress; the frame and headboard occupy 100 × 210 cm. */
 export const SINGLE_BED_SIZE = [1, 0.95, 2.1] as const;
 
-export function SingleBed({ size = SINGLE_BED_SIZE }: { size?: SceneItemSize }) {
+export function SingleBed({
+  size = SINGLE_BED_SIZE,
+  variant = "default",
+}: {
+  size?: SceneItemSize;
+  variant?: string;
+}) {
   return (
     <group
       name="single-bed"
@@ -51,7 +57,7 @@ export function SingleBed({ size = SINGLE_BED_SIZE }: { size?: SceneItemSize }) 
         name="single-bed-duvet"
         size={[0.94, 0.085, 1.48]}
         position={[0, 0.5525, 0.285]}
-        color="#e3d8c4"
+        color={variant === "sage" ? "#9ba888" : variant === "rose" ? "#caa39a" : "#e3d8c4"}
         radius={0.035}
         outlineColor="#a99c85"
       />
@@ -63,11 +69,21 @@ export function SingleBed({ size = SINGLE_BED_SIZE }: { size?: SceneItemSize }) 
         radius={0.045}
         outlineColor="#b5ac9b"
       />
+      {variant !== "default" && (
+        <RoundedFurniturePanel
+          name="single-bed-accent-cushion"
+          size={[0.34, 0.14, 0.34]}
+          position={[0, 0.72, -0.4]}
+          rotation={[0.8, 0, 0.12]}
+          color="#bd8368"
+          radius={0.055}
+        />
+      )}
       <RoundedFurniturePanel
         name="single-bed-folded-throw"
         size={[0.942, 0.035, 0.38]}
         position={[0, 0.6135, 0.62]}
-        color="#afa88d"
+        color={variant === "default" ? "#afa88d" : "#bd8368"}
         radius={0.012}
         outlineColor="#817e6b"
       />

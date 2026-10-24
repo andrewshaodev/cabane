@@ -1,3 +1,5 @@
+import { teakLoungeDefinitions } from "./teak-lounge";
+import { cozyDecorDefinitions } from "./cozy-decor";
 import { clipReadingLampDefinition } from "./clip-reading-lamp";
 import { wallLiftingDryingRackDefinition } from "./wall-lifting-drying-rack";
 
@@ -78,6 +80,8 @@ import { roundWallDisplayDefinition } from "./round-wall-display";
 import { threeTierWallShelvesDefinition } from "./three-tier-wall-shelves";
 
 export const furnishingPresetDefinitions = {
+  ...cozyDecorDefinitions,
+  ...teakLoungeDefinitions,
   ...laundryCleaningDefinitions,
   "wall-lifting-drying-rack": wallLiftingDryingRackDefinition,
   "clip-reading-lamp": clipReadingLampDefinition,

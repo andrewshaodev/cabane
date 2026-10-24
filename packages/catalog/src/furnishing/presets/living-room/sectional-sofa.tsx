@@ -7,8 +7,12 @@ export function CustomSectionalSofa({
   variant = "default",
   color,
 }: { variant?: string | undefined; color?: string | undefined } = {}) {
-  const mirrored = variant === "right" || variant === "cozy-right";
-  const cozy = variant === "cozy" || variant === "cozy-right";
+  const mirrored = variant === "right" || variant === "cozy-right" || variant === "sage-right";
+  const cozy =
+    variant === "cozy" ||
+    variant === "cozy-right" ||
+    variant === "sage" ||
+    variant === "sage-right";
   return (
     <group
       name="canape-salon-custom"
@@ -90,7 +94,7 @@ export function CustomSectionalSofa({
           />
         </group>
       ))}
-      {cozy && <CozySofaCushions />}
+      {cozy && <CozySofaCushions sage={variant.startsWith("sage")} />}
       {[
         [-1.23, -0.25],
         [-0.55, -0.25],

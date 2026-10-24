@@ -1,0 +1,60 @@
+import { defineFurnishingModel } from "@cabane/engine";
+import {
+  LooseThrowCushion,
+  LOOSE_THROW_CUSHION_SIZE,
+  TabletopCandle,
+  TABLETOP_CANDLE_SIZE,
+} from "../presets/decor";
+import { FlowerPot, FLOWER_POT_SIZE } from "../presets/outdoor";
+export const cozyDecorDefinitions = {
+  "loose-throw-cushion": defineFurnishingModel({
+    component: LooseThrowCushion,
+    label: "Throw cushion",
+    category: "Decor",
+    defaultRoomType: "living-room",
+    defaultSize: LOOSE_THROW_CUSHION_SIZE,
+    bounds: { min: [-0.225, 0, -0.225], max: [0.225, 0.16, 0.225] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: true,
+    complexity: { visibleMeshes: 2, triangles: 1500 },
+    variants: [
+      { id: "sage", label: "Sage" },
+      { id: "clay", label: "Terracotta" },
+      { id: "ivory", label: "Ivory" },
+    ],
+  }),
+  "tabletop-candle": defineFurnishingModel({
+    component: TabletopCandle,
+    label: "Pillar candle",
+    category: "Decor",
+    defaultRoomType: "living-room",
+    defaultSize: TABLETOP_CANDLE_SIZE,
+    bounds: { min: [-0.06, 0, -0.06], max: [0.06, 0.18, 0.06] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: false,
+    complexity: { visibleMeshes: 2, triangles: 150 },
+    variants: [
+      { id: "ivory", label: "Ivory wax" },
+      { id: "clay", label: "Clay wax" },
+    ],
+  }),
+  "flower-pot": defineFurnishingModel({
+    component: FlowerPot,
+    label: "Flowering terrace pot",
+    category: "Vegetation",
+    defaultRoomType: "outdoor",
+    defaultSize: FLOWER_POT_SIZE,
+    bounds: { min: [-0.25, 0, -0.25], max: [0.25, 0.8, 0.25] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "absolute",
+    outlineContact: false,
+    complexity: { visibleMeshes: 38, triangles: 4000 },
+    variants: [
+      { id: "lavender", label: "Lavender" },
+      { id: "white", label: "White flowers" },
+      { id: "coral", label: "Coral flowers" },
+    ],
+  }),
+};

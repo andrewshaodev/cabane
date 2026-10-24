@@ -1,7 +1,27 @@
+import { FramedWallArt, FRAMED_WALL_ART_SIZE } from "../presets/decor";
 import { AbstractReliefWallArt, ABSTRACT_RELIEF_WALL_ART_SIZE } from "../presets/decor";
 import { LinePortraitWallArt, LINE_PORTRAIT_WALL_ART_SIZE } from "../presets/decor";
 import { defineFurnishingModel } from "@cabane/engine";
 export const wallArtFurnishingDefinitions = {
+  "framed-wall-art": defineFurnishingModel({
+    component: FramedWallArt,
+    label: "Framed wall art",
+    category: "Decor",
+    defaultRoomType: "living-room",
+    defaultSize: FRAMED_WALL_ART_SIZE,
+    bounds: { min: [-0.4, 0, 0], max: [0.4, 0.6, 0.04] },
+    resizePolicy: { kind: "axes", axes: ["width", "height", "depth"] },
+    preferredPlacement: "wall",
+    outlineContact: true,
+    complexity: { visibleMeshes: 24, triangles: 2_500 },
+    variants: [
+      { id: "default", label: "Abstract earth" },
+      { id: "olive", label: "Olive branch" },
+      { id: "fern", label: "Fern study" },
+      { id: "clay", label: "Terracotta botanical" },
+    ],
+  }),
+
   "abstract-relief-wall-art": defineFurnishingModel({
     component: AbstractReliefWallArt,
     label: "Weird relief wall art",

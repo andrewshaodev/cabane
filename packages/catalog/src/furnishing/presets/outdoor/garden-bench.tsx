@@ -3,13 +3,28 @@ import { RoundedFurniturePanel } from "../construction";
 
 export const GARDEN_BENCH_SIZE = [1.5, 0.9, 0.6] as const;
 
-export function GardenBench({ size = GARDEN_BENCH_SIZE }: { size?: SceneItemSize }) {
+export function GardenBench({
+  size = GARDEN_BENCH_SIZE,
+  variant = "default",
+}: {
+  size?: SceneItemSize;
+  variant?: string;
+}) {
   return (
     <group
       name="garden-bench"
       scale={[size[0] / 1.5, size[1] / 0.9, size[2] / 0.6]}
       userData={{ walkCollider: true }}
     >
+      {variant !== "default" && (
+        <RoundedFurniturePanel
+          name="bench-seat-pad"
+          size={[1.32, 0.07, 0.48]}
+          position={[0, 0.515, 0]}
+          color={variant === "sage" ? "#95a184" : "#ddccb0"}
+          radius={0.03}
+        />
+      )}
       <RoundedFurniturePanel
         name="leg"
         size={[0.06, 0.44, 0.06]}
