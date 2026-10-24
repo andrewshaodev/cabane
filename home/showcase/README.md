@@ -22,7 +22,7 @@ vegetable bed, outdoor dining, barbecue and four loungers.
 
 Bedrooms use wall-aligned beds and round jute rugs. All six picture frames use
 wall-relative placement with 2 mm clearance and stay clear of openings. The
-frames mix the four French coastal/village illustrations with an olive still life.
+frames mix the four French coastal/village illustrations only.
 The pool terrace includes a woven-rug lounge with matching seating and plants.
 
 There are 239 scene items: 59 modeled devices and 180 furnishings/decorations.

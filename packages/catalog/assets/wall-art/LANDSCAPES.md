@@ -1,6 +1,6 @@
 # Low-fidelity French village landscapes
 
-Four illustrations generated with the built-in image_gen tool on 2026-10-24, one generation per image. Generic scenes inspired by French regions, not exact depictions of named landmarks. Landscape 7:5 PNGs, bundled locally. Select these IDs on `framed-wall-art`: `atlantic-village`, `riviera-cliffs`, `breton-harbor`, `provence-village`. Earlier botanical variants remain compatible with saved projects.
+Four illustrations generated with the built-in image_gen tool on 2026-10-24, one generation per image. Generic scenes inspired by French regions, not exact depictions of named landmarks. Landscape 7:5 PNGs, bundled locally. Select these IDs on `framed-wall-art`: `atlantic-village`, `riviera-cliffs`, `breton-harbor`, `provence-village`.
 
 ## Exact prompts
 

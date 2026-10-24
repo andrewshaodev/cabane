@@ -20,11 +20,6 @@ export const wallArtFurnishingDefinitions = {
       { id: "breton-harbor", label: "Breton harbor" },
       { id: "provence-village", label: "Provence village" },
       { id: "default", label: "Abstract earth" },
-      { id: "olive", label: "Olive branch" },
-      { id: "fern", label: "Rosemary pitcher" },
-      { id: "clay", label: "Mediterranean pottery" },
-      { id: "lemons", label: "Lemons and cream bowl" },
-      { id: "figs", label: "Fig leaf study" },
     ],
   }),
 
