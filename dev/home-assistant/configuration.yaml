@@ -23,3 +23,6 @@ http:
   cors_allowed_origins:
     - http://127.0.0.1:4173
     - http://localhost:4173
+
+# Import the local integration automatically, including after a volume reset.
+cabane:

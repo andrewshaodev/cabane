@@ -8,8 +8,10 @@ services:
     volumes:
       - config:/config
       - ./configuration.yaml:/config/configuration.yaml:ro
+      - ../../test-results/ha-dev/custom_components/cabane:/config/custom_components/cabane:ro
     environment:
       TZ: Europe/Paris
+      CABANE_LOCAL_DEVELOPMENT: "1"
     healthcheck:
       test:
         - CMD

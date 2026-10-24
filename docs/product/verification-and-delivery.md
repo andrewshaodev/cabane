@@ -205,8 +205,10 @@ a whole-building worst case. See the [README measurement instructions](../../REA
 `apps/web/dist`. The repository includes a Vercel configuration with SPA rewrites.
 The [local HA test stack](../local-home-assistant.md) provides a loopback-only
 Docker Compose server with official demo entities and persistent test data.
-It is development infrastructure; the Cabane companion integration is installed
-separately when testing native hosting or sync. A build or hosting
+It installs a pinned Cabane companion integration with the current local panel
+for native hosting and sync. `ha:refresh` rebuilds and restarts the test instance;
+a container-only adapter accepts development-marked bundles without changing
+release validation. A build or hosting
 configuration does not prove a deployed service, secured private access, or a
 working network route from every client to HA.
 

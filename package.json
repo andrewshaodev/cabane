@@ -56,10 +56,11 @@
     "release:ha-contract": "node scripts/release-ha-contract.mjs",
     "test:profile": "node scripts/profile-tests.mjs",
     "prepare": "node scripts/install-git-hooks.mjs",
-    "ha:up": "docker compose -f dev/home-assistant/compose.yaml up -d --wait --wait-timeout 360",
+    "ha:up": "node scripts/ha-dev.mjs up",
     "ha:down": "docker compose -f dev/home-assistant/compose.yaml down",
     "ha:logs": "docker compose -f dev/home-assistant/compose.yaml logs --tail=100 -f",
-    "ha:check": "docker compose -f dev/home-assistant/compose.yaml exec homeassistant python -m homeassistant --script check_config --config /config"
+    "ha:check": "docker compose -f dev/home-assistant/compose.yaml exec homeassistant python -m homeassistant --script check_config --config /config",
+    "ha:refresh": "node scripts/ha-dev.mjs refresh"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",
