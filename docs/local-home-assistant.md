@@ -27,6 +27,51 @@ Both URLs must use loopback HTTP on the same machine. If Vite selects a differen
 port, free port 4173 and restart it, or add that exact origin to
 `dev/home-assistant/configuration.yaml` and restart HA.
 
+## Recommended seed: Casa Solstice
+
+Use the checked-in [furnished Casa Solstice project](../home/showcase/furnished.project.json)
+as the default starting point for contributor testing. Import it through
+**Workspaces → Import workspace → From file**, review it, and **Save**.
+This is an explicit import, not automatic startup seeding: existing homes and
+accounts remain intact. The same file works in standalone Vite and the native
+HA panel. It contains two levels, four bedrooms, two bathrooms, a garden, pool,
+209 scene items and 62 device slots, including electric-car telemetry.
+
+For architecture-only work, import
+[layout.project.json](../home/showcase/layout.project.json) instead.
+Both files are portable designs with no HA entity identifiers or credentials.
+Without HA mappings, they are useful for visual, catalog and editor work;
+importing the design alone does not connect its device controls.
+
+After starting the local HA server and completing onboarding, install the
+optional synthetic showcase entities from the repository root:
+
+```sh
+node dev/home-assistant/showcase/install.mjs
+npm run ha:check
+```
+
+The installer checks the existing loopback test container, adds the fixture to
+its persistent configuration and restarts that container. It preserves its
+account, volume and workspaces. Because the Compose project is shared across
+checkouts, it updates the configuration mounted by the currently running test
+instance; do not run it against a household HA server.
+
+In the imported workspace's **Home Assistant** settings, connect to the local
+server (or select **Use this Home Assistant** in the native panel). In **Connect**,
+map rooms and device slots to the discovered synthetic areas/entities. Entity
+IDs are allocated by HA and must not be assumed to match another contributor's
+installation. The fixture alone does not create these mappings on a fresh
+checkout. Save, then enable HA sync to reuse the mapped home from either client
+via **Workspaces → Import workspace → From Home Assistant**.
+
+Keep your mapped workspace backup and optional runtime plan under ignored
+`test-results/showcase/`; never commit account data or HA mappings. See the
+[showcase reference](../home/showcase/README.md) for fixture details, validators
+and known simulation limitations. For a contribution, check both floors and the
+affected objects or controls; importing this seed does not substitute for the
+checks required by your change.
+
 ## What is available
 
 The [official HA Demo integration](https://www.home-assistant.io/integrations/demo/)
