@@ -11,7 +11,7 @@ try {
   const e = await s.ssrLoadModule("/packages/engine/src/index.ts"),
     f = await s.ssrLoadModule("/packages/catalog/src/furnishing/index.ts"),
     d = await s.ssrLoadModule("/packages/catalog/src/device/index.ts");
-  const p = JSON.parse(await readFile(process.argv[2] || "home/showcase/layout.project.json"));
+  const p = JSON.parse(await readFile(process.argv[2] || "home/showcase/furnished.project.json"));
   const regs = {
     furnishingModels: f.stableFurnishingRegistry,
     deviceModels: d.stableDeviceRegistry,

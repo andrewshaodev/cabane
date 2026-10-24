@@ -145,6 +145,16 @@ release builds require a clean, committed tree. See
 [verification and delivery](docs/product/verification-and-delivery.md) for focused
 checks, panel verification and deployment requirements.
 
+### Recommended contributor seed
+
+Import [Casa Solstice](home/showcase/furnished.project.json) through
+**Workspaces → Import workspace → From file**, then **Save**. This furnished
+two-level villa provides a repeatable starting point for catalog, layout and
+device-control contributions. It does not replace existing workspaces or the
+built-in demo. See the [local seed setup](docs/local-home-assistant.md#recommended-seed-casa-solstice)
+for synthetic HA devices and synchronization, and the
+[showcase reference](home/showcase/README.md) for architecture and validation.
+
 ### Measure scene rendering performance
 
 `npm run measure:scene` records draw calls and triangles in Orbit, Walk,

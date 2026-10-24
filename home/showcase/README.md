@@ -3,11 +3,10 @@
 A standalone Mediterranean showcase, authored directly as HomeProject V2 JSON.
 It does not replace the bundled demo or another workspace.
 
-## Importable designs
+## Importable design
 
-- `layout.project.json`: complete, deliberately unfurnished architecture checkpoint.
-- `furnished.project.json`: final portable design, without HA identifiers or mappings.
-- `ground.floor.json` and `upper.floor.json`: independently validated architecture.
+`furnished.project.json` is the single portable seed, including both floors,
+architecture, furnishings and device slots, without HA identifiers or mappings.
 
 Import the furnished project from **Workspaces → Import workspace → From file**,
 then review and Save. The project uses only registered public catalog models.
@@ -60,13 +59,10 @@ report in `/config/solstice-discovery.json`; it excludes camera/media tokens.
 ## Verification
 
 ```sh
-npm run home:validate-floor -- home/showcase/ground.floor.json
-npm run home:validate-floor -- home/showcase/upper.floor.json
-node dev/home-assistant/showcase/validate.mjs home/showcase/layout.project.json
 node dev/home-assistant/showcase/validate.mjs home/showcase/furnished.project.json
 ```
 
-Both architecture and final projects passed the public floor/project validators
+The furnished project passed the public project validator, including its floors,
 without errors or warnings. The final private record passed `parseHomeProjectRecord`,
 and all 62 mappings passed `validateRuntimeBindingProfile` with the observed HA
 registry, area and state data. Absolute indoor item footprints were checked
