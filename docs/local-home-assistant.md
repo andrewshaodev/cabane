@@ -37,9 +37,8 @@ accounts remain intact. The same file works in standalone Vite and the native
 HA panel. It contains two levels, four bedrooms, two bathrooms, a garden, pool,
 209 scene items and 62 device slots, including electric-car telemetry.
 
-For architecture-only work, import
-[layout.project.json](../home/showcase/layout.project.json) instead.
-Both files are portable designs with no HA entity identifiers or credentials.
+The single seed includes the complete architecture and furnishings, with no HA
+entity identifiers or credentials.
 Without HA mappings, they are useful for visual, catalog and editor work;
 importing the design alone does not connect its device controls.
 
