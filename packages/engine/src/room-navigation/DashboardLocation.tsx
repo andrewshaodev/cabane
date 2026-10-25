@@ -31,6 +31,7 @@ export function DashboardLocation({
     roomStatuses,
     homePresence,
     runtime,
+    bindingManager,
     sessionPresentation,
     demoSession,
   } = dashboard;
@@ -70,12 +71,19 @@ export function DashboardLocation({
       </span>
     </>
   );
+  // HA's area registry list already follows its user-configured order.
+  const areaOrder = new Map(runtime.areas.map((area, index) => [area.area_id, index]));
+  const roomOrder = (roomId: string) => {
+    const areaId = bindingManager.profile.roomAreaIds[roomId];
+    return (areaId ? areaOrder.get(areaId) : undefined) ?? runtime.areas.length;
+  };
+  const rooms = [...floor.rooms].sort((a, b) => roomOrder(a.id) - roomOrder(b.id));
   return (
     <RoomNavigation
       floor={floor}
       floors={manifest.floors}
       summary={summary}
-      rooms={floor.rooms}
+      rooms={rooms}
       names={roomDisplayNames}
       selectedId={mode === "room" ? selectedRoomId : null}
       onSelect={selectRoom}

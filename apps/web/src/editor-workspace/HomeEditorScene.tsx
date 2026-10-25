@@ -224,6 +224,7 @@ export function HomeEditorScene({
         <Canvas
           events={editorCanvasEvents}
           tabIndex={0}
+          style={{ outline: "none" }}
           aria-label="Home editor canvas"
           onPointerDownCapture={(event) => {
             // Leave inspector inputs before a scene click, so subsequent
