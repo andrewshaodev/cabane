@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import { VacuumTractorBeam } from "./vacuum-tractor-beam";
+import { sampleVacuumFlight } from "./vacuum-flight-motion";
 import { ActivityHologram } from "../../visuals/activity-hologram";
 import { Outlines, ToonMaterial } from "@cabane/engine";
 import type { HomeDeviceModelProps } from "@cabane/engine";
@@ -13,33 +14,41 @@ export function RobotVacuumModel({ visualState, reducedMotion, state }: HomeDevi
   const flying = active && state?.state === "cleaning";
   const hull = useRef<Group>(null);
   const drift = useRef<Group>(null);
-  useEffect(() => {
-    if (drift.current) drift.current.position.set(0, 0, 0);
-  }, [flying, reducedMotion]);
+  const beam = useRef<Group>(null);
   const time = useRef(0);
+  useLayoutEffect(() => {
+    time.current = 0;
+    if (drift.current) drift.current.position.set(0, 0, 0);
+    if (hull.current) {
+      hull.current.position.y = flying ? 1.5 : 0;
+      hull.current.rotation.set(0, 0, 0);
+    }
+    if (beam.current) beam.current.scale.y = 1;
+  }, [flying, reducedMotion]);
   useFrame(({ invalidate }, delta) => {
     if (!flying || reducedMotion || !hull.current) return;
     time.current += Math.min(delta, 0.05);
-    // Incommensurate waves give a smooth wandering path without random jumps.
-    // The hull stays within a 2 m square at its native catalog size.
-    if (drift.current) {
-      drift.current.position.x =
-        Math.sin(time.current * 0.23) * 0.55 + Math.sin(time.current * 0.61) * 0.2;
-      drift.current.position.z =
-        Math.sin(time.current * 0.31) * 0.55 + Math.sin(time.current * 0.47) * 0.2;
-    }
-    hull.current.position.y = 1.5 + Math.sin(time.current * 1.6) * 0.045;
-    hull.current.rotation.set(
-      Math.sin(time.current) * 0.06,
-      time.current * 0.35,
-      Math.cos(time.current * 0.7) * 0.06,
-    );
+    const pose = sampleVacuumFlight(time.current);
+    drift.current?.position.set(pose.x, 0, pose.z);
+    hull.current.position.y = pose.height;
+    hull.current.rotation.set(pose.pitch, pose.yaw, pose.roll);
+    // Stretch from the floor so the beam follows the rising and falling hull.
+    if (beam.current) beam.current.scale.y = pose.height / 1.5;
     invalidate();
   });
   return (
     <group ref={drift} name="catalog-robot-vacuum" userData={{ walkCollider: !flying }}>
-      {flying && <VacuumTractorBeam reducedMotion={reducedMotion} />}
-      <group ref={hull} position={[0, flying ? 1.5 : 0, 0]} rotation={[0, 0, 0]}>
+      {flying && (
+        <group ref={beam} name="vacuum-flight-beam">
+          <VacuumTractorBeam reducedMotion={reducedMotion} />
+        </group>
+      )}
+      <group
+        ref={hull}
+        name="vacuum-flight-hull"
+        position={[0, flying ? 1.5 : 0, 0]}
+        rotation={[0, 0, 0]}
+      >
         <mesh position={[0, 0.035, 0]} castShadow receiveShadow>
           <cylinderGeometry args={[0.175, 0.175, 0.07, 28]} />
           <ToonMaterial color="#59635f" />

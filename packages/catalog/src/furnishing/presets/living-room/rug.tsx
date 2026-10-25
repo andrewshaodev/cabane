@@ -47,7 +47,7 @@ function ColorfulRugLayers({ variant }: { variant: ColorfulRugVariant }) {
         position={[0, 0.0065, 0]}
         color={style.field}
         radius={0.015}
-        outlineColor={style.outline}
+        outline={false}
       />
       {[-0.945, 0.945].map((x) => (
         <mesh key={`side-${x}`} name="area-rug-border-side" position={[x, 0.014, 0]} receiveShadow>

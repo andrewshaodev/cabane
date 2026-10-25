@@ -14,6 +14,35 @@ await withModules(async (load) => {
   const floor = structuredClone(engine.neutralDemoManifest.floors[0]);
   const base = floor.openings.find((o) => o.kind === "door");
   const wall = { ...floor.walls[0], from: [1, 1], to: [5, 4], thicknessMeters: 0.07 };
+  test("explicit door positions preserve intermediate poses with reduced motion", async () => {
+    for (const operation of ["hinged", "sliding"]) {
+      const opening = { ...base, operation, variant: "panel", leafCount: 1 };
+      const render = (position) =>
+        createElement(stableArchitectureModelRegistry.door, {
+          floor,
+          wall,
+          opening,
+          position,
+          reducedMotion: true,
+        });
+      const renderer = await create(render(0));
+      const motion = renderer.scene.findByProps({ name: "opening-leaf-motion" }).instance;
+      await renderer.update(render(1));
+      await renderer.advanceFrames(1, 0.016);
+      const full = operation === "hinged" ? motion.rotation.y : motion.position.x;
+      assert.ok(Math.abs(full) > 0);
+      for (const position of [0.25, 0.5, 0.75, 0]) {
+        await renderer.update(render(position));
+        await renderer.advanceFrames(1, 0.016);
+        const actual = operation === "hinged" ? motion.rotation.y : motion.position.x;
+        assert.ok(
+          Math.abs(actual - full * position) < 1e-8,
+          `${operation} pose at ${position}: expected ${full * position}, got ${actual}`,
+        );
+      }
+      await renderer.unmount();
+    }
+  });
   test("framed leaves and handles clear every jamb throughout the actual animation on both swing sides and hinges", async () => {
     for (const variant of ["panel", "panel-white-lever", "french", "plank"]) {
       for (const leafCount of [1, 2]) {

@@ -1474,6 +1474,35 @@ await withModules(async (load) => {
             `${id}: glass is buried in painted bodywork`,
           );
         }
+        if (id === "electric-sedan") {
+          const roofHits = new Raycaster(
+            new Vector3(0, 3, -0.2),
+            new Vector3(0, -1, 0),
+          ).intersectObjects(body, false);
+          const glass = roofHits.find(
+            (hit) => hit.object.material.color.getHexString() === "496874",
+          );
+          const paint = roofHits.find(
+            (hit) => hit.object.material.color.getHexString() === "e1e5e0",
+          );
+          assert.ok(glass && paint, "roof glazing and backing must both exist");
+          for (const position of [
+            [24, 24, 35],
+            [31, 25, 35],
+            [21, 12, 23],
+          ]) {
+            const camera = new PerspectiveCamera(38, 16 / 9, 0.06, 250);
+            camera.position.set(...position);
+            camera.lookAt(0, 0, 0);
+            camera.updateMatrixWorld();
+            const depthGap =
+              (paint.point.clone().project(camera).z - glass.point.clone().project(camera).z) / 2;
+            assert.ok(
+              depthGap > 1 / 2 ** 24,
+              "roof layers must resolve separately in a 24-bit overview depth buffer",
+            );
+          }
+        }
         assert.ok(
           meshes.length <= definition.complexity.visibleMeshes,
           `${id} ${visualState}: mesh budget`,

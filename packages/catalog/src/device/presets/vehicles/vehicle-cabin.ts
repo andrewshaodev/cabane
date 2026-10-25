@@ -24,13 +24,15 @@ export interface VehicleCabinShape {
 /** Painted A/C pillars enclose individual panes; the side walls lean inward toward the roof. */
 export function vehicleCabin(c: VehicleCabinShape): VehicleSurface[] {
   const { rearBase, rearTop, frontTop, frontBase, belt, roof, halfWidth, split, color } = c;
+  // Leave enough depth separation for the glass at distant overview cameras.
+  const crown = roof - 0.025 - (c.glassRoof ? 0.01 : 0);
   const shape = new Shape();
   shape.moveTo(rearBase, belt);
   shape.lineTo(frontBase, belt);
   shape.lineTo(frontTop + 0.08, roof - 0.1);
-  shape.quadraticCurveTo(frontTop + 0.03, roof - 0.025, frontTop - 0.04, roof - 0.025);
-  shape.lineTo(rearTop + 0.06, roof - 0.025);
-  shape.quadraticCurveTo(rearTop, roof - 0.025, rearTop - 0.05, roof - 0.1);
+  shape.quadraticCurveTo(frontTop + 0.03, crown, frontTop - 0.04, crown);
+  shape.lineTo(rearTop + 0.06, crown);
+  shape.quadraticCurveTo(rearTop, crown, rearTop - 0.05, roof - 0.1);
   shape.closePath();
   const parts = [vehicleProfile(shape, halfWidth, color, 0.025, { belt, slope: 0.22 })];
   const sideX = (y: number) => (halfWidth + 0.025) * (1 - ((y - belt) * 0.22) / halfWidth) + 0.003;

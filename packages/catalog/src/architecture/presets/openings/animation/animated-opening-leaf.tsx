@@ -5,14 +5,14 @@ import type { DoorOperation, WindowOperation } from "@cabane/engine";
 
 export function AnimatedOpeningLeaf({
   operation,
-  open,
+  position,
   reducedMotion,
   direction,
   travel,
   children,
 }: {
   operation: DoorOperation | WindowOperation;
-  open: boolean;
+  position: number;
   reducedMotion: boolean;
   direction: -1 | 1;
   travel: number;
@@ -23,14 +23,14 @@ export function AnimatedOpeningLeaf({
 
   useEffect(() => {
     invalidate();
-  }, [invalidate, open, operation, reducedMotion, direction, travel]);
+  }, [invalidate, position, operation, reducedMotion, direction, travel]);
   useFrame((_, delta) => {
     if (!animated.current) return;
     const targetRotation =
-      open && (operation === "hinged" || operation === "casement")
-        ? direction * (operation === "hinged" ? Math.PI * 0.48 : 0.34)
+      operation === "hinged" || operation === "casement"
+        ? position * direction * (operation === "hinged" ? Math.PI * 0.48 : 0.34)
         : 0;
-    const targetX = open && operation === "sliding" ? direction * travel : 0;
+    const targetX = operation === "sliding" ? position * direction * travel : 0;
     const response = reducedMotion ? 1 : 1 - Math.exp(-9 * delta);
     animated.current.rotation.y += (targetRotation - animated.current.rotation.y) * response;
     animated.current.position.x += (targetX - animated.current.position.x) * response;

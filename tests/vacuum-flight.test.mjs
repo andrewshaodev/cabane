@@ -34,13 +34,35 @@ await withModules(async (load) => {
       const drift = renderer.scene.findByProps({ name: "catalog-robot-vacuum" }).instance;
       assert.notEqual(drift.position.x, 0);
       assert.notEqual(drift.position.z, 0);
+      const beam = renderer.scene.findByProps({ name: "vacuum-flight-beam" }).instance;
+      let lowest = Infinity;
+      let highest = -Infinity;
+      let previousHeight = hull.instance.position.y;
+      let rising = false;
+      let falling = false;
       for (let frame = 0; frame < 400; frame++) {
         await renderer.advanceFrames(1, 0.05);
         assert.ok(Math.abs(drift.position.x) <= 0.75);
         assert.ok(Math.abs(drift.position.z) <= 0.75);
+        const height = hull.instance.position.y;
+        lowest = Math.min(lowest, height);
+        highest = Math.max(highest, height);
+        rising ||= height > previousHeight;
+        falling ||= height < previousHeight;
+        assert.ok(height >= 1.11 && height <= 1.89);
+        assert.ok(Math.abs(height - previousHeight) < 0.03, "hover stays smooth");
+        assert.ok(Math.abs(hull.instance.rotation.x) <= 0.075);
+        assert.ok(Math.abs(hull.instance.rotation.z) <= 0.075);
+        assert.equal(beam.scale.y, height / 1.5);
+        previousHeight = height;
       }
+      assert.ok(highest - lowest > 0.6, "cleaning has a visible vertical excursion");
+      assert.ok(rising && falling);
       await renderer.update(React.createElement(RobotVacuumModel, props));
       assert.equal(drift.position.length(), 0);
+      assert.equal(hull.instance.position.y, 1.5);
+      assert.deepEqual(hull.instance.rotation.toArray().slice(0, 3), [0, 0, 0]);
+      assert.equal(beam.scale.y, 1);
       await renderer.advanceFrames(10, 0.05);
       assert.equal(drift.position.length(), 0);
       await renderer.update(

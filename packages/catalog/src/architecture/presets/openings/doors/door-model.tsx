@@ -159,7 +159,7 @@ export function DoorModel({
           >
             <AnimatedOpeningLeaf
               operation={opening.operation}
-              open={position > 0}
+              position={position}
               reducedMotion={reducedMotion}
               direction={direction}
               travel={leafWidth}

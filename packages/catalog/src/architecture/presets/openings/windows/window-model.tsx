@@ -39,7 +39,7 @@ export function WindowModel({
           <group key={index} position={[pivotX, 0, 0]}>
             <AnimatedOpeningLeaf
               operation={opening.operation}
-              open={position > 0}
+              position={position}
               reducedMotion={reducedMotion}
               direction={leaf.rotationSign}
               travel={0}
