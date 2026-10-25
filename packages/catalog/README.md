@@ -266,7 +266,7 @@ they do not claim to reproduce a particular manufacturer. Dimensions are
 | `wall-coat-rack`           | 80 × 22 × 32            | Light oak back and shelf with five supported grey hooks                                                           | Entryway     |
 | `hallway-console-table`    | 110 × 35 × 80           | Narrow light oak table with two drawers and four legs                                                             | Hallway      |
 | `floating-wall-shelf`      | 80 × 25 × 22            | Light oak shelf and back lip with two visible grey brackets                                                       | Hallway      |
-| `framed-wall-art`          | 80 × 4 × 60             | Oak frame with abstract relief or four bundled French landscape prints                                       | Living room  |
+| `framed-wall-art`          | 80 × 4 × 60             | Oak frame with abstract relief or four bundled French landscape prints                                            | Living room  |
 | `wooden-crib`              | 76 × 146 × 95           | Light oak slatted cot with a 70 × 140 mattress and ivory bedding                                                  | Bedroom      |
 | `counter-stool`            | 48 × 50 × 92            | Light oak four-leg frame, 65 cm beige seat, low back and foot rail                                                | Kitchen      |
 | `upholstered-ottoman`      | 70 × 55 × 42            | Beige upholstered cushion, perimeter seam and four short oak feet                                                 | Living room  |
