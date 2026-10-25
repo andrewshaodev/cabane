@@ -22,6 +22,9 @@ export async function mountHaStorageHarness(
     panelMissing?: boolean;
     panelError?: boolean;
     fullPage?: boolean;
+    setup?: boolean;
+    saveError?: boolean;
+    existingCopy?: boolean;
   } = {},
 ) {
   const repository = createWorkspaceRepository(indexedDB, ownerProjectRegistries);
@@ -32,6 +35,9 @@ export async function mountHaStorageHarness(
     "https://ha.test",
   );
   let remote: { version: number; document: string } | null = null;
+  if (options.existingCopy)
+    remote = { version: 1, document: exportWorkspaceBackup(entry.metadata, entry.record!) };
+  let saves = 0;
   const runtime = {
     status: "connected",
     origin: "https://ha.test",
@@ -53,6 +59,8 @@ export async function mountHaStorageHarness(
       if (options.missing) throw { code: "unknown_command" };
       if (message.type === "cabane/workspaces/get") return remote;
       if (message.type === "cabane/workspaces/put") {
+        saves++;
+        if (options.saveError) throw new Error("Save unavailable");
         if ((remote?.version ?? null) !== message.expected_version) throw { code: "conflict" };
         remote = { version: (remote?.version ?? 0) + 1, document: message.document as string };
         return remote.version;
@@ -89,7 +97,11 @@ export async function mountHaStorageHarness(
   }
   const root = createRoot(container);
   root.render(
-    <MemoryRouter initialEntries={[window.location.pathname + window.location.search]}>
+    <MemoryRouter
+      initialEntries={[
+        options.setup ? "/?action=dashboard" : window.location.pathname + window.location.search,
+      ]}
+    >
       <HomeAssistantRuntimeValueProvider value={runtime as never}>
         {options.fullPage ? (
           <Settings />
@@ -110,6 +122,10 @@ export async function mountHaStorageHarness(
     },
     id: entry.metadata.id,
     getRemoteVersion: () => remote?.version ?? null,
+    getSaveCount: () => saves,
+    allowSave: () => {
+      options.saveError = false;
+    },
     repository,
     setIntegrationInstalled: () => {
       options.missing = false;

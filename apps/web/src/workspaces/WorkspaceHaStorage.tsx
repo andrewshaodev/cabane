@@ -5,6 +5,7 @@ import {
   downloadCabaneBytes,
 } from "@cabane/engine";
 import { useLocation } from "react-router";
+import { useAutomaticHaSetup } from "./useAutomaticHaSetup";
 import { useWorkspaceSyncCoordinator } from "./useWorkspaceSyncCoordinator";
 import { WorkspaceDestinations } from "./WorkspaceDestinations";
 import { workspaceDestination } from "./workspace-open-link";
@@ -260,6 +261,14 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
       choice === "remote",
     );
   const intent = workspaceDestination(location.search);
+  useAutomaticHaSetup({
+    id,
+    origin,
+    ready: checked && !checking && available && panel === "ready" && runtime.status === "connected",
+    enabled,
+    busy,
+    start: () => run(() => coordinator.enableSync(id, origin!)),
+  });
   const syncLabel = enabled
     ? runtime.status !== "connected" ||
       status.kind === "disconnected" ||
@@ -294,7 +303,11 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
           {syncLabel}
         </span>
       </div>
-      <p>Your home, available inside Home Assistant.</p>
+      <p>
+        {intent === "dashboard"
+          ? "Once Cabane is installed, this home will be saved to Home Assistant and synced automatically, accessible to its signed-in users."
+          : "Your home, available inside Home Assistant."}
+      </p>
       {runtime.status === "connected" && (
         <ol className="ha-setup-progress" aria-label="Setup progress">
           {["Install", "Sync your home", "Open Cabane"].map((label, index) => (

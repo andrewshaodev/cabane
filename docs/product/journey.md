@@ -163,8 +163,12 @@ Assistant, and Open on another device. These destinations open the same per-home
 settings page with preserved intent, including across OAuth.
 
 Setup uses three states: Install, Sync your home, and Open Cabane. After sign-in,
-Cabane checks storage and the read-only HA panel registry independently, without
-uploading. Only the integration-owned custom cabane-panel at /cabane counts as
+Cabane checks storage and the read-only HA panel registry independently. The Add Cabane
+flow explains that the selected home will be saved and synced, then automatically
+enables sync once both checks succeed. It consumes the setup intent before the
+first attempt; failures and conflicts retain the manual controls, and disabling
+sync does not trigger another automatic upload. Ordinary settings visits remain
+read-only until the user chooses a storage action. Only the integration-owned custom cabane-panel at /cabane counts as
 installed; storage-only installations and failed checks do not imply readiness.
 Install guidance links to the configured instance's HACS and integration settings,
 explains custom repository installation, restart, and activation, and offers a

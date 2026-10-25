@@ -36,7 +36,7 @@ needs a running preview, and panel builds normally require a committed tree.
 
 Contract: [Startup and host integration](../docs/product/journey.md).
 
-- Owners: [`apps/web/src/main.tsx`](../apps/web/src/main.tsx), [`apps/web/src/workspaces/WorkspaceApplication.tsx`](../apps/web/src/workspaces/WorkspaceApplication.tsx), [`apps/web/src/workspaces/WorkspaceHost.tsx`](../apps/web/src/workspaces/WorkspaceHost.tsx), [`apps/web/src/panel/panel-element.ts`](../apps/web/src/panel/panel-element.ts).
+- Owners: [`apps/web/src/main.tsx`](../apps/web/src/main.tsx), [`apps/web/src/workspaces/WorkspaceApplication.tsx`](../apps/web/src/workspaces/WorkspaceApplication.tsx), [`apps/web/src/workspaces/WorkspaceHost.tsx`](../apps/web/src/workspaces/WorkspaceHost.tsx), [`apps/web/src/workspaces/useAutomaticHaSetup.ts`](../apps/web/src/workspaces/useAutomaticHaSetup.ts), [`apps/web/src/panel/panel-element.ts`](../apps/web/src/panel/panel-element.ts).
 - Interface: `CabaneApp`, `CabaneDomProvider`, `HomeAssistantHostSessionProvider` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
 - Review invariant: Follow the host boundary: workspace identity scopes the mounted runtime; native panel navigation and DOM stay inside its host. Native panel sizing must fill the viewport remainder in HA’s auto-height wrapper while preserving sidebar flow and safe-area padding.
 - Checks: `test:browser`, `build`, `build:panel`.

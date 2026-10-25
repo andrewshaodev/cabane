@@ -13,6 +13,42 @@ await withModules(async (load) => {
   const link = (dom, value) =>
     [...dom.document.querySelectorAll("a")].find((node) => node.textContent.trim() === value);
 
+  test("Add Cabane saves once after installation and respects subsequently disabling sync", () =>
+    withStorageDom(async (dom) => {
+      const harness = await dom.mount(mountHaStorageHarness, { setup: true, panelMissing: true });
+      await dom.until(() => text(dom, "Install Cabane"));
+      assert.equal(harness.getSaveCount(), 0);
+      harness.setIntegrationInstalled();
+      await dom.click("Check again");
+      await dom.until(() => text(dom, "Synced with HA"));
+      assert.equal(harness.getSaveCount(), 1);
+      assert.ok(link(dom, "Open in Home Assistant"));
+      await dom.click("Delete saved copy");
+      await dom.until(() => text(dom, "Home Assistant copy deleted"));
+      await dom.pollSync();
+      assert.equal(harness.getRemoteVersion(), null);
+      assert.equal(harness.getSaveCount(), 1);
+    }));
+
+  test("automatic setup failures remain retryable with the manual action", () =>
+    withStorageDom(async (dom) => {
+      const harness = await dom.mount(mountHaStorageHarness, { setup: true, saveError: true });
+      await dom.until(() => text(dom, "Save unavailable"));
+      assert.equal(harness.getSaveCount(), 1);
+      harness.allowSave();
+      await dom.click("Enable sync");
+      await dom.until(() => text(dom, "Synced with HA"));
+      assert.equal(harness.getSaveCount(), 2);
+    }));
+
+  test("automatic setup preserves an existing unacknowledged HA copy", () =>
+    withStorageDom(async (dom) => {
+      const harness = await dom.mount(mountHaStorageHarness, { setup: true, existingCopy: true });
+      await dom.until(() => text(dom, "Choose which copy to keep"));
+      assert.equal(harness.getSaveCount(), 0);
+      assert.equal(harness.getRemoteVersion(), 1);
+    }));
+
   test("authenticated storage enables sync in one action without a preliminary upload", () =>
     withStorageDom(async (dom) => {
       const harness = await dom.mount(mountHaStorageHarness);

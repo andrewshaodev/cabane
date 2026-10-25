@@ -6,6 +6,7 @@
       "apps/web/src/main.tsx",
       "apps/web/src/workspaces/WorkspaceApplication.tsx",
       "apps/web/src/workspaces/WorkspaceHost.tsx",
+      "apps/web/src/workspaces/useAutomaticHaSetup.ts",
       "apps/web/src/panel/panel-element.ts"
     ],
     "interfaces": [

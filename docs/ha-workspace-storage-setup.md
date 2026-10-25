@@ -38,7 +38,11 @@ your devices.
 Cabane checks that the integration is installed before offering storage controls.
 If it is missing, follow the installation steps, restart Home Assistant, then click **Check again**.
 
-Click **Enable sync** to save the workspace’s published home, draft, device
+The **Add Cabane to Home Assistant** flow automatically saves and enables sync for
+the selected home once the integration and sidebar panel are ready. If saving
+fails or copies conflict, use the displayed manual controls to continue.
+
+You can also click **Enable sync** to save the workspace’s published home, draft, device
 mappings and personal models, and synchronize changes while it is open. Offline
 changes remain in the browser until it reconnects.
 
