@@ -113,7 +113,7 @@ export interface ConstructEditorController extends ConstructEditorState {
     changes: Partial<
       Pick<
         FloorEditorHistory["present"]["rooms"][number],
-        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters" | "isSolid"
       >
     >,
   ) => void;
@@ -121,7 +121,7 @@ export interface ConstructEditorController extends ConstructEditorState {
     changes: Partial<
       Pick<
         FloorEditorHistory["present"]["rooms"][number],
-        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+        "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters" | "isSolid"
       >
     >,
   ) => void;

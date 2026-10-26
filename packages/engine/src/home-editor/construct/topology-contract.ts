@@ -42,6 +42,7 @@ type EditableOpening<T extends OpeningSpec> = T extends OpeningSpec
 export type EditorOpening = EditableOpening<OpeningSpec>;
 
 export interface EditorRoomIdentity {
+  isSolid?: boolean;
   id: string;
   name: string;
   accent: string;

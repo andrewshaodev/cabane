@@ -83,6 +83,25 @@ export const deriveWalkColliders = (
   furniture: readonly BoxWalkCollider[] = [],
   elevation = 0,
 ): WalkCollider[] => [
+  ...[...(floor.solidRooms ?? []), ...floor.rooms.filter((room) => room.isSolid)].flatMap(
+    (room): SegmentWalkCollider[] =>
+      room.polygon.map((point, index) => {
+        const [x, z] = planPointToWorld(point, floor.coordinates);
+        const [tx, tz] = planPointToWorld(
+          room.polygon[(index + 1) % room.polygon.length],
+          floor.coordinates,
+        );
+        return {
+          kind: "segment",
+          id: `${room.id}-solid-${index}`,
+          from: { x, z },
+          to: { x: tx, z: tz },
+          halfThickness: 0,
+          minY: elevation,
+          maxY: elevation + floor.defaultWallHeightMeters,
+        };
+      }),
+  ),
   ...deriveOutdoorPlatformBarriers(floor).map((barrier, index): SegmentWalkCollider => ({
     kind: "segment",
     id: `${barrier.edgeId}:walk-${index}`,

@@ -154,6 +154,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
       id,
       name,
       polygon: face,
+      ...(identity?.isSolid !== undefined ? { isSolid: identity.isSolid } : {}),
       accent: identity?.accent || input.defaultRoomAccent || "#c9a477",
       ...(identity?.floorFinish
         ? {

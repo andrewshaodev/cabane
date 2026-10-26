@@ -107,6 +107,12 @@ export const evaluateDerivedWalkNavigation = (
   floor: FloorSpec,
   options: DerivedWalkNavigationOptions = {},
 ): DerivedWalkNavigationEvaluation => {
+  const sourceRoomIndices = new Map(floor.rooms.map((room, index) => [room.id, index]));
+  floor = {
+    ...floor,
+    solidRooms: [...(floor.solidRooms ?? []), ...floor.rooms.filter((room) => room.isSolid)],
+    rooms: floor.rooms.filter((room) => !room.isSolid),
+  };
   const radius = options.playerRadius ?? WALK_PLAYER_RADIUS;
   const colliders = deriveWalkColliders(floor, options.openOpeningIds, options.furniture);
   const connections: WalkRoomConnection[] = floor.openings.flatMap((opening) => {
@@ -188,7 +194,7 @@ export const evaluateDerivedWalkNavigation = (
       ? new Set(floor.rooms.map((room) => room.id).filter((roomId) => !primaryRoomIds.has(roomId)))
       : new Set<string>();
   const diagnostics: WalkNavigationDiagnostic[] = [];
-  const rooms = floor.rooms.map((room, index): WalkRoomNavigation => {
+  const rooms = floor.rooms.map((room): WalkRoomNavigation => {
     const spawnPose = safeSpawnPoseForRoom(room, floor, colliders, radius);
     const connected = connectedByRoom.get(room.id) ?? new Set<string>();
     const connectedRoomIds = floor.rooms
@@ -198,7 +204,7 @@ export const evaluateDerivedWalkNavigation = (
       diagnostics.push({
         code: "navigation.room-no-walkable-connection",
         severity: "warning",
-        path: `rooms[${index}].polygon`,
+        path: `rooms[${sourceRoomIndices.get(room.id)}].polygon`,
         message: `${room.name} is disconnected from the main walkable room group.`,
         suggestion:
           "Add a door or passage if this room group should connect to the rest of the floor.",

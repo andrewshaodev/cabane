@@ -159,9 +159,11 @@ export const ConstructionPlan = memo(function ConstructionPlan({
   return (
     <group name="construction-plan">
       {showFinishes && <FloorFinishSurfaces floor={floor} variant="plan" />}
-      {floor.rooms.map((room) => (
-        <PlanRoom key={room.id} room={room} coordinates={floor.coordinates} {...naming} />
-      ))}
+      {floor.rooms
+        .filter((room) => !room.isSolid)
+        .map((room) => (
+          <PlanRoom key={room.id} room={room} coordinates={floor.coordinates} {...naming} />
+        ))}
       <PlanStrokeBatch name="plan-footprints" strokes={footprints} />
     </group>
   );

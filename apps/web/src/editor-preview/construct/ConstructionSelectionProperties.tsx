@@ -304,25 +304,40 @@ export function ConstructionSelectionProperties({
                 />
               </label>
             </fieldset>
-            {editor.deletionTargets?.some(
-              (target) => target.kind === "room" && target.id === selectedRoom.id,
-            ) === false && (
-              <p role="status">
-                All enclosing walls are shared. Edit the walls to remove this room.
+            <fieldset>
+              <legend>Room actions</legend>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={selectedRoom.isSolid ?? false}
+                  onChange={(event) => editor.updateSelectedRoom({ isSolid: event.target.checked })}
+                />
+                Not a room
+              </label>
+              <p>
+                Fill this space as a solid block, such as a chimney, shaft or pillar. It will not
+                appear in Home or Connect.
               </p>
-            )}
-            <EditorButton
-              variant="text"
-              type="button"
-              disabled={
-                editor.deletionTargets?.some(
-                  (target) => target.kind === "room" && target.id === selectedRoom.id,
-                ) === false
-              }
-              onClick={editor.deleteSelected}
-            >
-              Delete room
-            </EditorButton>
+              {editor.deletionTargets?.some(
+                (target) => target.kind === "room" && target.id === selectedRoom.id,
+              ) === false && (
+                <p role="status">
+                  All enclosing walls are shared. Edit the walls to remove this room.
+                </p>
+              )}
+              <EditorButton
+                variant="text"
+                type="button"
+                disabled={
+                  editor.deletionTargets?.some(
+                    (target) => target.kind === "room" && target.id === selectedRoom.id,
+                  ) === false
+                }
+                onClick={editor.deleteSelected}
+              >
+                Delete room
+              </EditorButton>
+            </fieldset>
           </div>
         )}
       </section>

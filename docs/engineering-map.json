@@ -22,6 +22,7 @@
     "spec": "docs/product/workspace.md",
     "owners": [
       "packages/engine/src/home-project/schema.ts",
+      "packages/engine/src/home-project/schema-room.ts",
       "packages/engine/src/home-project/schema-scene-item.ts",
       "packages/engine/src/home-project/workspace-repository.ts",
       "apps/web/src/workspaces/workspace-sync-coordinator.ts",
@@ -123,7 +124,7 @@
         "symbols": ["resizeWallAttachmentAtPoint"]
       }
     ],
-    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool. ConstructionInspector owns tool and building settings; ConstructionSelectionProperties owns selected-object attribute bodies in the shared inspector.",
+    "invariant": "Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool. Solid room identities stay editable in Construct; runtime composition projects them into solidRooms outside navigation and mapping, with filled geometry and walk barriers. ConstructionInspector owns tool and building settings; ConstructionSelectionProperties owns selected-object attribute bodies in the shared inspector.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {

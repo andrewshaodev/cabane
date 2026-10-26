@@ -34,7 +34,8 @@ export const validateRooms = (
   if (
     !Array.isArray(rawFloor.rooms) ||
     (rawFloor.rooms.length === 0 &&
-      !(Array.isArray(rawFloor.outdoorPlatforms) && rawFloor.outdoorPlatforms.length))
+      !(Array.isArray(rawFloor.outdoorPlatforms) && rawFloor.outdoorPlatforms.length) &&
+      !(Array.isArray(rawFloor.solidRooms) && rawFloor.solidRooms.length))
   ) {
     issues.push(
       issue("rooms.required", `${floorPath}.rooms`, "A floor must contain at least one room."),
