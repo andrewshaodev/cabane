@@ -224,6 +224,14 @@ It also offers Always day, Always night, and Auto lighting. Auto uses the availa
 sun state or local time. The smart bar lighting action remains available and
 updates the same local preference.
 
+Dashboard Preferences also offers Diorama landscapes: Original (the default),
+Grass, and Mountain. Grass adds trees and flowers above an earth base; Mountain
+adds alpine pines and rocks above a stone base. Both fit a rectangular tile around
+the ground floor, including outdoor platforms, ground zones, hedges, and pools.
+Decorations stay in the added border. The choice is saved locally, outside the
+project, and does not change Construct, Arrange, or Connect. Pool and stair
+cutouts remain open.
+
 The More options menu uses aligned action rows for Switch workspace, Send feedback,
 and contextual connection actions. Send feedback opens the Cabane
 GitHub issue template chooser in a new tab. Disconnect identifies Home Assistant in secondary

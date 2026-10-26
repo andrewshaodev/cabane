@@ -44,6 +44,17 @@ function savePreferences(next: Record<string, unknown>): void {
   }
 }
 
+export type DioramaLandscape = "off" | "grass" | "mountain";
+
+export function loadDioramaLandscape(): DioramaLandscape {
+  const value = loadPreferences().dioramaLandscape;
+  return value === "grass" || value === "mountain" ? value : "off";
+}
+
+export function saveDioramaLandscape(value: DioramaLandscape): void {
+  savePreferences({ ...loadPreferences(), dioramaLandscape: value });
+}
+
 export function loadInvertYAxis(): boolean {
   return loadPreferences().invertYAxis === true;
 }
@@ -63,6 +74,8 @@ export function saveLightingMode(mode: SolarLightingMode): void {
 
 export function WalkPreferences({
   weather,
+  dioramaLandscape = "off",
+  onDioramaLandscapeChange,
   overlayPreferences,
   onOverlayPreferencesChange,
   inverted,
@@ -73,6 +86,8 @@ export function WalkPreferences({
   onClose,
 }: {
   weather?: WeatherController | undefined;
+  dioramaLandscape?: DioramaLandscape;
+  onDioramaLandscapeChange?: (value: DioramaLandscape) => void;
   overlayPreferences: OverlayPreferences;
   onOverlayPreferencesChange: (value: OverlayPreferences) => void;
   inverted: boolean;
@@ -145,6 +160,35 @@ export function WalkPreferences({
             ×
           </button>
         </header>
+        {onDioramaLandscapeChange && (
+          <div className="walk-preferences__group">
+            <h3>Diorama</h3>
+            <fieldset className="walk-preferences__choices">
+              <legend>Landscape</legend>
+              {(
+                [
+                  ["off", "Original"],
+                  ["grass", "Grass"],
+                  ["mountain", "Mountain"],
+                ] as const
+              ).map(([value, label]) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="diorama-landscape"
+                    value={value}
+                    checked={dioramaLandscape === value}
+                    onChange={() => onDioramaLandscapeChange(value)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </fieldset>
+            <p className="walk-preferences__hint">
+              A miniature landscape with a sculpted earth base, trees and rocks around your home.
+            </p>
+          </div>
+        )}
         <div className="walk-preferences__group">
           <h3>Room overlays</h3>
           <p className="walk-preferences__hint">

@@ -1,3 +1,4 @@
+import type { DioramaLandscape } from "../WalkPreferences";
 import { ArchitecturalOutdoorPlatforms, floorSlabPolygons } from "../outdoor-platforms";
 import { ArchitecturalHedges } from "../hedges";
 export type FloorSceneProps = {
@@ -5,6 +6,7 @@ export type FloorSceneProps = {
   below?: HomeManifest["floors"][number] | undefined;
   platformBelow?: HomeManifest["floors"][number];
   above?: HomeManifest["floors"][number] | undefined;
+  dioramaLandscape?: DioramaLandscape;
   showGround: boolean;
   showCeiling: boolean;
   manifest: HomeManifest;
@@ -64,6 +66,7 @@ import type {
 
 export const FloorScene = memo(function FloorScene({
   sourceFloor,
+  dioramaLandscape = "off",
   showGround,
   showCeiling,
   below,
@@ -141,6 +144,9 @@ export const FloorScene = memo(function FloorScene({
       )}
       {showGround && (
         <DioramaGround
+          landscape={dioramaLandscape}
+          width={bounds.width + 7}
+          depth={bounds.depth + 7}
           floor={floor}
           centerX={bounds.centerX}
           centerZ={bounds.centerZ}

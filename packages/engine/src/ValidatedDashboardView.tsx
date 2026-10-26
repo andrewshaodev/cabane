@@ -1,3 +1,4 @@
+import { loadDioramaLandscape, saveDioramaLandscape } from "./WalkPreferences";
 import { useDashboardOrbitView } from "./navigation/orbit-view";
 import { useWeatherController } from "./weather/useWeatherController";
 import { WeatherScene } from "./weather/WeatherScene";
@@ -73,6 +74,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
   const toolNavigationRef = useRef<WalkToolNavigation | null>(null);
   const roomFocus = useRoomFocusFrame();
   const [overlayPreferences, setOverlayPreferences] = useState(loadOverlayPreferences);
+  const [dioramaLandscape, setDioramaLandscape] = useState(loadDioramaLandscape);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [invertYAxis, setInvertYAxis] = useState(loadInvertYAxis);
   const closePreferences = useCallback(() => setPreferencesOpen(false), []);
@@ -333,6 +335,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                     )}
                     <SceneNightContext.Provider value={nightLighting}>
                       <ArchitectureScene
+                        dioramaLandscape={dioramaLandscape}
                         activeFloorId={floor.id}
                         floorView={wholeBuilding ? "whole" : "cutaway"}
 
@@ -532,6 +535,11 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
           </header>
           {preferencesOpen && (
             <WalkPreferences
+              dioramaLandscape={dioramaLandscape}
+              onDioramaLandscapeChange={(value) => {
+                setDioramaLandscape(value);
+                saveDioramaLandscape(value);
+              }}
               weather={weather}
               overlayPreferences={overlayPreferences}
               onOverlayPreferencesChange={(value) => {
