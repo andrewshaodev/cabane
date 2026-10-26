@@ -38,7 +38,7 @@ export function useSceneStyle(): SceneStyle {
   return useSyncExternalStore(subscribe, snapshot, () => "default");
 }
 
-/** PoC: a brighter, warm key light and cool fill, retaining weather and time of day. */
+/** A brighter, warm key light and cool fill, retaining weather and time of day. */
 export function styleSolarLighting(
   solar: SolarLightingState,
   style: SceneStyle,

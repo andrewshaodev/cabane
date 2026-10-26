@@ -1,8 +1,8 @@
 # Geometry, rendering, and navigation
 
-## Visual style preview
+## Visual styles
 
-Menu → Preferences offers Default and an experimental Sims style, saved per
+Menu → Preferences offers Default and Sims styles, saved per
 browser origin on this device. Default preserves the existing renderer. Sims
 uses a continuous diffuse ramp, flat face normals, a stronger 24-hue material
 palette, no drawn contours, and a stronger directional light with less ambient
@@ -10,7 +10,7 @@ fill. These model material changes apply inside the shared stylized scene and
 retain batching. Arrange uses the same materials with its editor lighting;
 Construct keeps its technical rendering. Geometry, authored materials, imported
 GLB assets, connections, and project data are unchanged. Imported materials retain
-their original shading and receive only the final color grade. This PoC adds no
+their original shading and receive only the final color grade. The style adds no
 render pass or assets, and does not reproduce the original game's assets or fixed
 camera.
 
