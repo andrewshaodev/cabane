@@ -156,7 +156,7 @@ export function ConstructFloorControls({
               onAdd();
             }}
           >
-            <EditorIcon name="plus" />
+            <EditorIcon name="floorAbove" />
             <span>Add floor above</span>
           </button>
           {onAddBelow && (
@@ -169,7 +169,7 @@ export function ConstructFloorControls({
                 onAddBelow();
               }}
             >
-              <EditorIcon name="plus" />
+              <EditorIcon name="floorBelow" />
               <span>Add floor below</span>
             </button>
           )}
@@ -183,7 +183,8 @@ export function ConstructFloorControls({
                 setApartmentOpen(true);
               }}
             >
-              <span>Apartment floor: {apartmentFloor === 0 ? "Ground" : apartmentFloor}</span>
+              <EditorIcon name="apartmentFloor" />
+              <span>Setup apartment floor</span>
             </button>
           )}
         </div>

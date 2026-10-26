@@ -65,7 +65,7 @@ await withModules(async (load) => {
       await act(async () => shadow.querySelector('[aria-label="Current floor"]').click());
       const actions = [...shadow.querySelectorAll('[role="menuitem"]')];
       assert.equal(actions.at(-2).textContent.trim(), "Add floor below");
-      assert.equal(actions.at(-1).textContent.trim(), "Apartment floor: 3");
+      assert.equal(actions.at(-1).textContent.trim(), "Setup apartment floor");
       await act(async () => actions.at(-1).click());
       assert.equal(shadow.querySelector("input").value, "3");
       await act(async () => shadow.querySelector('button[type="submit"]').click());
