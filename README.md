@@ -189,13 +189,10 @@ homes use the same portable project schema. See the [bundled home guide](home/RE
 - [Home generation workflow](docs/agent-home-generation.md) — authoring layouts and rooms with an agent.
 - [Agent skills](https://github.com/cabane-app/agent-skills) — standalone custom-model authoring tools.
 
-<details>
-<summary>Easter egg: shoot the lights</summary>
+## Easter egg: shoot the lights
 
 The optional laser gun lets you toggle supported devices in Walk mode.
 
 <a href="docs/images/walk-laser.jpg">
   <img src="docs/images/walk-laser.jpg" alt="Laser gun toggling a light in Casa Solstice" width="480" />
 </a>
-
-</details>
