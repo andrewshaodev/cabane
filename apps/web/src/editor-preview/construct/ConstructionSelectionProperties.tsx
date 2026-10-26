@@ -1,3 +1,4 @@
+import { EditorSwitch } from "../../editor-chrome/EditorSwitch";
 import { useMemo } from "react";
 import {
   pointInsidePolygon,
@@ -307,19 +308,21 @@ export function ConstructionSelectionProperties({
             <fieldset>
               <legend>Room actions</legend>
               <div className="construction-inspector__room-actions">
-                <label
-                  className="construction-inspector__check"
-                  title="Render as a solid block, excluded from room navigation and area mapping."
-                >
-                  <input
-                    type="checkbox"
+                <div className="construction-inspector__room-toggle">
+                  <label
+                    id="room-solid-label"
+                    htmlFor="room-solid"
+                    title="Render as a solid block, excluded from room navigation and area mapping."
+                  >
+                    Not a room
+                  </label>
+                  <EditorSwitch
+                    id="room-solid"
+                    labelledBy="room-solid-label"
                     checked={selectedRoom.isSolid ?? false}
-                    onChange={(event) =>
-                      editor.updateSelectedRoom({ isSolid: event.target.checked })
-                    }
+                    onChange={(isSolid) => editor.updateSelectedRoom({ isSolid })}
                   />
-                  Not a room
-                </label>
+                </div>
                 <EditorButton
                   variant="text"
                   type="button"

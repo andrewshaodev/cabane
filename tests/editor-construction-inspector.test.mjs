@@ -415,8 +415,8 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       await act(async () => controller.selectRoom(room.id));
-      const toggle = [...dom.window.document.querySelectorAll('input[type="checkbox"]')].find(
-        (input) => input.closest("label").textContent.includes("Not a room"),
+      const toggle = dom.window.document.querySelector(
+        '[role="switch"][aria-labelledby="room-solid-label"]',
       );
       assert.ok(toggle);
       const section = toggle.closest("fieldset");

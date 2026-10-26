@@ -507,15 +507,21 @@
   accent-color: var(--preview-accent);
 }
 .construction-inspector__room-actions {
+  display: grid;
+  gap: 8px;
+}
+.construction-inspector__room-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.construction-inspector__room-actions .construction-inspector__check {
   min-height: 44px;
+  gap: 12px;
+}
+.construction-inspector__room-toggle label {
   cursor: pointer;
+}
+.construction-inspector__room-actions > .editor-button {
+  justify-self: start;
 }
 .construction-inspector__room-action-note {
   margin: 0;
