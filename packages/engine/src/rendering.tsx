@@ -1,3 +1,5 @@
+import { SceneStyleContext } from "./scene-style";
+import { simsGradient, simsMaterialColor } from "./sims-material-style";
 import { omitUndefinedProperties } from "./defined-properties";
 import type { OutlinesProps as DreiOutlinesProps } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -54,19 +56,28 @@ export type ToonMaterialProps = Omit<
 export const DeviceHoverContext = createContext(false);
 
 export function ToonMaterial(props: ToonMaterialProps) {
+  const style = useContext(SceneStyleContext);
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    invalidate();
+  }, [style, invalidate]);
   const hovered = useContext(DeviceHoverContext);
   const lightWalls = useContext(SceneLightWallMaskContext);
   const { onUpdate: authoredUpdate } = props;
   const onUpdate = useCallback(
     (material: MeshToonMaterial) => {
+      if (material.userData.cabaneSceneStyle !== style) {
+        material.userData.cabaneSceneStyle = style;
+        material.needsUpdate = true;
+      }
       authoredUpdate?.(material);
       lightWalls?.prepareMaterial(material);
     },
-    [authoredUpdate, lightWalls],
+    [authoredUpdate, lightWalls, style],
   );
-  let color = props.color;
+  let color = style === "sims" ? simsMaterialColor(props.color ?? "white") : props.color;
   if (hovered) {
-    const source = props.color ?? "white";
+    const source = color ?? "white";
     const tint = Array.isArray(source)
       ? source.length === 3
         ? new Color(...(source as [number, number, number]))
@@ -79,7 +90,8 @@ export function ToonMaterial(props: ToonMaterialProps) {
       {...props}
       onUpdate={onUpdate}
       {...omitUndefinedProperties({ color: color })}
-      gradientMap={toonGradient}
+      defines={style === "sims" ? { ...props.defines, FLAT_SHADED: "" } : { ...props.defines }}
+      gradientMap={style === "sims" ? simsGradient : toonGradient}
     />
   );
 }

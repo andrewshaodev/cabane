@@ -36,6 +36,7 @@ export class SceneToonBatcher {
     const revisions = families.map((family) => family.map(geometryRevision));
     const sourceMaterial = sources[0].material as MeshToonMaterial;
     const material = sourceMaterial.clone();
+    material.defines = { ...sourceMaterial.defines };
     material.color.set(0xffffff);
     material.transparent =
       (sourceMaterial.userData.cameraFadeBaseTransparent as boolean | undefined) ??
