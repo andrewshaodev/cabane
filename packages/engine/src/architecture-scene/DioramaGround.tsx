@@ -39,7 +39,7 @@ const roundedDioramaShape = (
   return shape;
 };
 
-export const DioramaGround = memo(function DioramaGround({
+export const DioramaTerrain = memo(function DioramaTerrain({
   landscape = "off",
   width,
   depth,
@@ -113,15 +113,25 @@ export const DioramaGround = memo(function DioramaGround({
           color={landscape === "off" ? color : landscape === "grass" ? "#91a85d" : "#a4ad90"}
         />
       </mesh>
-      {landscape !== "off" && (
+    </group>
+  );
+});
+
+export const DioramaGround = memo(function DioramaGround(
+  props: Parameters<typeof DioramaTerrain>[0],
+) {
+  return (
+    <>
+      <DioramaTerrain {...props} />
+      {props.landscape && props.landscape !== "off" && (
         <DioramaScenery
-          landscape={landscape}
-          centerX={centerX}
-          centerZ={centerZ}
-          width={tileWidth}
-          depth={tileDepth}
+          landscape={props.landscape}
+          centerX={props.centerX}
+          centerZ={props.centerZ}
+          width={props.width}
+          depth={props.depth}
         />
       )}
-    </group>
+    </>
   );
 });

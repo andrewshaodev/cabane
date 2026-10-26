@@ -225,8 +225,10 @@ sun state or local time. The smart bar lighting action remains available and
 updates the same local preference.
 
 Dashboard Preferences also offers Diorama landscapes: Original (the default),
-Grass, and Mountain. Grass adds trees and flowers above an earth base; Mountain
-adds alpine pines and rocks above a stone base. Both fit a rectangular tile around
+Grass, and Mountain. Grass adds textured trees, flowering bushes, ferns, and dense grass above an earth
+base; Mountain substitutes alpine pines above a stone base. Vegetation uses locally
+bundled CC0 Quaternius models, instanced with cel-shaded materials and alpha-tested
+leaf textures. Assets load only when a landscape is enabled. Both fit a rectangular tile around
 the ground floor, including outdoor platforms, ground zones, hedges, and pools.
 Decorations stay in the added border. The choice is saved locally, outside the
 project, and does not change Construct, Arrange, or Connect. Pool and stair

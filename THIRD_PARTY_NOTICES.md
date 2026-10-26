@@ -119,3 +119,10 @@ The workspace library and import dialog use the official Home Assistant SVG mark
 from [Home Assistant frontend](https://github.com/home-assistant/frontend/blob/dev/src/resources/home-assistant-logo-svg.ts)
 to identify Home Assistant connections. The logo is a trademark of the Open Home
 Foundation; see the [official logo guidelines](https://github.com/home-assistant/assets/tree/master/logo).
+
+## Quaternius Stylized Nature MegaKit
+
+Diorama vegetation models and embedded textures by Quaternius, licensed under
+CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://quaternius.com/packs/stylizednaturemegakit.html
+Individual model sources: packages/engine/src/architecture-scene/assets/LICENSE.md.

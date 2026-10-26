@@ -10,7 +10,9 @@ await withModules(async (load) => {
     "/packages/engine/src/navigation/terrain-support.ts",
   );
   const { resolveWalkLanding } = await load("/packages/engine/src/navigation/walk-landing.ts");
-  const { DioramaGround } = await load("/packages/engine/src/architecture-scene/DioramaGround.tsx");
+  const { DioramaTerrain: DioramaGround } = await load(
+    "/packages/engine/src/architecture-scene/DioramaGround.tsx",
+  );
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   for (const landscape of ["off", "grass", "mountain"])
     test(`${landscape}: terrain landings use the rendered outline and pool holes, without relaxing other-floor or obstacle checks`, async () => {

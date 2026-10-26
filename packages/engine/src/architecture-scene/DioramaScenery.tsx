@@ -1,49 +1,120 @@
-import { memo, useMemo, useLayoutEffect, useRef } from "react";
-import { Color, Object3D, type InstancedMesh } from "three";
+import { Component, type ReactNode, memo, Suspense, useMemo, useLayoutEffect, useRef } from "react";
+import { useGLTF } from "@react-three/drei";
+import {
+  Box3,
+  Matrix4,
+  Object3D,
+  Vector3,
+  DoubleSide,
+  type InstancedMesh,
+  type Mesh,
+  type MeshStandardMaterial,
+  type BufferGeometry,
+} from "three";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
+import { ToonMaterial } from "../rendering";
 
-type Detail = {
-  x: number;
-  y: number;
-  z: number;
-  sx: number;
-  sy: number;
-  sz: number;
-  rotation: number;
-  color: string;
+class SceneryAssetBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  override state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  override render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+const assets = {
+  grass: new URL("./assets/grass.glb", import.meta.url).href,
+  tree: new URL("./assets/tree.glb", import.meta.url).href,
+  bush: new URL("./assets/bush.glb", import.meta.url).href,
+  flowers: new URL("./assets/flowers.glb", import.meta.url).href,
+  pine: new URL("./assets/pine.glb", import.meta.url).href,
+  fern: new URL("./assets/fern.glb", import.meta.url).href,
 };
-function DetailBatch({ details, blade = false }: { details: Detail[]; blade?: boolean }) {
+type Placement = { x: number; z: number; scale: number; angle: number };
+function ModelPart({
+  geometry,
+  material,
+  placements,
+  heightScale = 1,
+}: {
+  heightScale?: number;
+  geometry: BufferGeometry;
+  material: MeshStandardMaterial;
+  placements: Placement[];
+}) {
   const ref = useRef<InstancedMesh>(null);
   useLayoutEffect(() => {
     const mesh = ref.current!;
-    const transform = new Object3D();
-    const color = new Color();
-    details.forEach((item, i) => {
-      transform.position.set(item.x, item.y, item.z);
-      transform.scale.set(item.sx, item.sy, item.sz);
-      transform.rotation.set(0, item.rotation, blade ? 0.2 : 0);
-      transform.updateMatrix();
-      mesh.setMatrixAt(i, transform.matrix);
-      mesh.setColorAt(i, color.set(item.color));
+    const object = new Object3D();
+    placements.forEach((p, i) => {
+      object.position.set(p.x, 0, p.z);
+      object.rotation.set(0, p.angle, 0);
+      object.scale.set(p.scale, p.scale * heightScale, p.scale);
+      object.updateMatrix();
+      mesh.setMatrixAt(i, object.matrix);
     });
     mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.computeBoundingSphere();
-  }, [details, blade]);
+  }, [placements, heightScale]);
   return (
     <instancedMesh
       ref={ref}
-      args={[undefined, undefined, details.length]}
-      castShadow={!blade}
+      args={[geometry, undefined, placements.length]}
+      castShadow
       receiveShadow
+      dispose={null}
     >
-      {blade ? <coneGeometry args={[1, 1, 3]} /> : <icosahedronGeometry args={[1, 1]} />}
-      <meshStandardMaterial roughness={0.95} />
+      <ToonMaterial
+        color={material.color}
+        map={material.map}
+        alphaTest={material.transparent ? 0.45 : 0}
+        side={DoubleSide}
+      />
     </instancedMesh>
   );
 }
+function Plants({ kind, placements }: { kind: keyof typeof assets; placements: Placement[] }) {
+  const { scene } = useGLTF(assets[kind]);
+  const parts = useMemo(() => {
+    scene.updateMatrixWorld(true);
+    const bounds = new Box3().setFromObject(scene),
+      size = bounds.getSize(new Vector3()),
+      center = bounds.getCenter(new Vector3());
+    // Normalize by horizontal spread: keep authored grass blades, branches, and leaf cards intact.
+    const scale = 1 / Math.max(size.x, size.z, 0.001);
+    const normalize = new Matrix4()
+      .makeScale(scale, scale, scale)
+      .multiply(new Matrix4().makeTranslation(-center.x, -bounds.min.y, -center.z));
+    const result: { geometry: BufferGeometry; material: MeshStandardMaterial }[] = [];
+    scene.traverse((object) => {
+      const mesh = object as Mesh;
+      if (!mesh.isMesh || Array.isArray(mesh.material)) return;
+      result.push({
+        geometry: mesh.geometry
+          .clone()
+          .applyMatrix4(new Matrix4().multiplyMatrices(normalize, mesh.matrixWorld)),
+        material: mesh.material as MeshStandardMaterial,
+      });
+    });
+    return result;
+  }, [scene]);
+  useLayoutEffect(() => () => parts.forEach((p) => p.geometry.dispose()), [parts]);
+  return (
+    <group name={`diorama-${kind}`}>
+      {parts.map((p, i) => (
+        <ModelPart
+          key={i}
+          {...p}
+          placements={placements}
+          heightScale={kind === "grass" ? 0.32 : 1}
+        />
+      ))}
+    </group>
+  );
+}
 
-/** Deterministic, bounded scatter in the added margin, never in the authored garden. */
 export const DioramaScenery = memo(function DioramaScenery({
   landscape,
   centerX,
@@ -57,149 +128,55 @@ export const DioramaScenery = memo(function DioramaScenery({
   width: number;
   depth: number;
 }) {
-  const details = useMemo(() => {
-    let seed = 4817;
+  const placements = useMemo(() => {
+    let seed = 781;
     const random = () => {
       seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
       return seed / 4294967296;
     };
-    const leaves: Detail[] = [],
-      grass: Detail[] = [],
-      flowers: Detail[] = [],
-      rocks: Detail[] = [],
-      trunks: Detail[] = [];
-    const alpine = landscape === "mountain";
-    const add = (
-      list: Detail[],
-      x: number,
-      y: number,
-      z: number,
-      sx: number,
-      sy: number,
-      sz: number,
-      color: string,
-    ) => list.push({ x, y, z, sx, sy, sz, color, rotation: random() * Math.PI * 2 });
-    const greens = alpine
-      ? ["#355849", "#496c4c", "#5f7850", "#7a8954"]
-      : ["#405c27", "#537332", "#6e883b", "#8d9e4c", "#a0aa56"];
-    const green = () => greens[Math.floor(random() * greens.length)];
     const perimeter = 2 * (width + depth);
-    // A natural, irregular planting ribbon. Four strips avoid rejected samples on long homes.
-    const point = (margin: number, spread: number) => {
-      const t = random() * perimeter;
-      const inset = margin + random() * spread;
-      if (t < width) return [-width / 2 + 0.6 + random() * (width - 1.2), -depth / 2 + inset];
-      if (t < width + depth)
-        return [width / 2 - inset, -depth / 2 + 0.6 + random() * (depth - 1.2)];
-      if (t < 2 * width + depth)
-        return [-width / 2 + 0.6 + random() * (width - 1.2), depth / 2 - inset];
-      return [-width / 2 + inset, -depth / 2 + 0.6 + random() * (depth - 1.2)];
-    };
-    for (let i = 0; i < Math.min(22000, perimeter * 110); i++) {
-      const [x, z] = point(0.24, 2.7);
-      const h = 0.07 + random() * 0.2;
-      add(grass, x, h / 2, z, 0.015 + random() * 0.025, h, 0.012, green());
-    }
-    for (let i = 0; i < Math.min(150, perimeter * 1.7); i++) {
-      const [x, z] = point(0.65, 1.5);
-      const radius = 0.23 + random() * 0.36;
-      for (let j = 0; j < 16; j++) {
-        const angle = random() * Math.PI * 2,
-          r = random() * radius;
-        add(
-          leaves,
-          x + Math.cos(angle) * r,
-          0.13 + random() * radius,
-          z + Math.sin(angle) * r,
-          0.12 + random() * 0.14,
-          0.12 + random() * 0.16,
-          0.12 + random() * 0.14,
-          green(),
-        );
-      }
-      if (i % 3 === 0)
-        for (let j = 0; j < 12; j++) {
-          const a = random() * 6.28,
-            r = random() * radius;
-          add(
-            flowers,
-            x + Math.cos(a) * r,
-            0.25 + radius * 0.6 + random() * 0.12,
-            z + Math.sin(a) * r,
-            0.045,
-            0.035,
-            0.045,
-            ["#f5e8c5", "#e9bd58", "#c87985", "#e6a6b0"][i % 4],
-          );
+    const scatter = (count: number, min: number, spread: number, diameter: number) =>
+      Array.from({ length: count }, () => {
+        const t = random() * perimeter,
+          inset = min + random() * spread;
+        let x, z;
+        if (t < width) {
+          x = -width / 2 + 0.7 + random() * (width - 1.4);
+          z = -depth / 2 + inset;
+        } else if (t < width + depth) {
+          x = width / 2 - inset;
+          z = -depth / 2 + 0.7 + random() * (depth - 1.4);
+        } else if (t < 2 * width + depth) {
+          x = -width / 2 + 0.7 + random() * (width - 1.4);
+          z = depth / 2 - inset;
+        } else {
+          x = -width / 2 + inset;
+          z = -depth / 2 + 0.7 + random() * (depth - 1.4);
         }
-    }
-    for (let i = 0; i < Math.min(32, perimeter / 3.7); i++) {
-      const [x, z] = point(1.1, 0.65);
-      const height = 1.35 + random() * 1.1;
-      add(trunks, x, height / 2, z, 0.08, height / 2, 0.08, "#715039");
-      for (let j = 0; j < 90; j++) {
-        const a = random() * 6.28,
-          y = random(),
-          r = Math.sqrt(random()) * (alpine ? (1 - y) * 0.7 : Math.sin(y * Math.PI) * 0.7);
-        add(
-          leaves,
-          x + Math.cos(a) * r,
-          height * 0.5 + y * height * 0.75,
-          z + Math.sin(a) * r,
-          0.15 + random() * 0.12,
-          0.18 + random() * 0.13,
-          0.15 + random() * 0.12,
-          green(),
-        );
-      }
-    }
-    for (let i = 0; i < Math.min(900, perimeter * 12); i++) {
-      const [x, z] = point(0.3, 2.3);
-      const r = (alpine ? 0.08 : 0.04) + random() * (alpine ? 0.3 : 0.1);
-      add(rocks, x, r * 0.3, z, r, r * 0.65, r * 0.85, ["#8c8b75", "#aaa18a", "#746e59"][i % 3]);
-    }
-    // Exposed aggregates break up the otherwise perfectly smooth cut-earth sides.
-    for (let i = 0; i < Math.min(2200, perimeter * 26); i++) {
-      const t = random() * perimeter;
-      let x, z;
-      if (t < width) {
-        x = t - width / 2;
-        z = -depth / 2 + 0.06;
-      } else if (t < width + depth) {
-        x = width / 2 - 0.06;
-        z = t - width - depth / 2;
-      } else if (t < 2 * width + depth) {
-        x = t - width - depth - width / 2;
-        z = depth / 2 - 0.06;
-      } else {
-        x = -width / 2 + 0.06;
-        z = t - 2 * width - depth - depth / 2;
-      }
-      if (Math.abs(x) > width / 2 - 0.45 && Math.abs(z) > depth / 2 - 0.45) continue;
-      const r = 0.035 + random() * 0.12;
-      add(
-        rocks,
-        x,
-        -0.15 - random() * 0.62,
-        z,
-        r,
-        r * 0.65,
-        r,
-        ["#564637", "#8a7152", "#a38a66", "#6b6250"][i % 4],
-      );
-    }
-    return { leaves, grass, flowers, rocks, trunks };
-  }, [width, depth, landscape]);
+        return { x, z, scale: diameter * (0.7 + random() * 0.3), angle: random() * Math.PI * 2 };
+      });
+    return {
+      grass: scatter(Math.min(9000, Math.floor(perimeter * 65)), 0.25, 2.65, 0.48),
+      tree: scatter(Math.min(22, Math.floor(perimeter / 4)), 1.25, 0.45, 1.65),
+      bush: scatter(Math.min(80, Math.floor(perimeter)), 0.8, 1.4, 0.8),
+      flowers: scatter(Math.min(150, Math.floor(perimeter * 2)), 0.6, 1.9, 0.45),
+      fern: scatter(Math.min(65, Math.floor(perimeter * 0.7)), 0.8, 1.4, 0.65),
+    };
+  }, [width, depth]);
   return (
     <group
       name={`diorama-${landscape}-scenery`}
       position={[centerX, GROUND_ELEVATION_METERS, centerZ]}
     >
-      <DetailBatch details={details.grass} blade />
-      <DetailBatch details={details.leaves} />
-      <DetailBatch details={details.flowers} />
-      <DetailBatch details={details.rocks} />
-      <DetailBatch details={details.trunks} />
+      <SceneryAssetBoundary key={landscape}>
+        <Suspense fallback={null}>
+          <Plants kind="grass" placements={placements.grass} />
+          <Plants kind={landscape === "mountain" ? "pine" : "tree"} placements={placements.tree} />
+          <Plants kind="bush" placements={placements.bush} />
+          <Plants kind="flowers" placements={placements.flowers} />
+          <Plants kind="fern" placements={placements.fern} />
+        </Suspense>
+      </SceneryAssetBoundary>
     </group>
   );
 });
