@@ -10,17 +10,16 @@ room. A critically damped transition retains velocity when another room is chose
 mid-flight. Dragging, pinching, scrolling or using camera buttons interrupts it;
 selecting the same room again refocuses it. Reduced motion applies the destination
 immediately. Returning to Overview, including Escape or Back, smoothly restores
-the default floor framing at the current viewport size. It never uses an arbitrary
-saved zoom; pressing the floor summary also resets a manually moved camera.
-The top floor pills explicitly frame the selected floor; the existing diamond
-floor picker retains its camera-preserving behavior.
+the last manually chosen orbital view. The floor summary returns to that same view;
+only Reset view restores default framing. Both floor pickers restore the selected
+floor's remembered view, or default framing on its first visit.
 
 The Orbit header combines the floor summary and room navigation in one top row.
 The leading button uses the current floor name, connection indicator, session
 information and home-presence summary. It replaces the separate heading and the
 Overview label, scrolls in the same row as the rooms, and returns to the
-default floor view when clicked. It also toggles a second row of floor pills.
-Choosing a floor closes that row, clears the room selection, frames the new floor
+remembered floor view when clicked. It also toggles a second row of floor pills.
+Choosing a floor closes that row, clears the room selection, restores the new floor view
 and updates the room list. Escape, an outside pointer press or selecting a room
 closes the floor choices; Escape restores focus to the floor button. Empty floors
 remain navigable. Scroll gutters leave room for pill shadows and focus outlines.
@@ -64,7 +63,7 @@ in that order. Owners can remove, reorder, or replace every item and add direct 
 and modeled devices that have a room sheet, or the All lights off action. Room and device
 icons share the built-in slot dimensions; rooms use Home Assistant photos or initials, and
 devices use cached procedural model previews. Build groups Construct, Arrange, and Connect; View
-groups wall fading and roof visibility. Room and device links select the correct floor and open the
+groups wall fading, roof visibility, Top-down, Reset view, and Lock view. Room and device links select the correct floor and open the
 room view or device sheet, including when leaving Walk. The bar shows the items that fit at usable
 size and puts the rest under More actions. An intentionally empty layout hides the bar; Customize
 action bar remains in Home's More options menu.
@@ -91,11 +90,27 @@ click targets. Escape and outside taps dismiss the stack. Existing floor shortcu
 and unavailable walking-entry guards still apply. Show roof / Hide roof is available
 in the action bar’s View group (R), and is disabled while walking. Roof view shows all floors, keeps walls solid,
 hides room status overlays, and preserves the current camera position, angle, target, and zoom.
-The diamond floor picker preserves the camera in Orbit, Construct, and Arrange. Selecting a floor restores the
+The diamond floor picker restores per-floor views in Orbit and preserves the camera in Construct and Arrange. Selecting a floor restores the
 cutaway; entering Walk exits roof view, while retaining roofs and ceilings in the walking scene. Stair traversal preserves the physical camera
 elevation while the active floor selection updates, including frames before that update commits. Construct exposes its existing floor actions
 through Manage floors. Mobile placement clears the editor inspector, and reduced
 motion disables the expansion and fade transitions.
+
+Orbital position, target, orientation, zoom and Lock view are remembered per home
+and floor in this browser's local storage. These preferences stay outside project
+exports and HA sync, so devices keep independent views. Manual pan, orbit, zoom,
+and camera buttons update the remembered view. Room-focus animations and Walk do
+not. Reloading or returning from the editor or Walk restores the saved view, even
+when a room remains selected. Viewport changes scale zoom to retain the visible
+area; malformed, unsupported, or far-outdated poses fall back to normal framing.
+Blocked storage keeps preferences in memory for the visit and retries on changes.
+
+Top-down frames the floor from above. Reset view explicitly restores its default
+three-quarter framing. Both actions remain available while locked. Lock view
+returns to the remembered view and prevents camera gestures, wheel/double-tap
+zoom, and compact camera buttons from moving it. Room and device selections keep
+their controls without reframing. Unlocking resumes manual camera navigation.
+These preferences do not restrict Construct, Arrange, Connect, or Walk cameras.
 
 In Home overview and room focus, a compact cream toolbar beside the floor picker
 provides zoom out, zoom in, and a 90° camera turn around the current orbit target.

@@ -1,21 +1,25 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OrthographicCamera } from "three";
 import type { OrbitControls } from "three-stdlib";
 
-export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitControls | null> }) {
+export function OrbitNavigation({
+  controls,
+  locked = false,
+}: {
+  controls: OrbitControls | null;
+  locked?: boolean;
+}) {
   const [isTopView, setIsTopView] = useState(false);
   const previousPolarAngle = useRef(Math.PI / 4);
   useEffect(() => {
-    const controls = controlsRef.current;
     if (!controls) return;
     const syncView = () => setIsTopView(controls.getPolarAngle() < 0.01);
     syncView();
     controls.addEventListener("change", syncView);
     return () => controls.removeEventListener("change", syncView);
-  }, [controlsRef]);
+  }, [controls]);
   const zoom = (factor: number) => {
-    const controls = controlsRef.current;
-    if (!controls) return;
+    if (!controls || !controls.enabled) return;
     controls.dispatchEvent({ type: "start", target: controls });
     const camera = controls.object as OrthographicCamera;
     if (!camera.isOrthographicCamera) return;
@@ -25,13 +29,12 @@ export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitC
     controls.dispatchEvent({ type: "change", target: controls });
   };
   const rotate = () => {
-    const controls = controlsRef.current;
-    controls?.dispatchEvent({ type: "start", target: controls });
-    if (controls) controls.setAzimuthalAngle(controls.getAzimuthalAngle() + Math.PI / 2);
+    if (!controls?.enabled) return;
+    controls.dispatchEvent({ type: "start", target: controls });
+    controls.setAzimuthalAngle(controls.getAzimuthalAngle() + Math.PI / 2);
   };
   const topView = () => {
-    const controls = controlsRef.current;
-    if (!controls) return;
+    if (!controls || !controls.enabled) return;
     const angle = controls.getPolarAngle();
     controls.dispatchEvent({ type: "start", target: controls });
     if (angle < 0.01) {
@@ -44,17 +47,30 @@ export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitC
   };
   return (
     <div className="orbit-navigation" role="group" aria-label="Camera controls">
-      <button type="button" aria-label="Zoom out" title="Zoom out" onClick={() => zoom(1 / 1.25)}>
+      <button
+        disabled={locked}
+        type="button"
+        aria-label="Zoom out"
+        title="Zoom out"
+        onClick={() => zoom(1 / 1.25)}
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M5 12h14" />
         </svg>
       </button>
-      <button type="button" aria-label="Zoom in" title="Zoom in" onClick={() => zoom(1.25)}>
+      <button
+        disabled={locked}
+        type="button"
+        aria-label="Zoom in"
+        title="Zoom in"
+        onClick={() => zoom(1.25)}
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M5 12h14M12 5v14" />
         </svg>
       </button>
       <button
+        disabled={locked}
         type="button"
         className="orbit-navigation__rotate"
         aria-label="Rotate camera 90 degrees"
@@ -67,9 +83,10 @@ export function OrbitNavigation({ controlsRef }: { controlsRef: RefObject<OrbitC
         <span>90°</span>
       </button>
       <button
+        disabled={locked}
         type="button"
-        aria-label={isTopView ? "3D view" : "Top view"}
-        title={isTopView ? "3D view" : "Top view"}
+        aria-label={isTopView ? "3D view" : "Top-down"}
+        title={isTopView ? "3D view" : "Top-down"}
         onClick={topView}
       >
         <svg viewBox="0 0 24 24" aria-hidden="true">

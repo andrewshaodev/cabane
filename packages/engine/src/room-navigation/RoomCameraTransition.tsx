@@ -39,6 +39,9 @@ export function RoomCameraTransition({
   controls,
   interruptRef,
   defaultPose,
+  getOverviewPose,
+  preserveInitialView = false,
+  onAutomaticMove,
   enabled,
   floor,
   room,
@@ -50,6 +53,9 @@ export function RoomCameraTransition({
   controls: React.RefObject<OrbitControls | null>;
   interruptRef: React.RefObject<(() => void) | null>;
   defaultPose: OrbitPose;
+  getOverviewPose?: () => OrbitPose;
+  preserveInitialView?: boolean;
+  onAutomaticMove?: () => void;
   enabled: boolean;
   floor: FloorSpec;
   room: RoomSpec | undefined;
@@ -62,8 +68,8 @@ export function RoomCameraTransition({
   const motion = useRef<Motion | null>(null);
   const previousFloor = useRef(floor.id);
   const previousRequest = useRef(requestKey);
-  const currentRoom = useRef<string | null>(null);
-  const overviewPose = useEffectEvent(() => defaultPose);
+  const currentRoom = useRef<string | null>(preserveInitialView ? (room?.id ?? null) : null);
+  const overviewPose = useEffectEvent(() => getOverviewPose?.() ?? defaultPose);
 
   useEffect(() => {
     interruptRef.current = () => {
@@ -75,6 +81,7 @@ export function RoomCameraTransition({
     };
   }, [controls, interruptRef]);
 
+  const automaticMove = useEffectEvent(() => onAutomaticMove?.());
   useEffect(() => {
     const orbit = controls.current;
     if (!orbit || orbit.object !== camera || !(camera as OrthographicCamera).isOrthographicCamera)
@@ -84,7 +91,7 @@ export function RoomCameraTransition({
     if (!enabled || previousFloor.current !== floor.id) {
       motion.current = null;
       orbit.enableDamping = true;
-      currentRoom.current = null;
+      currentRoom.current = !enabled ? (room?.id ?? null) : null;
       previousFloor.current = floor.id;
     }
     if (!enabled) return;
@@ -93,6 +100,7 @@ export function RoomCameraTransition({
     const selectionChanged = currentRoom.current !== roomId;
     const retargetingActiveMotion = motion.current !== null && !selectionChanged;
     if (!selectionChanged && !requested && !retargetingActiveMotion) return;
+    automaticMove();
     const from = readPose(orbit);
     let destination: OrbitPose;
     if (room && frame) {

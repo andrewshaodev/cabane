@@ -1,3 +1,4 @@
+import { OrbitViewMenu } from "./action-bar/OrbitViewMenu";
 import { SceneActionButton } from "./action-bar/SceneActionButton";
 import { SceneActionGroup } from "./action-bar/SceneActionGroup";
 import { WeatherMenu, type WeatherMenuProps } from "./weather/WeatherMenu";
@@ -221,7 +222,15 @@ export function SceneActionBar({
   onToggleRoof,
   keyboardEnabled = true,
   weather,
+  viewLocked = false,
+  onToggleViewLock,
+  onTopDown,
+  onResetView,
 }: {
+  viewLocked?: boolean;
+  onToggleViewLock?: () => void;
+  onTopDown?: () => void;
+  onResetView?: () => void;
   weather?: WeatherMenuProps | undefined;
   items?: readonly ActionBarItem[];
   walkTools?: readonly import("./walk-tools").WalkToolDefinition[] | undefined;
@@ -504,6 +513,17 @@ export function SceneActionBar({
               "View",
               <>
                 {renderAction(sceneActions[5])}
+                <OrbitViewMenu
+                  locked={viewLocked}
+                  disabled={mode === "walk"}
+                  onTopDown={onTopDown}
+                  onResetView={onResetView}
+                  onToggleLock={onToggleViewLock}
+                  onClose={() => {
+                    setOpen(null);
+                    setOverflowOpen(false);
+                  }}
+                />
                 <button
                   type="button"
                   className={`scene-action-slot is-filled ${roofVisible ? "is-active" : ""}`}

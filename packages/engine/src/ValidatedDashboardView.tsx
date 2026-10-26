@@ -1,3 +1,4 @@
+import { useDashboardOrbitView } from "./navigation/orbit-view";
 import { useWeatherController } from "./weather/useWeatherController";
 import { WeatherScene } from "./weather/WeatherScene";
 import { deriveSolarLighting } from "./lighting";
@@ -12,7 +13,6 @@ import { activateWalkTarget, canActivateWalkTarget } from "./walk-tools/activate
 import { connectedCanvasEvents } from "./connected-canvas-events";
 import { ScenePreview } from "./ScenePreview";
 import { RoomHoverProvider } from "./room-status/RoomHover";
-import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { OrbitNavigation } from "./OrbitNavigation";
 import { DashboardLocation, useRoomFocusFrame } from "./room-navigation";
 import { safeBuildingSpawn } from "./stairs/stair-navigation";
@@ -70,7 +70,6 @@ import { useDashboardController } from "./useDashboardController";
 
 export function ValidatedDashboardView(props: Parameters<typeof useDashboardController>[0]) {
   const toolNavigationRef = useRef<WalkToolNavigation | null>(null);
-  const orbitControls = useRef<OrbitControlsImpl | null>(null);
   const roomFocus = useRoomFocusFrame();
   const [overlayPreferences, setOverlayPreferences] = useState(loadOverlayPreferences);
   const [preferencesOpen, setPreferencesOpen] = useState(false);
@@ -164,6 +163,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     setSceneActionError,
     pendingHaActions,
   } = dashboard;
+  const orbitView = useDashboardOrbitView(manifest.home.id, floor.id);
   const equippedTool =
     walkMode && !walkthrough
       ? props.walkTools?.find((tool) => tool.id === equippedToolId)
@@ -220,7 +220,9 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
         >
           <div ref={roomFocus.ref} className="room-focus-frame" aria-hidden="true" />
           <div className="building-floor-controls">
-            {!walkMode && <OrbitNavigation controlsRef={orbitControls} />}
+            {!walkMode && (
+              <OrbitNavigation controls={orbitView.controls} locked={orbitView.locked} />
+            )}
             <FloorPicker
               unavailable={
                 walkMode
@@ -315,8 +317,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                       />
                     ) : (
                       <OrbitCamera
+                        {...orbitView.cameraProps}
                         showRoof={wholeBuilding}
-                        controlsRef={orbitControls}
                         elevation={elevation}
                         buildingFloors={cameraFloors}
 
@@ -667,6 +669,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
 
           {!walkthrough && (
             <SceneActionBar
+              {...orbitView.menuProps}
               weather={{
                 preview: weather.preview,
                 status: weather.live.status,

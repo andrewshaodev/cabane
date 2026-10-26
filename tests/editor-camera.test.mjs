@@ -183,6 +183,50 @@ await withModules(async (load) => {
     });
   }
 
+  test("locked orbit blocks wheel and double-tap zoom, then resumes normal input", async () => {
+    const props = { floor, resetKey: 0, locked: true };
+    const { renderer, controls, wheel, listeners } = await createWheelCamera(
+      createElement(OrbitCamera, props),
+    );
+    const tap = async (time) => {
+      await act(async () => {
+        for (const type of ["pointerdown", "pointerup"]) {
+          const event = {
+            pointerType: "touch",
+            pointerId: 1,
+            clientX: 500,
+            clientY: 400,
+            pageX: 500,
+            pageY: 400,
+            timeStamp: time,
+            preventDefault() {},
+          };
+          for (const { listener } of listeners.get(type) ?? []) listener(event);
+        }
+      });
+    };
+    try {
+      const initial = pose(controls);
+      await wheel(-100);
+      await tap(1000);
+      await tap(1100);
+      await renderer.advanceFrames(10, 1 / 60);
+      assert.deepEqual(pose(controls), initial);
+      await renderer.update(createElement(OrbitCamera, { ...props, locked: false }));
+      await wheel(-100);
+      assert.ok(controls.object.zoom > initial.zoom);
+      // Disable only native pointer controls to exercise the separate tap handler.
+      controls.enablePan = false;
+      controls.enableRotate = false;
+      const zoom = controls.object.zoom;
+      await tap(2000);
+      await tap(2100);
+      assert.ok(controls.object.zoom > zoom);
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("construction wheel pans without clicking even when pointer controls are disabled, and pinch zooms", async () => {
     const listeners = new Map();
     const props = cameraProps({ planWheelNavigation: true, controlsEnabled: false });
