@@ -1,5 +1,16 @@
 # Geometry, rendering, and navigation
 
+## Visual style preview
+
+Menu → Preferences offers Default and an experimental Sims style, saved per
+browser origin on this device. Default preserves the existing renderer. Sims
+uses richer color grading and softer contours in the shared scene pass, plus
+warmer solar lighting. Arrange uses the shared grading with its editor lighting;
+Construct keeps its technical rendering. Geometry, authored materials, imported
+GLB assets, connections, and project data are unchanged. Imported materials also
+receive the final color grade. This PoC adds no render pass or assets, and does
+not attempt to reproduce the original game's assets or fixed camera.
+
 ## Visual assets
 
 Hosted and bundled textures and 3D models are allowed in product, catalog and

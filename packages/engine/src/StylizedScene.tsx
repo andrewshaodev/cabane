@@ -1,3 +1,4 @@
+import { useSceneStyle } from "./scene-style";
 import { ImportedContourMask } from "./imported-models/contour-mask";
 import { contourFragmentShader } from "./scene-contour-shader";
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
@@ -22,6 +23,7 @@ import { SceneLightWallMask, SceneLightWallMaskContext } from "./scene-light-wal
 export const SceneContourContext = createContext(false);
 
 function SceneContourPass({ antialias, active }: { antialias: boolean; active: boolean }) {
+  const style = useSceneStyle();
   const gl = useThree((state) => state.gl);
   const invalidate = useThree((state) => state.invalidate);
   const lightWalls = useContext(SceneLightWallMaskContext)!;
@@ -38,6 +40,7 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
       depthTest: false,
       depthWrite: false,
       uniforms: {
+        simsStyle: { value: false },
         beauty: { value: target.texture },
         importedDepth: { value: importedMask.target.depthTexture },
         hasImportedModels: { value: false },
@@ -78,6 +81,10 @@ function SceneContourPass({ antialias, active }: { antialias: boolean; active: b
     gl.domElement.addEventListener("webglcontextrestored", resources.shadows.reset);
     return () => gl.domElement.removeEventListener("webglcontextrestored", resources.shadows.reset);
   }, [gl, resources]);
+  useEffect(() => {
+    resources.material.uniforms.simsStyle.value = style === "sims";
+    invalidate();
+  }, [style, resources, invalidate]);
   // Positive priority owns rendering, but never invalidates a resting demand canvas.
   useFrame(({ gl, scene, camera }) => {
     if (!active) {

@@ -1,4 +1,5 @@
 export const contourFragmentShader = /* glsl */ `
+  uniform bool simsStyle;
   uniform sampler2D beauty;
   uniform sampler2D importedDepth;
   uniform bool hasImportedModels;
@@ -34,7 +35,13 @@ export const contourFragmentShader = /* glsl */ `
                          contour(center, vec2(0.0, -texel.y))));
     if (hasImportedModels && abs(texture2D(importedDepth, vUv).x - texture2D(sceneDepth, vUv).x) < 0.000001) edge = 0.0;
     vec3 shadedInk = mix(surface.rgb * 0.42, ink, 0.35);
-    gl_FragColor = vec4(mix(surface.rgb, shadedInk, edge * 0.72), surface.a);
+    vec3 color = mix(surface.rgb, shadedInk, edge * (simsStyle ? 0.12 : 0.72));
+    if (simsStyle) {
+      float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+      color = max(vec3(0.0), mix(vec3(luminance), color, 1.28));
+      color *= vec3(1.06, 1.02, 0.94);
+    }
+    gl_FragColor = vec4(color, surface.a);
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
   }

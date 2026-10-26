@@ -259,6 +259,7 @@
       "packages/engine/src/building",
       "packages/engine/src/stairs",
       "packages/engine/src/SceneLighting.tsx",
+      "packages/engine/src/scene-style.ts",
       "packages/engine/src/lighting.ts",
       "packages/engine/src/solar-shadow-frame.ts",
       "packages/engine/src/hedges",
