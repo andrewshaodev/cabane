@@ -20,7 +20,12 @@ Use Cabane in your browser or directly in the Home Assistant sidebar.
 | :--------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | [![Cabane demo home with simulated room states](docs/images/demo-dashboard.jpg)](docs/images/demo-dashboard.jpg) | [![Furnishing the demo home in Arrange](docs/images/demo-arrange.jpg)](docs/images/demo-arrange.jpg) |
 
-Both screenshots show the bundled demo with simulated devices. Click to enlarge.
+The two screenshots above show the bundled demo with simulated devices. Click to enlarge.
+
+[![Walk mode in Casa Solstice: a laser gun aimed at a ceiling light, with a ZAP effect](docs/images/walk-laser.jpg)](docs/images/walk-laser.jpg)
+
+**Walk mode:** Explore your home in first person. You can even shoot supported
+devices to toggle them. Shown here: a light in Casa Solstice.
 
 ## What you can do
 
