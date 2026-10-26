@@ -309,16 +309,25 @@ export function ConstructionSelectionProperties({
               <legend>Room actions</legend>
               <div className="construction-inspector__room-actions">
                 <div className="construction-inspector__room-toggle">
-                  <label
-                    id="room-solid-label"
-                    htmlFor="room-solid"
-                    title="Render as a solid block, excluded from room navigation and area mapping."
-                  >
-                    Not a room
-                  </label>
+                  <div className="construction-inspector__room-toggle-copy">
+                    <label
+                      id="room-solid-label"
+                      htmlFor="room-solid"
+                      title="Render as a solid block, excluded from room navigation and area mapping."
+                    >
+                      Solid structure
+                    </label>
+                    <p
+                      id="room-solid-description"
+                      className="construction-inspector__room-action-note"
+                    >
+                      Fill this space for a chimney, shaft or pillar.
+                    </p>
+                  </div>
                   <EditorSwitch
                     id="room-solid"
                     labelledBy="room-solid-label"
+                    describedBy="room-solid-description"
                     checked={selectedRoom.isSolid ?? false}
                     onChange={(isSolid) => editor.updateSelectedRoom({ isSolid })}
                   />

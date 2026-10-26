@@ -520,8 +520,15 @@
 .construction-inspector__room-toggle label {
   cursor: pointer;
 }
-.construction-inspector__room-actions > .editor-button {
+.construction-inspector__room-toggle-copy {
+  display: grid;
+  gap: 4px;
+}
+.direction-preview .construction-inspector__room-actions > button.editor-button {
   justify-self: start;
+  min-height: 44px;
+  padding-inline: 0;
+  border: 0;
 }
 .construction-inspector__room-action-note {
   margin: 0;

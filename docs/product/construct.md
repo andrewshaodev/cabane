@@ -84,7 +84,7 @@ unselected rooms, and splits source walls where only part is removable. Shared
 boundaries incidentally touched by a room marquee remain; wall-only deletion
 still removes a directly selected wall. A room enclosed entirely by shared walls
 explains that its walls must be edited. In Properties, the separate Room actions
-section groups Delete room with a reversible Not a room toggle. This marks an
+section groups Delete room with a reversible Solid structure toggle. This marks an
 enclosed space as a solid structural block for chimneys, shafts or pillars,
 keeping its walls and saved room identity. Solid spaces have a neutral plan fill
 without a room label, remain selectable in Construct, and render at the floor's

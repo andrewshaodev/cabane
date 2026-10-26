@@ -401,7 +401,7 @@ await withModules(async (load) => {
     });
   });
 
-  test("Not a room shares Room actions with deletion and survives history and reopening", async () => {
+  test("Solid structure shares Room actions with deletion and survives history and reopening", async () => {
     await withDom(async ({ dom, root }) => {
       const floor = ownerHomeProject.floors[0];
       const room = floor.rooms[0];
@@ -419,6 +419,14 @@ await withModules(async (load) => {
         '[role="switch"][aria-labelledby="room-solid-label"]',
       );
       assert.ok(toggle);
+      assert.equal(
+        dom.window.document.getElementById(toggle.getAttribute("aria-labelledby")).textContent,
+        "Solid structure",
+      );
+      assert.equal(
+        dom.window.document.getElementById(toggle.getAttribute("aria-describedby")).textContent,
+        "Fill this space for a chimney, shaft or pillar.",
+      );
       const section = toggle.closest("fieldset");
       assert.equal(section.querySelector("legend").textContent, "Room actions");
       assert.ok(
