@@ -170,8 +170,8 @@ export function WalkPreferences({
             ))}
           </fieldset>
           <p className="walk-preferences__hint">
-            Sims is an experimental look with richer colors, warm lighting and softer outlines.
-            Saved on this device.
+            Sims is an experimental look with faceted models, a richer palette and stronger
+            lighting. Saved on this device.
           </p>
         </div>
         <div className="walk-preferences__group">

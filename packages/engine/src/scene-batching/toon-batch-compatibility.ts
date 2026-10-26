@@ -105,6 +105,7 @@ export function toonBatchKey(
   }
   return [
     material.gradientMap?.uuid ?? "",
+    JSON.stringify(material.defines),
     material.emissive.getHexString(),
     material.emissiveIntensity,
     material.precision,

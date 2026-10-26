@@ -4,12 +4,15 @@
 
 Menu → Preferences offers Default and an experimental Sims style, saved per
 browser origin on this device. Default preserves the existing renderer. Sims
-uses richer color grading and softer contours in the shared scene pass, plus
-warmer solar lighting. Arrange uses the shared grading with its editor lighting;
+uses a continuous diffuse ramp, flat face normals, a stronger 24-hue material
+palette, no drawn contours, and a stronger directional light with less ambient
+fill. These model material changes apply inside the shared stylized scene and
+retain batching. Arrange uses the same materials with its editor lighting;
 Construct keeps its technical rendering. Geometry, authored materials, imported
-GLB assets, connections, and project data are unchanged. Imported materials also
-receive the final color grade. This PoC adds no render pass or assets, and does
-not attempt to reproduce the original game's assets or fixed camera.
+GLB assets, connections, and project data are unchanged. Imported materials retain
+their original shading and receive only the final color grade. This PoC adds no
+render pass or assets, and does not reproduce the original game's assets or fixed
+camera.
 
 ## Visual assets
 

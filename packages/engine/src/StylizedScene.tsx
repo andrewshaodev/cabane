@@ -1,4 +1,4 @@
-import { useSceneStyle } from "./scene-style";
+import { SceneStyleContext, useSceneStyle } from "./scene-style";
 import { ImportedContourMask } from "./imported-models/contour-mask";
 import { contourFragmentShader } from "./scene-contour-shader";
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
@@ -143,12 +143,15 @@ export function StylizedScene({
   /** Suspend postprocessing without disposing its resources or changing model outlines. */
   active?: boolean;
 }) {
+  const style = useSceneStyle();
   const lightWalls = useMemo(() => new SceneLightWallMask(), []);
   useEffect(() => () => lightWalls.dispose(), [lightWalls]);
   return (
     <SceneLightWallMaskContext.Provider value={lightWalls}>
       <SceneContourContext.Provider value={enabled}>
-        {children}
+        <SceneStyleContext.Provider value={active ? style : "default"}>
+          {children}
+        </SceneStyleContext.Provider>
         {enabled && <SceneContourPass antialias={antialias} active={active} />}
       </SceneContourContext.Provider>
     </SceneLightWallMaskContext.Provider>

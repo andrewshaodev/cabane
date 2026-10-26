@@ -1,7 +1,8 @@
-import { useSyncExternalStore } from "react";
+import { createContext, useSyncExternalStore } from "react";
 import type { SolarLightingState } from "./lighting";
 
 export type SceneStyle = "default" | "sims";
+export const SceneStyleContext = createContext<SceneStyle>("default");
 const storageKey = "cabane.scene-style.v1";
 const listeners = new Set<() => void>();
 let current: SceneStyle | undefined;
@@ -45,10 +46,10 @@ export function styleSolarLighting(
   if (style === "default") return solar;
   return {
     ...solar,
-    sunColor: "#fff2c9",
-    sunIntensity: solar.sunIntensity * 1.12,
-    hemisphereSkyColor: "#d5e5ff",
-    hemisphereGroundColor: "#829567",
-    hemisphereIntensity: solar.hemisphereIntensity * 1.18,
+    sunColor: "#fff5df",
+    sunIntensity: solar.sunIntensity * 1.4,
+    hemisphereSkyColor: "#b7ccf5",
+    hemisphereGroundColor: "#697b65",
+    hemisphereIntensity: solar.hemisphereIntensity * 0.55,
   };
 }
