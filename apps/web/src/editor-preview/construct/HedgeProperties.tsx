@@ -1,6 +1,6 @@
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { HedgeStyleGrid } from "./HedgeStyleGrid";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import type { ConstructEditorController } from "./construct-controller-contract";
 
 export function HedgeProperties({
@@ -55,8 +55,8 @@ export function HedgeProperties({
         }
       />
       <label>
-        Height (m)
-        <CommittedNumberInput
+        Height
+        <LengthInput
           label="Boundary height"
           value={settings.heightMeters}
           min={0.2}
@@ -67,8 +67,8 @@ export function HedgeProperties({
         />
       </label>
       <label>
-        Width (m)
-        <CommittedNumberInput
+        Width
+        <LengthInput
           label="Boundary width"
           value={settings.widthMeters}
           min={0.2}

@@ -1,3 +1,4 @@
+import { LengthInput } from "../editor-chrome/LengthInput";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   createBrowserUuid,
@@ -184,21 +185,15 @@ export function ModelImportDialog({
         {normalization && (
           <>
             <fieldset disabled={busy} className="model-import-vectors">
-              <legend>Dimensions (m) · uniform scale</legend>
+              <legend>Dimensions · uniform scale</legend>
               {["Width", "Height", "Depth"].map((label, i) => (
                 <label key={label}>
                   {label}
-                  <input
-                    type="number"
-                    min="0.001"
-                    step="any"
-                    required
-                    value={Number(normalization.size[i].toFixed(4))}
-                    onChange={(e) => {
-                      const n = Number(e.target.value);
-                      if (n > 0 && Number.isFinite(n))
-                        setScale((scale * n) / normalization.size[i]);
-                    }}
+                  <LengthInput
+                    label={label}
+                    min={0.001}
+                    value={normalization.size[i]}
+                    onCommit={(n) => setScale((scale * n) / normalization.size[i])}
                   />
                 </label>
               ))}
@@ -225,18 +220,14 @@ export function ModelImportDialog({
         )}
         {light && (
           <fieldset disabled={busy} className="model-import-vectors">
-            <legend>Light source · position in metres</legend>
+            <legend>Light source · position</legend>
             {["Light X", "Light Y", "Light Z"].map((label, i) => (
               <label key={label}>
                 {label}
-                <input
-                  type="number"
-                  step="any"
+                <LengthInput
+                  label={label}
                   value={lightPosition[i]}
-                  onChange={(e) => {
-                    const n = Number(e.target.value);
-                    if (Number.isFinite(n)) setLightPosition(changeVector(lightPosition, i, n));
-                  }}
+                  onCommit={(n) => setLightPosition(changeVector(lightPosition, i, n))}
                 />
               </label>
             ))}
@@ -260,15 +251,8 @@ export function ModelImportDialog({
               />
             </label>
             <label>
-              Range (m)
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                required
-                value={distance}
-                onChange={(e) => setDistance(Number(e.target.value))}
-              />
+              Range
+              <LengthInput label="Light range" min={0} value={distance} onCommit={setDistance} />
             </label>
           </fieldset>
         )}

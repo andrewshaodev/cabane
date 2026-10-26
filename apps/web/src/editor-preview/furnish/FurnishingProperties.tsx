@@ -134,6 +134,7 @@ export function FurnishingProperties({
           <legend>Placement</legend>
           <NumericField
             unit="plan units"
+            metersPerUnit={floor?.coordinates.metersPerPlanUnit ?? 1}
             label="X"
             value={selected.placement.at[0]}
             onChange={(value) =>
@@ -144,6 +145,7 @@ export function FurnishingProperties({
           />
           <NumericField
             unit="plan units"
+            metersPerUnit={floor?.coordinates.metersPerPlanUnit ?? 1}
             label="Z"
             value={selected.placement.at[1]}
             onChange={(value) =>
@@ -179,6 +181,7 @@ export function FurnishingProperties({
           <legend>Placement · wall</legend>
           <NumericField
             unit="plan units"
+            metersPerUnit={floor?.coordinates.metersPerPlanUnit ?? 1}
             label="Offset"
             value={selected.placement.offsetFromWallStartPlanUnits}
             onChange={(offsetFromWallStartPlanUnits) =>
@@ -218,6 +221,7 @@ export function FurnishingProperties({
           <legend>Placement · ceiling</legend>
           <NumericField
             unit="plan units"
+            metersPerUnit={floor?.coordinates.metersPerPlanUnit ?? 1}
             label="X"
             value={selected.placement.at[0]}
             onChange={(value) =>
@@ -228,6 +232,7 @@ export function FurnishingProperties({
           />
           <NumericField
             unit="plan units"
+            metersPerUnit={floor?.coordinates.metersPerPlanUnit ?? 1}
             label="Z"
             value={selected.placement.at[1]}
             onChange={(value) =>

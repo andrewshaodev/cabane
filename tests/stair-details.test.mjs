@@ -78,7 +78,7 @@ await withModules(async (load) => {
           }),
         ),
       );
-      const input = document.querySelector('input[aria-label="Width (m)"]');
+      const input = document.querySelector('input[aria-label="Width"]');
       async function commit(value) {
         await act(async () => input.focus());
         await act(async () => {
@@ -95,14 +95,16 @@ await withModules(async (load) => {
       assert.equal(saved.length, 0);
       assert.equal(input.getAttribute("aria-invalid"), "true");
       assert.match(
-        document.getElementById(input.getAttribute("aria-describedby")).textContent,
-        /greater than 0/,
+        document.getElementById(input.getAttribute("aria-describedby").split(" ").at(-1))
+          .textContent,
+        /at least 0.01 m/,
       );
       await commit("");
       assert.equal(saved.length, 0);
       assert.match(
-        document.getElementById(input.getAttribute("aria-describedby")).textContent,
-        /number/,
+        document.getElementById(input.getAttribute("aria-describedby").split(" ").at(-1))
+          .textContent,
+        /valid length/,
       );
       await commit("0.4");
       assert.equal(saved.length, 1);
@@ -124,7 +126,7 @@ await withModules(async (load) => {
           }),
         ),
       );
-      const input = document.querySelector('input[aria-label="Width (m)"]');
+      const input = document.querySelector('input[aria-label="Width"]');
       await act(async () => input.focus());
       await act(async () => input.blur());
       assert.deepEqual(saved, []);

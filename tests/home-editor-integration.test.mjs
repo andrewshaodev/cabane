@@ -884,8 +884,8 @@ test("selected walls expose friendly facts before exact expert controls", async 
   ).join("\n");
   assert.match(inspector, /construction-inspector__wall-facts/);
   assert.match(inspector, />Direction</);
-  assert.match(inspector, /Thickness\s*<CommittedNumberInput/);
-  assert.match(inspector, /CommittedNumberInput/);
+  assert.match(inspector, /Thickness\s*<LengthInput/);
+  assert.match(inspector, /LengthInput/);
   assert.match(inspector, /label="Wall thickness"/);
   assert.match(inspector, /DebouncedColorInput/);
   assert.match(inspector, /inputLabel="Wall exterior color"/);

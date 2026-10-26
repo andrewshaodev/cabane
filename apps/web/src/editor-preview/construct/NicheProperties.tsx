@@ -1,5 +1,6 @@
+import { displayLength, parseLength, lengthUnit, useMeasurementUnits } from "@cabane/engine";
 import { nicheDepthLimit, type EditorNiche } from "@cabane/engine";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { CommittedTextInput } from "./CommittedTextInput";
 import type { ConstructEditorController } from "./construct-controller-contract";
@@ -11,14 +12,15 @@ export function NicheProperties({
   niche: EditorNiche;
   editor: ConstructEditorController;
 }) {
+  const units = useMeasurementUnits();
   const depthLimit = nicheDepthLimit(editor.draft, niche.wallId);
   return (
     <>
       <fieldset>
-        <legend>Dimensions · m</legend>
+        <legend>Dimensions</legend>
         <label>
           Width
-          <CommittedNumberInput
+          <LengthInput
             label="Niche width"
             value={niche.widthPlanUnits * editor.draft.coordinates.metersPerPlanUnit}
             min={0.05}
@@ -33,7 +35,7 @@ export function NicheProperties({
         </label>
         <label>
           Height
-          <CommittedNumberInput
+          <LengthInput
             label="Niche height"
             value={niche.openingHeightMeters}
             min={0.05}
@@ -46,7 +48,7 @@ export function NicheProperties({
         </label>
         <label>
           Depth
-          <CommittedNumberInput
+          <LengthInput
             label="Niche depth"
             value={niche.depthMeters}
             min={0.01}
@@ -66,7 +68,7 @@ export function NicheProperties({
         <legend>Placement</legend>
         <label className="construction-inspector__single-control">
           Height from floor
-          <CommittedNumberInput
+          <LengthInput
             label="Niche height from floor"
             value={niche.sillHeightMeters}
             min={0.012}
@@ -87,12 +89,16 @@ export function NicheProperties({
       <details className="selection-details-advanced">
         <summary>Shelves</summary>
         <label className="construction-inspector__single-control">
-          Heights · m
+          Heights ({lengthUnit(units)})
           <CommittedTextInput
             label="Niche shelf heights"
-            value={(niche.shelfHeightsMeters ?? []).join(", ")}
+            value={(niche.shelfHeightsMeters ?? [])
+              .map((height) => Number(displayLength(height, units).toFixed(4)))
+              .join(", ")}
             onCommit={(text) => {
-              const heights = text ? text.split(",").map((value) => Number(value.trim())) : [];
+              const heights = text
+                ? text.split(",").map((value) => parseLength(value.trim(), units))
+                : [];
               if (
                 heights.every(
                   (height) =>
@@ -104,8 +110,8 @@ export function NicheProperties({
           />
         </label>
         <label className="construction-inspector__single-control">
-          Thickness · m
-          <CommittedNumberInput
+          Thickness
+          <LengthInput
             label="Niche shelf thickness"
             value={niche.shelfThicknessMeters ?? 0.025}
             min={0.005}

@@ -1,5 +1,5 @@
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { EditorButton } from "../../editor-chrome/EditorButton";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
 
 import { useEffect, useState } from "react";
 
@@ -70,9 +70,9 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
       <fieldset>
         <legend>Plan coordinates</legend>
         <label>
-          Scale (m/unit)
-          <CommittedNumberInput
-            label="Meters per plan unit"
+          Scale (length per plan unit)
+          <LengthInput
+            label="Length per plan unit"
             min={0.001}
             step={0.01}
             value={scale}
@@ -95,7 +95,8 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
         </label>
         <label>
           Origin X
-          <CommittedNumberInput
+          <LengthInput
+            metersPerUnit={editor.draft.coordinates.metersPerPlanUnit}
             label="Floor origin X"
             step={0.1}
             value={originX}
@@ -104,7 +105,8 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
         </label>
         <label>
           Origin Y
-          <CommittedNumberInput
+          <LengthInput
+            metersPerUnit={editor.draft.coordinates.metersPerPlanUnit}
             label="Floor origin Y"
             step={0.1}
             value={originY}
@@ -115,8 +117,8 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
       <fieldset>
         <legend>Default heights</legend>
         <label>
-          Wall (m)
-          <CommittedNumberInput
+          Wall
+          <LengthInput
             label="Default wall height"
             min={0.3}
             step={0.05}
@@ -125,8 +127,8 @@ export function FloorSettingsEditor({ editor }: { editor: ConstructEditorControl
           />
         </label>
         <label>
-          Ceiling (m)
-          <CommittedNumberInput
+          Ceiling
+          <LengthInput
             label="Default ceiling height"
             min={0.3}
             step={0.05}
