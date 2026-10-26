@@ -306,37 +306,40 @@ export function ConstructionSelectionProperties({
             </fieldset>
             <fieldset>
               <legend>Room actions</legend>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={selectedRoom.isSolid ?? false}
-                  onChange={(event) => editor.updateSelectedRoom({ isSolid: event.target.checked })}
-                />
-                Not a room
-              </label>
-              <p>
-                Fill this space as a solid block, such as a chimney, shaft or pillar. It will not
-                appear in Home or Connect.
-              </p>
+              <div className="construction-inspector__room-actions">
+                <label
+                  className="construction-inspector__check"
+                  title="Render as a solid block, excluded from room navigation and area mapping."
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedRoom.isSolid ?? false}
+                    onChange={(event) =>
+                      editor.updateSelectedRoom({ isSolid: event.target.checked })
+                    }
+                  />
+                  Not a room
+                </label>
+                <EditorButton
+                  variant="text"
+                  type="button"
+                  disabled={
+                    editor.deletionTargets?.some(
+                      (target) => target.kind === "room" && target.id === selectedRoom.id,
+                    ) === false
+                  }
+                  onClick={editor.deleteSelected}
+                >
+                  Delete room
+                </EditorButton>
+              </div>
               {editor.deletionTargets?.some(
                 (target) => target.kind === "room" && target.id === selectedRoom.id,
               ) === false && (
-                <p role="status">
-                  All enclosing walls are shared. Edit the walls to remove this room.
+                <p className="construction-inspector__room-action-note" role="status">
+                  Shared walls. Edit the walls to delete this room.
                 </p>
               )}
-              <EditorButton
-                variant="text"
-                type="button"
-                disabled={
-                  editor.deletionTargets?.some(
-                    (target) => target.kind === "room" && target.id === selectedRoom.id,
-                  ) === false
-                }
-                onClick={editor.deleteSelected}
-              >
-                Delete room
-              </EditorButton>
             </fieldset>
           </div>
         )}

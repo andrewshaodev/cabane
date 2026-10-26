@@ -86,6 +86,39 @@ await withModules(async (load) => {
     );
   });
 
+  test("shows solid structures without room selection or mapping actions, including solid-only floors", () => {
+    for (const onlySolids of [false, true]) {
+      const source = manifest.floors[0];
+      const solid = { ...source.rooms[0], id: "chimney", isSolid: true };
+      const document = new JSDOM(
+        renderToStaticMarkup(
+          React.createElement(homePlanModule.HomePlanMapping, {
+            floor: { ...source, rooms: onlySolids ? [] : source.rooms, solidRooms: [solid] },
+            relationshipLabels: {},
+            roomIcons: {},
+            selectedRoomId: null,
+            inspectorOpen: false,
+            onActivateRoom: () => undefined,
+          }),
+        ),
+      ).window.document;
+      const structure = document.querySelector('[data-solid-id="chimney"]');
+      assert.ok(structure);
+      assert.equal(structure.getAttribute("role"), "img");
+      assert.equal(structure.hasAttribute("tabindex"), false);
+      assert.equal(document.querySelector('[data-room-id="chimney"]'), null);
+      assert.equal(
+        document.querySelector(".home-plan-mapping__solid-key").textContent,
+        "Not a room",
+      );
+      assert.equal(
+        document.querySelectorAll("[data-room-id]").length,
+        onlySolids ? 0 : source.rooms.length,
+      );
+      assert.equal(document.querySelector(".home-plan-mapping__empty"), null);
+    }
+  });
+
   test("shows room device coverage as a visual meter without a redundant Devices label", () => {
     const floor = structuredClone(manifest.floors[0]);
     const room = floor.rooms[0];

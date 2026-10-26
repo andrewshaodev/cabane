@@ -89,7 +89,9 @@ enclosed space as a solid structural block for chimneys, shafts or pillars,
 keeping its walls and saved room identity. Solid spaces have a neutral plan fill
 without a room label, remain selectable in Construct, and render at the floor's
 default wall height. They are excluded from Home room navigation, room status,
-Connect area mapping and walk connectivity diagnostics. Their boundaries block
+Connect area mapping and walk connectivity diagnostics. Connect keeps them visible
+as muted structural blocks in the plan with a Not a room key, without room
+labels, selection or mapping actions. Their boundaries block
 walking even where an opening exists. Toggling back restores the saved name,
 finishes, ceiling and room profile through ordinary undo/redo and save flows. Removing the final room clears its floor
 preview instead of keeping the last closed shape. Deletion is one undoable edit.
