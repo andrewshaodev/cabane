@@ -1,3 +1,4 @@
+import { useSceneStyle, setSceneStyle } from "./scene-style";
 import { WeatherPreferences } from "./weather/WeatherPreferences";
 import type { WeatherController } from "./weather/useWeatherController";
 import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
@@ -83,6 +84,7 @@ export function WalkPreferences({
   onClose: () => void;
 }) {
   const dom = useCabaneDom();
+  const sceneStyle = useSceneStyle();
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const previousFocus =
@@ -145,6 +147,32 @@ export function WalkPreferences({
             ×
           </button>
         </header>
+        <div className="walk-preferences__group">
+          <h3>Visual style</h3>
+          <fieldset className="walk-preferences__choices">
+            <legend>3D home appearance</legend>
+            {(
+              [
+                ["default", "Default"],
+                ["sims", "Sims"],
+              ] as const
+            ).map(([style, label]) => (
+              <label key={style}>
+                <input
+                  type="radio"
+                  name="scene-style"
+                  value={style}
+                  checked={sceneStyle === style}
+                  onChange={() => setSceneStyle(style)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </fieldset>
+          <p className="walk-preferences__hint">
+            Sims uses faceted models, a richer palette and stronger lighting. Saved on this device.
+          </p>
+        </div>
         <div className="walk-preferences__group">
           <h3>Room overlays</h3>
           <p className="walk-preferences__hint">

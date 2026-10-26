@@ -43,6 +43,24 @@ await withModules(async (load) => {
     };
     return { scene, camera, batcher, a, b, child, renderer };
   }
+  test("style shader defines survive batching and switching back", () => {
+    const f = fixture();
+    const draw = (flat) => {
+      for (const mesh of [f.a, f.b]) {
+        mesh.material.defines = flat ? { TOON: "", FLAT_SHADED: "" } : { TOON: "" };
+      }
+      f.renderer.render = (scene) => {
+        const batch = scene.children.find((object) => object.isBatchedMesh);
+        assert.ok(batch);
+        assert.equal("FLAT_SHADED" in batch.material.defines, flat);
+      };
+      f.batcher.render(f.renderer, f.scene, f.camera, () => f.renderer.render(f.scene));
+    };
+    draw(false);
+    draw(true);
+    draw(false);
+    f.batcher.dispose();
+  });
   test("batches colors and transforms while retaining children and restoring originals", () => {
     const f = fixture(),
       original = f.a.material;

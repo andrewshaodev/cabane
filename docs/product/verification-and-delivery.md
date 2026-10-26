@@ -53,6 +53,9 @@ and pinned Chromium launch once. Restricted agent environments need approved
 local-server and browser-process permissions; a failed preflight stops before
 shards start. Unit-only runs do not need these capabilities.
 
+Vercel Git deployments are enabled only for `main` in `vercel.json`. Branch and
+pull-request previews are disabled; GitHub verification still runs on PRs.
+
 ## Choose local verification
 
 Local check selection and result reuse follow [AGENTS.md](../../AGENTS.md#workflow).
