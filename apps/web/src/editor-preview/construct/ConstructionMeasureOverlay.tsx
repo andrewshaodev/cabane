@@ -1,3 +1,4 @@
+import { formatLength, useMeasurementUnits } from "@cabane/engine";
 import { Html } from "@react-three/drei";
 import { ToonMaterial as LitMaterial } from "@cabane/engine";
 import { noPlanRaycast, PlanOverlayMaterial } from "./PlanDrawing";
@@ -21,6 +22,7 @@ export function ConstructionMeasureOverlay({
   showLabel = true,
   onCopy,
 }: ConstructionMeasureOverlayProps) {
+  const units = useMeasurementUnits();
   const ToonMaterial = planMode ? PlanOverlayMaterial : LitMaterial;
   if (!measurement || !constructMeasurementIsVisible(measurement)) return null;
 
@@ -61,8 +63,8 @@ export function ConstructionMeasureOverlay({
           pointerEvents={onCopy ? "auto" : "none"}
         >
           <ConstructionDistanceLabel
-            label={measurement.label}
-            copyText={measurement.copyText}
+            label={formatLength(measurement.distanceMeters, units)}
+            copyText={formatLength(measurement.distanceMeters, units)}
             onCopy={onCopy}
           />
         </Html>

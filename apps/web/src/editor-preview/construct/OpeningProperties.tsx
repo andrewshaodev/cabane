@@ -1,3 +1,4 @@
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import type { ReactNode } from "react";
 import { OpeningColorControls } from "./OpeningColorControls";
 import { omitUndefinedProperties } from "@cabane/engine";
@@ -24,7 +25,8 @@ export function OpeningProperties({
       <legend>Wall position</legend>
       <label>
         Offset
-        <CommittedNumberInput
+        <LengthInput
+          metersPerUnit={editor.draft.coordinates.metersPerPlanUnit}
           label="Opening wall offset"
           min={0}
           value={selectedOpening.offsetPlanUnits}
@@ -48,7 +50,7 @@ export function OpeningProperties({
         <legend>Dimensions</legend>
         <label>
           Width
-          <CommittedNumberInput
+          <LengthInput
             label="Opening width"
             commitOnChange
             min={0.3}
@@ -64,7 +66,7 @@ export function OpeningProperties({
         </label>
         <label>
           Height
-          <CommittedNumberInput
+          <LengthInput
             label="Opening height"
             commitOnChange
             min={0.3}
@@ -80,7 +82,7 @@ export function OpeningProperties({
       {selectedOpening.kind === "window" && (
         <label className="construction-inspector__single-control">
           Height from floor
-          <CommittedNumberInput
+          <LengthInput
             label="Window height from floor"
             min={0}
             value={selectedOpening.sillHeightMeters}
@@ -262,7 +264,7 @@ export function OpeningProperties({
           {selectedOpening.variant === "arched" && (
             <label>
               Arch rise
-              <CommittedNumberInput
+              <LengthInput
                 label="Passage arch rise"
                 min={0.05}
                 step={0.01}

@@ -1,5 +1,5 @@
 import type { OutdoorPlatformEdgeConfiguration } from "@cabane/engine";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { PlatformEdgePalette } from "./PlatformEdgePalette";
 
 export function PlatformEdgeFields({
@@ -14,8 +14,8 @@ export function PlatformEdgeFields({
       <PlatformEdgePalette value={value} onChange={onChange} />
       {value.kind !== "open" && (
         <label>
-          Barrier height (m)
-          <CommittedNumberInput
+          Barrier height
+          <LengthInput
             label="Platform barrier height"
             value={value.heightMeters}
             step={0.1}

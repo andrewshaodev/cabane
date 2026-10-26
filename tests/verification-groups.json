@@ -132,7 +132,8 @@
       "wall-edge-colors.test.mjs",
       "wall-niche-properties.test.mjs",
       "wall-niches.test.mjs",
-      "workspace-publication.test.mjs"
+      "workspace-publication.test.mjs",
+      "measurement-units.test.mjs"
     ]
   },
   "runtime": {

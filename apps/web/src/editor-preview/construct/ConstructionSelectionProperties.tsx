@@ -1,3 +1,5 @@
+import { formatLength, formatArea, useMeasurementUnits } from "@cabane/engine";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { useMemo } from "react";
 import {
   pointInsidePolygon,
@@ -7,7 +9,7 @@ import {
 import type { ConstructionInspectorProps } from "./construction-inspector-contract";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import { EditorButton } from "../../editor-chrome/EditorButton";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+
 import { CommittedTextInput } from "./CommittedTextInput";
 import { DebouncedColorInput } from "./DebouncedColorInput";
 import { FloorFinishPalette } from "./FloorFinishPalette";
@@ -21,6 +23,7 @@ export function ConstructionSelectionProperties({
   editor,
   onClose,
 }: Pick<ConstructionInspectorProps, "editor"> & { onClose: () => void }) {
+  const units = useMeasurementUnits();
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
   const selectedPoolId = editor.selection?.kind === "pool" ? editor.selection.id : null;
   const selectedRoomId = editor.selection?.kind === "room" ? editor.selection.id : null;
@@ -187,7 +190,7 @@ export function ConstructionSelectionProperties({
             <dl className="construction-inspector__wall-facts">
               <div>
                 <dt>Length</dt>
-                <dd>{wallMetrics?.label}</dd>
+                <dd>{wallMetrics && formatLength(wallMetrics.lengthMeters, units)}</dd>
               </div>
               <div>
                 <dt>Direction</dt>
@@ -199,10 +202,10 @@ export function ConstructionSelectionProperties({
               </div>
             </dl>
             <fieldset>
-              <legend>Dimensions · m</legend>
+              <legend>Dimensions</legend>
               <label>
                 Thickness
-                <CommittedNumberInput
+                <LengthInput
                   label="Wall thickness"
                   min={0.04}
                   step={0.01}
@@ -214,7 +217,7 @@ export function ConstructionSelectionProperties({
               </label>
               <label>
                 Height
-                <CommittedNumberInput
+                <LengthInput
                   label="Wall height"
                   min={0.3}
                   step={0.05}
@@ -239,9 +242,9 @@ export function ConstructionSelectionProperties({
               Interior area{" "}
               <span
                 title="Interior floor area"
-                aria-label={`Interior floor area: ${roomAreaSquareMeters.toFixed(1)} square meters`}
+                aria-label={`Interior floor area: ${formatArea(roomAreaSquareMeters, units).replace("m²", "square meters").replace("ft²", "square feet")}`}
               >
-                <strong>{roomAreaSquareMeters.toFixed(1)} m²</strong>
+                <strong>{formatArea(roomAreaSquareMeters, units)}</strong>
               </span>
             </p>
             {mergedRoomIdentities.length > 1 && (
@@ -293,7 +296,7 @@ export function ConstructionSelectionProperties({
               <legend>Ceiling</legend>
               <label>
                 Ceiling
-                <CommittedNumberInput
+                <LengthInput
                   label="Room ceiling height"
                   min={0.3}
                   step={0.05}

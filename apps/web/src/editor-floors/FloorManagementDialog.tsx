@@ -1,3 +1,4 @@
+import { LengthInput } from "../editor-chrome/LengthInput";
 import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useId, useRef, useState } from "react";
 import { EditorButton } from "../editor-chrome/EditorButton";
@@ -81,15 +82,12 @@ export function FloorManagementDialog({
               />
             </label>
             <label>
-              Floor-to-floor height (m)
-              <input
-                type="number"
-                required
-                min="0.1"
-                step="0.01"
-                aria-describedby={heightHintId}
-                value={floorHeight}
-                onChange={(event) => setFloorHeight(event.target.value)}
+              Floor-to-floor height
+              <LengthInput
+                label="Floor-to-floor height"
+                min={0.1}
+                value={Number(floorHeight)}
+                onCommit={(value) => setFloorHeight(String(value))}
               />
             </label>
             <p id={heightHintId} className="floor-management-dialog__hint">
