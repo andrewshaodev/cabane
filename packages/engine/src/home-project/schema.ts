@@ -1,3 +1,4 @@
+import { validateHomePosition } from "./schema-home-position";
 import { validateActionBarSchema } from "./schema-action-bar";
 import { entitySlot } from "./schema-entity-slot";
 import { wallSchema } from "./schema-wall";
@@ -469,23 +470,20 @@ export const validateHomeProjectSchemaShape = (
   if (home) {
     keys(
       home,
-      ["id", "name", "locale", "palette", "roof", "walkStart", "northAngleDegrees"],
+      [
+        "id",
+        "name",
+        "locale",
+        "palette",
+        "roof",
+        "walkStart",
+        "northAngleDegrees",
+        "apartmentFloor",
+      ],
       "home",
       issues,
     );
-    if (home.northAngleDegrees !== undefined) {
-      finite(home.northAngleDegrees, "home.northAngleDegrees", issues);
-      if (
-        typeof home.northAngleDegrees === "number" &&
-        (home.northAngleDegrees < 0 || home.northAngleDegrees >= 360)
-      )
-        addProjectIssue(
-          issues,
-          "project.north-angle",
-          "home.northAngleDegrees",
-          "North angle must be at least 0 and less than 360 degrees.",
-        );
-    }
+    validateHomePosition(home, issues);
     if (home.walkStart !== undefined) {
       const start = record(home.walkStart, "home.walkStart", issues);
       if (start) {

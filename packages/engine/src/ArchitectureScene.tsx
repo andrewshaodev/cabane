@@ -1,3 +1,6 @@
+import { ApartmentFloors } from "./building/ApartmentFloors";
+import { DioramaGround } from "./architecture-scene/DioramaGround";
+import { worldBoundsForFloorScene } from "./pools";
 import type { HomeManifest } from "./types";
 import { isOutdoorPlatformOutline } from "./outdoor-platforms/platform-geometry";
 import { SceneRoomSelection } from "./building/RoomSelectionSurfaces";
@@ -95,6 +98,10 @@ export const ArchitectureScene = memo(function ArchitectureScene({
     [manifest],
   );
   const levels = deriveFloorLevels(manifest.floors);
+  const apartmentFloor = manifest.home.apartmentFloor ?? 0;
+  const lowest = manifest.floors[0];
+  const base = levels[0]?.elevationMeters ?? 0;
+  const contextBounds = lowest ? worldBoundsForFloorScene(lowest) : null;
   const offset =
     props.interactionMode === "editor" && view !== "plan" && view !== "whole"
       ? -(levels.find((level) => level.floorId === active)?.elevationMeters ?? 0)
@@ -104,6 +111,20 @@ export const ArchitectureScene = memo(function ArchitectureScene({
   return (
     <SceneRoomSelection.Provider value={selectedRoomId}>
       <group name="architecture-scene" position={[0, offset, 0]}>
+        {apartmentFloor > 0 && lowest && contextBounds && view !== "plan" && (
+          <>
+            <ApartmentFloors floor={lowest} count={apartmentFloor} base={base} />
+            <group position={[0, base - apartmentFloor * lowest.floorToFloorHeightMeters, 0]}>
+              <DioramaGround
+                centerX={contextBounds.centerX}
+                centerZ={contextBounds.centerZ}
+                size={Math.max(contextBounds.width, contextBounds.depth) + 7}
+                color={manifest.home.palette.ground}
+                floor={{ ...lowest, pools: [] }}
+              />
+            </group>
+          </>
+        )}
         {(view === "whole" || view === "walk") && <BuildingRoof manifest={manifest} />}
         {manifest.floors.map(
           (floor, index) =>
@@ -129,7 +150,7 @@ export const ArchitectureScene = memo(function ArchitectureScene({
                         ? manifest.floors[index + 1]
                         : undefined
                     }
-                    showGround={floor === ground && view !== "plan"}
+                    showGround={apartmentFloor === 0 && floor === ground && view !== "plan"}
                     showCeiling={view === "walk" || (view === "cutaway" && floor.id !== active)}
                     manifest={floorManifests.get(floor.id)!}
                     interactionMode={floor.id === active ? props.interactionMode : "editor"}

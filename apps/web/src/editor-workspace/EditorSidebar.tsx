@@ -161,6 +161,16 @@ export function EditorSidebar({
               onAdd={addFloorAbove}
               onAddBelow={addFloorBelow}
               onSettings={() => setFloorDialog("rename")}
+              apartmentFloor={snapshot.project.home.apartmentFloor ?? 0}
+              onApartmentFloor={(apartmentFloor) =>
+                commit({
+                  ...snapshot,
+                  project: {
+                    ...snapshot.project,
+                    home: { ...snapshot.project.home, apartmentFloor },
+                  },
+                })
+              }
             />
           )}
           <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />

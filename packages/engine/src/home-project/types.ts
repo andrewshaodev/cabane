@@ -106,6 +106,8 @@ export interface HomeProject {
   schemaVersion: 2;
   seedRevision: string;
   home: {
+    /** Decorative storeys below the modeled home; zero preserves the original appearance. */
+    apartmentFloor?: number;
     walkStart?: { floorId: string; at: PlanPoint };
     roof?: RoofSettings;
     /** Clockwise from plan up (−Z); omitted means 0°. */

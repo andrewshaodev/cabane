@@ -2702,6 +2702,12 @@
           "optional": false,
           "schema": {
             "properties": {
+              "apartmentFloor": {
+                "optional": true,
+                "schema": {
+                  "type": "number"
+                }
+              },
               "id": {
                 "optional": false,
                 "schema": {

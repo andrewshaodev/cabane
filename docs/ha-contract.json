@@ -1,9 +1,9 @@
 {
-  "revision": 10,
-  "fingerprint": "e3116eaf15243c13d69c3005ea363bd5301a3e66bbd16b82363ea8ad481dee8d",
-  "summary": "Allow imports and Save with unavailable catalog variants using default visuals",
+  "revision": 11,
+  "fingerprint": "de818b4b71ae956635e2c15e27ec46eb65af76d62cd3618e4a5b17f9190cc30b",
+  "summary": "Add decorative apartment floors through Construct floor management",
   "breakingChanges": [
-    "Existing projects remain compatible. Missing furnishing and device variants now produce warnings and render the model default while retaining the saved variant ID; missing models retain placeholders. Older panels can reject newer variants until updated through HACS. Structural and unsupported-schema errors remain blocked."
+    "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field."
   ],
   "history": [
     {
@@ -67,6 +67,13 @@
       "summary": "Add wall-owned niches with solid backing and shared Construct controls",
       "breakingChanges": [
         "Existing homes remain compatible. Homes saving wall niches require an updated panel; older panels keep unsupported fields blocked until updated through HACS."
+      ]
+    },
+    {
+      "revision": 10,
+      "summary": "Allow imports and Save with unavailable catalog variants using default visuals",
+      "breakingChanges": [
+        "Existing projects remain compatible. Missing furnishing and device variants now produce warnings and render the model default while retaining the saved variant ID; missing models retain placeholders. Older panels can reject newer variants until updated through HACS. Structural and unsupported-schema errors remain blocked."
       ]
     }
   ],
