@@ -12,6 +12,12 @@
   <a href="#run-locally">Run locally</a>
 </p>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/cabane">
+    <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000" alt="Buy me a coffee to support Cabane" />
+  </a>
+</p>
+
 Draw your floor plan, furnish it, and connect it to Home Assistant. Explore your
 home in 3D, see live device states, and control supported devices from the scene.
 Use Cabane in your browser or directly in the Home Assistant sidebar.

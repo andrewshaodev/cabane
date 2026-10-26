@@ -59,6 +59,7 @@ import { resolvePublishedActionBarItems } from "./action-bar/action-bar-config";
 import { CustomizeActionBarMenuItem } from "./CustomizeActionBarMenuItem";
 
 import { SceneMenuIcon } from "./SceneMenuIcon";
+import { ProjectSupportMenuItems } from "./ProjectSupportMenuItems";
 import {
   WalkPreferences,
   WalkPreferencesMenuItem,
@@ -507,18 +508,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                       </button>
                     )}
                     {preferencesMenuItem}
-                    <a
-                      href="https://github.com/cabane-app/cabane/issues/new/choose"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label="Send feedback (opens in a new tab)"
-                      onClick={(event) =>
-                        event.currentTarget.closest("details")?.removeAttribute("open")
-                      }
-                    >
-                      <SceneMenuIcon name="feedback" />
-                      <span>Send feedback</span>
-                    </a>
+                    <ProjectSupportMenuItems />
                     {!demoSession &&
                       ["connected", "connecting", "reconnecting", "error"].includes(
                         runtime.status,

@@ -12,6 +12,7 @@ type SceneMenuIconName =
   | "export"
   | "disconnect"
   | "feedback"
+  | "coffee"
   | "preferences";
 
 export function SceneMenuIcon({ name }: { name: SceneMenuIconName }) {
@@ -41,6 +42,11 @@ export function SceneMenuIcon({ name }: { name: SceneMenuIconName }) {
       <>
         <path d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6 4V6a2 2 0 0 1 2-2Z" />
         <path d="M7 9h10M7 13h6" />
+      </>
+    ),
+    coffee: (
+      <>
+        <path d="M4 8h12v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4ZM16 8h2a3 3 0 0 1 0 6h-2M3 22h16M7 2v3M11 2v3" />
       </>
     ),
     workspaces: (
