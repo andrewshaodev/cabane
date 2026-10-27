@@ -2021,6 +2021,25 @@
                             ],
                             "elementFlags": [1, 1, 1, 4]
                           }
+                        },
+                        "roomName": {
+                          "optional": true,
+                          "schema": {
+                            "type": "string"
+                          }
+                        },
+                        "useAsRoom": {
+                          "optional": true,
+                          "schema": {
+                            "anyOf": [
+                              {
+                                "const": false
+                              },
+                              {
+                                "const": true
+                              }
+                            ]
+                          }
                         }
                       }
                     }
@@ -5783,6 +5802,25 @@
                             }
                           ],
                           "elementFlags": [1, 1, 1, 4]
+                        }
+                      },
+                      "roomName": {
+                        "optional": true,
+                        "schema": {
+                          "type": "string"
+                        }
+                      },
+                      "useAsRoom": {
+                        "optional": true,
+                        "schema": {
+                          "anyOf": [
+                            {
+                              "const": false
+                            },
+                            {
+                              "const": true
+                            }
+                          ]
                         }
                       }
                     }

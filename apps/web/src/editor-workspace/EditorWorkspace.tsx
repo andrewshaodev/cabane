@@ -1,3 +1,4 @@
+import { roomsForFloor } from "@cabane/engine";
 import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinishPreview";
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
@@ -134,7 +135,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     : undefined;
   const roomPictures = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, resolveHomeAssistantPictureUrl(area?.picture, runtime.origin)] as const;
       }),
@@ -142,7 +143,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   );
   const roomNames = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, area?.name?.trim() || room.name] as const;
       }),

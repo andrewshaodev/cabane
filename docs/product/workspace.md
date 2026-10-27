@@ -10,7 +10,15 @@ model warning cannot hide the actual reason an import or restore failed.
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
 palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
 assumptions, and an optional `customModels` catalog. Layout rooms carry empty device/dashboard arrays; runtime bindings
-are composed from profiles and scene items. The layout project accepts flat
+are composed from profiles and scene items. Outdoor platforms optionally persist `useAsRoom` and `roomName`. Their room ID
+is derived as `<platform-id>:room`; the polygon and finish remain platform-owned.
+The runtime adds these rooms for bindings and navigation without persisting
+duplicate layout rooms or creating ceilings or roofs. Existing projects need no
+migration; omitted options keep the prior platform behavior. Older clients reject
+the new fields until updated. Disabling or deleting the platform removes its room
+profile and reconciles room-area mappings while retaining explicit device mappings.
+
+The layout project accepts flat
 ceilings; the broader runtime manifest also supports sloped ceilings.
 
 Scene items refer to registered models by ID, carry an explicit floor ID and size, an optional `variant` ID, and use

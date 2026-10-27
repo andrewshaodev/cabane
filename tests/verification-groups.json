@@ -105,6 +105,7 @@
       "opening-junction-clearance.test.mjs",
       "opening-orientation.test.mjs",
       "outdoor-platforms.test.mjs",
+      "outdoor-platform-rooms.test.mjs",
       "panel-dom.test.mjs",
       "plan-generation.test.mjs",
       "plan-stroke-batching.test.mjs",

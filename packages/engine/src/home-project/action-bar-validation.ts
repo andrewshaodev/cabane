@@ -1,3 +1,4 @@
+import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import type { ActionBarItem } from "../action-bar/action-bar-config";
 import type { HomeProject } from "./types";
 import { resolvedRoomIdForItem } from "./scene-items";
@@ -25,7 +26,9 @@ export function validateActionBarTargets(project: HomeProject, issues: HomeProje
   if (!project.actionBar) return;
   const ids = new Set<string>();
   const targets = new Set<string>();
-  const roomIds = new Set(project.floors.flatMap((floor) => floor.rooms.map((room) => room.id)));
+  const roomIds = new Set(
+    project.floors.flatMap((floor) => roomsForFloor(floor).map((room) => room.id)),
+  );
   project.actionBar.items.forEach((item, index) => {
     const path = `actionBar.items[${index}]`;
     if (ids.has(item.id))
