@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { editModelLighting } from "@cabane/engine";
+import { saveModelLighting } from "../model-lighting/save-model-lighting";
 import { ownerProjectRegistries } from "../project-runtime";
 import { ModelLightingDialog } from "../model-lighting/ModelLightingDialog";
 import type { ManifestIssue } from "@cabane/engine";
@@ -176,21 +176,15 @@ export function EditorSelectionDetails({
           modelId={lightingModel}
           native={ownerProjectRegistries}
           onCancel={() => setLightingModel(null)}
-          onSave={async (light) => {
-            const next = editModelLighting(
-              workspace.snapshot,
+          onSave={(light) =>
+            saveModelLighting(
+              workspace,
               lightingModel,
               light,
               ownerProjectRegistries,
-            );
-            replaceEditorsFromProject(next.project);
-            workspace.commit(next);
-            const saved = await workspace.flush();
-            if (saved.status !== "saved")
-              throw new Error(
-                "Could not save lighting. Your draft is kept in memory. Retry Save, or close and use Undo to revert.",
-              );
-          }}
+              replaceEditorsFromProject,
+            )
+          }
         />
       )}
       <div className="arrange-announcement" role="status">
