@@ -1,3 +1,4 @@
+import { resolveModelLighting } from "../model-lighting/settings";
 import type {
   DeviceModelRegistry,
   FurnishingModelRegistry,
@@ -12,11 +13,11 @@ const resolved = new WeakMap<readonly CustomModel[], ProjectModelRegistries>();
 const empty: readonly CustomModel[] = [];
 
 export function resolveProjectModels(
-  project: Pick<HomeProject, "customModels">,
+  project: Pick<HomeProject, "customModels" | "modelLights">,
   native: ProjectModelRegistries,
 ): ProjectModelRegistries {
   const models = project.customModels ?? empty;
-  if (!models.length) return native;
+  if (!models.length) return resolveModelLighting(project, native);
   let custom = resolved.get(models);
   if (!custom) {
     const furnishings: Record<string, FurnishingModelRegistry[string]> = Object.create(
@@ -65,8 +66,8 @@ export function resolveProjectModels(
     custom = { furnishingModels: furnishings, deviceModels: devices };
     resolved.set(models, custom);
   }
-  return {
+  return resolveModelLighting(project, {
     furnishingModels: { ...native.furnishingModels, ...custom.furnishingModels },
     deviceModels: { ...native.deviceModels, ...custom.deviceModels },
-  };
+  });
 }

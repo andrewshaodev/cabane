@@ -460,7 +460,7 @@ export function SelectedItemControls({
         <SelectedItemActionBar
           ref={toolbar}
           {...actions}
-          isDevice={item.kind === "device"}
+          isDevice={item.kind === "device" || !!item.lightSlotId}
           disabled={busy}
         />
       </div>

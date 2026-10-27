@@ -56,7 +56,9 @@
       "setup-progress.test.mjs",
       "vacuum-flight.test.mjs",
       "weather.test.mjs",
-      "workspace-startup-routing.test.mjs"
+      "workspace-startup-routing.test.mjs",
+      "model-lighting.test.mjs",
+      "model-lighting-ui.test.mjs"
     ]
   },
   "construct": {

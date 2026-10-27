@@ -1,5 +1,6 @@
 import {
   removeWorkspaceSlotReferences,
+  collectProjectIds,
   type CustomModel,
   type EditorWorkspaceSnapshot,
   type SceneItemSpec,
@@ -20,12 +21,7 @@ export function editCustomModel(
     throw new Error("Editing a model cannot replace its GLB asset.");
   const profileChanged = previous.profile !== model.profile;
   const removedSlots: string[] = [];
-  const occupied = new Set([
-    ...snapshot.project.sceneItems.map((item) => item.id),
-    ...snapshot.project.sceneItems.flatMap((item) =>
-      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
-    ),
-  ]);
+  const occupied = new Set(collectProjectIds(snapshot.project));
   const sceneItems = snapshot.project.sceneItems.map((item): SceneItemSpec => {
     if (item.modelId !== model.id) return item;
     // A copy's uniform multiplier survives corrections to the model's dimensions/orientation.

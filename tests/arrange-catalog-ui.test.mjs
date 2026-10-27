@@ -315,7 +315,9 @@ await withModules(async (load) => {
       assert.ok(document.querySelector('[aria-label="Add Television"]'));
       assert.equal(
         document.querySelectorAll(".catalog-card").length,
-        Object.keys(ownerProjectRegistries.deviceModels).length,
+        Object.values(ownerProjectRegistries.deviceModels).filter(
+          (definition) => !definition.lightingOnly,
+        ).length,
       );
       assert.ok(
         [...document.querySelectorAll(".catalog-card small")].every(

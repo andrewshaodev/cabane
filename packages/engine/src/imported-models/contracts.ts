@@ -65,6 +65,8 @@ export interface CustomModel {
 }
 
 export interface CustomModelLight {
+  /** False keeps surface glow without illuminating surroundings. */
+  illuminate?: boolean;
   /** Metres in normalized support space, before instance rotation and resizing. */
   position: ModelVector;
   color: string;
@@ -76,6 +78,8 @@ export interface CustomModelLight {
   strip?: { end: ModelVector; samples: number };
   /** Exact names of Standard/Physical GLB materials to control. */
   emissiveMaterials?: readonly string[];
+  /** Stable surface references within the immutable model geometry. */
+  emissiveSurfaces?: readonly string[];
 }
 
 export interface ModelAssetSource {

@@ -15,7 +15,7 @@ export function importedLightSources(light: CustomModelLight) {
   return positions.slice(0, CUSTOM_MODEL_LIMITS.lightPoints).map((position) => ({
     position,
     color: light.color,
-    maxIntensity: light.maxIntensity / positions.length,
+    maxIntensity: light.illuminate === false ? 0 : light.maxIntensity / positions.length,
     distance: light.distance,
   }));
 }

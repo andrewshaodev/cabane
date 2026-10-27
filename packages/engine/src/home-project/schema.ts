@@ -5,7 +5,7 @@ import { entitySlot } from "./schema-entity-slot";
 import { wallSchema } from "./schema-wall";
 import { projectSchemaVersionMessage } from "./project-format-errors";
 import { sceneItem } from "./schema-scene-item";
-import { validateCustomModels } from "../imported-models/model-schema";
+import { validateProjectModelCatalogs } from "../imported-models/model-schema";
 import { keys, record, array, string, finite, point, polygon } from "./schema-json-values";
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
@@ -354,7 +354,7 @@ export const validateHomeProjectSchemaShape = (
   const project = record(input, "$", issues);
   if (!project) return null;
   const legacy = project.schemaVersion === 1;
-  if (project.customModels !== undefined) validateCustomModels(project.customModels, issues);
+  validateProjectModelCatalogs(project, issues);
   keys(
     project,
     [
@@ -364,6 +364,7 @@ export const validateHomeProjectSchemaShape = (
       ...(legacy ? ["floor"] : ["floors", "coordinates", "stairs"]),
       "sceneItems",
       "customModels",
+      "modelLights",
       "roomProfiles",
       "openingProfiles",
       "shortcuts",

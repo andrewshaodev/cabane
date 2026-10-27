@@ -17,7 +17,19 @@ export function createCatalogItem(
       item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
     ),
   ]);
+  const lightSlotId =
+    entry.definition.lighting &&
+    (entry.kind === "furnishing" || !entry.definition.supportedDomains.includes("light"))
+      ? createSceneItemId([
+          ...occupiedIds,
+          id,
+          ...items.flatMap((item) =>
+            item.lightSlotId ? [item.lightSlotId, `${item.lightSlotId}-entity`] : [],
+          ),
+        ])
+      : undefined;
   const common = {
+    ...(lightSlotId ? { lightSlotId } : {}),
     variant: resolveModelVariant(entry.definition).id,
     id,
     floorId,
@@ -30,6 +42,7 @@ export function createCatalogItem(
   if (!domain) throw new Error(`${entry.definition.label} has no supported device domain.`);
   const slotId = createSceneItemId([
     ...occupiedIds,
+    ...(lightSlotId ? [lightSlotId, `${lightSlotId}-entity`] : []),
     id,
     ...items.map((item) => item.id),
     ...items.flatMap((item) =>

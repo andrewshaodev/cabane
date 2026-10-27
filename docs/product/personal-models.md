@@ -65,8 +65,7 @@ undo/redo step. Cancel before saving leaves the workspace untouched; storage
 failure keeps the draft in memory, shows a retry/Undo message, and preserves the
 preceding stored record. Missing or damaged assets block saving and can be
 recovered through an intact model pack. Editing uses the existing project and
-asset contracts without a schema migration. Multi-source lights are a separate
-feature.
+asset contracts without a schema migration. Lighting editing uses the shared [model lighting](model-lighting.md) editor.
 
 `HomeProject` V2 optionally contains `customModels`: name, support, existing
 profile, asset hash/byte length, normalization, bounds, complexity, and optional
@@ -154,3 +153,7 @@ Implementation: [import owner](../../packages/engine/src/imported-models/index.t
 [portable skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model).
 
 [Back to product overview](../../PRODUCT_SPEC.md).
+
+Personal import and Edit model expose **Model** and **Lighting** sections. The
+Lighting section shares the visual placement, surface selection and local preview
+used by built-in models. See [model lighting](model-lighting.md).

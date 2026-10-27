@@ -113,3 +113,7 @@ tracks, wood, motor housings, and decorative throw cushions retain their finishe
 Only descriptors declaring `defaultColor` offer this control.
 
 Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.
+
+Properties exposes **Lighting** for personal and built-in models. Shared settings
+apply to every copy in this home while each copy retains its own connection.
+The visual editor and persistence rules are defined by [model lighting](model-lighting.md).

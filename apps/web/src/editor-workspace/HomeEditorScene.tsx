@@ -655,11 +655,18 @@ export function HomeEditorScene({
                   }}
                   actions={{
                     onMap:
-                      selectedItem.kind === "device" &&
-                      selectedItem.entitySlots.length > 0 &&
+                      ((selectedItem.kind === "device" && selectedItem.entitySlots.length > 0) ||
+                        !!selectedItem.lightSlotId) &&
                       !unsettled
                         ? () => {
-                            if (connect.selectDevice(selectedItem.id)) selectMode("connect", true);
+                            if (
+                              connect.selectDevice(
+                                selectedItem.kind === "device"
+                                  ? selectedItem.id
+                                  : (selectedItem.lightSlotId ?? selectedItem.id),
+                              )
+                            )
+                              selectMode("connect", true);
                           }
                         : undefined,
                     onDuplicate: () => duplicateArrangeItem(selectedItem.id),

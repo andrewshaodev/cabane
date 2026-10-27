@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   CUSTOM_MODEL_LIMITS,
+  editModelLighting,
   createCabaneModelPack,
   createModelAssetRepository,
   downloadCabaneBytes,
@@ -218,7 +219,12 @@ export function CustomModelLibrary({
           onCancel={onCloseEditor}
           onImport={async (model) => {
             if (disabled) throw new Error("The editor is busy. Try again when it is ready.");
-            const next = editCustomModel(workspace.snapshot, model);
+            const next = editModelLighting(
+              editCustomModel(workspace.snapshot, model),
+              model.id,
+              model.light ?? null,
+              ownerProjectRegistries,
+            );
             onEditSnapshot(next);
             const saved = await workspace.flush();
             if (saved.status !== "saved")

@@ -25,12 +25,14 @@ export function catalogEntries(
         modelId,
         definition,
       })),
-    ...Object.entries(devices).map(([modelId, definition]) => ({
-      key: `device:${modelId}`,
-      kind: "device" as const,
-      modelId,
-      definition,
-    })),
+    ...Object.entries(devices)
+      .filter(([, definition]) => !definition.lightingOnly)
+      .map(([modelId, definition]) => ({
+        key: `device:${modelId}`,
+        kind: "device" as const,
+        modelId,
+        definition,
+      })),
   ];
   return entries.sort(
     (a, b) =>

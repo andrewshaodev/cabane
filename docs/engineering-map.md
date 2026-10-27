@@ -185,6 +185,15 @@ Contract: [Engine UI styles](../docs/product/architecture.md).
 - Review invariant: The public styles.css entry point owns explicit cascade order; global foundations live in styles/ and feature styles sit beside their React owners. Dashboard layout files and room-navigation.css coordinate cross-component responsive placement. Read room-navigation.css with room-control-sheet styles for room-focus changes. Extraction preserves selectors, declarations, media/container conditions, reduced-motion behavior and source order. React mounting order must not determine shared CSS precedence.
 - Checks: `verify:fast`, `test:unit`, `test:browser`, `build`.
 
+### Shared model lighting
+
+Contract: [Shared model lighting](../docs/product/model-lighting.md).
+
+- Owners: [`apps/web/src/model-lighting`](../apps/web/src/model-lighting), [`packages/engine/src/model-lighting`](../packages/engine/src/model-lighting), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx).
+- Interface: `projectModelLighting`, `editModelLighting`, `lightingSlotForItem`, `modelLightingSurfaces`, `modelLightingSurfaceAt`, `controlModelLightMaterials` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Bound source costs and show overflow.
+- Checks: `verify:workspace`, `verify:runtime`, `build:panel`.
+
 ## Package import boundaries
 
 Derived from workspace `package.json` exports. These are import entry points,

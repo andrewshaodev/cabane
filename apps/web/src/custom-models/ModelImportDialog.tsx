@@ -7,7 +7,6 @@ import {
   openGlbPreview,
   normalizeGlb,
   useCabaneDom,
-  importedEmissiveMaterialNames,
   type CustomModelLight,
   type CustomModel,
   type CustomModelProfile,
@@ -18,7 +17,8 @@ import {
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { ModelImportPreview } from "./ModelImportPreview";
-import { ModelLightFields } from "./ModelLightFields";
+import { ModelLightingEditor } from "../model-lighting/ModelLightingEditor";
+import { lightingError, renormalizeLighting } from "../model-lighting/lighting-layout";
 import "./custom-models.css";
 
 type Loaded = Awaited<ReturnType<typeof openGlbPreview>>;
@@ -61,6 +61,9 @@ export function ModelImportDialog({
     },
   );
   const lightInitialized = useRef(Boolean(existingModel?.light));
+  const [section, setSection] = useState<"model" | "lighting">("model");
+  const [lightingEnabled, setLightingEnabled] = useState(Boolean(existingModel?.light));
+  const previousNormalization = useRef<CustomModel["normalization"] | null>(null);
   const [replacementId, setReplacementId] = useState("");
   const replacementOptions = missingModelOptions.filter((option) =>
     profile === "furniture" ? option.kind === "furnishing" : option.kind === "device",
@@ -109,21 +112,14 @@ export function ModelImportDialog({
       return existingModel.normalization;
     return normalizeGlb(loaded.root, placement, rotation, scale);
   }, [loaded, placement, rotation, scale, existingModel]);
-  const materialNames = useMemo(
-    () => (loaded ? importedEmissiveMaterialNames(loaded.root) : []),
-    [loaded],
-  );
-  const light = profile === "light" ? lightSettings : undefined;
-  const lightError =
-    light &&
-    (!Number.isFinite(light.maxIntensity) ||
-    light.maxIntensity < 0 ||
-    !Number.isFinite(light.distance) ||
-    light.distance < 0
-      ? "Light intensity and range must be non-negative numbers."
-      : light.strip && light.strip.end.every((n, axis) => n === light.position[axis])
-        ? "The strip start and end must differ."
-        : null);
+  useEffect(() => {
+    const previous = previousNormalization.current;
+    if (normalization && previous && normalization !== previous)
+      setLightSettings((light) => renormalizeLighting(light, previous, normalization));
+    previousNormalization.current = normalization;
+  }, [normalization]);
+  const light = lightingEnabled ? lightSettings : undefined;
+  const lightError = lightingError(light ?? null);
   const valid =
     name.trim() && loaded && normalization && Number.isFinite(scale) && scale > 0 && !lightError;
   const changeVector = (value: ModelVector, axis: number, next: number): ModelVector =>
@@ -131,7 +127,7 @@ export function ModelImportDialog({
   return (
     <dialog
       ref={dialog}
-      className="model-import-dialog"
+      className={`model-import-dialog${section === "lighting" ? " model-lighting-dialog" : ""}`}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
@@ -177,106 +173,134 @@ export function ModelImportDialog({
             <EditorIcon name="close" />
           </EditorButton>
         </header>
-        {loaded && normalization ? (
-          <ModelImportPreview root={loaded.root} normalization={normalization} light={light} />
-        ) : (
-          !error && <p role="status">Reading model…</p>
-        )}
-        {existingModel && (
-          <p className="model-import-hint">
-            Changes apply to every placed copy when you save. Copies keep their support and relative
-            scale. Preferred placement sets the model origin and the support for new copies.
-            Changing profile clears draft connections for this model; reconnect in Connect.
-          </p>
-        )}
-        <fieldset disabled={busy} className="model-import-fields">
-          <label>
-            Name
-            <input autoFocus required value={name} onChange={(e) => setName(e.target.value)} />
-          </label>
-          <label>
-            Preferred placement
-            <select
-              aria-label="Preferred placement"
-              value={placement}
-              onChange={(e) => setPlacement(e.target.value as CustomModelPlacement)}
-            >
-              <option value="floor">Floor</option>
-              <option value="wall">Wall</option>
-              <option value="ceiling">Ceiling</option>
-            </select>
-          </label>
-          <label>
-            Profile
-            <select
-              aria-label="Profile"
-              value={profile}
-              onChange={(e) => {
-                setProfile(e.target.value as CustomModelProfile);
-                if (normalization && e.target.value === "light" && !lightInitialized.current) {
-                  lightInitialized.current = true;
-                  setLightSettings((previous) => ({
-                    ...previous,
-                    position: [
-                      0,
-                      (normalization.bounds.min[1] + normalization.bounds.max[1]) / 2,
-                      normalization.bounds.max[2],
-                    ],
-                  }));
-                }
-              }}
-            >
-              {CUSTOM_MODEL_PROFILES.map(([id, label]) => (
-                <option key={id} value={id}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </fieldset>
-        {normalization && (
-          <>
-            <fieldset disabled={busy} className="model-import-vectors">
-              <legend>Dimensions · uniform scale</legend>
-              {["Width", "Height", "Depth"].map((label, i) => (
-                <label key={label}>
-                  {label}
-                  <LengthInput
-                    label={label}
-                    min={0.001}
-                    value={normalization.size[i]}
-                    onCommit={(n) => setScale((scale * n) / normalization.size[i])}
-                  />
-                </label>
-              ))}
-            </fieldset>
-            <fieldset disabled={busy} className="model-import-vectors">
-              <legend>Orientation (degrees)</legend>
-              {["X", "Y", "Z"].map((label, i) => (
-                <label key={label}>
-                  {label}
-                  <input
-                    type="number"
-                    step="any"
-                    value={Number(((rotation[i] * 180) / Math.PI).toFixed(2))}
-                    onChange={(e) => {
-                      const n = Number(e.target.value);
-                      if (Number.isFinite(n))
-                        setRotation(changeVector(rotation, i, (n * Math.PI) / 180));
-                    }}
-                  />
-                </label>
-              ))}
-            </fieldset>
-          </>
-        )}
-        {light && (
-          <ModelLightFields
-            value={light}
-            onChange={setLightSettings}
-            materialNames={materialNames}
+        <div
+          className="lighting-type model-editor-sections"
+          role="group"
+          aria-label="Model settings section"
+        >
+          <EditorButton aria-pressed={section === "model"} onClick={() => setSection("model")}>
+            Model
+          </EditorButton>
+          <EditorButton
+            aria-pressed={section === "lighting"}
+            onClick={() => setSection("lighting")}
+          >
+            Lighting
+          </EditorButton>
+        </div>
+        <div hidden={section !== "model"}>
+          {loaded && normalization ? (
+            <ModelImportPreview root={loaded.root} normalization={normalization} light={light} />
+          ) : (
+            !error && <p role="status">Reading model…</p>
+          )}
+          {existingModel && (
+            <p className="model-import-hint">
+              Changes apply to every placed copy when you save. Copies keep their support and
+              relative scale. Preferred placement sets the model origin and the support for new
+              copies. Changing profile clears draft connections for this model; reconnect in
+              Connect.
+            </p>
+          )}
+          <fieldset disabled={busy} className="model-import-fields">
+            <label>
+              Name
+              <input autoFocus required value={name} onChange={(e) => setName(e.target.value)} />
+            </label>
+            <label>
+              Preferred placement
+              <select
+                aria-label="Preferred placement"
+                value={placement}
+                onChange={(e) => setPlacement(e.target.value as CustomModelPlacement)}
+              >
+                <option value="floor">Floor</option>
+                <option value="wall">Wall</option>
+                <option value="ceiling">Ceiling</option>
+              </select>
+            </label>
+            <label>
+              Profile
+              <select
+                aria-label="Profile"
+                value={profile}
+                onChange={(e) => {
+                  setProfile(e.target.value as CustomModelProfile);
+                  if (normalization && e.target.value === "light" && !lightInitialized.current) {
+                    lightInitialized.current = true;
+                    setLightingEnabled(true);
+                    setLightSettings((previous) => ({
+                      ...previous,
+                      position: [
+                        0,
+                        (normalization.bounds.min[1] + normalization.bounds.max[1]) / 2,
+                        normalization.bounds.max[2],
+                      ],
+                    }));
+                  }
+                }}
+              >
+                {CUSTOM_MODEL_PROFILES.map(([id, label]) => (
+                  <option key={id} value={id}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </fieldset>
+          {normalization && (
+            <>
+              <fieldset disabled={busy} className="model-import-vectors">
+                <legend>Dimensions · uniform scale</legend>
+                {["Width", "Height", "Depth"].map((label, i) => (
+                  <label key={label}>
+                    {label}
+                    <LengthInput
+                      label={label}
+                      min={0.001}
+                      value={normalization.size[i]}
+                      onCommit={(n) => setScale((scale * n) / normalization.size[i])}
+                    />
+                  </label>
+                ))}
+              </fieldset>
+              <fieldset disabled={busy} className="model-import-vectors">
+                <legend>Orientation (degrees)</legend>
+                {["X", "Y", "Z"].map((label, i) => (
+                  <label key={label}>
+                    {label}
+                    <input
+                      type="number"
+                      step="any"
+                      value={Number(((rotation[i] * 180) / Math.PI).toFixed(2))}
+                      onChange={(e) => {
+                        const n = Number(e.target.value);
+                        if (Number.isFinite(n))
+                          setRotation(changeVector(rotation, i, (n * Math.PI) / 180));
+                      }}
+                    />
+                  </label>
+                ))}
+              </fieldset>
+            </>
+          )}
+        </div>
+        {section === "lighting" && loaded && normalization && (
+          <ModelLightingEditor
+            value={light ?? null}
             disabled={busy}
-          />
+            bounds={normalization.bounds}
+            onChange={(value) => {
+              setLightingEnabled(!!value);
+              if (value) setLightSettings(value);
+            }}
+          >
+            <group position={normalization.offset}>
+              <group rotation={normalization.rotation} scale={normalization.scale}>
+                <primitive object={loaded.root} dispose={null} />
+              </group>
+            </group>
+          </ModelLightingEditor>
         )}
         {lightError && (
           <p role="alert" className="catalog-add-error">

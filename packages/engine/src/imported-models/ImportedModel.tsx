@@ -1,3 +1,4 @@
+import { useModelLightingState } from "../model-lighting/ModelLightingSurface";
 import { useEffect, useMemo, useState } from "react";
 import { useThree } from "@react-three/fiber";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
@@ -17,6 +18,8 @@ export function ImportedModelGeometry({
   size?: ModelVector;
   state?: EntityStateSnapshot | undefined;
 }) {
+  const lightingContext = useModelLightingState();
+  const lightState = lightingContext ? lightingContext.state : state;
   const invalidate = useThree((state) => state.invalidate);
   const [loaded, setLoaded] = useState<{ root?: Object3D; error?: string }>({});
   const hash = model.asset.sha256,
@@ -69,7 +72,7 @@ export function ImportedModelGeometry({
       {loaded.root ? (
         <group position={normalization.offset}>
           <group rotation={normalization.rotation} scale={normalization.scale}>
-            <ImportedModelSurface root={loaded.root} light={model.light} state={state} />
+            <ImportedModelSurface root={loaded.root} light={model.light} state={lightState} />
           </group>
         </group>
       ) : (

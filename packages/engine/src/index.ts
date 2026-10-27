@@ -130,3 +130,25 @@ export {
   formatArea,
   parseLength,
 } from "./measurement-units";
+
+export {
+  defaultModelLighting,
+  projectModelLighting,
+  lightingSlotForItem,
+  primaryLightSlot,
+  lightingEntitySlotId,
+  modelLightingPointCount,
+} from "./model-lighting/settings";
+export { editModelLighting } from "./model-lighting/edit";
+
+export {
+  modelLightingSurfaces,
+  modelLightingSurfaceAt,
+  controlModelLightMaterials,
+  type ModelLightingSurfaceOption,
+} from "./model-lighting/surfaces";
+
+export {
+  ModelLightingStateContext,
+  useModelLightingState,
+} from "./model-lighting/ModelLightingSurface";

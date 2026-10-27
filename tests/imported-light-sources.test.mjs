@@ -17,7 +17,7 @@ await withModules(async (load) => {
   );
   const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
   const { personalScaleFixture } = await load("/tests/fixtures/personal-models-scale.ts");
-  const { ModelLightFields } = await load("/apps/web/src/custom-models/ModelLightFields.tsx");
+  const { LightingFields } = await load("/apps/web/src/model-lighting/LightingFields.tsx");
   const light = { position: [-2, 0.2, 0], color: "#ffe3b4", maxIntensity: 6, distance: 5 };
   const state = (changes = {}) => ({
     entityId: "light.synthetic",
@@ -277,10 +277,16 @@ await withModules(async (load) => {
       function Harness() {
         const [value, setValue] = useState(light);
         current = value;
-        return React.createElement(ModelLightFields, {
-          value,
+        return React.createElement(LightingFields, {
+          light: value,
           onChange: setValue,
-          materialNames: ["Diffuser"],
+          bounds: { min: [-2, 0, -0.1], max: [2, 0.4, 0.1] },
+          selected: 0,
+          onSelect: () => {},
+          picking: null,
+          onPicking: () => {},
+          surfaces: [{ id: "surface:0:0", label: "Diffuser", supported: true }],
+          onHighlight: () => {},
         });
       }
       await dom.mount(async () => {
@@ -290,18 +296,18 @@ await withModules(async (load) => {
       });
       for (let i = 0; i < 7; i++) await dom.click("Add light point");
       assert.equal(dom.button("Add light point").disabled, true);
-      await dom.click("Remove point 2");
+      await act(async () => dom.document.querySelector('[aria-label="Remove point 2"]').click());
       assert.equal(current.points.length, 6);
-      await act(async () => dom.document.querySelector('input[type="checkbox"]').click());
-      assert.deepEqual(current.emissiveMaterials, ["Diffuser"]);
-      await act(async () => {
-        const select = dom.document.querySelector("select");
-        select.value = "strip";
-        select.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
-      });
+      await act(async () =>
+        dom.document.querySelector('.lighting-surfaces input[type="checkbox"]').click(),
+      );
+      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
+      await dom.click("LED strip");
       assert.equal(current.points, undefined);
-      assert.equal(current.strip.samples, 5);
-      assert.deepEqual(current.emissiveMaterials, ["Diffuser"]);
+      assert.equal(current.strip.samples, 7);
+      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
       assert.equal(dom.button("Add light point"), undefined);
+      await dom.click("Point lights");
+      assert.equal(current.points.length, 6);
     }));
 });

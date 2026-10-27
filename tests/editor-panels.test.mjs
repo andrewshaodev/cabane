@@ -101,7 +101,14 @@ await withModules(async (load) => {
         placementFloor: editor.previewFloor,
         visualSceneItems: furnishing.items,
         furnishingModels: { chair: definition },
-        deviceModels: { light: { ...definition, label: "Light", category: "Lighting" } },
+        deviceModels: {
+          light: {
+            ...definition,
+            label: "Light",
+            category: "Lighting",
+            lighting: { position: [0, 0.5, 0], color: "#ffffff", maxIntensity: 2, distance: 5 },
+          },
+        },
         snapshot: { project },
         stairDialog: null,
         commit() {},
