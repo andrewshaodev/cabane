@@ -45,7 +45,9 @@ export function useEditorConstructionTools(
         : current,
     );
   }, [activeFloorId, mode]);
-  const [floorDialog, setFloorDialog] = useState<"rename" | "remove" | null>(null);
+  const [floorDialog, setFloorDialog] = useState<
+    "rename" | "remove" | "add-above" | "add-below" | null
+  >(null);
   const selectedOpeningId =
     constructEditorSelection?.kind === "opening" ? constructEditorSelection.id : null;
   const selectedOpening = selectedOpeningId

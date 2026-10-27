@@ -128,6 +128,8 @@
       "packages/engine/src/validation/wall-niche-rules.ts",
       "apps/web/src/editor-preview/construct/ConstructionInspector.tsx",
       "apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx",
+      "packages/engine/src/home-project/floor-operations.ts",
+      "packages/engine/src/home-project/floor-duplication.ts",
       "apps/web/src/editor-floors/ApartmentFloorDialog.tsx"
     ],
     "interfaces": [
