@@ -22,6 +22,7 @@ test(
       );
       await current.click();
       await page.getByRole("menuitem", { name: "Add floor below", exact: true }).click();
+      await page.getByRole("button", { name: "Add floor", exact: true }).click();
       await page.waitForFunction(
         () =>
           document.querySelector(".construct-floor-controls__trigger")?.textContent === "Floor −1",
@@ -46,6 +47,7 @@ test(
         "Add floor below",
       );
       await page.keyboard.press("Enter");
+      await page.getByRole("button", { name: "Add floor", exact: true }).click();
       await page.waitForFunction(
         () =>
           document.querySelector(".construct-floor-controls__trigger")?.textContent === "Floor −2",

@@ -13,6 +13,15 @@ the scene immediately. Sizes that do not fit report an error; leaving the field
 restores the accepted value. These edits use the ordinary
 preview, undo/redo, autosave, and Apply flow.
 
+Add floor above/below opens a dialog with an empty-plan default and a
+“Duplicate this floor” option for the selected floor. Copies are appended above
+the top floor or below the lowest basement, and retain the source floor's height,
+architecture and finishes. Every copied identity and internal architectural
+reference is remapped. Furniture, devices, Connect profiles and private Home
+Assistant mappings are never copied. Connecting stairs and building-wide settings
+remain unchanged. Cancel leaves the workspace untouched;
+adding a floor is one undoable workspace edit using existing persistence formats.
+
 Niche uses the same wall placement preview, single-shot selection, dragging,
 width handles, marquee, duplication and deletion system as doors/windows.
 Decorations groups Niche, Boundary and Pool in a floating disclosure outside the

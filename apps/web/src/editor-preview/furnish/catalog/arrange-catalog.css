@@ -6,6 +6,7 @@
 }
 .arrange-catalog-mount {
   display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
 }
@@ -14,6 +15,7 @@
 }
 .arrange-catalog {
   display: flex;
+  flex: 1;
   flex-direction: column;
   width: 100%;
   min-height: 0;
