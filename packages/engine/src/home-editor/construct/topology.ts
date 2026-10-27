@@ -231,6 +231,7 @@ export const deriveFloorTopology = (input: FloorTopologyInput): FloorTopologyRes
     thicknessMeters:
       wall.thicknessMeters ??
       (classification === "interior" ? interiorThickness : exteriorThickness),
+    ...(wall.virtual ? { virtual: true } : {}),
     ...(wall.heightMeters && wall.heightMeters !== wallHeight
       ? { heightMeters: wall.heightMeters }
       : {}),

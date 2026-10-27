@@ -15,6 +15,7 @@ import {
   worldPointToPlan,
 } from "./geometry";
 import { resolveItemTransform, type SceneItemSpec } from "./home-project";
+import { physicalFloor } from "./architecture-geometry/physical-floor";
 import { lightBrightnessRatio, lightColorForSnapshot } from "./home-assistant-controls";
 import type { DeviceModelRegistry, FloorSpec, ResolvedHomeBindings, RoomSpec } from "./types";
 
@@ -61,7 +62,7 @@ const lightWallPlane = (
   const threshold = Math.min(0.6, distance * 0.25);
   let nearest: SceneLightWallPlane | null = null;
   let nearestDistance = threshold;
-  for (const wall of floor.walls) {
+  for (const wall of physicalFloor(floor).walls) {
     if (position[1] > (wall.heightMeters ?? floor.defaultWallHeightMeters)) continue;
     const [startX, startZ] = planPointToWorld(wall.from, floor.coordinates);
     const [endX, endZ] = planPointToWorld(wall.to, floor.coordinates);

@@ -286,6 +286,11 @@ rendering share this rule. Shared horizontal junction surfaces use the general
 finish when their participating walls disagree, without changing geometry,
 collision, shadows or fade ownership.
 
+An optional `WallSpec.virtual` wall divides rooms without being built: it adds no
+geometry, collision, shadow, lighting plane, roof seam, or opening host, and junctions
+keep only their physical walls (dropped below two). Rooms and ceilings are unchanged.
+Validation requires a boolean flag and rejects openings on a virtual wall.
+
 Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
 
 Construct’s floor palette includes Square tile, Rectangular tile (staggered), and

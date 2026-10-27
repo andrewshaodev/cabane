@@ -1,9 +1,9 @@
 {
-  "revision": 14,
-  "fingerprint": "615c6a751463c4ac5f3ea8dbabe4ae919053a845993436989e0279472965b052",
-  "summary": "Unify model lighting authoring for personal and built-in models",
+  "revision": 15,
+  "fingerprint": "1282c8f02bd246d3d0533586830795de838098d41538b2e28d3bedb749432667",
+  "summary": "Add optional WallSpec.virtual: a wall that divides rooms without being built (no geometry, collision, shadow or openings)",
   "breakingChanges": [
-    "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
+    "Older clients do not know WallSpec.virtual and keep blocking any saved project that uses it, as they do for every unknown field; they need the Cabane integration update to open such projects. Projects that never set the flag are unaffected."
   ],
   "history": [
     {
@@ -95,6 +95,13 @@
       "summary": "Add outdoor room membership with shared room controls",
       "breakingChanges": [
         "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+      ]
+    },
+    {
+      "revision": 14,
+      "summary": "Unify model lighting authoring for personal and built-in models",
+      "breakingChanges": [
+        "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
       ]
     }
   ],
