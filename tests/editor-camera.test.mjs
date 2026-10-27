@@ -578,7 +578,7 @@ await withModules(async (load) => {
     }
   });
 
-  test("a compact Properties drawer centers the visible scene without changing the camera pose", async () => {
+  test("Properties changes preserve the camera pose and projected scene position", async () => {
     const props = cameraProps();
     const renderer = await create(createElement(PreviewCamera, props), {
       ...options,
@@ -593,16 +593,22 @@ await withModules(async (load) => {
       controls.object.position.x += 2;
       controls.target.x += 2;
       controls.update();
+      controls.object.updateProjectionMatrix();
       const before = pose(controls);
+      controls.object.updateMatrixWorld(true);
+      const projectedTarget = controls.target.clone().project(controls.object);
+      const projection = controls.object.projectionMatrix.toArray();
       await renderer.update(createElement(PreviewCamera, { ...props, rightPanelOpen: true }));
       assert.deepEqual(pose(controls), before);
-      assert.equal(controls.object.view.enabled, true);
-      assert.equal(controls.object.view.offsetX, 160);
+      assert.equal(controls.object.view?.enabled ?? false, false);
       controls.object.updateMatrixWorld(true);
-      assert.ok(Math.abs(controls.target.clone().project(controls.object).x + 0.32) < 0.0001);
+      assert.ok(
+        controls.target.clone().project(controls.object).distanceTo(projectedTarget) < 1e-10,
+      );
+      assert.deepEqual(controls.object.projectionMatrix.toArray(), projection);
       await renderer.update(createElement(PreviewCamera, props));
       assert.deepEqual(pose(controls), before);
-      assert.equal(controls.object.view.enabled, false);
+      assert.deepEqual(controls.object.projectionMatrix.toArray(), projection);
     } finally {
       await renderer.unmount();
     }

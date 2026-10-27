@@ -371,6 +371,12 @@
   height: 16px;
 }
 
+@media (min-width: 1241px) and (max-width: 1360px) {
+  .editor-header .direction-modes button {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+}
 @media (min-width: 1241px) {
   .direction-preview:is([data-editor-mode="construct"], [data-editor-mode="furnish"])
     .editor-header {
