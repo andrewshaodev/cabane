@@ -256,6 +256,7 @@
     "tests": [
       "arrange-catalog-ui.test.mjs",
       "arrange-catalog.test.mjs",
+      "arrange-selection-events.test.mjs",
       "catalog-bedroom-modules.test.mjs",
       "catalog-device.test.mjs",
       "catalog-structure.test.mjs",
