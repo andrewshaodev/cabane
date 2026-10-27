@@ -125,6 +125,9 @@ export const removeFloor = (
   const roomIds = new Set(roomsForFloor(removedFloor).map((room) => room.id));
   const openingIds = new Set(removedFloor.openings.map((opening) => opening.id));
   const slotIds = [
+    ...project.sceneItems
+      .filter((item) => item.floorId === removedFloor.id && item.lightSlotId)
+      .map((item) => `${item.lightSlotId}-entity`),
     ...roomsForFloor(removedFloor).flatMap(
       (room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? [],
     ),

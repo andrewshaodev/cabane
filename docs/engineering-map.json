@@ -208,6 +208,9 @@
           "resolveProjectModels",
           "createModelAssetRepository",
           "openGlbPreview",
+          "ImportedModelSurface",
+          "importedLightSources",
+          "importedEmissiveMaterialNames",
           "createCabaneArchive",
           "readCabaneFile",
           "createCabaneModelPack",
@@ -215,7 +218,7 @@
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
+    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {
@@ -484,5 +487,29 @@
     "interfaces": [],
     "invariant": "The public styles.css entry point owns explicit cascade order; global foundations live in styles/ and feature styles sit beside their React owners. Dashboard layout files and room-navigation.css coordinate cross-component responsive placement. Read room-navigation.css with room-control-sheet styles for room-focus changes. Extraction preserves selectors, declarations, media/container conditions, reduced-motion behavior and source order. React mounting order must not determine shared CSS precedence.",
     "checks": ["verify:fast", "test:unit", "test:browser", "build"]
+  },
+  {
+    "title": "Shared model lighting",
+    "spec": "docs/product/model-lighting.md",
+    "owners": [
+      "apps/web/src/model-lighting",
+      "packages/engine/src/model-lighting",
+      "packages/engine/src/HomeAssistantSceneLighting.tsx"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": [
+          "projectModelLighting",
+          "editModelLighting",
+          "lightingSlotForItem",
+          "modelLightingSurfaces",
+          "modelLightingSurfaceAt",
+          "controlModelLightMaterials"
+        ]
+      }
+    ],
+    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Bound source costs and show overflow.",
+    "checks": ["verify:workspace", "verify:runtime", "build:panel"]
   }
 ]

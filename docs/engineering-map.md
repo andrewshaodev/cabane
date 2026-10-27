@@ -100,8 +100,8 @@ Contract: [Connect and binding profiles](../docs/product/connect.md).
 Contract: [Personal GLB models and asset transfer](../docs/product/personal-models.md).
 
 - Owners: [`packages/engine/src/imported-models`](../packages/engine/src/imported-models), [`apps/web/src/custom-models`](../apps/web/src/custom-models), [`apps/web/src/workspaces/ha-model-assets.ts`](../apps/web/src/workspaces/ha-model-assets.ts).
-- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `createCabaneArchive`, `readCabaneFile`, `createCabaneModelPack`, `readCabaneModelPack` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.
+- Interface: `CustomModel`, `ModelAsset`, `resolveProjectModels`, `createModelAssetRepository`, `openGlbPreview`, `ImportedModelSurface`, `importedLightSources`, `importedEmissiveMaterialNames`, `createCabaneArchive`, `readCabaneFile`, `createCabaneModelPack`, `readCabaneModelPack` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded.
 - Checks: `verify:workspace`, `verify:runtime`, `fixture:verify:scale`, `build:panel`.
 
 ### Home Assistant runtime and controls
@@ -184,6 +184,15 @@ Contract: [Engine UI styles](../docs/product/architecture.md).
 - Interface: repository commands below.
 - Review invariant: The public styles.css entry point owns explicit cascade order; global foundations live in styles/ and feature styles sit beside their React owners. Dashboard layout files and room-navigation.css coordinate cross-component responsive placement. Read room-navigation.css with room-control-sheet styles for room-focus changes. Extraction preserves selectors, declarations, media/container conditions, reduced-motion behavior and source order. React mounting order must not determine shared CSS precedence.
 - Checks: `verify:fast`, `test:unit`, `test:browser`, `build`.
+
+### Shared model lighting
+
+Contract: [Shared model lighting](../docs/product/model-lighting.md).
+
+- Owners: [`apps/web/src/model-lighting`](../apps/web/src/model-lighting), [`packages/engine/src/model-lighting`](../packages/engine/src/model-lighting), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx).
+- Interface: `projectModelLighting`, `editModelLighting`, `lightingSlotForItem`, `modelLightingSurfaces`, `modelLightingSurfaceAt`, `controlModelLightMaterials` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Bound source costs and show overflow.
+- Checks: `verify:workspace`, `verify:runtime`, `build:panel`.
 
 ## Package import boundaries
 

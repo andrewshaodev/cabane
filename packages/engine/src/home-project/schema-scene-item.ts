@@ -80,11 +80,25 @@ export const sceneItem = (
           "entitySlots",
           "lightState",
           "color",
+          "lightSlotId",
         ]
-      : ["id", "floorId", "kind", "modelId", "variant", "placement", "size", "color"],
+      : [
+          "id",
+          "floorId",
+          "kind",
+          "modelId",
+          "variant",
+          "placement",
+          "size",
+          "color",
+          "lightSlotId",
+          "lightState",
+        ],
     path,
     issues,
   );
+  if (candidate.lightSlotId !== undefined)
+    string(candidate.lightSlotId, `${path}.lightSlotId`, issues);
   string(candidate.id, `${path}.id`, issues);
   string(candidate.modelId, `${path}.modelId`, issues);
   if (candidate.variant !== undefined) string(candidate.variant, `${path}.variant`, issues);
@@ -112,7 +126,6 @@ export const sceneItem = (
     );
   size?.forEach((entry, index) => finite(entry, `${path}.size[${index}]`, issues));
   if (
-    device &&
     candidate.lightState !== undefined &&
     (typeof candidate.lightState !== "string" ||
       !["always-off", "always-on", "night-only", "connected"].includes(candidate.lightState))

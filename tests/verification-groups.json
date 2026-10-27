@@ -45,6 +45,7 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
+      "imported-light-sources.test.mjs",
       "room-cleaning.test.mjs",
       "orbit-view.test.mjs",
       "room-navigation.test.mjs",
@@ -55,7 +56,9 @@
       "setup-progress.test.mjs",
       "vacuum-flight.test.mjs",
       "weather.test.mjs",
-      "workspace-startup-routing.test.mjs"
+      "workspace-startup-routing.test.mjs",
+      "model-lighting.test.mjs",
+      "model-lighting-ui.test.mjs"
     ]
   },
   "construct": {
@@ -180,6 +183,7 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
+      "imported-light-sources.test.mjs",
       "room-cleaning.test.mjs",
       "orbit-view.test.mjs",
       "room-navigation.test.mjs",

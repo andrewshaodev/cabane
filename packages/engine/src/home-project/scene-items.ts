@@ -1,3 +1,4 @@
+import { modelLightingPointCount } from "../model-lighting/settings";
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
@@ -115,7 +116,17 @@ export const validateSceneItemsAndSupports = (
   project: HomeProject,
   registries: ProjectModelRegistries,
   issues: HomeProjectIssue[],
-) =>
+) => {
+  for (const floor of project.floors) {
+    const count = modelLightingPointCount(project, floor.id, registries);
+    if (count > 32)
+      addProjectWarning(
+        issues,
+        "project.light-budget",
+        `floors.${floor.id}`,
+        `${count} configured light points on ${floor.name}; only the first 32 illuminate the scene. Reduce points or strip density. Surface glow remains available.`,
+      );
+  }
   project.sceneItems.forEach((item, index) => {
     const itemPath = `sceneItems[${index}]`;
     const floor = project.floors.find((candidate) => candidate.id === item.floorId);
@@ -139,6 +150,20 @@ export const validateSceneItemsAndSupports = (
         `Model “${item.modelId}” is not registered; a generic placeholder will be shown until it is imported.`,
       );
     } else {
+      if (
+        item.lightSlotId &&
+        (!definition.lighting ||
+          (item.kind === "device" &&
+            item.entitySlots.some(
+              (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
+            )))
+      )
+        addProjectIssue(
+          issues,
+          "project.light-relationship",
+          `${itemPath}.lightSlotId`,
+          "An independent lighting relationship requires model lighting and no existing primary light slot.",
+        );
       if (
         item.variant !== undefined &&
         !modelVariants(definition).some((variant) => variant.id === item.variant)
@@ -260,3 +285,4 @@ export const validateSceneItemsAndSupports = (
       );
     }
   });
+};

@@ -34,6 +34,8 @@ export interface FurnishingInspectorProps {
     id: string,
     lightState: "always-off" | "always-on" | "night-only" | "connected",
   ) => void;
+  onConnectLighting?: (() => void) | undefined;
+  onEditLighting?: (() => void) | undefined;
   onClose: () => void;
 }
 
@@ -50,6 +52,8 @@ export function FurnishingInspector({
   onVariantChange,
   onColorChange,
   onClose,
+  onEditLighting,
+  onConnectLighting,
 }: FurnishingInspectorProps) {
   const selected = items.find((item) => item.id === selectedId);
   const definition = selected
@@ -67,6 +71,8 @@ export function FurnishingInspector({
       onColorChange={onColorChange}
       onPlacementChange={onPlacementChange}
       onSizeChange={onSizeChange}
+      onEditLighting={onEditLighting}
+      onConnectLighting={onConnectLighting}
       onClose={onClose}
     />
   ) : null;

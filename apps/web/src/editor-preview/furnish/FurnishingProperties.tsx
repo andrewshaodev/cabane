@@ -1,3 +1,4 @@
+import { EditorButton } from "../../editor-chrome/EditorButton";
 import { NumericField } from "./NumericField";
 import { modelVariants, resolveModelVariant } from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
@@ -22,6 +23,8 @@ export function FurnishingProperties({
   onVariantChange,
   onColorChange,
   onClose,
+  onEditLighting,
+  onConnectLighting,
   floor,
   onWindowFit,
 }: {
@@ -46,6 +49,8 @@ export function FurnishingProperties({
   onLightStateChange?:
     | ((id: string, lightState: "always-off" | "always-on" | "night-only" | "connected") => void)
     | undefined;
+  onConnectLighting?: (() => void) | undefined;
+  onEditLighting?: (() => void) | undefined;
   onClose: () => void;
 }) {
   const updatePlacement = (patch: Partial<ItemPlacement>) =>
@@ -105,6 +110,41 @@ export function FurnishingProperties({
           })
         )}
       </fieldset>
+      {onEditLighting && (
+        <fieldset>
+          <legend>Lighting</legend>
+          <p className="editor-properties-note">
+            {definition.lighting
+              ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
+              : "No lighting"}
+          </p>
+          <EditorButton onClick={onEditLighting}>Edit lighting</EditorButton>
+          {definition.lighting && onConnectLighting && (
+            <EditorButton variant="text" onClick={onConnectLighting}>
+              Connect lighting
+            </EditorButton>
+          )}
+          {definition.lighting && onLightStateChange && (
+            <label>
+              <span>Scene state</span>
+              <select
+                value={selected.lightState ?? "connected"}
+                onChange={(event) =>
+                  onLightStateChange(
+                    selected.id,
+                    event.target.value as "connected" | "always-on" | "always-off" | "night-only",
+                  )
+                }
+              >
+                <option value="connected">Connected</option>
+                <option value="always-on">Always on</option>
+                <option value="always-off">Always off</option>
+                <option value="night-only">Night only</option>
+              </select>
+            </label>
+          )}
+        </fieldset>
+      )}
       {definition.windowFit && onWindowFit && (
         <fieldset>
           <legend>Window</legend>
@@ -267,6 +307,7 @@ export function FurnishingProperties({
       {((modelVariants(definition).length > 1 && !!onVariantChange) ||
         (!!definition.defaultColor && !!onColorChange) ||
         (selected.kind === "device" &&
+          !onEditLighting &&
           !!onLightStateChange &&
           resolveModelVariant(definition, selected.variant).sceneLight !== false &&
           selected.entitySlots.some(
@@ -314,7 +355,8 @@ export function FurnishingProperties({
               </button>
             </>
           )}
-          {selected.kind === "device" &&
+          {!onEditLighting &&
+            selected.kind === "device" &&
             resolveModelVariant(definition, selected.variant).sceneLight !== false &&
             selected.entitySlots.some(
               (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),

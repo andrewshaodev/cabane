@@ -303,7 +303,9 @@ export const furnishingEditorReducer = (
       return updateItem(state, action.id, (item) => ({ ...item, variant: action.variant }));
     case "update-light-state":
       return updateItem(state, action.id, (item) =>
-        item.kind === "device" ? { ...item, lightState: action.lightState } : item,
+        item.kind === "device" || item.lightSlotId
+          ? { ...item, lightState: action.lightState }
+          : item,
       );
     case "update-placements": {
       const items = state.items.map((item) => {
