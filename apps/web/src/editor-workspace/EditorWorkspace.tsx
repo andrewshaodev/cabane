@@ -1,3 +1,4 @@
+import { roomsForFloor } from "@cabane/engine";
 import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinishPreview";
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
@@ -134,7 +135,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     : undefined;
   const roomPictures = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, resolveHomeAssistantPictureUrl(area?.picture, runtime.origin)] as const;
       }),
@@ -142,7 +143,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   );
   const roomNames = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, area?.name?.trim() || room.name] as const;
       }),
@@ -253,17 +254,17 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     (unsettled && !reference.adjusting) ||
     Boolean(floorDialog);
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
-  const addFloor = (below: boolean, duplicate: boolean, includeItems: boolean) => {
+  const addFloor = (below: boolean, duplicate: boolean) => {
     const id = `floor-${createBrowserUuid()}`;
     const next = (below ? addBottomFloor : addTopFloor)(
       snapshot,
       id,
-      duplicate ? { sourceFloorId: activeFloorId, includeItems } : undefined,
+      duplicate ? { sourceFloorId: activeFloorId } : undefined,
     );
     commit(next);
     floorNavigation.selectFloor(id);
     constructEditor.replaceFloor(next.project.floors.find((floor) => floor.id === id)!);
-    furnishingEditor.replaceItems(next.project.sceneItems.filter((item) => item.floorId === id));
+    furnishingEditor.replaceItems([]);
   };
   return (
     <WallFinishPreviewProvider palette={editorProject.home.palette}>
@@ -339,9 +340,9 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
               ).length
             }
             onCancel={() => setFloorDialog(null)}
-            onSave={(name, height, duplicate = false, includeItems = false) => {
+            onSave={(name, height, duplicate = false) => {
               if (floorDialog === "add-above" || floorDialog === "add-below") {
-                addFloor(floorDialog === "add-below", duplicate, includeItems);
+                addFloor(floorDialog === "add-below", duplicate);
                 setFloorDialog(null);
                 return;
               }

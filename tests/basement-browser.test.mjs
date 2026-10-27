@@ -39,6 +39,11 @@ test(
       await page.keyboard.press("End");
       assert.equal(
         await page.evaluate(() => document.activeElement?.textContent),
+        "Setup apartment floor",
+      );
+      await page.keyboard.press("ArrowUp");
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.textContent),
         "Add floor below",
       );
       await page.keyboard.press("Enter");

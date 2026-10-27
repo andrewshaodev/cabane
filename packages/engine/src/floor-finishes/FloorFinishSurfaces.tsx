@@ -1,3 +1,4 @@
+import { isOutdoorPlatformRoom, outdoorPlatformRoomId } from "../outdoor-platforms/platform-rooms";
 import { omitUndefinedProperties } from "../defined-properties";
 import { useCabaneDom } from "./../CabaneDom";
 import { useHoveredRoom, useRoomHoverTarget, useRoomHoverEnabled } from "../room-status/RoomHover";
@@ -277,6 +278,24 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
         .map((platform) => (
           <FinishSurface
             key={platform.id}
+            roomId={
+              platform.useAsRoom && onSelectRoom ? outdoorPlatformRoomId(platform.id) : undefined
+            }
+            onSelect={
+              platform.useAsRoom && onSelectRoom
+                ? () => onSelectRoom(outdoorPlatformRoomId(platform.id))
+                : undefined
+            }
+            selected={
+              Boolean(platform.useAsRoom) && selectedRoomId === outdoorPlatformRoomId(platform.id)
+            }
+            {...(platform.useAsRoom ? { interactionColor: "#c9a477" } : {})}
+            emphasis={roomSurfaceEmphasis(
+              variant === "scene" && Boolean(onSelectRoom) && Boolean(platform.useAsRoom),
+              selectedRoomId,
+              outdoorPlatformRoomId(platform.id),
+            )}
+            reducedMotion={reducedMotion}
             floor={floor}
             polygon={platform.polygon}
             finish={platform.finish}
@@ -288,7 +307,8 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
           />
         ))}
       {floor.rooms.flatMap((room) => {
-        if (room.isSolid && variant === "scene") return [];
+        if (isOutdoorPlatformRoom(floor, room.id) || (room.isSolid && variant === "scene"))
+          return [];
         const onSelect = onSelectRoom ? () => onSelectRoom(room.id) : undefined;
         const common = {
           roomId: onSelectRoom ? room.id : undefined,

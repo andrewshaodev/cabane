@@ -1,3 +1,4 @@
+import { outdoorPlatformRoomId } from "../outdoor-platforms/platform-rooms";
 import type { HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
@@ -17,6 +18,12 @@ const visitProjectIds = (
     );
     floor.outdoorPlatforms?.forEach((platform, index) => {
       register(platform.id, `floors[${floorIndex}].outdoorPlatforms[${index}].id`, "architecture");
+      if (platform.useAsRoom)
+        register(
+          outdoorPlatformRoomId(platform.id),
+          `floors[${floorIndex}].outdoorPlatforms[${index}].useAsRoom`,
+          "architecture",
+        );
       platform.edges.forEach((edge, i) =>
         register(
           edge.id,

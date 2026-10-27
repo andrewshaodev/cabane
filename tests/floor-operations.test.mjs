@@ -36,7 +36,7 @@ await withModules(async (load) => {
     assert.throws(() => api.removeTopFloor(api.removeTopFloor(removed)), /ground floor/);
   });
   for (const add of ["addTopFloor", "addBottomFloor"]) {
-    test(`${add} duplicates portable contents with fresh references and undo`, () => {
+    test(`${add} duplicates Construct elements without furniture, devices or mappings`, () => {
       const project = makeThreeFloorProject();
       const source = project.floors[0];
       source.floorToFloorHeightMeters = 3.1;
@@ -152,9 +152,10 @@ await withModules(async (load) => {
         },
       };
       const before = structuredClone(initial);
-      const architectureOnly = api[add](initial, "empty-copy", { sourceFloorId: source.id });
-      assert.deepEqual(architectureOnly.project.sceneItems, project.sceneItems);
-      const next = api[add](initial, "copy", { sourceFloorId: source.id, includeItems: true });
+      const next = api[add](initial, "copy", { sourceFloorId: source.id });
+      assert.deepEqual(next.project.sceneItems, project.sceneItems);
+      assert.deepEqual(next.project.roomProfiles, project.roomProfiles);
+      assert.deepEqual(next.project.openingProfiles, project.openingProfiles);
       assert.deepEqual(initial, before);
       assert.deepEqual(next.bindings, initial.bindings);
       assert.deepEqual(next.project.stairs, project.stairs);
@@ -173,17 +174,9 @@ await withModules(async (load) => {
         value.wallIds.forEach((id) => assert.ok(floor.walls.some((wall) => wall.id === id))),
       );
       assert.notEqual(floor.outdoorPlatforms[0].edges[0].id, "edge-0");
-      const copiedItems = next.project.sceneItems.filter((item) => item.floorId === "copy");
-      assert.equal(copiedItems.length, 2);
-      assert.equal(copiedItems[0].placement.roomId, floor.rooms[0].id);
-      assert.equal(copiedItems[1].placement.wallId, floor.walls[0].id);
-      assert.notEqual(copiedItems[0].entitySlots[0].id, "slot");
-      assert.equal(copiedItems[0].entitySlots[0].autoMap, "manual");
-      assert.deepEqual(copiedItems[0].entitySlots[0].compatibleDomains, ["light"]);
-      assert.equal(
-        next.project.roomProfiles[floor.rooms[0].id].dashboardSlots[0].autoMap,
-        "manual",
-      );
+      assert.equal(next.project.sceneItems.filter((item) => item.floorId === "copy").length, 0);
+      assert.equal(next.project.roomProfiles[floor.rooms[0].id], undefined);
+      assert.equal(next.project.openingProfiles[floor.openings[0].id], undefined);
       const ids = api.collectProjectIds(next.project);
       assert.equal(ids.length, new Set(ids).size);
       assert.equal(api.parseHomeProjectSchema(next.project).valid, true);

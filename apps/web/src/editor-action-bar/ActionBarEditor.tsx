@@ -3,6 +3,7 @@ import { useCabaneDom } from "@cabane/engine";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ActionBarBuiltInIcon,
+  roomsForFloor,
   RoomShortcutIcon,
   SceneActionSlotFace,
   actionBarBuiltInLabels,
@@ -67,7 +68,7 @@ export function ActionBarEditor({
   const bar = useRef<HTMLDivElement>(null);
   const tray = useRef<HTMLDivElement>(null);
   const items = resolveActionBarItems(project.actionBar, walkTools);
-  const rooms = project.floors.flatMap((floor) => floor.rooms);
+  const rooms = project.floors.flatMap(roomsForFloor);
   const devices = project.sceneItems.filter(
     (item) => item.kind === "device" && isActionBarDeviceNavigable(project, item.id),
   );

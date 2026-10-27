@@ -21,7 +21,7 @@ export function FloorManagementDialog({
   itemCount: number;
   stairCount: number;
   height: number;
-  onSave: (name: string, height: number, duplicate?: boolean, includeItems?: boolean) => void;
+  onSave: (name: string, height: number, duplicate?: boolean) => void;
   onCancel: () => void;
   onRemove?: (() => void) | undefined;
   removeDisabledReason?: string | undefined;
@@ -35,7 +35,6 @@ export function FloorManagementDialog({
   const [floorHeight, setFloorHeight] = useState(String(height));
   const adding = action === "add-above" || action === "add-below";
   const [duplicate, setDuplicate] = useState(false);
-  const [includeItems, setIncludeItems] = useState(false);
   const invalid =
     action === "rename" &&
     (!value.trim() || !Number.isFinite(Number(floorHeight)) || Number(floorHeight) <= 0);
@@ -59,8 +58,7 @@ export function FloorManagementDialog({
       <form
         onSubmit={(event) => {
           event.preventDefault();
-          if (!invalid)
-            onSave(value.trim(), Number(floorHeight), duplicate, duplicate && includeItems);
+          if (!invalid) onSave(value.trim(), Number(floorHeight), duplicate);
         }}
       >
         <header>
@@ -90,20 +88,10 @@ export function FloorManagementDialog({
               Duplicate this floor ({name})
             </label>
             {duplicate && (
-              <>
-                <label className="floor-management-dialog__choice">
-                  <input
-                    type="checkbox"
-                    checked={includeItems}
-                    onChange={(event) => setIncludeItems(event.target.checked)}
-                  />
-                  Include furniture and devices
-                </label>
-                <p>
-                  Copies have new IDs and no Home Assistant mappings. Stairs are not copied. Connect
-                  copied devices separately.
-                </p>
-              </>
+              <p>
+                Copies the Construct elements with new IDs. Furniture, devices and stairs are not
+                copied.
+              </p>
             )}
           </div>
         ) : action === "remove" ? (

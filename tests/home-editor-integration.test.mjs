@@ -251,6 +251,11 @@ await withModules(async (load) => {
           .querySelector('.floor-management-dialog input[type="checkbox"]')
           .click(),
       );
+      assert.equal(
+        dom.window.document.querySelectorAll('.floor-management-dialog input[type="checkbox"]')
+          .length,
+        1,
+      );
       await click("Add floor");
       assert.equal(button("Floor 2").getAttribute("aria-pressed"), "true");
       await expand("Floor 2");
@@ -890,6 +895,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
         "apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx",
         "apps/web/src/editor-preview/construct/DebouncedColorInput.tsx",
         "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
+        "apps/web/src/editor-preview/construct/RoomMembershipFields.tsx",
       ].map((path) => readFile(path, "utf8")),
     )
   ).join("\n");

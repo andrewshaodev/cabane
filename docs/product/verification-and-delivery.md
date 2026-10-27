@@ -8,8 +8,10 @@ with release revisions in `docs/ha-contract.json`, and checked by
 changes require a revision and upgrade notes. Rendering/UI and catalog model
 additions/deletions do not trigger automatic releases. Behavioral validation and
 migration changes require an explicit semantic revision. The GitHub `Home Assistant contract release` workflow checks
-PRs and publishes a verified matching integration patch release after a push to
-main, using its scoped deploy key. See [contract releases](../ha-contract-releases.md)
+PRs and pushes, then publishes a verified matching integration patch release once
+daily at 23:00 Europe/Paris when contract changes are pending, using its scoped
+deploy key. An explicit manual dispatch on main can publish an urgent release.
+See [contract releases](../ha-contract-releases.md)
 for the source coverage, Codex reminder hook, credential and retry behavior.
 
 The root package defines the executable checks. Run `npm run verify:fast` for

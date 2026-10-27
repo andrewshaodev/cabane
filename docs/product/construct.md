@@ -16,10 +16,10 @@ preview, undo/redo, autosave, and Apply flow.
 Add floor above/below opens a dialog with an empty-plan default and a
 “Duplicate this floor” option for the selected floor. Copies are appended above
 the top floor or below the lowest basement, and retain the source floor's height,
-architecture, finishes and profiles. Furniture and devices are optional. Every
-copied identity and internal attachment is remapped; copied slots require manual
-connection and private Home Assistant mappings are never copied. Connecting stairs
-and building-wide settings remain unchanged. Cancel leaves the workspace untouched;
+architecture and finishes. Every copied identity and internal architectural
+reference is remapped. Furniture, devices, Connect profiles and private Home
+Assistant mappings are never copied. Connecting stairs and building-wide settings
+remain unchanged. Cancel leaves the workspace untouched;
 adding a floor is one undoable workspace edit using existing persistence formats.
 
 Niche uses the same wall placement preview, single-shot selection, dragging,
@@ -92,10 +92,11 @@ removes exclusive boundary spans and their openings, preserves walls shared with
 unselected rooms, and splits source walls where only part is removable. Shared
 boundaries incidentally touched by a room marquee remain; wall-only deletion
 still removes a directly selected wall. A room enclosed entirely by shared walls
-explains that its walls must be edited. In Properties, the separate Room actions
-section groups Delete room with a reversible Solid structure toggle. This marks an
-enclosed space as a solid structural block for chimneys, shafts or pillars,
-keeping its walls and saved room identity. Solid spaces have a neutral plan fill
+explains that its walls must be edited. In Properties, the separate Actions
+section provides deletion. The Room section starts with **Use as room**, enabled
+by default for enclosed spaces. Turning it off fills the space as a structural
+block for cupboards, shafts or pillars, keeping its walls and saved room identity. Name, accent, floor finish and ceiling
+controls are hidden until room use is restored. Solid spaces have a neutral plan fill
 without a room label, remain selectable in Construct, and render at the floor's
 default wall height. They are excluded from Home room navigation, room status,
 Connect area mapping and walk connectivity diagnostics. Connect keeps them visible
@@ -310,7 +311,15 @@ Corner movement preserves edge IDs and overrides. Inserting a corner retains
 the leading edge and downstream identities; the new edge inherits the platform
 default. House-facade runs suppress platform barriers, including doorway spans.
 
-Platforms do not create rooms, ceilings, roof sections, or house walls. A top
+Platforms do not create enclosed rooms, ceilings, roof sections, or house walls.
+Select a platform and enable **Use as room** in Properties to name an outdoor room.
+It shares the switch, help-text layout and committed name input with enclosed
+spaces. Both keep the saved identity when room use is turned off; platforms
+keep their outdoor geometry rather than becoming structural blocks.
+It can map to an HA area in Connect, match its devices automatically, and take part
+in room navigation, focus, status and shortcuts. The option is off for existing
+and new platforms. Disabling it keeps the platform and name, removes its room
+from Connect and navigation, and returns its devices to Outside rooms. A top
 floor can consist of platforms without enclosed rooms. Same-level room/platform
 and platform/platform interior overlaps are errors; shared boundaries are valid.
 These edits use ordinary workspace history, autosave, export/import and Save.
@@ -362,3 +371,12 @@ use the existing faceColors metadata, undo/redo, autosave and Save/import/export
 The two-sided disclosure is editor state; differing stored face colors reopen it.
 Interior walls with differing faces use the general interior finish for Auto edges,
 even if an old exteriorColor value remains from their drawing history.
+
+The Construct floor menu places **Setup apartment floor** directly below **Add floor below**.
+Its dialog sets the storey where the lowest modeled floor starts (0–100, with 0
+preserving the original appearance). The setting follows normal draft, undo and
+publication behavior. Positive values repeat a muted shell of the lowest floor's
+footprint underneath the home, using its floor-to-floor height and simple facade
+windows. These instanced shells have no rooms, devices, selection or Walk surfaces
+and never appear in floor navigation. Plan views omit them; ordinary camera framing
+continues to use only the real floors. The decorative ground sits below the stack.

@@ -1,3 +1,4 @@
+import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
@@ -17,7 +18,9 @@ const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly str
     { x: transform.position[0], z: transform.position[2] },
     floor.coordinates,
   );
-  return floor.rooms.filter((room) => pointInsidePolygon(at, room.polygon)).map((room) => room.id);
+  return roomsForFloor(floor)
+    .filter((room) => pointInsidePolygon(at, room.polygon))
+    .map((room) => room.id);
 };
 
 export const resolvedRoomIdForItem = (item: SceneItemSpec, project: HomeProject): string | null => {

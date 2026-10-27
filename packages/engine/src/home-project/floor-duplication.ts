@@ -1,10 +1,9 @@
 import type { EditorWorkspaceSnapshot } from "../home-editor/workspace-history";
 import { collectProjectIds } from "./cross-references";
-import type { DraftLayoutFloorSpec, HomeProject } from "./types";
+import type { DraftLayoutFloorSpec } from "./types";
 
 export interface FloorCopyOptions {
   sourceFloorId: string;
-  includeItems?: boolean;
 }
 
 /** Copy only floor-owned portable data. Stairs, home settings and private bindings stay put. */
@@ -32,8 +31,8 @@ export const copyFloorContents = (
     ids.set(old, id);
     return id;
   };
-  // These are the only identity/reference fields in floor architecture, profiles and items.
-  // Model IDs, finish presets and all other strings are values, never references to remap.
+  // These are the only identity/reference fields in floor architecture.
+  // Finish presets and all other strings are values, never references to remap.
   const copy = <T>(value: T): T => {
     const visit = (entry: unknown): unknown => {
       if (Array.isArray(entry)) return entry.map(visit);
@@ -45,9 +44,7 @@ export const copyFloorContents = (
             ? remapId(child)
             : ["wallIds", "roomIds"].includes(key) && Array.isArray(child)
               ? child.map((id: string) => remapId(id))
-              : key === "autoMap"
-                ? "manual"
-                : visit(child),
+              : visit(child),
         ]),
       );
     };
@@ -60,31 +57,11 @@ export const copyFloorContents = (
     name: destination.name,
     ...(destination.belowGround ? { belowGround: true } : {}),
   };
-  const roomProfiles: HomeProject["roomProfiles"] = Object.fromEntries(
-    source.rooms.flatMap((room) =>
-      project.roomProfiles[room.id]
-        ? [[remapId(room.id), copy(project.roomProfiles[room.id])]]
-        : [],
-    ),
-  );
-  const openingProfiles: HomeProject["openingProfiles"] = Object.fromEntries(
-    source.openings.flatMap((opening) =>
-      project.openingProfiles[opening.id]
-        ? [[remapId(opening.id), copy(project.openingProfiles[opening.id])]]
-        : [],
-    ),
-  );
-  const items = options.includeItems
-    ? project.sceneItems.filter((item) => item.floorId === source.id).map(copy)
-    : [];
   return {
     ...snapshot,
     project: {
       ...project,
       floors: project.floors.map((value) => (value.id === destination.id ? floor : value)),
-      roomProfiles: { ...project.roomProfiles, ...roomProfiles },
-      openingProfiles: { ...project.openingProfiles, ...openingProfiles },
-      sceneItems: [...project.sceneItems, ...items],
     },
   };
 };
