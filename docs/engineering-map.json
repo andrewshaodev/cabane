@@ -109,6 +109,7 @@
       "apps/web/src/editor-floors",
       "apps/web/src/editor-preview/construct/NorthSettingsEditor.tsx",
       "apps/web/src/editor-preview/construct/ConstructionBuildingSettings.tsx",
+      "apps/web/src/editor-preview/construct/RoomMembershipFields.tsx",
       "apps/web/src/editor-preview/construct/NorthOrientationOverlay.tsx",
       "apps/web/src/editor-preview/construct/HedgeProperties.tsx",
       "apps/web/src/editor-preview/construct/WallFinishFields.tsx",

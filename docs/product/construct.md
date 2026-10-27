@@ -83,10 +83,11 @@ removes exclusive boundary spans and their openings, preserves walls shared with
 unselected rooms, and splits source walls where only part is removable. Shared
 boundaries incidentally touched by a room marquee remain; wall-only deletion
 still removes a directly selected wall. A room enclosed entirely by shared walls
-explains that its walls must be edited. In Properties, the separate Room actions
-section groups Delete room with a reversible Solid structure toggle. This marks an
-enclosed space as a solid structural block for chimneys, shafts or pillars,
-keeping its walls and saved room identity. Solid spaces have a neutral plan fill
+explains that its walls must be edited. In Properties, the separate Actions
+section provides deletion. The Room section starts with **Use as room**, enabled
+by default for enclosed spaces. Turning it off fills the space as a structural
+block for cupboards, shafts or pillars, keeping its walls and saved room identity. Name, accent, floor finish and ceiling
+controls are hidden until room use is restored. Solid spaces have a neutral plan fill
 without a room label, remain selectable in Construct, and render at the floor's
 default wall height. They are excluded from Home room navigation, room status,
 Connect area mapping and walk connectivity diagnostics. Connect keeps them visible
@@ -303,6 +304,9 @@ default. House-facade runs suppress platform barriers, including doorway spans.
 
 Platforms do not create enclosed rooms, ceilings, roof sections, or house walls.
 Select a platform and enable **Use as room** in Properties to name an outdoor room.
+It shares the switch, help-text layout and committed name input with enclosed
+spaces. Both keep the saved identity when room use is turned off; platforms
+keep their outdoor geometry rather than becoming structural blocks.
 It can map to an HA area in Connect, match its devices automatically, and take part
 in room navigation, focus, status and shortcuts. The option is off for existing
 and new platforms. Disabling it keeps the platform and name, removes its room

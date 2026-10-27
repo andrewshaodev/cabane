@@ -162,9 +162,14 @@ export function PlatformProperties({
           </div>
         ))}
       </fieldset>
-      <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
-        Delete platform
-      </EditorButton>
+      <fieldset>
+        <legend>Actions</legend>
+        <div className="construction-inspector__room-actions">
+          <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
+            Delete platform
+          </EditorButton>
+        </div>
+      </fieldset>
     </div>
   );
 }

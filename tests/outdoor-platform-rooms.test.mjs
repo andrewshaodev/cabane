@@ -15,9 +15,6 @@ await withModules(async (load) => {
   const { projectFromEditorState, workspaceSnapshotFromEditorState, layoutFloorFromEditorFloor } =
     await load("/apps/web/src/editor-preview/project-sync.ts");
   const { useConnectEditor } = await load("/apps/web/src/editor-connect/useConnectEditor.ts");
-  const { PlatformRoomFields } = await load(
-    "/apps/web/src/editor-preview/construct/PlatformRoomFields.tsx",
-  );
   const { RoomNavigation } = await load("/packages/engine/src/room-navigation/RoomNavigation.tsx");
   const { roomCameraFraming } = await load(
     "/packages/engine/src/room-navigation/room-camera-framing.ts",
@@ -419,19 +416,5 @@ await withModules(async (load) => {
     const migrated = e.parseHomeProjectSchema({ ...rest, schemaVersion: 1, floor: floors[0] });
     assert.equal(migrated.valid, true);
     assert.equal(manifestFor(migrated.project).floors[0].rooms.length, 1);
-  });
-
-  test("platform Properties has an opt-in checkbox and a named room field that commits trimmed names", () => {
-    const platform = fixture(false).floors[0].outdoorPlatforms[0];
-    let changes;
-    let panel = PlatformRoomFields({ platform, onChange: (next) => (changes = next) });
-    assert.equal(panel.props.children[1].props.children[0].props.checked, false);
-    panel.props.children[1].props.children[0].props.onChange({ target: { checked: true } });
-    assert.deepEqual(changes, { useAsRoom: true, roomName: "Outdoor room" });
-    Object.assign(platform, changes);
-    panel = PlatformRoomFields({ platform, onChange: (next) => (changes = next) });
-    const input = panel.props.children[2].props.children[1];
-    input.props.onBlur({ currentTarget: { value: "  Balcony  " } });
-    assert.deepEqual(changes, { roomName: "Balcony" });
   });
 });

@@ -401,7 +401,7 @@ await withModules(async (load) => {
     });
   });
 
-  test("Solid structure shares Room actions with deletion and survives history and reopening", async () => {
+  test("Use as room keeps structural conversion reversible through history and reopening", async () => {
     await withDom(async ({ dom, root }) => {
       const floor = ownerHomeProject.floors[0];
       const room = floor.rooms[0];
@@ -415,26 +415,29 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       await act(async () => controller.selectRoom(room.id));
-      const toggle = dom.window.document.querySelector(
-        '[role="switch"][aria-labelledby="room-solid-label"]',
-      );
+      const toggle = dom.window.document.querySelector('[role="switch"]');
       assert.ok(toggle);
       assert.equal(
         dom.window.document.getElementById(toggle.getAttribute("aria-labelledby")).textContent,
-        "Solid structure",
+        "Use as room",
       );
       assert.equal(
         dom.window.document.getElementById(toggle.getAttribute("aria-describedby")).textContent,
-        "Fill this space for a chimney, shaft or pillar.",
+        "Turn off to fill a cupboard, shaft or pillar as a structural block, without room navigation or area mapping.",
       );
       const section = toggle.closest("fieldset");
-      assert.equal(section.querySelector("legend").textContent, "Room actions");
+      assert.equal(section.querySelector("legend").textContent, "Room");
+      assert.equal(toggle.getAttribute("aria-checked"), "true");
+      assert.ok(dom.window.document.querySelector('[aria-label="Room name"]'));
+      await act(async () => toggle.click());
+      assert.equal(toggle.getAttribute("aria-checked"), "false");
+      assert.equal(dom.window.document.querySelector('[aria-label="Room name"]'), null);
+      assert.equal(dom.window.document.querySelector('[aria-label="Room ceiling height"]'), null);
       assert.ok(
-        [...section.querySelectorAll("button")].some(
-          (button) => button.textContent === "Delete room",
+        [...dom.window.document.querySelectorAll("button")].some(
+          (button) => button.textContent === "Delete space",
         ),
       );
-      await act(async () => toggle.click());
       assert.equal(
         controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).isSolid,
         true,
@@ -480,6 +483,97 @@ await withModules(async (load) => {
         controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).name,
         room.name,
       );
+    });
+  });
+
+  test("platforms share room controls and keep their name and outdoor geometry through toggle and history", async (context) => {
+    const priorObservers = {
+      IntersectionObserver: globalThis.IntersectionObserver,
+      ResizeObserver: globalThis.ResizeObserver,
+    };
+    context.after(() => Object.assign(globalThis, priorObservers));
+    globalThis.IntersectionObserver = globalThis.ResizeObserver = class {
+      observe() {}
+      disconnect() {}
+    };
+    await withDom(async ({ dom, root }) => {
+      const floor = ownerHomeProject.floors[0];
+      let controller;
+      function Harness() {
+        controller = useConstructEditor(floor);
+        return React.createElement(ConstructionSelectionProperties, {
+          editor: controller,
+          onClose() {},
+        });
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      await act(async () => controller.selectRoom(floor.rooms[0].id));
+      const originalSwitch = dom.window.document.querySelector('[role="switch"]');
+      const originalRowClass = originalSwitch.parentElement.className;
+      const originalCeilings = controller.previewFloor.ceilings;
+      await act(async () =>
+        controller.dispatch({
+          type: "add-outdoor-platform",
+          polygon: [
+            [100, 100],
+            [104, 100],
+            [104, 104],
+            [100, 104],
+          ],
+          finish: { kind: "solid", color: "#c8b79b" },
+          defaultEdge: { kind: "open" },
+        }),
+      );
+      const toggle = dom.window.document.querySelector('[role="switch"]');
+      assert.equal(toggle.parentElement.className, originalRowClass);
+      assert.equal(
+        dom.window.document.getElementById(toggle.getAttribute("aria-labelledby")).textContent,
+        "Use as room",
+      );
+      assert.match(
+        dom.window.document.getElementById(toggle.getAttribute("aria-describedby")).textContent,
+        /stays open to the sky/,
+      );
+      assert.equal(toggle.getAttribute("aria-checked"), "false");
+      assert.equal(dom.window.document.querySelector('[aria-label="Room name"]'), null);
+      await act(async () => toggle.click());
+      const name = () => dom.window.document.querySelector('[aria-label="Room name"]');
+      assert.equal(name().value, "Outdoor room");
+      dom.window.HTMLElement.prototype.attachEvent = () => {};
+      dom.window.HTMLElement.prototype.detachEvent = () => {};
+      const type = async (value) => {
+        await act(async () => name().focus());
+        await act(async () => {
+          Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+            name(),
+            value,
+          );
+          name().dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+          name().dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+          name().dispatchEvent(new dom.window.KeyboardEvent("keyup", { key: "o", bubbles: true }));
+        });
+      };
+      const key = async (key) =>
+        act(async () =>
+          name().dispatchEvent(new dom.window.KeyboardEvent("keydown", { key, bubbles: true })),
+        );
+      await type("  Balcony  ");
+      await key("Enter");
+      assert.equal(controller.draft.outdoorPlatforms[0].roomName, "Balcony");
+      await type("Cancelled");
+      await key("Escape");
+      assert.equal(name().value, "Balcony");
+      assert.equal(controller.draft.outdoorPlatforms[0].roomName, "Balcony");
+      await act(async () => toggle.click());
+      assert.equal(controller.draft.outdoorPlatforms[0].useAsRoom, false);
+      assert.equal(controller.draft.outdoorPlatforms[0].roomName, "Balcony");
+      assert.equal(dom.window.document.querySelector('[aria-label="Room name"]'), null);
+      await act(async () => controller.undo());
+      assert.equal(name().value, "Balcony");
+      assert.equal(toggle.getAttribute("aria-checked"), "true");
+      assert.deepEqual(controller.previewFloor.ceilings, originalCeilings);
+      assert.equal(controller.previewFloor.rooms.length, floor.rooms.length);
+      assert.equal(controller.draft.outdoorPlatforms[0].isSolid, undefined);
     });
   });
 
