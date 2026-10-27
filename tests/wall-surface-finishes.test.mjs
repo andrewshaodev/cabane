@@ -102,6 +102,33 @@ await withModules(async (load) => {
     );
   });
 
+  test("standalone patterns retain the original junction-trimmed geometry", async () => {
+    const { splitWallSurfaceGeometry } = await load(
+      "/packages/engine/src/architecture-geometry/wall-surface-geometry.ts",
+    );
+    const { Float32BufferAttribute } = await import("three");
+    const floor = structuredClone(e.neutralDemoManifest.floors[0]);
+    const wall = floor.walls[0];
+    const source = e.buildContinuousWallGeometry(wall, floor, floor.openings);
+    source.setAttribute(
+      "color",
+      new Float32BufferAttribute(new Array(source.getAttribute("position").count * 3).fill(0.5), 3),
+    );
+    const original = Array.from(source.getAttribute("position").array);
+    wall.faceFinishes = { left: finish, right: wallpaper };
+    const surfaces = splitWallSurfaceGeometry(source, wall, floor);
+    const triples = (array) =>
+      Array.from({ length: array.length / 9 }, (_, i) =>
+        array.slice(i * 9, i * 9 + 9).join(":"),
+      ).sort();
+    assert.deepEqual(
+      triples(surfaces.flatMap((s) => Array.from(s.geometry.getAttribute("position").array))),
+      triples(original),
+    );
+    assert.ok(surfaces.some((s) => s.finish));
+    surfaces.forEach((s) => s.geometry.dispose());
+  });
+
   test("pattern UVs keep physical scale across openings on rotated walls without changing geometry", () => {
     for (const angle of [0, Math.PI / 4, Math.PI / 2]) {
       const floor = structuredClone(e.neutralDemoManifest.floors[0]);

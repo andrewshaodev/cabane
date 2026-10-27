@@ -1,9 +1,10 @@
+import { useEffect, useMemo } from "react";
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from "three";
 import { paintFloorPattern } from "../floor-finishes/presets";
 import type { WallSurfaceFinish } from "../types";
 
 /** Private image assets are deliberately outside this generated-pattern contract. */
-export function createWallSurfaceTextures() {
+function createWallSurfaceTextures() {
   const textures = new Map<string, CanvasTexture>();
   return {
     get(finish: WallSurfaceFinish) {
@@ -49,4 +50,10 @@ export function createWallSurfaceTextures() {
       textures.forEach((texture) => texture.dispose());
     },
   };
+}
+
+export function useWallSurfaceTextures() {
+  const textures = useMemo(() => createWallSurfaceTextures(), []);
+  useEffect(() => () => textures.dispose(), [textures]);
+  return textures;
 }
