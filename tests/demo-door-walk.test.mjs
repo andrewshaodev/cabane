@@ -19,6 +19,44 @@ await withModules(async (load) => {
   const { openingWorldPlacement } = await load("/packages/engine/src/geometry.ts");
   const { WalkCameraController } = await load("/packages/engine/src/WalkCameraController.tsx");
 
+  const { deriveWalkColliders, resolveCircleMovement } = await load(
+    "/packages/engine/src/navigation.ts",
+  );
+
+  test("bundled doors and passages permit movement through their derived wall openings", () => {
+    for (const floor of homeManifest.floors) {
+      const openIds = new Set(
+        floor.openings.filter((opening) => opening.kind === "door").map((opening) => opening.id),
+      );
+      const openColliders = deriveWalkColliders(floor, openIds);
+      const closedColliders = deriveWalkColliders(floor);
+      for (const opening of floor.openings.filter((opening) => opening.kind !== "window")) {
+        const wall = floor.walls.find((wall) => wall.id === opening.wallId);
+        const { start, end } = openingWorldPlacement(wall, opening, floor.coordinates);
+        const x = (start[0] + end[0]) / 2;
+        const z = (start[1] + end[1]) / 2;
+        const length = Math.hypot(end[0] - start[0], end[1] - start[1]);
+        const normal = { x: -(end[1] - start[1]) / length, z: (end[0] - start[0]) / length };
+        for (const side of [-1, 1]) {
+          const cross = (colliders) => {
+            let pose = { x: x + normal.x * side * 0.7, z: z + normal.z * side * 0.7 };
+            for (let frame = 0; frame < 28; frame++)
+              pose = resolveCircleMovement(
+                pose,
+                { x: -normal.x * side * 0.05, z: -normal.z * side * 0.05 },
+                colliders,
+              );
+            return ((pose.x - x) * normal.x + (pose.z - z) * normal.z) * side;
+          };
+          const label = `${floor.id}/${opening.id}, side ${side}`;
+          assert.ok(cross(openColliders) < -0.4, `${label}: crosses the open aperture`);
+          if (opening.kind === "door")
+            assert.ok(cross(closedColliders) > 0.2, `${label}: closed door still blocks movement`);
+        }
+      }
+    }
+  });
+
   test("fresh bundled demo opens doors on approach and closes them on departure on every floor", async () => {
     const definition = deriveDemoSessionDefinition(homeManifest);
     const bindings = resolveHomeAssistantBindings(

@@ -1,14 +1,47 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import test from "node:test";
-import { createElement } from "react";
+import { act, createElement, Fragment } from "react";
 import { create } from "@react-three/test-renderer";
 import { CanvasTexture } from "three";
 import { withModules } from "./test-server.mjs";
 
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
+const makeCanvas = () => {
+  const canvas = { width: 0, height: 0, getContext: () => context };
+  const context = new Proxy(
+    {
+      canvas,
+      createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+    },
+    {
+      set(target, property, value) {
+        target[property] = value;
+        return true;
+      },
+      get(target, property) {
+        if (property in target) return target[property];
+        return () => undefined;
+      },
+    },
+  );
+  return canvas;
+};
+
 await withModules(async (load) => {
   const engine = await load("/packages/engine/src/index.ts");
   const { layoutFloorFromEditorFloor } = await load("/apps/web/src/editor-preview/project-sync.ts");
+  const { useConstructEditor } = await load(
+    "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
+  );
+  const { projectFromEditorState } = await load("/apps/web/src/editor-preview/project-sync.ts");
+  const { RetainedArrangeScene } = await load(
+    "/apps/web/src/editor-workspace/RetainedArrangeScene.tsx",
+  );
+  const { stableArchitectureModelRegistry } = await load(
+    "/packages/catalog/src/architecture/index.ts",
+  );
   const registries = { furnishingModels: {}, deviceModels: {} };
   const project = () =>
     engine.defineHomeProject({
@@ -275,26 +308,6 @@ await withModules(async (load) => {
   test("one texture set services many room bases and zones", () => {
     let canvasCount = 0;
     let disposeCount = 0;
-    const makeCanvas = () => {
-      const canvas = { width: 0, height: 0, getContext: () => context };
-      const context = new Proxy(
-        {
-          canvas,
-          createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
-        },
-        {
-          set(target, property, value) {
-            target[property] = value;
-            return true;
-          },
-          get(target, property) {
-            if (property in target) return target[property];
-            return () => undefined;
-          },
-        },
-      );
-      return canvas;
-    };
     const canvasDocument = {
       createElement(tag) {
         assert.equal(tag, "canvas");
@@ -433,6 +446,96 @@ await withModules(async (load) => {
       assert.deepEqual(selected, [floor.rooms[0].id]);
     } finally {
       await renderer.unmount();
+    }
+  });
+
+  test("painted finishes reach retained Arrange materials through editor projection", async () => {
+    const base = project();
+    const roomId = base.floors[0].rooms[0].id;
+    let editor;
+    function Probe({ arrange }) {
+      editor = useConstructEditor(base.floors[0]);
+      const projected = projectFromEditorState(base, editor.previewFloor, []);
+      const { manifest } = engine.composeHomeProjectPreview(projected, {
+        furnishingModels: {},
+        deviceModels: {},
+        openingModels: {},
+      });
+      return createElement(
+        Fragment,
+        null,
+        !arrange &&
+          createElement(engine.FloorFinishSurfaces, {
+            floor: editor.previewFloor,
+            variant: "plan",
+          }),
+        createElement(
+          RetainedArrangeScene,
+          { active: arrange },
+          createElement(engine.ArchitectureScene, {
+            manifest,
+            floorView: "cutaway",
+            activeFloorId: base.floors[0].id,
+            interactionMode: "editor",
+            selectedRoomId: null,
+            walkMode: false,
+            wallFadeEnabled: false,
+            reducedMotion: true,
+            resolvedBindings: { rooms: {}, openings: {} },
+            architectureModels: stableArchitectureModelRegistry,
+            deviceModels: {},
+            openingPositions: {},
+            onInteract() {},
+          }),
+        ),
+      );
+    }
+    // The renderer supplies its own WebGL canvas. Only procedural 2D texture
+    // painting is stubbed; draft editing, projection and scene materials are real.
+    const renderer = await create(createElement("group"));
+    const previousDocument = Object.getOwnPropertyDescriptor(globalThis, "document");
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: { createElement: () => makeCanvas() },
+    });
+    const material = (variant) =>
+      renderer.scene
+        .findByProps({ name: `floor-finishes-${variant}` })
+        .findByProps({ name: `room-${roomId}` }).instance.material;
+    try {
+      await renderer.update(createElement(Probe, { arrange: false }));
+      await act(async () =>
+        editor.paintRoomFloor(roomId, { kind: "preset", preset: "light-oak" }, false),
+      );
+      const planOak = material("plan").emissiveMap;
+      assert.ok(planOak?.isCanvasTexture, "Construct mounts the oak pattern");
+      await renderer.update(createElement(Probe, { arrange: true }));
+      const sceneOak = material("scene").map;
+      assert.ok(
+        sceneOak?.isCanvasTexture,
+        "Arrange mounts a patterned material, not grey fallback",
+      );
+      assert.notEqual(sceneOak, planOak, "3D uses its own scene texture");
+      assert.equal(sceneOak.image.width, 512);
+      await renderer.advanceFrames(1, 1 / 60);
+      assert.equal(material("scene").map, sceneOak, "room emphasis retains the texture");
+
+      await renderer.update(createElement(Probe, { arrange: false }));
+      await act(async () =>
+        editor.paintRoomFloor(roomId, { kind: "preset", preset: "dark-walnut" }, false),
+      );
+      assert.equal(material("scene").map, sceneOak, "hidden Arrange retains its previous scene");
+      await renderer.update(createElement(Probe, { arrange: true }));
+      assert.ok(material("scene").map?.isCanvasTexture);
+      assert.notEqual(
+        material("scene").map,
+        sceneOak,
+        "returning to Arrange displays the new finish",
+      );
+    } finally {
+      await renderer.unmount();
+      if (previousDocument) Object.defineProperty(globalThis, "document", previousDocument);
+      else delete globalThis.document;
     }
   });
 
