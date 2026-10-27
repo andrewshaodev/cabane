@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { HomeAssistantCameraMessage } from "./camera-runtime";
 import { DeviceCommandScheduler } from "./command-scheduler";
-import { normalizeHomeAssistantUrl, homeAssistantTransportError } from "./home-assistant-auth";
+import {
+  normalizeHomeAssistantUrl,
+  borrowedHomeAssistantTransportError,
+} from "./home-assistant-auth";
 import { normalizeEntityStates, markEntityStatesStale } from "./home-assistant-entity-snapshots";
 import { homeAssistantErrorMessage } from "./home-assistant-runtime-errors";
 import {
@@ -62,7 +65,7 @@ export function BorrowedHomeAssistantRuntime({
   const attachmentRef = useRef<Attachment | null>(null);
   const transportError =
     origin && typeof window !== "undefined"
-      ? homeAssistantTransportError(window.location.href, origin)
+      ? borrowedHomeAssistantTransportError(window.location.href, origin)
       : null;
   const configurationError =
     origin && origin !== hostOrigin
