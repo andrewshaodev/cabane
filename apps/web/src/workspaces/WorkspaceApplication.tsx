@@ -30,7 +30,7 @@ import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 import { readEditorReturn } from "../editor-connect/connect-navigation";
-import { workspaceHomePath, workspaceIdForPath } from "../editor-routes";
+import { agentPilotPath, workspaceHomePath, workspaceIdForPath } from "../editor-routes";
 import { ownerProjectRegistries } from "../project-runtime";
 
 export function WorkspaceApplication() {
@@ -265,6 +265,9 @@ export function WorkspaceApplication() {
           await navigate(
             `${workspaceHomePath(id)}/home-assistant${intent ? `?action=${intent}` : ""}`,
           );
+        }}
+        onAgentPilot={async (id) => {
+          await navigate(agentPilotPath(id));
         }}
         entries={entries}
         onOpen={open}

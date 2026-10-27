@@ -101,6 +101,21 @@
     "checks": ["verify:construct"]
   },
   {
+    "title": "Local agent pilot",
+    "spec": "docs/product/agent-pilot.md",
+    "owners": [
+      "apps/agent-cli/package.json",
+      "apps/agent-cli/src/cli.mjs",
+      "apps/web/src/agent-pilot/AgentPilotPanel.tsx",
+      "apps/web/src/agent-pilot/agent-command-contract.ts",
+      "apps/web/src/agent-pilot/browser-bridge.ts",
+      "package.json"
+    ],
+    "interfaces": [],
+    "invariant": "The CLI binds only to loopback and keeps pairing, requests and responses in memory. The browser binds one session to the currently open workspace and executes only the capability registry through the existing editor and authenticated runtime controllers; there is no separate Home Assistant bridge, and the bridge never reads workspace storage or credentials. Draft edits remain subject to the editor's busy, unsettled, history and autosave boundaries. Private entity IDs may be returned transiently to the paired local agent for explicit mapping, but never enter generated source or repository files; publication remains an explicit command.",
+    "checks": ["verify:fast", "build"]
+  },
+  {
     "title": "Construct and floor topology",
     "spec": "docs/product/construct.md",
     "owners": [

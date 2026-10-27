@@ -43,6 +43,7 @@ await withModules(async (load) => {
           "Export",
           "Recover",
           "ExportRaw",
+          "AgentPilot",
         ].map((name) => [
           `on${name}`,
           async (...args) => {
@@ -104,6 +105,16 @@ await withModules(async (load) => {
       await h.click("Cancel");
       await act(async () => target.click());
       assert.deepEqual(h.calls, [["Open", "a"]]);
+    } finally {
+      await h.close();
+    }
+  });
+  test("the workspace menu opens the selected home for agent pairing", async () => {
+    const h = await mount();
+    try {
+      await act(async () => h.dom.window.document.querySelector("summary").click());
+      await h.click("Connect LLM agent");
+      assert.deepEqual(h.calls, [["AgentPilot", "a"]]);
     } finally {
       await h.close();
     }

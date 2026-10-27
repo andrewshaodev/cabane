@@ -5,6 +5,8 @@ import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const {
     editorPath,
+    agentPilotPath,
+    agentPilotRequested,
     editorRequestForPath,
     workspaceHomePath,
     workspaceIdForPath,
@@ -73,5 +75,11 @@ await withModules(async (load) => {
     });
     assert.equal(shouldFlushEditorExit("home-a", "/workspaces/home-a"), true);
     assert.equal(shouldFlushEditorExit("home-a", "/workspaces/home-a/construct"), false);
+  });
+  test("agent pilot opens only when requested by the workspace menu", () => {
+    assert.equal(agentPilotPath("home-a"), "/workspaces/home-a/construct?agent-pilot=1");
+    assert.equal(agentPilotRequested("?agent-pilot=1"), true);
+    assert.equal(agentPilotRequested(""), false);
+    assert.equal(agentPilotRequested("?agent-pilot=0"), false);
   });
 });

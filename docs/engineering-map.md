@@ -68,6 +68,15 @@ Contract: [Measurement preferences](../docs/product/workspace.md).
 - Review invariant: Convert physical measurements at the UI boundary. Browser-local unit preferences never rescale authored geometry; plan-coordinate inputs account for metersPerPlanUnit. Temperatures, angles and dimensionless values keep their own units.
 - Checks: `verify:construct`.
 
+### Local agent pilot
+
+Contract: [Local agent pilot](../docs/product/agent-pilot.md).
+
+- Owners: [`apps/agent-cli/package.json`](../apps/agent-cli/package.json), [`apps/agent-cli/src/cli.mjs`](../apps/agent-cli/src/cli.mjs), [`apps/web/src/agent-pilot/AgentPilotPanel.tsx`](../apps/web/src/agent-pilot/AgentPilotPanel.tsx), [`apps/web/src/agent-pilot/agent-command-contract.ts`](../apps/web/src/agent-pilot/agent-command-contract.ts), [`apps/web/src/agent-pilot/browser-bridge.ts`](../apps/web/src/agent-pilot/browser-bridge.ts), [`package.json`](../package.json).
+- Interface: repository commands below.
+- Review invariant: The CLI binds only to loopback and keeps pairing, requests and responses in memory. The browser binds one session to the currently open workspace and executes only the capability registry through the existing editor and authenticated runtime controllers; there is no separate Home Assistant bridge, and the bridge never reads workspace storage or credentials. Draft edits remain subject to the editor's busy, unsettled, history and autosave boundaries. Private entity IDs may be returned transiently to the paired local agent for explicit mapping, but never enter generated source or repository files; publication remains an explicit command.
+- Checks: `verify:fast`, `build`.
+
 ### Construct and floor topology
 
 Contract: [Construct and floor topology](../docs/product/construct.md).

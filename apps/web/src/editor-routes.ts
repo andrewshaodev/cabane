@@ -33,6 +33,14 @@ export function workspaceHomePath(workspaceId: string): string {
   return `/workspaces/${encodeURIComponent(workspaceId)}`;
 }
 
+export function agentPilotPath(workspaceId: string): string {
+  return `${workspaceHomePath(workspaceId)}/construct?agent-pilot=1`;
+}
+
+export function agentPilotRequested(search: string): boolean {
+  return new URLSearchParams(search).get("agent-pilot") === "1";
+}
+
 export function workspaceIdForPath(pathname: string): string | null {
   return (
     matchRoutes([{ path: "/workspaces/:workspaceId/*" }], pathname)?.[0].params.workspaceId ?? null

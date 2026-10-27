@@ -7,7 +7,15 @@ import { readWorkspacePreview } from "./workspace-presentation";
 import type { WorkspaceEntry } from "@cabane/engine";
 export type WorkspaceLibraryEntry = WorkspaceEntry;
 export type WorkspaceCardAction =
-  "settings" | "sync" | "dashboard" | "device" | "rename" | "duplicate" | "export" | "delete";
+  | "settings"
+  | "sync"
+  | "dashboard"
+  | "device"
+  | "agent-pilot"
+  | "rename"
+  | "duplicate"
+  | "export"
+  | "delete";
 export function WorkspaceCard({
   entry,
   busy,
@@ -69,6 +77,7 @@ export function WorkspaceCard({
     sync: "Sync with Home Assistant",
     dashboard: "Add to Home Assistant",
     device: "Open on another device",
+    "agent-pilot": "Connect LLM agent",
     rename: "Rename",
     duplicate: "Duplicate",
     export: "Export",
@@ -95,6 +104,7 @@ export function WorkspaceCard({
               "sync",
               "dashboard",
               "device",
+              "agent-pilot",
               "rename",
               "duplicate",
               "export",

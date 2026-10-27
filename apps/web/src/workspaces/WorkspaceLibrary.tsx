@@ -31,6 +31,7 @@ export interface WorkspaceLibraryProps {
   onExport: (id: string, privateBackup: boolean) => Promise<void>;
   onRecover: (id: string) => Promise<void>;
   onExportRaw: (id: string) => Promise<void>;
+  onAgentPilot: (id: string) => Promise<void>;
   remoteImport?: ReactNode;
   renderSuggestions?: (busy: boolean, onBusyChange: (busy: boolean) => void) => ReactNode;
   onSettings?: (id: string, intent?: WorkspaceDestination) => Promise<void>;
@@ -142,7 +143,9 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
                         action === "settings" ? undefined : (action as WorkspaceDestination),
                       ) ?? Promise.resolve(),
                   )
-                : openDialog({ action, entry })
+                : action === "agent-pilot"
+                  ? void run(() => props.onAgentPilot(entry.metadata.id))
+                  : openDialog({ action, entry })
             }
             onRecover={() => void run(() => props.onRecover(entry.metadata.id))}
             onExportRaw={() => void run(() => props.onExportRaw(entry.metadata.id))}
