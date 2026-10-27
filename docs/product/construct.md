@@ -301,7 +301,12 @@ Corner movement preserves edge IDs and overrides. Inserting a corner retains
 the leading edge and downstream identities; the new edge inherits the platform
 default. House-facade runs suppress platform barriers, including doorway spans.
 
-Platforms do not create rooms, ceilings, roof sections, or house walls. A top
+Platforms do not create enclosed rooms, ceilings, roof sections, or house walls.
+Select a platform and enable **Use as room** in Properties to name an outdoor room.
+It can map to an HA area in Connect, match its devices automatically, and take part
+in room navigation, focus, status and shortcuts. The option is off for existing
+and new platforms. Disabling it keeps the platform and name, removes its room
+from Connect and navigation, and returns its devices to Outside rooms. A top
 floor can consist of platforms without enclosed rooms. Same-level room/platform
 and platform/platform interior overlaps are errors; shared boundaries are valid.
 These edits use ordinary workspace history, autosave, export/import and Save.

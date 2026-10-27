@@ -371,6 +371,9 @@ export interface OutdoorPlatformEdgeSpec {
 }
 export interface OutdoorPlatformSpec {
   id: string;
+  /** Opt-in room identity for Connect and dashboard use; never adds indoor geometry. */
+  useAsRoom?: boolean;
+  roomName?: string;
   polygon: Polygon;
   finish: FloorFinishSpec;
   defaultEdge: OutdoorPlatformEdgeConfiguration;

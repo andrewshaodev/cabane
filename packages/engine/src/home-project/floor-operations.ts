@@ -1,3 +1,4 @@
+import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import type { EditorWorkspaceSnapshot } from "../home-editor/workspace-history";
 import type { DraftLayoutFloorSpec } from "./types";
 import { removeWorkspaceSlotReferences } from "./workspace-bindings";
@@ -116,10 +117,10 @@ export const removeFloor = (
   const reason = floorRemovalDisabledReason(project.floors, floorId);
   if (reason) throw new Error(reason);
   const removedFloor = project.floors.find((floor) => floor.id === floorId)!;
-  const roomIds = new Set(removedFloor.rooms.map((room) => room.id));
+  const roomIds = new Set(roomsForFloor(removedFloor).map((room) => room.id));
   const openingIds = new Set(removedFloor.openings.map((opening) => opening.id));
   const slotIds = [
-    ...removedFloor.rooms.flatMap(
+    ...roomsForFloor(removedFloor).flatMap(
       (room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? [],
     ),
     ...removedFloor.openings.flatMap((opening) =>
