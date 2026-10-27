@@ -14,6 +14,110 @@ await withModules(async (load) => {
   const { homeExtensions, ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
   const { KitchenLighting } = await load("/home/src/extensions/kitchen/kitchen-lighting.tsx");
 
+  test("an always-on coffee plug steams only above its configured watts threshold", async () => {
+    const definition = stableDeviceRegistry["coffee-maker"];
+    const floor = engine.neutralDemoManifest.floors[0];
+    const item = {
+      id: "power-coffee",
+      floorId: floor.id,
+      modelId: "coffee-maker",
+      kind: "device",
+      size: definition.defaultSize,
+      placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
+      entitySlots: [
+        {
+          id: "coffee-switch",
+          compatibleDomains: ["switch"],
+          required: true,
+          autoMap: "manual",
+          deviceRole: "primary",
+          presentation: { label: "Coffee maker", dashboardRole: "primary" },
+        },
+        {
+          id: "coffee-power",
+          compatibleDomains: ["sensor"],
+          compatibleDeviceClasses: ["power"],
+          required: false,
+          autoMap: "manual",
+          deviceRole: "secondary",
+          activityThresholdWatts: 5,
+          presentation: { label: "Power", dashboardRole: "secondary" },
+        },
+      ],
+    };
+    const state = (entityId, value, attributes = {}) => ({
+      entityId,
+      state: value,
+      attributes,
+      available: true,
+      stale: false,
+    });
+    const primary = state("switch.fixture_coffee", "on");
+    const power = state("sensor.fixture_power", "0", {
+      device_class: "power",
+      unit_of_measurement: "W",
+    });
+    const props = (reading) => ({
+      item,
+      floor,
+      deviceModels: stableDeviceRegistry,
+      furnishingModels: {},
+      entityStatesBySlotId: {},
+      reducedMotion: true,
+      walkMode: false,
+      onInteract() {},
+      liveMediaByEntityId: {},
+      resolvedDevice: {
+        slot: engine.deviceSlotForItem(item, floor),
+        issues: [],
+        entities: [
+          {
+            slotId: "coffee-switch",
+            entityId: primary.entityId,
+            domain: "switch",
+            state: primary,
+            issues: [],
+          },
+          {
+            slotId: "coffee-power",
+            entityId: reading.entityId,
+            domain: "sensor",
+            state: reading,
+            issues: [],
+          },
+        ],
+      },
+    });
+    const renderer = await create(createElement(engine.SceneItemRenderer, props(power)));
+    try {
+      assert.equal(
+        renderer.scene.findAllByProps({ name: "appliance-steam" }).length,
+        0,
+        "an idle 0 W appliance must not steam while its switch stays on",
+      );
+      await renderer.update(
+        createElement(
+          engine.SceneItemRenderer,
+          props({
+            ...power,
+            state: "0.006",
+            attributes: { ...power.attributes, unit_of_measurement: "kW" },
+          }),
+        ),
+      );
+      assert.equal(renderer.scene.findAllByProps({ name: "appliance-steam" }).length, 1);
+      await renderer.update(
+        createElement(
+          engine.SceneItemRenderer,
+          props({ ...power, available: false, state: "unavailable" }),
+        ),
+      );
+      assert.equal(renderer.scene.findAllByProps({ name: "appliance-steam" }).length, 0);
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("pergola variants switch physical strings and lighting without changing bindings", async () => {
     const definition = stableDeviceRegistry["pergola-string-lights"];
     const floor = homeManifest.floors[0];

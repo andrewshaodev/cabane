@@ -1,9 +1,9 @@
 {
-  "revision": 11,
-  "fingerprint": "f798695dc616cbcb257c8e255e8beeef24cda3d7a84105282f71b240502df452",
-  "summary": "Support reversible solid structural spaces in room properties",
+  "revision": 12,
+  "fingerprint": "81631d99bb662eb324b4499d67015c44f672e9e7aaab061748ee10b352e3999c",
+  "summary": "Add optional power telemetry and watt thresholds for device activity",
   "breakingChanges": [
-    "Older clients must update before importing projects containing the room isSolid field."
+    "Existing homes keep switch-based activity. Homes saving activityThresholdWatts on a secondary power slot require the matching updated HA panel; older panels reject the new field without stripping it. Entity IDs remain private to their HA origin. The integration storage envelope is unchanged; distribute the matching frontend bundle and contract metadata."
   ],
   "history": [
     {
@@ -74,6 +74,13 @@
       "summary": "Allow imports and Save with unavailable catalog variants using default visuals",
       "breakingChanges": [
         "Existing projects remain compatible. Missing furnishing and device variants now produce warnings and render the model default while retaining the saved variant ID; missing models retain placeholders. Older panels can reject newer variants until updated through HACS. Structural and unsupported-schema errors remain blocked."
+      ]
+    },
+    {
+      "revision": 11,
+      "summary": "Support reversible solid structural spaces in room properties",
+      "breakingChanges": [
+        "Older clients must update before importing projects containing the room isSolid field."
       ]
     }
   ],

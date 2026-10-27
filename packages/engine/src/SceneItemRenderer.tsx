@@ -8,7 +8,7 @@ import { memo, useContext, useEffect, useState } from "react";
 import { orbitLightEntity } from "./orbit-light-control";
 import { useOrbitDevicePress } from "./useOrbitDevicePress";
 import { SceneNightContext, sceneLightState } from "./scene-light-state";
-import { deviceVisualStateForSnapshot } from "./devices";
+import { deviceVisualStateWithPower } from "./device-power";
 import {
   deviceSlotForItem,
   resolveItemTransform,
@@ -119,7 +119,7 @@ function DeviceSceneItem({
   const primarySlot = binding.entitySlots.find((slot) => slot.deviceRole === "primary");
   const primary = resolvedDevice.entities.find((entity) => entity.slotId === primarySlot?.id);
   const state = sceneLightState(item.lightState, primary?.state, nightLighting);
-  const visualState = deviceVisualStateForSnapshot(state);
+  const visualState = deviceVisualStateWithPower(resolvedDevice, state);
   const runtime = useHomeAssistantRuntime();
   const cleaningRoom = useVacuumRoom(
     runtime.callService,

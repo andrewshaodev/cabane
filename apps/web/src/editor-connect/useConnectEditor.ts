@@ -9,6 +9,8 @@ import {
   saveRoomAreaDraft,
   validateRuntimeBindingProfile,
   type HomeAssistantRuntimeValue,
+  type EntityBindingSlotSpec,
+  type EntityId,
   type HomeBindingManifest,
   type HomeProjectIssue,
   type RuntimeBindingProfile,
@@ -25,6 +27,7 @@ export function useConnectEditor({
   origin,
   active,
   onChange,
+  onDevicePowerChange,
   initialRequest,
   routeView,
   onViewChange,
@@ -37,6 +40,9 @@ export function useConnectEditor({
   origin: string | null;
   active: boolean;
   onChange: (bindings: WorkspaceBindings) => void;
+  onDevicePowerChange?:
+    | ((deviceId: string, slot: EntityBindingSlotSpec, entityId: EntityId | null) => void)
+    | undefined;
   initialRequest?: EditorOpenRequest;
   routeView?: "rooms" | "devices";
   onViewChange?: ((view: "rooms" | "devices") => void) | undefined;
@@ -277,6 +283,12 @@ export function useConnectEditor({
       setMessage(null);
       return true;
     },
+    configureDevicePower: onDevicePowerChange
+      ? (deviceId: string, slot: EntityBindingSlotSpec, entityId: EntityId | null) => {
+          if (disconnected && entityId !== profile.entityIdsBySlotId[slot.id] && entityId) return;
+          onDevicePowerChange(deviceId, slot, entityId);
+        }
+      : undefined,
     publishedProfile: state?.published ?? empty,
     displayRuntime,
     disconnected,

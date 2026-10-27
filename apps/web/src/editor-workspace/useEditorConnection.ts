@@ -1,3 +1,4 @@
+import { setDevicePowerDraft } from "../editor-connect/device-power-draft";
 import { composeHomeBindingManifest } from "@cabane/engine";
 import { useEffect } from "react";
 import type { ConnectWorkspaceProps } from "./editor-workspace-contract";
@@ -6,6 +7,7 @@ import {
   useHomeAssistantHostSession,
   useHomeAssistantRuntime,
   validateWorkspaceBindings,
+  type HomeProject,
 } from "@cabane/engine";
 
 import { homeManifest as ownerProjectManifest } from "@cabane/home";
@@ -24,6 +26,7 @@ import { useConnectSignIn } from "../editor-connect/useConnectSignIn";
 
 type Options = {
   workspace: ReturnType<typeof useEditorWorkspace>;
+  replaceEditorsFromProject: (project: HomeProject) => void;
   activeFloorId: string;
   runtime: ReturnType<typeof useHomeAssistantRuntime>;
   mode: EditorMode;
@@ -41,6 +44,7 @@ type Options = {
 };
 export function useEditorConnection({
   workspace,
+  replaceEditorsFromProject,
   activeFloorId,
   runtime,
   mode,
@@ -77,6 +81,13 @@ export function useEditorConnection({
     origin: homeAssistantUrl,
     active: mode === "connect" && !editingLocked && !unsettled && !publishOpen,
     onChange: (bindings) => commit({ ...snapshot, bindings }),
+    onDevicePowerChange: (deviceId, slot, entityId) => {
+      if (!homeAssistantUrl || editingLocked || unsettled || publishOpen) return;
+      const next = setDevicePowerDraft(snapshot, homeAssistantUrl, deviceId, slot, entityId);
+      if (next === snapshot) return;
+      commit(next);
+      replaceEditorsFromProject(next.project);
+    },
     ...(initialRequest === undefined ? {} : { initialRequest: initialRequest }),
     ...(navigation?.request.view === undefined ? {} : { routeView: navigation?.request.view }),
     onViewChange: navigation ? (view) => navigation.go({ mode: "connect", view }) : undefined,

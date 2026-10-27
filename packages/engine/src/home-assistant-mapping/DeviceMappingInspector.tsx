@@ -1,3 +1,4 @@
+import { isDevicePowerSlot } from "../device-power";
 import { useState, type ReactNode } from "react";
 import {
   bindingEntityCandidates,
@@ -64,6 +65,7 @@ export function DeviceMappingInspector({
   onChoiceElement,
   inline = false,
   preview,
+  footer,
 }: {
   manifest: HomeBindingManifest;
   room: RoomSpec;
@@ -81,6 +83,7 @@ export function DeviceMappingInspector({
   onChoiceElement?: (element: HTMLInputElement | null) => void;
   inline?: boolean;
   preview?: ReactNode;
+  footer?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [optimisticTarget, setOptimisticTarget] = useState<{ id: string; label: string } | null>(
@@ -172,12 +175,8 @@ export function DeviceMappingInspector({
   } else {
     const { device } = relationship;
     const cameraDescriptor = relationship.descriptors.find(isShareableCameraDescriptor);
-    const singleSlotDescriptor =
-      device.entitySlots.length === 1
-        ? relationship.descriptors.find(
-            (candidate) => candidate.slotId === device.entitySlots[0].id,
-          )
-        : undefined;
+    const controls = relationship.descriptors.filter((entry) => !isDevicePowerSlot(entry.spec));
+    const singleSlotDescriptor = controls.length === 1 ? controls[0] : undefined;
     if (cameraDescriptor) {
       const current = profile.entityIdsBySlotId[cameraDescriptor.slotId];
       const candidates = bindingEntityCandidates({
@@ -431,7 +430,7 @@ export function DeviceMappingInspector({
         const descriptor = relationship.descriptors.find(
           (candidate) => candidate.slotId === slotId,
         );
-        if (!slot || !descriptor || !currentDeviceId) return [];
+        if (!slot || isDevicePowerSlot(slot) || !descriptor || !currentDeviceId) return [];
         const current = profile.entityIdsBySlotId[slotId];
         const candidatesForFunction = bindingEntityCandidates({
           descriptor,
@@ -676,6 +675,7 @@ export function DeviceMappingInspector({
               </details>
             )}
           </div>
+          {footer}
           {connectionDetails && (
             <details className="device-mapping-inspector__details">
               <summary>Connection details</summary>

@@ -1,3 +1,4 @@
+import { powerInWatts } from "../device-power";
 import { DeviceCategoryIcon } from "../DeviceCategoryIcon";
 
 import { entityDisplayValue, type SupportedServiceCall } from "../home-assistant-controls";
@@ -29,6 +30,12 @@ export interface RoomModuleProps {
 }
 
 const readableSensorValue = (entity: EntityStateSnapshot) => {
+  if (entity.attributes.device_class === "power") {
+    const watts = powerInWatts(entity);
+    return watts === null
+      ? "Power unavailable"
+      : `${new Intl.NumberFormat("en", { maximumFractionDigits: 3 }).format(watts)} W`;
+  }
   if (!entity.entityId.startsWith("binary_sensor.")) return entityDisplayValue(entity);
   const active = entity.state === "on";
   switch (entity.attributes.device_class) {

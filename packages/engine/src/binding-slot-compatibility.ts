@@ -1,3 +1,4 @@
+import { isDevicePowerSlot } from "./device-power";
 import { entityDomain } from "./binding-profile-contract";
 import type {
   BindingSlotDescriptor,
@@ -78,13 +79,15 @@ export const allowsCrossAreaEntityBinding = (
 ) => {
   if (descriptor?.kind === "opening-contact" || descriptor?.kind === "opening-cover") return true;
   if (!descriptor || descriptor.kind !== "device") return false;
-  if (isShareableCameraDescriptor(descriptor)) return true;
+  if (isShareableCameraDescriptor(descriptor) || isDevicePowerSlot(descriptor.spec)) return true;
   return (
     manifest.floors
       .flatMap((floor) => floor.rooms)
       .some((room) =>
         room.devices.some(
-          (device) => device.id === descriptor.deviceSlotId && device.entitySlots.length === 1,
+          (device) =>
+            device.id === descriptor.deviceSlotId &&
+            device.entitySlots.filter((slot) => !isDevicePowerSlot(slot)).length === 1,
         ),
       ) ?? false
   );

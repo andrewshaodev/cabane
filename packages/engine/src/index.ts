@@ -6,6 +6,7 @@ export * from "./action-bar/ha-action-shortcuts";
 export { DEFAULT_ROOF_SETTINGS, type RoofSettings } from "./roof/roof-settings";
 export * from "./room-types";
 export * from "./devices";
+export { isDevicePowerSlot } from "./device-power";
 export * from "./geometry";
 export * from "./pools/pool-footprint";
 export * from "./floor-finishes";

@@ -1,3 +1,5 @@
+import { isDevicePowerSlot } from "../device-power";
+import type { EntityBindingSlotSpec } from "../types";
 import { type DeviceDomain, type DeviceModelDefinition, type ManifestIssue } from "../types";
 
 import {
@@ -33,7 +35,7 @@ export const validateEntitySlot = (
         "A slot requires at least one supported compatible domain.",
       ),
     );
-  } else if (definition) {
+  } else if (definition && !isDevicePowerSlot(rawSlot as unknown as EntityBindingSlotSpec)) {
     rawSlot.compatibleDomains.forEach((domain, domainIndex) => {
       if (!definition.supportedDomains.includes(domain as DeviceDomain)) {
         issues.push(
@@ -56,6 +58,20 @@ export const validateEntitySlot = (
         "slot.device-classes",
         `${slotPath}.compatibleDeviceClasses`,
         "Compatible device classes must be non-empty strings.",
+      ),
+    );
+  }
+  if (
+    rawSlot.activityThresholdWatts !== undefined &&
+    (!isDevicePowerSlot(rawSlot as unknown as EntityBindingSlotSpec) ||
+      !isFiniteNumber(rawSlot.activityThresholdWatts) ||
+      rawSlot.activityThresholdWatts < 0)
+  ) {
+    issues.push(
+      issue(
+        "slot.power-threshold",
+        `${slotPath}.activityThresholdWatts`,
+        "Animation threshold requires a secondary power sensor and a finite, non-negative watt value.",
       ),
     );
   }

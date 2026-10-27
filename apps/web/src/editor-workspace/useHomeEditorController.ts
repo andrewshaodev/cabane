@@ -327,6 +327,7 @@ export function useHomeEditorController({
   useEditorExitRequest(navigation?.exitRequested, editingLocked || unsettled, closeEditor);
   const { connect, connectManifest, connectFloor, signIn, bindingIssues } = useEditorConnection({
     workspace,
+    replaceEditorsFromProject,
     activeFloorId,
     runtime,
     mode,

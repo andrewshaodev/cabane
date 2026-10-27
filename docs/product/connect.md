@@ -63,6 +63,33 @@ Automatic matching excludes fallback domains. Validation, import, runtime resolu
 and scene lighting retain the same mapping; controls use the actual entity domain
 and capabilities, so a plug does not gain dimming controls.
 
+Switch-backed devices expose **Power & animation** in their Connect inspector.
+Choose an optional power-class sensor to show live watts in the device popover.
+Sensors sharing the primary switch's HA device are grouped first; other power
+sensors remain selectable across areas. Selection is explicit, including when
+there is one related sensor, and performs no HA service calls. This reuses a
+secondary typed sensor slot and the normal private, origin-scoped slot mapping.
+Adding telemetry preserves the primary entity picker and switch controls.
+
+**Animate using** defaults to **Switch state**. **Power threshold** defaults to
+5 W and accepts a finite non-negative watt value. The scene is active only while
+the primary is active and valid live power is strictly above the threshold.
+W, kW, MW, GW, mW and micro-watt readings are converted to watts; energy units
+such as Wh/kWh, missing units, invalid values, stale, missing and unavailable
+readings do not activate animation. The popover shows converted watts or a power
+unavailable state. Sensor failures never disable an otherwise valid switch.
+Clearing a sensor mapping retains the slot and threshold, including other
+origins' mappings; choose Switch state to restore switch-based activity.
+Unconfigured optional power slots do not create missing-binding warnings.
+
+The threshold is portable slot configuration; HA entity IDs remain private.
+Changes share the editor's history, autosave and Apply boundary. Existing homes
+keep their previous behavior. Homes saving the new threshold field require a
+matching updated HA panel; older panels reject the field without stripping it.
+No Python storage schema change is needed because the integration preserves the
+nested project document. Delivery requires the matching frontend bundle and
+contract metadata, separately from this source PR.
+
 Refreshing registries and matching profiles are read-only operations against HA.
 Editing a mapping stages local data; it does not call a device service.
 

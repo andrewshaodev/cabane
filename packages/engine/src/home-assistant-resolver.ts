@@ -1,3 +1,4 @@
+import { isDevicePowerSlot } from "./device-power";
 import { omitUndefinedProperties } from "./defined-properties";
 import { coverPosition } from "./cover-state";
 import { bindingDomainMatchRank } from "./binding-slot-compatibility";
@@ -346,7 +347,7 @@ export const resolveHomeAssistantBindings = (
           const descriptor = descriptorsById.get(spec.id)!;
           const entityId = profile.entityIdsBySlotId[spec.id];
           if (!entityId) {
-            deviceIssues.push(unmappedSlotIssue(descriptor, room));
+            if (!isDevicePowerSlot(spec)) deviceIssues.push(unmappedSlotIssue(descriptor, room));
             continue;
           }
           const resolved = resolveEntity({

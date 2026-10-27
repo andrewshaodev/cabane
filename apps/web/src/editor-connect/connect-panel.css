@@ -716,3 +716,24 @@
   font-size: var(--editor-text-body);
   line-height: 1.5;
 }
+
+.connect-power-settings {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 16px 0 0;
+  border: 0;
+  border-top: 1px solid #d5d1c5;
+}
+.connect-power-settings legend {
+  padding: 0;
+  color: var(--preview-ink);
+  font-weight: 600;
+}
+.connect-power-settings > label {
+  display: grid;
+  gap: 6px;
+}
+.connect-power-settings .connect-note {
+  margin: 0;
+}

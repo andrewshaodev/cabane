@@ -1,3 +1,4 @@
+import { DevicePowerSettings } from "./DevicePowerSettings";
 import { useEffect, useRef } from "react";
 import {
   DeviceMappingInspector,
@@ -179,6 +180,20 @@ export function ConnectInspector({
                       models={deviceModels}
                       manifest={manifest}
                     />
+                  }
+                  footer={
+                    editor.relationship.kind === "modeled-device" &&
+                    editor.configureDevicePower && (
+                      <DevicePowerSettings
+                        device={editor.relationship.device}
+                        profile={editor.profile}
+                        runtime={editor.displayRuntime}
+                        disconnected={editor.disconnected}
+                        onChange={(slot, entityId) =>
+                          editor.configureDevicePower?.(editor.relationship!.id, slot, entityId)
+                        }
+                      />
+                    )
                   }
                   state="open"
                   onEntityIdsBySlotIdChange={editor.assignEntities}

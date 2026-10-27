@@ -1,3 +1,5 @@
+import { isDevicePowerSlot } from "../device-power";
+import type { EntityBindingSlotSpec } from "../types";
 import { keys, record, array, string, finite, point } from "./schema-json-values";
 import type { DeviceDomain } from "../types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
@@ -40,6 +42,7 @@ export const entitySlot = (value: unknown, path: string, issues: HomeProjectIssu
       "deviceRole",
       "presentation",
       "sceneLight",
+      "activityThresholdWatts",
     ],
     path,
     issues,
@@ -94,6 +97,20 @@ export const entitySlot = (value: unknown, path: string, issues: HomeProjectIssu
         "Slot dashboardRole is invalid.",
       );
     }
+  }
+  if (
+    slot.activityThresholdWatts !== undefined &&
+    (!isDevicePowerSlot(slot as unknown as EntityBindingSlotSpec) ||
+      typeof slot.activityThresholdWatts !== "number" ||
+      !Number.isFinite(slot.activityThresholdWatts) ||
+      slot.activityThresholdWatts < 0)
+  ) {
+    addProjectIssue(
+      issues,
+      "project.power-threshold",
+      `${path}.activityThresholdWatts`,
+      "Animation threshold requires a secondary power sensor and a finite, non-negative watt value.",
+    );
   }
   if (slot.sceneLight !== undefined) {
     const light = record(slot.sceneLight, `${path}.sceneLight`, issues);

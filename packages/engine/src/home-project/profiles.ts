@@ -1,3 +1,4 @@
+import { isDevicePowerSlot } from "../device-power";
 import type { DeviceModelDefinition, EntityBindingSlotSpec } from "../types";
 import type { DeviceItemSpec, HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
@@ -120,6 +121,7 @@ export const validateDeviceSlotsAgainstModel = (
   issues: HomeProjectIssue[],
 ) => {
   item.entitySlots.forEach((slot, slotIndex) => {
+    if (isDevicePowerSlot(slot)) return;
     slot.compatibleDomains.forEach((domain) => {
       if (!definition.supportedDomains.includes(domain)) {
         addProjectIssue(

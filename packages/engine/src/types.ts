@@ -80,6 +80,8 @@ export interface EntityBindingSlotSpec {
     label: string;
     dashboardRole: "primary" | "secondary" | "diagnostic" | "hidden";
   };
+  /** Optional activity gate on a secondary power sensor, in watts (strictly above). */
+  activityThresholdWatts?: number;
   sceneLight?: {
     at: PlanPoint;
     elevationMeters: number;

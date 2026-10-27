@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 3,
+    "validationRevision": 4,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -2945,6 +2945,12 @@
                   "schema": {
                     "items": {
                       "properties": {
+                        "activityThresholdWatts": {
+                          "optional": true,
+                          "schema": {
+                            "type": "number"
+                          }
+                        },
                         "autoMap": {
                           "optional": false,
                           "schema": {
@@ -3170,6 +3176,12 @@
                       "schema": {
                         "items": {
                           "properties": {
+                            "activityThresholdWatts": {
+                              "optional": true,
+                              "schema": {
+                                "type": "number"
+                              }
+                            },
                             "autoMap": {
                               "optional": false,
                               "schema": {
@@ -6503,6 +6515,12 @@
                       "schema": {
                         "items": {
                           "properties": {
+                            "activityThresholdWatts": {
+                              "optional": true,
+                              "schema": {
+                                "type": "number"
+                              }
+                            },
                             "autoMap": {
                               "optional": false,
                               "schema": {
