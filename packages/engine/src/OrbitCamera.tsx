@@ -230,6 +230,11 @@ function OrbitCameraRig({
       zoom,
     };
   }, [buildingFloors, elevation, floor, height, showRoof, width]);
+  // Orthographic magnification comes from zoom, not the orbit radius. Keep the
+  // camera behind the scene so the near plane cannot slice foreground geometry.
+  const minDistance = Math.hypot(
+    ...defaultFraming.position.map((value, index) => value - defaultFraming.target[index]),
+  );
   // Keep the home legible: manual zoom-out stops just beyond its fitted overview.
   const minZoom = defaultFraming.zoom * 0.7;
   // Read once per home/floor mount. Metadata updates never reset a user view.
@@ -373,7 +378,7 @@ function OrbitCameraRig({
         position={framing.position}
         zoom={framing.zoom}
         near={0.1}
-        far={150}
+        far={Math.max(150, minDistance * 5)}
       />
       <OrbitDoubleTapZoom controls={orbitRef} />
       <MapControls
@@ -393,6 +398,7 @@ function OrbitCameraRig({
         zoomSpeed={1.1}
         minPolarAngle={0}
         maxPolarAngle={1.28}
+        minDistance={minDistance}
         minZoom={minZoom}
         maxZoom={MAX_ORTHOGRAPHIC_ZOOM}
         zoomToCursor

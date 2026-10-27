@@ -258,6 +258,45 @@ await withModules(async (load) => {
     });
   }
 
+  test("active orthographic controls keep foreground geometry out of the near clipping plane", async () => {
+    const { renderer, controls } = await createWheelCamera(
+      createElement(OrbitCamera, { floor, resetKey: 0 }),
+    );
+    try {
+      const camera = controls.object;
+      const target = controls.target.clone();
+      const direction = camera.position.clone().sub(target).normalize();
+      camera.zoom = 160;
+      camera.updateProjectionMatrix();
+      camera.position.copy(target).add(direction);
+      controls.update();
+      camera.updateMatrixWorld();
+      const foreground = target.clone().addScaledVector(direction, 2);
+      const screen = foreground.project(camera);
+      assert.ok(Math.abs(screen.x) < 1 && Math.abs(screen.y) < 1, "the face is on screen");
+      assert.ok(screen.z >= -1 && screen.z <= 1, `foreground face clipped at depth ${screen.z}`);
+      assert.ok(camera.position.distanceTo(controls.target) > 2);
+      assert.equal(camera.zoom, 160, "safe camera depth does not change magnification");
+      assert.deepEqual(controls.target.toArray(), target.toArray());
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
+  test("large home overview stays inside the far clipping plane", async () => {
+    const large = { ...floor, coordinates: { ...floor.coordinates, metersPerPlanUnit: 50 } };
+    const { renderer, controls } = await createWheelCamera(
+      createElement(OrbitCamera, { floor: large, resetKey: 0 }),
+    );
+    try {
+      controls.object.updateMatrixWorld();
+      const center = controls.target.clone().project(controls.object);
+      assert.ok(center.z >= -1 && center.z <= 1, `overview clipped at depth ${center.z}`);
+    } finally {
+      await renderer.unmount();
+    }
+  });
+
   test("locked orbit blocks wheel and double-tap zoom, then resumes normal input", async () => {
     const props = { floor, resetKey: 0, locked: true };
     const { renderer, controls, wheel, listeners } = await createWheelCamera(
