@@ -1,3 +1,5 @@
+import { useSceneStyle, setSceneStyle } from "./scene-style";
+import { useMeasurementUnits, setMeasurementUnits } from "./measurement-units";
 import { WeatherPreferences } from "./weather/WeatherPreferences";
 import type { WeatherController } from "./weather/useWeatherController";
 import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
@@ -83,6 +85,8 @@ export function WalkPreferences({
   onClose: () => void;
 }) {
   const dom = useCabaneDom();
+  const units = useMeasurementUnits();
+  const sceneStyle = useSceneStyle();
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const previousFocus =
@@ -133,7 +137,7 @@ export function WalkPreferences({
         <header>
           <div>
             <h2 id="walk-preferences-title">Preferences</h2>
-            <p>Make exploring feel natural to you.</p>
+            <p>Make Cabane feel natural to you.</p>
           </div>
           <button
             ref={closeRef}
@@ -145,6 +149,58 @@ export function WalkPreferences({
             ×
           </button>
         </header>
+        <div className="walk-preferences__group">
+          <h3>Visual style</h3>
+          <fieldset className="walk-preferences__choices">
+            <legend>3D home appearance</legend>
+            {(
+              [
+                ["default", "Default"],
+                ["sims", "Sims"],
+              ] as const
+            ).map(([style, label]) => (
+              <label key={style}>
+                <input
+                  type="radio"
+                  name="scene-style"
+                  value={style}
+                  checked={sceneStyle === style}
+                  onChange={() => setSceneStyle(style)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </fieldset>
+          <p className="walk-preferences__hint">
+            Sims uses faceted models, a richer palette and stronger lighting. Saved on this device.
+          </p>
+        </div>
+        <div className="walk-preferences__group">
+          <h3>Units</h3>
+          <fieldset className="walk-preferences__choices">
+            <legend>Length and area</legend>
+            {(
+              [
+                ["metric", "Metric (m, m²)"],
+                ["imperial", "Imperial (ft, ft²)"],
+              ] as const
+            ).map(([value, label]) => (
+              <label key={value}>
+                <input
+                  type="radio"
+                  name="measurement-units"
+                  value={value}
+                  checked={units === value}
+                  onChange={() => setMeasurementUnits(value)}
+                />
+                <span>{label}</span>
+              </label>
+            ))}
+          </fieldset>
+          <p className="walk-preferences__hint">
+            Applies to editor measurements. You can also enter lengths such as 90 cm or 5' 6".
+          </p>
+        </div>
         <div className="walk-preferences__group">
           <h3>Room overlays</h3>
           <p className="walk-preferences__hint">

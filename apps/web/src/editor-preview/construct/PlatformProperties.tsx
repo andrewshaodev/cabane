@@ -1,3 +1,5 @@
+import { formatArea, useMeasurementUnits } from "@cabane/engine";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import {
@@ -7,7 +9,7 @@ import {
   type OutdoorPlatformEdgeConfiguration,
   type PlanPoint,
 } from "@cabane/engine";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+
 import { FloorFinishPalette } from "./FloorFinishPalette";
 import { PlatformEdgeFields } from "./PlatformEdgeFields";
 import type { ConstructEditorController } from "./useConstructEditor";
@@ -20,6 +22,7 @@ export function PlatformProperties({
   platform: OutdoorPlatformSpec;
   editor: ConstructEditorController;
 }) {
+  const units = useMeasurementUnits();
   const edge = platform.edges.find((candidate) => candidate.id === editor.selectedPlatformEdgeId);
   const area =
     Math.abs(polygonSignedArea(platform.polygon)) * editor.draft.coordinates.metersPerPlanUnit ** 2;
@@ -60,7 +63,7 @@ export function PlatformProperties({
   return (
     <div className="construction-inspector__selection">
       <p className="editor-property-fact">
-        Area <strong>{area.toFixed(1)} m²</strong>
+        Area <strong>{formatArea(area, units)}</strong>
       </p>
       <p className="construction-inspector__tool-hint">
         Drag the platform to move it, or a corner to reshape it. Select an edge to change its style.
@@ -109,7 +112,7 @@ export function PlatformProperties({
         />
       </fieldset>
       <fieldset className="platform-corners">
-        <legend>Corners · plan units</legend>
+        <legend>Corners</legend>
         {platform.polygon.map((point, index) => (
           <div key={index} className="platform-corner-row">
             <span className="platform-corner-number" aria-label={`Corner ${index + 1}`}>
@@ -118,7 +121,8 @@ export function PlatformProperties({
             {([0, 1] as const).map((axis) => (
               <label key={axis}>
                 {axis === 0 ? "X" : "Y"}
-                <CommittedNumberInput
+                <LengthInput
+                  metersPerUnit={editor.draft.coordinates.metersPerPlanUnit}
                   label={`Platform corner ${index + 1} ${axis === 0 ? "X" : "Y"}`}
                   value={point[axis]}
                   step={0.1}

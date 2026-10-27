@@ -267,9 +267,9 @@ export function HomePlanMapping({
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
     >
-      {floor.rooms.length > 0 ? (
+      {floor.rooms.length > 0 || (floor.solidRooms?.length ?? 0) > 0 ? (
         <>
-          {showFitControl && !selectedRoomId && (
+          {showFitControl && !selectedRoomId && floor.rooms.length > 0 && (
             <p className="home-plan-mapping__instruction">Select a 3D room</p>
           )}
           <div className="home-plan-mapping__controls" aria-label="Plan zoom controls">
@@ -295,6 +295,12 @@ export function HomePlanMapping({
               </button>
             )}
           </div>
+          {(floor.solidRooms?.length ?? 0) > 0 && (
+            <p className="home-plan-mapping__solid-key">
+              <span aria-hidden="true" />
+              Not a room
+            </p>
+          )}
           <svg
             className="home-plan-mapping__svg"
             viewBox={viewBox}
@@ -303,6 +309,18 @@ export function HomePlanMapping({
               transform: `translate3d(${pan.x + inspectorFocusOffset.x}px, ${pan.y + inspectorFocusOffset.y}px, 0) rotate(-.65deg) scale(${zoom})`,
             }}
           >
+            {floor.solidRooms?.map((room) => (
+              <polygon
+                key={room.id}
+                className="home-plan-mapping__solid"
+                data-solid-id={room.id}
+                points={room.polygon.map(([x, y]) => `${x},${y}`).join(" ")}
+                role="img"
+                aria-label="Solid structure, not a room"
+              >
+                <title>Solid structure · Not a room</title>
+              </polygon>
+            ))}
             {floor.rooms.map((room) => {
               const center = roomCenter(room.polygon);
               const relationshipLabel = relationshipLabels[room.id] ?? "No HA area";

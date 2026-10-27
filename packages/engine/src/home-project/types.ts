@@ -30,7 +30,10 @@ type LayoutOpeningWithoutContact<T extends OpeningSpec> = T extends OpeningSpec
 
 export type LayoutOpeningSpec = LayoutOpeningWithoutContact<OpeningSpec>;
 
-export type LayoutFloorSpec = Omit<FloorSpec, "rooms" | "openings" | "ceilings" | "footprint"> & {
+export type LayoutFloorSpec = Omit<
+  FloorSpec,
+  "rooms" | "openings" | "ceilings" | "footprint" | "solidRooms"
+> & {
   footprint: Polygon;
   rooms: readonly LayoutRoomSpec[];
   openings: readonly LayoutOpeningSpec[];

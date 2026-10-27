@@ -22,6 +22,7 @@
     "spec": "docs/product/workspace.md",
     "owners": [
       "packages/engine/src/home-project/schema.ts",
+      "packages/engine/src/home-project/schema-room.ts",
       "packages/engine/src/home-project/schema-scene-item.ts",
       "packages/engine/src/home-project/workspace-repository.ts",
       "apps/web/src/workspaces/workspace-sync-coordinator.ts",
@@ -80,6 +81,24 @@
     "checks": ["test:unit", "test:browser"]
   },
   {
+    "title": "Measurement preferences",
+    "spec": "docs/product/workspace.md",
+    "owners": [
+      "packages/engine/src/measurement-units.ts",
+      "packages/engine/src/WalkPreferences.tsx",
+      "apps/web/src/editor-chrome/LengthInput.tsx",
+      "apps/web/src/editor-preview/furnish/NumericField.tsx"
+    ],
+    "interfaces": [
+      {
+        "module": "packages/engine/src/index.ts",
+        "symbols": ["useMeasurementUnits", "formatLength", "formatArea", "parseLength"]
+      }
+    ],
+    "invariant": "Convert physical measurements at the UI boundary. Browser-local unit preferences never rescale authored geometry; plan-coordinate inputs account for metersPerPlanUnit. Temperatures, angles and dimensionless values keep their own units.",
+    "checks": ["verify:construct"]
+  },
+  {
     "title": "Construct and floor topology",
     "spec": "docs/product/construct.md",
     "owners": [
@@ -124,7 +143,7 @@
         "symbols": ["resizeWallAttachmentAtPoint"]
       }
     ],
-    "invariant": "Apartment floor settings live in Construct floor management and persist on the home; decorative shells never enter real floor lists or Walk geometry. Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool. ConstructionInspector owns tool and building settings; ConstructionSelectionProperties owns selected-object attribute bodies in the shared inspector.",
+    "invariant": "Apartment floor settings live in Construct floor management and persist on the home; decorative shells never enter real floor lists or Walk geometry. Start at topology and validation for architectural changes: walls own openings; junctions and derived collision must agree. Optional door/window finish colors follow opening history and persistence without changing geometry. North orientation previews around the plan; only confirmation commits the shared building angle. Boundary (H) reuses hedge drawing, selection and persisted IDs. Wall edge color uses Auto or a persisted custom CSS color; Auto inherits matching authored side colors, then authored exterior color, otherwise the general interior wall finish. Face color controls follow wall direction and adjacent-room labels, preserve the opposite side, reset to the home palette, and highlight the edited face without persisting UI state. Wall niches remain wall-owned, preserve their backing through wall thickness edits and solid walk collision, and share placement, selection and resize gestures with doors and windows; Decorations groups Niche, Boundary and Pool. Solid room identities stay editable in Construct; runtime composition projects them into solidRooms outside navigation and mapping, with filled geometry and walk barriers. ConstructionInspector owns tool and building settings; ConstructionSelectionProperties owns selected-object attribute bodies in the shared inspector.",
     "checks": ["verify:construct", "fixture:verify:layout"]
   },
   {
@@ -260,6 +279,7 @@
       "packages/engine/src/building",
       "packages/engine/src/stairs",
       "packages/engine/src/SceneLighting.tsx",
+      "packages/engine/src/scene-style.ts",
       "packages/engine/src/lighting.ts",
       "packages/engine/src/solar-shadow-frame.ts",
       "packages/engine/src/hedges",

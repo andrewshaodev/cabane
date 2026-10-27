@@ -1,0 +1,39 @@
+.editor-switch[role="switch"] {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  width: 44px;
+  min-width: 44px;
+  height: 26px;
+  min-height: 26px;
+  padding: 3px;
+  border: none;
+  border-radius: 20px;
+  background: #b5b5a6;
+  justify-content: flex-start;
+}
+.editor-switch span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fffaf0;
+}
+.editor-switch[role="switch"][aria-checked="true"] {
+  background: var(--ha-accent, var(--preview-accent, #526448));
+  justify-content: flex-end;
+}
+.editor-switch[role="switch"]:hover:not(:disabled) {
+  background: #858d7a;
+}
+.editor-switch[role="switch"][aria-checked="true"]:hover:not(:disabled) {
+  background: #44583b;
+}
+.editor-switch[role="switch"]:focus-visible {
+  outline: 2px solid var(--ha-accent, var(--preview-accent, #526448));
+  outline-offset: 3px;
+}
+.editor-switch[role="switch"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

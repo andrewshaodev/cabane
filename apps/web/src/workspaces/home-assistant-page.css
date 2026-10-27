@@ -242,33 +242,6 @@
   margin: 4px 0 0;
   font-size: 12px;
 }
-.ha-page .ha-switch {
-  width: 44px;
-  min-width: 44px;
-  height: 26px;
-  min-height: 26px;
-  padding: 3px;
-  border: none;
-  border-radius: 20px;
-  background: #b5b5a6;
-  justify-content: flex-start;
-}
-.ha-switch span {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fffaf0;
-}
-.ha-page .ha-switch[aria-checked="true"] {
-  background: var(--ha-accent);
-  justify-content: flex-end;
-}
-.ha-page .ha-switch:hover:not(:disabled) {
-  background: #858d7a;
-}
-.ha-page .ha-switch[aria-checked="true"]:hover:not(:disabled) {
-  background: #44583b;
-}
 .ha-storage-state {
   padding: 20px;
   background: #ebe7db;

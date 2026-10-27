@@ -1,3 +1,4 @@
+import { useSceneStyle, styleSolarLighting } from "./scene-style";
 import {
   CLEAR_WEATHER,
   weatherSolarLighting,
@@ -38,11 +39,15 @@ export function SolarLighting({
   northAngleDegrees?: number;
   floors?: readonly RenderableFloorSpec[];
 }) {
+  const style = useSceneStyle();
   const solar = useMemo(
     () => deriveSolarLighting(sunState, mode, northAngleDegrees),
     [mode, sunState, northAngleDegrees],
   );
-  const target = useMemo(() => weatherSolarLighting(solar, weather), [solar, weather]);
+  const target = useMemo(
+    () => styleSolarLighting(weatherSolarLighting(solar, weather), style),
+    [solar, weather, style],
+  );
   const frame = useMemo(() => solarShadowFrame(floors), [floors]);
   const lightTarget = useMemo(() => {
     const object = new Object3D();

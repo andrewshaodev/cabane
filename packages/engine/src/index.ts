@@ -120,3 +120,13 @@ export { sha256Hex } from "./sha256-digest";
 export { DEFAULT_WALL_COLORS } from "./wall-colors";
 
 export type { WeatherSource, WeatherPreview } from "./weather";
+export {
+  useMeasurementUnits,
+  setMeasurementUnits,
+  lengthUnit,
+  displayLength,
+  storedLength,
+  formatLength,
+  formatArea,
+  parseLength,
+} from "./measurement-units";

@@ -70,6 +70,7 @@ await withModules(async (load) => {
   const controls = await load("/packages/engine/src/SceneControls.tsx");
   const geometry = await load("/packages/engine/src/geometry.ts");
   const rendering = await load("/packages/engine/src/rendering.tsx");
+  const { SceneStyleContext } = await load("/packages/engine/src/scene-style.ts");
   const architecture = await load("/packages/engine/src/architecture-geometry.ts");
   const openingModels = await load("/packages/catalog/src/architecture/index.ts");
   const { stableDeviceRegistry } = await load("/packages/catalog/src/device/index.ts");
@@ -77,6 +78,30 @@ await withModules(async (load) => {
   const outline = await load("/packages/engine/src/SceneOutlines.tsx");
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const cabaneFloor = JSON.parse(await readFile("tests/fixtures/cabane-floor.json", "utf8"));
+
+  test("Sims materials change shading and palette without mutating authored colors", async () => {
+    const authored = new Color("#719976");
+    const original = authored.clone();
+    const element = (style) =>
+      createElement(
+        SceneStyleContext.Provider,
+        { value: style },
+        createElement("mesh", null, createElement(rendering.ToonMaterial, { color: authored })),
+      );
+    const renderer = await create(element("default"));
+    const material = renderer.scene.children[0].instance.material;
+    const gradient = material.gradientMap;
+    await renderer.update(element("sims"));
+    assert.ok("FLAT_SHADED" in material.defines);
+    assert.notEqual(material.gradientMap, gradient);
+    assert.ok(!material.color.equals(original));
+    assert.ok(authored.equals(original));
+    await renderer.update(element("default"));
+    assert.ok(!("FLAT_SHADED" in material.defines));
+    assert.equal(material.gradientMap, gradient);
+    assert.ok(material.color.equals(original));
+    await renderer.unmount();
+  });
 
   test("outline smoothing preserves the source mesh normals for non-indexed geometry", async () => {
     const source = new BoxGeometry(1, 1, 1).toNonIndexed();

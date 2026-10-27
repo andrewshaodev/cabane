@@ -1,6 +1,6 @@
 import { omitUndefinedProperties } from "@cabane/engine";
 import type { DoorConfiguration } from "@cabane/engine";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 export function DoorDesignFields({
   value,
   onChange,
@@ -17,7 +17,7 @@ export function DoorDesignFields({
           <legend>Size</legend>
           <label>
             Width
-            <CommittedNumberInput
+            <LengthInput
               label="Door width"
               min={0.3}
               value={value.widthMeters}
@@ -26,7 +26,7 @@ export function DoorDesignFields({
           </label>
           <label>
             Height
-            <CommittedNumberInput
+            <LengthInput
               label="Door height"
               min={0.3}
               value={value.heightMeters}

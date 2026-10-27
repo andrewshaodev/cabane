@@ -506,6 +506,36 @@
   height: 16px;
   accent-color: var(--preview-accent);
 }
+.construction-inspector__room-actions {
+  display: grid;
+  gap: 8px;
+}
+.construction-inspector__room-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  gap: 12px;
+}
+.construction-inspector__room-toggle label {
+  cursor: pointer;
+}
+.construction-inspector__room-toggle-copy {
+  display: grid;
+  gap: 4px;
+}
+.direction-preview .construction-inspector__room-actions > button.editor-button {
+  justify-self: start;
+  min-height: 44px;
+  padding-inline: 0;
+  border: 0;
+}
+.construction-inspector__room-action-note {
+  margin: 0;
+  color: var(--preview-muted);
+  font-size: var(--editor-text-caption);
+  line-height: 1.5;
+}
 .construction-inspector__single-control {
   margin: 15px 0;
 }

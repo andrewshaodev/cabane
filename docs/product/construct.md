@@ -83,7 +83,17 @@ removes exclusive boundary spans and their openings, preserves walls shared with
 unselected rooms, and splits source walls where only part is removable. Shared
 boundaries incidentally touched by a room marquee remain; wall-only deletion
 still removes a directly selected wall. A room enclosed entirely by shared walls
-explains that its walls must be edited. Removing the final room clears its floor
+explains that its walls must be edited. In Properties, the separate Room actions
+section groups Delete room with a reversible Solid structure toggle. This marks an
+enclosed space as a solid structural block for chimneys, shafts or pillars,
+keeping its walls and saved room identity. Solid spaces have a neutral plan fill
+without a room label, remain selectable in Construct, and render at the floor's
+default wall height. They are excluded from Home room navigation, room status,
+Connect area mapping and walk connectivity diagnostics. Connect keeps them visible
+as muted structural blocks in the plan with a Not a room key, without room
+labels, selection or mapping actions. Their boundaries block
+walking even where an opening exists. Toggling back restores the saved name,
+finishes, ceiling and room profile through ordinary undo/redo and save flows. Removing the final room clears its floor
 preview instead of keeping the last closed shape. Deletion is one undoable edit.
 Tool shortcuts include V/W/D/N/A/F/P/M; Escape cancels the active drawing
 or selection state. Measure displays lengths and supports copying a result.

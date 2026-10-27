@@ -1,9 +1,9 @@
 {
-  "revision": 11,
-  "fingerprint": "de818b4b71ae956635e2c15e27ec46eb65af76d62cd3618e4a5b17f9190cc30b",
+  "revision": 12,
+  "fingerprint": "990281835e28e788f18f312263ca929f202f78076eb580e6f1c8c37c34b61f10",
   "summary": "Add decorative apartment floors through Construct floor management",
   "breakingChanges": [
-    "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field."
+    "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field. Solid structural spaces from revision 11 remain supported."
   ],
   "history": [
     {
@@ -74,6 +74,13 @@
       "summary": "Allow imports and Save with unavailable catalog variants using default visuals",
       "breakingChanges": [
         "Existing projects remain compatible. Missing furnishing and device variants now produce warnings and render the model default while retaining the saved variant ID; missing models retain placeholders. Older panels can reject newer variants until updated through HACS. Structural and unsupported-schema errors remain blocked."
+      ]
+    },
+    {
+      "revision": 11,
+      "summary": "Support reversible solid structural spaces in room properties",
+      "breakingChanges": [
+        "Older clients must update before importing projects containing the room isSolid field."
       ]
     }
   ],

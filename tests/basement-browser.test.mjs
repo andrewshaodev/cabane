@@ -38,6 +38,11 @@ test(
       await page.keyboard.press("End");
       assert.equal(
         await page.evaluate(() => document.activeElement?.textContent),
+        "Setup apartment floor",
+      );
+      await page.keyboard.press("ArrowUp");
+      assert.equal(
+        await page.evaluate(() => document.activeElement?.textContent),
         "Add floor below",
       );
       await page.keyboard.press("Enter");
@@ -47,7 +52,7 @@ test(
       );
       await page.getByRole("button", { name: "Floor settings", exact: true }).click();
       await page.getByLabel("Floor name", { exact: true }).fill("Cellar");
-      await page.getByLabel("Floor-to-floor height (m)", { exact: true }).fill("3");
+      await page.getByLabel("Floor-to-floor height", { exact: true }).fill("3");
       await page.getByRole("button", { name: "Save floor", exact: true }).click();
       await page.waitForFunction(
         () =>
@@ -79,7 +84,7 @@ test(
       await page.getByRole("menuitemradio", { name: "Cellar", exact: true }).click();
       await page.getByRole("button", { name: "Floor settings", exact: true }).click();
       assert.equal(
-        await page.getByLabel("Floor-to-floor height (m)", { exact: true }).inputValue(),
+        await page.getByLabel("Floor-to-floor height", { exact: true }).inputValue(),
         "3",
       );
       await page.getByRole("button", { name: "Cancel", exact: true }).click();

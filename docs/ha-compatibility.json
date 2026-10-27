@@ -2415,6 +2415,19 @@
                             "type": "string"
                           }
                         },
+                        "isSolid": {
+                          "optional": true,
+                          "schema": {
+                            "anyOf": [
+                              {
+                                "const": false
+                              },
+                              {
+                                "const": true
+                              }
+                            ]
+                          }
+                        },
                         "name": {
                           "optional": false,
                           "schema": {
@@ -6163,6 +6176,19 @@
                         "optional": false,
                         "schema": {
                           "type": "string"
+                        }
+                      },
+                      "isSolid": {
+                        "optional": true,
+                        "schema": {
+                          "anyOf": [
+                            {
+                              "const": false
+                            },
+                            {
+                              "const": true
+                            }
+                          ]
                         }
                       },
                       "name": {

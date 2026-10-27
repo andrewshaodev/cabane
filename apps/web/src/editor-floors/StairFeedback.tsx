@@ -1,8 +1,10 @@
+import { formatLength, useMeasurementUnits } from "@cabane/engine";
 import { Html } from "@react-three/drei";
 import type { StairFlight } from "@cabane/engine";
 import { ConstructionDistanceLabel } from "../editor-preview/construct/ConstructionDistanceLabel";
 
 export function StairFeedback({ flight }: { flight: StairFlight }) {
+  const units = useMeasurementUnits();
   return (
     <Html
       position={[
@@ -18,10 +20,10 @@ export function StairFeedback({ flight }: { flight: StairFlight }) {
       <ConstructionDistanceLabel
         label={
           flight.spec.shape === "spiral"
-            ? `Ø ${flight.spec.diameterMeters.toFixed(2)} m · ${flight.spec.totalTurnDegrees}°`
+            ? `Ø ${formatLength(flight.spec.diameterMeters, units)} · ${flight.spec.totalTurnDegrees}°`
             : flight.spec.shape === "l-shaped" || flight.spec.shape === "u-shaped"
-              ? `${flight.spec.lowerRunMeters.toFixed(2)} + ${flight.spec.upperRunMeters.toFixed(2)} m × ${flight.widthMeters.toFixed(2)} m`
-              : `${flight.runMeters.toFixed(2)} m × ${flight.widthMeters.toFixed(2)} m`
+              ? `${formatLength(flight.spec.lowerRunMeters, units)} + ${formatLength(flight.spec.upperRunMeters, units)} × ${formatLength(flight.widthMeters, units)}`
+              : `${formatLength(flight.runMeters, units)} × ${formatLength(flight.widthMeters, units)}`
         }
         ariaLabel="Stair length and width"
       />

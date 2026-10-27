@@ -1,3 +1,4 @@
+import { LengthInput } from "../editor-chrome/LengthInput";
 import { useState } from "react";
 import { SidebarSectionSummary } from "../editor-chrome/SidebarSectionSummary";
 import { EditorButton } from "../editor-chrome/EditorButton";
@@ -106,15 +107,12 @@ export function ReferencePlanPanel({
                     }}
                   >
                     <label>
-                      Distance (m)
-                      <input
-                        aria-label="Reference distance in metres"
-                        type="number"
-                        min="0.0001"
-                        step="any"
-                        required
-                        value={distance}
-                        onChange={(event) => setDistance(event.target.value)}
+                      Distance
+                      <LengthInput
+                        label="Reference distance"
+                        min={0.0001}
+                        value={Number(distance)}
+                        onCommit={(value) => setDistance(String(value))}
                       />
                     </label>
                     <EditorButton type="submit" variant="primary" disabled={r.points.length !== 2}>

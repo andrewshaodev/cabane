@@ -9,18 +9,10 @@ import { keys, record, array, string, finite, point, polygon } from "./schema-js
 import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
-import { floorFinish } from "./schema-floor-finish";
+import { room } from "./schema-room";
+import { floorFinish, floorZone } from "./schema-floor-finish";
 import type { HomeProject, LegacyHomeProject } from "./types";
 import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
-
-const floorZone = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  keys(candidate, ["id", "polygon", "finish"], path, issues);
-  string(candidate.id, `${path}.id`, issues);
-  polygon(candidate.polygon, `${path}.polygon`, issues);
-  floorFinish(candidate.finish, `${path}.finish`, issues);
-};
 
 const stringArray = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   array(value, path, issues)?.forEach((entry, index) => string(entry, `${path}[${index}]`, issues));
@@ -59,47 +51,6 @@ const contactSlot = (value: unknown, path: string, issues: HomeProjectIssue[]) =
       "Contact autoMap is invalid.",
     );
   }
-};
-
-const room = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
-  const candidate = record(value, path, issues);
-  if (!candidate) return;
-  keys(
-    candidate,
-    ["id", "name", "polygon", "accent", "floorFinish", "floorZones", "dashboardSlots", "devices"],
-    path,
-    issues,
-  );
-  string(candidate.id, `${path}.id`, issues);
-  // An unnamed derived room is a valid editable draft. Layout validation
-  // still requires a non-empty name before publication.
-  if (typeof candidate.name !== "string") string(candidate.name, `${path}.name`, issues);
-  polygon(candidate.polygon, `${path}.polygon`, issues);
-  string(candidate.accent, `${path}.accent`, issues);
-  if (candidate.floorFinish !== undefined) {
-    floorFinish(candidate.floorFinish, `${path}.floorFinish`, issues);
-  }
-  if (candidate.floorZones !== undefined) {
-    array(candidate.floorZones, `${path}.floorZones`, issues)?.forEach((zone, index) =>
-      floorZone(zone, `${path}.floorZones[${index}]`, issues),
-    );
-  }
-  const slots = array(candidate.dashboardSlots, `${path}.dashboardSlots`, issues);
-  if (slots?.length)
-    addProjectIssue(
-      issues,
-      "project.layout-dashboard-slots",
-      `${path}.dashboardSlots`,
-      "Layout rooms require an empty dashboardSlots array.",
-    );
-  const devices = array(candidate.devices, `${path}.devices`, issues);
-  if (devices?.length)
-    addProjectIssue(
-      issues,
-      "project.layout-devices",
-      `${path}.devices`,
-      "Layout rooms require an empty devices array.",
-    );
 };
 
 const opening = (value: unknown, path: string, issues: HomeProjectIssue[]) => {

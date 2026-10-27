@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://buymeacoffee.com/cabane">
-    <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000000" alt="Buy me a coffee to support Cabane" />
+  <a href="https://paypal.me/hilliaapp">
+    <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=paypal&logoColor=000000" alt="Buy me a coffee to support Cabane via PayPal" />
   </a>
 </p>
 

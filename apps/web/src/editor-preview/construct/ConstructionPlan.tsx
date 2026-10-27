@@ -1,3 +1,4 @@
+import { formatArea, useMeasurementUnits } from "@cabane/engine";
 import { useCabaneDom } from "@cabane/engine";
 import { RoomNameControl } from "./RoomNameControl";
 import { Html } from "@react-three/drei";
@@ -37,6 +38,7 @@ const PlanRoom = memo(function PlanRoom({
   room: FloorSpec["rooms"][number];
   coordinates: FloorSpec["coordinates"];
 }) {
+  const units = useMeasurementUnits();
   const dom = useCabaneDom();
   const label = useRef<HTMLSpanElement>(null);
   const bounds = useMemo(
@@ -83,7 +85,9 @@ const PlanRoom = memo(function PlanRoom({
             ) : (
               room.name
             )}
-            <span className="construction-plan__room-area">{areaSquareMeters.toFixed(1)} m²</span>
+            <span className="construction-plan__room-area">
+              {formatArea(areaSquareMeters, units)}
+            </span>
           </span>
         </Html>
       )}
@@ -159,9 +163,11 @@ export const ConstructionPlan = memo(function ConstructionPlan({
   return (
     <group name="construction-plan">
       {showFinishes && <FloorFinishSurfaces floor={floor} variant="plan" />}
-      {floor.rooms.map((room) => (
-        <PlanRoom key={room.id} room={room} coordinates={floor.coordinates} {...naming} />
-      ))}
+      {floor.rooms
+        .filter((room) => !room.isSolid)
+        .map((room) => (
+          <PlanRoom key={room.id} room={room} coordinates={floor.coordinates} {...naming} />
+        ))}
       <PlanStrokeBatch name="plan-footprints" strokes={footprints} />
     </group>
   );

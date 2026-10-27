@@ -1,3 +1,6 @@
+import { EditorSwitch } from "../../editor-chrome/EditorSwitch";
+import { formatLength, formatArea, useMeasurementUnits } from "@cabane/engine";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { useMemo } from "react";
 import {
   pointInsidePolygon,
@@ -7,7 +10,7 @@ import {
 import type { ConstructionInspectorProps } from "./construction-inspector-contract";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import { EditorButton } from "../../editor-chrome/EditorButton";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+
 import { CommittedTextInput } from "./CommittedTextInput";
 import { DebouncedColorInput } from "./DebouncedColorInput";
 import { FloorFinishPalette } from "./FloorFinishPalette";
@@ -21,6 +24,7 @@ export function ConstructionSelectionProperties({
   editor,
   onClose,
 }: Pick<ConstructionInspectorProps, "editor"> & { onClose: () => void }) {
+  const units = useMeasurementUnits();
   const selectedWallId = editor.selection?.kind === "wall" ? editor.selection.id : null;
   const selectedPoolId = editor.selection?.kind === "pool" ? editor.selection.id : null;
   const selectedRoomId = editor.selection?.kind === "room" ? editor.selection.id : null;
@@ -187,7 +191,7 @@ export function ConstructionSelectionProperties({
             <dl className="construction-inspector__wall-facts">
               <div>
                 <dt>Length</dt>
-                <dd>{wallMetrics?.label}</dd>
+                <dd>{wallMetrics && formatLength(wallMetrics.lengthMeters, units)}</dd>
               </div>
               <div>
                 <dt>Direction</dt>
@@ -199,10 +203,10 @@ export function ConstructionSelectionProperties({
               </div>
             </dl>
             <fieldset>
-              <legend>Dimensions · m</legend>
+              <legend>Dimensions</legend>
               <label>
                 Thickness
-                <CommittedNumberInput
+                <LengthInput
                   label="Wall thickness"
                   min={0.04}
                   step={0.01}
@@ -214,7 +218,7 @@ export function ConstructionSelectionProperties({
               </label>
               <label>
                 Height
-                <CommittedNumberInput
+                <LengthInput
                   label="Wall height"
                   min={0.3}
                   step={0.05}
@@ -239,9 +243,9 @@ export function ConstructionSelectionProperties({
               Interior area{" "}
               <span
                 title="Interior floor area"
-                aria-label={`Interior floor area: ${roomAreaSquareMeters.toFixed(1)} square meters`}
+                aria-label={`Interior floor area: ${formatArea(roomAreaSquareMeters, units).replace("m²", "square meters").replace("ft²", "square feet")}`}
               >
-                <strong>{roomAreaSquareMeters.toFixed(1)} m²</strong>
+                <strong>{formatArea(roomAreaSquareMeters, units)}</strong>
               </span>
             </p>
             {mergedRoomIdentities.length > 1 && (
@@ -293,7 +297,7 @@ export function ConstructionSelectionProperties({
               <legend>Ceiling</legend>
               <label>
                 Ceiling
-                <CommittedNumberInput
+                <LengthInput
                   label="Room ceiling height"
                   min={0.3}
                   step={0.05}
@@ -304,25 +308,54 @@ export function ConstructionSelectionProperties({
                 />
               </label>
             </fieldset>
-            {editor.deletionTargets?.some(
-              (target) => target.kind === "room" && target.id === selectedRoom.id,
-            ) === false && (
-              <p role="status">
-                All enclosing walls are shared. Edit the walls to remove this room.
-              </p>
-            )}
-            <EditorButton
-              variant="text"
-              type="button"
-              disabled={
-                editor.deletionTargets?.some(
-                  (target) => target.kind === "room" && target.id === selectedRoom.id,
-                ) === false
-              }
-              onClick={editor.deleteSelected}
-            >
-              Delete room
-            </EditorButton>
+            <fieldset>
+              <legend>Room actions</legend>
+              <div className="construction-inspector__room-actions">
+                <div className="construction-inspector__room-toggle">
+                  <div className="construction-inspector__room-toggle-copy">
+                    <label
+                      id="room-solid-label"
+                      htmlFor="room-solid"
+                      title="Render as a solid block, excluded from room navigation and area mapping."
+                    >
+                      Solid structure
+                    </label>
+                    <p
+                      id="room-solid-description"
+                      className="construction-inspector__room-action-note"
+                    >
+                      Fill this space for a chimney, shaft or pillar.
+                    </p>
+                  </div>
+                  <EditorSwitch
+                    id="room-solid"
+                    labelledBy="room-solid-label"
+                    describedBy="room-solid-description"
+                    checked={selectedRoom.isSolid ?? false}
+                    onChange={(isSolid) => editor.updateSelectedRoom({ isSolid })}
+                  />
+                </div>
+                <EditorButton
+                  variant="text"
+                  type="button"
+                  disabled={
+                    editor.deletionTargets?.some(
+                      (target) => target.kind === "room" && target.id === selectedRoom.id,
+                    ) === false
+                  }
+                  onClick={editor.deleteSelected}
+                >
+                  Delete room
+                </EditorButton>
+              </div>
+              {editor.deletionTargets?.some(
+                (target) => target.kind === "room" && target.id === selectedRoom.id,
+              ) === false && (
+                <p className="construction-inspector__room-action-note" role="status">
+                  Shared walls. Edit the walls to delete this room.
+                </p>
+              )}
+            </fieldset>
           </div>
         )}
       </section>

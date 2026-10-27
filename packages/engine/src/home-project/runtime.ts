@@ -25,7 +25,7 @@ export const roomIdForItem = (
   floor: HomeBindingManifest["floors"][number],
 ): string | null => {
   const { at } = resolvedPlanPoint(item, floor);
-  const rooms = floor.rooms.filter((room) => pointInsidePolygon(at, room.polygon));
+  const rooms = floor.rooms.filter((room) => !room.isSolid && pointInsidePolygon(at, room.polygon));
   if (rooms.length !== 1) return null;
   return item.placement.kind !== "ceiling" || rooms[0].id === item.placement.roomId
     ? rooms[0].id
@@ -92,20 +92,39 @@ export const composeHomeBindingManifest = (
     const items = project.sceneItems.filter(
       (item): item is DeviceItemSpec => item.kind === "device" && item.floorId === floor.id,
     );
-    const rooms = floor.rooms.map((room) => ({
-      ...room,
-      dashboardSlots: project.roomProfiles[room.id]?.dashboardSlots ?? [],
-      devices: items
-        .filter((item) => {
-          try {
-            return roomIdForItem(item, floor) === room.id;
-          } catch {
-            return false;
+    const rooms = floor.rooms
+      .filter((room) => !room.isSolid)
+      .map((room) => ({
+        ...room,
+        dashboardSlots: project.roomProfiles[room.id]?.dashboardSlots ?? [],
+        devices: items
+          .filter((item) => {
+            try {
+              return roomIdForItem(item, floor) === room.id;
+            } catch {
+              return false;
+            }
+          })
+          .map((item) => deviceSlotForItem(item, floor)),
+      }));
+    const solidRooms = floor.rooms.filter((room) => room.isSolid);
+    const roomIds = new Set(rooms.map((room) => room.id));
+    return {
+      ...floor,
+      rooms,
+      openings,
+      ...(solidRooms.length ? { solidRooms } : {}),
+      ...(floor.ceilings
+        ? {
+            ceilings: floor.ceilings
+              .map((ceiling) => ({
+                ...ceiling,
+                roomIds: ceiling.roomIds.filter((id) => roomIds.has(id)),
+              }))
+              .filter((ceiling) => ceiling.roomIds.length),
           }
-        })
-        .map((item) => deviceSlotForItem(item, floor)),
-    }));
-    return { ...floor, rooms, openings };
+        : {}),
+    };
   }),
   sceneItems: project.sceneItems,
   shortcuts: project.shortcuts,
