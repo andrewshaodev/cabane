@@ -13,9 +13,7 @@
   gap: 10px;
   font-weight: 600;
 }
-.lighting-enable input,
-.lighting-surfaces input,
-.lighting-saved-material input {
+.lighting-enable input {
   width: 18px;
   min-height: 18px;
   flex: none;
@@ -45,6 +43,17 @@
   background: var(--editor-muted, #ece9df);
   border-radius: 10px;
   overflow: hidden;
+  cursor: grab;
+}
+.lighting-stage[data-picking="orbit"]:active {
+  cursor: grabbing;
+}
+.lighting-stage[data-picking="position"],
+.lighting-stage[data-picking="surface"] {
+  cursor: crosshair;
+}
+.lighting-stage canvas {
+  cursor: inherit;
 }
 .lighting-stage__hint {
   position: absolute;
@@ -117,8 +126,8 @@
   gap: 6px;
   flex-wrap: wrap;
 }
-.lighting-type [aria-pressed="true"],
-.lighting-source-row [aria-pressed="true"] {
+.model-lighting-editor .editor-button[aria-pressed="true"],
+.model-lighting-editor .editor-button[aria-pressed="true"]:hover:not(:disabled) {
   background: var(--editor-selected, #e0e7d9);
   color: var(--editor-ink, #354738);
   border-color: var(--editor-accent, #395a3d);
@@ -137,22 +146,10 @@
   flex: 1;
   justify-content: flex-start;
 }
-.lighting-surfaces {
-  max-height: 200px;
-  overflow: auto;
-  margin-block: 10px;
-}
-.lighting-surfaces label,
-.lighting-fields .lighting-saved-material {
-  flex-direction: row;
-  align-items: center;
-  gap: 9px;
-  padding-block: 3px;
-  overflow-wrap: anywhere;
-}
-.lighting-surfaces small {
-  display: block;
-  color: var(--editor-ink-muted, #53604e);
+.lighting-source-state {
+  margin-inline-start: auto;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 .lighting-coordinates {
   display: grid;
@@ -256,14 +253,10 @@
 .model-editor-sections {
   margin-block: 12px 20px;
 }
-.model-import-dialog .lighting-enable label,
-.model-import-dialog .lighting-surfaces label,
-.model-import-dialog .lighting-saved-material {
+.model-import-dialog .lighting-enable label {
   flex-direction: row;
 }
-.model-import-dialog .lighting-enable input,
-.model-import-dialog .lighting-surfaces input,
-.model-import-dialog .lighting-saved-material input {
+.model-import-dialog .lighting-enable input {
   width: 18px;
   min-height: 18px;
 }

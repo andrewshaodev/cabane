@@ -1,4 +1,7 @@
 import { EditorButton } from "../../editor-chrome/EditorButton";
+import { EditorIcon } from "../../editor-chrome/EditorIcon";
+import { FurnishingVariantGrid } from "./FurnishingVariantGrid";
+import type { CatalogEntry } from "./catalog/catalog";
 import { NumericField } from "./NumericField";
 import { modelVariants, resolveModelVariant } from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
@@ -17,6 +20,7 @@ const rotationFor = (placement: ItemPlacement) =>
 export function FurnishingProperties({
   selected,
   definition,
+  previewEntry,
   onPlacementChange,
   onSizeChange,
   onLightStateChange,
@@ -39,6 +43,7 @@ export function FurnishingProperties({
     | undefined;
   selected: SceneItemSpec;
   definition: SceneModelEditorDescriptor;
+  previewEntry?: CatalogEntry | undefined;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
   onSizeChange: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
   onColorChange?:
@@ -72,6 +77,16 @@ export function FurnishingProperties({
       subtitle={`${definition.category}${floor ? ` · ${floor.name}` : ""}`}
       onClose={onClose}
     >
+      {previewEntry && modelVariants(definition).length > 1 && onVariantChange && (
+        <fieldset>
+          <legend>Variant</legend>
+          <FurnishingVariantGrid
+            entry={previewEntry}
+            value={selected.variant}
+            onChange={(variant) => onVariantChange(selected.id, variant, definition)}
+          />
+        </fieldset>
+      )}
       <fieldset>
         <legend>Dimensions</legend>
         {definition.resizePolicy.kind === "uniform" ? (
@@ -113,12 +128,17 @@ export function FurnishingProperties({
       {onEditLighting && (
         <fieldset>
           <legend>Lighting</legend>
-          <p className="editor-properties-note">
-            {definition.lighting
-              ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
-              : "No lighting"}
-          </p>
-          <EditorButton onClick={onEditLighting}>Edit lighting</EditorButton>
+          <div className="furnishing-lighting-action">
+            <p className="editor-properties-note">
+              {definition.lighting
+                ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
+                : "No lighting"}
+            </p>
+            <EditorButton onClick={onEditLighting}>
+              <EditorIcon name="lighting" />
+              Edit lighting
+            </EditorButton>
+          </div>
           {definition.lighting && onConnectLighting && (
             <EditorButton variant="text" onClick={onConnectLighting}>
               Connect lighting
@@ -304,8 +324,7 @@ export function FurnishingProperties({
         </fieldset>
       )}
 
-      {((modelVariants(definition).length > 1 && !!onVariantChange) ||
-        (!!definition.defaultColor && !!onColorChange) ||
+      {((!!definition.defaultColor && !!onColorChange) ||
         (selected.kind === "device" &&
           !onEditLighting &&
           !!onLightStateChange &&
@@ -315,25 +334,6 @@ export function FurnishingProperties({
           ))) && (
         <fieldset>
           <legend>Appearance</legend>
-          {modelVariants(definition).length > 1 && onVariantChange && (
-            <>
-              <label>
-                <span>Variant</span>
-                <select
-                  value={resolveModelVariant(definition, selected.variant).id}
-                  onChange={(event) =>
-                    onVariantChange(selected.id, event.currentTarget.value, definition)
-                  }
-                >
-                  {modelVariants(definition).map((variant) => (
-                    <option key={variant.id} value={variant.id}>
-                      {variant.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </>
-          )}
           {definition.defaultColor && onColorChange && (
             <>
               <label>

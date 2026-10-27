@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { LengthInput } from "../editor-chrome/LengthInput";
 import { EditorButton } from "../editor-chrome/EditorButton";
+import { EditorIcon } from "../editor-chrome/EditorIcon";
 import type {
   CustomModelLight,
   DeviceModelBounds,
@@ -17,7 +18,6 @@ export function LightingFields({
   picking,
   onPicking,
   surfaces,
-  onHighlight,
 }: {
   light: CustomModelLight;
   onChange: (light: CustomModelLight) => void;
@@ -27,7 +27,6 @@ export function LightingFields({
   picking: "position" | "surface" | null;
   onPicking: (mode: "position" | "surface" | null) => void;
   surfaces: readonly ModelLightingSurfaceOption[];
-  onHighlight: (id: string | undefined) => void;
 }) {
   const pointLayout = useRef<Pick<CustomModelLight, "position" | "points"> | null>(null);
   const stripLayout = useRef<Pick<CustomModelLight, "position" | "strip"> | null>(null);
@@ -43,15 +42,6 @@ export function LightingFields({
     } else if (selected === 0) onChange({ ...light, position: next });
     else
       onChange({ ...light, points: light.points!.map((p, i) => (i === selected - 1 ? next : p)) });
-  };
-  const toggleSurface = (id: string) => {
-    const selected = light.emissiveSurfaces ?? [];
-    onChange({
-      ...light,
-      emissiveSurfaces: selected.includes(id)
-        ? selected.filter((value) => value !== id)
-        : [...selected, id],
-    });
   };
   return (
     <div className="lighting-fields">
@@ -102,13 +92,19 @@ export function LightingFields({
           {positions.map((_position, index) => (
             <div key={index} className="lighting-source-row">
               <EditorButton
-                aria-pressed={selected === index}
+                aria-pressed={selected === index && picking === "position"}
                 onClick={() => {
                   onSelect(index);
-                  onPicking("position");
+                  onPicking(selected === index && picking === "position" ? null : "position");
                 }}
               >
-                {light.strip ? (index === 0 ? "Strip start" : "Strip end") : `Point ${index + 1}`}
+                <EditorIcon name="move" />
+                <span>
+                  {light.strip ? (index === 0 ? "Strip start" : "Strip end") : `Point ${index + 1}`}
+                </span>
+                {selected === index && picking === "position" && (
+                  <small className="lighting-source-state">Editing</small>
+                )}
               </EditorButton>
               {!light.strip && index > 0 && (
                 <EditorButton
@@ -155,9 +151,8 @@ export function LightingFields({
           </EditorButton>
         )}
         <p className="lighting-note">
-          {light.strip
-            ? "Choose an endpoint, then click the model to move it."
-            : "Choose a point, then click the model to move it."}
+          Select {light.strip ? "an endpoint" : "a point"} to edit its position in the preview.
+          Select it again to finish.
         </p>
       </fieldset>
       <fieldset>
@@ -166,52 +161,17 @@ export function LightingFields({
           aria-pressed={picking === "surface"}
           onClick={() => onPicking(picking === "surface" ? null : "surface")}
         >
+          <EditorIcon name="select" />
           Choose in preview
         </EditorButton>
-        <div className="lighting-surfaces">
-          {surfaces.map((surface) => (
-            <label
-              key={surface.id}
-              onPointerEnter={() => onHighlight(surface.id)}
-              onPointerLeave={() => onHighlight(undefined)}
-            >
-              <input
-                type="checkbox"
-                checked={light.emissiveSurfaces?.includes(surface.id) ?? false}
-                disabled={
-                  !surface.supported ||
-                  (!light.emissiveSurfaces?.includes(surface.id) &&
-                    (light.emissiveSurfaces?.length ?? 0) +
-                      (light.emissiveMaterials?.length ?? 0) >=
-                      16)
-                }
-                onChange={() => toggleSurface(surface.id)}
-              />
-              <span>
-                {surface.label}
-                {!surface.supported && <small>Glow unavailable</small>}
-              </span>
-            </label>
-          ))}
-        </div>
+        {picking === "surface" && (
+          <p className="lighting-note">
+            Click surfaces to add or remove glow. Select again to finish.
+          </p>
+        )}
         {!surfaces.some((surface) => surface.supported) && (
           <p className="lighting-note">No surfaces available for glow.</p>
         )}
-        {(light.emissiveMaterials ?? []).map((name) => (
-          <label className="lighting-saved-material" key={name}>
-            <input
-              type="checkbox"
-              checked
-              onChange={() =>
-                onChange({
-                  ...light,
-                  emissiveMaterials: light.emissiveMaterials!.filter((value) => value !== name),
-                })
-              }
-            />
-            {name} · saved material
-          </label>
-        ))}
       </fieldset>
       <fieldset>
         <legend>Appearance</legend>
