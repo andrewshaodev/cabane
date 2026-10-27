@@ -26,6 +26,11 @@ await withModules(async (load) => {
     "/apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
   );
 
+  const { ArrangePlacedItems } = await load(
+    "/apps/web/src/editor-preview/furnish/ArrangePlacedItems.tsx",
+  );
+  const { useEditorPanels } = await load("/apps/web/src/editor-workspace/useEditorPanels.ts");
+
   async function withDom(run) {
     const dom = new JSDOM('<!doctype html><div id="root"></div>', { url: "http://cabane.local/" });
     const names = [
@@ -82,6 +87,179 @@ await withModules(async (load) => {
       }
     }
   }
+
+  test("placed items include occluded and missing models on this floor and open normal Properties without moving focus or editing history", async () => {
+    await withDom(async ({ root, document }) => {
+      const baseFloor = ownerProjectManifest.floors[0];
+      const floor = {
+        ...baseFloor,
+        id: "synthetic-floor",
+        rooms: [
+          {
+            ...baseFloor.rooms[0],
+            id: "study",
+            name: "Study",
+            polygon: [
+              [0, 0],
+              [4, 0],
+              [4, 4],
+              [0, 4],
+            ],
+          },
+          {
+            ...baseFloor.rooms[0],
+            id: "kitchen",
+            name: "Kitchen",
+            polygon: [
+              [4, 0],
+              [8, 0],
+              [8, 4],
+              [4, 4],
+            ],
+          },
+        ],
+        outdoorPlatforms: [
+          {
+            id: "patio",
+            useAsRoom: true,
+            roomName: "Patio",
+            polygon: [
+              [8, 0],
+              [12, 0],
+              [12, 4],
+              [8, 4],
+            ],
+            finish: baseFloor.rooms[0].floorFinish,
+          },
+        ],
+      };
+      const placement = { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 };
+      const cabinet = {
+        id: "cabinet",
+        floorId: floor.id,
+        kind: "furnishing",
+        modelId: "cabinet",
+        size: [2, 2, 2],
+        placement,
+      };
+      const device = {
+        ...cabinet,
+        id: "inside-cabinet",
+        kind: "device",
+        modelId: "sensor",
+        size: [0.1, 0.1, 0.1],
+        entitySlots: [],
+      };
+      const missing = {
+        ...cabinet,
+        id: "unresolved",
+        modelId: "removed-model",
+        placement: { kind: "wall", wallId: "missing-wall" },
+      };
+      const ceiling = {
+        ...device,
+        id: "ceiling-device",
+        placement: {
+          kind: "ceiling",
+          roomId: "kitchen",
+          at: [6, 2],
+          dropMeters: 0.2,
+          rotationYRadians: 0,
+        },
+      };
+      const outdoor = { ...cabinet, id: "patio-item", placement: { ...placement, at: [10, 2] } };
+      const items = [
+        cabinet,
+        device,
+        missing,
+        ceiling,
+        outdoor,
+        { ...cabinet, id: "upstairs", floorId: "other-floor" },
+      ];
+      const definition = {
+        ...ownerProjectRegistries.furnishingModels["sectional-sofa"],
+        label: "Cabinet",
+      };
+      let editor, panels, setDisabled;
+      function Harness() {
+        editor = useFurnishingEditor(items);
+        panels = useEditorPanels(editor.selectedId, false);
+        const [disabled, updateDisabled] = useState(false);
+        setDisabled = updateDisabled;
+        const registries = {
+          furnishingModels: { cabinet: definition },
+          deviceModels: { sensor: { ...definition, label: "Temperature sensor" } },
+        };
+        return React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(ArrangePlacedItems, {
+            ...registries,
+            floor,
+            items: editor.items,
+            selectedIds: editor.selectedIds,
+            disabled,
+            onSelect: (id) => {
+              editor.select(id);
+              panels.openProperties();
+            },
+          }),
+          panels.propertiesOpen &&
+            React.createElement(FurnishingInspector, {
+              ...registries,
+              floor,
+              items: editor.items,
+              selectedId: editor.selectedId,
+              onPlacementChange: editor.updatePlacement,
+              onSizeChange: editor.updateSize,
+              onClose: panels.collapseProperties,
+            }),
+        );
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      const list = () => document.querySelector(".arrange-placed-items__groups");
+      assert.equal(list().querySelectorAll("button").length, 5, "other floors are excluded");
+      assert.deepEqual(
+        [...list().querySelectorAll("h3")].map((heading) => heading.textContent),
+        ["Study", "Kitchen", "Patio", "Outside rooms"],
+      );
+      assert.match(
+        list().querySelector('ul[aria-label="Kitchen"]').textContent,
+        /Temperature sensor/,
+      );
+      assert.match(list().querySelector('ul[aria-label="Patio"]').textContent, /Cabinet/);
+      assert.match(
+        list().querySelector('ul[aria-label="Outside rooms"]').textContent,
+        /Missing model/,
+      );
+      assert.match(list().textContent, /Temperature sensor/);
+      assert.match(list().textContent, /Missing model/);
+      assert.doesNotMatch(list().textContent, /inside-cabinet|unresolved|removed-model/);
+      await act(async () => editor.selectMany([cabinet.id, device.id]));
+      assert.equal(list().querySelectorAll('[aria-pressed="true"]').length, 2);
+      const hiddenItem = list().querySelectorAll("button")[1];
+      document.querySelector("details").open = true;
+      hiddenItem.focus();
+      await act(async () => hiddenItem.click());
+      assert.deepEqual(editor.selectedIds, [device.id]);
+      assert.equal(document.activeElement, hiddenItem);
+      assert.equal(
+        document.querySelector("#editor-properties h2").textContent,
+        "Temperature sensor",
+      );
+      await act(async () => panels.collapseProperties());
+      assert.equal(document.querySelector("#editor-properties"), null);
+      await act(async () => hiddenItem.click());
+      assert.ok(
+        document.querySelector("#editor-properties"),
+        "reselecting reopens collapsed Properties",
+      );
+      assert.deepEqual(editor.items, items);
+      assert.equal(editor.past.length, 0);
+      await act(async () => setDisabled(true));
+      assert.ok([...list().querySelectorAll("button")].every((button) => button.disabled));
+    });
+  });
 
   test("details show variants only for multiple choices and persist the selection", async () => {
     await withDom(async ({ root, document, window }) => {

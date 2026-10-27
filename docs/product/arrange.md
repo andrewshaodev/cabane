@@ -37,6 +37,14 @@ persisted scene override controls bulb appearance and illumination without
 sending HA commands; Connected follows the
 bound entity. Changes participate in draft history and take effect in Home on Apply.
 
+The **Placed items** disclosure above the catalog lists every stored item on the active
+floor, including occluded items and unavailable models. Items are grouped by room,
+including outdoor areas, with an Outside rooms group for unassigned items. Search
+matches item and room names; instance IDs are not displayed. Choosing an entry selects that existing item and opens the normal
+Properties inspector, including when it was collapsed. Focus stays on the list.
+Selection alone changes no item data or undo history; canvas group selection and
+group movement keep their existing behavior. The list includes items outside rooms.
+
 Placement resolves a feasible start near the camera target (or floor center),
 using model support and outdoor-only model constraints. Furnishings and devices
 may be placed outside the house or in areas without a room; neither condition
