@@ -1,21 +1,20 @@
-/* One shared frame owns panel clearance; the canvas keeps accurate picking bounds. */
+/* Properties overlay a stable canvas; only floating controls need clearance. */
 .direction-preview {
   --preview-muted: #626d63;
+  --editor-properties-width: 320px;
   --editor-properties-clearance: 0px;
-  --editor-inspector-width: 0px;
   --editor-panel-top: 139px;
   --editor-issues-height: min(30dvh, 240px);
   --editor-issues-clearance: 0px;
 }
 .direction-preview[data-properties-open="true"] {
-  --editor-inspector-width: 320px;
-  --editor-properties-clearance: 320px;
+  --editor-properties-clearance: var(--editor-properties-width);
 }
 .direction-preview[data-issues-expanded="true"] {
   --editor-issues-clearance: calc(var(--editor-issues-height) + 32px);
 }
 .direction-preview .direction-preview__model {
-  right: var(--editor-inspector-width);
+  right: 0;
   bottom: var(--editor-issues-clearance);
 }
 .direction-preview .direction-camera {
@@ -26,7 +25,7 @@
   bottom: calc(16px + var(--editor-issues-clearance));
 }
 .direction-preview .direction-status {
-  right: calc(18px + var(--editor-inspector-width));
+  right: calc(18px + var(--editor-properties-clearance));
   bottom: calc(72px + var(--editor-issues-clearance));
 }
 .editor-properties-toggle {
@@ -372,19 +371,24 @@
   height: 16px;
 }
 
+@media (min-width: 1241px) {
+  .direction-preview:is([data-editor-mode="construct"], [data-editor-mode="furnish"])
+    .editor-header {
+    right: calc(var(--editor-properties-width) + max(16px, env(safe-area-inset-right)));
+  }
+  .direction-preview:is([data-editor-mode="construct"], [data-editor-mode="furnish"])
+    .direction-project-actions {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    right: max(16px, env(safe-area-inset-right));
+  }
+}
 @media (max-width: 1240px) {
   .direction-preview {
-    --editor-inspector-width: 0px;
     --editor-panel-top: 195px;
   }
-  .direction-preview[data-properties-open="true"] {
-    --editor-inspector-width: 0px;
-  }
   .direction-preview .selection-details {
-    bottom: 16px;
-    border-left: 0;
-    box-shadow: -10px 12px 30px #313c2b12;
-    border-radius: 12px 0 0 12px;
+    padding-top: var(--editor-panel-top);
   }
   .editor-issues__count-label {
     display: none;
@@ -439,6 +443,7 @@
     display: none;
   }
   .editor-panel-switcher {
+    --editor-panel-accent: var(--preview-ink);
     position: absolute;
     z-index: 9;
     left: 0;
@@ -446,19 +451,30 @@
     bottom: calc(40dvh - 44px);
     display: flex;
     height: 44px;
-    gap: 6px;
-    padding: 4px 12px;
+    gap: 16px;
+    padding: 0 18px;
+    border-bottom: 1px solid var(--editor-line);
     background: var(--preview-paper);
+  }
+  .direction-preview[data-editor-mode="construct"] .editor-panel-switcher {
+    --editor-panel-accent: #934c2e;
+  }
+  .direction-preview[data-editor-mode="furnish"] .editor-panel-switcher {
+    --editor-panel-accent: #3e6144;
   }
   .editor-panel-switcher button {
     display: flex;
     align-items: center;
     justify-content: center;
     flex: 1;
+    min-width: 0;
+    min-height: 44px;
     gap: 6px;
+    margin-bottom: -1px;
     border: 0;
-    border-radius: 6px;
-    padding: 6px;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    padding: 10px 4px 7px;
     color: var(--preview-muted);
     background: transparent;
     font:
@@ -466,12 +482,33 @@
       sans-serif;
     cursor: pointer;
   }
-  .editor-panel-switcher button[aria-pressed="true"] {
+  .editor-panel-switcher button:hover:not(:disabled) {
     color: var(--preview-ink);
-    background: #e4e7d8;
+    background: #eee9df;
+  }
+  .editor-panel-switcher button[aria-pressed="true"] {
+    border-bottom-color: var(--editor-panel-accent);
+    color: var(--editor-panel-accent);
+    background: transparent;
+    font-weight: 600;
   }
   .editor-panel-switcher span {
+    display: inline-flex;
+    min-width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 5px;
+    border-radius: 10px;
+    background: #e7e4d9;
+    color: var(--preview-ink);
+    font-size: var(--editor-text-caption);
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
+  }
+  .editor-panel-switcher button[aria-pressed="true"] span {
+    background: var(--editor-panel-accent);
+    color: var(--preview-paper);
   }
   .direction-preview:not([data-mobile-panel="tools"]) .direction-rail,
   .direction-preview:not([data-mobile-panel="properties"]) .editor-properties-host,
@@ -556,7 +593,6 @@
   .direction-preview[data-properties-open="true"] {
     --editor-rail-width: 250px;
     --editor-properties-clearance: 0px;
-    --editor-inspector-width: 0px;
     --editor-panel-top: 185px;
   }
   .direction-preview .direction-preview__model {

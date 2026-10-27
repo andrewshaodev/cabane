@@ -280,7 +280,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       >
         {!shortcutsMode && (
           <HomeEditorScene
-            rightPanelOpen={panels.propertiesOpen}
             onStairIssuesChange={setStairLiveIssues}
             onNameFocusHandled={() => setNameFocusRequest(null)}
             nameFocusRequest={nameFocusRequest}
