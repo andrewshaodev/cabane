@@ -63,6 +63,20 @@ await withModules(async (load) => {
     assert.equal(editorRequestForPath("/workspaces/home-a/home-assistant"), null);
     assert.equal(workspaceIdForPath("/workspaces/home-a/home-assistant"), "home-a");
   });
+  test("OAuth preserves close Arrange views and rejects invalid zoom", () => {
+    const camera = { view: "3d", position: [3, 8, 3], target: [0, 0.2, 0], zoom: 1500 };
+    const request = {
+      workspaceId: "close-view",
+      mode: "connect",
+      arrange: { selectedItemId: "sensor", camera },
+    };
+    assert.deepEqual(parseEditorReturn(JSON.stringify(request)).arrange.camera, camera);
+    for (const zoom of [1501, 7, null]) {
+      request.arrange.camera = { ...camera, zoom };
+      assert.equal(parseEditorReturn(JSON.stringify(request)).arrange.camera, undefined);
+    }
+  });
+
   test("action bar customization is a refreshable editor panel route", () => {
     const path = editorPath({ mode: "construct", panel: "action-bar" }, "home-a");
     assert.equal(path, "/workspaces/home-a/shortcuts");

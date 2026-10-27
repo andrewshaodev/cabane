@@ -130,3 +130,5 @@ export {
   formatArea,
   parseLength,
 } from "./measurement-units";
+
+export { MAX_ORTHOGRAPHIC_ZOOM } from "./navigation/camera-zoom";

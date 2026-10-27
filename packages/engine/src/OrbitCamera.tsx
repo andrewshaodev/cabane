@@ -1,3 +1,4 @@
+import { MAX_ORTHOGRAPHIC_ZOOM } from "./navigation/camera-zoom";
 import {
   readOrbitView,
   writeOrbitView,
@@ -32,8 +33,6 @@ const ORBIT_DOUBLE_TAP_DISTANCE_PX = 24;
 const ORBIT_TAP_MOVEMENT_PX = 12;
 
 const ORBIT_DOUBLE_TAP_ZOOM_FACTOR = 1.5;
-
-const ORBIT_MAX_ZOOM = 190;
 
 function OrbitDoubleTapZoom({ controls }: { controls: React.RefObject<OrbitControlsImpl | null> }) {
   const { camera, gl, invalidate } = useThree();
@@ -92,7 +91,10 @@ function OrbitDoubleTapZoom({ controls }: { controls: React.RefObject<OrbitContr
       const orbitCamera = camera as ThreeOrthographicCamera;
       if (!orbitCamera.isOrthographicCamera) return;
       controls.current?.dispatchEvent({ type: "start", target: controls.current });
-      orbitCamera.zoom = Math.min(ORBIT_MAX_ZOOM, orbitCamera.zoom * ORBIT_DOUBLE_TAP_ZOOM_FACTOR);
+      orbitCamera.zoom = Math.min(
+        MAX_ORTHOGRAPHIC_ZOOM,
+        orbitCamera.zoom * ORBIT_DOUBLE_TAP_ZOOM_FACTOR,
+      );
       orbitCamera.updateProjectionMatrix();
       controls.current?.dispatchEvent({ type: "change", target: controls.current });
       controls.current?.dispatchEvent({ type: "end", target: controls.current });
@@ -339,7 +341,7 @@ function OrbitCameraRig({
     const scale =
       fitSavedOrbitView(source, width, height).zoom /
       fitSavedOrbitView(source, previous.width, previous.height).zoom;
-    camera.zoom = Math.max(1, Math.min(ORBIT_MAX_ZOOM, camera.zoom * scale));
+    camera.zoom = Math.max(1, Math.min(MAX_ORTHOGRAPHIC_ZOOM, camera.zoom * scale));
     camera.updateProjectionMatrix();
     const wasManual = manual.current;
     manual.current = false;
@@ -389,7 +391,7 @@ function OrbitCameraRig({
         minPolarAngle={0}
         maxPolarAngle={1.28}
         minZoom={1}
-        maxZoom={ORBIT_MAX_ZOOM}
+        maxZoom={MAX_ORTHOGRAPHIC_ZOOM}
         zoomToCursor
       />
       <RoomCameraTransition

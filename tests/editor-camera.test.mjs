@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { act, createElement } from "react";
+import { Vector3, Raycaster, Plane, Vector2 } from "three";
 import { create } from "@react-three/test-renderer";
 import { withModules } from "./test-server.mjs";
 
@@ -102,6 +103,7 @@ await withModules(async (load) => {
 
   for (const [name, element] of [
     ["orbit", createElement(OrbitCamera, { floor, resetKey: 0 })],
+    ["editor top", createElement(PreviewCamera, cameraProps())],
     ["editor 3D", createElement(PreviewCamera, cameraProps({ view: "3d" }))],
   ]) {
     test(`${name} wheel zoom responds immediately and follows scroll distance, not event count`, async () => {
@@ -163,7 +165,32 @@ await withModules(async (load) => {
         assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one page uses viewport height");
         assert.ok(page < line);
         await wheel(-10000);
-        assert.equal(camera.zoom, controls.maxZoom);
+        assert.equal(camera.zoom, 1500, "small devices need a useful close-up ceiling");
+        const direction = new Vector3();
+        camera.getWorldDirection(direction);
+        const right = new Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+        const center = controls.target.clone();
+        const edge = center.clone().addScaledVector(right, 0.04);
+        const screen = center.clone().project(camera);
+        const edgeScreen = edge.clone().project(camera);
+        assert.ok(
+          Math.abs(edgeScreen.x - screen.x) * 500 > 59.9,
+          "a 4 cm sensor spans 60 CSS pixels",
+        );
+        assert.ok(
+          screen.z > -1 && screen.z < 1,
+          "close zoom keeps the target inside clipping planes",
+        );
+        const ray = new Raycaster();
+        ray.setFromCamera(new Vector2(screen.x + 3 / 500, screen.y), camera);
+        const hit = ray.ray.intersectPlane(
+          new Plane().setFromNormalAndCoplanarPoint(direction, center),
+          new Vector3(),
+        );
+        assert.ok(
+          Math.abs(hit.distanceTo(center) - 0.002) < 1e-8,
+          "three screen pixels resolve a 2 mm placement adjustment",
+        );
         const atLimit = pose(controls);
         await wheel(-10, cursor);
         assert.deepEqual(pose(controls), atLimit, "clamping must not move the cursor anchor");
@@ -222,6 +249,10 @@ await withModules(async (load) => {
       await tap(2000);
       await tap(2100);
       assert.ok(controls.object.zoom > zoom);
+      controls.object.zoom = 1200;
+      await tap(3000);
+      await tap(3100);
+      assert.equal(controls.object.zoom, 1500, "double-tap shares the close-up ceiling");
     } finally {
       await renderer.unmount();
     }
@@ -328,11 +359,14 @@ await withModules(async (load) => {
     try {
       const controls = controlsFor(renderer);
       controls.enableDamping = false;
+      controls.object.zoom = 1200;
+      controls.object.updateProjectionMatrix();
       await act(async () => {
         dispatch(elementListeners, "pointerdown", 1, 400, 400);
         dispatch(elementListeners, "pointerdown", 2, 600, 400);
-        dispatch(documentListeners, "pointermove", 1, 430, 400);
+        dispatch(documentListeners, "pointermove", 1, 370, 400);
       });
+      assert.ok(controls.object.zoom > 1200, "native touch pinch can zoom beyond the old ceiling");
       const before = controls.getAzimuthalAngle();
       await renderer.update(createElement(OrbitCamera, { ...props }));
       await act(async () => {
@@ -357,6 +391,8 @@ await withModules(async (load) => {
         beforePan,
         "one-finger pan must still work after the rotation ends",
       );
+      const panDistance = controls.target.distanceTo(new Vector3(...beforePan));
+      assert.ok(panDistance < 0.15, "close-up pan remains proportional to screen distance");
       await act(async () => dispatch(documentListeners, "pointerup", 3, 500, 430));
     } finally {
       await renderer.unmount();
