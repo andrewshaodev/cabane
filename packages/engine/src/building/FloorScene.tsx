@@ -1,3 +1,4 @@
+import { SolidRooms } from "../architecture-scene/SolidRooms";
 import { ArchitecturalOutdoorPlatforms, floorSlabPolygons } from "../outdoor-platforms";
 import { ArchitecturalHedges } from "../hedges";
 export type FloorSceneProps = {
@@ -149,6 +150,7 @@ export const FloorScene = memo(function FloorScene({
         />
       )}
       <ArchitecturalOutdoorPlatforms floor={floor} below={platformBelow} />
+      <SolidRooms floor={floor} color={manifest.home.palette.interior} />
       <ArchitecturalHedges floor={floor} />
       <ArchitecturalPools floor={floor} reducedMotion={reducedMotion} />
       {floorSlabPolygons(floor).map((polygon, index) => (

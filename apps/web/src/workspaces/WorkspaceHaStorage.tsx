@@ -1,3 +1,4 @@
+import { EditorSwitch } from "../editor-chrome/EditorSwitch";
 import {
   createModelAssetRepository,
   createCabaneArchive,
@@ -390,17 +391,13 @@ export function WorkspaceHaStorage({ id, origin, repository }: StorageContext) {
                     <label id="ha-auto-label" htmlFor="ha-auto">
                       Sync automatically
                     </label>
-                    <button
+                    <EditorSwitch
                       id="ha-auto"
-                      className="ha-switch"
-                      role="switch"
-                      aria-labelledby="ha-auto-label"
-                      aria-checked={enabled}
+                      labelledBy="ha-auto-label"
+                      checked={enabled}
                       disabled={busy}
-                      onClick={() => void run(() => coordinator.setEnabled(id, origin!, false))}
-                    >
-                      <span />
-                    </button>
+                      onChange={() => void run(() => coordinator.setEnabled(id, origin!, false))}
+                    />
                   </div>
                 )}
                 <div className="ha-actions">

@@ -134,6 +134,8 @@ export interface FloorFinishZoneSpec {
 }
 
 export interface RoomSpec {
+  /** Enclosed structural volume, retained for reversible Construct editing. */
+  isSolid?: boolean;
   id: string;
   name: string;
   polygon: Polygon;
@@ -388,6 +390,8 @@ export interface FloorSpec {
   footprint: readonly PlanPoint[];
   footprintRegions?: readonly Polygon[];
   rooms: readonly RoomSpec[];
+  /** Derived runtime volumes excluded from room navigation and mapping. Never persisted. */
+  solidRooms?: readonly RoomSpec[];
   walls: readonly WallSpec[];
   wallJunctions: readonly WallJunctionSpec[];
   openings: readonly OpeningSpec[];

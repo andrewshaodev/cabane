@@ -1,3 +1,4 @@
+import { EditorSwitch } from "../../editor-chrome/EditorSwitch";
 import { formatLength, formatArea, useMeasurementUnits } from "@cabane/engine";
 import { LengthInput } from "../../editor-chrome/LengthInput";
 import { useMemo } from "react";
@@ -307,25 +308,54 @@ export function ConstructionSelectionProperties({
                 />
               </label>
             </fieldset>
-            {editor.deletionTargets?.some(
-              (target) => target.kind === "room" && target.id === selectedRoom.id,
-            ) === false && (
-              <p role="status">
-                All enclosing walls are shared. Edit the walls to remove this room.
-              </p>
-            )}
-            <EditorButton
-              variant="text"
-              type="button"
-              disabled={
-                editor.deletionTargets?.some(
-                  (target) => target.kind === "room" && target.id === selectedRoom.id,
-                ) === false
-              }
-              onClick={editor.deleteSelected}
-            >
-              Delete room
-            </EditorButton>
+            <fieldset>
+              <legend>Room actions</legend>
+              <div className="construction-inspector__room-actions">
+                <div className="construction-inspector__room-toggle">
+                  <div className="construction-inspector__room-toggle-copy">
+                    <label
+                      id="room-solid-label"
+                      htmlFor="room-solid"
+                      title="Render as a solid block, excluded from room navigation and area mapping."
+                    >
+                      Solid structure
+                    </label>
+                    <p
+                      id="room-solid-description"
+                      className="construction-inspector__room-action-note"
+                    >
+                      Fill this space for a chimney, shaft or pillar.
+                    </p>
+                  </div>
+                  <EditorSwitch
+                    id="room-solid"
+                    labelledBy="room-solid-label"
+                    describedBy="room-solid-description"
+                    checked={selectedRoom.isSolid ?? false}
+                    onChange={(isSolid) => editor.updateSelectedRoom({ isSolid })}
+                  />
+                </div>
+                <EditorButton
+                  variant="text"
+                  type="button"
+                  disabled={
+                    editor.deletionTargets?.some(
+                      (target) => target.kind === "room" && target.id === selectedRoom.id,
+                    ) === false
+                  }
+                  onClick={editor.deleteSelected}
+                >
+                  Delete room
+                </EditorButton>
+              </div>
+              {editor.deletionTargets?.some(
+                (target) => target.kind === "room" && target.id === selectedRoom.id,
+              ) === false && (
+                <p className="construction-inspector__room-action-note" role="status">
+                  Shared walls. Edit the walls to delete this room.
+                </p>
+              )}
+            </fieldset>
           </div>
         )}
       </section>

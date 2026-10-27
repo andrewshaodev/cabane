@@ -288,6 +288,7 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
           />
         ))}
       {floor.rooms.flatMap((room) => {
+        if (room.isSolid && variant === "scene") return [];
         const onSelect = onSelectRoom ? () => onSelectRoom(room.id) : undefined;
         const common = {
           roomId: onSelectRoom ? room.id : undefined,
@@ -309,11 +310,13 @@ export const FloorFinishSurfaces = memo(function FloorFinishSurfaces({
             key={room.id}
             {...common}
             polygon={room.polygon}
-            finish={resolveRoomFloorFinish(room)}
+            finish={
+              room.isSolid ? { kind: "solid", color: "#b8b3aa" } : resolveRoomFloorFinish(room)
+            }
             layer={0}
             name={`room-${room.id}`}
           />,
-          ...(room.floorZones ?? []).flatMap((zone, index) =>
+          ...(room.isSolid ? [] : (room.floorZones ?? [])).flatMap((zone, index) =>
             isFloorZoneOutline(zone.polygon)
               ? [
                   <FinishSurface

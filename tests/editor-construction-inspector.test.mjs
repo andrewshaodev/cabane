@@ -22,6 +22,12 @@ await withModules(async (load) => {
   const { ConstructionSelectionProperties } = await load(
     "/apps/web/src/editor-preview/construct/ConstructionSelectionProperties.tsx",
   );
+  const {
+    createFloorEditorDraft,
+    deriveFloorTopology,
+    composeHomeBindingManifest,
+    parseHomeProjectSchema,
+  } = await load("/packages/engine/src/index.ts");
   function ConstructionPanels(props) {
     return React.createElement(
       React.Fragment,
@@ -391,6 +397,88 @@ await withModules(async (load) => {
       assert.ok(
         dom.window.document.body.textContent.indexOf("Hold Shift and drag") <
           dom.window.document.body.textContent.indexOf("Have a floor plan?"),
+      );
+    });
+  });
+
+  test("Solid structure shares Room actions with deletion and survives history and reopening", async () => {
+    await withDom(async ({ dom, root }) => {
+      const floor = ownerHomeProject.floors[0];
+      const room = floor.rooms[0];
+      let controller;
+      function Harness() {
+        controller = useConstructEditor(floor);
+        return React.createElement(ConstructionSelectionProperties, {
+          editor: controller,
+          onClose() {},
+        });
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      await act(async () => controller.selectRoom(room.id));
+      const toggle = dom.window.document.querySelector(
+        '[role="switch"][aria-labelledby="room-solid-label"]',
+      );
+      assert.ok(toggle);
+      assert.equal(
+        dom.window.document.getElementById(toggle.getAttribute("aria-labelledby")).textContent,
+        "Solid structure",
+      );
+      assert.equal(
+        dom.window.document.getElementById(toggle.getAttribute("aria-describedby")).textContent,
+        "Fill this space for a chimney, shaft or pillar.",
+      );
+      const section = toggle.closest("fieldset");
+      assert.equal(section.querySelector("legend").textContent, "Room actions");
+      assert.ok(
+        [...section.querySelectorAll("button")].some(
+          (button) => button.textContent === "Delete room",
+        ),
+      );
+      await act(async () => toggle.click());
+      assert.equal(
+        controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).isSolid,
+        true,
+      );
+      assert.equal(controller.previewFloor.walls.length, floor.walls.length);
+      await act(async () => controller.undo());
+      assert.notEqual(
+        controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).isSolid,
+        true,
+      );
+      await act(async () => controller.redo());
+      const saved = JSON.parse(JSON.stringify(controller.previewFloor));
+      const reopened = createFloorEditorDraft(saved);
+      assert.equal(
+        deriveFloorTopology(reopened).floor.rooms.find((candidate) => candidate.id === room.id)
+          .isSolid,
+        true,
+      );
+      const project = {
+        ...ownerHomeProject,
+        floors: ownerHomeProject.floors.map((candidate) =>
+          candidate.id === floor.id ? saved : candidate,
+        ),
+      };
+      assert.equal(parseHomeProjectSchema(project).valid, true);
+      const runtime = composeHomeBindingManifest(project, neutralDemoManifest.extensions);
+      const runtimeFloor = runtime.floors.find((candidate) => candidate.id === floor.id);
+      assert.equal(
+        runtimeFloor.rooms.some((candidate) => candidate.id === room.id),
+        false,
+      );
+      assert.equal(runtimeFloor.solidRooms[0].id, room.id);
+      assert.equal(
+        runtimeFloor.ceilings.some((ceiling) => ceiling.roomIds.includes(room.id)),
+        false,
+      );
+      await act(async () => toggle.click());
+      assert.equal(
+        controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).isSolid,
+        false,
+      );
+      assert.equal(
+        controller.previewFloor.rooms.find((candidate) => candidate.id === room.id).name,
+        room.name,
       );
     });
   });

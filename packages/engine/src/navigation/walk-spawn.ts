@@ -67,7 +67,10 @@ export const safeSpawnPoseForRoom = (
 };
 
 export const spawnPoseForRoom = (room: RoomSpec | undefined, floor: FloorSpec): WalkPose => {
-  const polygon = room?.polygon ?? floor.rooms[0]?.polygon ?? floor.footprint;
+  const polygon =
+    room?.polygon ??
+    floor.rooms.find((candidate) => !candidate.isSolid)?.polygon ??
+    floor.footprint;
   const average = polygon.reduce(
     (total, point) => [total[0] + point[0], total[1] + point[1]] as PlanPoint,
     [0, 0] as PlanPoint,

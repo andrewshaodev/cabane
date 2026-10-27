@@ -101,6 +101,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
     );
     return {
       id: room.id,
+      ...(room.isSolid !== undefined ? { isSolid: room.isSolid } : {}),
       name: room.name,
       accent: room.accent,
       ...(room.floorFinish

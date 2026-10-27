@@ -180,7 +180,7 @@ export type FloorEditorAction =
       changes: Partial<
         Pick<
           EditorRoomIdentity,
-          "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters"
+          "name" | "accent" | "floorFinish" | "floorZones" | "ceilingHeightMeters" | "isSolid"
         >
       >;
     }
