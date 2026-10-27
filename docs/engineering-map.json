@@ -149,6 +149,7 @@
     "title": "Arrange and placement",
     "spec": "docs/product/arrange.md",
     "owners": [
+      "apps/web/src/editor-preview/furnish/ArrangePlacedItems.tsx",
       "apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
       "apps/web/src/editor-preview/furnish/placement",
       "packages/engine/src/home-project/placements.ts",

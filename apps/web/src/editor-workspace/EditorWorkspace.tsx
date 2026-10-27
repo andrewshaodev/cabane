@@ -387,6 +387,10 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
         <EditorSidebar
           {...controller}
+          onSelectPlacedItem={(id) => {
+            controller.furnishingEditor.select(id);
+            panels.openProperties();
+          }}
           sidebar={sidebar}
           iconUrl={iconUrl}
           shortcutsMode={shortcutsMode}

@@ -19,6 +19,7 @@ import { ConstructionInspector } from "../editor-preview/construct";
 
 import { ConnectInspector } from "../editor-connect/ConnectInspector";
 
+import { ArrangePlacedItems } from "../editor-preview/furnish/ArrangePlacedItems";
 import { ArrangeCatalog } from "../editor-preview/furnish/catalog/ArrangeCatalog";
 
 import { useHomeEditorController } from "./useHomeEditorController";
@@ -60,7 +61,10 @@ type Props = Pick<
   | "setCatalogBrowsing"
   | "catalogError"
   | "addCatalogItem"
+  | "furnishingEditor"
+  | "placementFloor"
 > & {
+  onSelectPlacedItem: (id: string) => void;
   sidebar: React.RefObject<HTMLElement | null>;
   iconUrl: string;
   shortcutsMode: boolean;
@@ -110,6 +114,9 @@ export function EditorSidebar({
   setCatalogBrowsing,
   catalogError,
   addCatalogItem,
+  furnishingEditor,
+  placementFloor,
+  onSelectPlacedItem,
   sidebar,
   iconUrl,
   shortcutsMode,
@@ -327,6 +334,16 @@ export function EditorSidebar({
             />
           )}
           <div className="arrange-catalog-mount" hidden={shortcutsMode || mode !== "furnish"}>
+            <ArrangePlacedItems
+              key={activeFloorId}
+              floor={placementFloor}
+              items={furnishingEditor.items}
+              furnishingModels={furnishingModels}
+              deviceModels={deviceModels}
+              selectedIds={furnishingEditor.selectedIds}
+              disabled={editingLocked || unsettled}
+              onSelect={onSelectPlacedItem}
+            />
             <ArrangeCatalog
               enabled={!shortcutsMode && mode === "furnish"}
               furnishingModels={furnishingModels}
