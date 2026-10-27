@@ -253,19 +253,17 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     (unsettled && !reference.adjusting) ||
     Boolean(floorDialog);
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
-  const addFloorBelow = () => {
-    const next = addBottomFloor(snapshot, `floor-${createBrowserUuid()}`);
+  const addFloor = (below: boolean, duplicate: boolean, includeItems: boolean) => {
+    const id = `floor-${createBrowserUuid()}`;
+    const next = (below ? addBottomFloor : addTopFloor)(
+      snapshot,
+      id,
+      duplicate ? { sourceFloorId: activeFloorId, includeItems } : undefined,
+    );
     commit(next);
-    floorNavigation.selectFloor(next.project.floors[0].id);
-    constructEditor.replaceFloor(next.project.floors[0]);
-    furnishingEditor.replaceItems([]);
-  };
-  const addFloorAbove = () => {
-    const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
-    commit(next);
-    floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
-    constructEditor.replaceFloor(next.project.floors.at(-1)!);
-    furnishingEditor.replaceItems([]);
+    floorNavigation.selectFloor(id);
+    constructEditor.replaceFloor(next.project.floors.find((floor) => floor.id === id)!);
+    furnishingEditor.replaceItems(next.project.sceneItems.filter((item) => item.floorId === id));
   };
   return (
     <WallFinishPreviewProvider palette={editorProject.home.palette}>
@@ -300,8 +298,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             selectedId={activeFloorId}
             disabled={floorControlsDisabled}
             onSelect={(id) => floorNavigation.selectFloor(id)}
-            onAdd={mode === "construct" ? addFloorAbove : undefined}
-            onAddBelow={mode === "construct" ? addFloorBelow : undefined}
+            onAdd={mode === "construct" ? () => setFloorDialog("add-above") : undefined}
+            onAddBelow={mode === "construct" ? () => setFloorDialog("add-below") : undefined}
             onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
             onRemove={
               mode === "construct" && !removeDisabledReason
@@ -341,7 +339,12 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
               ).length
             }
             onCancel={() => setFloorDialog(null)}
-            onSave={(name, height) => {
+            onSave={(name, height, duplicate = false, includeItems = false) => {
+              if (floorDialog === "add-above" || floorDialog === "add-below") {
+                addFloor(floorDialog === "add-below", duplicate, includeItems);
+                setFloorDialog(null);
+                return;
+              }
               const next =
                 floorDialog === "remove"
                   ? removeFloor(snapshot, activeFloorId)
@@ -391,8 +394,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           iconUrl={iconUrl}
           shortcutsMode={shortcutsMode}
           floorControlsDisabled={floorControlsDisabled}
-          addFloorAbove={addFloorAbove}
-          addFloorBelow={addFloorBelow}
+          addFloorAbove={() => setFloorDialog("add-above")}
+          addFloorBelow={() => setFloorDialog("add-below")}
           tutorial={tutorial}
           tutorialBusy={tutorialBusy}
           activateTutorial={activateTutorial}
