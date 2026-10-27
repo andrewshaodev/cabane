@@ -30,6 +30,9 @@ await withModules(async (load) => {
       HTMLElement: browser.window.HTMLElement,
       IS_REACT_ACT_ENVIRONMENT: true,
     });
+    // React can initialize its legacy input watcher before JSDOM is installed.
+    browser.window.HTMLElement.prototype.attachEvent = () => {};
+    browser.window.HTMLElement.prototype.detachEvent = () => {};
     const shadow = document.querySelector("#panel").attachShadow({ mode: "open" });
     const container = document.createElement("div"),
       portals = document.createElement("div");

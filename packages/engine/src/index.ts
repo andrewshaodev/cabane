@@ -132,6 +132,8 @@ export {
   parseLength,
 } from "./measurement-units";
 
+export { MAX_ORTHOGRAPHIC_ZOOM, MIN_EDITOR_ZOOM } from "./navigation/camera-zoom";
+
 export {
   defaultModelLighting,
   projectModelLighting,

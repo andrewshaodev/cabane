@@ -2,6 +2,8 @@ import { type OrthographicCamera as ThreeOrthographicCamera, Vector3 } from "thr
 import { MapControls, OrthographicCamera } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import {
+  MAX_ORTHOGRAPHIC_ZOOM,
+  MIN_EDITOR_ZOOM,
   worldBoundsForFloorScene,
   worldBoundsForPolygon,
   useCameraWheelZoom,
@@ -215,8 +217,8 @@ function PreviewCameraRig({
         enableZoom
         minPolarAngle={0}
         maxPolarAngle={view === "top" ? 0.01 : 1.28}
-        minZoom={northOrientation ? 0.1 : 8}
-        maxZoom={180}
+        minZoom={northOrientation ? 0.1 : MIN_EDITOR_ZOOM}
+        maxZoom={northOrientation ? 180 : MAX_ORTHOGRAPHIC_ZOOM}
         zoomToCursor
       />
     </group>
