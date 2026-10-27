@@ -1,9 +1,9 @@
 {
-  "revision": 12,
-  "fingerprint": "08384552dbe4a793fa989913424a1dd5e3a58ba6e52e612c168b4d18f7cfee90",
-  "summary": "Allow outdoor platforms to opt into room mapping and dashboard navigation",
+  "revision": 13,
+  "fingerprint": "05c0de4e8a5a1cacdd3bb4ba191aab9414a886cc3dbbcbc13e80c42c8c543b28",
+  "summary": "Add outdoor room membership with shared room controls",
   "breakingChanges": [
-    "Existing platforms remain unchanged. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked; update through HACS before opening these homes. No data migration is required."
+    "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
   ],
   "history": [
     {
@@ -81,6 +81,13 @@
       "summary": "Support reversible solid structural spaces in room properties",
       "breakingChanges": [
         "Older clients must update before importing projects containing the room isSolid field."
+      ]
+    },
+    {
+      "revision": 12,
+      "summary": "Add decorative apartment floors through Construct floor management",
+      "breakingChanges": [
+        "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field. Solid structural spaces from revision 11 remain supported."
       ]
     }
   ],

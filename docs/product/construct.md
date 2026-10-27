@@ -362,3 +362,12 @@ use the existing faceColors metadata, undo/redo, autosave and Save/import/export
 The two-sided disclosure is editor state; differing stored face colors reopen it.
 Interior walls with differing faces use the general interior finish for Auto edges,
 even if an old exteriorColor value remains from their drawing history.
+
+The Construct floor menu places **Setup apartment floor** directly below **Add floor below**.
+Its dialog sets the storey where the lowest modeled floor starts (0–100, with 0
+preserving the original appearance). The setting follows normal draft, undo and
+publication behavior. Positive values repeat a muted shell of the lowest floor's
+footprint underneath the home, using its floor-to-floor height and simple facade
+windows. These instanced shells have no rooms, devices, selection or Walk surfaces
+and never appear in floor navigation. Plan views omit them; ordinary camera framing
+continues to use only the real floors. The decorative ground sits below the stack.
