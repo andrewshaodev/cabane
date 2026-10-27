@@ -1,3 +1,5 @@
+import { useState } from "react";
+import type { CustomModel } from "@cabane/engine";
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
 import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
@@ -49,6 +51,7 @@ type Props = Pick<
   | "onWorkspaces"
   | "runtime"
   | "reference"
+  | "replaceEditorsFromProject"
   | "workspace"
   | "floorFinish"
   | "setFloorFinish"
@@ -98,6 +101,7 @@ export function EditorSidebar({
   unsettled,
   onWorkspaces,
   workspace,
+  replaceEditorsFromProject,
   runtime,
   reference,
   floorFinish,
@@ -125,6 +129,7 @@ export function EditorSidebar({
   setWalkStartFloor,
   onHomeAssistantSettings,
 }: Props) {
+  const [editingModel, setEditingModel] = useState<CustomModel | null>(null);
   return (
     <>
       <aside
@@ -348,6 +353,12 @@ export function EditorSidebar({
               customModels={
                 <CustomModelLibrary
                   workspace={workspace}
+                  editingModel={editingModel}
+                  onCloseEditor={() => setEditingModel(null)}
+                  onEditSnapshot={(next) => {
+                    replaceEditorsFromProject(next.project);
+                    workspace.commit(next);
+                  }}
                   disabled={editingLocked || unsettled}
                   onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
                 />
@@ -358,6 +369,7 @@ export function EditorSidebar({
                   entry={entry}
                   disabled={editingLocked || unsettled}
                   onChoose={() => addCatalogItem(entry)}
+                  onEdit={setEditingModel}
                 />
               )}
             />

@@ -212,7 +212,7 @@
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
+    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {

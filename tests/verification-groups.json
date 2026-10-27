@@ -13,6 +13,7 @@
       "demo-door-walk.test.mjs",
       "demo-provider.test.mjs",
       "demo-session.test.mjs",
+      "edit-custom-model.test.mjs",
       "editor-connect.test.mjs",
       "editor-panels.test.mjs",
       "editor-validation-recovery.test.mjs",
