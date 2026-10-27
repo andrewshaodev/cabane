@@ -57,6 +57,7 @@ await withModules(async (load) => {
 
   const createWheelCamera = async (element) => {
     const listeners = new Map();
+    if (element.props.savedCamera) element.props.savedCamera.current = null;
     const renderer = await create(element, {
       ...options,
       beforeReturn(canvas) {
@@ -134,6 +135,34 @@ await withModules(async (load) => {
       }
     });
 
+    test(`${name} zooming out off-center preserves the orbit distance and direction`, async () => {
+      const { renderer, controls, wheel } = await createWheelCamera(element);
+      try {
+        const offset = controls.object.position.clone().sub(controls.target);
+        const initial = pose(controls);
+        for (let i = 0; i < 12; i++) {
+          await wheel(150, { clientX: 750, clientY: 150 });
+          controls.update();
+        }
+        const after = controls.object.position.clone().sub(controls.target);
+        assert.ok(
+          after.distanceTo(offset) < 1e-7,
+          `zoom changed orbit offset: ${offset.toArray()} -> ${after.toArray()}`,
+        );
+        controls.update();
+        assert.ok(controls.object.position.clone().sub(controls.target).distanceTo(offset) < 1e-7);
+        for (let i = 0; i < 12; i++) {
+          await wheel(-150, { clientX: 750, clientY: 150 });
+          controls.update();
+        }
+        assert.ok(Math.abs(controls.object.zoom - initial.zoom) < 1e-7);
+        assert.ok(controls.target.distanceTo(new Vector3(...initial.target)) < 1e-7);
+        assert.ok(controls.object.position.distanceTo(new Vector3(...initial.position)) < 1e-7);
+      } finally {
+        await renderer.unmount();
+      }
+    });
+
     test(`${name} wheel zoom preserves its cursor anchor, normalizes units and respects limits`, async () => {
       const { renderer, controls, wheel, listeners } = await createWheelCamera(element);
       try {
@@ -165,7 +194,7 @@ await withModules(async (load) => {
         assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one page uses viewport height");
         assert.ok(page < line);
         await wheel(-10000);
-        assert.equal(camera.zoom, 1500, "small devices need a useful close-up ceiling");
+        assert.equal(camera.zoom, 300, "small devices need a useful close-up ceiling");
         const direction = new Vector3();
         camera.getWorldDirection(direction);
         const right = new Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
@@ -174,8 +203,8 @@ await withModules(async (load) => {
         const screen = center.clone().project(camera);
         const edgeScreen = edge.clone().project(camera);
         assert.ok(
-          Math.abs(edgeScreen.x - screen.x) * 500 > 59.9,
-          "a 4 cm sensor spans 60 CSS pixels",
+          Math.abs(edgeScreen.x - screen.x) * 500 > 11.9,
+          "a 4 cm sensor spans 12 CSS pixels",
         );
         assert.ok(
           screen.z > -1 && screen.z < 1,
@@ -188,8 +217,8 @@ await withModules(async (load) => {
           new Vector3(),
         );
         assert.ok(
-          Math.abs(hit.distanceTo(center) - 0.002) < 1e-8,
-          "three screen pixels resolve a 2 mm placement adjustment",
+          Math.abs(hit.distanceTo(center) - 0.01) < 1e-8,
+          "three screen pixels resolve a 10 mm placement adjustment",
         );
         const atLimit = pose(controls);
         await wheel(-10, cursor);
@@ -249,10 +278,10 @@ await withModules(async (load) => {
       await tap(2000);
       await tap(2100);
       assert.ok(controls.object.zoom > zoom);
-      controls.object.zoom = 1200;
+      controls.object.zoom = 240;
       await tap(3000);
       await tap(3100);
-      assert.equal(controls.object.zoom, 1500, "double-tap shares the close-up ceiling");
+      assert.equal(controls.object.zoom, 300, "double-tap shares the close-up ceiling");
     } finally {
       await renderer.unmount();
     }
@@ -359,14 +388,14 @@ await withModules(async (load) => {
     try {
       const controls = controlsFor(renderer);
       controls.enableDamping = false;
-      controls.object.zoom = 1200;
+      controls.object.zoom = 240;
       controls.object.updateProjectionMatrix();
       await act(async () => {
         dispatch(elementListeners, "pointerdown", 1, 400, 400);
         dispatch(elementListeners, "pointerdown", 2, 600, 400);
         dispatch(documentListeners, "pointermove", 1, 370, 400);
       });
-      assert.ok(controls.object.zoom > 1200, "native touch pinch can zoom beyond the old ceiling");
+      assert.ok(controls.object.zoom > 240, "native touch pinch can zoom beyond the old ceiling");
       const before = controls.getAzimuthalAngle();
       await renderer.update(createElement(OrbitCamera, { ...props }));
       await act(async () => {

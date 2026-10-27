@@ -163,15 +163,15 @@ await withModules(async (load) => {
     const renderer = await create(createElement(OrbitCamera, { floor, resetKey: 0 }), options);
     try {
       const controls = controlsFor(renderer);
-      controls.object.zoom = 1400;
+      controls.object.zoom = 280;
       await withStorageDom(async ({ document }) => {
         const root = createRoot(document.body);
         try {
           await act(async () => root.render(createElement(OrbitNavigation, { controls })));
           await act(async () => document.querySelector('[aria-label="Zoom in"]').click());
-          assert.equal(controls.object.zoom, 1500);
+          assert.equal(controls.object.zoom, 300);
           await act(async () => document.querySelector('[aria-label="Zoom out"]').click());
-          assert.equal(controls.object.zoom, 1200);
+          assert.equal(controls.object.zoom, 240);
         } finally {
           await act(async () => root.unmount());
         }
@@ -293,18 +293,23 @@ await withModules(async (load) => {
       values.set(valid, JSON.stringify({ version: 1, locked: true, pose: saved }));
       assert.deepEqual(readOrbitView(valid).pose, saved);
       assert.equal(fitSavedOrbitView(saved, 600, 900).zoom, 30);
-      const closeView = { ...saved, zoom: 1500 };
+      const closeView = { ...saved, zoom: 300 };
       const closeKey = orbitViewKey("stored-close", "floor");
       values.set(closeKey, JSON.stringify({ version: 1, locked: false, pose: closeView }));
       assert.deepEqual(readOrbitView(closeKey).pose, closeView);
-      assert.equal(fitSavedOrbitView(closeView, 600, 900).zoom, 750);
-      assert.equal(fitSavedOrbitView(closeView, 2400, 1800).zoom, 1500);
+      assert.equal(fitSavedOrbitView(closeView, 600, 900).zoom, 150);
+      assert.equal(fitSavedOrbitView(closeView, 2400, 1800).zoom, 300);
+      const wideView = { ...saved, zoom: 0.8 };
+      const wideKey = orbitViewKey("stored-wide", "floor");
+      values.set(wideKey, JSON.stringify({ version: 1, locked: false, pose: wideView }));
+      assert.deepEqual(readOrbitView(wideKey).pose, wideView);
+      assert.equal(fitSavedOrbitView(wideView, 600, 900).zoom, 0.8);
       for (const [name, value] of Object.entries({
         json: "broken",
         version: JSON.stringify({ version: 2, locked: true, pose: saved }),
         vector: JSON.stringify({ version: 1, locked: true, pose: { ...saved, position: [1] } }),
         zoom: JSON.stringify({ version: 1, locked: false, pose: { ...saved, zoom: -1 } }),
-        tooClose: JSON.stringify({ version: 1, locked: false, pose: { ...saved, zoom: 1501 } }),
+        tooClose: JSON.stringify({ version: 1, locked: false, pose: { ...saved, zoom: 301 } }),
         viewport: JSON.stringify({
           version: 1,
           locked: false,

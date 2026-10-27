@@ -1,4 +1,4 @@
-import { MAX_ORTHOGRAPHIC_ZOOM } from "./navigation/camera-zoom";
+import { MAX_ORTHOGRAPHIC_ZOOM, MIN_ORBIT_ZOOM } from "./navigation/camera-zoom";
 import {
   readOrbitView,
   writeOrbitView,
@@ -341,7 +341,7 @@ function OrbitCameraRig({
     const scale =
       fitSavedOrbitView(source, width, height).zoom /
       fitSavedOrbitView(source, previous.width, previous.height).zoom;
-    camera.zoom = Math.max(1, Math.min(MAX_ORTHOGRAPHIC_ZOOM, camera.zoom * scale));
+    camera.zoom = Math.max(MIN_ORBIT_ZOOM, Math.min(MAX_ORTHOGRAPHIC_ZOOM, camera.zoom * scale));
     camera.updateProjectionMatrix();
     const wasManual = manual.current;
     manual.current = false;
@@ -390,7 +390,7 @@ function OrbitCameraRig({
         zoomSpeed={1.1}
         minPolarAngle={0}
         maxPolarAngle={1.28}
-        minZoom={1}
+        minZoom={MIN_ORBIT_ZOOM}
         maxZoom={MAX_ORTHOGRAPHIC_ZOOM}
         zoomToCursor
       />
