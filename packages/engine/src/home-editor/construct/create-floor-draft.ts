@@ -1,5 +1,6 @@
 /* Interaction concepts were reviewed against ai_room_planner (MIT); this
  * reducer and metre-first state contract are original to Cabane. */
+import { indoorRoomsForFloor } from "../../outdoor-platforms/platform-rooms";
 import type { FloorSpec, Polygon } from "../../types";
 
 import { mapPoolOutline } from "../../pools/pool-footprint";
@@ -95,7 +96,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
         }
       : { ...shared, kind: "passage" as const, variant: "rectangular" as const };
   }),
-  rooms: floor.rooms.map((room) => {
+  rooms: indoorRoomsForFloor(floor).map((room) => {
     const ceiling = floor.ceilings?.find(
       (candidate) => candidate.kind === "flat" && candidate.roomIds.includes(room.id),
     );

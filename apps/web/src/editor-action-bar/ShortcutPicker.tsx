@@ -28,7 +28,7 @@ type Props = {
   roomNames: Readonly<Record<string, string>>;
   deviceNames: Readonly<Record<string, string>>;
   disabled: boolean;
-  rooms: HomeProject["floors"][number]["rooms"];
+  rooms: readonly { id: string; name: string }[];
   devices: HomeProject["sceneItems"];
   query: string;
   setQuery: (query: string) => void;

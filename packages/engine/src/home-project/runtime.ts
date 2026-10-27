@@ -1,3 +1,4 @@
+import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { resolveProjectModels } from "../imported-models/resolve-models";
 import { deriveFloorLevels } from "../building/floor-levels";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
@@ -25,7 +26,9 @@ export const roomIdForItem = (
   floor: HomeBindingManifest["floors"][number],
 ): string | null => {
   const { at } = resolvedPlanPoint(item, floor);
-  const rooms = floor.rooms.filter((room) => !room.isSolid && pointInsidePolygon(at, room.polygon));
+  const rooms = roomsForFloor(floor).filter(
+    (room) => !room.isSolid && pointInsidePolygon(at, room.polygon),
+  );
   if (rooms.length !== 1) return null;
   return item.placement.kind !== "ceiling" || rooms[0].id === item.placement.roomId
     ? rooms[0].id
@@ -92,7 +95,7 @@ export const composeHomeBindingManifest = (
     const items = project.sceneItems.filter(
       (item): item is DeviceItemSpec => item.kind === "device" && item.floorId === floor.id,
     );
-    const rooms = floor.rooms
+    const rooms = roomsForFloor(floor)
       .filter((room) => !room.isSolid)
       .map((room) => ({
         ...room,

@@ -9,10 +9,12 @@ import {
   resolveProjectModels,
   stageModelAssets,
   type CustomModel,
+  type EditorWorkspaceSnapshot,
   type ModelAsset,
 } from "@cabane/engine";
 import { ownerProjectRegistries } from "../project-runtime";
 import { EditorButton } from "../editor-chrome/EditorButton";
+import { editCustomModel } from "./edit-custom-model";
 import { ModelImportDialog } from "./ModelImportDialog";
 import { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
@@ -23,10 +25,16 @@ export function CustomModelLibrary({
   workspace,
   disabled,
   onBrowse,
+  editingModel,
+  onCloseEditor,
+  onEditSnapshot,
 }: {
   workspace: ReturnType<typeof useEditorWorkspace>;
   disabled: boolean;
   onBrowse: () => void;
+  editingModel: CustomModel | null;
+  onCloseEditor: () => void;
+  onEditSnapshot: (snapshot: EditorWorkspaceSnapshot) => void;
 }) {
   const picker = useRef<HTMLInputElement>(null);
   const packPicker = useRef<HTMLInputElement>(null);
@@ -201,6 +209,25 @@ export function CustomModelLibrary({
         <p role="alert" className="catalog-add-error">
           {error}
         </p>
+      )}
+      {editingModel && (
+        <ModelImportDialog
+          key={editingModel.id}
+          existingModel={editingModel}
+          missingModelOptions={[]}
+          onCancel={onCloseEditor}
+          onImport={async (model) => {
+            if (disabled) throw new Error("The editor is busy. Try again when it is ready.");
+            const next = editCustomModel(workspace.snapshot, model);
+            onEditSnapshot(next);
+            const saved = await workspace.flush();
+            if (saved.status !== "saved")
+              throw new Error(
+                "Could not save the model. Your draft is kept in memory. Retry Save changes, or close and use Undo to revert.",
+              );
+            onCloseEditor();
+          }}
+        />
       )}
       {file && (
         <ModelImportDialog

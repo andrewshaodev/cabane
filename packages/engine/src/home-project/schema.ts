@@ -1,3 +1,5 @@
+import { outdoorPlatforms } from "./schema-outdoor-platforms";
+import { validateHomePosition } from "./schema-home-position";
 import { validateActionBarSchema } from "./schema-action-bar";
 import { entitySlot } from "./schema-entity-slot";
 import { wallSchema } from "./schema-wall";
@@ -9,7 +11,7 @@ import { doorDesignErrors } from "../door-design-validation";
 import { validHedge } from "../hedges/hedge-validity";
 import type { HedgeSpec } from "../types";
 import { room } from "./schema-room";
-import { floorFinish, floorZone } from "./schema-floor-finish";
+import { floorZone } from "./schema-floor-finish";
 import type { HomeProject, LegacyHomeProject } from "./types";
 import { addProjectIssue, isPlainRecord, type HomeProjectIssue } from "./validation-types";
 
@@ -260,43 +262,8 @@ const floor = (value: unknown, path: string, issues: HomeProjectIssue[], legacy:
           "Boundaries need distinct endpoints, a supported style, height 0.2–5 m and width 0.2–3 m.",
         );
     });
-  const edgeConfiguration = (value: unknown, edgePath: string) => {
-    const c = record(value, edgePath, issues);
-    if (!c) return;
-    keys(c, ["kind", "heightMeters"], edgePath, issues);
-    if (!["railing", "low-wall", "open"].includes(String(c.kind)))
-      addProjectIssue(issues, "project.platform-edge", edgePath, "Unknown platform edge style.");
-    if (c.kind !== "open") finite(c.heightMeters, `${edgePath}.heightMeters`, issues);
-    else if (c.heightMeters !== undefined)
-      addProjectIssue(
-        issues,
-        "project.platform-edge",
-        edgePath,
-        "Open edges do not have a barrier height.",
-      );
-  };
   if (candidate.outdoorPlatforms !== undefined)
-    array(candidate.outdoorPlatforms, `${path}.outdoorPlatforms`, issues)?.forEach(
-      (entry, index) => {
-        const p = `${path}.outdoorPlatforms[${index}]`;
-        const platform = record(entry, p, issues);
-        if (!platform) return;
-        keys(platform, ["id", "polygon", "finish", "defaultEdge", "edges"], p, issues);
-        string(platform.id, `${p}.id`, issues);
-        polygon(platform.polygon, `${p}.polygon`, issues);
-        floorFinish(platform.finish, `${p}.finish`, issues);
-        edgeConfiguration(platform.defaultEdge, `${p}.defaultEdge`);
-        array(platform.edges, `${p}.edges`, issues)?.forEach((entry, i) => {
-          const edgePath = `${p}.edges[${i}]`;
-          const edge = record(entry, edgePath, issues);
-          if (!edge) return;
-          keys(edge, ["id", "configuration"], edgePath, issues);
-          string(edge.id, `${edgePath}.id`, issues);
-          if (edge.configuration !== undefined)
-            edgeConfiguration(edge.configuration, `${edgePath}.configuration`);
-        });
-      },
-    );
+    outdoorPlatforms(candidate.outdoorPlatforms, `${path}.outdoorPlatforms`, issues);
   if (candidate.pools !== undefined)
     array(candidate.pools, `${path}.pools`, issues)?.forEach((entry, index) => {
       const poolPath = `${path}.pools[${index}]`;
@@ -420,23 +387,20 @@ export const validateHomeProjectSchemaShape = (
   if (home) {
     keys(
       home,
-      ["id", "name", "locale", "palette", "roof", "walkStart", "northAngleDegrees"],
+      [
+        "id",
+        "name",
+        "locale",
+        "palette",
+        "roof",
+        "walkStart",
+        "northAngleDegrees",
+        "apartmentFloor",
+      ],
       "home",
       issues,
     );
-    if (home.northAngleDegrees !== undefined) {
-      finite(home.northAngleDegrees, "home.northAngleDegrees", issues);
-      if (
-        typeof home.northAngleDegrees === "number" &&
-        (home.northAngleDegrees < 0 || home.northAngleDegrees >= 360)
-      )
-        addProjectIssue(
-          issues,
-          "project.north-angle",
-          "home.northAngleDegrees",
-          "North angle must be at least 0 and less than 360 degrees.",
-        );
-    }
+    validateHomePosition(home, issues);
     if (home.walkStart !== undefined) {
       const start = record(home.walkStart, "home.walkStart", issues);
       if (start) {

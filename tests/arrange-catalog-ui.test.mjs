@@ -692,6 +692,60 @@ await withModules(async (load) => {
     });
   });
 
+  const { editCustomModel } = await load("/apps/web/src/custom-models/edit-custom-model.ts");
+  const { personalScaleFixture } = await load("/tests/fixtures/personal-models-scale.ts");
+  test("custom model edits survive editor reconciliation and undo/redo across floors", async (context) => {
+    context.mock.timers.enable({ apis: ["setTimeout"] });
+    await withDom(async ({ root }) => {
+      const model = personalScaleFixture().project.customModels[0];
+      const project = { ...makeThreeFloorProject(), customModels: [model] };
+      project.sceneItems = project.floors.map((floor, i) => ({
+        id: `personal-${i}`,
+        floorId: floor.id,
+        kind: "furnishing",
+        modelId: model.id,
+        size: model.normalization.size,
+        placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
+      }));
+      const { light: _light, ...base } = model;
+      project.customModels = [{ ...base, profile: "furniture" }];
+      const record = createSeedProjectRecord(project, 1);
+      let controller;
+      function Harness() {
+        controller = useHomeEditorController({
+          initialRecord: record,
+          lifecycle: {
+            autosave: async (current, draft, _now, bindings) => ({
+              status: "saved",
+              record: { ...current, draft, bindings, revision: current.revision + 1 },
+            }),
+          },
+          autosaveDelayMs: 5,
+          onClose() {},
+          initialRequest: { mode: "furnish" },
+        });
+        return null;
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      const before = structuredClone(controller.snapshot);
+      const next = editCustomModel(controller.snapshot, model);
+      await act(async () => {
+        controller.replaceEditorsFromProject(next.project);
+        controller.workspace.commit(next);
+      });
+      await act(async () => context.mock.timers.tick(5));
+      assert.deepEqual(controller.snapshot, next);
+      assert.deepEqual(
+        controller.furnishingEditor.items,
+        next.project.sceneItems.filter((item) => item.floorId === controller.activeFloorId),
+      );
+      await act(async () => controller.undoProject());
+      assert.deepEqual(controller.snapshot, before);
+      await act(async () => controller.redoProject());
+      assert.deepEqual(controller.snapshot, next);
+    });
+  });
+
   test("history floor restoration preserves room identities and shared ceilings after settling", async (context) => {
     context.mock.timers.enable({ apis: ["setTimeout"] });
     await withDom(async ({ root }) => {

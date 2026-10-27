@@ -2,7 +2,7 @@
 
 Arrange exposes personal-model tools only inside **My models**, identified by
 a cube icon. This section offers **Import model (.glb file)** and **Generate a
-custom model**. A single preview grid lists the home's models, with download and
+custom model**. A single preview grid lists the home's models, with edit, download and
 unused-model removal icons on preview hover or keyboard focus, and always visible
 on touch devices. Clicking a model's name renames it; there is no second management
 list. The generation guide explains use of any AI tool, installation
@@ -38,11 +38,30 @@ and the preceding persisted workspace usable.
 
 Every import allocates an independent `custom:<UUID>` model, including repeated
 imports of identical bytes. Identical files share their immutable SHA-256 asset.
-Models can be renamed or downloaded; deletion requires no remaining draft
+Models can be edited, renamed or downloaded; deletion requires no remaining draft
 instances. Published and active history references retain their assets even when
 a draft removes the corresponding model. Instances share loaded geometry,
 materials, and textures while retaining independent transforms and skeletons.
 The final resource lease disposes the cache after previews or scenes close.
+
+**Edit model** reopens the import preview with the stored settings and verified
+original GLB. Saving updates the definition in place, keeping its custom ID and
+immutable asset reference. Every placed copy adopts the new light settings,
+orientation and dimensions. Copies retain their per-instance scale multiplier,
+floor and placement declaration (including support and yaw). Preferred placement
+sets the model's normalization origin and the support offered for new copies;
+it does not remount existing copies onto another wall or ceiling.
+
+Changing profile converts all copies to Furniture or the selected device kind.
+Device profile changes replace local slots with fresh manual primary slots and
+clear only the affected draft connections across all HA origins. Published
+mappings remain intact. The model, copies and private mapping cleanup share one
+undo/redo step. Cancel before saving leaves the workspace untouched; storage
+failure keeps the draft in memory, shows a retry/Undo message, and preserves the
+preceding stored record. Missing or damaged assets block saving and can be
+recovered through an intact model pack. Editing uses the existing project and
+asset contracts without a schema migration. Multi-source lights are a separate
+feature.
 
 `HomeProject` V2 optionally contains `customModels`: name, support, existing
 profile, asset hash/byte length, normalization, bounds, complexity, and optional
