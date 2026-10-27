@@ -171,6 +171,9 @@ export function HomeAssistantSceneLighting({
         resolved,
       })),
   ];
+  // Imported multi-source models have a bounded per-floor shader cost. Reserve
+  // slots independent of state so switching lights never changes the layout.
+  let importedPointsRemaining = 32;
   return (
     <group name="home-assistant-scene-lighting">
       {floor.rooms.flatMap((room) => {
@@ -249,12 +252,16 @@ export function HomeAssistantSceneLighting({
         const scale = sceneItem
           ? sceneItemScale!
           : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
-        const source = definition.sceneLight;
-        return [
+        const sources = definition.sceneLights ?? [definition.sceneLight];
+        const visibleSources = modelId.startsWith("custom:")
+          ? sources.slice(0, importedPointsRemaining)
+          : sources;
+        if (modelId.startsWith("custom:")) importedPointsRemaining -= visibleSources.length;
+        return visibleSources.map((source, index) => (
           <PhysicalSceneLight
             floor={floor}
-            key={`device-light-${id}`}
-            name={`ha-device-light-${id}`}
+            key={`device-light-${id}-${index}`}
+            name={`ha-device-light-${id}${index ? `-${index}` : ""}`}
             position={deviceLightPosition(
               transform.position,
               transform.rotationYRadians,
@@ -264,8 +271,8 @@ export function HomeAssistantSceneLighting({
             color={lightColorForSnapshot(state, source.color)}
             intensity={source.maxIntensity * brightness}
             distance={source.distance * scale}
-          />,
-        ];
+          />
+        ));
       })}
     </group>
   );

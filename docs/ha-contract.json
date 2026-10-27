@@ -1,9 +1,9 @@
 {
-  "revision": 13,
-  "fingerprint": "05c0de4e8a5a1cacdd3bb4ba191aab9414a886cc3dbbcbc13e80c42c8c543b28",
-  "summary": "Add outdoor room membership with shared room controls",
+  "revision": 14,
+  "fingerprint": "69ec3f17963bdee24fbd3b48888b6a0e209427021a3f7e7f34bae0f2c3175dbb",
+  "summary": "Add multiple imported light sources and material glow",
   "breakingChanges": [
-    "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+    "Existing models remain supported. New points, strip and emissive material settings require an updated frontend and matching panel. No asset migration is required."
   ],
   "history": [
     {
@@ -88,6 +88,13 @@
       "summary": "Add decorative apartment floors through Construct floor management",
       "breakingChanges": [
         "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field. Solid structural spaces from revision 11 remain supported."
+      ]
+    },
+    {
+      "revision": 13,
+      "summary": "Add outdoor room membership with shared room controls",
+      "breakingChanges": [
+        "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
       ]
     }
   ],

@@ -319,10 +319,37 @@
                           "type": "number"
                         }
                       },
+                      "emissiveMaterials": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
                       "maxIntensity": {
                         "optional": false,
                         "schema": {
                           "type": "number"
+                        }
+                      },
+                      "points": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "tuple": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "elementFlags": [1, 1, 1]
+                          }
                         }
                       },
                       "position": {
@@ -340,6 +367,36 @@
                             }
                           ],
                           "elementFlags": [1, 1, 1]
+                        }
+                      },
+                      "strip": {
+                        "optional": true,
+                        "schema": {
+                          "properties": {
+                            "end": {
+                              "optional": false,
+                              "schema": {
+                                "tuple": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "elementFlags": [1, 1, 1]
+                              }
+                            },
+                            "samples": {
+                              "optional": false,
+                              "schema": {
+                                "type": "number"
+                              }
+                            }
+                          }
                         }
                       }
                     }

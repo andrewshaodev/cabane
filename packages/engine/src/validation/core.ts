@@ -293,6 +293,23 @@ export const isDeviceModelDefinition = (value: unknown): value is DeviceModelDef
         isFiniteNumber(value.sceneLight.distance) &&
         value.sceneLight.distance > 0 &&
         (value.supportedDomains as unknown[]).includes("light"))) &&
+    (value.sceneLights === undefined ||
+      (Array.isArray(value.sceneLights) &&
+        value.sceneLights.length > 0 &&
+        value.sceneLights.length <= 8 &&
+        (value.supportedDomains as unknown[]).includes("light") &&
+        value.sceneLights.every(
+          (source) =>
+            isObject(source) &&
+            Array.isArray(source.position) &&
+            source.position.length === 3 &&
+            source.position.every(isFiniteNumber) &&
+            isNonEmptyString(source.color) &&
+            isFiniteNumber(source.maxIntensity) &&
+            source.maxIntensity >= 0 &&
+            isFiniteNumber(source.distance) &&
+            source.distance >= 0,
+        ))) &&
     isFiniteNumber(value.interaction.tapTolerancePixels) &&
     value.interaction.tapTolerancePixels > 0
   );

@@ -4,5 +4,8 @@ export { inspectGlb, SUPPORTED_GLB_EXTENSIONS } from "./glb-validation";
 export { loadGlb, disposeGlb, openGlbPreview } from "./glb-resources";
 export { normalizeGlb } from "./normalization";
 export { ImportedModelGeometry } from "./ImportedModel";
+export { ImportedModelSurface } from "./ImportedModelSurface";
+export { importedLightSources } from "./light-sources";
+export { importedEmissiveMaterialNames } from "./light-materials";
 export { resolveProjectModels } from "./resolve-models";
 export * from "./archive";

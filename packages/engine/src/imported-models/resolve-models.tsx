@@ -6,6 +6,7 @@ import type {
 import type { HomeProject } from "../home-project/types";
 import { ImportedModelGeometry } from "./ImportedModel";
 import type { CustomModel } from "./contracts";
+import { importedLightSources } from "./light-sources";
 
 const resolved = new WeakMap<readonly CustomModel[], ProjectModelRegistries>();
 const empty: readonly CustomModel[] = [];
@@ -45,10 +46,12 @@ export function resolveProjectModels(
       } else {
         devices[model.id] = {
           ...descriptor,
-          component: () => <ImportedModelGeometry model={model} />,
+          component: ({ state }) => <ImportedModelGeometry model={model} state={state} />,
           mountKind: model.placement === "wall" ? "wall" : "surface",
           supportedDomains: [model.profile],
-          ...(model.profile === "light" && model.light ? { sceneLight: model.light } : {}),
+          ...(model.profile === "light" && model.light
+            ? { sceneLight: model.light, sceneLights: importedLightSources(model.light) }
+            : {}),
           ...(model.profile === "camera"
             ? { liveMedia: { kind: "camera-stream" as const, slotRole: "primary" as const } }
             : {}),
