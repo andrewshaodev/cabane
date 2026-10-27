@@ -1,3 +1,4 @@
+import { createWallSurfaceTextures } from "./wall-surface-textures";
 import { wallFrame } from "../architecture-geometry/wall-coordinate-frame";
 import { wallFaceFinish, wallEdgeFinish } from "../architecture-geometry/wall-face-finish";
 import { BufferGeometry, Color, Float32BufferAttribute } from "three";
@@ -44,7 +45,7 @@ const splitArchitectureGeometry = (source: BufferGeometry) => {
   return result;
 };
 
-export function ArchitecturalWall({
+function SolidArchitecturalWall({
   wall,
   floor,
   openings,
@@ -116,6 +117,18 @@ export function ArchitecturalWall({
   );
 }
 
+export function ArchitecturalWall(props: Parameters<typeof SolidArchitecturalWall>[0]) {
+  const floor = useMemo(
+    () => ({ ...props.floor, walls: [props.wall], wallJunctions: [], openings: props.openings }),
+    [props.floor, props.wall, props.openings],
+  );
+  return props.wall.faceFinishes ? (
+    <ArchitecturalWalls {...props} floor={floor} baseElevationMeters={0} />
+  ) : (
+    <SolidArchitecturalWall {...props} />
+  );
+}
+
 export function ArchitecturalWalls({
   floor,
   interiorColor,
@@ -138,6 +151,8 @@ export function ArchitecturalWalls({
   reducedMotion: boolean;
 }) {
   const selectionHandlers = useWallRoomSelection(floor, onSelectRoom);
+  const textures = useMemo(() => createWallSurfaceTextures(), []);
+  useEffect(() => () => textures.dispose(), [textures]);
   const groups = useMemo(
     () =>
       buildArchitecturalWallGeometries(floor, interiorColor, exteriorColor, baseElevationMeters, {
@@ -149,10 +164,16 @@ export function ArchitecturalWalls({
   useEffect(() => () => groups.forEach(({ geometry }) => geometry.dispose()), [groups]);
   return (
     <>
-      {groups.map(({ geometry, outwardNormal, fadeNormals }, index) => {
+      {groups.map(({ geometry, outwardNormal, fadeNormals, finish }, index) => {
+        const texture = finish ? textures.get(finish) : null;
         const wall = (
           <mesh key={`mesh-${index}`} geometry={geometry} castShadow {...selectionHandlers}>
-            <ToonMaterial color="white" vertexColors />
+            <ToonMaterial
+              key={texture ? "pattern" : "solid"}
+              color={texture ? "white" : (finish?.color ?? "white")}
+              map={texture}
+              vertexColors
+            />
             <RoomWallEmphasis
               geometry={geometry}
               floor={floor}
