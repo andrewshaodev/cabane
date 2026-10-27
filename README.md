@@ -53,7 +53,9 @@ shows Casa Solstice from inside. Click any screenshot to enlarge.
 
 ### HACS
 
-Requires **Home Assistant 2024.7 or newer**, **HACS**, and **HTTPS**.
+Requires **Home Assistant 2024.7 or newer** and **HACS**. HTTPS is recommended.
+The native sidebar panel also works over HTTP at the same origin as Home Assistant;
+HTTP does not encrypt your traffic.
 
 [![Open your Home Assistant instance and add the Cabane repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=cabane-app&repository=cabane-home-assistant&category=integration)
 
@@ -128,7 +130,7 @@ npm run dev
 ```
 
 Open the URL printed by Vite, normally `http://127.0.0.1:4173`. The demo and
-editors work locally without Home Assistant. A real Home Assistant connection
+editors work locally without Home Assistant. A standalone Home Assistant connection
 requires HTTPS for both endpoints; paired HTTP loopback origins are supported
 for local development.
 
