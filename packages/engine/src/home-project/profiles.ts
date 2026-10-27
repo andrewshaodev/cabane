@@ -1,3 +1,4 @@
+import { isAuxiliaryEntitySlot } from "../entity-slot-roles";
 import type { DeviceModelDefinition, EntityBindingSlotSpec } from "../types";
 import type { DeviceItemSpec, HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
@@ -83,7 +84,20 @@ export const validateProfileReferencesAndSlots = (
   }
 
   project.sceneItems.forEach((item, itemIndex) => {
-    if (item.kind !== "device") return;
+    if (item.kind !== "device") {
+      (item.entitySlots ?? []).forEach((slot, slotIndex) => {
+        const path = `sceneItems[${itemIndex}].entitySlots[${slotIndex}]`;
+        validateEntitySlotSemantics(slot, path, issues);
+        if (!isAuxiliaryEntitySlot(slot))
+          addProjectIssue(
+            issues,
+            "project.furnishing-slot",
+            path,
+            "Furniture attachments must be optional manual secondary sensor or binary sensor slots.",
+          );
+      });
+      return;
+    }
     if (item.entitySlots.length === 0) {
       addProjectIssue(
         issues,
@@ -120,6 +134,7 @@ export const validateDeviceSlotsAgainstModel = (
   issues: HomeProjectIssue[],
 ) => {
   item.entitySlots.forEach((slot, slotIndex) => {
+    if (isAuxiliaryEntitySlot(slot)) return;
     slot.compatibleDomains.forEach((domain) => {
       if (!definition.supportedDomains.includes(domain)) {
         addProjectIssue(
@@ -148,16 +163,20 @@ export const validateDeviceSlotsAgainstModel = (
     (!definition.supportedDomains.includes("media_player") ||
       item.entitySlots.some((slot) => slot.compatibleDomains.includes("camera")))
   ) {
-    const cameraSlot = item.entitySlots[0];
+    const controlSlots = item.entitySlots.filter((slot) => !isAuxiliaryEntitySlot(slot));
+    const cameraSlot = controlSlots[0];
     if (
-      item.entitySlots.length !== 1 ||
+      controlSlots.length !== 1 ||
       cameraSlot?.deviceRole !== definition.liveMedia.slotRole ||
       cameraSlot?.required !== true ||
       !cameraSlot?.compatibleDomains.length ||
       cameraSlot.compatibleDomains.some(
         (domain) =>
           domain !== "camera" &&
-          !(domain === "media_player" && definition.supportedDomains.includes("media_player")),
+          !(
+            ["media_player", "switch"].includes(domain) &&
+            definition.supportedDomains.includes(domain)
+          ),
       )
     ) {
       addProjectIssue(

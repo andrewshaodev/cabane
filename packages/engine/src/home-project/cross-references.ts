@@ -64,8 +64,7 @@ const visitProjectIds = (
     );
   }
   project.sceneItems.forEach((item, itemIndex) => {
-    if (item.kind !== "device") return;
-    item.entitySlots.forEach((slot, slotIndex) =>
+    (item.entitySlots ?? []).forEach((slot, slotIndex) =>
       register(slot.id, `sceneItems[${itemIndex}].entitySlots[${slotIndex}].id`, "slot"),
     );
   });

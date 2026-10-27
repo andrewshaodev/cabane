@@ -1,5 +1,6 @@
 import { modelVariants } from "@cabane/engine";
 import type {
+  EntityBindingSlotSpec,
   FloorSpec,
   FurnishingItemSpec,
   FurnishingModelDefinition,
@@ -164,6 +165,7 @@ export type FurnishingEditorAction =
   | { type: "begin-transaction" }
   | { type: "commit-transaction" }
   | { type: "cancel-transaction" }
+  | { type: "update-entity-slots"; id: string; entitySlots: readonly EntityBindingSlotSpec[] }
   | { type: "update-variant"; id: string; variant: string; definition: SceneModelEditorDescriptor }
   | {
       type: "update-light-state";
@@ -301,6 +303,8 @@ export const furnishingEditorReducer = (
       if (!modelVariants(action.definition).some((variant) => variant.id === action.variant))
         return state;
       return updateItem(state, action.id, (item) => ({ ...item, variant: action.variant }));
+    case "update-entity-slots":
+      return updateItem(state, action.id, (item) => ({ ...item, entitySlots: action.entitySlots }));
     case "update-light-state":
       return updateItem(state, action.id, (item) =>
         item.kind === "device" ? { ...item, lightState: action.lightState } : item,
@@ -358,7 +362,7 @@ export const furnishingEditorReducer = (
       const id = createSceneItemId(
         state.items.flatMap((item) => [
           item.id,
-          ...(item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : []),
+          ...(item.entitySlots ?? []).map((slot) => slot.id),
         ]),
       );
       const item: FurnishingItemSpec = {

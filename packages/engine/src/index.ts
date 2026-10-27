@@ -1,5 +1,6 @@
 export { createBrowserUuid } from "./browser-uuid";
 export * from "./types";
+export { isAuxiliaryEntitySlot } from "./entity-slot-roles";
 export * from "./walk-tools";
 export * from "./action-bar/action-bar-config";
 export * from "./action-bar/ha-action-shortcuts";

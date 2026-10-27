@@ -81,7 +81,17 @@ export const sceneItem = (
           "lightState",
           "color",
         ]
-      : ["id", "floorId", "kind", "modelId", "variant", "placement", "size", "color"],
+      : [
+          "id",
+          "floorId",
+          "kind",
+          "modelId",
+          "variant",
+          "placement",
+          "size",
+          "color",
+          "entitySlots",
+        ],
     path,
     issues,
   );
@@ -124,7 +134,7 @@ export const sceneItem = (
       "Choose always-off, always-on, night-only, or connected.",
     );
   }
-  if (device)
+  if (device || candidate.entitySlots !== undefined)
     array(candidate.entitySlots, `${path}.entitySlots`, issues)?.forEach((entry, index) =>
       entitySlot(entry, `${path}.entitySlots[${index}]`, issues),
     );

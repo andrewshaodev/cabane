@@ -267,3 +267,5 @@ Plan-coordinate inputs account for the floor's metres-per-plan-unit scale.
 Changing display units never rescales the project or rewrites its stored geometry;
 portable project formats retain their existing units. Blocked browser storage
 retains the preference for the current session.
+
+Furniture may declare optional `entitySlots` containing manual, non-required secondary sensor or binary sensor attachments. Devices retain exactly one primary control; optional read-only attachments are validated independently of the model’s control domains. `presentation.showInScene` is opt-in map visibility. Older documents omit both fields and keep their prior behavior. Older panels reject documents containing the new fields; preserve that rejection and update the matching HACS panel before transfer.

@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 3,
+    "validationRevision": 4,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -3082,6 +3082,19 @@
                                 "schema": {
                                   "type": "string"
                                 }
+                              },
+                              "showInScene": {
+                                "optional": true,
+                                "schema": {
+                                  "anyOf": [
+                                    {
+                                      "const": false
+                                    },
+                                    {
+                                      "const": true
+                                    }
+                                  ]
+                                }
                               }
                             }
                           }
@@ -3306,6 +3319,19 @@
                                     "optional": false,
                                     "schema": {
                                       "type": "string"
+                                    }
+                                  },
+                                  "showInScene": {
+                                    "optional": true,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
                                     }
                                   }
                                 }
@@ -3585,6 +3611,227 @@
                       "optional": true,
                       "schema": {
                         "type": "string"
+                      }
+                    },
+                    "entitySlots": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "properties": {
+                            "autoMap": {
+                              "optional": false,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": "manual"
+                                  },
+                                  {
+                                    "const": "unique-compatible"
+                                  }
+                                ]
+                              }
+                            },
+                            "compatibleDeviceClasses": {
+                              "optional": true,
+                              "schema": {
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "compatibleDomains": {
+                              "optional": false,
+                              "schema": {
+                                "items": {
+                                  "anyOf": [
+                                    {
+                                      "const": "alarm_control_panel"
+                                    },
+                                    {
+                                      "const": "binary_sensor"
+                                    },
+                                    {
+                                      "const": "button"
+                                    },
+                                    {
+                                      "const": "camera"
+                                    },
+                                    {
+                                      "const": "climate"
+                                    },
+                                    {
+                                      "const": "cover"
+                                    },
+                                    {
+                                      "const": "fan"
+                                    },
+                                    {
+                                      "const": "humidifier"
+                                    },
+                                    {
+                                      "const": "input_boolean"
+                                    },
+                                    {
+                                      "const": "light"
+                                    },
+                                    {
+                                      "const": "lock"
+                                    },
+                                    {
+                                      "const": "media_player"
+                                    },
+                                    {
+                                      "const": "number"
+                                    },
+                                    {
+                                      "const": "select"
+                                    },
+                                    {
+                                      "const": "sensor"
+                                    },
+                                    {
+                                      "const": "siren"
+                                    },
+                                    {
+                                      "const": "switch"
+                                    },
+                                    {
+                                      "const": "vacuum"
+                                    },
+                                    {
+                                      "const": "valve"
+                                    },
+                                    {
+                                      "const": "water_heater"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "deviceRole": {
+                              "optional": true,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": "primary"
+                                  },
+                                  {
+                                    "const": "secondary"
+                                  }
+                                ]
+                              }
+                            },
+                            "id": {
+                              "optional": false,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
+                            "presentation": {
+                              "optional": false,
+                              "schema": {
+                                "properties": {
+                                  "dashboardRole": {
+                                    "optional": false,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": "diagnostic"
+                                        },
+                                        {
+                                          "const": "hidden"
+                                        },
+                                        {
+                                          "const": "primary"
+                                        },
+                                        {
+                                          "const": "secondary"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "label": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "showInScene": {
+                                    "optional": true,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "required": {
+                              "optional": false,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": false
+                                  },
+                                  {
+                                    "const": true
+                                  }
+                                ]
+                              }
+                            },
+                            "sceneLight": {
+                              "optional": true,
+                              "schema": {
+                                "properties": {
+                                  "at": {
+                                    "optional": false,
+                                    "schema": {
+                                      "tuple": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ],
+                                      "elementFlags": [1, 1]
+                                    }
+                                  },
+                                  "color": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "distance": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "elevationMeters": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "maxIntensity": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     },
                     "floorId": {
@@ -6640,6 +6887,19 @@
                                     "schema": {
                                       "type": "string"
                                     }
+                                  },
+                                  "showInScene": {
+                                    "optional": true,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
+                                    }
                                   }
                                 }
                               }
@@ -6918,6 +7178,227 @@
                       "optional": true,
                       "schema": {
                         "type": "string"
+                      }
+                    },
+                    "entitySlots": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "properties": {
+                            "autoMap": {
+                              "optional": false,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": "manual"
+                                  },
+                                  {
+                                    "const": "unique-compatible"
+                                  }
+                                ]
+                              }
+                            },
+                            "compatibleDeviceClasses": {
+                              "optional": true,
+                              "schema": {
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "compatibleDomains": {
+                              "optional": false,
+                              "schema": {
+                                "items": {
+                                  "anyOf": [
+                                    {
+                                      "const": "alarm_control_panel"
+                                    },
+                                    {
+                                      "const": "binary_sensor"
+                                    },
+                                    {
+                                      "const": "button"
+                                    },
+                                    {
+                                      "const": "camera"
+                                    },
+                                    {
+                                      "const": "climate"
+                                    },
+                                    {
+                                      "const": "cover"
+                                    },
+                                    {
+                                      "const": "fan"
+                                    },
+                                    {
+                                      "const": "humidifier"
+                                    },
+                                    {
+                                      "const": "input_boolean"
+                                    },
+                                    {
+                                      "const": "light"
+                                    },
+                                    {
+                                      "const": "lock"
+                                    },
+                                    {
+                                      "const": "media_player"
+                                    },
+                                    {
+                                      "const": "number"
+                                    },
+                                    {
+                                      "const": "select"
+                                    },
+                                    {
+                                      "const": "sensor"
+                                    },
+                                    {
+                                      "const": "siren"
+                                    },
+                                    {
+                                      "const": "switch"
+                                    },
+                                    {
+                                      "const": "vacuum"
+                                    },
+                                    {
+                                      "const": "valve"
+                                    },
+                                    {
+                                      "const": "water_heater"
+                                    }
+                                  ]
+                                }
+                              }
+                            },
+                            "deviceRole": {
+                              "optional": true,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": "primary"
+                                  },
+                                  {
+                                    "const": "secondary"
+                                  }
+                                ]
+                              }
+                            },
+                            "id": {
+                              "optional": false,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
+                            "presentation": {
+                              "optional": false,
+                              "schema": {
+                                "properties": {
+                                  "dashboardRole": {
+                                    "optional": false,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": "diagnostic"
+                                        },
+                                        {
+                                          "const": "hidden"
+                                        },
+                                        {
+                                          "const": "primary"
+                                        },
+                                        {
+                                          "const": "secondary"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "label": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "showInScene": {
+                                    "optional": true,
+                                    "schema": {
+                                      "anyOf": [
+                                        {
+                                          "const": false
+                                        },
+                                        {
+                                          "const": true
+                                        }
+                                      ]
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "required": {
+                              "optional": false,
+                              "schema": {
+                                "anyOf": [
+                                  {
+                                    "const": false
+                                  },
+                                  {
+                                    "const": true
+                                  }
+                                ]
+                              }
+                            },
+                            "sceneLight": {
+                              "optional": true,
+                              "schema": {
+                                "properties": {
+                                  "at": {
+                                    "optional": false,
+                                    "schema": {
+                                      "tuple": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ],
+                                      "elementFlags": [1, 1]
+                                    }
+                                  },
+                                  "color": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "distance": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "elevationMeters": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "maxIntensity": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     },
                     "floorId": {

@@ -1,5 +1,5 @@
 import { pointInsidePolygon } from "./geometry";
-import { deviceSlotForItem } from "./home-project/runtime";
+import { deviceSlotForItem, roomIdForItem } from "./home-project/runtime";
 import type { HomeBindingManifest, RoomSpec } from "./types";
 
 /** A device-list group only; never added to architectural floor rooms. */
@@ -20,7 +20,16 @@ export function outsideRoomDevices(
       return [];
     }
   });
-  return devices.length
+  const dashboardSlots = manifest.sceneItems.flatMap((item) => {
+    if (item.kind !== "furnishing" || item.floorId !== floorId || !item.entitySlots?.length)
+      return [];
+    try {
+      return roomIdForItem(item, floor) === null ? item.entitySlots : [];
+    } catch {
+      return [];
+    }
+  });
+  return devices.length || dashboardSlots.length
     ? {
         id: `outside-rooms:${floorId}`,
         name: "Outside rooms",
@@ -31,7 +40,7 @@ export function outsideRoomDevices(
           [0, 0],
         ],
         accent: "#74856a",
-        dashboardSlots: [],
+        dashboardSlots,
         devices,
       }
     : null;

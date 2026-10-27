@@ -1,9 +1,9 @@
 {
-  "revision": 11,
-  "fingerprint": "f798695dc616cbcb257c8e255e8beeef24cda3d7a84105282f71b240502df452",
-  "summary": "Support reversible solid structural spaces in room properties",
+  "revision": 12,
+  "fingerprint": "2cc44df71eda661a1f94d90cfb1ea1d5f42fac0c70135f2cb74c0b3564bcec08",
+  "summary": "Support independent furniture and device sensor attachments with opt-in map readings and TV switch controls",
   "breakingChanges": [
-    "Older clients must update before importing projects containing the room isSolid field."
+    "Older panels reject furnishing entitySlots and slot presentation.showInScene. Update the matching HACS panel and compatibility manifest before transferring affected homes. Existing primary slots and household mappings are preserved."
   ],
   "history": [
     {
@@ -74,6 +74,13 @@
       "summary": "Allow imports and Save with unavailable catalog variants using default visuals",
       "breakingChanges": [
         "Existing projects remain compatible. Missing furnishing and device variants now produce warnings and render the model default while retaining the saved variant ID; missing models retain placeholders. Older panels can reject newer variants until updated through HACS. Structural and unsupported-schema errors remain blocked."
+      ]
+    },
+    {
+      "revision": 11,
+      "summary": "Support reversible solid structural spaces in room properties",
+      "breakingChanges": [
+        "Older clients must update before importing projects containing the room isSolid field."
       ]
     }
   ],

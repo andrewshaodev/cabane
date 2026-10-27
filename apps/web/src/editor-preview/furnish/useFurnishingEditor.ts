@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useReducer, useState } from "react";
 import type {
+  EntityBindingSlotSpec,
   FloorSpec,
   FurnishingModelDefinition,
   ItemPlacement,
@@ -51,6 +52,11 @@ export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
     updateVariant: useCallback(
       (id: string, variant: string, definition: SceneModelEditorDescriptor) =>
         dispatch({ type: "update-variant", id, variant, definition }),
+      [],
+    ),
+    updateEntitySlots: useCallback(
+      (id: string, entitySlots: readonly EntityBindingSlotSpec[]) =>
+        dispatch({ type: "update-entity-slots", id, entitySlots }),
       [],
     ),
     updateLightState: useCallback(

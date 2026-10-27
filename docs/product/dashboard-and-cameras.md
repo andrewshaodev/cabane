@@ -380,3 +380,5 @@ rendered floor. It returns to its authored placement when cleaning stops. This i
 a decorative status visualization, not robot localization: external cleaning has
 no inferred destination and remains at the authored location. The destination is
 not persisted or written to HA. The activity studio includes a simulated vacuum.
+
+Opted-in item readings appear above the furniture or device in the 3D map, with the authored label, state and reported unit. Unavailable, stale and unconnected readings show status text instead of a last-known value. These badges are non-interactive and hidden in Walk and editor previews. Auxiliary fridge/freezer telemetry does not become the room’s ambient temperature or presence. Map visibility and dashboard visibility are independent.

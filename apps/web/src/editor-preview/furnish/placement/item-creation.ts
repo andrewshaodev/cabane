@@ -13,9 +13,7 @@ export function createCatalogItem(
   const id = createSceneItemId([
     ...occupiedIds,
     ...items.map((item) => item.id),
-    ...items.flatMap((item) =>
-      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
-    ),
+    ...items.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
   ]);
   const common = {
     variant: resolveModelVariant(entry.definition).id,
@@ -32,9 +30,7 @@ export function createCatalogItem(
     ...occupiedIds,
     id,
     ...items.map((item) => item.id),
-    ...items.flatMap((item) =>
-      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
-    ),
+    ...items.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
   ]);
   const classes = entry.definition.supportedDeviceClasses?.[domain];
   // A slot has one class constraint for all its domains. Include alternatives
