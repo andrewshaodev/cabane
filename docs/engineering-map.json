@@ -201,6 +201,9 @@
           "resolveProjectModels",
           "createModelAssetRepository",
           "openGlbPreview",
+          "ImportedModelSurface",
+          "importedLightSources",
+          "importedEmissiveMaterialNames",
           "createCabaneArchive",
           "readCabaneFile",
           "createCabaneModelPack",
@@ -208,7 +211,7 @@
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
+    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Imported Light sources use normalized support coordinates and share the primary entity; only selected emissive materials are cloned per instance. Bound imported source counts and preserve legacy single-point settings. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {

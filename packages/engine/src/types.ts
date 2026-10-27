@@ -738,6 +738,12 @@ export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
     maxIntensity: number;
     distance: number;
   };
+  sceneLights?: readonly {
+    position: readonly [x: number, y: number, z: number];
+    color: string;
+    maxIntensity: number;
+    distance: number;
+  }[];
   interaction: {
     target?: DeviceInteractionIntent;
     tapTolerancePixels: number;

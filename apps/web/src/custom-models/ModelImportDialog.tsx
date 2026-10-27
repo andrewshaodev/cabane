@@ -6,6 +6,8 @@ import {
   openGlbPreview,
   normalizeGlb,
   useCabaneDom,
+  importedEmissiveMaterialNames,
+  type CustomModelLight,
   type CustomModel,
   type CustomModelProfile,
   type CustomModelPlacement,
@@ -15,6 +17,7 @@ import {
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { ModelImportPreview } from "./ModelImportPreview";
+import { ModelLightFields } from "./ModelLightFields";
 import "./custom-models.css";
 
 type Loaded = Awaited<ReturnType<typeof openGlbPreview>>;
@@ -43,10 +46,13 @@ export function ModelImportDialog({
   const [profile, setProfile] = useState<CustomModelProfile>("furniture");
   const [rotation, setRotation] = useState<ModelVector>([0, 0, 0]);
   const [scale, setScale] = useState(1);
-  const [lightPosition, setLightPosition] = useState<ModelVector>([0, 0, 0]);
-  const [lightColor, setLightColor] = useState("#ffe3b4");
-  const [intensity, setIntensity] = useState(2);
-  const [distance, setDistance] = useState(5);
+  const [lightSettings, setLightSettings] = useState<CustomModelLight>({
+    position: [0, 0, 0],
+    color: "#ffe3b4",
+    maxIntensity: 2,
+    distance: 5,
+  });
+  const lightInitialized = useRef(false);
   const [replacementId, setReplacementId] = useState("");
   const replacementOptions = missingModelOptions.filter((option) =>
     profile === "furniture" ? option.kind === "furnishing" : option.kind === "device",
@@ -85,11 +91,22 @@ export function ModelImportDialog({
     () => (loaded ? normalizeGlb(loaded.root, placement, rotation, scale) : null),
     [loaded, placement, rotation, scale],
   );
-  const light =
-    profile === "light"
-      ? { position: lightPosition, color: lightColor, maxIntensity: intensity, distance }
-      : undefined;
-  const valid = name.trim() && loaded && normalization && scale > 0;
+  const materialNames = useMemo(
+    () => (loaded ? importedEmissiveMaterialNames(loaded.root) : []),
+    [loaded],
+  );
+  const light = profile === "light" ? lightSettings : undefined;
+  const lightError =
+    light &&
+    (!Number.isFinite(light.maxIntensity) ||
+    light.maxIntensity < 0 ||
+    !Number.isFinite(light.distance) ||
+    light.distance < 0
+      ? "Light intensity and range must be non-negative numbers."
+      : light.strip && light.strip.end.every((n, axis) => n === light.position[axis])
+        ? "The strip start and end must differ."
+        : null);
+  const valid = name.trim() && loaded && normalization && scale > 0 && !lightError;
   const changeVector = (value: ModelVector, axis: number, next: number): ModelVector =>
     value.map((n, i) => (i === axis ? next : n)) as [number, number, number];
   return (
@@ -166,12 +183,17 @@ export function ModelImportDialog({
               value={profile}
               onChange={(e) => {
                 setProfile(e.target.value as CustomModelProfile);
-                if (normalization)
-                  setLightPosition([
-                    0,
-                    (normalization.bounds.min[1] + normalization.bounds.max[1]) / 2,
-                    normalization.bounds.max[2],
-                  ]);
+                if (normalization && e.target.value === "light" && !lightInitialized.current) {
+                  lightInitialized.current = true;
+                  setLightSettings((previous) => ({
+                    ...previous,
+                    position: [
+                      0,
+                      (normalization.bounds.min[1] + normalization.bounds.max[1]) / 2,
+                      normalization.bounds.max[2],
+                    ],
+                  }));
+                }
               }}
             >
               {CUSTOM_MODEL_PROFILES.map(([id, label]) => (
@@ -219,42 +241,17 @@ export function ModelImportDialog({
           </>
         )}
         {light && (
-          <fieldset disabled={busy} className="model-import-vectors">
-            <legend>Light source · position</legend>
-            {["Light X", "Light Y", "Light Z"].map((label, i) => (
-              <label key={label}>
-                {label}
-                <LengthInput
-                  label={label}
-                  value={lightPosition[i]}
-                  onCommit={(n) => setLightPosition(changeVector(lightPosition, i, n))}
-                />
-              </label>
-            ))}
-            <label>
-              Color
-              <input
-                type="color"
-                value={lightColor}
-                onChange={(e) => setLightColor(e.target.value)}
-              />
-            </label>
-            <label>
-              Intensity
-              <input
-                type="number"
-                min="0"
-                step="0.1"
-                required
-                value={intensity}
-                onChange={(e) => setIntensity(Number(e.target.value))}
-              />
-            </label>
-            <label>
-              Range
-              <LengthInput label="Light range" min={0} value={distance} onCommit={setDistance} />
-            </label>
-          </fieldset>
+          <ModelLightFields
+            value={light}
+            onChange={setLightSettings}
+            materialNames={materialNames}
+            disabled={busy}
+          />
+        )}
+        {lightError && (
+          <p role="alert" className="catalog-add-error">
+            {lightError}
+          </p>
         )}
         {loaded && (
           <p className="model-import-hint">

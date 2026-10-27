@@ -107,12 +107,62 @@ export function validateCustomModels(
       if (model.profile !== "light") error("light", "Only Light models have a light source.");
       const light = record(model.light, `${path}.light`, issues);
       if (light) {
-        keys(light, ["position", "color", "maxIntensity", "distance"], `${path}.light`, issues);
+        keys(
+          light,
+          ["position", "color", "maxIntensity", "distance", "points", "strip", "emissiveMaterials"],
+          `${path}.light`,
+          issues,
+        );
         vector(light.position, `${path}.light.position`, issues);
         string(light.color, `${path}.light.color`, issues);
         for (const key of ["maxIntensity", "distance"]) {
           finite(light[key], `${path}.light.${key}`, issues);
           if (Number(light[key]) < 0) error(`light.${key}`, "Light settings must be non-negative.");
+        }
+        if (light.points !== undefined) {
+          const points = array(light.points, `${path}.light.points`, issues);
+          if (points && points.length >= CUSTOM_MODEL_LIMITS.lightPoints)
+            error("light.points", "Use at most eight light points in total.");
+          points?.forEach((point, index) =>
+            vector(point, `${path}.light.points[${index}]`, issues),
+          );
+        }
+        if (light.strip !== undefined) {
+          if (light.points !== undefined)
+            error("light.strip", "Choose points or a strip, not both.");
+          const strip = record(light.strip, `${path}.light.strip`, issues);
+          if (strip) {
+            keys(strip, ["end", "samples"], `${path}.light.strip`, issues);
+            vector(strip.end, `${path}.light.strip.end`, issues);
+            if (
+              !Number.isSafeInteger(strip.samples) ||
+              Number(strip.samples) < 2 ||
+              Number(strip.samples) > CUSTOM_MODEL_LIMITS.lightPoints
+            )
+              error("light.strip.samples", "A strip uses between two and eight samples.");
+            if (
+              Array.isArray(strip.end) &&
+              Array.isArray(light.position) &&
+              strip.end.every((n, axis) => n === (light.position as unknown[])[axis])
+            )
+              error("light.strip.end", "The strip start and end must differ.");
+          }
+        }
+        if (light.emissiveMaterials !== undefined) {
+          const names = array(light.emissiveMaterials, `${path}.light.emissiveMaterials`, issues);
+          if (
+            names &&
+            (names.length > CUSTOM_MODEL_LIMITS.emissiveMaterials ||
+              new Set(names).size !== names.length)
+          )
+            error("light.emissiveMaterials", "Choose up to sixteen distinct material names.");
+          names?.forEach((name, index) => {
+            if (typeof name !== "string" || !name.trim() || name.length > 128)
+              error(
+                `light.emissiveMaterials[${index}]`,
+                "Choose a non-empty material name of at most 128 characters.",
+              );
+          });
         }
       }
     }

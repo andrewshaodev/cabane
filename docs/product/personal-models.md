@@ -23,7 +23,9 @@ Original GLB materials, colours, and embedded textures are preserved. Personal
 models receive scene lighting without compulsory toon conversion or contours.
 Native procedural models retain their materials, batching, LOD, and outlines.
 Animations remain in their initial pose; embedded cameras and lights are ignored
-with preview notices. Visual variants driven by HA state are outside this version.
+with preview notices. Light profiles may explicitly select named Standard/Physical
+materials whose emissive colour and intensity follow the connected light. Other
+visual variants driven by HA state are outside this version.
 Only the import owner may load personal GLB resources; catalog/home generation
 follows the [visual asset contract](geometry-and-rendering.md#visual-assets).
 
@@ -42,11 +44,20 @@ Models can be renamed or downloaded; deletion requires no remaining draft
 instances. Published and active history references retain their assets even when
 a draft removes the corresponding model. Instances share loaded geometry,
 materials, and textures while retaining independent transforms and skeletons.
+Selected emissive materials alone receive per-instance copies. They retain their
+textures, are restored and disposed when the instance or preview closes, and
+never mutate cached materials or dispose shared geometry/textures.
 The final resource lease disposes the cache after previews or scenes close.
 
 `HomeProject` V2 optionally contains `customModels`: name, support, existing
 profile, asset hash/byte length, normalization, bounds, complexity, and optional
-Light source. Projects without it have an empty personal catalog. The public
+Light settings. Legacy single-point settings remain readable without migration.
+Optional `light.points` adds at most seven points to `light.position`, or
+`light.strip` defines a distinct end and two to eight evenly spaced samples.
+These alternatives cannot coexist. `light.emissiveMaterials` selects up to sixteen
+distinct exact material names. Unknown fields remain blocked in older panels,
+so homes using these fields require the matching updated HA frontend bundle.
+Projects without custom models have an empty personal catalog. The public
 engine resolves definitions per project before validation and composition;
 custom IDs never become a global catalog registration. Binaries occupy the
 separate IndexedDB `model-assets` store and never enter project/history JSON.
@@ -55,8 +66,22 @@ published, and active history references are preserved across edits and Reset.
 
 Device profiles reuse existing HA domains and controls. Each placed or duplicated
 device receives a fresh primary local slot. Exact entity IDs remain in private,
-origin-scoped binding profiles. Light adds a configurable point source and reuses
-brightness, colour, availability, and local scene-light rules. Camera opens the
+origin-scoped binding profiles. Light supports points or a strip, plus named
+emissive materials, and reuses brightness, colour, availability, and local
+scene-light rules. All sources share the primary connected entity; independent
+per-source entity mappings are deferred to general entity attachment work.
+Positions and strip endpoints are metres in normalized support space, after the
+import's orientation and size corrections. Instance rotation and uniform resizing
+transform source positions and range once, alongside the model. Total intensity
+is divided equally across samples, including both strip endpoints. Sources are
+unshadowed point lights, with a maximum of eight per model and 32 imported sources
+per active floor in scene-item order. Overflow sources do not illuminate receivers;
+their selected materials still glow. Off, unavailable, stale and disconnected
+connected lights have zero source and emissive intensity. Local Always on,
+Always off and Night only modes apply to both. Source counts stay stable on HA
+state changes. Strip lighting approximates a line with points; it is not an area
+light or bloom effect. The import preview shows full brightness and source markers.
+Camera opens the
 existing viewer. Sensor, Cover, and the other profiles retain static geometry.
 Import and preview never inspect or operate household devices.
 
