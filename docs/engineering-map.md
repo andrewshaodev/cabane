@@ -59,6 +59,15 @@ Contract: [Editor coordination](../docs/product/workspace.md).
 - Review invariant: Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel reflow waits for active gestures. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time; panel state stays outside project persistence. Compact Properties drawers offset camera projection to the unobscured canvas without changing its pan or zoom.
 - Checks: `test:unit`, `test:browser`.
 
+### Measurement preferences
+
+Contract: [Measurement preferences](../docs/product/workspace.md).
+
+- Owners: [`packages/engine/src/measurement-units.ts`](../packages/engine/src/measurement-units.ts), [`packages/engine/src/WalkPreferences.tsx`](../packages/engine/src/WalkPreferences.tsx), [`apps/web/src/editor-chrome/LengthInput.tsx`](../apps/web/src/editor-chrome/LengthInput.tsx), [`apps/web/src/editor-preview/furnish/NumericField.tsx`](../apps/web/src/editor-preview/furnish/NumericField.tsx).
+- Interface: `useMeasurementUnits`, `formatLength`, `formatArea`, `parseLength` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Convert physical measurements at the UI boundary. Browser-local unit preferences never rescale authored geometry; plan-coordinate inputs account for metersPerPlanUnit. Temperatures, angles and dimensionless values keep their own units.
+- Checks: `verify:construct`.
+
 ### Construct and floor topology
 
 Contract: [Construct and floor topology](../docs/product/construct.md).

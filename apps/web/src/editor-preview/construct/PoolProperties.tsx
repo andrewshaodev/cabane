@@ -1,6 +1,8 @@
+import { formatLength, formatArea, useMeasurementUnits } from "@cabane/engine";
+import { LengthInput } from "../../editor-chrome/LengthInput";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { mapPoolOutline, polygonSignedArea, type PoolSpec } from "@cabane/engine";
-import { CommittedNumberInput } from "../../editor-chrome/CommittedNumberInput";
+
 import type { ConstructEditorController } from "./useConstructEditor";
 
 export function PoolProperties({
@@ -10,6 +12,7 @@ export function PoolProperties({
   pool: PoolSpec;
   editor: ConstructEditorController;
 }) {
+  const units = useMeasurementUnits();
   const scale = editor.draft.coordinates.metersPerPlanUnit;
   const perimeter = pool.polygon.reduce((sum, point, index) => {
     const next = pool.polygon[(index + 1) % pool.polygon.length];
@@ -26,11 +29,11 @@ export function PoolProperties({
       <dl className="construction-inspector__wall-facts construction-inspector__pool-facts">
         <div>
           <dt>Area</dt>
-          <dd>{(Math.abs(polygonSignedArea(pool.polygon)) * scale ** 2).toFixed(1)} m²</dd>
+          <dd>{formatArea(Math.abs(polygonSignedArea(pool.polygon)) * scale ** 2, units)}</dd>
         </div>
         <div>
           <dt>Perimeter</dt>
-          <dd>{perimeter.toFixed(2)} m</dd>
+          <dd>{formatLength(perimeter, units)}</dd>
         </div>
       </dl>
       <p>Drag the pool to move it, or drag a corner to reshape it.</p>
@@ -38,11 +41,12 @@ export function PoolProperties({
         <summary>Outline coordinates</summary>
         {pool.polygon.map((point, index) => (
           <fieldset key={index}>
-            <legend>Corner {index + 1} · plan units</legend>
+            <legend>Corner {index + 1}</legend>
             {([0, 1] as const).map((axis) => (
               <label key={axis}>
                 {axis === 0 ? "X" : "Y"}
-                <CommittedNumberInput
+                <LengthInput
+                  metersPerUnit={scale}
                   label={`Pool corner ${index + 1} ${axis === 0 ? "X" : "Y"}`}
                   step={0.1}
                   value={Number(point[axis].toPrecision(15))}

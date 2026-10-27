@@ -1,3 +1,10 @@
+import {
+  displayLength,
+  storedLength,
+  parseLength,
+  lengthUnit,
+  useMeasurementUnits,
+} from "@cabane/engine";
 import { useId, useState } from "react";
 
 const format = (value: number) => String(Number(value.toFixed(4)));
@@ -7,7 +14,7 @@ const parse = (text: string) => {
 };
 
 /** Keep incomplete edits local; only complete, valid values reach item history. */
-export function NumericField({
+function ScalarNumericField({
   label,
   value,
   disabled,
@@ -15,6 +22,8 @@ export function NumericField({
   step = 0.1,
   min,
   unit,
+  parseValue = parse,
+  stepLabel,
 }: {
   label: string;
   value: number;
@@ -23,6 +32,8 @@ export function NumericField({
   step?: number;
   min?: number;
   unit?: string;
+  parseValue?: (text: string) => number;
+  stepLabel?: string;
 }) {
   const id = useId();
   const [source, setSource] = useState(value);
@@ -50,9 +61,12 @@ export function NumericField({
     if (next !== value) onChange(next);
   };
   const increment = (direction: number, large: boolean) => {
-    const parsed = parse(draft);
+    const parsed = parseValue(draft);
     const next = Number(
-      ((Number.isFinite(parsed) ? parsed : value) + direction * step * (large ? 10 : 1)).toFixed(4),
+      (
+        (dirty && Number.isFinite(parsed) ? parsed : value) +
+        direction * step * (large ? 10 : 1)
+      ).toFixed(10),
     );
     commit(min === undefined ? next : Math.max(min, next));
   };
@@ -77,14 +91,14 @@ export function NumericField({
             setError("");
           }}
           onBlur={() => {
-            if (dirty) commit(parse(draft));
+            if (dirty) commit(parseValue(draft));
           }}
           onKeyDown={(event) => {
             if (!["Enter", "Escape", "ArrowUp", "ArrowDown"].includes(event.key)) return;
             event.preventDefault();
             event.stopPropagation();
             if (event.key === "Enter") {
-              if (dirty) commit(parse(draft));
+              if (dirty) commit(parseValue(draft));
             } else if (event.key === "Escape") {
               setDraft(format(value));
               setDirty(false);
@@ -100,7 +114,7 @@ export function NumericField({
             type="button"
             disabled={disabled}
             aria-label={`${direction === 1 ? "Increase" : "Decrease"} ${label}`}
-            title={`Step ${step}${unit ? ` ${unit}` : ""}; hold Shift for ×10`}
+            title={`Step ${stepLabel ?? `${step}${unit ? ` ${unit}` : ""}`}; hold Shift for ×10`}
             onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => increment(direction, event.shiftKey)}
           >
@@ -114,5 +128,26 @@ export function NumericField({
         </small>
       )}
     </div>
+  );
+}
+
+export function NumericField(
+  props: Parameters<typeof ScalarNumericField>[0] & { metersPerUnit?: number },
+) {
+  const units = useMeasurementUnits();
+  if (props.unit !== "m" && props.unit !== "plan units") return <ScalarNumericField {...props} />;
+  const scale = props.metersPerUnit ?? 1;
+  return (
+    <ScalarNumericField
+      {...props}
+      key={units}
+      unit={lengthUnit(units)}
+      value={displayLength(props.value * scale, units)}
+      {...(props.min === undefined ? {} : { min: displayLength(props.min * scale, units) })}
+      stepLabel={units === "imperial" ? "1 in" : `${(props.step ?? 0.1) * scale} m`}
+      step={units === "imperial" ? 1 / 12 : (props.step ?? 0.1) * scale}
+      parseValue={(text) => displayLength(parseLength(text, units), units)}
+      onChange={(value) => props.onChange(storedLength(value, units) / scale)}
+    />
   );
 }

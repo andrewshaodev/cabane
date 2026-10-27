@@ -1,3 +1,4 @@
+import { LengthInput } from "../editor-chrome/LengthInput";
 import { omitUndefinedProperties } from "@cabane/engine";
 import { StairShapeSelect } from "./StairShapeSelect";
 import { convertStairShape } from "./stair-placement-geometry";
@@ -38,6 +39,26 @@ export function StairDetails({
     setDraft(next);
     if (canDraftStair(project, next)) onSave(next);
   };
+  const length = (
+    label: string,
+    value: number,
+    onCommit: (value: number) => void,
+    minimum?: number,
+    metersPerUnit = 1,
+  ) => (
+    <label className="construction-inspector__single-control">
+      {label}
+      <LengthInput
+        label={label}
+        value={value}
+        min={minimum === 0 ? 0.01 : minimum}
+        metersPerUnit={metersPerUnit}
+        onCommit={onCommit}
+      />
+    </label>
+  );
+  const planScale = project.floors.find((floor) => floor.id === draft.lowerFloorId)!.coordinates
+    .metersPerPlanUnit;
   const number = (
     label: string,
     value: number,
@@ -68,8 +89,8 @@ export function StairDetails({
       />
       {draft.shape === "spiral" ? (
         <>
-          {number(
-            "Diameter (m)",
+          {length(
+            "Diameter",
             draft.diameterMeters,
             (diameterMeters) => update({ ...draft, diameterMeters }),
             0.2,
@@ -100,22 +121,22 @@ export function StairDetails({
         </>
       ) : (
         <>
-          {number(
-            "Width (m)",
+          {length(
+            "Width",
             draft.widthMeters,
             (widthMeters) => update({ ...draft, widthMeters }),
             0,
           )}
           {draft.shape === "l-shaped" || draft.shape === "u-shaped" ? (
             <>
-              {number(
-                "Lower flight length (m)",
+              {length(
+                "Lower flight length",
                 draft.lowerRunMeters,
                 (lowerRunMeters) => update({ ...draft, lowerRunMeters }),
                 0,
               )}
-              {number(
-                "Upper flight length (m)",
+              {length(
+                "Upper flight length",
                 draft.upperRunMeters,
                 (upperRunMeters) => update({ ...draft, upperRunMeters }),
                 0,
@@ -135,7 +156,7 @@ export function StairDetails({
               </label>
             </>
           ) : (
-            number("Length (m)", draft.runMeters, (runMeters) => update({ ...draft, runMeters }), 0)
+            length("Length", draft.runMeters, (runMeters) => update({ ...draft, runMeters }), 0)
           )}
         </>
       )}
@@ -167,15 +188,19 @@ export function StairDetails({
         {number("Rotation (degrees)", (draft.rotationYRadians * 180) / Math.PI, (value) =>
           update({ ...draft, rotationYRadians: (value * Math.PI) / 180 }),
         )}
-        {number(
-          draft.shape === "spiral" ? "Center X (plan units)" : "Start X (plan units)",
+        {length(
+          draft.shape === "spiral" ? "Center X" : "Start X",
           draft.at[0],
           (value) => update({ ...draft, at: [value, draft.at[1]] }),
+          undefined,
+          planScale,
         )}
-        {number(
-          draft.shape === "spiral" ? "Center Y (plan units)" : "Start Y (plan units)",
+        {length(
+          draft.shape === "spiral" ? "Center Y" : "Start Y",
           draft.at[1],
           (value) => update({ ...draft, at: [draft.at[0], value] }),
+          undefined,
+          planScale,
         )}
       </details>
       <StairWarnings issues={issues} />

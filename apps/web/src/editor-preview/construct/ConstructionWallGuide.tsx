@@ -1,3 +1,4 @@
+import { formatLength, useMeasurementUnits } from "@cabane/engine";
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import type { FloorCoordinates, PlanPoint } from "@cabane/engine";
@@ -5,11 +6,7 @@ import { useMemo, useRef } from "react";
 import { Vector3 } from "three";
 import { ConstructionDistanceLabel } from "./ConstructionDistanceLabel";
 import { ConstructionPointMarker } from "./ConstructionPointMarker";
-import {
-  constructMeasurementIsVisible,
-  formatConstructDistance,
-  measureConstructPoints,
-} from "./measure-geometry";
+import { constructMeasurementIsVisible, measureConstructPoints } from "./measure-geometry";
 import { constructPixelsPerMeter } from "./plan-screen-scale";
 import { constructPlanToWorld } from "./drag-geometry";
 
@@ -36,12 +33,13 @@ export function ConstructionWallGuide({
   labelKind?: string;
   labelAvoidPoint?: PlanPoint | undefined;
 }) {
+  const units = useMeasurementUnits();
   const measurement = useMemo(
     () => measureConstructPoints(from, to, coordinates),
     [from, to, coordinates],
   );
   const visible = constructMeasurementIsVisible(measurement);
-  const label = `${formatConstructDistance(measurement.distanceMeters)} m`;
+  const label = formatLength(measurement.distanceMeters, units);
   const labelElement = useRef<HTMLDivElement>(null);
   const projected = useMemo(() => [new Vector3(), new Vector3(), new Vector3()] as const, []);
   useFrame(({ camera, size }) => {

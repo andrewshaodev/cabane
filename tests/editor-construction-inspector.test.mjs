@@ -758,7 +758,7 @@ await withModules(async (load) => {
       );
       const floorSettings = sections[1];
       assert.equal(floorSettings.open, false);
-      assert.ok(floorSettings.querySelector('[aria-label="Meters per plan unit"]'));
+      assert.ok(floorSettings.querySelector('[aria-label="Length per plan unit"]'));
       assert.ok(floorSettings.querySelector('[aria-label="Default wall height"]'));
       assert.ok(floorSettings.querySelector("summary small").textContent);
       assert.equal(floorSettings.querySelectorAll("summary svg").length, 2);

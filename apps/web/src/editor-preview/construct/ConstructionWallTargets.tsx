@@ -1,3 +1,4 @@
+import { formatLength, useMeasurementUnits } from "@cabane/engine";
 import { PlanStroke } from "./PlanDrawing";
 import { floorEditorSelectionTargets } from "@cabane/engine";
 
@@ -67,6 +68,7 @@ export function ConstructionWallTargets({
   finishEndpointDrag,
   cancelEndpointDrag,
 }: Props) {
+  const units = useMeasurementUnits();
   return (
     <>
       {draft.walls.map((wall) => {
@@ -152,7 +154,7 @@ export function ConstructionWallTargets({
                 position={[measurement.guideCenter[0], 0.08, measurement.guideCenter[1]]}
                 rotation={[0, measurement.rotationYRadians, 0]}
                 userData={{
-                  label: measurement.label,
+                  label: formatLength(measurement.lengthMeters, units),
                   lengthMeters: measurement.lengthMeters,
                   directionDegrees: measurement.directionDegrees,
                 }}
