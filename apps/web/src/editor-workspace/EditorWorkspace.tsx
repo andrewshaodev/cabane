@@ -1,3 +1,4 @@
+import { EditorDraftStatus } from "./EditorDraftStatus";
 import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinishPreview";
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
@@ -71,7 +72,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     snapshot,
     commit,
     replaceEditorsFromProject,
-    autosaveStatus,
     editedManifest,
   } = controller;
   const [stairLiveIssues, setStairLiveIssues] = useState<readonly ManifestIssue[] | null>(null);
@@ -427,13 +427,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             disabled={panelsDisabled}
           />
         </div>
-        {autosaveStatus !== "saved" && (
-          <div className={`direction-status is-${autosaveStatus}`}>
-            <span />
-            {autosaveStatus === "saving" && "Saving draft…"}
-            {autosaveStatus === "error" && "Could not save · Changes kept in memory"}
-          </div>
-        )}
+        <EditorDraftStatus workspace={workspace} homeAssistantUrl={homeAssistantUrl} />
 
         <EditorCompletionDialogs {...controller} />
       </main>

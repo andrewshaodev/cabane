@@ -69,7 +69,8 @@
       "apps/web/src/editor-workspace/EditorPanelControls.tsx",
       "apps/web/src/editor-workspace/editor-panels.css",
       "apps/web/src/editor-chrome/SelectionDetailsPanel.tsx",
-      "apps/web/src/editor-preview/PreviewCamera.tsx"
+      "apps/web/src/editor-preview/PreviewCamera.tsx",
+      "apps/web/src/editor-workspace/EditorDraftStatus.tsx"
     ],
     "interfaces": [
       {
@@ -77,7 +78,7 @@
         "symbols": ["ConnectWorkspaceProps", "HomeEditorExitReason"]
       }
     ],
-    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel reflow waits for active gestures. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time; panel state stays outside project persistence. Compact Properties drawers offset camera projection to the unobscured canvas without changing its pan or zoom.",
+    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel reflow waits for active gestures. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time; panel state stays outside project persistence. Compact Properties drawers offset camera projection to the unobscured canvas without changing its pan or zoom. Failed exits retain the in-memory draft, show storage/conflict recovery and reset pending navigation for explicit retries.",
     "checks": ["test:unit", "test:browser"]
   },
   {
