@@ -13,6 +13,7 @@
       "demo-door-walk.test.mjs",
       "demo-provider.test.mjs",
       "demo-session.test.mjs",
+      "edit-custom-model.test.mjs",
       "editor-connect.test.mjs",
       "editor-panels.test.mjs",
       "editor-validation-recovery.test.mjs",
@@ -44,6 +45,7 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
+      "imported-light-sources.test.mjs",
       "room-cleaning.test.mjs",
       "orbit-view.test.mjs",
       "room-navigation.test.mjs",
@@ -54,7 +56,9 @@
       "setup-progress.test.mjs",
       "vacuum-flight.test.mjs",
       "weather.test.mjs",
-      "workspace-startup-routing.test.mjs"
+      "workspace-startup-routing.test.mjs",
+      "model-lighting.test.mjs",
+      "model-lighting-ui.test.mjs"
     ]
   },
   "construct": {
@@ -105,6 +109,7 @@
       "opening-junction-clearance.test.mjs",
       "opening-orientation.test.mjs",
       "outdoor-platforms.test.mjs",
+      "outdoor-platform-rooms.test.mjs",
       "panel-dom.test.mjs",
       "plan-generation.test.mjs",
       "plan-stroke-batching.test.mjs",
@@ -178,6 +183,7 @@
       "personal-models-browser.test.mjs",
       "personal-models-runtime.test.mjs",
       "personal-models.test.mjs",
+      "imported-light-sources.test.mjs",
       "room-cleaning.test.mjs",
       "orbit-view.test.mjs",
       "room-navigation.test.mjs",
@@ -255,6 +261,7 @@
     "tests": [
       "arrange-catalog-ui.test.mjs",
       "arrange-catalog.test.mjs",
+      "arrange-selection-events.test.mjs",
       "catalog-bedroom-modules.test.mjs",
       "catalog-device.test.mjs",
       "catalog-structure.test.mjs",

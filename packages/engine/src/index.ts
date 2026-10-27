@@ -47,6 +47,7 @@ export {
   homeAssistantAuthStorageKey,
   normalizeHomeAssistantUrl,
   homeAssistantTransportError,
+  borrowedHomeAssistantTransportError,
 } from "./home-assistant-auth";
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
@@ -132,3 +133,25 @@ export {
 } from "./measurement-units";
 
 export { MAX_ORTHOGRAPHIC_ZOOM, MIN_EDITOR_ZOOM } from "./navigation/camera-zoom";
+
+export {
+  defaultModelLighting,
+  projectModelLighting,
+  lightingSlotForItem,
+  primaryLightSlot,
+  lightingEntitySlotId,
+  modelLightingPointCount,
+} from "./model-lighting/settings";
+export { editModelLighting } from "./model-lighting/edit";
+
+export {
+  modelLightingSurfaces,
+  modelLightingSurfaceAt,
+  controlModelLightMaterials,
+  type ModelLightingSurfaceOption,
+} from "./model-lighting/surfaces";
+
+export {
+  ModelLightingStateContext,
+  useModelLightingState,
+} from "./model-lighting/ModelLightingSurface";

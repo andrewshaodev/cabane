@@ -94,6 +94,7 @@ export function FurnishingEditLayer({
     target: PointerCaptureTarget | null;
   } | null>(null);
   const drag = useRef<DragSession | null>(null);
+  const backgroundPointerDown = useRef(false);
   const dragPlane = useRef(new Plane(new Vector3(0, 1, 0), 0));
   const scratch = useRef(new Vector3());
   const callbacks = useRef({ onDragEnd, onDragCancel, onDraggingChange });
@@ -171,10 +172,15 @@ export function FurnishingEditLayer({
           name="arrange-marquee-surface"
           onClick={(event) => {
             event.stopPropagation();
-            if (!boxSelectionModifier(event) && !cameraModifier(event)) onSelectMany([]);
+            const startedOnBackground = backgroundPointerDown.current;
+            backgroundPointerDown.current = false;
+            if (startedOnBackground && !boxSelectionModifier(event) && !cameraModifier(event))
+              onSelectMany([]);
           }}
           rotation={[-Math.PI / 2, 0, 0]}
           onPointerDown={(event) => {
+            backgroundPointerDown.current =
+              event.button === 0 && !boxSelectionModifier(event) && !cameraModifier(event);
             if (event.button !== 0 || !boxSelectionModifier(event)) return;
             const hit = pointOnElevationPlane(event, 0);
             if (!hit) return;
@@ -270,6 +276,7 @@ export function FurnishingEditLayer({
                   onSelect(item.id);
               }}
               onPointerDown={(event) => {
+                backgroundPointerDown.current = false;
                 if (
                   event.button !== 0 ||
                   cameraModifier(event) ||
@@ -279,8 +286,8 @@ export function FurnishingEditLayer({
                 )
                   return;
                 event.stopPropagation();
-                if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected)
-                  onSelect(item.id);
+                // Select taps on click, after picking has finished. Selecting here
+                // opens Properties and can move the item out from under the pointer.
                 const hit = pointOnElevationPlane(event, transform.position[1]);
                 if (!hit) return;
                 drag.current = {
@@ -313,6 +320,7 @@ export function FurnishingEditLayer({
                   if (movement < DRAG_ACTIVATION_DISTANCE_PX) return;
                   session.active = true;
                   onDraggingChange?.(true);
+                  if (!selected) onSelect(item.id);
                   onDragStart?.(item.id);
                 }
                 const hit = pointOnElevationPlane(event, session.elevation);

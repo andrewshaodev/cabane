@@ -37,6 +37,14 @@ persisted scene override controls bulb appearance and illumination without
 sending HA commands; Connected follows the
 bound entity. Changes participate in draft history and take effect in Home on Apply.
 
+The **Placed items** disclosure above the catalog lists every stored item on the active
+floor, including occluded items and unavailable models. Items are grouped by room,
+including outdoor areas, with an Outside rooms group for unassigned items. Search
+matches item and room names; instance IDs are not displayed. Choosing an entry selects that existing item and opens the normal
+Properties inspector, including when it was collapsed. Focus stays on the list.
+Selection alone changes no item data or undo history; canvas group selection and
+group movement keep their existing behavior. The list includes items outside rooms.
+
 Placement resolves a feasible start near the camera target (or floor center),
 using model support and outdoor-only model constraints. Furnishings and devices
 may be placed outside the house or in areas without a room; neither condition
@@ -113,3 +121,7 @@ tracks, wood, motor housings, and decorative throw cushions retain their finishe
 Only descriptors declaring `defaultColor` offer this control.
 
 Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.
+
+Properties exposes **Lighting** for personal and built-in models. Shared settings
+apply to every copy in this home while each copy retains its own connection.
+The visual editor and persistence rules are defined by [model lighting](model-lighting.md).

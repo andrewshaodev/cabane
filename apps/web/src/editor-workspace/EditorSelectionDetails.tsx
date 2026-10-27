@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { editModelLighting } from "@cabane/engine";
+import { ownerProjectRegistries } from "../project-runtime";
+import { ModelLightingDialog } from "../model-lighting/ModelLightingDialog";
 import type { ManifestIssue } from "@cabane/engine";
 import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
 import { ConstructionSelectionProperties } from "../editor-preview/construct/ConstructionSelectionProperties";
@@ -30,6 +34,10 @@ type Props = Pick<
   | "stairDialog"
   | "snapshot"
   | "commit"
+  | "connect"
+  | "selectMode"
+  | "workspace"
+  | "replaceEditorsFromProject"
 > & {
   open: boolean;
   onCollapse: () => void;
@@ -58,11 +66,16 @@ export function EditorSelectionDetails({
   stairDialog,
   snapshot,
   commit,
+  workspace,
+  connect,
+  selectMode,
+  replaceEditorsFromProject,
   open,
   onCollapse,
   liveStairIssues,
   disabled,
 }: Props) {
+  const [lightingModel, setLightingModel] = useState<string | null>(null);
   const selectedStair =
     stairDialog && snapshot.project.stairs.find((stair) => stair.id === stairDialog.id);
   return (
@@ -146,10 +159,39 @@ export function EditorSelectionDetails({
                 onLightStateChange={furnishingEditor.updateLightState}
                 onVariantChange={furnishingEditor.updateVariant}
                 onColorChange={furnishingEditor.updateColor}
+                onEditLighting={() => setLightingModel(selectedItem.modelId)}
+                onConnectLighting={() => {
+                  if (connect.selectDevice(selectedItem.lightSlotId ?? selectedItem.id))
+                    selectMode("connect", true);
+                }}
                 onClose={onCollapse}
               />
             ) : null)}
         </div>
+      )}
+      {lightingModel && (
+        <ModelLightingDialog
+          key={lightingModel}
+          project={snapshot.project}
+          modelId={lightingModel}
+          native={ownerProjectRegistries}
+          onCancel={() => setLightingModel(null)}
+          onSave={async (light) => {
+            const next = editModelLighting(
+              workspace.snapshot,
+              lightingModel,
+              light,
+              ownerProjectRegistries,
+            );
+            replaceEditorsFromProject(next.project);
+            workspace.commit(next);
+            const saved = await workspace.flush();
+            if (saved.status !== "saved")
+              throw new Error(
+                "Could not save lighting. Your draft is kept in memory. Retry Save, or close and use Undo to revert.",
+              );
+          }}
+        />
       )}
       <div className="arrange-announcement" role="status">
         {arrangeAnnouncement}

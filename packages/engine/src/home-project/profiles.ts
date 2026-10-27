@@ -1,3 +1,4 @@
+import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import type { DeviceModelDefinition, EntityBindingSlotSpec } from "../types";
 import type { DeviceItemSpec, HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
@@ -29,7 +30,7 @@ export const validateProfileReferencesAndSlots = (
   project: HomeProject,
   issues: HomeProjectIssue[],
 ) => {
-  const roomIds = new Set(project.floors.flatMap((floor) => floor.rooms).map((room) => room.id));
+  const roomIds = new Set(project.floors.flatMap(roomsForFloor).map((room) => room.id));
   for (const [roomId, profile] of Object.entries(project.roomProfiles)) {
     if (!roomIds.has(roomId)) {
       addProjectIssue(

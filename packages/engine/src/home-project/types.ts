@@ -1,4 +1,4 @@
-import type { CustomModel } from "../imported-models/contracts";
+import type { CustomModel, CustomModelLight } from "../imported-models/contracts";
 import type {
   Assumption,
   EntityBindingSlotSpec,
@@ -70,6 +70,10 @@ export type ItemPlacement =
     };
 
 interface SceneItemBase {
+  /** Independent lighting relationship; the entity slot is derived as <id>-entity. */
+  lightSlotId?: string;
+  /** Local scene appearance only; this never sends Home Assistant commands. */
+  lightState?: "always-off" | "always-on" | "night-only" | "connected";
   /** Optional six-digit hex fabric override; omitted preserves the model palette. */
   color?: string;
   /** Omitted values use the model's first variant. */
@@ -105,10 +109,14 @@ export interface OpeningProfileSpec {
 }
 
 export interface HomeProject {
+  /** Home-local overrides for built-in models. Null disables their lighting. */
+  modelLights?: Readonly<Record<string, CustomModelLight | null>>;
   customModels?: readonly CustomModel[];
   schemaVersion: 2;
   seedRevision: string;
   home: {
+    /** Decorative storeys below the modeled home; zero preserves the original appearance. */
+    apartmentFloor?: number;
     walkStart?: { floorId: string; at: PlanPoint };
     roof?: RoofSettings;
     /** Clockwise from plan up (−Z); omitted means 0°. */

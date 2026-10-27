@@ -371,6 +371,9 @@ export interface OutdoorPlatformEdgeSpec {
 }
 export interface OutdoorPlatformSpec {
   id: string;
+  /** Opt-in room identity for Connect and dashboard use; never adds indoor geometry. */
+  useAsRoom?: boolean;
+  roomName?: string;
   polygon: Polygon;
   finish: FloorFinishSpec;
   defaultEdge: OutdoorPlatformEdgeConfiguration;
@@ -688,6 +691,10 @@ export interface SceneModelVariant {
 }
 
 export interface SceneModelEditorDescriptor {
+  /** Effective model-local lighting, shared by every copy in this home. */
+  lighting?: import("./imported-models/contracts").CustomModelLight;
+  lightingCustomized?: boolean;
+  lightingDisabled?: boolean;
   /** Enables the fabric color picker; omission keeps a model's original palette. */
   defaultColor?: string;
   /** Ordered choices sharing size, placement, and bindings. First is the default. */
@@ -723,6 +730,8 @@ export interface FurnishingModelDefinition extends SceneModelEditorDescriptor {
 export type FurnishingModelRegistry = Readonly<Record<string, FurnishingModelDefinition>>;
 
 export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
+  /** Binding-only adapter for an item’s independent lighting relationship. */
+  lightingOnly?: boolean;
   component: HomeDeviceModelComponent;
   supportedDomains: readonly DeviceDomain[];
   supportedDeviceClasses?: Readonly<Partial<Record<DeviceDomain, readonly string[]>>>;
@@ -738,6 +747,12 @@ export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
     maxIntensity: number;
     distance: number;
   };
+  sceneLights?: readonly {
+    position: readonly [x: number, y: number, z: number];
+    color: string;
+    maxIntensity: number;
+    distance: number;
+  }[];
   interaction: {
     target?: DeviceInteractionIntent;
     tapTolerancePixels: number;
