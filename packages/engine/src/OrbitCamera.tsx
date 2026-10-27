@@ -1,4 +1,4 @@
-import { MAX_ORTHOGRAPHIC_ZOOM, MIN_ORBIT_ZOOM } from "./navigation/camera-zoom";
+import { MAX_ORTHOGRAPHIC_ZOOM } from "./navigation/camera-zoom";
 import {
   readOrbitView,
   writeOrbitView,
@@ -230,6 +230,8 @@ function OrbitCameraRig({
       zoom,
     };
   }, [buildingFloors, elevation, floor, height, showRoof, width]);
+  // Keep the home legible: manual zoom-out stops just beyond its fitted overview.
+  const minZoom = defaultFraming.zoom * 0.7;
   // Read once per home/floor mount. Metadata updates never reset a user view.
   const [framing] = useState<SavedOrbitView & { restored?: boolean }>(() => {
     const fallback: SavedOrbitView = {
@@ -239,6 +241,7 @@ function OrbitCameraRig({
     const saved = viewKey ? readOrbitView(viewKey).pose : null;
     if (!saved) return fallback;
     const adapted = fitSavedOrbitView(saved, width, height);
+    if (adapted.zoom < minZoom) return fallback;
     // A removed/moved floor should not leave the home outside the camera.
     const span = new Vector3(...defaultFraming.position).distanceTo(
       new Vector3(...defaultFraming.target),
@@ -284,7 +287,7 @@ function OrbitCameraRig({
     return {
       target,
       offset: new Spherical().setFromVector3(new Vector3(...pose.position).sub(target)),
-      zoom: pose.zoom,
+      zoom: Math.max(minZoom, pose.zoom),
     };
   };
   useEffect(() => {
@@ -341,13 +344,13 @@ function OrbitCameraRig({
     const scale =
       fitSavedOrbitView(source, width, height).zoom /
       fitSavedOrbitView(source, previous.width, previous.height).zoom;
-    camera.zoom = Math.max(MIN_ORBIT_ZOOM, Math.min(MAX_ORTHOGRAPHIC_ZOOM, camera.zoom * scale));
+    camera.zoom = Math.max(minZoom, Math.min(MAX_ORTHOGRAPHIC_ZOOM, camera.zoom * scale));
     camera.updateProjectionMatrix();
     const wasManual = manual.current;
     manual.current = false;
     controls.update();
     manual.current = wasManual;
-  }, [width, height, framing]);
+  }, [width, height, framing, minZoom]);
   const defaultPose = useMemo(() => {
     const target = new Vector3(...defaultFraming.target);
     return {
@@ -390,7 +393,7 @@ function OrbitCameraRig({
         zoomSpeed={1.1}
         minPolarAngle={0}
         maxPolarAngle={1.28}
-        minZoom={MIN_ORBIT_ZOOM}
+        minZoom={minZoom}
         maxZoom={MAX_ORTHOGRAPHIC_ZOOM}
         zoomToCursor
       />

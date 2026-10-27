@@ -135,6 +135,25 @@ await withModules(async (load) => {
       }
     });
 
+    if (name === "orbit")
+      test("Orbit stops zooming out while the home remains at 70% of overview scale", async () => {
+        const { renderer, controls, wheel } = await createWheelCamera(element);
+        try {
+          const initial = pose(controls);
+          await wheel(10000, { clientX: 750, clientY: 150 });
+          assert.equal(controls.object.zoom, initial.zoom * 0.7);
+          const atLimit = pose(controls);
+          for (let i = 0; i < 20; i++) await wheel(200, { clientX: 750, clientY: 150 });
+          assert.deepEqual(
+            pose(controls),
+            atLimit,
+            "further scrolling cannot zoom or push the home away",
+          );
+        } finally {
+          await renderer.unmount();
+        }
+      });
+
     test(`${name} zooming out off-center preserves the orbit distance and direction`, async () => {
       const { renderer, controls, wheel } = await createWheelCamera(element);
       try {
@@ -151,10 +170,10 @@ await withModules(async (load) => {
         );
         controls.update();
         assert.ok(controls.object.position.clone().sub(controls.target).distanceTo(offset) < 1e-7);
-        for (let i = 0; i < 12; i++) {
-          await wheel(-150, { clientX: 750, clientY: 150 });
-          controls.update();
-        }
+        const reverseDistance =
+          Math.log(initial.zoom / controls.object.zoom) / (0.0015 * controls.zoomSpeed);
+        await wheel(-reverseDistance, { clientX: 750, clientY: 150 });
+        controls.update();
         assert.ok(Math.abs(controls.object.zoom - initial.zoom) < 1e-7);
         assert.ok(controls.target.distanceTo(new Vector3(...initial.target)) < 1e-7);
         assert.ok(controls.object.position.distanceTo(new Vector3(...initial.position)) < 1e-7);
@@ -188,10 +207,10 @@ await withModules(async (load) => {
         assert.ok(Math.abs(camera.zoom - initial) < 1e-8);
         await wheel(16);
         assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one line equals 16 pixels");
-        await wheel(1, { deltaMode: 2 });
+        await wheel(0.25, { deltaMode: 2 });
         const page = camera.zoom;
-        await wheel(-800);
-        assert.ok(Math.abs(camera.zoom - line) < 1e-8, "one page uses viewport height");
+        await wheel(-200);
+        assert.ok(Math.abs(camera.zoom - line) < 1e-8, "quarter-page input uses viewport height");
         assert.ok(page < line);
         await wheel(-10000);
         assert.equal(camera.zoom, 300, "small devices need a useful close-up ceiling");

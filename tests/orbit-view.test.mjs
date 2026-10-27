@@ -48,7 +48,7 @@ await withModules(async (load) => {
       controls.dispatchEvent({ type: "start" });
       controls.target.x += 2;
       controls.object.position.x += 2;
-      controls.object.zoom = 30;
+      controls.object.zoom = 90;
       controls.update();
       expected = pose(controls);
       await renderer.update(createElement(OrbitCamera, { ...props, room }));
@@ -172,6 +172,12 @@ await withModules(async (load) => {
           assert.equal(controls.object.zoom, 300);
           await act(async () => document.querySelector('[aria-label="Zoom out"]').click());
           assert.equal(controls.object.zoom, 240);
+          for (let i = 0; i < 20; i++)
+            await act(async () => document.querySelector('[aria-label="Zoom out"]').click());
+          assert.equal(controls.object.zoom, controls.minZoom);
+          const atLimit = pose(controls);
+          await act(async () => document.querySelector('[aria-label="Zoom out"]').click());
+          close(pose(controls), atLimit);
         } finally {
           await act(async () => root.unmount());
         }
@@ -183,14 +189,14 @@ await withModules(async (load) => {
 
   test("restored views adapt to viewport size and outdated camera distances fall back", async () => {
     const viewKey = orbitViewKey("resize", floor.id);
-    const saved = { position: [10, 20, 10], target: [0, 0.2, 0], zoom: 60, viewport: [1200, 900] };
+    const saved = { position: [10, 20, 10], target: [0, 0.2, 0], zoom: 110, viewport: [1200, 900] };
     writeOrbitView(viewKey, { pose: saved });
     const renderer = await create(createElement(OrbitCamera, { floor, resetKey: 0, viewKey }), {
       ...options,
       width: 600,
     });
     try {
-      assert.equal(controlsFor(renderer).object.zoom, 30);
+      assert.equal(controlsFor(renderer).object.zoom, 55);
     } finally {
       await renderer.unmount();
     }
@@ -220,17 +226,68 @@ await withModules(async (load) => {
     try {
       const controls = controlsFor(renderer);
       controls.dispatchEvent({ type: "start" });
-      controls.object.zoom = 60;
+      controls.object.zoom = 110;
       controls.update();
       const before = pose(controls);
       await act(async () => state.setSize(600, 900));
-      assert.equal(controls.object.zoom, 30);
+      assert.equal(controls.object.zoom, 55);
       await act(async () => state.setSize(1200, 900));
       close(pose(controls), before);
-      assert.equal(readOrbitView(viewKey).pose.zoom, 60);
+      assert.equal(readOrbitView(viewKey).pose.zoom, 110);
       assert.deepEqual(readOrbitView(viewKey).pose.viewport, [1200, 900]);
     } finally {
       await renderer.unmount();
+    }
+  });
+
+  test("zoom-out bounds scale with the home and recover an old excessively distant view", async () => {
+    for (const scale of [1, 4]) {
+      const scaledFloor = {
+        ...floor,
+        coordinates: {
+          ...floor.coordinates,
+          metersPerPlanUnit: floor.coordinates.metersPerPlanUnit * scale,
+        },
+      };
+      const key = orbitViewKey("zoom-out-recovery", String(scale));
+      writeOrbitView(key, {
+        pose: { position: [10, 20, 10], target: [20, 0.2, 20], zoom: 0.8, viewport: [1200, 900] },
+      });
+      let state;
+      const renderer = await create(
+        createElement(OrbitCamera, { floor: scaledFloor, resetKey: 0, viewKey: key }),
+        {
+          ...options,
+          onCreated(value) {
+            state = value;
+          },
+        },
+      );
+      try {
+        const controls = controlsFor(renderer);
+        const overview = controls.object.zoom;
+        assert.ok(overview > 0.8, "legacy extreme zoom restores the fitted overview");
+        assert.equal(controls.minZoom, overview * 0.7);
+        assert.notDeepEqual(
+          controls.target.toArray(),
+          [20, 0.2, 20],
+          "recovery recenters the home",
+        );
+        controls.object.zoom = controls.minZoom;
+        controls.dispatchEvent({ type: "start" });
+        controls.update();
+        await act(async () => state.setSize(600, 900));
+        assert.ok(
+          controls.object.zoom >= controls.minZoom,
+          "viewport changes preserve the current lower bound",
+        );
+        assert.ok(
+          controls.minZoom < overview * 0.7,
+          "smaller viewport recalculates the fitted bound",
+        );
+      } finally {
+        await renderer.unmount();
+      }
     }
   });
 
