@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { EditorButton } from "../editor-chrome/EditorButton";
 import type {
   CustomModelLight,
   DeviceModelBounds,
@@ -24,8 +23,7 @@ export function ModelLightingEditor({
   disabled?: boolean;
 }) {
   const [selected, setSelected] = useState(0);
-  const [picking, setPicking] = useState<"position" | "surface" | null>(null);
-  const [highlighted, setHighlighted] = useState<string>();
+  const [picking, setPicking] = useState<"position" | "surface" | null>(value ? "position" : null);
   const [surfaces, setSurfaces] = useState<ModelLightingSurfaceOption[]>([]);
   const [brightness, setBrightness] = useState(100);
   const previous = useRef<CustomModelLight | null>(value);
@@ -83,7 +81,7 @@ export function ModelLightingEditor({
                   : null,
               );
               setSelected(0);
-              setPicking(null);
+              setPicking(event.target.checked ? "position" : null);
             }}
           />
           Enable lighting
@@ -97,22 +95,27 @@ export function ModelLightingEditor({
             state={state}
             selected={selected}
             picking={picking}
-            highlighted={highlighted}
             onPosition={place}
             onSelect={(index) => {
               setSelected(index);
               setPicking("position");
             }}
-            onSurface={(id) => {
+            onSurface={(id, materialName) => {
               if (!value) return;
               const ids = value.emissiveSurfaces ?? [];
-              if (!ids.includes(id) && ids.length + (value.emissiveMaterials?.length ?? 0) >= 16)
+              const materials = value.emissiveMaterials ?? [];
+              const savedMaterial = materials.includes(materialName);
+              if (!savedMaterial && !ids.includes(id) && ids.length + materials.length >= 16)
                 return;
               change({
                 ...value,
-                emissiveSurfaces: ids.includes(id)
-                  ? ids.filter((value) => value !== id)
-                  : [...ids, id],
+                ...(savedMaterial
+                  ? { emissiveMaterials: materials.filter((name) => name !== materialName) }
+                  : {}),
+                emissiveSurfaces:
+                  savedMaterial || ids.includes(id)
+                    ? ids.filter((value) => value !== id)
+                    : [...ids, id],
               });
             }}
             onSurfaces={receiveSurfaces}
@@ -120,9 +123,6 @@ export function ModelLightingEditor({
             {children}
           </LightingStage>
           <div className="lighting-preview-controls">
-            <EditorButton onClick={() => setBrightness(brightness ? 0 : 100)}>
-              {brightness ? "Preview off" : "Preview on"}
-            </EditorButton>
             <label>
               Preview brightness
               <input
@@ -147,7 +147,6 @@ export function ModelLightingEditor({
             picking={picking}
             onPicking={setPicking}
             surfaces={surfaces}
-            onHighlight={setHighlighted}
           />
         ) : (
           <p className="lighting-empty">Enable lighting to add sources and glow.</p>

@@ -34,7 +34,7 @@ export function ModelVisual({
     const Component = entry.definition.component;
     return (
       <Component
-        variant={resolveModelVariant(entry.definition).id}
+        variant={resolveModelVariant(entry.definition, entry.variant).id}
         size={entry.definition.defaultSize}
         entityStatesBySlotId={emptyStates}
         reducedMotion
@@ -46,7 +46,7 @@ export function ModelVisual({
   const Component = entry.definition.component;
   return (
     <Component
-      variant={resolveModelVariant(entry.definition).id}
+      variant={resolveModelVariant(entry.definition, entry.variant).id}
       visualState={deviceVisualStateForSnapshot(previewState)}
       {...(previewState ? { state: previewState } : {})}
       reducedMotion

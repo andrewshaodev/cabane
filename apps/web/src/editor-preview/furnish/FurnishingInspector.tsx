@@ -9,6 +9,8 @@ import type {
 } from "@cabane/engine";
 import { FurnishingProperties } from "./FurnishingProperties";
 import { missingModelEditorDescriptor } from "./missing-model";
+import { useMemo } from "react";
+import type { CatalogEntry } from "./catalog/catalog";
 
 export interface FurnishingInspectorProps {
   floor?: FloorSpec;
@@ -56,14 +58,25 @@ export function FurnishingInspector({
   onConnectLighting,
 }: FurnishingInspectorProps) {
   const selected = items.find((item) => item.id === selectedId);
+  const kind = selected?.kind;
+  const modelId = selected?.modelId;
+  const previewEntry = useMemo<CatalogEntry | undefined>(() => {
+    if (!kind || !modelId) return undefined;
+    if (kind === "device") {
+      const definition = deviceModels[modelId];
+      return definition ? { key: `device:${modelId}`, kind, modelId, definition } : undefined;
+    }
+    const definition = furnishingModels[modelId];
+    return definition ? { key: `furnishing:${modelId}`, kind, modelId, definition } : undefined;
+  }, [kind, modelId, furnishingModels, deviceModels]);
   const definition = selected
-    ? ((selected.kind === "device" ? deviceModels : furnishingModels)[selected.modelId] ??
-      missingModelEditorDescriptor(selected))
+    ? (previewEntry?.definition ?? missingModelEditorDescriptor(selected))
     : undefined;
   return selected && definition ? (
     <FurnishingProperties
       selected={selected}
       definition={definition}
+      previewEntry={previewEntry}
       floor={floor}
       onWindowFit={onWindowFit}
       onLightStateChange={onLightStateChange}

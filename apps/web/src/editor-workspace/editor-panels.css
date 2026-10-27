@@ -160,6 +160,13 @@
   color: var(--preview-muted);
   font-size: var(--editor-text-control);
 }
+.furnishing-lighting-action {
+  display: grid;
+  gap: 8px;
+}
+.furnishing-lighting-action .editor-properties-note {
+  margin: 0;
+}
 .direction-preview .construction-inspector__selection > header small {
   display: none;
 }

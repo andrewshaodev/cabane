@@ -21,14 +21,18 @@ A strip chooses two to eight samples automatically from its length; total
 brightness is distributed across its samples. Trying another source type retains
 the preceding layout until the editor closes. Up to eight points are supported.
 
-Choose in preview selects glowing surfaces directly. The list highlights surfaces
-on hover and explains unsupported materials. Up to sixteen surfaces/materials
-may glow. Existing named GLB material selections remain readable and editable.
+The active source is marked Editing, with a matching preview marker and crosshair
+cursor. Select it again to finish positioning and return to orbiting.
+
+Choose in preview selects glowing surfaces directly, highlights the surface under
+the cursor, and uses a crosshair while choosing. Click again to remove glow;
+existing named GLB material selections can also be removed this way. Up to sixteen
+surfaces/materials may glow.
 Disabling Illuminate surroundings retains surface glow and source settings.
 Default color, total brightness and range configure the scene. Connected light
 entities supply their actual brightness and color; switches use on/off plus the
-configured defaults. Preview off and Preview brightness simulate state locally
-without operating Home Assistant devices.
+configured defaults. Preview brightness simulates state locally, including off at
+0%, without operating Home Assistant devices.
 
 ## Connections and persistence
 

@@ -1,7 +1,7 @@
 import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import { Bounds, OrbitControls } from "@react-three/drei";
-import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { Group } from "three";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Group, Mesh, type BufferGeometry, type Material } from "three";
 import {
   controlModelLightMaterials,
   ModelLightingStateContext,
@@ -22,7 +22,6 @@ function StageContent({
   state,
   selected,
   picking,
-  highlighted,
   onPosition,
   onSurface,
   onSurfaces,
@@ -34,14 +33,15 @@ function StageContent({
   state: EntityStateSnapshot;
   selected: number;
   picking: "position" | "surface" | null;
-  highlighted: string | undefined;
   onPosition: (position: ModelVector) => void;
-  onSurface: (id: string) => void;
+  onSurface: (id: string, materialName: string) => void;
   onSurfaces: (surfaces: ModelLightingSurfaceOption[]) => void;
   onSelect: (index: number) => void;
 }) {
   const geometry = useRef<Group>(null);
   const origin = useRef<Group>(null);
+  const [hoveredSurface, setHoveredSurface] = useState<string>();
+  const highlighted = picking === "surface" ? hoveredSurface : undefined;
   const invalidate = useThree((scene) => scene.invalidate);
   const span = Math.max(...bounds.max.map((n, i) => n - bounds.min[i]));
   useLayoutEffect(() => {
@@ -61,7 +61,13 @@ function StageContent({
         event.object,
         event.face?.materialIndex ?? 0,
       );
-      if (id) onSurface(id);
+      if (id && event.object instanceof Mesh) {
+        const mesh = event.object as Mesh<BufferGeometry, Material | Material[]>;
+        const material = Array.isArray(mesh.material)
+          ? mesh.material[event.face?.materialIndex ?? 0]
+          : mesh.material;
+        onSurface(id, material.name);
+      }
     } else {
       const position = origin.current
         .worldToLocal(event.point.clone())
@@ -79,38 +85,60 @@ function StageContent({
       <directionalLight position={[4, 6, 5]} intensity={2} />
       <Bounds fit clip margin={1.45}>
         <group position={center} ref={origin}>
-          <group ref={geometry} onClick={pick}>
+          <group
+            ref={geometry}
+            onClick={pick}
+            onPointerMove={(event) => {
+              if (picking !== "surface" || !geometry.current) return;
+              event.stopPropagation();
+              setHoveredSurface(
+                modelLightingSurfaceAt(
+                  geometry.current,
+                  event.object,
+                  event.face?.materialIndex ?? 0,
+                ),
+              );
+            }}
+            onPointerLeave={() => setHoveredSurface(undefined)}
+          >
             <ModelLightingStateContext.Provider value={{ state }}>
               {children}
             </ModelLightingStateContext.Provider>
           </group>
-          {sources.map((source, index) => (
-            <group key={index} position={source.position}>
-              <mesh
-                renderOrder={10000}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onSelect(light?.strip ? (index === sources.length - 1 ? 1 : 0) : index);
-                }}
-              >
-                <sphereGeometry args={[Math.max(0.012, span * 0.022), 12, 8]} />
-                <meshBasicMaterial
-                  color={selected === index ? "#2a7351" : "#a9653f"}
-                  depthTest={false}
-                  depthWrite={false}
+          {sources.map((source, index) => {
+            const point = light?.strip ? (index === sources.length - 1 ? 1 : 0) : index;
+            const active =
+              picking === "position" &&
+              selected === point &&
+              (!light?.strip || index === 0 || index === sources.length - 1);
+            return (
+              <group key={index} position={source.position}>
+                <mesh
+                  renderOrder={10000}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(point);
+                  }}
+                >
+                  <sphereGeometry args={[Math.max(0.012, span * 0.022), 12, 8]} />
+                  <meshBasicMaterial
+                    color={active ? "#2a7351" : "#a9653f"}
+                    depthTest={false}
+                    depthWrite={false}
+                  />
+                </mesh>
+                <pointLight
+                  color={source.color}
+                  intensity={
+                    state.state === "on"
+                      ? (source.maxIntensity * Number(state.attributes.brightness ?? 255)) / 255
+                      : 0
+                  }
+                  distance={source.distance}
                 />
-              </mesh>
-              <pointLight
-                color={source.color}
-                intensity={
-                  state.state === "on"
-                    ? (source.maxIntensity * Number(state.attributes.brightness ?? 255)) / 255
-                    : 0
-                }
-                distance={source.distance}
-              />
-            </group>
-          ))}
+              </group>
+            );
+          })}
         </group>
       </Bounds>
       <OrbitControls makeDefault enablePan={false} />
@@ -120,7 +148,11 @@ function StageContent({
 export function LightingStage(props: Parameters<typeof StageContent>[0]) {
   const span = Math.max(...props.bounds.max.map((n, i) => n - props.bounds.min[i]));
   return (
-    <div className="lighting-stage" aria-label="Interactive lighting preview">
+    <div
+      className="lighting-stage"
+      data-picking={props.picking ?? "orbit"}
+      aria-label="Interactive lighting preview"
+    >
       <Canvas
         frameloop="demand"
         camera={{
@@ -134,9 +166,9 @@ export function LightingStage(props: Parameters<typeof StageContent>[0]) {
       </Canvas>
       <p className="lighting-stage__hint" role="status">
         {props.picking === "surface"
-          ? "Click a surface to make it glow."
+          ? "Choosing surfaces · Click to add or remove glow."
           : props.picking === "position"
-            ? `Click the model to place ${props.light?.strip ? (props.selected === 0 ? "the strip start" : "the strip end") : `point ${props.selected + 1}`}.`
+            ? `Editing ${props.light?.strip ? (props.selected === 0 ? "strip start" : "strip end") : `point ${props.selected + 1}`} · Click the model to move it.`
             : "Drag to orbit · Scroll to zoom"}
       </p>
     </div>
