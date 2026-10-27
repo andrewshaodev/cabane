@@ -79,7 +79,7 @@
   left: calc(var(--editor-rail-width) + 16px);
   right: max(16px, env(safe-area-inset-right));
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 16px 8px;
   pointer-events: none;

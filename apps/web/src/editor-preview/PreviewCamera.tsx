@@ -16,7 +16,6 @@ import type { EditorCameraState } from "../editor-connect/connect-navigation";
 import { navigatePlanWheel } from "./construct/plan-wheel-navigation";
 
 interface PreviewCameraProps {
-  rightPanelOpen?: boolean;
   planWheelNavigation?: boolean;
   northOrientation?: boolean;
   view: EditorCameraState["view"];
@@ -73,29 +72,10 @@ function PreviewCameraRig({
   restored,
   planWheelNavigation,
   northOrientation,
-  rightPanelOpen,
 }: PreviewCameraProps & { restored: EditorCameraState | null }) {
   const { width, height } = useThree((state) => state.size);
   const canvas = useThree((state) => state.gl.domElement);
   const invalidate = useThree((state) => state.invalidate);
-  const camera = useThree((state) => state.camera);
-  const compactDrawer =
-    !northOrientation &&
-    rightPanelOpen &&
-    canvas.ownerDocument.defaultView?.matchMedia?.("(min-width: 761px) and (max-width: 1240px)")
-      .matches;
-  const rightInset = compactDrawer ? 320 : 0;
-  // A compact drawer overlays the canvas. Center focus in its unobscured region
-  // without replacing the user's pan, zoom or active control listeners.
-  useEffect(() => {
-    if (!(camera as ThreeOrthographicCamera).isOrthographicCamera || width <= 0 || height <= 0)
-      return;
-    const orthographic = camera as ThreeOrthographicCamera;
-    if (rightInset) orthographic.setViewOffset(width, height, rightInset / 2, 0, width, height);
-    else orthographic.clearViewOffset();
-    orthographic.updateProjectionMatrix();
-    invalidate();
-  }, [camera, width, height, rightInset, invalidate]);
   const controls = useRef<ComponentRef<typeof MapControls>>(null);
   useCameraWheelZoom(controls, !planWheelNavigation || view !== "top");
   const {
@@ -194,14 +174,7 @@ function PreviewCameraRig({
           (Math.min(width - 48, height - 162) * 0.68) /
             Math.max(2, Math.hypot(bounds.width, bounds.depth)),
         )
-      : Math.max(
-          8,
-          Math.min(
-            110,
-            (width - rightInset) / (bounds.width * 1.48),
-            height / (bounds.depth * 1.58),
-          ),
-        );
+      : Math.max(8, Math.min(110, width / (bounds.width * 1.48), height / (bounds.depth * 1.58)));
     const focusX =
       !northOrientation && focusPoint
         ? (focusPoint[0] - floor.coordinates.origin[0]) * floor.coordinates.metersPerPlanUnit

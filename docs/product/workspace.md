@@ -85,12 +85,16 @@ Panels use continuous warm surfaces, aligned fields and spaced semantic groups,
 without nested cards or decorative section rules. Relevant fields group dimensions,
 placement and appearance; advanced controls remain accessible through one disclosure level.
 
-Above 1240px, Properties reserves canvas width. Compact windows use a right drawer;
-mobile uses one active bottom sheet for tools, Properties or Issues. Short mobile
-landscape windows put that shared surface on the left to retain canvas height. Canvas picking,
-framing, floor controls and view controls use the available region. Panel changes
-that resize the canvas wait for active drawing, dragging and marquee gestures to
-settle. Panel state is presentation-only and is not exported or added to history.
+On desktop, Properties overlays the canvas as a full-height right sidebar. Opening
+or collapsing it never resizes the canvas or shifts the camera projection; floating
+floor and status controls move aside to stay accessible. Undo and Redo share the
+top-right project actions with Reset and Save, separated by a divider. The Construct
+toolbar contains construction tools; Arrange has no separate history toolbar.
+Mobile uses one active bottom sheet for Tools, Properties or Issues, with an
+underlined active tab and a count badge for Issues. Short mobile landscape windows
+put that shared surface on the left to retain canvas height. Panel changes wait
+for active drawing, dragging and marquee gestures to settle. Panel state is
+presentation-only and is not exported or added to history.
 
 Draft Issues lives in a separate tray below the canvas in every editor mode.
 It starts collapsed with error/warning counts, expands to a scrollable list capped

@@ -46,7 +46,6 @@ import type { useHomeEditorController } from "./useHomeEditorController";
 
 const NO_INTERACTION = () => undefined;
 type Props = {
-  rightPanelOpen: boolean;
   onStairIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
   reference: ReferencePlanController;
   onNameFocusHandled?: () => void;
@@ -115,7 +114,6 @@ type Props = {
   | "deleteSceneItem"
 >;
 export function HomeEditorScene({
-  rightPanelOpen,
   reference,
   northOrientation,
   onStairIssuesChange,
@@ -279,7 +277,6 @@ export function HomeEditorScene({
               )}
               {mode === "construct" && !referenceCanvas.visible && <ConstructionGrid />}
               <PreviewCamera
-                rightPanelOpen={rightPanelOpen}
                 northOrientation={northOrientation.active}
                 planWheelNavigation={mode === "construct" || mode === "furnish"}
                 view={mode === "construct" ? "top" : cameraView}
