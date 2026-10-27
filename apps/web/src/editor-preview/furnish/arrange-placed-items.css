@@ -17,10 +17,12 @@
 .arrange-placed-items p {
   margin: 8px 0 12px;
 }
-.arrange-placed-items ul {
+.arrange-placed-items__groups {
   max-height: min(240px, 26dvh);
   overflow: auto;
   scrollbar-width: thin;
+}
+.arrange-placed-items ul {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -51,7 +53,12 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.arrange-placed-items strong,
-.arrange-placed-items small {
-  display: block;
+.arrange-placed-items h3 {
+  margin: 14px 8px 4px;
+  color: #58654e;
+  font: inherit;
+  font-weight: 600;
+}
+.arrange-placed-items section:first-child h3 {
+  margin-top: 0;
 }

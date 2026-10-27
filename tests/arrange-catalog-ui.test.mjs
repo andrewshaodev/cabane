@@ -90,7 +90,49 @@ await withModules(async (load) => {
 
   test("placed items include occluded and missing models on this floor and open normal Properties without moving focus or editing history", async () => {
     await withDom(async ({ root, document }) => {
-      const floor = { ...ownerProjectManifest.floors[0], id: "synthetic-floor" };
+      const baseFloor = ownerProjectManifest.floors[0];
+      const floor = {
+        ...baseFloor,
+        id: "synthetic-floor",
+        rooms: [
+          {
+            ...baseFloor.rooms[0],
+            id: "study",
+            name: "Study",
+            polygon: [
+              [0, 0],
+              [4, 0],
+              [4, 4],
+              [0, 4],
+            ],
+          },
+          {
+            ...baseFloor.rooms[0],
+            id: "kitchen",
+            name: "Kitchen",
+            polygon: [
+              [4, 0],
+              [8, 0],
+              [8, 4],
+              [4, 4],
+            ],
+          },
+        ],
+        outdoorPlatforms: [
+          {
+            id: "patio",
+            useAsRoom: true,
+            roomName: "Patio",
+            polygon: [
+              [8, 0],
+              [12, 0],
+              [12, 4],
+              [8, 4],
+            ],
+            finish: baseFloor.rooms[0].floorFinish,
+          },
+        ],
+      };
       const placement = { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 };
       const cabinet = {
         id: "cabinet",
@@ -108,11 +150,30 @@ await withModules(async (load) => {
         size: [0.1, 0.1, 0.1],
         entitySlots: [],
       };
-      const missing = { ...cabinet, id: "unresolved", modelId: "removed-model" };
+      const missing = {
+        ...cabinet,
+        id: "unresolved",
+        modelId: "removed-model",
+        placement: { kind: "wall", wallId: "missing-wall" },
+      };
+      const ceiling = {
+        ...device,
+        id: "ceiling-device",
+        placement: {
+          kind: "ceiling",
+          roomId: "kitchen",
+          at: [6, 2],
+          dropMeters: 0.2,
+          rotationYRadians: 0,
+        },
+      };
+      const outdoor = { ...cabinet, id: "patio-item", placement: { ...placement, at: [10, 2] } };
       const items = [
         cabinet,
         device,
         missing,
+        ceiling,
+        outdoor,
         { ...cabinet, id: "upstairs", floorId: "other-floor" },
       ];
       const definition = {
@@ -156,11 +217,24 @@ await withModules(async (load) => {
         );
       }
       await act(async () => root.render(React.createElement(Harness)));
-      const list = () =>
-        document.querySelector('ul[aria-label="Placed items on ' + floor.name + '"]');
-      assert.equal(list().querySelectorAll("button").length, 3, "other floors are excluded");
+      const list = () => document.querySelector(".arrange-placed-items__groups");
+      assert.equal(list().querySelectorAll("button").length, 5, "other floors are excluded");
+      assert.deepEqual(
+        [...list().querySelectorAll("h3")].map((heading) => heading.textContent),
+        ["Study", "Kitchen", "Patio", "Outside rooms"],
+      );
+      assert.match(
+        list().querySelector('ul[aria-label="Kitchen"]').textContent,
+        /Temperature sensor/,
+      );
+      assert.match(list().querySelector('ul[aria-label="Patio"]').textContent, /Cabinet/);
+      assert.match(
+        list().querySelector('ul[aria-label="Outside rooms"]').textContent,
+        /Missing model/,
+      );
       assert.match(list().textContent, /Temperature sensor/);
-      assert.match(list().textContent, /Missing model · removed-model/);
+      assert.match(list().textContent, /Missing model/);
+      assert.doesNotMatch(list().textContent, /inside-cabinet|unresolved|removed-model/);
       await act(async () => editor.selectMany([cabinet.id, device.id]));
       assert.equal(list().querySelectorAll('[aria-pressed="true"]').length, 2);
       const hiddenItem = list().querySelectorAll("button")[1];
