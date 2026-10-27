@@ -226,6 +226,8 @@
     "spec": "docs/product/runtime-and-privacy.md",
     "owners": [
       "packages/engine/src/HomeAssistantRuntime.tsx",
+      "packages/engine/src/BorrowedHomeAssistantRuntime.tsx",
+      "packages/engine/src/home-assistant-auth.ts",
       "packages/engine/src/home-assistant-controls.ts",
       "packages/engine/src/command-scheduler.ts",
       "packages/engine/src/home-assistant-storage-session.ts",
@@ -238,7 +240,7 @@
         "symbols": ["HomeAssistantRuntimeProvider", "useHomeAssistantRuntime"]
       }
     ],
-    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable. Demo fans start at 50% speed and valves start open; normal controls update their in-memory state and existing catalog animations respect reduced motion.",
+    "invariant": "Resolve and authorize supported controls at runtime; credentials and household IDs stay outside generated home source. Native sessions require matching HTTP or HTTPS page/host/workspace origins; standalone OAuth retains HTTPS or paired-loopback transport protection. Storage transfers remain bound to their originating authenticated session. Demo devices stay in memory, and simulated lights start on when the demo opens in night lighting while remaining manually controllable. Demo fans start at 50% speed and valves start open; normal controls update their in-memory state and existing catalog animations respect reduced motion.",
     "checks": ["verify:runtime"]
   },
   {

@@ -47,6 +47,7 @@ export {
   homeAssistantAuthStorageKey,
   normalizeHomeAssistantUrl,
   homeAssistantTransportError,
+  borrowedHomeAssistantTransportError,
 } from "./home-assistant-auth";
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
