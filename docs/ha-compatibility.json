@@ -2885,6 +2885,19 @@
                             ],
                             "elementFlags": [1, 1]
                           }
+                        },
+                        "virtual": {
+                          "optional": true,
+                          "schema": {
+                            "anyOf": [
+                              {
+                                "const": false
+                              },
+                              {
+                                "const": true
+                              }
+                            ]
+                          }
                         }
                       }
                     }
@@ -7160,6 +7173,19 @@
                             }
                           ],
                           "elementFlags": [1, 1]
+                        }
+                      },
+                      "virtual": {
+                        "optional": true,
+                        "schema": {
+                          "anyOf": [
+                            {
+                              "const": false
+                            },
+                            {
+                              "const": true
+                            }
+                          ]
                         }
                       }
                     }

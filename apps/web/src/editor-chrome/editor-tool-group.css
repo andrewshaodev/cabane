@@ -1,8 +1,8 @@
-.decorations-tools {
+.editor-tool-group {
   display: flex;
   flex: none;
 }
-.decorations-tools__panel {
+.editor-tool-group__panel {
   position: fixed;
   z-index: 49;
   display: grid;
@@ -14,7 +14,7 @@
   background: #f5f0e7;
   box-shadow: 0 8px 28px #39462e15;
 }
-.decorations-tools__panel button.editor-action-button {
+.editor-tool-group__panel button.editor-action-button {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -30,16 +30,26 @@
     sans-serif;
   cursor: pointer;
 }
-.decorations-tools__panel button.editor-action-button:hover,
-.decorations-tools__panel button.editor-action-button[aria-pressed="true"] {
+.editor-tool-group__panel button.editor-action-button:hover,
+.editor-tool-group__panel button.editor-action-button[aria-pressed="true"] {
   color: #934c2e;
   background: #eddfd0;
 }
-.decorations-tools__panel button:focus-visible {
+.editor-tool-group__panel button:focus-visible {
   outline: 2px solid var(--preview-accent);
   outline-offset: -2px;
 }
-.decorations-tools__panel .editor-icon {
+.editor-tool-group__panel .editor-icon {
   width: 18px;
   height: 18px;
+}
+
+.editor-action-button__disclosure {
+  display: flex;
+  transform: rotate(90deg);
+}
+
+.editor-action-button__disclosure .editor-icon {
+  width: 12px;
+  height: 12px;
 }

@@ -169,6 +169,11 @@ export interface WallSpec {
   to: PlanPoint;
   classification: "interior" | "exterior";
   thicknessMeters: number;
+  /**
+   * A virtual wall only divides rooms: it has no geometry, collision, shadow or
+   * openings, and renders and collides as open floor.
+   */
+  virtual?: boolean;
   niches?: readonly WallNicheSpec[];
   heightMeters?: number;
   exteriorColor?: string;

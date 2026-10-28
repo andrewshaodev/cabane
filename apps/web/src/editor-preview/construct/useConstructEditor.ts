@@ -19,7 +19,6 @@ import {
   type FloorEditorTool,
   type FloorFinishSpec,
   type FloorSpec,
-  type PlanPoint,
   type Polygon,
 } from "@cabane/engine";
 
@@ -36,7 +35,7 @@ import {
   topologyIssueKey,
 } from "./construct-controller-reducer";
 import { useClosedOutlineDrawing } from "./useClosedOutlineDrawing";
-import { closesWallLoop } from "./wall-loop-closure";
+import { useWallDrawing } from "./useWallDrawing";
 
 export const useConstructEditor = (
   initialFloor: FloorSpec,
@@ -77,7 +76,6 @@ export const useConstructEditor = (
   const [hedgeSettings, setHedgeSettings] = useState<
     Pick<import("@cabane/engine").HedgeSpec, "style" | "heightMeters" | "widthMeters">
   >({ style: "clipped", heightMeters: 1.4, widthMeters: 0.65 });
-  const [drawStart, setDrawStart] = useState<PlanPoint | null>(null);
   const [exteriorWallColor, setExteriorWallColor] = useState(defaultExteriorWallColor);
   const [platformSettings, setPlatformSettings] = useState<
     ConstructEditorController["platformSettings"]
@@ -101,9 +99,6 @@ export const useConstructEditor = (
     history.present.tool === "platform" ? "platform" : "pool",
   );
   const { cancel: poolDrawingCancel } = poolDrawing;
-  const [drawPreview, setDrawPreview] = useState<PlanPoint | null>(null);
-  const [drawAngleReferenceRadians, setDrawAngleReferenceRadians] = useState<number | null>(null);
-  const drawStartRef = useRef<PlanPoint | null>(null);
   const draft = history.present;
   const restoredFloor = useRef<{ floor: FloorSpec; draft: typeof draft | null } | null>(null);
   const initialDraft = useRef(draft);
@@ -175,77 +170,47 @@ export const useConstructEditor = (
     baselineTopologyIssueKeys,
     deriveTopology,
   ]);
+  const {
+    drawStart,
+    drawPreview,
+    drawAngleReferenceRadians,
+    beginWall,
+    previewWall,
+    addWall,
+    cancelWall,
+  } = useWallDrawing({
+    tool: history.present.tool,
+    walls: history.present.walls,
+    hedgeSettings,
+    exteriorWallColor,
+    dispatch,
+  });
   const setTool = useCallback(
     (tool: FloorEditorTool) => {
       poolDrawingCancel();
-      drawStartRef.current = null;
-      setDrawStart(null);
-      setDrawPreview(null);
-      setDrawAngleReferenceRadians(null);
+      cancelWall();
       if (tool === "platform") rememberFloorPaintTarget("outdoor-platform");
+      if (tool === "floor" && floorPaintTarget === "outdoor-platform")
+        rememberFloorPaintTarget("room");
       dispatch({
         type: "set-tool",
-        tool: tool === "floor" && floorPaintTarget === "outdoor-platform" ? "platform" : tool,
+        tool,
       });
     },
-    [poolDrawingCancel, floorPaintTarget],
+    [poolDrawingCancel, floorPaintTarget, cancelWall],
   );
   const setFloorPaintTarget = useCallback(
     (target: ConstructEditorController["floorPaintTarget"]) => {
       rememberFloorPaintTarget(target);
       poolDrawingCancel();
-      drawStartRef.current = null;
-      setDrawStart(null);
-      setDrawPreview(null);
-      setDrawAngleReferenceRadians(null);
+      cancelWall();
       dispatch({ type: "set-tool", tool: target === "outdoor-platform" ? "platform" : "floor" });
     },
-    [poolDrawingCancel],
+    [poolDrawingCancel, cancelWall],
   );
   const select = useCallback((selection: FloorEditorSelection) => {
     setOpeningError(null);
     dispatch({ type: "select", selection });
-  }, []);
-  const beginWall = useCallback((from: PlanPoint) => {
-    drawStartRef.current = from;
-    setDrawStart(from);
-    setDrawPreview(from);
-    setDrawAngleReferenceRadians(null);
-  }, []);
-  const addWall = useCallback(
-    (to: PlanPoint) => {
-      const from = drawStartRef.current;
-      if (!from) return;
-      if (history.present.tool === "hedge") {
-        dispatch({ type: "add-hedge", hedge: { from, to, ...hedgeSettings } });
-        drawStartRef.current = to;
-        setDrawStart(to);
-        setDrawPreview(to);
-        setDrawAngleReferenceRadians(Math.atan2(to[1] - from[1], to[0] - from[0]));
-        return;
-      }
-      const closesLoop = closesWallLoop(history.present.walls, from, to);
-      dispatch({ type: "add-wall", from, to, exteriorColor: exteriorWallColor });
-      if (closesLoop) {
-        dispatch({ type: "set-tool", tool: "select" });
-        drawStartRef.current = null;
-        setDrawStart(null);
-        setDrawPreview(null);
-        setDrawAngleReferenceRadians(null);
-        return;
-      }
-      drawStartRef.current = to;
-      setDrawStart(to);
-      setDrawPreview(to);
-      setDrawAngleReferenceRadians(Math.atan2(to[1] - from[1], to[0] - from[0]));
-    },
-    [exteriorWallColor, history.present.walls, history.present.tool, hedgeSettings],
-  );
-  const cancelWall = useCallback(() => {
-    drawStartRef.current = null;
-    setDrawStart(null);
-    setDrawPreview(null);
-    setDrawAngleReferenceRadians(null);
   }, []);
   const { addOpening, placeOpening } = useWallOpeningPlacement(
     draft,
@@ -434,7 +399,7 @@ export const useConstructEditor = (
     resolveRoomMerge,
     translateWall: (wallId, delta) => dispatch({ type: "translate-wall", wallId, delta }),
     beginWall,
-    previewWall: setDrawPreview,
+    previewWall,
     addWall,
     cancelWall,
     addOpening,

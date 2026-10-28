@@ -4,6 +4,7 @@ import { validHedge } from "../hedges/hedge-validity";
 import { planPointToWorld } from "../geometry";
 
 import { junctionConnectorInterval } from "../architecture-geometry";
+import { physicalFloor } from "../architecture-geometry/physical-floor";
 
 import { isPoolOutline, POOL_RIM_WIDTH_METERS, poolWorldRing } from "../pools/pool-footprint";
 
@@ -77,11 +78,20 @@ const wallColliderRuns = (
   }));
 };
 
+/** Virtual room dividers never block walking. */
 export const deriveWalkColliders = (
   floor: FloorSpec,
   openOpeningIds: ReadonlySet<string> = new Set(),
   furniture: readonly BoxWalkCollider[] = [],
   elevation = 0,
+): WalkCollider[] =>
+  deriveBuiltWalkColliders(physicalFloor(floor), openOpeningIds, furniture, elevation);
+
+const deriveBuiltWalkColliders = (
+  floor: FloorSpec,
+  openOpeningIds: ReadonlySet<string>,
+  furniture: readonly BoxWalkCollider[],
+  elevation: number,
 ): WalkCollider[] => [
   ...[...(floor.solidRooms ?? []), ...floor.rooms.filter((room) => room.isSolid)].flatMap(
     (room): SegmentWalkCollider[] =>

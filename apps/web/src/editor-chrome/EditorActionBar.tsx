@@ -1,16 +1,18 @@
 import { DecorationsTools } from "./DecorationsTools";
 import type { FloorEditorTool } from "@cabane/engine";
 import { EditorActionButton } from "./EditorActionButton";
+import { EditorToolGroup, type EditorToolOption } from "./EditorToolGroup";
 
-const constructionTools = [
-  { tool: "select", label: "Select", key: "V" },
-  { tool: "wall", label: "Wall", key: "W" },
-  { tool: "door", label: "Door", key: "D" },
-  { tool: "window", label: "Window", key: "N" },
-  { tool: "passage", label: "Passage", key: "A" },
-  { tool: "floor", label: "Floor", key: "F" },
-  { tool: "measure", label: "Measure", key: "M" },
-] as const;
+const wallTools = [
+  { tool: "wall", icon: "wall", label: "Wall", shortcut: "W" },
+  { tool: "virtual-wall", icon: "virtual-wall", label: "Invisible wall" },
+  { tool: "platform", icon: "outdoor-space", label: "Outdoor space" },
+] as const satisfies readonly EditorToolOption[];
+const openingTools = [
+  { tool: "door", icon: "door", label: "Door", shortcut: "D" },
+  { tool: "passage", icon: "passage", label: "Passage", shortcut: "A" },
+  { tool: "window", icon: "window", label: "Window", shortcut: "N" },
+] as const satisfies readonly EditorToolOption[];
 
 export interface EditorActionBarProps {
   inert?: boolean | undefined;
@@ -37,35 +39,62 @@ export function EditorActionBar({
       data-mode="construct"
       aria-label="Construction actions"
     >
-      {constructionTools.flatMap((action) => [
+      <EditorActionButton
+        icon="select"
+        label="Select"
+        showLabel
+        pressed={!stairsActive && tool === "select"}
+        shortcut="V"
+        keyShortcuts="V"
+        onClick={() => onToolChange("select")}
+      />
+      <EditorToolGroup
+        label="Wall"
+        panelLabel="Wall tools"
+        icon="wall"
+        tools={wallTools}
+        tool={stairsActive ? null : tool}
+        onToolChange={onToolChange}
+        disabled={inert}
+      />
+      <EditorToolGroup
+        label="Openings"
+        panelLabel="Opening tools"
+        icon="door"
+        tools={openingTools}
+        tool={stairsActive ? null : tool}
+        onToolChange={onToolChange}
+        disabled={inert}
+      />
+      <EditorActionButton
+        icon="floor"
+        label="Floor"
+        showLabel
+        pressed={!stairsActive && tool === "floor"}
+        shortcut="F"
+        keyShortcuts="F"
+        onClick={() => onToolChange("floor")}
+      />
+      {onStairs && (
         <EditorActionButton
-          key={action.tool}
-          icon={action.tool}
-          label={action.label}
+          icon="stairs"
+          label="Stairs"
           showLabel
-          pressed={
-            !stairsActive &&
-            (tool === action.tool || (tool === "platform" && action.tool === "floor"))
-          }
-          shortcut={action.key}
-          keyShortcuts={action.key}
-          onClick={() => onToolChange(action.tool)}
-        />,
-        ...(action.tool === "wall" && onStairs
-          ? [
-              <EditorActionButton
-                key="stairs"
-                icon="stairs"
-                label="Stairs"
-                showLabel
-                pressed={stairsActive}
-                disabled={Boolean(stairsDisabledReason)}
-                disabledReason={stairsDisabledReason}
-                onClick={onStairs}
-              />,
-            ]
-          : []),
-      ])}
+          pressed={stairsActive}
+          disabled={Boolean(stairsDisabledReason)}
+          disabledReason={stairsDisabledReason}
+          onClick={onStairs}
+        />
+      )}
+      <EditorActionButton
+        icon="measure"
+        label="Measure"
+        showLabel
+        pressed={!stairsActive && tool === "measure"}
+        shortcut="M"
+        keyShortcuts="M"
+        onClick={() => onToolChange("measure")}
+      />
       <DecorationsTools tool={tool} onToolChange={onToolChange} disabled={inert} />
     </div>
   );

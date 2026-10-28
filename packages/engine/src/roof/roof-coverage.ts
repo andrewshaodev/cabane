@@ -5,6 +5,7 @@ import {
   differenceClippingGeometry,
   unionClippingPolygons,
 } from "../architecture-geometry/architecture-clipping";
+import { physicalFloor } from "../architecture-geometry/physical-floor";
 import { wallSolidFootprintPolygons } from "../architecture-geometry/wall-solid-footprints";
 import { deriveFloorLevels } from "../building/floor-levels";
 import { planPointToWorld, slopedCeilingHeightAtPoint, worldPointToPlan } from "../geometry";
@@ -78,7 +79,8 @@ const ceilingWithWalls = (
   return polygonClipping.intersection(unionClippingPolygons(strips), domain);
 };
 
-export function deriveRoofRegions(floors: readonly FloorSpec[]): RoofRegion[] {
+export function deriveRoofRegions(requestedFloors: readonly FloorSpec[]): RoofRegion[] {
+  const floors = requestedFloors.map(physicalFloor);
   const levels = deriveFloorLevels(floors);
   const domains = floors.map(coveredFloor);
   const coverDomains = floors.map((floor, index) =>

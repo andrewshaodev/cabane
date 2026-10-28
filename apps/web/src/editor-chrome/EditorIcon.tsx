@@ -1,6 +1,12 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  "virtual-wall": <path d="M3 4h18v16H3Z M3 12h18 M9 4v8 M15 12v8" strokeDasharray="3 3" />,
+  "outdoor-space": (
+    <>
+      <path d="m3 14 9-5 9 5-9 6Z M3 14v3l9 6 9-6v-3 M6 11V5m6 4V2m6 9V5M6 6l6-4 6 4" />
+    </>
+  ),
   lighting: (
     <>
       <path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z" />

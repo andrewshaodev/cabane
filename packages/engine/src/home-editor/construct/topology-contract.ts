@@ -27,6 +27,7 @@ export interface EditorWall {
   from: PlanPoint;
   to: PlanPoint;
   thicknessMeters?: number;
+  virtual?: boolean;
   heightMeters?: number;
   exteriorColor?: string | undefined;
   edgeColor?: string | undefined;

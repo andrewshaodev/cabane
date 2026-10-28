@@ -1,9 +1,9 @@
 {
-  "revision": 17,
-  "fingerprint": "537bdb97439f6ffe46858de782293c996a7720f92352aee213c587d07b850344",
-  "summary": "Support independent furniture and device sensor readings with scene visibility and TV switch controls",
+  "revision": 18,
+  "fingerprint": "200393e0197c3a96f2dc26cf3e3f957ecc6831bd302b57573c1f605a156ddeeb",
+  "summary": "Add virtual room boundaries without physical geometry or collision",
   "breakingChanges": [
-    "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Mixed model lighting and placement repairs from revisions 15 and 16 remain supported. Older clients retain unsupported-field protection."
+    "Existing homes remain supported. Homes using WallSpec.virtual require the matching updated frontend and Home Assistant panel; older clients keep unsupported fields blocked. Mixed lighting, placement repairs and independent entity readings from revisions 15 through 17 remain supported."
   ],
   "history": [
     {
@@ -116,6 +116,13 @@
       "summary": "Keep misplaced items editable and add explicit placement repairs",
       "breakingChanges": [
         "Existing homes remain compatible. The updated panel treats geometric placement diagnostics as warnings, checks scaled bounds before Arrange edits, and offers per-copy repairs in Issues. Older panels can still block a home on legacy device contact errors. No data or asset migration is required."
+      ]
+    },
+    {
+      "revision": 17,
+      "summary": "Support independent furniture and device sensor readings with scene visibility and TV switch controls",
+      "breakingChanges": [
+        "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Mixed model lighting and placement repairs from revisions 15 and 16 remain supported. Older clients retain unsupported-field protection."
       ]
     }
   ],

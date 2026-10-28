@@ -49,6 +49,7 @@ export const createFloorEditorDraft = (floor: FloorSpec): FloorEditorDraft => ({
     from: [...wall.from],
     to: [...wall.to],
     thicknessMeters: wall.thicknessMeters,
+    ...(wall.virtual ? { virtual: true } : {}),
     ...(wall.heightMeters ? { heightMeters: wall.heightMeters } : {}),
     ...(wall.exteriorColor ? { exteriorColor: wall.exteriorColor } : {}),
     ...(wall.edgeColor ? { edgeColor: wall.edgeColor } : {}),

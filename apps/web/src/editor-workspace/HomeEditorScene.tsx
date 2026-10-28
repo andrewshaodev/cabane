@@ -457,7 +457,7 @@ export function HomeEditorScene({
                       : constructEditor.drawPreview
                   }
                   drawAngleReferenceRadians={
-                    constructEditor.tool === "wall"
+                    constructEditor.tool === "wall" || constructEditor.tool === "virtual-wall"
                       ? constructEditor.drawAngleReferenceRadians
                       : null
                   }

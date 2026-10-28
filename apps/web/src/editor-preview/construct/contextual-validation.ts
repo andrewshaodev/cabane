@@ -304,7 +304,9 @@ export const visibleConstructIssues = (
       )
         return false;
     }
-    return tool !== "wall" || !wallCompletionIssueCodes.has(issue.code);
+    return (
+      (tool !== "wall" && tool !== "virtual-wall") || !wallCompletionIssueCodes.has(issue.code)
+    );
   });
   return visible.length === issues.length ? issues : visible;
 };

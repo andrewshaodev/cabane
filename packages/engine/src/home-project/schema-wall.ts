@@ -13,6 +13,7 @@ export const wallSchema = (value: unknown, path: string, issues: HomeProjectIssu
       "to",
       "classification",
       "thicknessMeters",
+      "virtual",
       "heightMeters",
       "exteriorColor",
       "edgeColor",
@@ -34,6 +35,14 @@ export const wallSchema = (value: unknown, path: string, issues: HomeProjectIssu
     );
   }
   finite(candidate.thicknessMeters, `${path}.thicknessMeters`, issues);
+  if (candidate.virtual !== undefined && typeof candidate.virtual !== "boolean") {
+    addProjectIssue(
+      issues,
+      "project.wall-virtual",
+      `${path}.virtual`,
+      "Wall virtual flag must be a boolean.",
+    );
+  }
   wallNichesSchema(candidate.niches, `${path}.niches`, issues);
   if (candidate.heightMeters !== undefined)
     finite(candidate.heightMeters, `${path}.heightMeters`, issues);

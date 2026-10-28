@@ -83,6 +83,7 @@
       "editor-construct-preview.test.mjs",
       "editor-construct-scale.test.mjs",
       "editor-construct-wall-drawing.test.mjs",
+      "virtual-room-dividers.test.mjs",
       "editor-construction-inspector.test.mjs",
       "editor-floor-finishes.test.mjs",
       "editor-hedge.test.mjs",
