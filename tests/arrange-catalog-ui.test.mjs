@@ -288,9 +288,9 @@ await withModules(async (load) => {
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
-      const variants = [...document.querySelectorAll('[aria-label="Variant"] button')];
+      const choices = document.querySelector('[role="group"][aria-label="Variant"]');
       assert.deepEqual(
-        variants.map((button) => button.getAttribute("aria-label")),
+        [...choices.querySelectorAll("button")].map((button) => button.getAttribute("aria-label")),
         [
           "Sage cushions — left chaise (front view)",
           "Sage cushions — right chaise (front view)",
@@ -300,13 +300,16 @@ await withModules(async (load) => {
           "Cozy — right chaise (front view)",
         ],
       );
-      assert.equal(variants[2].getAttribute("aria-pressed"), "true");
+      assert.equal(
+        choices.querySelector('[aria-pressed="true"]').getAttribute("aria-label"),
+        "Classic — left chaise (front view)",
+      );
       await act(async () => {
-        variants[5].click();
+        choices.querySelector('[aria-label="Cozy — right chaise (front view)"]').click();
       });
       assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
-      assert.equal(document.querySelector('[aria-label="Variant"]'), null);
+      assert.equal(document.querySelector('[role="group"][aria-label="Variant"]'), null);
     });
   });
 

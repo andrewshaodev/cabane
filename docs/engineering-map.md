@@ -189,9 +189,9 @@ Contract: [Engine UI styles](../docs/product/architecture.md).
 
 Contract: [Shared model lighting](../docs/product/model-lighting.md).
 
-- Owners: [`apps/web/src/model-lighting`](../apps/web/src/model-lighting), [`packages/engine/src/model-lighting`](../packages/engine/src/model-lighting), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx).
-- Interface: `projectModelLighting`, `editModelLighting`, `lightingSlotForItem`, `modelLightingSurfaces`, `modelLightingSurfaceAt`, `controlModelLightMaterials` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
-- Review invariant: Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Bound source costs and show overflow.
+- Owners: [`apps/web/src/model-lighting`](../apps/web/src/model-lighting), [`packages/engine/src/model-lighting`](../packages/engine/src/model-lighting), [`packages/engine/src/HomeAssistantSceneLighting.tsx`](../packages/engine/src/HomeAssistantSceneLighting.tsx), [`packages/engine/src/SceneLightPool.tsx`](../packages/engine/src/SceneLightPool.tsx).
+- Interface: `modelLightSources`, `importedLightSources`, `projectModelLighting`, `editModelLighting`, `lightingSlotForItem`, `modelLightingSurfaces`, `modelLightingSurfaceAt`, `controlModelLightMaterials` via [`packages/engine/src/index.ts`](../packages/engine/src/index.ts).
+- Review invariant: Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. Only on sources occupy the reusable pool; grow capacity without an arbitrary floor cutoff and retain slots across state changes.
 - Checks: `verify:workspace`, `verify:runtime`, `build:panel`.
 
 ## Package import boundaries

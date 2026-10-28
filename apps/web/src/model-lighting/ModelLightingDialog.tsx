@@ -2,7 +2,6 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   createModelAssetRepository,
   defaultModelLighting,
-  modelLightingPointCount,
   openGlbPreview,
   projectModelLighting,
   useCabaneDom,
@@ -100,24 +99,6 @@ export function ModelLightingDialog({
   }, [custom, loaded, definition, modelId, native]);
   const bounds = custom?.normalization.bounds ?? definition?.bounds;
   const count = project.sceneItems.filter((item) => item.modelId === modelId).length;
-  const proposed = {
-    ...project,
-    ...(custom
-      ? {
-          customModels: project.customModels!.map((model) =>
-            model.id === modelId
-              ? { ...model, ...(value ? { light: value } : { light: undefined }) }
-              : model,
-          ),
-        }
-      : { modelLights: { ...project.modelLights, [modelId]: value } }),
-  } as HomeProject;
-  const floors = project.floors.filter((floor) =>
-    project.sceneItems.some((item) => item.modelId === modelId && item.floorId === floor.id),
-  );
-  const budget = floors
-    .map((floor) => ({ floor, count: modelLightingPointCount(proposed, floor.id, native) }))
-    .filter((entry) => entry.count > 32);
   const invalid = lightingError(value);
   return (
     <dialog
@@ -172,12 +153,6 @@ export function ModelLightingDialog({
         ) : (
           !error && <p role="status">Reading model…</p>
         )}
-        {budget.map(({ floor, count }) => (
-          <p key={floor.id} role="status" className="lighting-warning">
-            {floor.name} will use {count} configured light points. Only the first 32 illuminate the
-            scene. Use fewer points or a shorter strip; surface glow is retained.
-          </p>
-        ))}
         {(error || invalid) && (
           <p role="alert" className="catalog-add-error">
             {error ?? invalid}

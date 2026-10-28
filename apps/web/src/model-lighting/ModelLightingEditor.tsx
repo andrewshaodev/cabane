@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
+import { modelLightSources } from "@cabane/engine";
 import type {
   CustomModelLight,
   DeviceModelBounds,
@@ -7,7 +8,7 @@ import type {
 } from "@cabane/engine";
 import { LightingStage } from "./LightingStage";
 import { LightingFields } from "./LightingFields";
-import { stripSamples } from "./lighting-layout";
+import { moveLightSource, withLightSources, type LightingSelection } from "./lighting-layout";
 import "./model-lighting.css";
 export function ModelLightingEditor({
   value,
@@ -22,8 +23,9 @@ export function ModelLightingEditor({
   children: ReactNode;
   disabled?: boolean;
 }) {
-  const [selected, setSelected] = useState(0);
-  const [picking, setPicking] = useState<"position" | "surface" | null>(value ? "position" : null);
+  const [selected, setSelected] = useState<LightingSelection>({ index: 0 });
+  const [step, setStep] = useState(0.01);
+  const [picking, setPicking] = useState<"position" | "surface" | null>(null);
   const [surfaces, setSurfaces] = useState<ModelLightingSurfaceOption[]>([]);
   const [brightness, setBrightness] = useState(100);
   const previous = useRef<CustomModelLight | null>(value);
@@ -50,17 +52,7 @@ export function ModelLightingEditor({
   };
   const place = (position: ModelVector) => {
     if (!value) return;
-    if (value.strip) {
-      const start = selected === 0 ? position : value.position;
-      const end = selected === 1 ? position : value.strip.end;
-      change({ ...value, position: start, strip: { end, samples: stripSamples(start, end) } });
-      if (selected === 0) setSelected(1);
-    } else if (selected === 0) change({ ...value, position });
-    else
-      change({
-        ...value,
-        points: value.points!.map((point, index) => (index === selected - 1 ? position : point)),
-      });
+    change(moveLightSource(value, selected, position));
   };
   return (
     <fieldset disabled={disabled} className="model-lighting-editor">
@@ -80,7 +72,7 @@ export function ModelLightingEditor({
                     })
                   : null,
               );
-              setSelected(0);
+              setSelected({ index: 0 });
               setPicking(event.target.checked ? "position" : null);
             }}
           />
@@ -92,13 +84,28 @@ export function ModelLightingEditor({
           <LightingStage
             bounds={bounds}
             light={value}
+            disabled={disabled}
+            step={step}
             state={state}
             selected={selected}
             picking={picking}
             onPosition={place}
+            onRotateStrip={(start, end) => {
+              if (value)
+                change(
+                  withLightSources(
+                    value,
+                    modelLightSources(value).map((source, index) =>
+                      index === selected.index && source.kind === "strip"
+                        ? { ...source, start, end }
+                        : source,
+                    ),
+                  ),
+                );
+            }}
             onSelect={(index) => {
               setSelected(index);
-              setPicking("position");
+              setPicking(null);
             }}
             onSurface={(id, materialName) => {
               if (!value) return;
@@ -147,6 +154,8 @@ export function ModelLightingEditor({
             picking={picking}
             onPicking={setPicking}
             surfaces={surfaces}
+            step={step}
+            onStep={setStep}
           />
         ) : (
           <p className="lighting-empty">Enable lighting to add sources and glow.</p>
