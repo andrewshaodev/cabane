@@ -82,6 +82,51 @@ await withModules(async (load) => {
       false,
     );
   });
+  test("spiral bridge collisions warn at each storey and coordinate scale", () => {
+    for (const coordinates of [
+      { origin: [0, 0], metersPerPlanUnit: 1, scaleBasis: "measured" },
+      { origin: [17, -9], metersPerPlanUnit: 0.25, scaleBasis: "measured" },
+    ]) {
+      for (const [lowerFloorId, upperFloorId] of [
+        ["ground", "first"],
+        ["first", "second"],
+      ]) {
+        const p = makeStairProject();
+        p.coordinates = coordinates;
+        const at = (x, z) => [
+          coordinates.origin[0] + x / coordinates.metersPerPlanUnit,
+          coordinates.origin[1] + z / coordinates.metersPerPlanUnit,
+        ];
+        p.stairs = [
+          {
+            id: "spiral",
+            lowerFloorId,
+            upperFloorId,
+            at: at(4, 6),
+            rotationYRadians: 0,
+            shape: "spiral",
+            diameterMeters: 2,
+            totalTurnDegrees: 180,
+            direction: "clockwise",
+          },
+          {
+            id: "straight",
+            lowerFloorId,
+            upperFloorId,
+            at: at(4, 1.95),
+            rotationYRadians: 0,
+            widthMeters: 1.2,
+            runMeters: 4,
+          },
+        ];
+        const overlaps = () => validateStairs(p).filter((issue) => issue.code === "stair.overlap");
+        assert.equal(overlaps().length, 1, "the top tread intersects only the spiral's bridge");
+        assert.equal(overlaps()[0].severity, "warning");
+        p.stairs[1].at = at(6, 1.95);
+        assert.equal(overlaps().length, 0, "separated stairs must not warn");
+      }
+    }
+  });
   test("long rotated wardrobe uses its physical narrow side, not its diagonal radius", () => {
     const p = makeStairProject();
     p.stairs[0].widthMeters = 1;
