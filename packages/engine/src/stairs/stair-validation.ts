@@ -5,8 +5,7 @@ import { deriveStairFlight } from "./flight-geometry";
 import {
   stairClearanceVolumes,
   stairLandingSupported,
-  stairPolygon,
-  stairVolume,
+  stairStructureVolumes,
   stairVolumesIntersect,
 } from "./stair-clearance";
 import {
@@ -66,10 +65,11 @@ export const validateStairs = (
         )
       )
         continue;
+      const structure = stairStructureVolumes(flight),
+        previousStructure = stairStructureVolumes(previous);
       if (
-        stairVolumesIntersect(
-          stairVolume(stairPolygon(flight.footprintWorld), 0, 1),
-          stairVolume(stairPolygon(previous.footprintWorld), 0, 1),
+        structure.some((volume) =>
+          previousStructure.some((otherVolume) => stairVolumesIntersect(volume, otherVolume)),
         )
       ) {
         add(

@@ -235,7 +235,9 @@ bounds. Walls share their height slices and opening cuts with the renderer; clos
 door state does not fill these structural apertures. Bounds retain model-origin
 offsets and vertical clearance, including the spiral bridge. Unknown model bounds
 are not guessed; missing-model validation remains authoritative. Whole landing
-polygons are checked against floor regions. Width and slope are unrestricted. Full-turn
+polygons are checked against floor regions. Stair-to-stair advice compares rendered
+tread slabs and rendered spiral upper bridges at their building elevations, so
+vertically separated flights may share a stairwell without an overlap warning. Width and slope are unrestricted. Full-turn
 spirals retain the current route elevation at their coincident entrance and exit.
 Shaped plan strokes and guard rails are instanced; each model family has its own
 renderer. Legacy straight-stair geometry and stored records remain supported.
