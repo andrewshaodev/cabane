@@ -69,6 +69,28 @@ slots. Catalog models and room display names may repeat; instance IDs must remai
 unique. Identity-conflict errors distinguish rooms, items, and device slots and
 identify their floors with recovery guidance. Failed placement reports a catalog error.
 
+Arrange checks placement changes, duplication, group movement, and resizing against the same
+support diagnostics as saved projects. An invalid change is refused with a
+visible message and creates no undo step. Bounds account for the model's origin
+and the placed copy's scale: a wall-normalized model may move freely when its
+bottom stays above the floor. Preferred placement does not restrict an existing
+copy to one support kind.
+Checks run against each queued edit's result. Window fitting changes size and
+placement together in one validated undo step. Native ceiling devices retain
+their existing recessed mounting convention; personal GLBs use their explicit
+normalized bounds for ceiling clearance.
+
+Existing geometric placement problems are warnings, so the home remains visible
+and editable. Issues names the affected model and offers **Select in Arrange**,
+**Reset placement**, and **Remove**. Reset places that copy on a supported floor,
+preserving its dimensions, identity, horizontal anchor and rotation where
+possible. If the anchor has no floor support, it searches for a valid starting
+position. A failed repair leaves the item unchanged and explains how to continue.
+Repairs share workspace Undo/Redo; removing a device clears its draft mappings
+in the same step. Model definitions, normalization and other copies are unchanged.
+Malformed data, identity conflicts, and missing floor/wall/room references remain
+blocking structural errors. The new repair actions run only when explicitly chosen.
+
 Wall and ceiling dependencies are evaluated against the edited architecture.
 Shortening a collinear wall preserves attached items at their original anchors
 when their width still fits the retained wall; unsupported items are deleted.

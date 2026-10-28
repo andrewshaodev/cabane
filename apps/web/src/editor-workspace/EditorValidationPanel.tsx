@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import type { ConstructValidationDiagnostic } from "../editor-preview/construct/contextual-validation";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { EditorButton } from "../editor-chrome/EditorButton";
 
 /** Draft diagnostics live outside the tools and properties surfaces. */
 export function EditorValidationPanel<Issue extends ConstructValidationDiagnostic>({
@@ -9,12 +10,16 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
   expanded: controlledExpanded,
   onToggle,
   disabled = false,
+  onRepair,
+  itemLabel,
 }: {
   issues: readonly Issue[];
   onSelect: (issue: Issue) => void;
   expanded?: boolean;
   onToggle?: () => void;
   disabled?: boolean;
+  onRepair?: (issue: Issue, action: "reset-placement" | "remove") => void;
+  itemLabel?: (issue: Issue) => string | undefined;
 }) {
   const [localExpanded, setLocalExpanded] = useState(false);
   const expanded = controlledExpanded ?? localExpanded;
@@ -70,12 +75,14 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
                 <EditorIcon name="warning" />
               </span>
               <span>
+                {itemLabel?.(issue) && <strong>{itemLabel(issue)}</strong>}
                 <strong>{issue.message}</strong>
                 {issue.suggestion && <small>{issue.suggestion}</small>}
               </span>
               {issue.target && (
                 <span className="editor-issues__locate" aria-hidden="true">
-                  <EditorIcon name="spawn" /> Locate
+                  <EditorIcon name="spawn" />{" "}
+                  {issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"}
                 </span>
               )}
             </>
@@ -86,13 +93,33 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
                 <button
                   type="button"
                   disabled={disabled}
-                  aria-label={`Locate ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
+                  aria-label={`${issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"} ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
                   onClick={() => onSelect(issue)}
                 >
                   {content}
                 </button>
               ) : (
                 <div>{content}</div>
+              )}
+              {issue.target?.kind === "scene-item" && onRepair && (
+                <footer className="editor-issues__actions">
+                  {issue.path.includes(".placement") && (
+                    <EditorButton
+                      variant="text"
+                      disabled={disabled}
+                      onClick={() => onRepair(issue, "reset-placement")}
+                    >
+                      Reset placement
+                    </EditorButton>
+                  )}
+                  <EditorButton
+                    variant="text"
+                    disabled={disabled}
+                    onClick={() => onRepair(issue, "remove")}
+                  >
+                    Remove
+                  </EditorButton>
+                </footer>
               )}
             </li>
           );

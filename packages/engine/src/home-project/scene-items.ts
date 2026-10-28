@@ -5,13 +5,16 @@ import { modelVariants } from "../model-variants";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import { pointStrictlyOutsideFloorFootprint } from "../floor-finishes/finish-geometry";
-import type { ProjectModelRegistries, SceneModelEditorDescriptor } from "../types";
+import type { FloorSpec, ProjectModelRegistries, SceneModelEditorDescriptor } from "../types";
 import { resolveItemTransform } from "./placements";
 import { validateDeviceSlotsAgainstModel } from "./profiles";
 import type { HomeProject, SceneItemSpec } from "./types";
 import { addProjectIssue, addProjectWarning, type HomeProjectIssue } from "./validation-types";
 
-const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly string[] => {
+const roomIdsForItem = (
+  item: SceneItemSpec,
+  project: { floors: readonly FloorSpec[] },
+): readonly string[] => {
   const floor = project.floors.find((candidate) => candidate.id === item.floorId);
   if (!floor) return [];
   const transform = resolveItemTransform(item.placement, floor);
@@ -24,7 +27,10 @@ const roomIdsForItem = (item: SceneItemSpec, project: HomeProject): readonly str
     .map((room) => room.id);
 };
 
-export const resolvedRoomIdForItem = (item: SceneItemSpec, project: HomeProject): string | null => {
+export const resolvedRoomIdForItem = (
+  item: SceneItemSpec,
+  project: { floors: readonly FloorSpec[] },
+): string | null => {
   const roomIds = roomIdsForItem(item, project);
   if (roomIds.length !== 1) return null;
   if (item.placement.kind === "ceiling" && roomIds[0] !== item.placement.roomId) return null;
@@ -33,21 +39,23 @@ export const resolvedRoomIdForItem = (item: SceneItemSpec, project: HomeProject)
 
 const validatePlacementBounds = (
   item: SceneItemSpec,
-  index: number,
-  project: HomeProject,
+  path: string,
+  project: { floors: readonly FloorSpec[] },
   issues: HomeProjectIssue[],
   definition: SceneModelEditorDescriptor | undefined,
 ) => {
   const floor = project.floors.find((candidate) => candidate.id === item.floorId);
   if (!floor) return;
-  const path = `sceneItems[${index}].placement`;
   const placement = item.placement;
+  const heightScale = definition ? item.size[1] / definition.defaultSize[1] : 1;
+  const minimumY = (definition?.bounds.min[1] ?? 0) * heightScale;
+  const maximumY = definition ? definition.bounds.max[1] * heightScale : item.size[1];
   if (placement.kind === "absolute") {
     if (
       floor.id !== project.floors.find((floor) => !floor.belowGround)?.id &&
       !pointOnFloorSupport(placement.at, floor)
     )
-      addProjectIssue(
+      addProjectWarning(
         issues,
         "project.item-support",
         path,
@@ -58,12 +66,12 @@ const validatePlacementBounds = (
       floor.id === project.floors.find((floor) => !floor.belowGround)?.id &&
       pointStrictlyOutsideFloorFootprint(placement.at, floor);
     const minimumElevation = onOutdoorGround ? GROUND_ELEVATION_METERS : 0;
-    if (placement.elevationMeters < minimumElevation) {
-      addProjectIssue(
+    if (placement.elevationMeters + minimumY < minimumElevation - 1e-8) {
+      addProjectWarning(
         issues,
         "project.item-elevation",
         `${path}.elevationMeters`,
-        `Absolute item elevation cannot be below its ${minimumElevation} metre ground datum.`,
+        "The item extends below the floor. Raise it or reset its placement in Arrange.",
       );
     }
     return;
@@ -76,7 +84,7 @@ const validatePlacementBounds = (
       placement.offsetFromWallStartPlanUnits < 0 ||
       placement.offsetFromWallStartPlanUnits > wallLength
     ) {
-      addProjectIssue(
+      addProjectWarning(
         issues,
         "project.wall-support-span",
         `${path}.offsetFromWallStartPlanUnits`,
@@ -84,14 +92,10 @@ const validatePlacementBounds = (
       );
     }
     const wallHeight = wall.heightMeters ?? floor.defaultWallHeightMeters;
-    const heightScale = definition ? item.size[1] / definition.defaultSize[1] : 1;
-    // Hanging models extend below their anchor. Keep the existing size-based
-    // envelope for floor-origin models while accounting for that lower origin.
-    const bottom =
-      placement.elevationMeters + Math.min(0, definition?.bounds.min[1] ?? 0) * heightScale;
-    const top = bottom + item.size[1];
+    const bottom = placement.elevationMeters + minimumY;
+    const top = placement.elevationMeters + maximumY;
     if (placement.elevationMeters < 0 || bottom < -1e-8 || top > wallHeight + 1e-8) {
-      addProjectIssue(
+      addProjectWarning(
         issues,
         "project.wall-support-height",
         `${path}.elevationMeters`,
@@ -102,14 +106,109 @@ const validatePlacementBounds = (
   }
   const ceiling = floor.ceilings?.find((candidate) => candidate.roomIds.includes(placement.roomId));
   const height = ceiling?.kind === "flat" ? ceiling.heightMeters : floor.defaultCeilingHeightMeters;
-  if (placement.dropMeters < 0 || placement.dropMeters > height) {
-    addProjectIssue(
+  if (
+    placement.dropMeters < 0 ||
+    placement.dropMeters > height ||
+    height - placement.dropMeters + minimumY < -1e-8 ||
+    // Native ceiling devices can include recessed geometry above their anchor.
+    // Imported GLBs have an explicit normalized support origin instead.
+    (item.modelId.startsWith("custom:") && maximumY - placement.dropMeters > 1e-8)
+  ) {
+    addProjectWarning(
       issues,
       "project.ceiling-drop",
       `${path}.dropMeters`,
-      `Ceiling drop must be between zero and ${height} metres.`,
+      "The item must fit below the ceiling and above the floor. Reset its placement or adjust its drop.",
     );
   }
+};
+
+/** Shared by saved-project diagnostics and Arrange's edit guard. */
+export const sceneItemPlacementIssues = (
+  item: SceneItemSpec,
+  project: { floors: readonly FloorSpec[] },
+  definition: SceneModelEditorDescriptor | undefined,
+  path = "placement",
+): readonly HomeProjectIssue[] => {
+  const issues: HomeProjectIssue[] = [];
+  const floor = project.floors.find((candidate) => candidate.id === item.floorId);
+  if (!floor) return issues;
+  const placement = item.placement;
+  let supportExists = true;
+  if (placement.kind === "wall" && !floor.walls.some((wall) => wall.id === placement.wallId)) {
+    supportExists = false;
+    addProjectIssue(
+      issues,
+      "project.wall-support-missing",
+      `${path}.wallId`,
+      `Wall “${placement.wallId}” does not exist.`,
+    );
+  }
+  if (placement.kind === "ceiling" && !floor.rooms.some((room) => room.id === placement.roomId)) {
+    addProjectIssue(
+      issues,
+      "project.ceiling-room-missing",
+      `${path}.roomId`,
+      `Room “${placement.roomId}” does not exist.`,
+    );
+  }
+  validatePlacementBounds(item, path, project, issues, definition);
+  if (!supportExists) return issues;
+
+  const roomIds = roomIdsForItem(item, project);
+  if (definition?.placementEnvironment === "outdoor") {
+    const transform = resolveItemTransform(item.placement, floor);
+    const at =
+      item.placement.kind === "absolute"
+        ? item.placement.at
+        : worldPointToPlan(
+            {
+              x: transform.position[0],
+              z: transform.position[2],
+            },
+            floor.coordinates,
+          );
+    if (
+      item.placement.kind !== "absolute" ||
+      (!floor.outdoorPlatforms?.some((p) => pointInsidePolygon(at, p.polygon)) &&
+        !pointStrictlyOutsideFloorFootprint(at, floor))
+    ) {
+      addProjectWarning(
+        issues,
+        "project.outdoor-placement",
+        path,
+        "Outdoor items require absolute ground placement outside the building footprint.",
+      );
+    }
+    return issues;
+  }
+  if (roomIds.length === 0 && placement.kind === "ceiling") {
+    addProjectWarning(
+      issues,
+      "project.room-membership-missing",
+      path,
+      "The resolved item placement must belong to one room.",
+    );
+  } else if (roomIds.length > 1) {
+    addProjectWarning(
+      issues,
+      "project.room-membership-ambiguous",
+      path,
+      "The resolved item placement belongs to more than one room.",
+    );
+  } else if (
+    placement.kind === "ceiling" &&
+    roomIds.length === 1 &&
+    roomIds[0] !== placement.roomId
+  ) {
+    addProjectWarning(
+      issues,
+      "project.ceiling-room-mismatch",
+      `${path}.roomId`,
+      `Ceiling placement declares room “${placement.roomId}” but its point belongs to room “${roomIds[0]}”.`,
+    );
+  }
+  return issues;
 };
 
 export const validateSceneItemsAndSupports = (
@@ -139,7 +238,6 @@ export const validateSceneItemsAndSupports = (
       );
       return;
     }
-    const placement = item.placement;
     const registry = item.kind === "device" ? registries.deviceModels : registries.furnishingModels;
     const definition = Object.hasOwn(registry, item.modelId) ? registry[item.modelId] : undefined;
     if (!definition) {
@@ -200,24 +298,6 @@ export const validateSceneItemsAndSupports = (
         );
     }
 
-    let supportExists = true;
-    if (placement.kind === "wall" && !floor.walls.some((wall) => wall.id === placement.wallId)) {
-      supportExists = false;
-      addProjectIssue(
-        issues,
-        "project.wall-support-missing",
-        `${itemPath}.placement.wallId`,
-        `Wall “${placement.wallId}” does not exist.`,
-      );
-    }
-    if (placement.kind === "ceiling" && !floor.rooms.some((room) => room.id === placement.roomId)) {
-      addProjectIssue(
-        issues,
-        "project.ceiling-room-missing",
-        `${itemPath}.placement.roomId`,
-        `Room “${placement.roomId}” does not exist.`,
-      );
-    }
     item.size.forEach((value, axis) => {
       if (!Number.isFinite(value) || value <= 0) {
         addProjectIssue(
@@ -228,61 +308,6 @@ export const validateSceneItemsAndSupports = (
         );
       }
     });
-    validatePlacementBounds(item, index, project, issues, definition);
-    if (!supportExists) return;
-
-    const roomIds = roomIdsForItem(item, project);
-    if (definition?.placementEnvironment === "outdoor") {
-      const transform = resolveItemTransform(item.placement, floor);
-      const at =
-        item.placement.kind === "absolute"
-          ? item.placement.at
-          : worldPointToPlan(
-              {
-                x: transform.position[0],
-                z: transform.position[2],
-              },
-              floor.coordinates,
-            );
-      if (
-        item.placement.kind !== "absolute" ||
-        (!floor.outdoorPlatforms?.some((p) => pointInsidePolygon(at, p.polygon)) &&
-          !pointStrictlyOutsideFloorFootprint(at, floor))
-      ) {
-        addProjectIssue(
-          issues,
-          "project.outdoor-placement",
-          `${itemPath}.placement`,
-          "Outdoor items require absolute ground placement outside the building footprint.",
-        );
-      }
-      return;
-    }
-    if (roomIds.length === 0 && placement.kind === "ceiling") {
-      addProjectIssue(
-        issues,
-        "project.room-membership-missing",
-        `${itemPath}.placement`,
-        "The resolved item placement must belong to one room.",
-      );
-    } else if (roomIds.length > 1) {
-      addProjectIssue(
-        issues,
-        "project.room-membership-ambiguous",
-        `${itemPath}.placement`,
-        "The resolved item placement belongs to more than one room.",
-      );
-    } else if (
-      placement.kind === "ceiling" &&
-      roomIds.length === 1 &&
-      roomIds[0] !== placement.roomId
-    ) {
-      addProjectIssue(
-        issues,
-        "project.ceiling-room-mismatch",
-        `${itemPath}.placement.roomId`,
-        `Ceiling placement declares room “${placement.roomId}” but its point belongs to room “${roomIds[0]}”.`,
-      );
-    }
+    issues.push(...sceneItemPlacementIssues(item, project, definition, `${itemPath}.placement`));
   });
 };

@@ -27,6 +27,8 @@
 .direction-preview .direction-status {
   right: calc(18px + var(--editor-properties-clearance));
   bottom: calc(72px + var(--editor-issues-clearance));
+  max-width: min(44rem, calc(100% - 36px));
+  overflow-wrap: anywhere;
 }
 .editor-properties-toggle {
   position: absolute;
@@ -376,6 +378,12 @@
 .editor-issues__locate .editor-icon {
   width: 16px;
   height: 16px;
+}
+.editor-issues__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 10px 12px 40px;
 }
 
 @media (min-width: 1241px) and (max-width: 1360px) {

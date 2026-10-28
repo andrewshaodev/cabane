@@ -28,8 +28,18 @@ await withModules(async (load) => {
   const { EditorValidationPanel } = await load(
     "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
   );
+  const { useFurnishingEditor } = await load(
+    "/apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
+  );
+  const { placementForWorldDrag } = await load(
+    "/apps/web/src/editor-preview/furnish/editor-state.ts",
+  );
+  const { useEditorIssueRepairs } = await load(
+    "/apps/web/src/editor-workspace/useEditorIssueRepairs.ts",
+  );
   const { interactionFloor: acceptedFloor } = await load("/tests/fixtures/interaction-floor.ts");
-  const { createEmptyHomeProject } = await load("/packages/engine/src/index.ts");
+  const engine = await load("/packages/engine/src/index.ts");
+  const { createEmptyHomeProject } = engine;
   const { deriveFloorTopology } = await load(
     "/packages/engine/src/home-editor/construct/topology.ts",
   );
@@ -41,6 +51,44 @@ await withModules(async (load) => {
     floors: [acceptedFloor],
   };
   const { ownerProjectRegistries } = await load("/apps/web/src/project-runtime.ts");
+  const cabinet = {
+    ...ownerProjectRegistries.deviceModels["wall-switch"],
+    label: "Kitchen cabinet",
+    defaultSize: [2.55, 2, 2.3],
+    bounds: { min: [-1.275, -1, 0], max: [1.275, 1, 2.3] },
+    resizePolicy: { kind: "uniform" },
+    supportedDomains: ["sensor"],
+  };
+  const registries = {
+    ...ownerProjectRegistries,
+    deviceModels: {
+      ...ownerProjectRegistries.deviceModels,
+      "custom:11111111-2222-4333-8444-555555555555": cabinet,
+    },
+  };
+  const brokenItem = () => ({
+    id: "repair-target",
+    floorId: acceptedFloor.id,
+    kind: "device",
+    modelId: "custom:11111111-2222-4333-8444-555555555555",
+    size: cabinet.defaultSize,
+    placement: {
+      kind: "absolute",
+      at: engine.polygonCentroid(acceptedFloor.rooms[0].polygon),
+      elevationMeters: 0.2,
+      rotationYRadians: 0.4,
+    },
+    entitySlots: [
+      {
+        id: "cabinet-primary",
+        deviceRole: "primary",
+        compatibleDomains: ["sensor"],
+        required: true,
+        autoMap: "manual",
+        presentation: { label: "Cabinet", dashboardRole: "primary" },
+      },
+    ],
+  });
 
   async function withDom(run) {
     const dom = new JSDOM('<!doctype html><div id="root"></div>');
@@ -63,6 +111,208 @@ await withModules(async (load) => {
       Object.assign(globalThis, previous);
     }
   }
+
+  test("Arrange refuses unsupported moves and resizes without changing the draft or history", async () => {
+    await withDom(async (root) => {
+      const initial = brokenItem();
+      const project = { ...ownerHomeProject, sceneItems: [initial] };
+      let editor;
+      function Harness() {
+        editor = useFurnishingEditor([initial], { project, floor: acceptedFloor, registries });
+        return null;
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      assert.deepEqual(
+        editor.items[0],
+        initial,
+        "opening the editor does not silently repair data",
+      );
+      await act(async () =>
+        editor.updatePlacement(initial.id, { ...initial.placement, elevationMeters: 1 }),
+      );
+      const valid = editor.items[0];
+      const historyLength = editor.past.length;
+      await act(async () => editor.beginTransaction());
+      await act(async () =>
+        editor.updatePlacements({
+          [valid.id]: { ...valid.placement, at: [2, 2], elevationMeters: 0.2 },
+        }),
+      );
+      await act(async () => editor.commitTransaction());
+      assert.deepEqual(editor.items[0], valid);
+      assert.equal(editor.past.length, historyLength, "a rejected group move creates no undo step");
+      assert.match(editor.placementError, /below the floor.*Change refused/);
+      await act(async () =>
+        editor.updateSize(
+          valid.id,
+          valid.size.map((value) => value * 2),
+          cabinet,
+        ),
+      );
+      assert.deepEqual(editor.items[0], valid, "resizing must check the scaled lower bounds");
+      await act(async () =>
+        editor.updatePlacement(valid.id, {
+          kind: "ceiling",
+          roomId: acceptedFloor.rooms[0].id,
+          at: valid.placement.at,
+          dropMeters: 0,
+          rotationYRadians: 0,
+        }),
+      );
+      assert.deepEqual(editor.items[0], valid, "the upper bounds cannot extend above a ceiling");
+      const { position } = engine.resolveItemTransform(valid.placement, acceptedFloor);
+      const moved = placementForWorldDrag({
+        item: valid,
+        definition: cabinet,
+        floor: acceptedFloor,
+        world: { x: position[0] + 0.1, z: position[2] },
+        raw: true,
+      });
+      await act(async () => editor.updatePlacement(valid.id, moved));
+      assert.deepEqual(
+        editor.items[0].placement,
+        moved,
+        "wall-normalized models can move freely above the floor",
+      );
+      assert.equal(editor.placementError, null);
+      await act(async () => editor.undo());
+      assert.deepEqual(editor.items[0], valid);
+      const fitted = {
+        kind: "wall",
+        wallId: acceptedFloor.walls[0].id,
+        face: "right",
+        offsetFromWallStartPlanUnits: 5,
+        elevationMeters: 0.5,
+        depthOffsetMeters: 0.003,
+        rotationOffsetRadians: 0,
+      };
+      const half = valid.size.map((value) => value / 2);
+      await act(async () => editor.updatePlacementAndSize(valid.id, fitted, half, cabinet));
+      assert.deepEqual(
+        editor.items[0].placement,
+        fitted,
+        "window fitting validates size and support together",
+      );
+      assert.deepEqual(editor.items[0].size, half);
+      await act(async () => editor.undo());
+      assert.deepEqual(editor.items[0], valid, "one undo restores both size and placement");
+      await act(async () => {
+        editor.updatePlacement(valid.id, { ...valid.placement, elevationMeters: 2 });
+        editor.updateSize(
+          valid.id,
+          valid.size.map((value) => value * 2),
+          cabinet,
+        );
+      });
+      assert.equal(editor.items[0].placement.elevationMeters, 2);
+      assert.deepEqual(
+        editor.items[0].size,
+        valid.size.map((value) => value * 2),
+        "queued edits validate against the latest accepted state",
+      );
+      await act(async () => editor.replaceItems([initial]));
+      await act(async () => editor.duplicate(initial.id, acceptedFloor));
+      assert.equal(
+        editor.items.length,
+        1,
+        "duplicating an invalid placement cannot create another bad item",
+      );
+      assert.equal(editor.past.length, 0);
+    });
+  });
+
+  test("Issues selects, resets and removes a bad item with undoable private mapping cleanup", async () => {
+    await withDom(async (root, document) => {
+      const item = brokenItem();
+      const project = { ...ownerHomeProject, sceneItems: [item] };
+      const origin = "https://fixture.invalid";
+      const profile = {
+        schemaVersion: 1,
+        homeId: project.home.id,
+        roomAreaIds: {},
+        entityIdsBySlotId: { "cabinet-primary": "sensor.fixture" },
+      };
+      const initial = {
+        project,
+        bindings: {
+          [origin]: {
+            draft: profile,
+            published: structuredClone(profile),
+            manualRoomIds: [],
+            manualSlotIds: ["cabinet-primary"],
+          },
+        },
+      };
+      let history, setHistory;
+      const selected = [],
+        restored = [];
+      function Harness({ disabled = false }) {
+        [history, setHistory] = React.useState(() => engine.createWorkspaceHistory(initial));
+        const snapshot = history.present;
+        const repairs = useEditorIssueRepairs({
+          ...registries,
+          snapshot,
+          editorProject: snapshot.project,
+          commit: (next) => setHistory((current) => engine.commitWorkspaceSnapshot(current, next)),
+          replaceEditorsFromProject: (next) => restored.push(next),
+        });
+        const validation = validateHomeProject(snapshot.project, registries);
+        assert.equal(validation.valid, true, JSON.stringify(validation.issues));
+        const issues = collectConstructContextualIssues({
+          project: snapshot.project,
+          floor: acceptedFloor,
+          sceneItems: snapshot.project.sceneItems,
+          projectIssues: validation.issues,
+        });
+        return React.createElement(EditorValidationPanel, {
+          issues,
+          onSelect: (issue) => selected.push(issue.target.id),
+          onRepair: repairs.repairIssue,
+          itemLabel: repairs.itemLabel,
+          expanded: true,
+          disabled,
+        });
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      assert.match(document.body.textContent, /Kitchen cabinet/);
+      assert.match(document.body.textContent, /Select in Arrange/);
+      assert.equal(
+        document.querySelector("button button"),
+        null,
+        "repair buttons must not nest inside Locate",
+      );
+      await act(async () => document.querySelector('[aria-label^="Select in Arrange"]').click());
+      assert.deepEqual(selected, [item.id]);
+      const action = (label) =>
+        [...document.querySelectorAll("footer button")].find(
+          (button) => button.textContent.trim() === label,
+        );
+      await act(async () => action("Reset placement").click());
+      assert.equal(document.querySelector('[aria-label="Editor validation"]'), null);
+      assert.equal(history.past.length, 1);
+      assert.deepEqual(history.present.project.sceneItems[0].size, item.size);
+      assert.deepEqual(
+        history.present.bindings[origin].draft.entityIdsBySlotId,
+        profile.entityIdsBySlotId,
+      );
+      await act(async () => setHistory((current) => engine.undoWorkspaceHistory(current)));
+      assert.deepEqual(history.present, initial);
+      await act(async () => root.render(React.createElement(Harness, { disabled: true })));
+      assert.equal(action("Reset placement").disabled, true);
+      assert.equal(action("Remove").disabled, true);
+      await act(async () => root.render(React.createElement(Harness)));
+      await act(async () => action("Remove").click());
+      assert.equal(history.past.length, 1);
+      assert.deepEqual(history.present.project.sceneItems, []);
+      assert.deepEqual(history.present.bindings[origin].draft.entityIdsBySlotId, {});
+      assert.deepEqual(history.present.bindings[origin].published, profile);
+      await act(async () => setHistory((current) => engine.undoWorkspaceHistory(current)));
+      assert.deepEqual(history.present, initial);
+      await act(async () => setHistory((current) => engine.redoWorkspaceHistory(current)));
+      assert.deepEqual(history.present.project.sceneItems, []);
+      assert.equal(restored.length, 2);
+    });
+  });
 
   test("hover and keyboard focus expose every full error and correction outside the canvas", async () => {
     await withDom(async (root, document) => {

@@ -18,6 +18,11 @@ the ground at their bottom, wall models contact the wall at their back, and
 ceiling models contact their support at their top. Placement, selection,
 rotation, uniform resizing, duplication, history, Reset, and Save use the normal
 editor paths. Floor instances have a simple bounding-envelope walk collider.
+Free placement uses the imported model's scaled lower bounds, including the
+centered origin of wall models. Invalid moves and resizes are refused. Existing
+geometric placement problems remain editable warnings with Select in Arrange,
+Reset placement and Remove in Issues. Reset changes only the placed copy, without
+renormalizing the import or changing its other copies.
 
 Original GLB materials, colours, and embedded textures are preserved. Personal
 models receive scene lighting without compulsory toon conversion or contours.

@@ -1135,8 +1135,11 @@ await withModules(async (load) => {
         ".construction-inspector__validation li button",
       );
       assert.equal(buttons.length, issues.length);
-      for (const button of buttons) {
-        assert.match(button.textContent, /Locate/);
+      for (const [index, button] of buttons.entries()) {
+        assert.match(
+          button.textContent,
+          issues[index].target.kind === "scene-item" ? /Select in Arrange/ : /Locate/,
+        );
         await act(async () => button.click());
       }
       assert.deepEqual(focused, issues);

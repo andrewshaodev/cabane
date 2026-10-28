@@ -37,9 +37,12 @@ import type { EditorMode } from "../editor-chrome/EditorModeNav";
 import { HomeEditorHeader } from "./HomeEditorHeader";
 import { HomeEditorScene } from "./HomeEditorScene";
 import { useHomeEditorController } from "./useHomeEditorController";
+import { useEditorIssueRepairs } from "./useEditorIssueRepairs";
 
 export function EditorWorkspace(props: Parameters<typeof useHomeEditorController>[0]) {
   const controller = useHomeEditorController(props);
+  const { repairIssue, repairMessage, repairError, itemLabel } = useEditorIssueRepairs(controller);
+  const placementError = controller.furnishingEditor.placementError ?? repairError;
   const {
     editorProject,
     northOrientation,
@@ -422,6 +425,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             expanded={panels.issuesExpanded}
             onToggle={panels.toggleIssues}
             disabled={panelBusy}
+            onRepair={repairIssue}
+            itemLabel={itemLabel}
             onSelect={(issue) => {
               setActionBarPanelOpen(false);
               panels.openProperties();
@@ -434,13 +439,21 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             disabled={panelsDisabled}
           />
         </div>
-        {autosaveStatus !== "saved" && (
-          <div className={`direction-status is-${autosaveStatus}`}>
+        {(placementError || autosaveStatus !== "saved") && (
+          <div
+            className={`direction-status is-${placementError ? "error" : autosaveStatus}`}
+            role="status"
+          >
             <span />
-            {autosaveStatus === "saving" && "Saving draft…"}
-            {autosaveStatus === "error" && "Could not save · Changes kept in memory"}
+            {placementError ??
+              (autosaveStatus === "saving"
+                ? "Saving draft…"
+                : "Could not save · Changes kept in memory")}
           </div>
         )}
+        <div className="arrange-announcement" role="status">
+          {repairMessage}
+        </div>
 
         <EditorCompletionDialogs {...controller} />
       </main>

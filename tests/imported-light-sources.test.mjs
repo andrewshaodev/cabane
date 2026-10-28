@@ -271,20 +271,23 @@ await withModules(async (load) => {
     }
   });
 
-  test("import controls add/remove bounded points, switch to strips and select emissive names", () =>
+  test("import controls bound points, switch strips and hand glow selection to the preview", () =>
     withStorageDom(async (dom) => {
-      let current;
+      let current, currentPicking;
       function Harness() {
-        const [value, setValue] = useState(light);
+        const [value, setValue] = useState({ ...light, emissiveSurfaces: ["surface:0:0"] });
+        const [selected, setSelected] = useState(0);
+        const [picking, setPicking] = useState(null);
         current = value;
+        currentPicking = picking;
         return React.createElement(LightingFields, {
           light: value,
           onChange: setValue,
           bounds: { min: [-2, 0, -0.1], max: [2, 0.4, 0.1] },
-          selected: 0,
-          onSelect: () => {},
-          picking: null,
-          onPicking: () => {},
+          selected,
+          onSelect: setSelected,
+          picking,
+          onPicking: setPicking,
           surfaces: [{ id: "surface:0:0", label: "Diffuser", supported: true }],
           onHighlight: () => {},
         });
@@ -298,9 +301,10 @@ await withModules(async (load) => {
       assert.equal(dom.button("Add light point").disabled, true);
       await act(async () => dom.document.querySelector('[aria-label="Remove point 2"]').click());
       assert.equal(current.points.length, 6);
-      await act(async () =>
-        dom.document.querySelector('.lighting-surfaces input[type="checkbox"]').click(),
-      );
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, "surface");
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, null);
       assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
       await dom.click("LED strip");
       assert.equal(current.points, undefined);

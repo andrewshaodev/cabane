@@ -262,7 +262,7 @@ await withModules(async (load) => {
   });
 
   test("details show variants only for multiple choices and persist the selection", async () => {
-    await withDom(async ({ root, document, window }) => {
+    await withDom(async ({ root, document }) => {
       const sofa = {
         ...ownerHomeProject.sceneItems.find((item) => item.modelId === "sectional-sofa"),
         variant: "default",
@@ -288,9 +288,9 @@ await withModules(async (load) => {
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
-      const select = document.querySelector("select");
+      const variants = [...document.querySelectorAll('[aria-label="Variant"] button')];
       assert.deepEqual(
-        [...select.options].map((option) => option.textContent),
+        variants.map((button) => button.getAttribute("aria-label")),
         [
           "Sage cushions — left chaise (front view)",
           "Sage cushions — right chaise (front view)",
@@ -300,14 +300,13 @@ await withModules(async (load) => {
           "Cozy — right chaise (front view)",
         ],
       );
-      assert.equal(select.value, "default");
+      assert.equal(variants[2].getAttribute("aria-pressed"), "true");
       await act(async () => {
-        select.value = "cozy-right";
-        select.dispatchEvent(new window.Event("change", { bubbles: true }));
+        variants[5].click();
       });
       assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
-      assert.equal(document.querySelector("select"), null);
+      assert.equal(document.querySelector('[aria-label="Variant"]'), null);
     });
   });
 
