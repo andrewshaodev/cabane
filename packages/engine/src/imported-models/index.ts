@@ -5,7 +5,7 @@ export { loadGlb, disposeGlb, openGlbPreview } from "./glb-resources";
 export { normalizeGlb } from "./normalization";
 export { ImportedModelGeometry } from "./ImportedModel";
 export { ImportedModelSurface } from "./ImportedModelSurface";
-export { importedLightSources } from "./light-sources";
+export { importedLightSources, modelLightSources } from "./light-sources";
 export { importedEmissiveMaterialNames } from "./light-materials";
 export { resolveProjectModels } from "./resolve-models";
 export * from "./archive";

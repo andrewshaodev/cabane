@@ -1,4 +1,3 @@
-import { modelLightingPointCount } from "../model-lighting/settings";
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
@@ -117,16 +116,6 @@ export const validateSceneItemsAndSupports = (
   registries: ProjectModelRegistries,
   issues: HomeProjectIssue[],
 ) => {
-  for (const floor of project.floors) {
-    const count = modelLightingPointCount(project, floor.id, registries);
-    if (count > 32)
-      addProjectWarning(
-        issues,
-        "project.light-budget",
-        `floors.${floor.id}`,
-        `${count} configured light points on ${floor.name}; only the first 32 illuminate the scene. Reduce points or strip density. Surface glow remains available.`,
-      );
-  }
   project.sceneItems.forEach((item, index) => {
     const itemPath = `sceneItems[${index}]`;
     const floor = project.floors.find((candidate) => candidate.id === item.floorId);

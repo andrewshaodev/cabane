@@ -262,7 +262,7 @@ await withModules(async (load) => {
   });
 
   test("details show variants only for multiple choices and persist the selection", async () => {
-    await withDom(async ({ root, document, window }) => {
+    await withDom(async ({ root, document }) => {
       const sofa = {
         ...ownerHomeProject.sceneItems.find((item) => item.modelId === "sectional-sofa"),
         variant: "default",
@@ -288,9 +288,9 @@ await withModules(async (load) => {
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
-      const select = document.querySelector("select");
+      const choices = document.querySelector('[role="group"][aria-label="Variant"]');
       assert.deepEqual(
-        [...select.options].map((option) => option.textContent),
+        [...choices.querySelectorAll("button")].map((button) => button.getAttribute("aria-label")),
         [
           "Sage cushions — left chaise (front view)",
           "Sage cushions — right chaise (front view)",
@@ -300,14 +300,16 @@ await withModules(async (load) => {
           "Cozy — right chaise (front view)",
         ],
       );
-      assert.equal(select.value, "default");
+      assert.equal(
+        choices.querySelector('[aria-pressed="true"]').getAttribute("aria-label"),
+        "Classic — left chaise (front view)",
+      );
       await act(async () => {
-        select.value = "cozy-right";
-        select.dispatchEvent(new window.Event("change", { bubbles: true }));
+        choices.querySelector('[aria-label="Cozy — right chaise (front view)"]').click();
       });
       assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
-      assert.equal(document.querySelector("select"), null);
+      assert.equal(document.querySelector('[role="group"][aria-label="Variant"]'), null);
     });
   });
 

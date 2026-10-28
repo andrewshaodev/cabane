@@ -1,9 +1,9 @@
 {
-  "revision": 14,
-  "fingerprint": "615c6a751463c4ac5f3ea8dbabe4ae919053a845993436989e0279472965b052",
-  "summary": "Unify model lighting authoring for personal and built-in models",
+  "revision": 15,
+  "fingerprint": "f6e6b17584f14c4a0fce5ef63c91a39fcb7cf4dd60a57f72c99e527c691b9f6e",
+  "summary": "Support mixed light sources and remove fixed lighting cutoffs",
   "breakingChanges": [
-    "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
+    "Existing point and strip declarations remain readable without migration. Mixed explicit source layouts and expanded sample counts require this updated frontend and matching native panel. Older clients retain unsupported-data protection. No asset, HA binding or backend migration is required."
   ],
   "history": [
     {
@@ -95,6 +95,13 @@
       "summary": "Add outdoor room membership with shared room controls",
       "breakingChanges": [
         "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+      ]
+    },
+    {
+      "revision": 14,
+      "summary": "Unify model lighting authoring for personal and built-in models",
+      "breakingChanges": [
+        "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
       ]
     }
   ],

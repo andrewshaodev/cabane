@@ -1,176 +1,153 @@
-import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
-import { Bounds, OrbitControls } from "@react-three/drei";
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Group, Mesh, type BufferGeometry, type Material } from "three";
-import {
-  controlModelLightMaterials,
-  ModelLightingStateContext,
-  importedLightSources,
-  modelLightingSurfaceAt,
-  modelLightingSurfaces,
-  type CustomModelLight,
-  type DeviceModelBounds,
-  type EntityStateSnapshot,
-  type ModelLightingSurfaceOption,
-  type ModelVector,
-} from "@cabane/engine";
+import { Canvas } from "@react-three/fiber";
+import { useState, type KeyboardEvent } from "react";
+import { modelLightSources } from "@cabane/engine";
+import { EditorButton } from "../editor-chrome/EditorButton";
+import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { LightingStageScene, type LightingSceneProps } from "./LightingStageScene";
+import { sourceLabel, sourcePosition } from "./lighting-layout";
+import type { LightingView } from "./LightingCamera";
 
-function StageContent({
-  children,
-  bounds,
-  light,
-  state,
-  selected,
-  picking,
-  onPosition,
-  onSurface,
-  onSurfaces,
-  onSelect,
-}: {
-  children: ReactNode;
-  bounds: DeviceModelBounds;
-  light: CustomModelLight | null;
-  state: EntityStateSnapshot;
-  selected: number;
-  picking: "position" | "surface" | null;
-  onPosition: (position: ModelVector) => void;
-  onSurface: (id: string, materialName: string) => void;
-  onSurfaces: (surfaces: ModelLightingSurfaceOption[]) => void;
-  onSelect: (index: number) => void;
-}) {
-  const geometry = useRef<Group>(null);
-  const origin = useRef<Group>(null);
-  const [hoveredSurface, setHoveredSurface] = useState<string>();
-  const highlighted = picking === "surface" ? hoveredSurface : undefined;
-  const invalidate = useThree((scene) => scene.invalidate);
-  const span = Math.max(...bounds.max.map((n, i) => n - bounds.min[i]));
-  useLayoutEffect(() => {
-    if (!geometry.current) return;
-    onSurfaces(modelLightingSurfaces(geometry.current));
-    const materials = controlModelLightMaterials(geometry.current, light ?? {}, highlighted);
-    materials.update(state, light?.color ?? "#ffe3b4");
-    invalidate();
-    return () => materials.dispose();
-  }, [children, light, state, highlighted, invalidate, onSurfaces]);
-  const pick = (event: ThreeEvent<MouseEvent>) => {
-    if (!picking || !geometry.current || !origin.current) return;
+export function LightingStage(props: LightingSceneProps & { step: number }) {
+  const [request, setRequest] = useState<{ view: LightingView; key: number }>({
+    view: "3D",
+    key: 0,
+  });
+  const [throughGlass, setThroughGlass] = useState(true);
+  const [markers, setMarkers] = useState(true);
+  const [rotate, setRotate] = useState(false);
+  const [night, setNight] = useState(false);
+  const span = Math.max(...props.bounds.max.map((n, i) => n - props.bounds.min[i]));
+  const sources = props.light ? modelLightSources(props.light) : [];
+  const source = sources[props.selected.index];
+  const view = (view: LightingView) => setRequest((request) => ({ view, key: request.key + 1 }));
+  const nudge = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (
+      props.disabled ||
+      !source ||
+      (event.target !== event.currentTarget && (event.target as HTMLElement).tagName !== "CANVAS")
+    )
+      return;
+    const movements: Record<string, [number, number]> = {
+      ArrowLeft: [0, -1],
+      ArrowRight: [0, 1],
+      ArrowUp: [2, -1],
+      ArrowDown: [2, 1],
+      PageUp: [1, 1],
+      PageDown: [1, -1],
+    };
+    const movement = movements[event.key];
+    if (!movement) return;
+    event.preventDefault();
     event.stopPropagation();
-    if (picking === "surface") {
-      const id = modelLightingSurfaceAt(
-        geometry.current,
-        event.object,
-        event.face?.materialIndex ?? 0,
-      );
-      if (id && event.object instanceof Mesh) {
-        const mesh = event.object as Mesh<BufferGeometry, Material | Material[]>;
-        const material = Array.isArray(mesh.material)
-          ? mesh.material[event.face?.materialIndex ?? 0]
-          : mesh.material;
-        onSurface(id, material.name);
-      }
-    } else {
-      const position = origin.current
-        .worldToLocal(event.point.clone())
-        .toArray()
-        .map((n) => Number(n.toFixed(5))) as [number, number, number];
-      onPosition(position);
-    }
+    const point = sourcePosition(source, props.selected.end);
+    props.onPosition(
+      point.map((n, axis) =>
+        axis === movement[0]
+          ? Number((n + movement[1] * props.step * (event.shiftKey ? 10 : 1)).toFixed(6))
+          : n,
+      ) as [number, number, number],
+    );
   };
-  const center = bounds.min.map((n, i) => -(n + bounds.max[i]) / 2) as [number, number, number];
-  const sources = light ? importedLightSources(light) : [];
+  const label = source
+    ? sourceLabel(sources, props.selected.index).toLowerCase() +
+      (source.kind === "strip" ? (props.selected.end ? " end" : " start") : "")
+    : "source";
   return (
     <>
-      <ambientLight intensity={0.45} />
-      <hemisphereLight args={["#f4f5ff", "#7a7166", 1.3]} />
-      <directionalLight position={[4, 6, 5]} intensity={2} />
-      <Bounds fit clip margin={1.45}>
-        <group position={center} ref={origin}>
-          <group
-            ref={geometry}
-            onClick={pick}
-            onPointerMove={(event) => {
-              if (picking !== "surface" || !geometry.current) return;
-              event.stopPropagation();
-              setHoveredSurface(
-                modelLightingSurfaceAt(
-                  geometry.current,
-                  event.object,
-                  event.face?.materialIndex ?? 0,
-                ),
-              );
-            }}
-            onPointerLeave={() => setHoveredSurface(undefined)}
-          >
-            <ModelLightingStateContext.Provider value={{ state }}>
-              {children}
-            </ModelLightingStateContext.Provider>
-          </group>
-          {sources.map((source, index) => {
-            const point = light?.strip ? (index === sources.length - 1 ? 1 : 0) : index;
-            const active =
-              picking === "position" &&
-              selected === point &&
-              (!light?.strip || index === 0 || index === sources.length - 1);
-            return (
-              <group key={index} position={source.position}>
-                <mesh
-                  renderOrder={10000}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    onSelect(point);
-                  }}
-                >
-                  <sphereGeometry args={[Math.max(0.012, span * 0.022), 12, 8]} />
-                  <meshBasicMaterial
-                    color={active ? "#2a7351" : "#a9653f"}
-                    depthTest={false}
-                    depthWrite={false}
-                  />
-                </mesh>
-                <pointLight
-                  color={source.color}
-                  intensity={
-                    state.state === "on"
-                      ? (source.maxIntensity * Number(state.attributes.brightness ?? 255)) / 255
-                      : 0
-                  }
-                  distance={source.distance}
-                />
-              </group>
-            );
-          })}
-        </group>
-      </Bounds>
-      <OrbitControls makeDefault enablePan={false} />
-    </>
-  );
-}
-export function LightingStage(props: Parameters<typeof StageContent>[0]) {
-  const span = Math.max(...props.bounds.max.map((n, i) => n - props.bounds.min[i]));
-  return (
-    <div
-      className="lighting-stage"
-      data-picking={props.picking ?? "orbit"}
-      aria-label="Interactive lighting preview"
-    >
-      <Canvas
-        frameloop="demand"
-        camera={{
-          fov: 40,
-          position: [span * 1.8, span * 1.4, span * 2],
-          near: Math.max(0.001, span / 1000),
-          far: Math.max(100, span * 20),
+      <div
+        className="lighting-stage"
+        data-picking={props.picking ?? "orbit"}
+        tabIndex={0}
+        aria-label="Interactive lighting preview"
+        onKeyDown={nudge}
+        onPointerDown={(event) => {
+          if ((event.target as HTMLElement).tagName === "CANVAS")
+            event.currentTarget.focus({ preventScroll: true });
         }}
       >
-        <StageContent {...props} />
-      </Canvas>
-      <p className="lighting-stage__hint" role="status">
-        {props.picking === "surface"
-          ? "Choosing surfaces · Click to add or remove glow."
-          : props.picking === "position"
-            ? `Editing ${props.light?.strip ? (props.selected === 0 ? "strip start" : "strip end") : `point ${props.selected + 1}`} · Click the model to move it.`
-            : "Drag to orbit · Scroll to zoom"}
-      </p>
-    </div>
+        <Canvas
+          frameloop="demand"
+          dpr={[1, 2]}
+          camera={{
+            fov: 40,
+            position: [span * 1.8, span * 1.4, span * 2],
+            near: Math.max(0.001, span / 1000),
+            far: Math.max(100, span * 100),
+          }}
+        >
+          <LightingStageScene
+            {...props}
+            throughGlass={throughGlass}
+            markers={markers}
+            night={night}
+            request={request}
+            rotate={rotate}
+          />
+        </Canvas>
+        <div className="lighting-view-tools" role="group" aria-label="Preview camera">
+          {(["3D", "Top", "Front", "Side"] as const).map((name) => (
+            <EditorButton
+              key={name}
+              aria-pressed={request.view === name}
+              disabled={props.disabled}
+              onClick={() => view(name)}
+            >
+              {name}
+            </EditorButton>
+          ))}
+          <EditorButton
+            aria-label="Fit model in preview"
+            title="Fit model"
+            disabled={props.disabled}
+            onClick={() => view("Fit")}
+          >
+            <EditorIcon name="resize" />
+          </EditorButton>
+          <EditorButton disabled={!source || props.disabled} onClick={() => view("Focus")}>
+            Focus source
+          </EditorButton>
+        </div>
+        <p className="lighting-stage__hint" role="status">
+          {props.picking === "surface"
+            ? "Click a surface to add or remove glow."
+            : props.picking === "position"
+              ? "Place " + label + " · Click the model."
+              : "Drag to pan · Right-drag to orbit · Scroll to zoom"}
+        </p>
+      </div>
+      <div className="lighting-preview-options">
+        {source?.kind === "strip" && (
+          <EditorButton aria-pressed={rotate} onClick={() => setRotate(!rotate)}>
+            <EditorIcon name={rotate ? "move" : "rotateRight"} />
+            {rotate ? "Move endpoint" : "Rotate strip"}
+          </EditorButton>
+        )}
+
+        <label>
+          <input
+            type="checkbox"
+            checked={throughGlass}
+            onChange={(event) => setThroughGlass(event.target.checked)}
+          />
+          Pick through glass
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={markers}
+            onChange={(event) => setMarkers(event.target.checked)}
+          />
+          Show handles
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={night}
+            onChange={(event) => setNight(event.target.checked)}
+          />
+          Night preview
+        </label>
+      </div>
+    </>
   );
 }
