@@ -3,6 +3,7 @@ import {
   createModelAssetRepository,
   defaultModelLighting,
   openGlbPreview,
+  modelVariants,
   projectModelLighting,
   useCabaneDom,
   type CustomModelLight,
@@ -39,6 +40,9 @@ export function ModelLightingDialog({
     () => projectModelLighting(project, modelId, native) ?? null,
   );
   const [reset, setReset] = useState(false);
+  const [variant, setVariant] = useState(() =>
+    definition ? modelVariants(definition)[0].id : "default",
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Awaited<ReturnType<typeof openGlbPreview>> | null>(null);
@@ -86,17 +90,24 @@ export function ModelLightingDialog({
         previewOn
         entry={
           native.deviceModels[modelId]
-            ? { key: modelId, modelId, kind: "device", definition: native.deviceModels[modelId] }
+            ? {
+                key: modelId,
+                modelId,
+                variant,
+                kind: "device",
+                definition: native.deviceModels[modelId],
+              }
             : {
                 key: modelId,
                 modelId,
+                variant,
                 kind: "furnishing",
                 definition: native.furnishingModels[modelId],
               }
         }
       />
     );
-  }, [custom, loaded, definition, modelId, native]);
+  }, [custom, loaded, definition, modelId, native, variant]);
   const bounds = custom?.normalization.bounds ?? definition?.bounds;
   const count = project.sceneItems.filter((item) => item.modelId === modelId).length;
   const invalid = lightingError(value);
@@ -138,6 +149,18 @@ export function ModelLightingDialog({
           Applies to <strong>{count === 1 ? "the placed copy" : `all ${count} copies`}</strong> in
           this home.
         </p>
+        {definition && modelVariants(definition).length > 1 && (
+          <label>
+            Preview variant
+            <select value={variant} onChange={(event) => setVariant(event.target.value)}>
+              {modelVariants(definition).map((variant) => (
+                <option key={variant.id} value={variant.id}>
+                  {variant.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {bounds && geometry ? (
           <ModelLightingEditor
             value={value}

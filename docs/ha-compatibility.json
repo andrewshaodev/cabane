@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 4,
+    "validationRevision": 5,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -328,6 +328,14 @@
                         }
                       },
                       "emissiveSurfaces": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "glowTargets": {
                         "optional": true,
                         "schema": {
                           "items": {
@@ -3072,6 +3080,14 @@
                       }
                     },
                     "emissiveSurfaces": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "glowTargets": {
                       "optional": true,
                       "schema": {
                         "items": {

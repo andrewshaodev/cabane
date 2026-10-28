@@ -1,6 +1,7 @@
 import { keys, record, array, string, finite } from "../home-project/schema-json-values";
 import { addProjectIssue, type HomeProjectIssue } from "../home-project/validation-types";
 import { CUSTOM_MODEL_LIMITS } from "../imported-models/contracts";
+import { isModelGlowTargetId, MODEL_GLOW_TARGET_LIMIT } from "./surface-targets";
 const vector = (value: unknown, path: string, issues: HomeProjectIssue[]) => {
   const values = array(value, path, issues);
   if (values?.length !== 3)
@@ -25,6 +26,7 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
         "sources",
         "emissiveMaterials",
         "emissiveSurfaces",
+        "glowTargets",
         "illuminate",
       ],
       `${path}`,
@@ -88,7 +90,7 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
         } else error(`sources[${index}].kind`, "Choose a point or LED strip source.");
       });
     }
-    for (const field of ["emissiveMaterials", "emissiveSurfaces"])
+    for (const field of ["emissiveMaterials", "emissiveSurfaces", "glowTargets"])
       if (light[field] !== undefined) {
         const names = array(light[field], `${path}.${field}`, issues);
         if (
@@ -96,12 +98,12 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
           (names.length > CUSTOM_MODEL_LIMITS.emissiveMaterials ||
             new Set(names).size !== names.length)
         )
-          error(field, "Choose up to sixteen distinct surfaces or material names.");
+          error(field, "Choose up to sixteen distinct glow targets.");
         names?.forEach((name, index) => {
           if (typeof name !== "string" || !name.trim() || name.length > 128)
             error(
               `${field}[${index}]`,
-              "Choose a non-empty material name of at most 128 characters.",
+              "Choose a non-empty glow target of at most 128 characters.",
             );
         });
       }
@@ -111,9 +113,15 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
     )
       error("emissiveSurfaces", "Choose surfaces from the model preview.");
     if (
+      Array.isArray(light.glowTargets) &&
+      light.glowTargets.some((id) => typeof id !== "string" || !isModelGlowTargetId(id))
+    )
+      error("glowTargets", "Choose supported glow targets from the model preview.");
+    if (
       (Array.isArray(light.emissiveSurfaces) ? light.emissiveSurfaces.length : 0) +
-        (Array.isArray(light.emissiveMaterials) ? light.emissiveMaterials.length : 0) >
-      16
+        (Array.isArray(light.emissiveMaterials) ? light.emissiveMaterials.length : 0) +
+        (Array.isArray(light.glowTargets) ? light.glowTargets.length : 0) >
+      MODEL_GLOW_TARGET_LIMIT
     )
       error("emissiveSurfaces", "Choose up to sixteen glowing surfaces and materials in total.");
   }

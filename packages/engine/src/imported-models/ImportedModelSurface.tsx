@@ -19,20 +19,22 @@ export function ImportedModelSurface({
   const controller = useRef<ReturnType<typeof controlModelLightMaterials> | null>(null);
   const names = light?.emissiveMaterials;
   const surfaces = light?.emissiveSurfaces;
+  const targets = light?.glowTargets;
   useLayoutEffect(() => {
     const materials = controlModelLightMaterials(root, {
       ...(names ? { emissiveMaterials: names } : {}),
       ...(surfaces ? { emissiveSurfaces: surfaces } : {}),
+      ...(targets ? { glowTargets: targets } : {}),
     });
     controller.current = materials;
     return () => {
       controller.current = null;
       materials.dispose();
     };
-  }, [root, names, surfaces]);
+  }, [root, names, surfaces, targets]);
   useLayoutEffect(() => {
     controller.current?.update(state, light?.color ?? "#ffe3b4");
     invalidate();
-  }, [root, names, surfaces, state, light?.color, invalidate]);
+  }, [root, names, surfaces, targets, state, light?.color, invalidate]);
   return <primitive object={root} dispose={null} />;
 }

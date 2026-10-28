@@ -81,10 +81,12 @@ export interface CustomModelLight {
   strip?: { end: ModelVector; samples: number };
   /** Explicit sources replace legacy position/points/strip emission. Empty means glow only. */
   sources?: readonly CustomModelLightSource[];
-  /** Exact names of Standard/Physical GLB materials to control. */
+  /** Legacy exact-name groups, supported only within an immutable GLB asset. */
   emissiveMaterials?: readonly string[];
-  /** Stable surface references within the immutable model geometry. */
+  /** Historical traversal ordinals. Retained unresolved until explicitly reselected. */
   emissiveSurfaces?: readonly string[];
+  /** Versioned authored native keys or immutable asset/node/primitive/material targets. */
+  glowTargets?: readonly string[];
 }
 
 export interface ModelAssetSource {

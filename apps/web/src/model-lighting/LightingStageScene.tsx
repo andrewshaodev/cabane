@@ -1,7 +1,7 @@
 import { type ThreeEvent, useThree } from "@react-three/fiber";
 import { Line, TransformControls } from "@react-three/drei";
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Group, Quaternion, Vector3, type Mesh, type Material, type BufferGeometry } from "three";
+import { Group, Quaternion, Vector3 } from "three";
 import {
   controlModelLightMaterials,
   ModelLightingStateContext,
@@ -28,7 +28,7 @@ export type LightingSceneProps = {
   picking: "position" | "surface" | null;
   onPosition: (position: ModelVector) => void;
   onRotateStrip: (start: ModelVector, end: ModelVector) => void;
-  onSurface: (id: string, materialName: string) => void;
+  onSurface: (id: string) => void;
   onSurfaces: (surfaces: ModelLightingSurfaceOption[]) => void;
   onSelect: (selection: LightingSelection) => void;
   disabled: boolean;
@@ -93,11 +93,7 @@ export function LightingStageScene({
     if (picking === "surface") {
       const id = modelLightingSurfaceAt(geometry.current, hit.object, hit.face?.materialIndex ?? 0);
       if (!id) return;
-      const mesh = hit.object as Mesh<BufferGeometry, Material | Material[]>;
-      const material = Array.isArray(mesh.material)
-        ? mesh.material[hit.face?.materialIndex ?? 0]
-        : mesh.material;
-      onSurface(id, material.name);
+      onSurface(id);
     } else {
       onPosition(
         origin.current

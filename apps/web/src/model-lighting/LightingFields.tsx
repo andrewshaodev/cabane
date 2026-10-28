@@ -1,5 +1,9 @@
 import {
   modelLightSources,
+  modelGlowTargetCount,
+  MODEL_GLOW_TARGET_LIMIT,
+  resolveModelGlowTargets,
+  toggleModelGlowTarget,
   type CustomModelLight,
   type DeviceModelBounds,
   type ModelLightingSurfaceOption,
@@ -51,7 +55,8 @@ export function LightingFields({
         sources.map((source, i) => (i === selected.index ? next : source)),
       ),
     );
-  const glowing = (light.emissiveSurfaces?.length ?? 0) + (light.emissiveMaterials?.length ?? 0);
+  const glowing = modelGlowTargetCount(light);
+  const resolution = resolveModelGlowTargets(surfaces, light);
   return (
     <div className="lighting-fields">
       <LightingSources
@@ -163,41 +168,57 @@ export function LightingFields({
         <details className="lighting-surfaces">
           <summary>Surface list</summary>
           {surfaces.map((surface) => {
-            const checked = !!light.emissiveSurfaces?.includes(surface.id);
+            const checked = resolution.selected.includes(surface.id);
             return (
-              <label key={surface.id} className="lighting-check">
+              <label key={surface.id} className="lighting-check" title={surface.unavailableReason}>
                 <input
                   type="checkbox"
                   checked={checked}
-                  disabled={!surface.supported || (!checked && glowing >= 16)}
-                  onChange={() =>
-                    onChange({
-                      ...light,
-                      emissiveSurfaces: checked
-                        ? light.emissiveSurfaces!.filter((id) => id !== surface.id)
-                        : [...(light.emissiveSurfaces ?? []), surface.id],
-                    })
-                  }
+                  disabled={!surface.supported || (!checked && glowing >= MODEL_GLOW_TARGET_LIMIT)}
+                  onChange={() => onChange(toggleModelGlowTarget(light, surfaces, surface.id))}
                 />
                 {surface.label}
+                {!surface.supported && ` · ${surface.unavailableReason ?? "Unavailable"}`}
               </label>
             );
           })}
-          {light.emissiveMaterials?.map((name) => (
-            <label key={name} className="lighting-check">
+          {light.emissiveMaterials
+            ?.filter(
+              (name) =>
+                !resolution.unresolved.some(
+                  (target) => target.field === "emissiveMaterials" && target.id === name,
+                ),
+            )
+            .map((name) => (
+              <label key={name} className="lighting-check">
+                <input
+                  type="checkbox"
+                  checked
+                  onChange={() =>
+                    onChange({
+                      ...light,
+                      emissiveMaterials: light.emissiveMaterials!.filter(
+                        (material) => material !== name,
+                      ),
+                    })
+                  }
+                />
+                {name} (material)
+              </label>
+            ))}
+          {resolution.unresolved.map((target) => (
+            <label key={`${target.field}:${target.id}`} className="lighting-check">
               <input
                 type="checkbox"
                 checked
                 onChange={() =>
                   onChange({
                     ...light,
-                    emissiveMaterials: light.emissiveMaterials!.filter(
-                      (material) => material !== name,
-                    ),
+                    [target.field]: light[target.field]!.filter((id) => id !== target.id),
                   })
                 }
               />
-              {name} (material)
+              {target.id} · {target.reason}
             </label>
           ))}
           {!surfaces.some((surface) => surface.supported) && (

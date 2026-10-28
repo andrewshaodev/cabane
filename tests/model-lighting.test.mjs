@@ -249,15 +249,23 @@ await withModules(async (load) => {
       const next = api.editModelLighting(
         { project: entry.record.draft, bindings: entry.record.bindings },
         "cabinet",
-        withLightSources(light, [
-          { kind: "point", position: [-0.2, 0.7, 0] },
-          ...Array.from({ length: 4 }, (_, i) => ({
-            kind: "strip",
-            start: [-0.4, 0.2 + i * 0.2, 0],
-            end: [0.4, 0.2 + i * 0.2, 0],
-            samples: 12,
-          })),
-        ]),
+        withLightSources(
+          {
+            ...light,
+            glowTargets: ["native:1:cabinet.door"],
+            emissiveSurfaces: ["surface:0:0"],
+            emissiveMaterials: ["Historical material"],
+          },
+          [
+            { kind: "point", position: [-0.2, 0.7, 0] },
+            ...Array.from({ length: 4 }, (_, i) => ({
+              kind: "strip",
+              start: [-0.4, 0.2 + i * 0.2, 0],
+              end: [0.4, 0.2 + i * 0.2, 0],
+              samples: 12,
+            })),
+          ],
+        ),
         native,
       );
       const saved = await lifecycle.autosave(entry.record, next.project, undefined, next.bindings);
@@ -448,6 +456,7 @@ await withModules(async (load) => {
     const first = new Group();
     const a = new Mesh(geometry, original);
     a.name = "Diffuser";
+    a.userData.modelGlowKey = "diffuser";
     first.add(a);
     const second = first.clone();
     const b = second.children[0];
@@ -458,7 +467,7 @@ await withModules(async (load) => {
     assert.equal(options.length, 1);
     assert.equal(options[0].label, "Diffuser");
     assert.equal(api.modelLightingSurfaceAt(first, a), options[0].id);
-    const control = api.controlModelLightMaterials(first, { emissiveSurfaces: [options[0].id] });
+    const control = api.controlModelLightMaterials(first, { glowTargets: [options[0].id] });
     control.update(
       {
         entityId: "light.test",

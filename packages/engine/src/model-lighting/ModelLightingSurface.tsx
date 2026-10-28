@@ -24,20 +24,13 @@ export function ModelLightingSurface({
 }) {
   const root = useRef<Group>(null);
   const invalidate = useThree((scene) => scene.invalidate);
-  const controller = useRef<ReturnType<typeof controlModelLightMaterials> | null>(null);
   useLayoutEffect(() => {
     if (!root.current || imported || !light) return;
     const instance = controlModelLightMaterials(root.current, light);
-    controller.current = instance;
-    return () => {
-      controller.current = null;
-      instance.dispose();
-    };
-  }, [light, imported, revision]);
-  useLayoutEffect(() => {
-    controller.current?.update(state, light?.color ?? "#ffe3b4");
+    instance.update(state, light.color);
     invalidate();
-  }, [light, state, revision, invalidate]);
+    return () => instance.dispose();
+  }, [children, light, imported, state, revision, invalidate]);
   return (
     <ModelLightingStateContext.Provider value={{ state }}>
       <group ref={root}>{children}</group>
