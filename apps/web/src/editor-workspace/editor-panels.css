@@ -309,28 +309,20 @@
   padding: 0 8px 8px;
   list-style: none;
 }
-.editor-issues li + li {
-  margin-top: 2px;
+.editor-issues li {
+  padding: 12px 10px;
+  border-radius: 6px;
+  background: #eae7de;
+  color: var(--preview-ink);
 }
-.editor-issues li > :is(button, div) {
+.editor-issues li + li {
+  margin-top: 8px;
+}
+.editor-issues__message {
   display: grid;
-  width: 100%;
-  grid-template-columns: 18px minmax(0, 1fr) auto;
+  grid-template-columns: 18px minmax(0, 1fr);
   align-items: start;
   gap: 12px;
-  padding: 12px 10px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--preview-ink);
-  text-align: left;
-  font: inherit;
-}
-.editor-issues li > button {
-  cursor: pointer;
-}
-.editor-issues li > button:hover:not(:disabled) {
-  background: #eae7de;
 }
 .editor-issues li strong {
   display: block;
@@ -358,32 +350,12 @@
   width: 16px;
   height: 16px;
 }
-.editor-issues__locate {
-  display: inline-flex;
-  justify-self: start;
-  min-height: 36px;
-  gap: 6px;
-  align-items: center;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #e0e5d6;
-  color: #3f513b;
-  font-size: var(--editor-text-control);
-  font-weight: 500;
-  white-space: nowrap;
-}
-.editor-issues li > button:is(:hover, :focus-visible):not(:disabled) .editor-issues__locate {
-  background: #d4dcc6;
-}
-.editor-issues__locate .editor-icon {
-  width: 16px;
-  height: 16px;
-}
 .editor-issues__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 0 10px 12px 40px;
+  margin-top: 12px;
+  padding-left: 30px;
 }
 
 @media (min-width: 1241px) and (max-width: 1360px) {
@@ -563,12 +535,12 @@
   .editor-issues__count-label {
     display: inline;
   }
-  .direction-preview .editor-issues li > :is(button, div) {
+  .editor-issues__message {
     grid-template-columns: 16px minmax(0, 1fr);
     gap: 8px;
   }
-  .editor-issues__locate {
-    grid-column: 2;
+  .editor-issues__actions {
+    padding-left: 24px;
   }
 }
 @media (pointer: coarse) {
@@ -666,9 +638,12 @@
   .direction-preview .editor-issues__count-label {
     display: none;
   }
-  .direction-preview .editor-issues li > :is(button, div) {
+  .editor-issues__message {
     grid-template-columns: 16px minmax(0, 1fr);
     gap: 7px;
+  }
+  .editor-issues__actions {
+    padding-left: 23px;
   }
   .direction-preview .direction-camera {
     left: 260px;

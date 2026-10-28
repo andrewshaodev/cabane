@@ -68,62 +68,46 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
         <EditorIcon name="chevron" />
       </button>
       <ul id={contentId} hidden={!expanded}>
-        {issues.map((issue, index) => {
-          const content = (
-            <>
+        {issues.map((issue, index) => (
+          <li key={`${issue.code}:${issue.path}:${index}`} data-severity={issue.severity}>
+            <div className="editor-issues__message">
               <span className="construction-inspector__validation-marker">
                 <EditorIcon name="warning" />
               </span>
-              <span>
+              <div>
                 {itemLabel?.(issue) && <strong>{itemLabel(issue)}</strong>}
                 <strong>{issue.message}</strong>
                 {issue.suggestion && <small>{issue.suggestion}</small>}
-              </span>
-              {issue.target && (
-                <span className="editor-issues__locate" aria-hidden="true">
-                  <EditorIcon name="spawn" />{" "}
-                  {issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"}
-                </span>
-              )}
-            </>
-          );
-          return (
-            <li key={`${issue.code}:${issue.path}:${index}`} data-severity={issue.severity}>
-              {issue.target ? (
-                <button
-                  type="button"
+              </div>
+            </div>
+            {issue.target && (
+              <footer className="editor-issues__actions">
+                <EditorButton
                   disabled={disabled}
                   aria-label={`${issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"} ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
                   onClick={() => onSelect(issue)}
                 >
-                  {content}
-                </button>
-              ) : (
-                <div>{content}</div>
-              )}
-              {issue.target?.kind === "scene-item" && onRepair && (
-                <footer className="editor-issues__actions">
-                  {issue.path.includes(".placement") && (
-                    <EditorButton
-                      variant="text"
-                      disabled={disabled}
-                      onClick={() => onRepair(issue, "reset-placement")}
-                    >
-                      Reset placement
+                  {issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"}
+                </EditorButton>
+                {issue.target.kind === "scene-item" && onRepair && (
+                  <>
+                    {issue.path.includes(".placement") && (
+                      <EditorButton
+                        disabled={disabled}
+                        onClick={() => onRepair(issue, "reset-placement")}
+                      >
+                        Reset placement
+                      </EditorButton>
+                    )}
+                    <EditorButton disabled={disabled} onClick={() => onRepair(issue, "remove")}>
+                      Remove item
                     </EditorButton>
-                  )}
-                  <EditorButton
-                    variant="text"
-                    disabled={disabled}
-                    onClick={() => onRepair(issue, "remove")}
-                  >
-                    Remove
-                  </EditorButton>
-                </footer>
-              )}
-            </li>
-          );
-        })}
+                  </>
+                )}
+              </footer>
+            )}
+          </li>
+        ))}
       </ul>
     </section>
   );

@@ -299,9 +299,9 @@ await withModules(async (load) => {
       assert.deepEqual(history.present, initial);
       await act(async () => root.render(React.createElement(Harness, { disabled: true })));
       assert.equal(action("Reset placement").disabled, true);
-      assert.equal(action("Remove").disabled, true);
+      assert.equal(action("Remove item").disabled, true);
       await act(async () => root.render(React.createElement(Harness)));
-      await act(async () => action("Remove").click());
+      await act(async () => action("Remove item").click());
       assert.equal(history.past.length, 1);
       assert.deepEqual(history.present.project.sceneItems, []);
       assert.deepEqual(history.present.bindings[origin].draft.entityIdsBySlotId, {});
@@ -647,8 +647,9 @@ await withModules(async (load) => {
         ".construction-inspector__validation li button",
       );
       assert.equal(namingButtons.length, 1);
-      assert.match(namingButtons[0].textContent, /This room needs a name/);
-      assert.doesNotMatch(namingButtons[0].textContent, /Expected a non-empty string/);
+      const namingIssue = namingButtons[0].closest("li");
+      assert.match(namingIssue.textContent, /This room needs a name/);
+      assert.doesNotMatch(namingIssue.textContent, /Expected a non-empty string/);
       await act(async () => editor.selectRoom(shack.id));
       await act(async () => editor.updateSelectedRoom({ name: "Wooden shack" }));
       assert.equal(editor.topologyIssues.length, 0, JSON.stringify(editor.topologyIssues));
