@@ -102,6 +102,11 @@ at 30% of the desktop viewport height, and disappears when empty. Messages retai
 full recovery guidance and Locate actions. New issues update counts quietly;
 expansion persists across mode changes during the editor session. Locate opens the
 affected object's Properties, including when that inspector was collapsed.
+Scene-item rows identify the model and group **Select**, **Reset placement**, and
+**Remove item** as matching buttons inside each issue. Repairs use the shared workspace
+history, including draft mapping cleanup on removal. Geometric item-placement
+diagnostics are warnings; they do not prevent opening or saving the home.
+Schema, identity and structural-reference errors retain their blocking behavior.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
 can remain visible while editing. The shared validation panel stays available in

@@ -1,5 +1,6 @@
 import { useNorthOrientation } from "./useNorthOrientation";
-import { isEmptyPublishedHome, useFloorNavigation } from "@cabane/engine";
+import { isEmptyPublishedHome, resolveProjectModels, useFloorNavigation } from "@cabane/engine";
+import { ownerProjectRegistries } from "../project-runtime";
 import { useAdjacentFloorReferences } from "../editor-floors/useAdjacentFloorReferences";
 import { isPristineConstructionFloor } from "../editor-preview/construct/contextual-validation";
 import { useReferencePlan } from "../editor-reference-plan/useReferencePlan";
@@ -29,7 +30,7 @@ import {
 
 import { homeManifest as ownerProjectManifest } from "@cabane/home";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { type EditorMode } from "../editor-chrome/EditorModeNav";
 
@@ -98,8 +99,13 @@ export function useHomeEditorController({
     cancelWall: constructEditorCancelWall,
     duplicateOpening: constructEditorDuplicateOpening,
   } = constructEditor;
+  const registries = useMemo(
+    () => resolveProjectModels(snapshot.project, ownerProjectRegistries),
+    [snapshot.project],
+  );
   const furnishingEditor = useFurnishingEditor(
     initialRecord.draft.sceneItems.filter((item) => item.floorId === initialFloor.id),
+    { project: snapshot.project, floor: constructEditorPreviewFloor, registries },
   );
   const {
     select: furnishingEditorSelect,
@@ -112,6 +118,7 @@ export function useHomeEditorController({
     constructEditor,
     furnishingEditor,
     activeFloorId,
+    registries,
   });
   const {
     furnishingModels,

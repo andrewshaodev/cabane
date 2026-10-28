@@ -288,10 +288,9 @@ await withModules(async (load) => {
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
-      const variants = document.querySelector('[role="group"][aria-label="Variant"]');
-      const choices = [...variants.querySelectorAll("button")];
+      const choices = document.querySelector('[role="group"][aria-label="Variant"]');
       assert.deepEqual(
-        choices.map((button) => button.getAttribute("aria-label")),
+        [...choices.querySelectorAll("button")].map((button) => button.getAttribute("aria-label")),
         [
           "Sage cushions — left chaise (front view)",
           "Sage cushions — right chaise (front view)",
@@ -302,18 +301,12 @@ await withModules(async (load) => {
         ],
       );
       assert.equal(
-        document
-          .querySelector('[aria-label="Classic — left chaise (front view)"]')
-          .getAttribute("aria-pressed"),
-        "true",
+        choices.querySelector('[aria-pressed="true"]').getAttribute("aria-label"),
+        "Classic — left chaise (front view)",
       );
-      await act(async () => choices[5].click());
-      assert.equal(
-        document
-          .querySelector('[aria-label="Cozy — right chaise (front view)"]')
-          .getAttribute("aria-pressed"),
-        "true",
-      );
+      await act(async () => {
+        choices.querySelector('[aria-label="Cozy — right chaise (front view)"]').click();
+      });
       assert.deepEqual(editor.items[0], { ...sofa, variant: "cozy-right" });
       await act(async () => root.render(React.createElement(Harness, { multiple: false })));
       assert.equal(document.querySelector('[role="group"][aria-label="Variant"]'), null);

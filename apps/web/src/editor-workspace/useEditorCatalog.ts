@@ -1,5 +1,5 @@
 import type { PlanPoint } from "@cabane/engine";
-import { collectProjectIds } from "@cabane/engine";
+import { collectProjectIds, sceneItemPlacementIssues } from "@cabane/engine";
 import { useEditorSceneProjection } from "./useEditorSceneProjection";
 
 import { polygonCentroid } from "@cabane/engine";
@@ -59,7 +59,13 @@ export function useEditorCatalog({ projection, furnishingEditor, disabled }: Opt
       collectProjectIds(editorProject),
       placementFloor.id,
     );
-    furnishingEditorAddItem(candidate.size ? { ...item, size: candidate.size } : item);
+    const placed = candidate.size ? { ...item, size: candidate.size } : item;
+    const issue = sceneItemPlacementIssues(placed, editorProject, entry.definition)[0];
+    if (issue) {
+      setCatalogError(issue.message);
+      return;
+    }
+    furnishingEditorAddItem(placed);
     setArrangeAnnouncement(
       `${entry.definition.label} added. Drag to move it; use Undo to remove it.`,
     );

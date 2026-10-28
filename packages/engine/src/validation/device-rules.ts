@@ -170,6 +170,7 @@ export const validateDevice = (
         "device.elevation",
         `${devicePath}.placement.elevationMeters`,
         "Device elevation cannot be negative.",
+        "warning",
       ),
     );
   }

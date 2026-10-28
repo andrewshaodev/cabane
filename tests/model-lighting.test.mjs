@@ -17,7 +17,7 @@ await withModules(async (load) => {
   const { duplicateSceneItem } = await load(
     "/apps/web/src/editor-preview/furnish/duplicate-item.ts",
   );
-  const { lightingError, renormalizeLighting } = await load(
+  const { lightingError, renormalizeLighting, withLightSources } = await load(
     "/apps/web/src/model-lighting/lighting-layout.ts",
   );
   const descriptor = {
@@ -249,7 +249,15 @@ await withModules(async (load) => {
       const next = api.editModelLighting(
         { project: entry.record.draft, bindings: entry.record.bindings },
         "cabinet",
-        light,
+        withLightSources(light, [
+          { kind: "point", position: [-0.2, 0.7, 0] },
+          ...Array.from({ length: 4 }, (_, i) => ({
+            kind: "strip",
+            start: [-0.4, 0.2 + i * 0.2, 0],
+            end: [0.4, 0.2 + i * 0.2, 0],
+            samples: 12,
+          })),
+        ]),
         native,
       );
       const saved = await lifecycle.autosave(entry.record, next.project, undefined, next.bindings);
@@ -386,6 +394,54 @@ await withModules(async (load) => {
       await scene.unmount();
     }
   });
+  test("the light pool borrows off slots while retaining sources that stay on", async () => {
+    const { ActiveSceneLightPool } = await load("/packages/engine/src/SceneLightPool.tsx");
+    const floor = { ...fixture().project.floors[0], rooms: [], walls: [], openings: [] };
+    const source = (name, x, intensity = 1) => ({
+      name,
+      position: [x, 1, 0],
+      color: "#ffffff",
+      intensity,
+      distance: 5,
+    });
+    const render = (sources) => React.createElement(ActiveSceneLightPool, { floor, sources });
+    const scene = await create(render([source("a", 0), source("b", 1)]));
+    try {
+      const lights = () => scene.scene.findAllByType("PointLight").map((node) => node.instance);
+      const [a, b] = lights();
+      await scene.update(render([source("a", 0, 0), source("b", 1)]));
+      assert.equal(
+        lights().find((light) => light.name === "b"),
+        b,
+      );
+      assert.equal(a.intensity, 0);
+      await scene.update(render([source("c", 2), source("b", 1)]));
+      assert.equal(lights().length, 2);
+      assert.equal(
+        lights().find((light) => light.name === "c"),
+        a,
+      );
+      assert.equal(
+        lights().find((light) => light.name === "b"),
+        b,
+      );
+      assert.equal(a.position.x, 2);
+      await scene.update(render([source("c", 2), source("a", 0), source("b", 1, 0)]));
+      assert.deepEqual(
+        lights()
+          .map((light) => light.name)
+          .sort(),
+        ["a", "c"],
+      );
+      assert.equal(
+        lights().find((light) => light.name === "a"),
+        b,
+      );
+      assert.ok(lights().every((light) => light.intensity === 1));
+    } finally {
+      await scene.unmount();
+    }
+  });
   test("native surface glow is isolated between copies and preview highlights preserve shared geometry/materials", () => {
     const original = new MeshToonMaterial({ color: "#aabbcc" });
     const geometry = new BoxGeometry();
@@ -424,7 +480,7 @@ await withModules(async (load) => {
     geometry.dispose();
     original.dispose();
   });
-  test("glow-only mode, invalid fields, source budgets and normalization corrections are explicit", () => {
+  test("glow-only mode, invalid fields, unbounded sources and normalization corrections are explicit", () => {
     assert.ok(
       api
         .importedLightSources({ ...light, illuminate: false })
@@ -455,13 +511,24 @@ await withModules(async (load) => {
       lightSlotId: `many-light-${i}`,
     }));
     const project = { ...many.project, sceneItems: repeated };
-    assert.ok(
+    assert.equal(api.modelLightingPointCount(project, "ground", native), 40);
+    assert.equal(
       api
         .validateHomeProject(project, native)
-        .issues.some(
-          (issue) => issue.code === "project.light-budget" && issue.severity === "warning",
-        ),
+        .issues.some((issue) => issue.code === "project.light-budget"),
+      false,
     );
+    for (const illuminate of [true, false])
+      assert.equal(
+        api.parseHomeProjectSchema({
+          ...fixture().project,
+          modelLights: {
+            cabinet: { ...light, illuminate },
+          },
+        }).valid,
+        true,
+      );
+
     const previous = {
       rotation: [0, 0, 0],
       scale: 1,
@@ -478,5 +545,19 @@ await withModules(async (load) => {
     assert.ok(Math.abs(corrected.position[1] - 2.4) < 1e-8);
     assert.ok(Math.abs(corrected.position[2] - 0.6) < 1e-8);
     assert.equal(corrected.distance, 10);
+    const mixed = withLightSources(light, [
+      { kind: "point", position: [1, 0, 0] },
+      { kind: "strip", start: [1, 0, 0], end: [1, 1, 0], samples: 12 },
+    ]);
+    const normalized = renormalizeLighting(mixed, previous, {
+      ...previous,
+      scale: 2,
+      offset: [0, 1, 0],
+      rotation: [0, Math.PI / 2, 0],
+    });
+    assert.ok(Math.abs(normalized.sources[0].position[2] + 2) < 1e-8);
+    assert.ok(Math.abs(normalized.sources[1].start[1] - 1) < 1e-8);
+    assert.ok(Math.abs(normalized.sources[1].end[1] - 3) < 1e-8);
+    assert.equal(normalized.sources[1].samples, 12);
   });
 });

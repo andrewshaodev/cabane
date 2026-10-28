@@ -2,6 +2,8 @@ import { useCallback, useMemo, useReducer, useState } from "react";
 import type {
   EntityBindingSlotSpec,
   FloorSpec,
+  HomeProject,
+  ProjectModelRegistries,
   FurnishingModelDefinition,
   ItemPlacement,
   PlanPoint,
@@ -9,11 +11,39 @@ import type {
   SceneItemSize,
   SceneModelEditorDescriptor,
 } from "@cabane/engine";
-import { createFurnishingEditorState, furnishingEditorReducer } from "./editor-state";
+import {
+  createFurnishingEditorState,
+  type FurnishingEditorState,
+  type FurnishingEditorAction,
+} from "./editor-state";
+import { guardedFurnishingEditorReducer } from "./placement/guarded-editor-state";
 
-export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
+export const useFurnishingEditor = (
+  initialItems: readonly SceneItemSpec[],
+  context?: {
+    project: HomeProject;
+    floor: FloorSpec;
+    registries: ProjectModelRegistries;
+  },
+) => {
+  const floors = context?.project.floors;
+  const floor = context?.floor;
+  const registries = context?.registries;
+  const validation = useMemo(
+    () =>
+      floors && floor && registries
+        ? {
+            project: {
+              floors: floors.map((candidate) => (candidate.id === floor.id ? floor : candidate)),
+            },
+            registries,
+          }
+        : undefined,
+    [floors, floor, registries],
+  );
   const [state, dispatch] = useReducer(
-    furnishingEditorReducer,
+    (state: FurnishingEditorState, action: FurnishingEditorAction) =>
+      guardedFurnishingEditorReducer(state, action, validation),
     initialItems,
     createFurnishingEditorState,
   );
@@ -77,6 +107,15 @@ export const useFurnishingEditor = (initialItems: readonly SceneItemSpec[]) => {
     updateSize: useCallback(
       (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) =>
         dispatch({ type: "update-size", id, size, definition }),
+      [],
+    ),
+    updatePlacementAndSize: useCallback(
+      (
+        id: string,
+        placement: ItemPlacement,
+        size: SceneItemSize,
+        definition: SceneModelEditorDescriptor,
+      ) => dispatch({ type: "update-placement-and-size", id, placement, size, definition }),
       [],
     ),
     rotate: useCallback(

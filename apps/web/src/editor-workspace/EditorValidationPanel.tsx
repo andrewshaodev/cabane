@@ -1,6 +1,7 @@
 import { useId, useState } from "react";
 import type { ConstructValidationDiagnostic } from "../editor-preview/construct/contextual-validation";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
+import { EditorButton } from "../editor-chrome/EditorButton";
 
 /** Draft diagnostics live outside the tools and properties surfaces. */
 export function EditorValidationPanel<Issue extends ConstructValidationDiagnostic>({
@@ -9,12 +10,16 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
   expanded: controlledExpanded,
   onToggle,
   disabled = false,
+  onRepair,
+  itemLabel,
 }: {
   issues: readonly Issue[];
   onSelect: (issue: Issue) => void;
   expanded?: boolean;
   onToggle?: () => void;
   disabled?: boolean;
+  onRepair?: (issue: Issue, action: "reset-placement" | "remove") => void;
+  itemLabel?: (issue: Issue) => string | undefined;
 }) {
   const [localExpanded, setLocalExpanded] = useState(false);
   const expanded = controlledExpanded ?? localExpanded;
@@ -63,40 +68,46 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
         <EditorIcon name="chevron" />
       </button>
       <ul id={contentId} hidden={!expanded}>
-        {issues.map((issue, index) => {
-          const content = (
-            <>
+        {issues.map((issue, index) => (
+          <li key={`${issue.code}:${issue.path}:${index}`} data-severity={issue.severity}>
+            <div className="editor-issues__message">
               <span className="construction-inspector__validation-marker">
                 <EditorIcon name="warning" />
               </span>
-              <span>
+              <div>
+                {itemLabel?.(issue) && <strong>{itemLabel(issue)}</strong>}
                 <strong>{issue.message}</strong>
                 {issue.suggestion && <small>{issue.suggestion}</small>}
-              </span>
-              {issue.target && (
-                <span className="editor-issues__locate" aria-hidden="true">
-                  <EditorIcon name="spawn" /> Locate
-                </span>
-              )}
-            </>
-          );
-          return (
-            <li key={`${issue.code}:${issue.path}:${index}`} data-severity={issue.severity}>
-              {issue.target ? (
-                <button
-                  type="button"
+              </div>
+            </div>
+            {issue.target && (
+              <footer className="editor-issues__actions">
+                <EditorButton
                   disabled={disabled}
-                  aria-label={`Locate ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
+                  aria-label={`${issue.target.kind === "scene-item" ? "Select" : "Locate"} ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
                   onClick={() => onSelect(issue)}
                 >
-                  {content}
-                </button>
-              ) : (
-                <div>{content}</div>
-              )}
-            </li>
-          );
-        })}
+                  {issue.target.kind === "scene-item" ? "Select" : "Locate"}
+                </EditorButton>
+                {issue.target.kind === "scene-item" && onRepair && (
+                  <>
+                    {issue.path.includes(".placement") && (
+                      <EditorButton
+                        disabled={disabled}
+                        onClick={() => onRepair(issue, "reset-placement")}
+                      >
+                        Reset placement
+                      </EditorButton>
+                    )}
+                    <EditorButton disabled={disabled} onClick={() => onRepair(issue, "remove")}>
+                      Remove item
+                    </EditorButton>
+                  </>
+                )}
+              </footer>
+            )}
+          </li>
+        ))}
       </ul>
     </section>
   );

@@ -252,10 +252,13 @@ const contextualize = (
     target,
     suggestion:
       issue.suggestion ??
+      defaultCorrections[issue.code] ??
+      (target?.kind === "scene-item"
+        ? "Select the item in Arrange to adjust it, reset its placement to the floor, or remove it. You can undo repairs."
+        : undefined) ??
       (issue.code.startsWith("stair.") && issue.severity === "warning"
         ? "You can keep this layout and save with warnings."
         : undefined) ??
-      defaultCorrections[issue.code] ??
       "Review the highlighted context and correct this issue before publishing.",
   });
 };
