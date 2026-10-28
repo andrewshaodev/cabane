@@ -84,10 +84,10 @@ export function EditorValidationPanel<Issue extends ConstructValidationDiagnosti
               <footer className="editor-issues__actions">
                 <EditorButton
                   disabled={disabled}
-                  aria-label={`${issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"} ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
+                  aria-label={`${issue.target.kind === "scene-item" ? "Select" : "Locate"} ${issue.target.kind} ${issue.target.id}: ${issue.message}`}
                   onClick={() => onSelect(issue)}
                 >
-                  {issue.target.kind === "scene-item" ? "Select in Arrange" : "Locate"}
+                  {issue.target.kind === "scene-item" ? "Select" : "Locate"}
                 </EditorButton>
                 {issue.target.kind === "scene-item" && onRepair && (
                   <>

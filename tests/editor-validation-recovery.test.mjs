@@ -275,13 +275,13 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       assert.match(document.body.textContent, /Kitchen cabinet/);
-      assert.match(document.body.textContent, /Select in Arrange/);
+      assert.match(document.body.textContent, /Select/);
       assert.equal(
         document.querySelector("button button"),
         null,
         "repair buttons must not nest inside Locate",
       );
-      await act(async () => document.querySelector('[aria-label^="Select in Arrange"]').click());
+      await act(async () => document.querySelector('[aria-label^="Select"]').click());
       assert.deepEqual(selected, [item.id]);
       const action = (label) =>
         [...document.querySelectorAll("footer button")].find(

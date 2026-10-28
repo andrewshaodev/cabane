@@ -1141,7 +1141,7 @@ await withModules(async (load) => {
       for (const [index, button] of buttons.entries()) {
         assert.match(
           button.textContent,
-          issues[index].target.kind === "scene-item" ? /Select in Arrange/ : /Locate/,
+          issues[index].target.kind === "scene-item" ? /Select/ : /Locate/,
         );
         await act(async () => button.click());
       }

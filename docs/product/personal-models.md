@@ -20,7 +20,7 @@ rotation, uniform resizing, duplication, history, Reset, and Save use the normal
 editor paths. Floor instances have a simple bounding-envelope walk collider.
 Free placement uses the imported model's scaled lower bounds, including the
 centered origin of wall models. Invalid moves and resizes are refused. Existing
-geometric placement problems remain editable warnings with Select in Arrange,
+geometric placement problems remain editable warnings with Select,
 Reset placement and Remove in Issues. Reset changes only the placed copy, without
 renormalizing the import or changing its other copies.
 

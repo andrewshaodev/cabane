@@ -81,8 +81,8 @@ their existing recessed mounting convention; personal GLBs use their explicit
 normalized bounds for ceiling clearance.
 
 Existing geometric placement problems are warnings, so the home remains visible
-and editable. Issues names the affected model and offers **Select in Arrange**,
-**Reset placement**, and **Remove**. Reset places that copy on a supported floor,
+and editable. Issues names the affected model and offers **Select**,
+**Reset placement**, and **Remove item**. Reset places that copy on a supported floor,
 preserving its dimensions, identity, horizontal anchor and rotation where
 possible. If the anchor has no floor support, it searches for a valid starting
 position. A failed repair leaves the item unchanged and explains how to continue.
