@@ -50,7 +50,16 @@ await withModules(async (load) => {
     id: "light",
     kind: "device",
     modelId: "light",
-    entitySlots: [{ id: "light-slot", deviceRole: "primary", compatibleDomains: ["light"] }],
+    entitySlots: [
+      {
+        id: "light-slot",
+        deviceRole: "primary",
+        compatibleDomains: ["light"],
+        required: true,
+        autoMap: "manual",
+        presentation: { label: "Light", dashboardRole: "primary" },
+      },
+    ],
   });
   let editor, furnishing, panels;
   const project = {

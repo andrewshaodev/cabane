@@ -51,9 +51,7 @@ export const duplicateSceneItem = (
     ...items.flatMap((item) =>
       item.lightSlotId ? [item.lightSlotId, `${item.lightSlotId}-entity`] : [],
     ),
-    ...items.flatMap((item) =>
-      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
-    ),
+    ...items.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
   ]);
   const id = createSceneItemId(occupied);
   occupied.add(id);
@@ -89,5 +87,17 @@ export const duplicateSceneItem = (
           return { ...structuredClone(slot), id: slotId };
         }),
       }
-    : { ...common, kind: "furnishing" };
+    : {
+        ...common,
+        kind: "furnishing",
+        ...(source.entitySlots
+          ? {
+              entitySlots: source.entitySlots.map((slot) => {
+                const slotId = createSceneItemId(occupied);
+                occupied.add(slotId);
+                return { ...structuredClone(slot), id: slotId };
+              }),
+            }
+          : {}),
+      };
 };

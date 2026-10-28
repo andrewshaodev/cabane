@@ -37,9 +37,10 @@ export function useEditorSession(
     const result = await flush();
     if (result.status === "saved") {
       onClose(result.record, "draft-saved");
-      return;
+      return true;
     }
     setClosing(false);
+    return false;
   }, [flush, onClose]);
 
   const publishProject = useCallback(
@@ -114,7 +115,8 @@ export function useEditorPublicationIssues(
 export function useEditorExitRequest(
   exitRequested: boolean | undefined,
   blocked: boolean,
-  closeEditor: () => Promise<void>,
+  closeEditor: () => Promise<boolean | void>,
+  onExitFailed?: () => void,
 ) {
   const exitHandled = useRef(false);
   useEffect(() => {
@@ -124,7 +126,9 @@ export function useEditorExitRequest(
     }
     if (!blocked && !exitHandled.current) {
       exitHandled.current = true;
-      void closeEditor();
+      void closeEditor().then((saved) => {
+        if (saved === false) onExitFailed?.();
+      });
     }
-  }, [exitRequested, blocked, closeEditor]);
+  }, [exitRequested, blocked, closeEditor, onExitFailed]);
 }

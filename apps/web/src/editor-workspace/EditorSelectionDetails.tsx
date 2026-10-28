@@ -148,15 +148,11 @@ export function EditorSelectionDetails({
                 floor={placementFloor}
                 furnishingModels={furnishingModels}
                 deviceModels={deviceModels}
-                onWindowFit={(id, placement, size, definition) => {
-                  furnishingEditor.beginTransaction();
-                  furnishingEditor.updatePlacement(id, placement);
-                  furnishingEditor.updateSize(id, size, definition);
-                  furnishingEditor.commitTransaction();
-                }}
+                onWindowFit={furnishingEditor.updatePlacementAndSize}
                 onPlacementChange={furnishingEditor.updatePlacement}
                 onSizeChange={furnishingEditor.updateSize}
                 onLightStateChange={furnishingEditor.updateLightState}
+                onEntitySlotsChange={furnishingEditor.updateEntitySlots}
                 onVariantChange={furnishingEditor.updateVariant}
                 onColorChange={furnishingEditor.updateColor}
                 onEditLighting={() => setLightingModel(selectedItem.modelId)}

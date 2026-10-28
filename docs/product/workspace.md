@@ -102,6 +102,11 @@ at 30% of the desktop viewport height, and disappears when empty. Messages retai
 full recovery guidance and Locate actions. New issues update counts quietly;
 expansion persists across mode changes during the editor session. Locate opens the
 affected object's Properties, including when that inspector was collapsed.
+Scene-item rows identify the model and group **Select**, **Reset placement**, and
+**Remove item** as matching buttons inside each issue. Repairs use the shared workspace
+history, including draft mapping cleanup on removal. Geometric item-placement
+diagnostics are warnings; they do not prevent opening or saving the home.
+Schema, identity and structural-reference errors retain their blocking behavior.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
 can remain visible while editing. The shared validation panel stays available in
@@ -279,3 +284,7 @@ Plan-coordinate inputs account for the floor's metres-per-plan-unit scale.
 Changing display units never rescales the project or rewrites its stored geometry;
 portable project formats retain their existing units. Blocked browser storage
 retains the preference for the current session.
+
+Furniture may declare optional `entitySlots` containing manual, non-required secondary sensor or binary sensor attachments. Devices retain exactly one primary control; optional read-only attachments are validated independently of the model’s control domains. `presentation.showInScene` is opt-in map visibility. Older documents omit both fields and keep their prior behavior. Older panels reject documents containing the new fields; preserve that rejection and update the matching HACS panel before transfer.
+
+Leaving the editor for Home Assistant settings or another page saves the draft first. A failed save cancels that navigation attempt so a later click can retry. Storage errors show their reason and an explicit retry. Revision conflicts keep both the newer saved record and the current in-memory draft intact, and offer a complete `.cabane` draft backup containing the current project, private mappings and verified imported GLBs, including staged imports, before the user reopens the saved workspace. Backup failures retain the draft and show a retryable error.

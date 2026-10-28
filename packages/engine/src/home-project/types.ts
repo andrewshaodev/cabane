@@ -87,6 +87,8 @@ interface SceneItemBase {
 
 export interface FurnishingItemSpec extends SceneItemBase {
   kind: "furnishing";
+  /** Optional read-only sensor attachments, independent of model controls. */
+  entitySlots?: readonly EntityBindingSlotSpec[];
 }
 
 export interface DeviceItemSpec extends SceneItemBase {

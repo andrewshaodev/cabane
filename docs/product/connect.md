@@ -102,3 +102,7 @@ without an assigned area. The cover drives position; a valid contact supplies a
 binary fallback when cover position is unknown. Unmapped opening slots do not
 make a room look unfinished. Changing to a conventional door removes its cover
 profile and browser mapping through ordinary draft reconciliation and history.
+
+Auxiliary readings declared in Arrange Properties are optional, manual secondary sensor slots. They can map to separate HA devices or entities in any area, including entities without a device. Existing shared-entity mappings and usage indications remain. Furniture readings appear separately by their reading names in the room’s Devices list, or under Outside rooms when placed outside room polygons. Devices retain one primary control and list attached readings under Additional entities. Changing the primary HA device preserves its independently mapped readings.
+
+TV models offer a manual smart-plug switch alternative for on/off control, including TVs created before this feature. This is a model-specific compatibility rule, not an unrestricted entity-filter override. Commands follow the actual mapped switch domain; camera or media controls remain available for their corresponding entities.

@@ -652,15 +652,16 @@ export function HomeEditorScene({
                   }}
                   actions={{
                     onMap:
-                      ((selectedItem.kind === "device" && selectedItem.entitySlots.length > 0) ||
-                        !!selectedItem.lightSlotId) &&
+                      ((selectedItem.entitySlots?.length ?? 0) > 0 || !!selectedItem.lightSlotId) &&
                       !unsettled
                         ? () => {
                             if (
                               connect.selectDevice(
                                 selectedItem.kind === "device"
                                   ? selectedItem.id
-                                  : (selectedItem.lightSlotId ?? selectedItem.id),
+                                  : (selectedItem.lightSlotId ??
+                                      selectedItem.entitySlots?.[0]?.id ??
+                                      selectedItem.id),
                               )
                             )
                               selectMode("connect", true);

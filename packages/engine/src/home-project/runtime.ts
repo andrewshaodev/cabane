@@ -36,6 +36,18 @@ export const roomIdForItem = (
     : null;
 };
 
+const itemBelongsToRoom = (
+  item: SceneItemSpec,
+  floor: HomeBindingManifest["floors"][number],
+  roomId: string,
+) => {
+  try {
+    return roomIdForItem(item, floor) === roomId;
+  } catch {
+    return false;
+  }
+};
+
 export const deviceSlotForItem = (
   item: DeviceItemSpec,
   floor: HomeBindingManifest["floors"][number],
@@ -134,15 +146,20 @@ export const composeHomeBindingManifest = (
       .filter((room) => !room.isSolid)
       .map((room) => ({
         ...room,
-        dashboardSlots: project.roomProfiles[room.id]?.dashboardSlots ?? [],
+        dashboardSlots: [
+          ...(project.roomProfiles[room.id]?.dashboardSlots ?? []),
+          ...project.sceneItems
+            .filter(
+              (item) =>
+                item.kind === "furnishing" &&
+                item.floorId === floor.id &&
+                Boolean(item.entitySlots?.length) &&
+                itemBelongsToRoom(item, floor, room.id),
+            )
+            .flatMap((item) => item.entitySlots ?? []),
+        ],
         devices: items
-          .filter((item) => {
-            try {
-              return roomIdForItem(item, floor) === room.id;
-            } catch {
-              return false;
-            }
-          })
+          .filter((item) => itemBelongsToRoom(item, floor, room.id))
           .flatMap((item) =>
             bindingDevicesForItem(
               item,

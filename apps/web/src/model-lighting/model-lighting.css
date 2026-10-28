@@ -5,30 +5,36 @@
   padding: 0;
 }
 .lighting-enable {
-  margin-block: 0 18px;
+  margin-block: 0 16px;
+}
+.lighting-enable label,
+.lighting-preview-options label,
+.lighting-fields .lighting-check {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 .lighting-enable label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   font-weight: 600;
 }
-.lighting-enable input {
+.lighting-enable input,
+.lighting-preview-options input,
+.lighting-check input {
   width: 18px;
   min-height: 18px;
   flex: none;
   accent-color: var(--editor-accent, #395a3d);
 }
-.lighting-enable p,
 .lighting-note {
   color: var(--editor-ink-muted, #53604e);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
   margin-block: 8px 0;
 }
 .lighting-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(260px, 1fr);
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 24px;
   align-items: start;
 }
@@ -38,7 +44,7 @@
   min-width: 0;
 }
 .lighting-stage {
-  height: 340px;
+  height: max(360px, calc(100dvh - 400px));
   position: relative;
   background: var(--editor-muted, #ece9df);
   border-radius: 10px;
@@ -61,46 +67,74 @@
   inset-inline: 0;
   margin: 0;
   padding: 10px 12px;
-  background: #faf7efe8;
+  background: var(--editor-paper, #faf7ef);
   color: var(--editor-ink, #354738);
   font-size: 0.8125rem;
   pointer-events: none;
 }
-.lighting-preview-controls {
+.lighting-view-tools {
+  position: absolute;
+  top: 12px;
+  inset-inline: 12px;
   display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-block-start: 12px;
   flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.lighting-view-tools .editor-button {
+  background: var(--editor-paper, #faf7ef);
+  min-height: 36px;
+  padding: 6px 10px;
+}
+.lighting-preview-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-block: 12px;
+  font-size: 0.8125rem;
+}
+.lighting-preview-controls {
+  padding-block-start: 6px;
 }
 .lighting-preview-controls label {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 8px;
-  min-width: 0;
-  flex: 1;
+  gap: 6px 12px;
   font-size: 0.875rem;
 }
 .lighting-preview-controls input {
-  grid-column: 1/-1;
+  grid-column: 1 / -1;
   grid-row: 2;
   width: 100%;
   accent-color: var(--editor-accent, #395a3d);
 }
-.lighting-preview-controls output {
+.lighting-preview-controls output,
+.lighting-count {
   font-variant-numeric: tabular-nums;
 }
 .lighting-fields {
   min-width: 0;
+  max-height: calc(100dvh - 320px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-inline-end: 8px;
 }
 .lighting-fields fieldset {
-  margin-block: 0 22px;
+  margin: 0 0 24px;
   padding: 0;
   border: 0;
+  min-width: 0;
 }
-.lighting-fields legend {
+.lighting-fields legend,
+.lighting-inspector-heading h3 {
+  font-size: 0.9375rem;
   font-weight: 600;
-  margin-block-end: 10px;
+  margin-block: 0 10px;
+}
+.lighting-count {
+  color: var(--editor-ink-muted, #53604e);
+  margin-inline-start: 6px;
+  font-weight: 400;
 }
 .lighting-fields label {
   display: flex;
@@ -108,6 +142,7 @@
   gap: 5px;
   margin-block: 8px;
   min-width: 0;
+  font-size: 0.875rem;
 }
 .lighting-fields input:not([type="checkbox"]),
 .lighting-fields select {
@@ -121,7 +156,11 @@
   color: var(--editor-ink, #354738);
   font: inherit;
 }
-.lighting-type {
+.lighting-fields input[type="color"] {
+  padding: 4px;
+}
+.lighting-type,
+.lighting-source-actions {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -133,28 +172,98 @@
   border-color: var(--editor-accent, #395a3d);
 }
 .lighting-source-list {
-  margin-block: 10px;
+  margin-block: 0 10px;
   display: grid;
-  gap: 6px;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
 }
 .lighting-source-row {
   display: flex;
-  gap: 8px;
+  gap: 4px;
   align-items: center;
 }
 .lighting-source-row .editor-button:first-child {
   flex: 1;
   justify-content: flex-start;
+  min-width: 0;
 }
-.lighting-source-state {
+.lighting-source-row small {
   margin-inline-start: auto;
   font-size: 0.75rem;
-  font-weight: 600;
+  color: var(--editor-ink-muted, #53604e);
+}
+.lighting-source-row > .editor-button:last-child {
+  padding: 8px;
+}
+.lighting-source-inspector {
+  margin-block-end: 24px;
+  padding-block-start: 20px;
+  border-top: 1px solid var(--editor-line, #c9cabc);
+}
+.lighting-inspector-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-block-end: 12px;
+}
+.lighting-inspector-heading h3 {
+  margin: 0;
+}
+.lighting-fields .lighting-position {
+  margin-block: 18px 0;
+}
+.lighting-fields .lighting-step {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.lighting-step select {
+  max-width: 120px;
 }
 .lighting-coordinates {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+.lighting-coordinate {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+.lighting-coordinate label {
+  flex: 1;
+  margin: 0;
+}
+.lighting-coordinate label > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-weight: 600;
+}
+.lighting-coordinate label small {
+  font-weight: 400;
+  color: var(--editor-ink-muted, #53604e);
+}
+.lighting-coordinate label > small {
+  display: none;
+}
+.lighting-coordinate-steps {
+  display: flex;
+  gap: 4px;
+}
+.lighting-coordinate-steps .editor-button {
+  min-width: 40px;
+  padding-inline: 8px;
+}
+.lighting-output-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.lighting-surfaces {
+  margin-block-start: 12px;
 }
 .lighting-fields summary {
   cursor: pointer;
@@ -165,7 +274,8 @@
   line-height: 1.6;
 }
 .model-lighting-dialog {
-  width: min(980px, calc(100vw - 32px));
+  width: calc(100% - 32px);
+  max-width: none;
   max-height: calc(100dvh - 32px);
   overflow: auto;
   border: 1px solid var(--editor-line, #c9cabc);
@@ -203,7 +313,7 @@
   margin-block-start: 16px;
   flex-wrap: wrap;
 }
-.model-lighting-dialog footer .lighting-save-actions {
+.lighting-save-actions {
   display: flex;
   gap: 8px;
   margin-inline-start: auto;
@@ -220,35 +330,12 @@
   color: #6b411b;
   background: #fff2d9;
 }
-.model-lighting-editor button:focus-visible,
-.model-lighting-editor input:focus-visible,
-.model-lighting-editor summary:focus-visible {
+.model-lighting-editor :is(button, input, select, summary, .lighting-stage):focus-visible {
   outline: 2px solid var(--editor-accent, #395a3d);
   outline-offset: 3px;
 }
-@media (max-width: 700px) {
-  .lighting-layout {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 20px;
-  }
-  .lighting-preview-column {
-    position: static;
-  }
-  .lighting-stage {
-    height: 250px;
-  }
-  .model-lighting-dialog {
-    padding: 16px;
-  }
-  .model-lighting-dialog footer {
-    bottom: -16px;
-  }
-  .lighting-fields input:not([type="checkbox"]) {
-    font-size: 16px;
-  }
-}
 .model-import-dialog.model-lighting-dialog {
-  width: min(980px, calc(100vw - 32px));
+  width: calc(100% - 32px);
 }
 .model-editor-sections {
   margin-block: 12px 20px;
@@ -263,11 +350,54 @@
 .model-import-dialog .model-lighting-editor {
   margin: 0;
 }
-.lighting-fields .lighting-illuminate {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
+
+@media (max-width: 900px) {
+  .lighting-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 16px;
+  }
+  .lighting-view-tools {
+    top: 8px;
+    inset-inline: 8px;
+  }
 }
-.lighting-illuminate input {
-  accent-color: var(--editor-accent, #395a3d);
+@media (max-width: 700px) {
+  .lighting-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+  }
+  .lighting-preview-column {
+    position: static;
+  }
+  .lighting-stage {
+    height: clamp(280px, 46dvh, 440px);
+  }
+  .lighting-fields {
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+  }
+  .model-lighting-dialog {
+    width: calc(100% - 16px);
+    max-height: calc(100dvh - 16px);
+    padding: 16px;
+  }
+  .model-lighting-dialog footer {
+    bottom: -16px;
+  }
+  .model-import-dialog.model-lighting-dialog {
+    width: calc(100% - 16px);
+  }
+  .lighting-fields input:not([type="checkbox"]),
+  .lighting-fields select {
+    font-size: 16px;
+  }
+  .lighting-source-actions .editor-button {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .model-lighting-editor * {
+    scroll-behavior: auto;
+  }
 }

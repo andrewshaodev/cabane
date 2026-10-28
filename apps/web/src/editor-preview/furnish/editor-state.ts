@@ -1,5 +1,6 @@
 import { modelVariants } from "@cabane/engine";
 import type {
+  EntityBindingSlotSpec,
   FloorSpec,
   FurnishingItemSpec,
   FurnishingModelDefinition,
@@ -147,6 +148,7 @@ interface EditorSnapshot {
 }
 
 export interface FurnishingEditorState extends EditorSnapshot {
+  placementError: string | null;
   past: readonly EditorSnapshot[];
   future: readonly EditorSnapshot[];
   transaction: EditorSnapshot | null;
@@ -164,6 +166,7 @@ export type FurnishingEditorAction =
   | { type: "begin-transaction" }
   | { type: "commit-transaction" }
   | { type: "cancel-transaction" }
+  | { type: "update-entity-slots"; id: string; entitySlots: readonly EntityBindingSlotSpec[] }
   | { type: "update-variant"; id: string; variant: string; definition: SceneModelEditorDescriptor }
   | {
       type: "update-light-state";
@@ -173,6 +176,13 @@ export type FurnishingEditorAction =
   | { type: "update-placements"; placements: Readonly<Record<string, ItemPlacement>> }
   | { type: "update-placement"; id: string; placement: ItemPlacement }
   | { type: "update-size"; id: string; size: SceneItemSize; definition: SceneModelEditorDescriptor }
+  | {
+      type: "update-placement-and-size";
+      id: string;
+      placement: ItemPlacement;
+      size: SceneItemSize;
+      definition: SceneModelEditorDescriptor;
+    }
   | { type: "rotate"; id: string; rotationYRadians: number }
   | { type: "duplicate"; id: string; floor?: FloorSpec; reservedSlotIds?: readonly string[] }
   | { type: "delete"; id: string }
@@ -194,6 +204,7 @@ export const createFurnishingEditorState = (
 ): FurnishingEditorState => ({
   items: [...items],
   selectedId: null,
+  placementError: null,
   past: [],
   future: [],
   transaction: null,
@@ -301,6 +312,8 @@ export const furnishingEditorReducer = (
       if (!modelVariants(action.definition).some((variant) => variant.id === action.variant))
         return state;
       return updateItem(state, action.id, (item) => ({ ...item, variant: action.variant }));
+    case "update-entity-slots":
+      return updateItem(state, action.id, (item) => ({ ...item, entitySlots: action.entitySlots }));
     case "update-light-state":
       return updateItem(state, action.id, (item) =>
         item.kind === "device" || item.lightSlotId
@@ -321,8 +334,10 @@ export const furnishingEditorReducer = (
     case "update-placement":
       return updateItem(state, action.id, (item) => ({ ...item, placement: action.placement }));
     case "update-size":
+    case "update-placement-and-size":
       return updateItem(state, action.id, (item) => ({
         ...item,
+        ...(action.type === "update-placement-and-size" ? { placement: action.placement } : {}),
         size: normalizeSizeForPolicy(
           action.definition.defaultSize,
           action.size,
@@ -360,7 +375,7 @@ export const furnishingEditorReducer = (
       const id = createSceneItemId(
         state.items.flatMap((item) => [
           item.id,
-          ...(item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : []),
+          ...(item.entitySlots ?? []).map((slot) => slot.id),
         ]),
       );
       const item: FurnishingItemSpec = {

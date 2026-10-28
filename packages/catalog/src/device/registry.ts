@@ -217,7 +217,7 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     defaultSize: [1.58, 0.95, 0.18],
     resizePolicy: { kind: "axes", axes: ["width", "height"] },
     preferredPlacement: "absolute",
-    supportedDomains: ["camera", "media_player"],
+    supportedDomains: ["camera", "media_player", "switch"],
     mountKind: "surface",
     bounds: { min: [-0.79, 0, -0.1], max: [0.79, 0.95, 0.08] },
     outlineContact: false,

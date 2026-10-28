@@ -1,5 +1,6 @@
 import type {
   DeviceModelRegistry,
+  EntityBindingSlotSpec,
   FloorSpec,
   FurnishingModelRegistry,
   ItemPlacement,
@@ -32,6 +33,7 @@ export interface FurnishingInspectorProps {
     definition: SceneModelEditorDescriptor,
   ) => void;
   onVariantChange?: (id: string, variant: string, definition: SceneModelEditorDescriptor) => void;
+  onEntitySlotsChange?: ((id: string, slots: readonly EntityBindingSlotSpec[]) => void) | undefined;
   onLightStateChange?: (
     id: string,
     lightState: "always-off" | "always-on" | "night-only" | "connected",
@@ -51,6 +53,7 @@ export function FurnishingInspector({
   onPlacementChange,
   onSizeChange,
   onLightStateChange,
+  onEntitySlotsChange,
   onVariantChange,
   onColorChange,
   onClose,
@@ -80,6 +83,7 @@ export function FurnishingInspector({
       floor={floor}
       onWindowFit={onWindowFit}
       onLightStateChange={onLightStateChange}
+      onEntitySlotsChange={onEntitySlotsChange}
       onVariantChange={onVariantChange}
       onColorChange={onColorChange}
       onPlacementChange={onPlacementChange}

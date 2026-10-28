@@ -42,7 +42,21 @@ await withModules(async (load) => {
           ],
           emissiveMaterials: ["Diffuser"],
         },
-        { ...light, strip: { end: [2, 0.2, 0], samples: 8 }, emissiveMaterials: ["Diffuser"] },
+        { ...light, strip: { end: [2, 0.2, 0], samples: 20 }, emissiveMaterials: ["Diffuser"] },
+        { ...light, points: Array.from({ length: 20 }, (_, i) => [i / 10, 0.2, 0]) },
+        {
+          ...light,
+          illuminate: false,
+          sources: [
+            { kind: "point", position: [0, 0.2, 0] },
+            ...Array.from({ length: 4 }, (_, i) => ({
+              kind: "strip",
+              start: [-1, i / 4, 0],
+              end: [1, i / 4, 0],
+              samples: 12,
+            })),
+          ],
+        },
       ]) {
         const model = {
           ...base,
@@ -58,9 +72,13 @@ await withModules(async (load) => {
         assert.deepEqual(restored.models[0].light, settings);
       }
       for (const invalid of [
-        { points: Array(8).fill([0, 0, 0]) },
         { points: [[0, NaN, 0]] },
-        { strip: { end: [2, 0, 0], samples: 9 } },
+        { strip: { end: [2, 0, 0], samples: 1 } },
+        { sources: [{ kind: "strip", start: [0, 0, 0], end: [0, 0, 0], samples: 2 }] },
+        { sources: [{ kind: "strip", start: [0, 0, 0], end: [1, 0, 0], samples: 2.5 }] },
+        { sources: [{ kind: "point", position: [0, 0, 0], extra: true }] },
+        { sources: [{ kind: "area", position: [0, 0, 0] }] },
+        { sources: [], points: [] },
         { strip: { end: [2, 0, 0], samples: 1.5 } },
         { strip: { end: light.position, samples: 5 } },
         { strip: { end: [2, 0, 0], samples: 5 }, points: [] },
@@ -82,7 +100,7 @@ await withModules(async (load) => {
   });
 
   test("strip samples span both endpoints and conserve total intensity", () => {
-    for (const samples of [2, 5, 8]) {
+    for (const samples of [2, 5, 20]) {
       const sources = api.importedLightSources({ ...light, strip: { end: [2, 0.2, 0], samples } });
       assert.equal(sources.length, samples);
       assert.deepEqual(sources[0].position, light.position);
@@ -93,6 +111,21 @@ await withModules(async (load) => {
         ) < 1e-8,
       );
     }
+    const mixed = api.importedLightSources({
+      ...light,
+      sources: [
+        { kind: "point", position: [0, 0, 0] },
+        { kind: "strip", start: [-1, 1, 0], end: [1, 1, 0], samples: 4 },
+        { kind: "strip", start: [-1, 2, 0], end: [1, 2, 0], samples: 12 },
+      ],
+    });
+    assert.equal(mixed.length, 17);
+    assert.equal(mixed[0].maxIntensity, 2);
+    assert.ok(
+      Math.abs(mixed.slice(1, 5).reduce((sum, source) => sum + source.maxIntensity, 0) - 2) < 1e-8,
+    );
+    assert.ok(Math.abs(mixed.reduce((sum, source) => sum + source.maxIntensity, 0) - 6) < 1e-8);
+    assert.deepEqual(api.importedLightSources({ ...light, sources: [] }), []);
     assert.deepEqual(api.importedLightSources(light), [light]);
   });
 
@@ -178,8 +211,30 @@ await withModules(async (load) => {
         lights.reduce((sum, source) => sum + source.intensity, 0),
         6,
       );
-      await renderer.update(render({ ...item, lightState: "always-on" }, state(), true, 10));
-      assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 32);
+      const withManyOff = render(item, state(), true, 25);
+      await renderer.update(
+        React.cloneElement(withManyOff, {
+          sceneItems: [...withManyOff.props.sceneItems].reverse(),
+        }),
+      );
+      assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 5);
+      assert.ok(
+        renderer.scene
+          .findAll((node) => node.instance.isPointLight)
+          .every((node) => node.instance.intensity > 0),
+        "120 earlier off sources cannot crowd out the on light",
+      );
+      await renderer.update(render({ ...item, lightState: "always-on" }, state(), true, 25));
+      assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 125);
+      const pool = renderer.scene
+        .findAll((node) => node.instance.isPointLight)
+        .map((node) => node.instance);
+      await renderer.update(render(item, state({ state: "off" }), true, 25));
+      assert.deepEqual(
+        renderer.scene.findAll((node) => node.instance.isPointLight).map((node) => node.instance),
+        pool,
+      );
+      assert.ok(pool.every((source) => source.intensity === 0));
       await renderer.update(render(item, state(), false));
       assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 0);
     } finally {
@@ -271,22 +326,27 @@ await withModules(async (load) => {
     }
   });
 
-  test("import controls add/remove bounded points, switch to strips and select emissive names", () =>
+  test("source controls mix unlimited points and strips, preserve sample counts and nudge chosen endpoints", () =>
     withStorageDom(async (dom) => {
-      let current;
+      let current, currentPicking;
       function Harness() {
-        const [value, setValue] = useState(light);
+        const [value, setValue] = useState({ ...light, emissiveSurfaces: ["surface:0:0"] });
+        const [picking, setPicking] = useState(null);
+        const [selected, onSelect] = useState({ index: 0 });
+        const [step, onStep] = useState(0.01);
         current = value;
+        currentPicking = picking;
         return React.createElement(LightingFields, {
           light: value,
           onChange: setValue,
           bounds: { min: [-2, 0, -0.1], max: [2, 0.4, 0.1] },
-          selected: 0,
-          onSelect: () => {},
-          picking: null,
-          onPicking: () => {},
+          selected,
+          onSelect,
+          step,
+          onStep,
+          picking,
+          onPicking: setPicking,
           surfaces: [{ id: "surface:0:0", label: "Diffuser", supported: true }],
-          onHighlight: () => {},
         });
       }
       await dom.mount(async () => {
@@ -294,20 +354,51 @@ await withModules(async (load) => {
         root.render(React.createElement(Harness));
         return { unmount: () => root.unmount() };
       });
-      for (let i = 0; i < 7; i++) await dom.click("Add light point");
-      assert.equal(dom.button("Add light point").disabled, true);
+      for (let i = 0; i < 10; i++) await dom.click("Add point");
+      assert.equal(dom.button("Add point").disabled, false);
+      assert.equal(current.sources.length, 11);
       await act(async () => dom.document.querySelector('[aria-label="Remove point 2"]').click());
-      assert.equal(current.points.length, 6);
-      await act(async () =>
-        dom.document.querySelector('.lighting-surfaces input[type="checkbox"]').click(),
+      assert.equal(current.sources.length, 10);
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, "surface");
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, null);
+      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
+      await dom.click("Add LED strip");
+      assert.equal(current.sources.length, 11);
+      const strip = current.sources.at(-1);
+      assert.equal(strip.samples, 7);
+      await dom.click("End");
+      await act(async () => dom.document.querySelector('[aria-label="Increase Y"]').click());
+      assert.equal(current.sources.at(-1).end[1], Number((strip.end[1] + 0.01).toFixed(6)));
+      assert.deepEqual(current.sources.at(-1).start, strip.start);
+      assert.equal(current.sources.at(-1).samples, 7);
+      await dom.click("Duplicate source");
+      assert.equal(current.sources.length, 12);
+      assert.equal(current.sources.at(-1).samples, 7);
+      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
+      assert.equal(current.sources.filter((source) => source.kind === "point").length, 10);
+      await act(async () => {
+        const step = dom.document.querySelector('[aria-label="Movement step"]');
+        step.value = "0.001";
+        step.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      const start = current.sources.at(-1).start;
+      await act(async () => dom.document.querySelector('[aria-label="Decrease X"]').click());
+      assert.equal(current.sources.at(-1).start[0], Number((start[0] - 0.001).toFixed(6)));
+      await act(async () => {
+        const input = dom.document.querySelector('[aria-label="Strip sample count"]');
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          input,
+          "12",
+        );
+        input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+      });
+      await dom.click("Fit along model");
+      assert.equal(
+        current.sources.at(-1).samples,
+        12,
+        "fitting does not overwrite the chosen count",
       );
-      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
-      await dom.click("LED strip");
-      assert.equal(current.points, undefined);
-      assert.equal(current.strip.samples, 7);
-      assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
-      assert.equal(dom.button("Add light point"), undefined);
-      await dom.click("Point lights");
-      assert.equal(current.points.length, 6);
     }));
 });

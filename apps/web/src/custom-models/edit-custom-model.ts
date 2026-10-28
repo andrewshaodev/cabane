@@ -1,6 +1,7 @@
 import {
   removeWorkspaceSlotReferences,
   collectProjectIds,
+  isAuxiliaryEntitySlot,
   type CustomModel,
   type EditorWorkspaceSnapshot,
   type SceneItemSpec,
@@ -31,13 +32,20 @@ export function editCustomModel(
         : item.size[axis] * (value / previous.normalization.size[axis]),
     ) as [number, number, number];
     if (!profileChanged) return { ...item, size };
-    if (item.kind === "device") removedSlots.push(...item.entitySlots.map((slot) => slot.id));
-    const {
-      entitySlots: _slots,
-      lightState: _lightState,
-      ...common
-    } = item.kind === "device" ? item : { ...item, entitySlots: undefined, lightState: undefined };
-    if (model.profile === "furniture") return { ...common, size, kind: "furnishing" };
+    const readings = (item.entitySlots ?? []).filter(isAuxiliaryEntitySlot);
+    removedSlots.push(
+      ...(item.entitySlots ?? [])
+        .filter((slot) => !isAuxiliaryEntitySlot(slot))
+        .map((slot) => slot.id),
+    );
+    const { entitySlots: _slots, lightState: _lightState, ...common } = item;
+    if (model.profile === "furniture")
+      return {
+        ...common,
+        size,
+        kind: "furnishing",
+        ...(readings.length ? { entitySlots: readings } : {}),
+      };
     const slotId = createSceneItemId(occupied);
     occupied.add(slotId);
     return {
@@ -53,6 +61,7 @@ export function editCustomModel(
           deviceRole: "primary",
           presentation: { label: model.name, dashboardRole: "primary" },
         },
+        ...readings,
       ],
     };
   });

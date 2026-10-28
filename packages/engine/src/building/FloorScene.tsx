@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+import { ItemEntityReadings } from "../ItemEntityReadings";
 import { SolidRooms } from "../architecture-scene/SolidRooms";
 import { ArchitecturalOutdoorPlatforms, floorSlabPolygons } from "../outdoor-platforms";
 import { ArchitecturalHedges } from "../hedges";
@@ -245,23 +247,34 @@ export const FloorScene = memo(function FloorScene({
         manifest.sceneItems
           .filter((item) => item.floorId === floor.id)
           .map((item) => (
-            <SceneItemRenderer
-              key={item.id}
-              item={item}
-              floor={floor}
-              furnishingModels={manifest.extensions.furnishingModels}
-              deviceModels={declarativeDeviceModels}
-              resolvedDevice={resolvedDeviceById[item.id]}
-              entityStatesBySlotId={
-                roomStates[roomIdForItem(item, floor) ?? `outside-rooms:${floor.id}`] ??
-                EMPTY_STATES
-              }
-              reducedMotion={reducedMotion}
-              walkMode={walkMode}
-              onInteract={onInteract}
-              liveMediaByEntityId={liveMediaByEntityId}
-              outlineColor={manifest.home.palette.accent}
-            />
+            <Fragment key={item.id}>
+              <SceneItemRenderer
+                item={item}
+                floor={floor}
+                furnishingModels={manifest.extensions.furnishingModels}
+                deviceModels={declarativeDeviceModels}
+                resolvedDevice={resolvedDeviceById[item.id]}
+                entityStatesBySlotId={
+                  roomStates[roomIdForItem(item, floor) ?? `outside-rooms:${floor.id}`] ??
+                  EMPTY_STATES
+                }
+                reducedMotion={reducedMotion}
+                walkMode={walkMode}
+                onInteract={onInteract}
+                liveMediaByEntityId={liveMediaByEntityId}
+                outlineColor={manifest.home.palette.accent}
+              />
+              {!walkMode && interactionMode !== "editor" && (
+                <ItemEntityReadings
+                  item={item}
+                  floor={floor}
+                  states={
+                    roomStates[roomIdForItem(item, floor) ?? `outside-rooms:${floor.id}`] ??
+                    EMPTY_STATES
+                  }
+                />
+              )}
+            </Fragment>
           ))
       ) : (
         <>
