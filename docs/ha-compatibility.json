@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 3,
+    "validationRevision": 4,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -388,6 +388,92 @@
                             }
                           ],
                           "elementFlags": [1, 1, 1]
+                        }
+                      },
+                      "sources": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "anyOf": [
+                              {
+                                "properties": {
+                                  "end": {
+                                    "optional": false,
+                                    "schema": {
+                                      "tuple": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ],
+                                      "elementFlags": [1, 1, 1]
+                                    }
+                                  },
+                                  "kind": {
+                                    "optional": false,
+                                    "schema": {
+                                      "const": "strip"
+                                    }
+                                  },
+                                  "samples": {
+                                    "optional": false,
+                                    "schema": {
+                                      "type": "number"
+                                    }
+                                  },
+                                  "start": {
+                                    "optional": false,
+                                    "schema": {
+                                      "tuple": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ],
+                                      "elementFlags": [1, 1, 1]
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "properties": {
+                                  "kind": {
+                                    "optional": false,
+                                    "schema": {
+                                      "const": "point"
+                                    }
+                                  },
+                                  "position": {
+                                    "optional": false,
+                                    "schema": {
+                                      "tuple": [
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        },
+                                        {
+                                          "type": "number"
+                                        }
+                                      ],
+                                      "elementFlags": [1, 1, 1]
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
                         }
                       },
                       "strip": {
@@ -3033,6 +3119,92 @@
                           }
                         ],
                         "elementFlags": [1, 1, 1]
+                      }
+                    },
+                    "sources": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "anyOf": [
+                            {
+                              "properties": {
+                                "end": {
+                                  "optional": false,
+                                  "schema": {
+                                    "tuple": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "elementFlags": [1, 1, 1]
+                                  }
+                                },
+                                "kind": {
+                                  "optional": false,
+                                  "schema": {
+                                    "const": "strip"
+                                  }
+                                },
+                                "samples": {
+                                  "optional": false,
+                                  "schema": {
+                                    "type": "number"
+                                  }
+                                },
+                                "start": {
+                                  "optional": false,
+                                  "schema": {
+                                    "tuple": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "elementFlags": [1, 1, 1]
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "properties": {
+                                "kind": {
+                                  "optional": false,
+                                  "schema": {
+                                    "const": "point"
+                                  }
+                                },
+                                "position": {
+                                  "optional": false,
+                                  "schema": {
+                                    "tuple": [
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "number"
+                                      }
+                                    ],
+                                    "elementFlags": [1, 1, 1]
+                                  }
+                                }
+                              }
+                            }
+                          ]
+                        }
                       }
                     },
                     "strip": {

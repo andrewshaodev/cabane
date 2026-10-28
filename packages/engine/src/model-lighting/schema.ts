@@ -22,6 +22,7 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
         "distance",
         "points",
         "strip",
+        "sources",
         "emissiveMaterials",
         "emissiveSurfaces",
         "illuminate",
@@ -41,8 +42,6 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
     }
     if (light.points !== undefined) {
       const points = array(light.points, `${path}.points`, issues);
-      if (points && points.length >= CUSTOM_MODEL_LIMITS.lightPoints)
-        error("points", "Use at most eight light points in total.");
       points?.forEach((point, index) => vector(point, `${path}.points[${index}]`, issues));
     }
     if (light.strip !== undefined) {
@@ -51,12 +50,8 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
       if (strip) {
         keys(strip, ["end", "samples"], `${path}.strip`, issues);
         vector(strip.end, `${path}.strip.end`, issues);
-        if (
-          !Number.isSafeInteger(strip.samples) ||
-          Number(strip.samples) < 2 ||
-          Number(strip.samples) > CUSTOM_MODEL_LIMITS.lightPoints
-        )
-          error("strip.samples", "A strip uses between two and eight samples.");
+        if (!Number.isSafeInteger(strip.samples) || Number(strip.samples) < 2)
+          error("strip.samples", "A strip needs a whole number of at least two samples.");
         if (
           Array.isArray(strip.end) &&
           Array.isArray(light.position) &&
@@ -65,7 +60,35 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
           error("strip.end", "The strip start and end must differ.");
       }
     }
-    for (const field of ["emissiveMaterials", "emissiveSurfaces", "illuminate"])
+    if (light.sources !== undefined) {
+      if (light.points !== undefined || light.strip !== undefined)
+        error("sources", "Use explicit sources or legacy points/strip settings, not both.");
+      array(light.sources, `${path}.sources`, issues)?.forEach((input, index) => {
+        const sourcePath = `${path}.sources[${index}]`;
+        const source = record(input, sourcePath, issues);
+        if (!source) return;
+        if (source.kind === "point") {
+          keys(source, ["kind", "position"], sourcePath, issues);
+          vector(source.position, `${sourcePath}.position`, issues);
+        } else if (source.kind === "strip") {
+          keys(source, ["kind", "start", "end", "samples"], sourcePath, issues);
+          vector(source.start, `${sourcePath}.start`, issues);
+          vector(source.end, `${sourcePath}.end`, issues);
+          if (!Number.isSafeInteger(source.samples) || Number(source.samples) < 2)
+            error(
+              `sources[${index}].samples`,
+              "A strip needs a whole number of at least two samples.",
+            );
+          if (
+            Array.isArray(source.start) &&
+            Array.isArray(source.end) &&
+            source.end.every((n, axis) => n === (source.start as unknown[])[axis])
+          )
+            error(`sources[${index}].end`, "The strip start and end must differ.");
+        } else error(`sources[${index}].kind`, "Choose a point or LED strip source.");
+      });
+    }
+    for (const field of ["emissiveMaterials", "emissiveSurfaces"])
       if (light[field] !== undefined) {
         const names = array(light[field], `${path}.${field}`, issues);
         if (

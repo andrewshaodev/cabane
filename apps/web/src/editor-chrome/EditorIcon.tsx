@@ -185,6 +185,7 @@ const paths = {
   devices: <path d="M9 3v6m6-6v6M6 9h12v3a6 6 0 0 1-12 0Zm6 9v3" />,
   refresh: <path d="M20 4v6h-6M4 20v-6h6M19 8a7 7 0 0 0-12-3L4 8m1 8a7 7 0 0 0 12 3l3-3" />,
   warning: <path d="M12 3 2 21h20ZM12 9v5m0 3v.1" />,
+  minus: <path d="M5 12h14" />,
   plus: <path d="M12 5v14M5 12h14" />,
   chevronLeft: <path d="m15 5-7 7 7 7" />,
   chevron: <path d="m9 5 7 7-7 7" />,

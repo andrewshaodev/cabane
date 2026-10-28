@@ -84,21 +84,24 @@ published, and active history references are preserved across edits and Reset.
 
 Device profiles reuse existing HA domains and controls. Each placed or duplicated
 device receives a fresh primary local slot. Exact entity IDs remain in private,
-origin-scoped binding profiles. Light supports points or a strip, plus named
-emissive materials, and reuses brightness, colour, availability, and local
-scene-light rules. All sources share the primary connected entity; independent
-per-source entity mappings are deferred to general entity attachment work.
-Positions and strip endpoints are metres in normalized support space, after the
-import's orientation and size corrections. Instance rotation and uniform resizing
-transform source positions and range once, alongside the model. Total intensity
-is divided equally across samples, including both strip endpoints. Sources are
-unshadowed point lights, with a maximum of eight per model and 32 imported sources
-per active floor in scene-item order. Overflow sources do not illuminate receivers;
-their selected materials still glow. Off, unavailable, stale and disconnected
-connected lights have zero source and emissive intensity. Local Always on,
-Always off and Night only modes apply to both. Source counts stay stable on HA
-state changes. Strip lighting approximates a line with points; it is not an area
-light or bloom effect. The import preview shows full brightness and source markers.
+origin-scoped binding profiles. Light supports mixed points and multiple strips,
+plus selected glowing surfaces and named emissive materials. All sources share
+the primary connected entity; independent per-source entity mappings remain
+separate work. Positions and strip endpoints are metres in normalized support
+space, after the import's orientation and size corrections. Instance rotation and
+uniform resizing transform source positions and range alongside the model.
+Total intensity is shared between sources, then between each strip's samples,
+including both endpoints. Sample counts are explicit and survive endpoint edits.
+
+There is no eight-point model limit or 32-point floor cutoff. The active source
+pool grows as needed and reuses zero-intensity slots when lights turn off, avoiding
+shader rebuilds within its existing capacity. Off, unavailable, stale and
+disconnected connected lights have zero source and emissive intensity. Local
+Always on, Always off and Night only modes apply to both. Strip lighting
+approximates a line with points compatible with native toon and imported PBR
+materials; surface glow alone does not emit area light or bloom. The shared
+[lighting editor](model-lighting.md) supports camera navigation, glass passthrough,
+move/rotation gizmos, precise coordinates and simulated preview state.
 Camera opens the
 existing viewer. Sensor, Cover, and the other profiles retain static geometry.
 Import and preview never inspect or operate household devices.
