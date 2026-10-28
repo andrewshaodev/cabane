@@ -78,7 +78,7 @@ export function ItemEntitySlots({
                 )
               }
             />
-            Show on 3D map
+            Show readings
           </label>
           {isAuxiliaryEntitySlot(slot) && (
             <EditorButton

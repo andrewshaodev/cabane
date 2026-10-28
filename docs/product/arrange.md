@@ -122,7 +122,7 @@ Only descriptors declaring `defaultColor` offer this control.
 
 Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.
 
-Properties → Linked entities adds optional temperature, power, humidity, sensor or binary sensor readings to furniture and devices. Each reading declares a local slot and name. Choose its HA entity in Connect. “Show on 3D map” is independent for every slot and does not change dashboard visibility or the primary control. Reading edits use ordinary undo/redo, duplication and Apply; duplicates get fresh slot identities and no household mappings.
+Properties → Linked entities adds optional temperature, power, humidity, sensor or binary sensor readings to furniture and devices. Each reading declares a local slot and name. Choose its HA entity in Connect. “Show readings” is independent for every slot and does not change dashboard visibility or the primary control. Reading edits use ordinary undo/redo, duplication and Apply; duplicates get fresh slot identities and no household mappings.
 
 Properties exposes **Lighting** for personal and built-in models. Shared settings
 apply to every copy in this home while each copy retains its own connection.
