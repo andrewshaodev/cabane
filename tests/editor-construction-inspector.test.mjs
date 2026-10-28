@@ -1093,7 +1093,10 @@ await withModules(async (load) => {
       for (const issue of issues) assert.ok(panel.textContent.includes(issue.message));
       assert.ok(panel.textContent.includes(issues[0].suggestion));
       assert.equal(panel.querySelectorAll("li").length, 3);
-      assert.equal(panel.querySelectorAll("li > div").length, 1);
+      assert.equal(
+        [...panel.querySelectorAll("li")].filter((row) => !row.querySelector("button")).length,
+        1,
+      );
       for (const button of panel.querySelectorAll("li button"))
         await act(async () => button.click());
       assert.deepEqual(focused, issues.slice(0, 2));
@@ -1135,8 +1138,11 @@ await withModules(async (load) => {
         ".construction-inspector__validation li button",
       );
       assert.equal(buttons.length, issues.length);
-      for (const button of buttons) {
-        assert.match(button.textContent, /Locate/);
+      for (const [index, button] of buttons.entries()) {
+        assert.match(
+          button.textContent,
+          issues[index].target.kind === "scene-item" ? /Select/ : /Locate/,
+        );
         await act(async () => button.click());
       }
       assert.deepEqual(focused, issues);

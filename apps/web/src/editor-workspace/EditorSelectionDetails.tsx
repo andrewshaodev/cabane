@@ -148,12 +148,7 @@ export function EditorSelectionDetails({
                 floor={placementFloor}
                 furnishingModels={furnishingModels}
                 deviceModels={deviceModels}
-                onWindowFit={(id, placement, size, definition) => {
-                  furnishingEditor.beginTransaction();
-                  furnishingEditor.updatePlacement(id, placement);
-                  furnishingEditor.updateSize(id, size, definition);
-                  furnishingEditor.commitTransaction();
-                }}
+                onWindowFit={furnishingEditor.updatePlacementAndSize}
                 onPlacementChange={furnishingEditor.updatePlacement}
                 onSizeChange={furnishingEditor.updateSize}
                 onLightStateChange={furnishingEditor.updateLightState}

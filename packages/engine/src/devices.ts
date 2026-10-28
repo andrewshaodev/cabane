@@ -110,7 +110,7 @@ export const deviceWorldTransform = (
 
 const issue = (code: string, path: string, message: string): ManifestIssue => ({
   code,
-  severity: "fatal",
+  severity: "warning",
   path,
   message,
 });

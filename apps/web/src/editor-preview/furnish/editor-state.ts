@@ -147,6 +147,7 @@ interface EditorSnapshot {
 }
 
 export interface FurnishingEditorState extends EditorSnapshot {
+  placementError: string | null;
   past: readonly EditorSnapshot[];
   future: readonly EditorSnapshot[];
   transaction: EditorSnapshot | null;
@@ -173,6 +174,13 @@ export type FurnishingEditorAction =
   | { type: "update-placements"; placements: Readonly<Record<string, ItemPlacement>> }
   | { type: "update-placement"; id: string; placement: ItemPlacement }
   | { type: "update-size"; id: string; size: SceneItemSize; definition: SceneModelEditorDescriptor }
+  | {
+      type: "update-placement-and-size";
+      id: string;
+      placement: ItemPlacement;
+      size: SceneItemSize;
+      definition: SceneModelEditorDescriptor;
+    }
   | { type: "rotate"; id: string; rotationYRadians: number }
   | { type: "duplicate"; id: string; floor?: FloorSpec; reservedSlotIds?: readonly string[] }
   | { type: "delete"; id: string }
@@ -194,6 +202,7 @@ export const createFurnishingEditorState = (
 ): FurnishingEditorState => ({
   items: [...items],
   selectedId: null,
+  placementError: null,
   past: [],
   future: [],
   transaction: null,
@@ -321,8 +330,10 @@ export const furnishingEditorReducer = (
     case "update-placement":
       return updateItem(state, action.id, (item) => ({ ...item, placement: action.placement }));
     case "update-size":
+    case "update-placement-and-size":
       return updateItem(state, action.id, (item) => ({
         ...item,
+        ...(action.type === "update-placement-and-size" ? { placement: action.placement } : {}),
         size: normalizeSizeForPolicy(
           action.definition.defaultSize,
           action.size,

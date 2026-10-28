@@ -120,7 +120,18 @@ await withModules(async (load) => {
       assert.equal(item.floorId, before.project.sceneItems[i].floorId);
       assert.deepEqual(item.entitySlots, before.project.sceneItems[i].entitySlots);
     });
-    assert.deepEqual(api.validateHomeProject(next.project, native).issues, []);
+    const validation = api.validateHomeProject(next.project, native);
+    assert.equal(validation.valid, true, JSON.stringify(validation.issues));
+    assert.deepEqual(
+      validation.issues.map(({ code, path, severity }) => ({ code, path, severity })),
+      [
+        {
+          code: "project.item-elevation",
+          path: "sceneItems[0].placement.elevationMeters",
+          severity: "warning",
+        },
+      ],
+    );
   });
 
   for (const profile of ["sensor", "furniture"])

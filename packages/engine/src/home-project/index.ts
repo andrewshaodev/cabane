@@ -17,6 +17,6 @@ export * from "./empty-project";
 
 export * from "./workspace-onboarding-state";
 
-export { resolvedRoomIdForItem } from "./scene-items";
+export { resolvedRoomIdForItem, sceneItemPlacementIssues } from "./scene-items";
 
 export { collectProjectIds } from "./cross-references";

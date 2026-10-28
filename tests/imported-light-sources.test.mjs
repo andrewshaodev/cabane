@@ -328,12 +328,14 @@ await withModules(async (load) => {
 
   test("source controls mix unlimited points and strips, preserve sample counts and nudge chosen endpoints", () =>
     withStorageDom(async (dom) => {
-      let current;
+      let current, currentPicking;
       function Harness() {
-        const [value, setValue] = useState(light);
+        const [value, setValue] = useState({ ...light, emissiveSurfaces: ["surface:0:0"] });
+        const [picking, setPicking] = useState(null);
         const [selected, onSelect] = useState({ index: 0 });
         const [step, onStep] = useState(0.01);
         current = value;
+        currentPicking = picking;
         return React.createElement(LightingFields, {
           light: value,
           onChange: setValue,
@@ -342,8 +344,8 @@ await withModules(async (load) => {
           onSelect,
           step,
           onStep,
-          picking: null,
-          onPicking: () => {},
+          picking,
+          onPicking: setPicking,
           surfaces: [{ id: "surface:0:0", label: "Diffuser", supported: true }],
         });
       }
@@ -357,9 +359,10 @@ await withModules(async (load) => {
       assert.equal(current.sources.length, 11);
       await act(async () => dom.document.querySelector('[aria-label="Remove point 2"]').click());
       assert.equal(current.sources.length, 10);
-      await act(async () =>
-        dom.document.querySelector('.lighting-surfaces input[type="checkbox"]').click(),
-      );
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, "surface");
+      await dom.click("Choose in preview");
+      assert.equal(currentPicking, null);
       assert.deepEqual(current.emissiveSurfaces, ["surface:0:0"]);
       await dom.click("Add LED strip");
       assert.equal(current.sources.length, 11);
