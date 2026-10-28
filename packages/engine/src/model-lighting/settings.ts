@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { resolveModelVariant } from "../model-variants";
 import type { CustomModelLight } from "../imported-models/contracts";
 import { importedLightSources } from "../imported-models/light-sources";
+import { lightingEntitySlotId } from "../home-project/item-binding-identities";
 import type { HomeProject, SceneItemSpec } from "../home-project/types";
 import type {
   DeviceModelDefinition,
@@ -12,7 +13,7 @@ import type {
 } from "../types";
 
 export const lightingModelId = (modelId: string) => `lighting:${modelId}`;
-export const lightingEntitySlotId = (id: string) => `${id}-entity`;
+export { lightingEntitySlotId } from "../home-project/item-binding-identities";
 export const primaryLightSlot = (item: SceneItemSpec) =>
   item.kind === "device"
     ? item.entitySlots.find(

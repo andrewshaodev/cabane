@@ -126,6 +126,23 @@ scene items that currently point at a selected missing model ID. Pack imports
 reject unknown files, unreferenced assets, hash/size mismatches, and conflicting
 IDs; a same-ID model is accepted only when it points to the same asset.
 
+Edit and same-asset pack updates share the engine's `editCustomModel` /
+`importCustomModels` operation. It returns the complete definition, placed copies,
+lighting relationships and private draft cleanup in one snapshot for one history
+commit. Pack updates apply profile conversions and normalization corrections to
+every copy, using the same relative sizing and support rules as Edit. Independent
+readings retain their identities and mappings. Enabling lighting adds independent
+relationships only to copies without a primary light; disabling it removes those
+relationships and their draft mappings across all origins. Published mappings
+remain intact until publication.
+
+Restoring a definition that was missing retains compatible primary slots and the
+saved copy sizes, since the previous normalization is unavailable. Replacing a
+missing model ID through single-GLB import uses the same operation, retaining
+placements and readings while replacing incompatible primary controls. Immutable
+asset conflicts are rejected before any project change. Asset verification,
+staging and revision-checked persistence remain outside this pure transformation.
+
 JSON projects and workspace imports preserve unknown furnishing and device model
 IDs as warnings. The scene shows an editable generic cube with the saved size
 and placement until the model is imported or replaced. Structural errors still

@@ -314,6 +314,71 @@ await withModules(async (load) => {
     });
   });
 
+  test("Issues removal cleans independent lighting even while an unrelated floor is unfinished", async () => {
+    await withDom(async (root) => {
+      const item = { ...brokenItem(), modelId: "repair-sensor", lightSlotId: "repair-light" };
+      const repairRegistries = {
+        ...registries,
+        deviceModels: { ...registries.deviceModels, [item.modelId]: cabinet },
+      };
+      const project = {
+        ...ownerHomeProject,
+        sceneItems: [item],
+        modelLights: {
+          [item.modelId]: { position: [0, 0.5, 0], color: "#ffffff", maxIntensity: 2, distance: 5 },
+        },
+      };
+      const profile = {
+        schemaVersion: 1,
+        homeId: project.home.id,
+        roomAreaIds: {},
+        entityIdsBySlotId: {
+          "cabinet-primary": "sensor.fixture",
+          "repair-light-entity": "light.fixture",
+        },
+      };
+      const initial = engine.addTopFloor(
+        {
+          project,
+          bindings: {
+            "https://fixture.invalid": {
+              draft: profile,
+              published: structuredClone(profile),
+              manualRoomIds: [],
+              manualSlotIds: Object.keys(profile.entityIdsBySlotId),
+            },
+          },
+        },
+        "unfinished",
+      );
+      assert.equal(engine.parseHomeProjectSchema(initial.project).valid, true);
+      let history, repairs;
+      function Harness() {
+        let setHistory;
+        [history, setHistory] = React.useState(() => engine.createWorkspaceHistory(initial));
+        repairs = useEditorIssueRepairs({
+          ...repairRegistries,
+          snapshot: history.present,
+          editorProject: history.present.project,
+          commit: (next) => setHistory((current) => engine.commitWorkspaceSnapshot(current, next)),
+          replaceEditorsFromProject: () => {},
+        });
+        return null;
+      }
+      await act(async () => root.render(React.createElement(Harness)));
+      await act(async () =>
+        repairs.repairIssue({ target: { kind: "scene-item", id: item.id } }, "remove"),
+      );
+      assert.equal(history.past.length, 1);
+      assert.deepEqual(history.present.project.sceneItems, []);
+      const state = history.present.bindings["https://fixture.invalid"];
+      assert.deepEqual(state.draft.entityIdsBySlotId, {});
+      assert.deepEqual(state.manualSlotIds, []);
+      assert.deepEqual(state.published, profile);
+      assert.deepEqual(engine.undoWorkspaceHistory(history).present, initial);
+    });
+  });
+
   test("hover and keyboard focus expose every full error and correction outside the canvas", async () => {
     await withDom(async (root, document) => {
       const issues = [

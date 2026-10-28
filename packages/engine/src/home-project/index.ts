@@ -7,6 +7,7 @@ export * from "./runtime";
 export * from "./serialization";
 export * from "./repository";
 export * from "./workspace-bindings";
+export { itemBindingSlotIds } from "./item-binding-identities";
 export * from "./lifecycle";
 export * from "./floor-operations";
 export * from "./workspace-contract";

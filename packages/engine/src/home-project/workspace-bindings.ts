@@ -6,6 +6,8 @@ import {
 import type { HomeBindingManifest, RuntimeBindingProfile } from "../types";
 import type { HomeProjectIssue } from "./validation";
 import { isPlainRecord } from "./validation-types";
+import { itemBindingSlotIds } from "./item-binding-identities";
+import type { SceneItemSpec } from "./types";
 
 export interface WorkspaceBindingState {
   draft: RuntimeBindingProfile;
@@ -224,9 +226,22 @@ export const validateWorkspaceBindings = (
 };
 
 /**
- * Removes draft-only references to deleted binding slots across every origin.
- * Published mappings remain intact until the draft is published.
+ * Clean known-deleted item bindings without resolving models or geometry.
+ * Surviving declarations and published profiles remain intact in unfinished drafts.
  */
+export const removeDeletedItemBindingReferences = (
+  bindings: WorkspaceBindings,
+  before: readonly SceneItemSpec[],
+  after: readonly SceneItemSpec[],
+): WorkspaceBindings => {
+  const retained = new Set(after.flatMap(itemBindingSlotIds));
+  return removeWorkspaceSlotReferences(
+    bindings,
+    before.flatMap(itemBindingSlotIds).filter((id) => !retained.has(id)),
+  );
+};
+
+/** Removes only the named draft slot references across all origins. */
 export const removeWorkspaceSlotReferences = (
   bindings: WorkspaceBindings,
   slotIds: readonly string[],

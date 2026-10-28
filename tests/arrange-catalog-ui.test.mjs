@@ -14,7 +14,7 @@ await withModules(async (load) => {
   );
   const { HomeEditorHeader } = await load("/apps/web/src/editor-workspace/HomeEditorHeader.tsx");
   const { ownerProjectRegistries } = await load("/apps/web/src/project-runtime.ts");
-  const { createSeedProjectRecord } = await load("/packages/engine/src/index.ts");
+  const { createSeedProjectRecord, editCustomModel } = await load("/packages/engine/src/index.ts");
   const { ownerHomeProject, ownerProjectManifest } = await load("/tests/fixtures/bundled-home.ts");
   const { useConstructEditor } = await load(
     "/apps/web/src/editor-preview/construct/useConstructEditor.ts",
@@ -770,7 +770,6 @@ await withModules(async (load) => {
     });
   });
 
-  const { editCustomModel } = await load("/apps/web/src/custom-models/edit-custom-model.ts");
   const { personalScaleFixture } = await load("/tests/fixtures/personal-models-scale.ts");
   test("custom model edits survive editor reconciliation and undo/redo across floors", async (context) => {
     context.mock.timers.enable({ apis: ["setTimeout"] });

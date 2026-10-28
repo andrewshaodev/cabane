@@ -15,7 +15,7 @@ import {
   indoorRoomsForFloor,
   roomsForFloor,
   reconcileWorkspaceBindings,
-  removeWorkspaceSlotReferences,
+  removeDeletedItemBindingReferences,
   validateHomeProject,
 } from "@cabane/engine";
 
@@ -147,13 +147,11 @@ export const workspaceSnapshotFromEditorState = (
   additionalIssues: readonly HomeProjectIssue[] = [],
 ): EditorWorkspaceSnapshot => {
   const project = projectFromEditorState(base.project, floor, sceneItems);
-  const retainedDeviceSlotIds = new Set(
-    project.sceneItems.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
+  let bindings = removeDeletedItemBindingReferences(
+    base.bindings,
+    base.project.sceneItems,
+    project.sceneItems,
   );
-  const removedDeviceSlotIds = base.project.sceneItems.flatMap((item) =>
-    (item.entitySlots ?? []).map((slot) => slot.id).filter((id) => !retainedDeviceSlotIds.has(id)),
-  );
-  let bindings = removeWorkspaceSlotReferences(base.bindings, removedDeviceSlotIds);
   try {
     const validation = validateHomeProject(project, registries);
     if (![...validation.issues, ...additionalIssues].some((issue) => issue.severity === "error")) {

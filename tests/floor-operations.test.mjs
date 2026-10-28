@@ -35,6 +35,84 @@ await withModules(async (load) => {
     assert.deepEqual(api.undoWorkspaceHistory(history).present, initial);
     assert.throws(() => api.removeTopFloor(api.removeTopFloor(removed)), /ground floor/);
   });
+  test("floor deletion removes every item-owned draft binding and retains unresolved surviving references", () => {
+    const project = makeThreeFloorProject();
+    project.sceneItems = project.floors.map((floor) => ({
+      id: `${floor.id}-item`,
+      kind: "device",
+      modelId: "missing-sensor",
+      floorId: floor.id,
+      size: [1, 1, 1],
+      lightSlotId: `${floor.id}-lighting`,
+      placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
+      entitySlots: [
+        {
+          id: `${floor.id}-primary`,
+          compatibleDomains: ["sensor"],
+          required: true,
+          autoMap: "manual",
+          deviceRole: "primary",
+          presentation: { label: "Sensor", dashboardRole: "primary" },
+        },
+        {
+          id: `${floor.id}-reading`,
+          compatibleDomains: ["sensor"],
+          required: false,
+          autoMap: "manual",
+          deviceRole: "secondary",
+          presentation: { label: "Reading", dashboardRole: "secondary" },
+        },
+      ],
+    }));
+    assert.deepEqual(api.itemBindingSlotIds(project.sceneItems[2]), [
+      "second-primary",
+      "second-reading",
+      "second-lighting-entity",
+    ]);
+    const profile = {
+      schemaVersion: 1,
+      homeId: project.home.id,
+      roomAreaIds: {},
+      entityIdsBySlotId: Object.fromEntries([
+        ...project.sceneItems
+          .flatMap(api.itemBindingSlotIds)
+          .map((id) => [id, id.endsWith("entity") ? "light.fixture" : "sensor.fixture"]),
+        ["temporarily-unresolved", "sensor.retained"],
+      ]),
+    };
+    const initial = {
+      project,
+      bindings: Object.fromEntries(
+        ["https://one.invalid", "https://two.invalid"].map((origin) => [
+          origin,
+          {
+            draft: profile,
+            published: structuredClone(profile),
+            manualRoomIds: [],
+            manualSlotIds: Object.keys(profile.entityIdsBySlotId),
+          },
+        ]),
+      ),
+    };
+    const next = api.removeTopFloor(initial);
+    for (const state of Object.values(next.bindings)) {
+      for (const id of ["second-primary", "second-reading", "second-lighting-entity"]) {
+        assert.equal(state.draft.entityIdsBySlotId[id], undefined);
+        assert.equal(state.manualSlotIds.includes(id), false);
+      }
+      for (const id of [
+        "ground-primary",
+        "first-reading",
+        "first-lighting-entity",
+        "temporarily-unresolved",
+      ])
+        assert.equal(state.draft.entityIdsBySlotId[id], profile.entityIdsBySlotId[id]);
+      assert.deepEqual(state.published, profile);
+    }
+    const history = api.commitWorkspaceSnapshot(api.createWorkspaceHistory(initial), next);
+    assert.deepEqual(api.undoWorkspaceHistory(history).present, initial);
+    assert.deepEqual(api.redoWorkspaceHistory(api.undoWorkspaceHistory(history)).present, next);
+  });
   for (const add of ["addTopFloor", "addBottomFloor"]) {
     test(`${add} duplicates Construct elements without furniture, devices or mappings`, () => {
       const project = makeThreeFloorProject();

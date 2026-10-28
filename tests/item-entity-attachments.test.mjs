@@ -4,6 +4,7 @@ import React, { act, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
+import { withStorageDom } from "./dom-test-environment.mjs";
 import { connectedRuntimeFixture, rawEntity, toSnapshots } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
@@ -369,6 +370,91 @@ await withModules(async (load) => {
       false,
     );
   });
+  test("removing a lit item in an unfinished floor draft autosaves and reopens with atomic undo and draft-only cleanup", () =>
+    withStorageDom(async (dom) => {
+      const { project, profile } = connectionFixture();
+      const light = { position: [0, 0.5, 0], color: "#ffffff", maxIntensity: 2, distance: 5 };
+      const lit = engine.editModelLighting(
+        { project, bindings: {} },
+        project.sceneItems[1].modelId,
+        light,
+        registries,
+      );
+      const target = lit.project.sceneItems[1];
+      const lightId = engine.lightingEntitySlotId(target.lightSlotId);
+      const mapped = {
+        ...profile,
+        entityIdsBySlotId: { ...profile.entityIdsBySlotId, [lightId]: "light.fixture" },
+      };
+      lit.bindings = Object.fromEntries(
+        ["https://one.invalid", "https://two.invalid"].map((origin) => [
+          origin,
+          {
+            draft: structuredClone(mapped),
+            published: structuredClone(mapped),
+            manualRoomIds: Object.keys(mapped.roomAreaIds),
+            manualSlotIds: Object.keys(mapped.entityIdsBySlotId),
+          },
+        ]),
+      );
+      assert.equal(engine.validateHomeProject(lit.project, registries).valid, true);
+      const records = engine.createHomeProjectRepository(
+        engine.createIndexedDbProjectRecordStore(dom.indexedDB),
+        registries,
+      );
+      const seed = engine.createSeedProjectRecord(lit.project);
+      seed.bindings = lit.bindings;
+      const record = await records.replace(seed);
+      const lifecycle = engine.createHomeProjectLifecycle(records, lit.project);
+      const before = engine.addTopFloor(lit, "unfinished");
+      assert.equal(engine.parseHomeProjectSchema(before.project).valid, true);
+      assert.equal(engine.validateHomeProject(before.project, registries).valid, false);
+      const next = workspaceSnapshotFromEditorState(
+        before,
+        before.project.floors[0],
+        before.project.sceneItems.filter((item) => item.id !== target.id),
+        registries,
+      );
+      const history = engine.commitWorkspaceSnapshot(engine.createWorkspaceHistory(before), next);
+      assert.equal(history.past.length, 1);
+      assert.deepEqual(engine.undoWorkspaceHistory(history).present, before);
+      assert.deepEqual(
+        engine.redoWorkspaceHistory(engine.undoWorkspaceHistory(history)).present,
+        next,
+      );
+      const saved = await lifecycle.autosave(record, next.project, undefined, next.bindings);
+      assert.equal(saved.status, "saved", saved.error?.message ?? JSON.stringify(saved.issues));
+      const reopened = await records.load(record.homeId);
+      assert.deepEqual(reopened.draft, next.project);
+      assert.deepEqual(reopened.published, lit.project);
+      for (const [origin, state] of Object.entries(reopened.bindings)) {
+        assert.equal(state.draft.entityIdsBySlotId[lightId], undefined);
+        assert.equal(state.draft.entityIdsBySlotId["furniture-reading"], undefined);
+        assert.equal(state.manualSlotIds.includes(lightId), false);
+        assert.equal(state.manualSlotIds.includes("furniture-reading"), false);
+        assert.equal(state.draft.entityIdsBySlotId["fridge-control"], "sensor.fridge");
+        assert.deepEqual(state.published, lit.bindings[origin].published);
+      }
+      const undone = engine.undoWorkspaceHistory(history).present;
+      const savedUndo = await lifecycle.autosave(
+        reopened,
+        undone.project,
+        undefined,
+        undone.bindings,
+      );
+      assert.equal(savedUndo.status, "saved", savedUndo.error?.message);
+      const reopenedUndo = await records.load(record.homeId);
+      assert.deepEqual(reopenedUndo.draft, before.project);
+      assert.deepEqual(reopenedUndo.bindings, before.bindings);
+      const savedRedo = await lifecycle.autosave(
+        reopenedUndo,
+        next.project,
+        undefined,
+        next.bindings,
+      );
+      assert.equal(savedRedo.status, "saved", savedRedo.error?.message);
+      assert.deepEqual((await records.load(record.homeId)).bindings, next.bindings);
+    }));
   test("attachment edits participate in undo, duplication identity, and mapping cleanup while published mappings remain intact", () => {
     const { project, profile, runtime } = connectionFixture();
     const original = project.sceneItems[1];

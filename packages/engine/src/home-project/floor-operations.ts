@@ -3,6 +3,7 @@ import type { EditorWorkspaceSnapshot } from "../home-editor/workspace-history";
 import { copyFloorContents, type FloorCopyOptions } from "./floor-duplication";
 import type { DraftLayoutFloorSpec } from "./types";
 import { removeWorkspaceSlotReferences } from "./workspace-bindings";
+import { itemBindingSlotIds } from "./item-binding-identities";
 
 export const addTopFloor = (
   snapshot: EditorWorkspaceSnapshot,
@@ -126,8 +127,8 @@ export const removeFloor = (
   const openingIds = new Set(removedFloor.openings.map((opening) => opening.id));
   const slotIds = [
     ...project.sceneItems
-      .filter((item) => item.floorId === removedFloor.id && item.lightSlotId)
-      .map((item) => `${item.lightSlotId}-entity`),
+      .filter((item) => item.floorId === removedFloor.id)
+      .flatMap(itemBindingSlotIds),
     ...roomsForFloor(removedFloor).flatMap(
       (room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? [],
     ),
@@ -136,9 +137,6 @@ export const removeFloor = (
         project.openingProfiles[opening.id]?.contactSlot?.id,
         project.openingProfiles[opening.id]?.coverSlot?.id,
       ].filter((id): id is string => Boolean(id)),
-    ),
-    ...project.sceneItems.flatMap((item) =>
-      item.floorId === removedFloor.id ? (item.entitySlots ?? []).map((slot) => slot.id) : [],
     ),
   ];
   const bindings = removeWorkspaceSlotReferences(snapshot.bindings, slotIds);

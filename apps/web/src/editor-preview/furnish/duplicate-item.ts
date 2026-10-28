@@ -1,5 +1,7 @@
 import {
   pointInsidePolygon,
+  itemBindingSlotIds,
+  lightingEntitySlotId,
   resolveItemTransform,
   type FloorSpec,
   type ItemPlacement,
@@ -48,10 +50,8 @@ export const duplicateSceneItem = (
   const occupied = new Set([
     ...items.map((item) => item.id),
     ...reservedSlotIds,
-    ...items.flatMap((item) =>
-      item.lightSlotId ? [item.lightSlotId, `${item.lightSlotId}-entity`] : [],
-    ),
-    ...items.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
+    ...items.flatMap((item) => (item.lightSlotId ? [item.lightSlotId] : [])),
+    ...items.flatMap(itemBindingSlotIds),
   ]);
   const id = createSceneItemId(occupied);
   occupied.add(id);
@@ -68,7 +68,7 @@ export const duplicateSceneItem = (
   const lightSlotId = source.lightSlotId ? createSceneItemId(occupied) : undefined;
   if (lightSlotId) {
     occupied.add(lightSlotId);
-    occupied.add(`${lightSlotId}-entity`);
+    occupied.add(lightingEntitySlotId(lightSlotId));
   }
   const common = {
     ...source,
