@@ -14,8 +14,16 @@ service and camera clients only when the workspace selects the host origin.
 Replacement or teardown releases Cabane's subscriptions, cancels pending work,
 and rejects stale results; it never closes the host connection or logs HA out.
 An origin mismatch requires explicit workspace selection and never remaps device
-bindings silently. The same HTTPS/paired-loopback policy applies to borrowed
-sessions; native hosting does not permit ordinary LAN HTTP.
+bindings silently. Native panels permit HTTP or HTTPS only when the page, host
+session and selected workspace have the exact same origin (scheme, host and port).
+This includes local-network HTTP without browser flags. HTTP remains unencrypted;
+HTTPS is recommended. Treating an HTTP origin as a secure context does not encrypt it.
+UUID generation uses getRandomValues when randomUUID is unavailable; SHA-256
+content identities use the existing fallback without SubtleCrypto. Workspace and
+model storage still require working IndexedDB. Storage failures retain the existing
+recovery path rather than overwriting saved data; optional browser features such as
+clipboard access retain their unavailable-feature guidance. Model synchronization
+uses the borrowed authenticated WebSocket, including chunked GLB uploads.
 
 Native initialization skips standalone legacy URL and authentication migration.
 It does not read, copy, remove, or persist legacy OAuth material, write OAuth
@@ -35,7 +43,7 @@ current session before exchanging the code. Tokens stay in the frame's storage
 context. Blocked, closed, cancelled, or timed-out popups allow retry; standalone
 sign-in continues to use the existing redirect flow.
 
-Real-device deployments require browser-trusted HTTPS delivery of Cabane and
+Standalone real-device deployments require browser-trusted HTTPS delivery of Cabane and
 HTTPS/WSS Home Assistant connectivity. The UI and runtime reject unsupported
 transport before sign-in, callback exchange, or stored-token restoration, with
 actionable HTTPS guidance. Rejected callback parameters are removed from the URL.
@@ -43,11 +51,11 @@ actionable HTTPS guidance. Rejected callback parameters are removed from the URL
 HTTP development remains supported when both endpoints use HTTP loopback origins:
 `localhost`, IPv4 `127.0.0.0/8`, or IPv6 `[::1]`, on the browser's machine.
 Local demo and construction remain available over HTTP without HA. This exception
-is local development, not encryption. Ordinary LAN HTTP, private-tunnel bypasses,
+is local development, not encryption. Standalone LAN HTTP, private-tunnel bypasses,
 HTTPS-to-HTTP, and loopback-HTTP-to-remote-HTTPS sessions are unsupported.
 
 The client guard cannot protect JavaScript replaced during HTTP delivery.
-Production infrastructure must enforce HTTPS. Actual certificate, HTTP redirect
+Standalone production infrastructure must enforce HTTPS. Actual certificate, HTTP redirect
 or rejection, and HA HTTPS/WSS behavior on the chosen release target remain a
 launch gate; static builds do not complete Docker/LAN deployment acceptance.
 See [transport acceptance](../transport-acceptance.md) for the required checks.

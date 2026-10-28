@@ -1,6 +1,19 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  lighting: (
+    <>
+      <path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z" />
+    </>
+  ),
+  floorAbove: <path d="M3 14h12v7H3zM3 17.5h12M19 13V3m-3 3 3-3 3 3" />,
+  floorBelow: <path d="M3 3h12v7H3zM3 6.5h12M19 11v10m-3-3 3 3 3-3" />,
+  apartmentFloor: (
+    <>
+      <rect x="4" y="3" width="16" height="18" rx="1" />
+      <path d="M4 9h16M4 15h16M9 5.5v1M15 5.5v1M9 11.5v1M15 11.5v1M10 21v-3h4v3" />
+    </>
+  ),
   niche: (
     <>
       <path d="M3 21V3h18v18M6 18V6h12v12Z" />

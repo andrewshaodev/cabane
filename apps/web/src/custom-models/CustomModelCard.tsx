@@ -12,11 +12,13 @@ export function CustomModelCard({
   entry,
   disabled,
   onChoose,
+  onEdit,
 }: {
   workspace: ReturnType<typeof useEditorWorkspace>;
   entry: CatalogEntry;
   disabled: boolean;
   onChoose: () => void;
+  onEdit: (model: CustomModel) => void;
 }) {
   const [name, setName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +61,15 @@ export function CustomModelCard({
           <ModelThumbnail entry={entry} />
         </button>
         <div className="custom-model-preview-actions">
+          <EditorButton
+            className="custom-model-icon"
+            aria-label={`Edit ${model.name}`}
+            title="Edit model"
+            disabled={disabled}
+            onClick={() => onEdit(model)}
+          >
+            <EditorIcon name="settings" />
+          </EditorButton>
           <EditorButton
             className="custom-model-icon"
             aria-label={`Download ${model.name} GLB`}

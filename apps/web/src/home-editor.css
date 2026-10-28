@@ -79,7 +79,7 @@
   left: calc(var(--editor-rail-width) + 16px);
   right: max(16px, env(safe-area-inset-right));
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 16px 8px;
   pointer-events: none;
@@ -511,18 +511,20 @@
   gap: 8px;
 }
 .construction-inspector__room-toggle {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;
-  justify-content: space-between;
   min-height: 44px;
-  gap: 12px;
+  gap: 8px 12px;
 }
 .construction-inspector__room-toggle label {
+  display: block;
+  color: var(--preview-ink);
+  font-weight: 500;
   cursor: pointer;
 }
-.construction-inspector__room-toggle-copy {
-  display: grid;
-  gap: 4px;
+.construction-inspector__room-toggle .construction-inspector__room-action-note {
+  grid-column: 1 / -1;
 }
 .direction-preview .construction-inspector__room-actions > button.editor-button {
   justify-self: start;

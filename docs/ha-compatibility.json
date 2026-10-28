@@ -319,10 +319,58 @@
                           "type": "number"
                         }
                       },
+                      "emissiveMaterials": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "emissiveSurfaces": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "illuminate": {
+                        "optional": true,
+                        "schema": {
+                          "anyOf": [
+                            {
+                              "const": false
+                            },
+                            {
+                              "const": true
+                            }
+                          ]
+                        }
+                      },
                       "maxIntensity": {
                         "optional": false,
                         "schema": {
                           "type": "number"
+                        }
+                      },
+                      "points": {
+                        "optional": true,
+                        "schema": {
+                          "items": {
+                            "tuple": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "elementFlags": [1, 1, 1]
+                          }
                         }
                       },
                       "position": {
@@ -340,6 +388,36 @@
                             }
                           ],
                           "elementFlags": [1, 1, 1]
+                        }
+                      },
+                      "strip": {
+                        "optional": true,
+                        "schema": {
+                          "properties": {
+                            "end": {
+                              "optional": false,
+                              "schema": {
+                                "tuple": [
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "number"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "elementFlags": [1, 1, 1]
+                              }
+                            },
+                            "samples": {
+                              "optional": false,
+                              "schema": {
+                                "type": "number"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -2021,6 +2099,25 @@
                             ],
                             "elementFlags": [1, 1, 1, 4]
                           }
+                        },
+                        "roomName": {
+                          "optional": true,
+                          "schema": {
+                            "type": "string"
+                          }
+                        },
+                        "useAsRoom": {
+                          "optional": true,
+                          "schema": {
+                            "anyOf": [
+                              {
+                                "const": false
+                              },
+                              {
+                                "const": true
+                              }
+                            ]
+                          }
                         }
                       }
                     }
@@ -2715,6 +2812,12 @@
           "optional": false,
           "schema": {
             "properties": {
+              "apartmentFloor": {
+                "optional": true,
+                "schema": {
+                  "type": "number"
+                }
+              },
               "id": {
                 "optional": false,
                 "schema": {
@@ -2838,6 +2941,136 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "modelLights": {
+          "optional": true,
+          "schema": {
+            "properties": {},
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "color": {
+                      "optional": false,
+                      "schema": {
+                        "type": "string"
+                      }
+                    },
+                    "distance": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "emissiveMaterials": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "emissiveSurfaces": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "illuminate": {
+                      "optional": true,
+                      "schema": {
+                        "anyOf": [
+                          {
+                            "const": false
+                          },
+                          {
+                            "const": true
+                          }
+                        ]
+                      }
+                    },
+                    "maxIntensity": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "points": {
+                      "optional": true,
+                      "schema": {
+                        "items": {
+                          "tuple": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "elementFlags": [1, 1, 1]
+                        }
+                      }
+                    },
+                    "position": {
+                      "optional": false,
+                      "schema": {
+                        "tuple": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "elementFlags": [1, 1, 1]
+                      }
+                    },
+                    "strip": {
+                      "optional": true,
+                      "schema": {
+                        "properties": {
+                          "end": {
+                            "optional": false,
+                            "schema": {
+                              "tuple": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "elementFlags": [1, 1, 1]
+                            }
+                          },
+                          "samples": {
+                            "optional": false,
+                            "schema": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
             }
           }
         },
@@ -3417,6 +3650,12 @@
                         "const": "device"
                       }
                     },
+                    "lightSlotId": {
+                      "optional": true,
+                      "schema": {
+                        "type": "string"
+                      }
+                    },
                     "lightState": {
                       "optional": true,
                       "schema": {
@@ -3850,6 +4089,31 @@
                       "optional": false,
                       "schema": {
                         "const": "furnishing"
+                      }
+                    },
+                    "lightSlotId": {
+                      "optional": true,
+                      "schema": {
+                        "type": "string"
+                      }
+                    },
+                    "lightState": {
+                      "optional": true,
+                      "schema": {
+                        "anyOf": [
+                          {
+                            "const": "always-off"
+                          },
+                          {
+                            "const": "always-on"
+                          },
+                          {
+                            "const": "connected"
+                          },
+                          {
+                            "const": "night-only"
+                          }
+                        ]
                       }
                     },
                     "modelId": {
@@ -6025,6 +6289,25 @@
                           ],
                           "elementFlags": [1, 1, 1, 4]
                         }
+                      },
+                      "roomName": {
+                        "optional": true,
+                        "schema": {
+                          "type": "string"
+                        }
+                      },
+                      "useAsRoom": {
+                        "optional": true,
+                        "schema": {
+                          "anyOf": [
+                            {
+                              "const": false
+                            },
+                            {
+                              "const": true
+                            }
+                          ]
+                        }
                       }
                     }
                   }
@@ -6720,6 +7003,12 @@
             "ref": "project.properties.home"
           }
         },
+        "modelLights": {
+          "optional": true,
+          "schema": {
+            "ref": "project.properties.modelLights"
+          }
+        },
         "openingProfiles": {
           "optional": false,
           "schema": {
@@ -6982,6 +7271,12 @@
                       "optional": false,
                       "schema": {
                         "const": "device"
+                      }
+                    },
+                    "lightSlotId": {
+                      "optional": true,
+                      "schema": {
+                        "type": "string"
                       }
                     },
                     "lightState": {
@@ -7417,6 +7712,31 @@
                       "optional": false,
                       "schema": {
                         "const": "furnishing"
+                      }
+                    },
+                    "lightSlotId": {
+                      "optional": true,
+                      "schema": {
+                        "type": "string"
+                      }
+                    },
+                    "lightState": {
+                      "optional": true,
+                      "schema": {
+                        "anyOf": [
+                          {
+                            "const": "always-off"
+                          },
+                          {
+                            "const": "always-on"
+                          },
+                          {
+                            "const": "connected"
+                          },
+                          {
+                            "const": "night-only"
+                          }
+                        ]
                       }
                     },
                     "modelId": {

@@ -10,7 +10,15 @@ model warning cannot hide the actual reason an import or restore failed.
 `HomeProject` V2 is pure JSON: schema version, seed revision, home identity and
 palette, shared coordinates, ordered floors, straight/L-shaped/spiral stairs, scene items, room/opening profiles, legacy shortcuts, optional action-bar configuration, and
 assumptions, and an optional `customModels` catalog. Layout rooms carry empty device/dashboard arrays; runtime bindings
-are composed from profiles and scene items. The layout project accepts flat
+are composed from profiles and scene items. Outdoor platforms optionally persist `useAsRoom` and `roomName`. Their room ID
+is derived as `<platform-id>:room`; the polygon and finish remain platform-owned.
+The runtime adds these rooms for bindings and navigation without persisting
+duplicate layout rooms or creating ceilings or roofs. Existing projects need no
+migration; omitted options keep the prior platform behavior. Older clients reject
+the new fields until updated. Disabling or deleting the platform removes its room
+profile and reconciles room-area mappings while retaining explicit device mappings.
+
+The layout project accepts flat
 ceilings; the broader runtime manifest also supports sloped ceilings.
 
 Scene items refer to registered models by ID, carry an explicit floor ID and size, an optional `variant` ID, and use
@@ -77,12 +85,16 @@ Panels use continuous warm surfaces, aligned fields and spaced semantic groups,
 without nested cards or decorative section rules. Relevant fields group dimensions,
 placement and appearance; advanced controls remain accessible through one disclosure level.
 
-Above 1240px, Properties reserves canvas width. Compact windows use a right drawer;
-mobile uses one active bottom sheet for tools, Properties or Issues. Short mobile
-landscape windows put that shared surface on the left to retain canvas height. Canvas picking,
-framing, floor controls and view controls use the available region. Panel changes
-that resize the canvas wait for active drawing, dragging and marquee gestures to
-settle. Panel state is presentation-only and is not exported or added to history.
+On desktop, Properties overlays the canvas as a full-height right sidebar. Opening
+or collapsing it never resizes the canvas or shifts the camera projection; floating
+floor and status controls move aside to stay accessible. Undo and Redo share the
+top-right project actions with Reset and Save, separated by a divider. The Construct
+toolbar contains construction tools; Arrange has no separate history toolbar.
+Mobile uses one active bottom sheet for Tools, Properties or Issues, with an
+underlined active tab and a count badge for Issues. Short mobile landscape windows
+put that shared surface on the left to retain canvas height. Panel changes wait
+for active drawing, dragging and marquee gestures to settle. Panel state is
+presentation-only and is not exported or added to history.
 
 Draft Issues lives in a separate tray below the canvas in every editor mode.
 It starts collapsed with error/warning counts, expands to a scrollable list capped
@@ -270,4 +282,4 @@ retains the preference for the current session.
 
 Furniture may declare optional `entitySlots` containing manual, non-required secondary sensor or binary sensor attachments. Devices retain exactly one primary control; optional read-only attachments are validated independently of the model’s control domains. `presentation.showInScene` is opt-in map visibility. Older documents omit both fields and keep their prior behavior. Older panels reject documents containing the new fields; preserve that rejection and update the matching HACS panel before transfer.
 
-Leaving the editor for Home Assistant settings or another page saves the draft first. A failed save cancels that navigation attempt so a later click can retry. Storage errors show their reason and an explicit retry. Revision conflicts keep both the newer saved record and the current in-memory draft intact, and offer a draft backup containing the current project and private mappings before the user reopens the saved workspace.
+Leaving the editor for Home Assistant settings or another page saves the draft first. A failed save cancels that navigation attempt so a later click can retry. Storage errors show their reason and an explicit retry. Revision conflicts keep both the newer saved record and the current in-memory draft intact, and offer a complete `.cabane` draft backup containing the current project, private mappings and verified imported GLBs, including staged imports, before the user reopens the saved workspace. Backup failures retain the draft and show a retryable error.

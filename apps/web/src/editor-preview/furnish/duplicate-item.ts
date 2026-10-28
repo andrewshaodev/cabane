@@ -48,6 +48,9 @@ export const duplicateSceneItem = (
   const occupied = new Set([
     ...items.map((item) => item.id),
     ...reservedSlotIds,
+    ...items.flatMap((item) =>
+      item.lightSlotId ? [item.lightSlotId, `${item.lightSlotId}-entity`] : [],
+    ),
     ...items.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
   ]);
   const id = createSceneItemId(occupied);
@@ -62,7 +65,18 @@ export const duplicateSceneItem = (
     if (floor.rooms.filter((room) => pointInsidePolygon(point, room.polygon)).length !== 1)
       placement = { ...source.placement };
   }
-  const common = { ...source, id, size: [...source.size] as [number, number, number], placement };
+  const lightSlotId = source.lightSlotId ? createSceneItemId(occupied) : undefined;
+  if (lightSlotId) {
+    occupied.add(lightSlotId);
+    occupied.add(`${lightSlotId}-entity`);
+  }
+  const common = {
+    ...source,
+    ...(lightSlotId ? { lightSlotId } : {}),
+    id,
+    size: [...source.size] as [number, number, number],
+    placement,
+  };
   return source.kind === "device"
     ? {
         ...common,

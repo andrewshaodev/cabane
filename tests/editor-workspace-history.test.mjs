@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { IDBFactory } from "fake-indexeddb";
+import { testGlb } from "./fixtures/personal-glb.mjs";
 import { act, createElement, StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
@@ -9,6 +11,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 await withModules(async (load) => {
   const engine = await load("/packages/engine/src/index.ts");
+  const { parseWorkspaceImport } = await load("/apps/web/src/workspaces/workspace-transfer.ts");
   const { useEditorExitRequest } = await load("/apps/web/src/editor-workspace/useEditorSession.ts");
   const { EditorDraftStatus } = await load("/apps/web/src/editor-workspace/EditorDraftStatus.tsx");
   const { ownerHomeProject } = await load("/tests/fixtures/bundled-home.ts");
@@ -132,6 +135,7 @@ await withModules(async (load) => {
     const dom = new JSDOM('<!doctype html><div id="root"></div>', {
       url: "http://fixture.invalid/",
     });
+    dom.window.indexedDB = new IDBFactory();
     const names = ["window", "document", "navigator", "HTMLElement"];
     const previous = Object.fromEntries(
       names.map((name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
@@ -557,7 +561,26 @@ await withModules(async (load) => {
     };
     const saved = await lifecycle.autosave(record, newerDraft);
     assert.equal(saved.status, "saved");
+    const bytes = testGlb();
+    const asset = { bytes, sha256: await engine.modelAssetHash(bytes), byteLength: bytes.length };
+    const model = {
+      id: "custom:11111111-2222-4333-8444-555555555555",
+      name: "Unsaved cabinet",
+      profile: "furniture",
+      placement: "floor",
+      asset: { sha256: asset.sha256, byteLength: asset.byteLength },
+      normalization: {
+        rotation: [0, 0, 0],
+        scale: 1,
+        offset: [0, 0.25, 0],
+        size: [1, 0.5, 0.4],
+        bounds: { min: [-0.5, 0, -0.2], max: [0.5, 0.5, 0.2] },
+      },
+      complexity: { visibleMeshes: 1, triangles: 12 },
+    };
     const harness = await mount(record, lifecycle, false, true);
+    // This model was imported in the conflicted draft and has never reached its record.
+    await engine.stageModelAssets([asset]);
     let blob, filename;
     context.mock.method(URL, "createObjectURL", (value) => {
       blob = value;
@@ -569,7 +592,9 @@ await withModules(async (load) => {
     });
     try {
       await act(async () => {
-        harness.current.commit(changed(harness.current.snapshot, "Retained in-memory draft"));
+        const edited = changed(harness.current.snapshot, "Retained in-memory draft");
+        edited.project.customModels = [model];
+        harness.current.commit(edited);
         assert.equal((await harness.current.flush()).status, "storage-error");
       });
       const alert = document.querySelector('[role="alert"]');
@@ -582,14 +607,79 @@ await withModules(async (load) => {
         false,
       );
       await act(async () => alert.querySelector("button").click());
-      assert.equal(filename, `${record.homeId}-draft-recovery.json`);
-      const backup = JSON.parse(await blob.text());
+      const archive = await engine.readCabaneFile(blob);
+      assert.equal(archive.assets.length, 1);
+      assert.equal(filename, `${record.homeId}-draft-recovery.cabane`);
+      assert.deepEqual(archive.assets[0].bytes, bytes);
+      const backup = JSON.parse(archive.json);
+      assert.deepEqual(backup.record.draft.customModels, [model]);
+      const imported = parseWorkspaceImport(archive.json, ownerProjectRegistries);
+      const freshStorage = new IDBFactory();
+      await engine.createModelAssetRepository(freshStorage).restore(archive.assets);
+      const restored = await engine
+        .createWorkspaceRepository(freshStorage, ownerProjectRegistries)
+        .create(imported.record, imported);
+      assert.deepEqual(restored.record.draft.customModels, [model]);
+      assert.deepEqual(
+        await engine.createModelAssetRepository(freshStorage).read(asset.sha256),
+        bytes,
+      );
       assert.equal(backup.workspace.homeAssistantUrl, origin);
       assert.equal(backup.record.draft.home.name, "Retained in-memory draft");
       assert.deepEqual(backup.record.bindings, harness.current.snapshot.bindings);
       assert.deepEqual(backup.record.published, record.published);
       assert.equal((await repository.load(record.homeId)).draft.home.name, "Saved in another tab");
       assert.equal(harness.current.snapshot.project.home.name, "Retained in-memory draft");
+    } finally {
+      await harness.dispose();
+    }
+  });
+
+  test("a failed recovery download reports its error, preserves the draft, and can be retried", async (context) => {
+    const { record, lifecycle } = await fixture();
+    const harness = await mount(
+      record,
+      {
+        ...lifecycle,
+        autosave: async (...args) => ({
+          status: "storage-error",
+          record: args[0],
+          error: new Error("Storage blocked"),
+        }),
+      },
+      false,
+      true,
+    );
+    Object.defineProperty(window, "indexedDB", {
+      get() {
+        throw new Error("Storage access blocked");
+      },
+    });
+    let downloaded = false;
+    context.mock.method(URL, "createObjectURL", () => {
+      throw new Error("Download blocked");
+    });
+    context.mock.method(URL, "revokeObjectURL", () => {});
+    context.mock.method(window.HTMLAnchorElement.prototype, "click", () => {
+      downloaded = true;
+    });
+    const backupButton = () =>
+      [...document.querySelectorAll("button")].find(
+        (button) => button.textContent === "Download draft backup",
+      );
+    try {
+      await act(async () => {
+        harness.current.commit(changed(harness.current.snapshot, "Unsaved draft"));
+        await harness.current.flush();
+      });
+      await act(async () => backupButton().click());
+      assert.match(document.querySelector('[role="alert"]').textContent, /Download blocked/);
+      assert.equal(downloaded, false);
+      assert.equal(harness.current.snapshot.project.home.name, "Unsaved draft");
+      context.mock.method(URL, "createObjectURL", () => "blob:synthetic-recovery");
+      await act(async () => backupButton().click());
+      assert.equal(downloaded, true);
+      assert.doesNotMatch(document.querySelector('[role="alert"]').textContent, /Download blocked/);
     } finally {
       await harness.dispose();
     }

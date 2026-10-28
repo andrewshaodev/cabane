@@ -7,6 +7,8 @@ export const CUSTOM_MODEL_LIMITS = {
   triangles: 100_000,
   meshes: 128,
   chunkBytes: 256 * 1024,
+  lightPoints: 8,
+  emissiveMaterials: 16,
 } as const;
 
 export const CUSTOM_MODEL_PROFILES = [
@@ -59,7 +61,25 @@ export interface CustomModel {
   asset: ModelAssetReference;
   normalization: CustomModelNormalization;
   complexity: DeviceModelComplexity;
-  light?: { position: ModelVector; color: string; maxIntensity: number; distance: number };
+  light?: CustomModelLight;
+}
+
+export interface CustomModelLight {
+  /** False keeps surface glow without illuminating surroundings. */
+  illuminate?: boolean;
+  /** Metres in normalized support space, before instance rotation and resizing. */
+  position: ModelVector;
+  color: string;
+  /** Total intensity shared equally by the source points. */
+  maxIntensity: number;
+  distance: number;
+  /** Additional points, excluding position; mutually exclusive with strip. */
+  points?: readonly ModelVector[];
+  strip?: { end: ModelVector; samples: number };
+  /** Exact names of Standard/Physical GLB materials to control. */
+  emissiveMaterials?: readonly string[];
+  /** Stable surface references within the immutable model geometry. */
+  emissiveSurfaces?: readonly string[];
 }
 
 export interface ModelAssetSource {

@@ -1,3 +1,5 @@
+import { useState } from "react";
+import type { CustomModel } from "@cabane/engine";
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
 import { CustomModelCard } from "../custom-models/CustomModelCard";
 import type { ManifestIssue } from "@cabane/engine";
@@ -19,6 +21,7 @@ import { ConstructionInspector } from "../editor-preview/construct";
 
 import { ConnectInspector } from "../editor-connect/ConnectInspector";
 
+import { ArrangePlacedItems } from "../editor-preview/furnish/ArrangePlacedItems";
 import { ArrangeCatalog } from "../editor-preview/furnish/catalog/ArrangeCatalog";
 
 import { useHomeEditorController } from "./useHomeEditorController";
@@ -49,6 +52,7 @@ type Props = Pick<
   | "onWorkspaces"
   | "runtime"
   | "reference"
+  | "replaceEditorsFromProject"
   | "workspace"
   | "floorFinish"
   | "setFloorFinish"
@@ -60,7 +64,10 @@ type Props = Pick<
   | "setCatalogBrowsing"
   | "catalogError"
   | "addCatalogItem"
+  | "furnishingEditor"
+  | "placementFloor"
 > & {
+  onSelectPlacedItem: (id: string) => void;
   sidebar: React.RefObject<HTMLElement | null>;
   iconUrl: string;
   shortcutsMode: boolean;
@@ -98,6 +105,7 @@ export function EditorSidebar({
   unsettled,
   onWorkspaces,
   workspace,
+  replaceEditorsFromProject,
   runtime,
   reference,
   floorFinish,
@@ -110,6 +118,9 @@ export function EditorSidebar({
   setCatalogBrowsing,
   catalogError,
   addCatalogItem,
+  furnishingEditor,
+  placementFloor,
+  onSelectPlacedItem,
   sidebar,
   iconUrl,
   shortcutsMode,
@@ -125,6 +136,7 @@ export function EditorSidebar({
   setWalkStartFloor,
   onHomeAssistantSettings,
 }: Props) {
+  const [editingModel, setEditingModel] = useState<CustomModel | null>(null);
   return (
     <>
       <aside
@@ -161,6 +173,16 @@ export function EditorSidebar({
               onAdd={addFloorAbove}
               onAddBelow={addFloorBelow}
               onSettings={() => setFloorDialog("rename")}
+              apartmentFloor={snapshot.project.home.apartmentFloor ?? 0}
+              onApartmentFloor={(apartmentFloor) =>
+                commit({
+                  ...snapshot,
+                  project: {
+                    ...snapshot.project,
+                    home: { ...snapshot.project.home, apartmentFloor },
+                  },
+                })
+              }
             />
           )}
           <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
@@ -327,6 +349,16 @@ export function EditorSidebar({
             />
           )}
           <div className="arrange-catalog-mount" hidden={shortcutsMode || mode !== "furnish"}>
+            <ArrangePlacedItems
+              key={activeFloorId}
+              floor={placementFloor}
+              items={furnishingEditor.items}
+              furnishingModels={furnishingModels}
+              deviceModels={deviceModels}
+              selectedIds={furnishingEditor.selectedIds}
+              disabled={editingLocked || unsettled}
+              onSelect={onSelectPlacedItem}
+            />
             <ArrangeCatalog
               enabled={!shortcutsMode && mode === "furnish"}
               furnishingModels={furnishingModels}
@@ -338,6 +370,12 @@ export function EditorSidebar({
               customModels={
                 <CustomModelLibrary
                   workspace={workspace}
+                  editingModel={editingModel}
+                  onCloseEditor={() => setEditingModel(null)}
+                  onEditSnapshot={(next) => {
+                    replaceEditorsFromProject(next.project);
+                    workspace.commit(next);
+                  }}
                   disabled={editingLocked || unsettled}
                   onBrowse={() => setCatalogBrowsing({ room: "my-models", query: "" })}
                 />
@@ -348,6 +386,7 @@ export function EditorSidebar({
                   entry={entry}
                   disabled={editingLocked || unsettled}
                   onChoose={() => addCatalogItem(entry)}
+                  onEdit={setEditingModel}
                 />
               )}
             />

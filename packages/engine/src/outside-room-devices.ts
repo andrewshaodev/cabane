@@ -1,5 +1,5 @@
 import { pointInsidePolygon } from "./geometry";
-import { deviceSlotForItem, roomIdForItem } from "./home-project/runtime";
+import { bindingDevicesForItem, roomIdForItem } from "./home-project/runtime";
 import type { HomeBindingManifest, RoomSpec } from "./types";
 
 /** A device-list group only; never added to architectural floor rooms. */
@@ -10,12 +10,18 @@ export function outsideRoomDevices(
   const floor = manifest.floors.find((candidate) => candidate.id === floorId);
   if (!floor) return null;
   const devices = manifest.sceneItems.flatMap((item) => {
-    if (item.kind !== "device" || item.floorId !== floorId) return [];
+    if ((item.kind !== "device" && !item.lightSlotId) || item.floorId !== floorId) return [];
     try {
-      const device = deviceSlotForItem(item, floor);
-      return floor.rooms.some((room) => pointInsidePolygon(device.placement.at, room.polygon))
-        ? []
-        : [device];
+      return bindingDevicesForItem(
+        item,
+        floor,
+        manifest.extensions.deviceModels[item.modelId]?.label ??
+          manifest.extensions.furnishingModels[item.modelId]?.label ??
+          item.modelId,
+      ).filter(
+        (device) =>
+          !floor.rooms.some((room) => pointInsidePolygon(device.placement.at, room.polygon)),
+      );
     } catch {
       return [];
     }

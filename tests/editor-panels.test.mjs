@@ -110,7 +110,14 @@ await withModules(async (load) => {
         placementFloor: editor.previewFloor,
         visualSceneItems: furnishing.items,
         furnishingModels: { chair: definition },
-        deviceModels: { light: { ...definition, label: "Light", category: "Lighting" } },
+        deviceModels: {
+          light: {
+            ...definition,
+            label: "Light",
+            category: "Lighting",
+            lighting: { position: [0, 0.5, 0], color: "#ffffff", maxIntensity: 2, distance: 5 },
+          },
+        },
         snapshot: { project },
         stairDialog: null,
         commit() {},
@@ -206,7 +213,7 @@ await withModules(async (load) => {
       assert.equal(document.querySelector(".editor-properties-toggle"), null);
     });
   });
-  test("canvas reflow waits for drag, drawing or marquee completion, including deselection", async () => {
+  test("panel changes wait for drag, drawing or marquee completion, including deselection", async () => {
     await withDom(async (root, document) => {
       await act(async () => root.render(React.createElement(Harness, { busy: true })));
       await act(async () => editor.selectWall(floor.walls[0].id));

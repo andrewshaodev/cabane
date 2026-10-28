@@ -1,9 +1,9 @@
 {
-  "revision": 12,
-  "fingerprint": "2cc44df71eda661a1f94d90cfb1ea1d5f42fac0c70135f2cb74c0b3564bcec08",
-  "summary": "Support independent furniture and device sensor attachments with opt-in map readings and TV switch controls",
+  "revision": 15,
+  "fingerprint": "ecd5f0810623e5a9a253a751d57de21fcc12698f58a68f35dc96ebe59f72df18",
+  "summary": "Support independent furniture and device sensor readings with map visibility and TV switch controls",
   "breakingChanges": [
-    "Older panels reject furnishing entitySlots and slot presentation.showInScene. Update the matching HACS panel and compatibility manifest before transferring affected homes. Existing primary slots and household mappings are preserved."
+    "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Existing model lighting and outdoor room fields remain supported. Older clients retain unsupported-field protection."
   ],
   "history": [
     {
@@ -81,6 +81,27 @@
       "summary": "Support reversible solid structural spaces in room properties",
       "breakingChanges": [
         "Older clients must update before importing projects containing the room isSolid field."
+      ]
+    },
+    {
+      "revision": 12,
+      "summary": "Add decorative apartment floors through Construct floor management",
+      "breakingChanges": [
+        "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field. Solid structural spaces from revision 11 remain supported."
+      ]
+    },
+    {
+      "revision": 13,
+      "summary": "Add outdoor room membership with shared room controls",
+      "breakingChanges": [
+        "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+      ]
+    },
+    {
+      "revision": 14,
+      "summary": "Unify model lighting authoring for personal and built-in models",
+      "breakingChanges": [
+        "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
       ]
     }
   ],

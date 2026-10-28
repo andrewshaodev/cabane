@@ -30,6 +30,9 @@ await withModules(async (load) => {
       HTMLElement: browser.window.HTMLElement,
       IS_REACT_ACT_ENVIRONMENT: true,
     });
+    // React can initialize its legacy input watcher before JSDOM is installed.
+    browser.window.HTMLElement.prototype.attachEvent = () => {};
+    browser.window.HTMLElement.prototype.detachEvent = () => {};
     const shadow = document.querySelector("#panel").attachShadow({ mode: "open" });
     const container = document.createElement("div"),
       portals = document.createElement("div");
@@ -46,6 +49,32 @@ await withModules(async (load) => {
       Object.assign(globalThis, previous);
     }
   }
+  test("apartment floor follows Add floor below and saves through a separate dialog", async () =>
+    fixture(async ({ shadow, render }) => {
+      const saved = [];
+      await render(
+        h(ConstructFloorControls, {
+          floors: [{ id: "g", name: "Ground" }],
+          selectedId: "g",
+          disabled: false,
+          onSelect() {},
+          onAdd() {},
+          onAddBelow() {},
+          onSettings() {},
+          apartmentFloor: 3,
+          onApartmentFloor: (value) => saved.push(value),
+        }),
+      );
+      await act(async () => shadow.querySelector('[aria-label="Current floor"]').click());
+      const actions = [...shadow.querySelectorAll('[role="menuitem"]')];
+      assert.equal(actions.at(-2).textContent.trim(), "Add floor below");
+      assert.equal(actions.at(-1).textContent.trim(), "Setup apartment floor");
+      await act(async () => actions.at(-1).click());
+      assert.equal(shadow.querySelector("input").value, "3");
+      await act(async () => shadow.querySelector('button[type="submit"]').click());
+      assert.deepEqual(saved, [3]);
+      assert.equal(shadow.querySelector("dialog"), null);
+    }));
   test("DOM environment identity stays stable across unrelated renders", async () => {
     await fixture(async ({ render, shadow }) => {
       const values = [];

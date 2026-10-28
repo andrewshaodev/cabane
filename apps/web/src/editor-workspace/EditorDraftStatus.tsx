@@ -1,5 +1,6 @@
 import { WorkspaceConflictError } from "@cabane/engine";
-import { downloadConnectData } from "../editor-connect/profile-transfer";
+import { useState } from "react";
+import { downloadWorkspaceArchive } from "../workspaces/download-workspace-archive";
 import { exportWorkspaceBackup } from "../workspaces/workspace-transfer";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import type { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
@@ -17,6 +18,8 @@ export function EditorDraftStatus({
   workspace: Workspace;
   homeAssistantUrl: string | null;
 }) {
+  const [downloading, setDownloading] = useState(false);
+  const [backupError, setBackupError] = useState<string | null>(null);
   const error = workspace.error;
   if (!error && !workspace.saving) return null;
   if (!error)
@@ -27,21 +30,36 @@ export function EditorDraftStatus({
       </div>
     );
   const conflict = error instanceof WorkspaceConflictError;
-  const download = () => {
-    const stored = workspace.getRecord();
-    const record = {
-      ...stored,
-      draft: workspace.snapshot.project,
-      bindings: workspace.snapshot.bindings,
-      draftUpdatedAt: Date.now(),
-    };
-    downloadConnectData(
-      exportWorkspaceBackup(
-        { name: record.draft.home.name, homeAssistantUrl, hasPublished: record.publishedAt !== 0 },
-        record,
-      ),
-      `${record.homeId}-draft-recovery.json`,
-    );
+  const download = async () => {
+    if (downloading) return;
+    setDownloading(true);
+    setBackupError(null);
+    try {
+      const stored = workspace.getRecord();
+      const record = {
+        ...stored,
+        draft: workspace.snapshot.project,
+        bindings: workspace.snapshot.bindings,
+        draftUpdatedAt: Date.now(),
+      };
+      await downloadWorkspaceArchive(
+        exportWorkspaceBackup(
+          {
+            name: record.draft.home.name,
+            homeAssistantUrl,
+            hasPublished: record.publishedAt !== 0,
+          },
+          record,
+        ),
+        `${record.homeId}-draft-recovery.cabane`,
+      );
+    } catch (cause) {
+      setBackupError(
+        cause instanceof Error ? cause.message : "Could not download the backup. Please try again.",
+      );
+    } finally {
+      setDownloading(false);
+    }
   };
   return (
     <div className="direction-status is-error editor-draft-error" role="alert">
@@ -55,7 +73,14 @@ export function EditorDraftStatus({
             : `${error.message} Your changes are kept in this tab.`}
         </p>
         <div className="editor-draft-error__actions">
-          <EditorButton onClick={download}>Download draft backup</EditorButton>
+          <EditorButton
+            disabled={downloading}
+            onClick={() => {
+              void download();
+            }}
+          >
+            {downloading ? "Preparing backup…" : "Download draft backup"}
+          </EditorButton>
           {!conflict && (
             <EditorButton
               onClick={() => {
@@ -66,6 +91,7 @@ export function EditorDraftStatus({
             </EditorButton>
           )}
         </div>
+        {backupError && <p>{backupError} Your changes are kept in this tab.</p>}
       </div>
     </div>
   );

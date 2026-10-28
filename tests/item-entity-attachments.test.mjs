@@ -449,7 +449,11 @@ await withModules(async (load) => {
       globalThis.IS_REACT_ACT_ENVIRONMENT = priorAct;
     }
   }
-  test("normal attachment authoring adds an optional reading and toggles only its map visibility", async () => {
+  test("attachment authoring works on HTTP without randomUUID and toggles only its map visibility", async (context) => {
+    const source = globalThis.crypto;
+    context.mock.getter(globalThis, "crypto", () => ({
+      getRandomValues: source.getRandomValues.bind(source),
+    }));
     await withDom(async ({ root, document }) => {
       let current;
       function Harness() {

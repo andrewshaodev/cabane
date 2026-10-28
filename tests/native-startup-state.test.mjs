@@ -137,6 +137,16 @@ await withModules(async (load) => {
     };
   }
 
+  startupTest("native LAN HTTP startup discovers saved homes without OAuth", () =>
+    withStorageDom(async (dom) => {
+      const h = await dom.mount(mount, "saved");
+      await dom.until(() => dom.document.body.textContent.includes("Saved HA home"));
+      assert.ok(h.requests.includes("cabane/workspaces/list"));
+      assert.ok(!h.requests.includes("cabane/workspaces/put"));
+      assert.ok(!dom.document.body.textContent.includes("Open Cabane over HTTPS"));
+    }, "http://homeassistant.local:8123/cabane"),
+  );
+
   startupTest(
     "native library appends suggested cards and adds the exact saved home with sync",
     () =>

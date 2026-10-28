@@ -12,6 +12,8 @@ import type {
 } from "@cabane/engine";
 import {
   composeHomeManifest,
+  indoorRoomsForFloor,
+  roomsForFloor,
   reconcileWorkspaceBindings,
   removeWorkspaceSlotReferences,
   validateHomeProject,
@@ -47,7 +49,7 @@ export const layoutFloorFromEditorFloor = (floor: FloorSpec): DraftLayoutFloorSp
     ...(floor.ceilings
       ? { ceilings: floor.ceilings.filter((ceiling) => ceiling.kind === "flat") }
       : {}),
-    rooms: floor.rooms.map((room) => {
+    rooms: indoorRoomsForFloor(floor).map((room) => {
       const {
         furnishings: _furnishings,
         dashboardSlots: _dashboardSlots,
@@ -84,7 +86,7 @@ export const projectFromEditorState = (
       : base.floors.map((entry) => (entry.id === floor.id ? layoutFloor : entry));
   const nextRoomProfiles = Object.fromEntries(
     floors
-      .flatMap((entry) => entry.rooms)
+      .flatMap(roomsForFloor)
       .map((room) => [room.id, base.roomProfiles[room.id] ?? { dashboardSlots: [] }]),
   );
   const nextOpeningProfiles = Object.fromEntries(

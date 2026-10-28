@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   isAuxiliaryEntitySlot,
+  createBrowserUuid,
   type EntityBindingSlotSpec,
   type SceneItemSpec,
 } from "@cabane/engine";
@@ -32,7 +33,7 @@ export function ItemEntitySlots({
     onChange([
       ...slots,
       {
-        id: `reading-${crypto.randomUUID()}`,
+        id: `reading-${createBrowserUuid()}`,
         compatibleDomains: [reading.domain],
         ...("deviceClass" in reading ? { compatibleDeviceClasses: [reading.deviceClass] } : {}),
         deviceRole: "secondary",

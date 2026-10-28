@@ -1,3 +1,4 @@
+import { lightingSlotForItem, lightingModelId } from "./model-lighting/settings";
 import { useContext, useMemo } from "react";
 import type { SceneLightWallPlane } from "./scene-light-wall-mask";
 import { resolveModelVariant } from "./model-variants";
@@ -34,16 +35,17 @@ const defaultRoomLight = (room: RoomSpec, floor: FloorSpec) => {
 const deviceLightPosition = (
   position: readonly [number, number, number],
   rotationYRadians: number,
-  scale: number,
+  scale: number | readonly [number, number, number],
   local: readonly [number, number, number],
 ): readonly [number, number, number] => {
   const cosine = Math.cos(rotationYRadians);
   const sine = Math.sin(rotationYRadians);
-  const localX = local[0] * scale;
-  const localZ = local[2] * scale;
+  const axes = typeof scale === "number" ? [scale, scale, scale] : scale;
+  const localX = local[0] * axes[0];
+  const localZ = local[2] * axes[2];
   return [
     position[0] + localX * cosine + localZ * sine,
-    position[1] + local[1] * scale,
+    position[1] + local[1] * axes[1],
     position[2] - localX * sine + localZ * cosine,
   ];
 };
@@ -151,16 +153,21 @@ export function HomeAssistantSceneLighting({
   const resolvedDevices = floor.rooms.flatMap(
     (room) => resolvedBindings.rooms[room.id]?.devices ?? [],
   );
+  resolvedDevices.push(...(resolvedBindings.rooms[`outside-rooms:${floor.id}`]?.devices ?? []));
   const resolvedById = new Map(resolvedDevices.map((device) => [device.slot.id, device]));
   // Scene items exist independently of room assignment and HA connectivity.
-  const deviceItems = sceneItems.filter((item) => item.kind === "device");
-  const deviceItemIds = new Set(deviceItems.map((item) => item.id));
+  const deviceItems = sceneItems.filter(
+    (item) => item.floorId === floor.id && (item.kind === "device" || !!item.lightSlotId),
+  );
+  const deviceItemIds = new Set(
+    deviceItems.flatMap((item) => [item.id, ...(item.lightSlotId ? [item.lightSlotId] : [])]),
+  );
   const lightDevices = [
     ...deviceItems.map((item) => ({
       id: item.id,
       modelId: item.modelId,
       item,
-      resolved: resolvedById.get(item.id),
+      resolved: resolvedById.get(item.lightSlotId ?? item.id),
     })),
     ...resolvedDevices
       .filter((device) => !deviceItemIds.has(device.slot.id))
@@ -171,6 +178,9 @@ export function HomeAssistantSceneLighting({
         resolved,
       })),
   ];
+  // Imported multi-source models have a bounded per-floor shader cost. Reserve
+  // slots independent of state so switching lights never changes the layout.
+  let importedPointsRemaining = 32;
   return (
     <group name="home-assistant-scene-lighting">
       {floor.rooms.flatMap((room) => {
@@ -215,7 +225,7 @@ export function HomeAssistantSceneLighting({
       })}
       {lightDevices.flatMap(({ id, modelId, item: sceneItem, resolved }) => {
         const definition = resolveDeviceModelDefinition(
-          modelId,
+          sceneItem?.lightSlotId ? lightingModelId(modelId) : modelId,
           deviceModels,
           extensionDeviceModels,
         );
@@ -224,11 +234,13 @@ export function HomeAssistantSceneLighting({
           resolveModelVariant(definition, sceneItem?.variant).sceneLight === false
         )
           return [];
-        const primaryLightSlot = (sceneItem?.entitySlots ?? resolved?.slot.entitySlots)?.find(
-          (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
-        );
+        const primaryLightSlot = sceneItem
+          ? lightingSlotForItem(sceneItem)
+          : resolved?.slot.entitySlots.find(
+              (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
+            );
         const entity =
-          resolved?.slot.model === modelId
+          resolved && (resolved.slot.model === modelId || !!sceneItem?.lightSlotId)
             ? resolved.entities.find(
                 (candidate) =>
                   (candidate.domain === "light" ||
@@ -245,16 +257,25 @@ export function HomeAssistantSceneLighting({
         const sceneItemScale = sceneItem
           ? uniformDeviceScaleForSize(sceneItem.size, definition)
           : null;
-        if (sceneItem && sceneItemScale === null) return [];
+        if (sceneItem && sceneItemScale === null && !definition.lighting) return [];
         const scale = sceneItem
-          ? sceneItemScale!
+          ? definition.lighting
+            ? (sceneItem.size.map((n, axis) => n / definition.defaultSize[axis]) as [
+                number,
+                number,
+                number,
+              ])
+            : sceneItemScale!
           : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
-        const source = definition.sceneLight;
-        return [
+        const sources = definition.sceneLights ?? [definition.sceneLight];
+        const budgeted = definition.lightingCustomized || modelId.startsWith("custom:");
+        const visibleSources = budgeted ? sources.slice(0, importedPointsRemaining) : sources;
+        if (budgeted) importedPointsRemaining -= visibleSources.length;
+        return visibleSources.map((source, index) => (
           <PhysicalSceneLight
             floor={floor}
-            key={`device-light-${id}`}
-            name={`ha-device-light-${id}`}
+            key={`device-light-${id}-${index}`}
+            name={`ha-device-light-${id}${index ? `-${index}` : ""}`}
             position={deviceLightPosition(
               transform.position,
               transform.rotationYRadians,
@@ -263,9 +284,9 @@ export function HomeAssistantSceneLighting({
             )}
             color={lightColorForSnapshot(state, source.color)}
             intensity={source.maxIntensity * brightness}
-            distance={source.distance * scale}
-          />,
-        ];
+            distance={source.distance * (typeof scale === "number" ? scale : Math.max(...scale))}
+          />
+        ));
       })}
     </group>
   );
