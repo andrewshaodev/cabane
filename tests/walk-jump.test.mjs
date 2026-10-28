@@ -79,6 +79,28 @@ await withModules(async (load) => {
     assert.equal(balcony.maxY, 3.6);
   });
 
+  test("a walker standing above a wall's top passes over it while full-height walls still block", () => {
+    const floor = makeOutdoorPlatformProject().floors[0];
+    const [low, ...rest] = floor.walls;
+    const lowered = { ...floor, walls: [{ ...low, heightMeters: 1.0 }, ...rest] };
+    const colliders = deriveWalkColliders(lowered, new Set(), [], 0);
+    const lowRuns = colliders.filter((collider) => collider.id.startsWith(`${low.id}-walk-`));
+    assert.ok(lowRuns.length > 0);
+    for (const run of lowRuns) assert.deepEqual([run.minY, run.maxY], [0, 1.0]);
+    const tall = colliders.find((collider) => collider.id === `${rest[0].id}-walk-0`);
+    assert.deepEqual(
+      [tall.minY, tall.maxY],
+      [0, rest[0].heightMeters ?? lowered.defaultWallHeightMeters],
+    );
+
+    const ids = (range) =>
+      new Set(walkCollidersForVerticalRange(colliders, range).map((collider) => collider.id));
+    // On a landing 1.1 m up, the 1 m wall is underfoot; on the floor it blocks.
+    assert.equal(ids(walkJumpVerticalRange(1.1, 0)).has(lowRuns[0].id), false);
+    assert.equal(ids(walkJumpVerticalRange(0, 0)).has(lowRuns[0].id), true);
+    assert.equal(ids(walkJumpVerticalRange(1.1, 0)).has(tall.id), true);
+  });
+
   test("bed collision separates the jumpable mattress from the tall headboard", async () => {
     for (const variant of ["default", "cozy-white-blue"]) {
       const renderer = await create(createElement(DoubleBed, { variant }));

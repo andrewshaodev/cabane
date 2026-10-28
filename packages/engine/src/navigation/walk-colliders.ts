@@ -32,10 +32,17 @@ const wallPointAtDistance = (
   };
 };
 
+// A walker above a wall's top (a stair landing over a low wall) passes over it, like a hedge or a low platform wall.
+const wallVerticalRange = (wall: WallSpec, floor: FloorSpec, elevation: number) => ({
+  minY: elevation,
+  maxY: elevation + (wall.heightMeters ?? floor.defaultWallHeightMeters),
+});
+
 const wallColliderRuns = (
   wall: WallSpec,
   floor: FloorSpec,
   openOpeningIds: ReadonlySet<string>,
+  elevation: number,
 ): SegmentWalkCollider[] => {
   const relevant = floor.openings
     .filter((opening) => opening.wallId === wall.id)
@@ -74,6 +81,7 @@ const wallColliderRuns = (
     from: wallPointAtDistance(wall, start, floor),
     to: wallPointAtDistance(wall, end, floor),
     halfThickness: wall.thicknessMeters / 2,
+    ...wallVerticalRange(wall, floor, elevation),
   }));
 };
 
@@ -137,7 +145,7 @@ export const deriveWalkColliders = (
       halfThickness: POOL_RIM_WIDTH_METERS,
     }));
   }),
-  ...floor.walls.flatMap((wall) => wallColliderRuns(wall, floor, openOpeningIds)),
+  ...floor.walls.flatMap((wall) => wallColliderRuns(wall, floor, openOpeningIds, elevation)),
   ...floor.wallJunctions.flatMap((junction) => {
     return junction.wallIds.flatMap((wallId) => {
       const wall = floor.walls.find((candidate) => candidate.id === wallId);
@@ -158,6 +166,7 @@ export const deriveWalkColliders = (
           },
           to: { x: from[0] + direction[0] * interval[1], z: from[1] + direction[1] * interval[1] },
           halfThickness: wall.thicknessMeters / 2,
+          ...wallVerticalRange(wall, floor, elevation),
         },
       ];
     });
