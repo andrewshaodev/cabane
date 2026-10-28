@@ -1,3 +1,4 @@
+import { isAuxiliaryEntitySlot } from "../entity-slot-roles";
 import { validateDevicePlacementContact } from "../devices";
 
 import { type FloorSpec, type HomeManifest, type ManifestIssue } from "../types";
@@ -106,9 +107,12 @@ export const validateDevice = (
             slot.compatibleDomains.includes("camera"),
         ))
     ) {
-      const cameraSlot: unknown = rawDevice.entitySlots[0];
+      const controlSlots = rawDevice.entitySlots.filter(
+        (slot) => !isObject(slot) || !isAuxiliaryEntitySlot(slot),
+      );
+      const cameraSlot: unknown = controlSlots[0];
       if (
-        rawDevice.entitySlots.length !== 1 ||
+        controlSlots.length !== 1 ||
         !isObject(cameraSlot) ||
         cameraSlot.deviceRole !== definition.liveMedia.slotRole ||
         cameraSlot.required !== true ||
@@ -117,7 +121,10 @@ export const validateDevice = (
         cameraSlot.compatibleDomains.some(
           (domain) =>
             domain !== "camera" &&
-            !(domain === "media_player" && definition.supportedDomains.includes("media_player")),
+            !(
+              ["media_player", "switch"].includes(String(domain)) &&
+              definition.supportedDomains.includes(domain as import("../types").DeviceDomain)
+            ),
         )
       ) {
         issues.push(

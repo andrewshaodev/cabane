@@ -49,7 +49,14 @@ export function RoutedHomeEditor({ onClose, ...props }: ComponentProps<typeof Ho
           allowExit.current = true;
           void navigate("/workspaces");
         }}
-        navigation={{ request, go, exitRequested: blocker.state === "blocked" }}
+        navigation={{
+          request,
+          go,
+          exitRequested: blocker.state === "blocked",
+          cancelExit: () => {
+            if (blocker.state === "blocked") blocker.reset();
+          },
+        }}
         onClose={(record, reason) => {
           allowExit.current = true;
           onClose(record, reason);

@@ -1,10 +1,5 @@
-import {
-  readCabaneFile,
-  createModelAssetRepository,
-  createCabaneArchive,
-  documentModelReferences,
-  downloadCabaneBytes,
-} from "@cabane/engine";
+import { readCabaneFile } from "@cabane/engine";
+import { downloadWorkspaceArchive } from "./download-workspace-archive";
 import { workspaceDestination } from "./workspace-open-link";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
@@ -127,14 +122,7 @@ export function HomeAssistantPage({
       },
       current,
     );
-    const assets = await createModelAssetRepository(window.indexedDB).verify(
-      documentModelReferences(json),
-    );
-    downloadCabaneBytes(
-      createCabaneArchive(json, assets),
-      `${record.homeId}-backup.cabane`,
-      "application/zip",
-    );
+    await downloadWorkspaceArchive(json, `${record.homeId}-backup.cabane`);
     setNotice("Backup downloaded.");
   };
   const importBackup = async (file: File) => {

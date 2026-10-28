@@ -10,6 +10,7 @@ export interface ConnectWorkspaceProps {
     request: EditorOpenRequest;
     go: (request: EditorOpenRequest, replace?: boolean) => void;
     exitRequested: boolean;
+    cancelExit?: () => void;
   };
   homeAssistantUrl?: string | null;
   onPrepareOrigin?: (

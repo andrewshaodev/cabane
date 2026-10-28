@@ -78,6 +78,8 @@ export interface EntityBindingSlotSpec {
   deviceRole?: "primary" | "secondary";
   presentation: {
     label: string;
+    /** Opt-in reading badge above the item; does not change dashboard visibility. */
+    showInScene?: boolean;
     dashboardRole: "primary" | "secondary" | "diagnostic" | "hidden";
   };
   sceneLight?: {
@@ -540,6 +542,8 @@ export interface ResolvedDeviceBinding {
 }
 
 export interface ResolvedRoomBindings {
+  /** Resolved opted-in map readings, including slots hidden from the dashboard. */
+  sceneEntities?: readonly ResolvedEntityBinding[];
   room: RoomSpec;
   displayName: string;
   pictureUrl: string | null;

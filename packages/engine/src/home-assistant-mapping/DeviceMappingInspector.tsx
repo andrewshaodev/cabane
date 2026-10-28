@@ -1,3 +1,12 @@
+import {
+  auxiliaryMappingChoices,
+  entityMappingChange,
+  singleControlDescriptor,
+  type MappingChoice,
+  type MappingOption,
+  type MappingOptionGroup,
+} from "./auxiliary-mapping-choices";
+import { isAuxiliaryEntitySlot } from "../entity-slot-roles";
 import { useState, type ReactNode } from "react";
 import {
   bindingEntityCandidates,
@@ -19,33 +28,6 @@ import type {
 import type { DeviceMappingRelationship } from "./device-mapping-groups";
 
 export type DeviceMappingInspectorState = "open" | "summary";
-
-interface MappingOption {
-  value: string;
-  label: string;
-  summaryLabel?: string;
-  disabled?: boolean;
-}
-
-interface MappingOptionGroup {
-  id?: string;
-  collapsed?: boolean;
-  groups?: readonly MappingOptionGroup[];
-  label: string;
-  options: readonly MappingOption[];
-}
-
-interface MappingChoice {
-  id: string;
-  label: string;
-  ariaLabel: string;
-  value: string;
-  emptyLabel: string;
-  required?: boolean;
-  options: readonly MappingOption[];
-  optionGroups?: readonly MappingOptionGroup[];
-  onChange: (value: string) => boolean;
-}
 
 const domId = (value: string) => value.replaceAll(/[^a-zA-Z0-9_-]/g, "-");
 
@@ -109,7 +91,9 @@ export function DeviceMappingInspector({
       profile,
       runtime,
       scope:
-        descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover"
+        descriptor.kind === "opening-contact" ||
+        descriptor.kind === "opening-cover" ||
+        isAuxiliaryEntitySlot(descriptor.spec)
           ? "all-areas"
           : "mapped-area",
     });
@@ -136,13 +120,7 @@ export function DeviceMappingInspector({
           disabled: !candidate.selectable && candidate.entityId !== current,
         })),
       ],
-      onChange: (value) => {
-        onEntityIdsBySlotIdChange(
-          replaceEntitySlotMapping(profile, descriptor.slotId, (value || null) as EntityId | null)
-            .entityIdsBySlotId,
-        );
-        return true;
-      },
+      onChange: entityMappingChange(profile, descriptor.slotId, onEntityIdsBySlotIdChange),
     };
     connectionDetails = (
       <>
@@ -172,12 +150,7 @@ export function DeviceMappingInspector({
   } else {
     const { device } = relationship;
     const cameraDescriptor = relationship.descriptors.find(isShareableCameraDescriptor);
-    const singleSlotDescriptor =
-      device.entitySlots.length === 1
-        ? relationship.descriptors.find(
-            (candidate) => candidate.slotId === device.entitySlots[0].id,
-          )
-        : undefined;
+    const singleSlotDescriptor = singleControlDescriptor(device, relationship.descriptors);
     if (cameraDescriptor) {
       const current = profile.entityIdsBySlotId[cameraDescriptor.slotId];
       const candidates = bindingEntityCandidates({
@@ -489,6 +462,20 @@ export function DeviceMappingInspector({
     }
   }
 
+  const auxiliaryDescriptors =
+    relationship.kind === "modeled-device"
+      ? relationship.descriptors.filter((descriptor) => isAuxiliaryEntitySlot(descriptor.spec))
+      : [];
+  functionChoices = [
+    ...functionChoices,
+    ...auxiliaryMappingChoices(
+      auxiliaryDescriptors,
+      room.id,
+      profile,
+      runtime,
+      onEntityIdsBySlotIdChange,
+    ),
+  ];
   const selectedTargetLabel =
     optimisticTarget?.id === relationship.id ? optimisticTarget.label : relationshipLabel;
   const choose = (choice: MappingChoice, value: string, primary: boolean) => {
@@ -502,7 +489,7 @@ export function DeviceMappingInspector({
     const targetLabel = primary ? chosenLabel : relationshipLabel;
     const selectionComplete = choice.onChange(value);
     setOptimisticTarget({ id: relationship.id, label: targetLabel });
-    if (selectionComplete) onSelectionMade(targetLabel);
+    if (selectionComplete && auxiliaryDescriptors.length === 0) onSelectionMade(targetLabel);
   };
   const renderChoice = (choice: MappingChoice, primary = false) => {
     const groupId = `device-map-${domId(choice.id)}`;
@@ -668,9 +655,15 @@ export function DeviceMappingInspector({
             {renderChoice(primaryChoice, true)}
             {requiredFunctionChoices.map((choice) => renderChoice(choice))}
             {optionalFunctionChoices.length > 0 && (
-              <details className="device-mapping-inspector__functions">
+              <details
+                className="device-mapping-inspector__functions"
+                open={auxiliaryDescriptors.length > 0}
+              >
                 <summary>
-                  Optional device functions <span>{optionalFunctionChoices.length}</span>
+                  {auxiliaryDescriptors.length
+                    ? "Additional entities"
+                    : "Optional device functions"}{" "}
+                  <span>{optionalFunctionChoices.length}</span>
                 </summary>
                 <div>{optionalFunctionChoices.map((choice) => renderChoice(choice))}</div>
               </details>

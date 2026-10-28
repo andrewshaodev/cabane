@@ -1,3 +1,4 @@
+import { ItemEntitySlots } from "./ItemEntitySlots";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import { FurnishingVariantGrid } from "./FurnishingVariantGrid";
@@ -6,6 +7,7 @@ import { NumericField } from "./NumericField";
 import { modelVariants, resolveModelVariant } from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import type {
+  EntityBindingSlotSpec,
   FloorSpec,
   ItemPlacement,
   SceneItemSpec,
@@ -24,6 +26,7 @@ export function FurnishingProperties({
   onPlacementChange,
   onSizeChange,
   onLightStateChange,
+  onEntitySlotsChange,
   onVariantChange,
   onColorChange,
   onClose,
@@ -51,6 +54,7 @@ export function FurnishingProperties({
     | undefined;
   onVariantChange?:
     ((id: string, variant: string, definition: SceneModelEditorDescriptor) => void) | undefined;
+  onEntitySlotsChange?: ((id: string, slots: readonly EntityBindingSlotSpec[]) => void) | undefined;
   onLightStateChange?:
     | ((id: string, lightState: "always-off" | "always-on" | "night-only" | "connected") => void)
     | undefined;
@@ -86,6 +90,14 @@ export function FurnishingProperties({
             onChange={(variant) => onVariantChange(selected.id, variant, definition)}
           />
         </fieldset>
+      )}
+      {onEntitySlotsChange && (
+        <ItemEntitySlots
+          key={selected.id}
+          item={selected}
+          label={definition.label}
+          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
+        />
       )}
       <fieldset>
         <legend>Dimensions</legend>

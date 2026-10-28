@@ -59,7 +59,11 @@ export const collectBindingSlots = (
         }
       }
     }
-    for (const device of outsideRoomDevices(manifest, floor.id)?.devices ?? []) {
+    const outside = outsideRoomDevices(manifest, floor.id);
+    for (const spec of outside?.dashboardSlots ?? []) {
+      descriptors.push({ slotId: spec.id, kind: "dashboard", roomIds: [], spec });
+    }
+    for (const device of outside?.devices ?? []) {
       for (const spec of device.entitySlots)
         descriptors.push({
           slotId: spec.id,

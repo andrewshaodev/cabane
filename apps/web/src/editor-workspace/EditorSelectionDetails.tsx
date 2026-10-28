@@ -152,6 +152,7 @@ export function EditorSelectionDetails({
                 onPlacementChange={furnishingEditor.updatePlacement}
                 onSizeChange={furnishingEditor.updateSize}
                 onLightStateChange={furnishingEditor.updateLightState}
+                onEntitySlotsChange={furnishingEditor.updateEntitySlots}
                 onVariantChange={furnishingEditor.updateVariant}
                 onColorChange={furnishingEditor.updateColor}
                 onEditLighting={() => setLightingModel(selectedItem.modelId)}

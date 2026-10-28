@@ -138,9 +138,7 @@ export const removeFloor = (
       ].filter((id): id is string => Boolean(id)),
     ),
     ...project.sceneItems.flatMap((item) =>
-      item.floorId === removedFloor.id && item.kind === "device"
-        ? item.entitySlots.map((slot) => slot.id)
-        : [],
+      item.floorId === removedFloor.id ? (item.entitySlots ?? []).map((slot) => slot.id) : [],
     ),
   ];
   const bindings = removeWorkspaceSlotReferences(snapshot.bindings, slotIds);

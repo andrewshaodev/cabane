@@ -75,8 +75,7 @@ const visitProjectIds = (
       register(item.lightSlotId, `sceneItems[${itemIndex}].lightSlotId`, "slot");
       register(`${item.lightSlotId}-entity`, `sceneItems[${itemIndex}].lightSlotId.entity`, "slot");
     }
-    if (item.kind !== "device") return;
-    item.entitySlots.forEach((slot, slotIndex) =>
+    (item.entitySlots ?? []).forEach((slot, slotIndex) =>
       register(slot.id, `sceneItems[${itemIndex}].entitySlots[${slotIndex}].id`, "slot"),
     );
   });

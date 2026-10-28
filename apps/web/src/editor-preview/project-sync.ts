@@ -148,14 +148,10 @@ export const workspaceSnapshotFromEditorState = (
 ): EditorWorkspaceSnapshot => {
   const project = projectFromEditorState(base.project, floor, sceneItems);
   const retainedDeviceSlotIds = new Set(
-    project.sceneItems.flatMap((item) =>
-      item.kind === "device" ? item.entitySlots.map((slot) => slot.id) : [],
-    ),
+    project.sceneItems.flatMap((item) => (item.entitySlots ?? []).map((slot) => slot.id)),
   );
   const removedDeviceSlotIds = base.project.sceneItems.flatMap((item) =>
-    item.kind === "device"
-      ? item.entitySlots.map((slot) => slot.id).filter((id) => !retainedDeviceSlotIds.has(id))
-      : [],
+    (item.entitySlots ?? []).map((slot) => slot.id).filter((id) => !retainedDeviceSlotIds.has(id)),
   );
   let bindings = removeWorkspaceSlotReferences(base.bindings, removedDeviceSlotIds);
   try {

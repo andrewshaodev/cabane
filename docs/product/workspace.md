@@ -284,3 +284,7 @@ Plan-coordinate inputs account for the floor's metres-per-plan-unit scale.
 Changing display units never rescales the project or rewrites its stored geometry;
 portable project formats retain their existing units. Blocked browser storage
 retains the preference for the current session.
+
+Furniture may declare optional `entitySlots` containing manual, non-required secondary sensor or binary sensor attachments. Devices retain exactly one primary control; optional read-only attachments are validated independently of the model’s control domains. `presentation.showInScene` is opt-in map visibility. Older documents omit both fields and keep their prior behavior. Older panels reject documents containing the new fields; preserve that rejection and update the matching HACS panel before transfer.
+
+Leaving the editor for Home Assistant settings or another page saves the draft first. A failed save cancels that navigation attempt so a later click can retry. Storage errors show their reason and an explicit retry. Revision conflicts keep both the newer saved record and the current in-memory draft intact, and offer a complete `.cabane` draft backup containing the current project, private mappings and verified imported GLBs, including staged imports, before the user reopens the saved workspace. Backup failures retain the draft and show a retryable error.

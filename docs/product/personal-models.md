@@ -165,3 +165,5 @@ Implementation: [import owner](../../packages/engine/src/imported-models/index.t
 Personal import and Edit model expose **Model** and **Lighting** sections. The
 Lighting section shares the visual placement, surface selection and local preview
 used by built-in models. See [model lighting](model-lighting.md).
+
+Changing an imported model’s profile replaces only its primary control slot. Optional independent sensor readings retain their slot IDs, visibility and private mappings on every copy, including conversions between furniture and devices. Published mappings remain intact until Apply.

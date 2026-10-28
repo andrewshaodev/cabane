@@ -329,9 +329,14 @@ export function useHomeEditorController({
   };
   const closeEditor = useCallback(async () => {
     if (editingLocked || unsettled) return;
-    await saveDraft();
+    return saveDraft();
   }, [editingLocked, unsettled, saveDraft]);
-  useEditorExitRequest(navigation?.exitRequested, editingLocked || unsettled, closeEditor);
+  useEditorExitRequest(
+    navigation?.exitRequested,
+    editingLocked || unsettled,
+    closeEditor,
+    navigation?.cancelExit,
+  );
   const { connect, connectManifest, connectFloor, signIn, bindingIssues } = useEditorConnection({
     workspace,
     activeFloorId,

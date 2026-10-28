@@ -159,6 +159,61 @@ await withModules(async (load) => {
       assert.deepEqual(api.redoWorkspaceHistory(undo).present, next);
     });
 
+  test("profile conversions retain independent readings and mappings while replacing only primary controls", () => {
+    const before = fixture();
+    const readings = before.project.sceneItems.map((item, index) => {
+      const slot = {
+        id: `reading-${index}`,
+        compatibleDomains: ["sensor"],
+        required: false,
+        autoMap: "manual",
+        deviceRole: "secondary",
+        presentation: {
+          label: `Temperature ${index}`,
+          dashboardRole: "secondary",
+          showInScene: true,
+        },
+      };
+      item.entitySlots.push(slot);
+      for (const state of Object.values(before.bindings)) {
+        state.draft.entityIdsBySlotId[slot.id] = `sensor.fixture_${index}`;
+        state.published.entityIdsBySlotId[slot.id] = `sensor.fixture_${index}`;
+        state.manualSlotIds.push(slot.id);
+      }
+      return slot;
+    });
+    const { light: _light, ...base } = model;
+    const furniture = editCustomModel(before, { ...base, profile: "furniture" });
+    const sensor = editCustomModel(before, { ...base, profile: "sensor" });
+    const deviceAgain = editCustomModel(furniture, model);
+    for (const next of [furniture, sensor, deviceAgain]) {
+      next.project.sceneItems.forEach((item, index) => {
+        assert.deepEqual((item.entitySlots ?? []).filter(api.isAuxiliaryEntitySlot), [
+          readings[index],
+        ]);
+      });
+      for (const [origin, state] of Object.entries(next.bindings)) {
+        assert.deepEqual(
+          state.draft.entityIdsBySlotId,
+          Object.fromEntries(readings.map((slot, index) => [slot.id, `sensor.fixture_${index}`])),
+        );
+        assert.deepEqual(
+          state.manualSlotIds,
+          readings.map((slot) => slot.id),
+        );
+        assert.deepEqual(state.published, before.bindings[origin].published);
+      }
+      assert.deepEqual(api.validateHomeProject(next.project, native).issues, []);
+      const history = api.commitWorkspaceSnapshot(api.createWorkspaceHistory(before), next);
+      assert.deepEqual(api.undoWorkspaceHistory(history).present, before);
+      assert.deepEqual(api.redoWorkspaceHistory(api.undoWorkspaceHistory(history)).present, next);
+    }
+    const ids = deviceAgain.project.sceneItems.flatMap((item) =>
+      item.entitySlots.map((slot) => slot.id),
+    );
+    assert.equal(new Set(ids).size, ids.length);
+  });
+
   test("furniture to device gives each copy a unique unmapped primary slot and preserves other models", () => {
     const source = editCustomModel(
       fixture(),

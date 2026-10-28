@@ -1,9 +1,9 @@
 {
-  "revision": 16,
-  "fingerprint": "f6e6b17584f14c4a0fce5ef63c91a39fcb7cf4dd60a57f72c99e527c691b9f6e",
-  "summary": "Keep misplaced items editable and add explicit placement repairs",
+  "revision": 17,
+  "fingerprint": "537bdb97439f6ffe46858de782293c996a7720f92352aee213c587d07b850344",
+  "summary": "Support independent furniture and device sensor readings with scene visibility and TV switch controls",
   "breakingChanges": [
-    "Existing homes remain compatible. The updated panel treats geometric placement diagnostics as warnings, checks scaled bounds before Arrange edits, and offers per-copy repairs in Issues. Older panels can still block a home on legacy device contact errors. No data or asset migration is required."
+    "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Mixed model lighting and placement repairs from revisions 15 and 16 remain supported. Older clients retain unsupported-field protection."
   ],
   "history": [
     {
@@ -109,6 +109,13 @@
       "summary": "Support mixed light sources and remove fixed lighting cutoffs",
       "breakingChanges": [
         "Existing point and strip declarations remain readable without migration. Mixed explicit source layouts and expanded sample counts require this updated frontend and matching native panel. Older clients retain unsupported-data protection. No asset, HA binding or backend migration is required."
+      ]
+    },
+    {
+      "revision": 16,
+      "summary": "Keep misplaced items editable and add explicit placement repairs",
+      "breakingChanges": [
+        "Existing homes remain compatible. The updated panel treats geometric placement diagnostics as warnings, checks scaled bounds before Arrange edits, and offers per-copy repairs in Issues. Older panels can still block a home on legacy device contact errors. No data or asset migration is required."
       ]
     }
   ],

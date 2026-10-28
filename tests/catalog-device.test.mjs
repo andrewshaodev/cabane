@@ -963,7 +963,7 @@ await withModules(async (load) => {
 
   test("television displays camera media while preserving its media-player fallback", async () => {
     const definition = catalog.stableDeviceRegistry.television;
-    assert.deepEqual(definition.supportedDomains, ["camera", "media_player"]);
+    assert.deepEqual(definition.supportedDomains, ["camera", "media_player", "switch"]);
     assert.equal(definition.liveMedia.kind, "camera-stream");
     assert.equal(definition.interaction.target, "camera-viewer");
     const props = { ...blindProps, visualState: "connected-active" };
