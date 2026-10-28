@@ -512,6 +512,7 @@
     "owners": [
       "apps/web/src/model-lighting",
       "packages/engine/src/model-lighting",
+      "packages/engine/src/model-lighting/execution.ts",
       "packages/engine/src/HomeAssistantSceneLighting.tsx",
       "packages/engine/src/SceneLightPool.tsx"
     ],
@@ -521,6 +522,8 @@
         "symbols": [
           "modelLightSources",
           "importedLightSources",
+          "modelLightingExecution",
+          "SCENE_LIGHT_BUDGET",
           "projectModelLighting",
           "editModelLighting",
           "lightingSlotForItem",
@@ -530,7 +533,7 @@
         ]
       }
     ],
-    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. Only on sources occupy the reusable pool; grow capacity without an arbitrary floor cutoff and retain slots across state changes.",
+    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. execution.ts alone bounds physical expansion for import, editor and floor runtime. Keep strips compact across copies; all logical sources contribute within the 128-light budget through fair strip sampling or spatial merging, without rewriting saved intent. Only on sources occupy the reusable pool; retain at most the bounded peak slots across state changes.",
     "checks": ["verify:workspace", "verify:runtime", "build:panel"]
   }
 ]

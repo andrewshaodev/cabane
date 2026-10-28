@@ -75,8 +75,8 @@ asset contracts without a schema migration. Lighting editing uses the shared [mo
 `HomeProject` V2 optionally contains `customModels`: name, support, existing
 profile, asset hash/byte length, normalization, bounds, complexity, and optional
 Light settings. Legacy single-point settings remain readable without migration.
-Optional `light.points` adds at most seven points to `light.position`, or
-`light.strip` defines a distinct end and two to eight evenly spaced samples.
+Optional legacy `light.points` adds points to `light.position`, or
+`light.strip` defines a distinct end and a safe-integer sample request of at least two.
 These alternatives cannot coexist. `light.emissiveMaterials` selects up to sixteen
 distinct exact material names. Unknown fields remain blocked in older panels,
 so homes using these fields require the matching updated HA frontend bundle.
@@ -98,8 +98,12 @@ uniform resizing transform source positions and range alongside the model.
 Total intensity is shared between sources, then between each strip's samples,
 including both endpoints. Sample counts are explicit and survive endpoint edits.
 
-There is no eight-point model limit or 32-point floor cutoff. The active source
-pool grows as needed and reuses zero-intensity slots when lights turn off, avoiding
+There is no eight-point logical model limit or source-discarding floor cutoff.
+The shared [execution policy](model-lighting.md#rendering) approximates all active
+sources within 128 physical lights per preview or floor. It reduces strip samples
+and, when necessary, merges nearby logical sources while conserving total
+brightness. Saved declarations and requested counts remain intact. The pool
+reuses bounded zero-intensity slots when lights turn off, avoiding
 shader rebuilds within its existing capacity. Off, unavailable, stale and
 disconnected connected lights have zero source and emissive intensity. Local
 Always on, Always off and Night only modes apply to both. Strip lighting

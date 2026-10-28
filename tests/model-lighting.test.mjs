@@ -10,6 +10,8 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
+  const { ActiveSceneLightPool } = await load("/packages/engine/src/SceneLightPool.tsx");
+  const { planSceneLights } = await load("/packages/engine/src/model-lighting/execution.ts");
   const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
   const { createCatalogItem } = await load(
     "/apps/web/src/editor-preview/furnish/placement/item-creation.ts",
@@ -395,7 +397,6 @@ await withModules(async (load) => {
     }
   });
   test("the light pool borrows off slots while retaining sources that stay on", async () => {
-    const { ActiveSceneLightPool } = await load("/packages/engine/src/SceneLightPool.tsx");
     const floor = { ...fixture().project.floors[0], rooms: [], walls: [], openings: [] };
     const source = (name, x, intensity = 1) => ({
       name,
@@ -438,6 +439,43 @@ await withModules(async (load) => {
         b,
       );
       assert.ok(lights().every((light) => light.intensity === 1));
+    } finally {
+      await scene.unmount();
+    }
+  });
+  test("the bounded pool includes every active source, blends linear color and retains a safe peak layout", async () => {
+    const floor = { ...fixture().project.floors[0], rooms: [], walls: [], openings: [] };
+    const sources = Array.from({ length: 256 }, (_, i) => ({
+      name: `copy-${i}`,
+      position: [Math.floor(i / 2), 1, 0],
+      color: i % 2 ? "#0000ff" : "#ff0000",
+      intensity: i % 2 ? 3 : 1,
+      distance: i % 2 ? 0 : 5,
+    }));
+    const execution = planSceneLights(sources);
+    assert.equal(execution.lights.length, 128);
+    assert.ok(
+      execution.lights.every((source) => source.color === "#8900e1" && source.distance === 0),
+    );
+    assert.equal(
+      execution.lights.reduce((sum, source) => sum + source.intensity, 0),
+      512,
+    );
+    const render = (sources) => React.createElement(ActiveSceneLightPool, { floor, sources });
+    const scene = await create(render(sources));
+    const lights = () => scene.scene.findAllByType("PointLight").map((node) => node.instance);
+    try {
+      const peak = lights();
+      assert.equal(peak.length, 128);
+      await scene.update(render(sources.map((source) => ({ ...source, intensity: 0 }))));
+      assert.deepEqual(lights(), peak);
+      assert.ok(lights().every((source) => source.intensity === 0));
+      await scene.update(render([sources[0]]));
+      assert.deepEqual(lights(), peak);
+      assert.equal(
+        lights().reduce((sum, source) => sum + source.intensity, 0),
+        1,
+      );
     } finally {
       await scene.unmount();
     }

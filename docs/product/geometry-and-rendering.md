@@ -113,10 +113,13 @@ owned, shared, and disposed by the dedicated import module and use ordinary
 draws. Floor imports add a simple envelope collider. The exception does not
 permit asset loading in native models or generated home extensions. See
 [personal models](personal-models.md).
-Physical lights render only on the active floor. On that floor, supported emitters
+Physical lights render only on the active floor. Room, dashboard and device
+emissions share the [bounded model-lighting execution policy](model-lighting.md#rendering),
+which preserves authored declarations and total brightness within 128 physical
+point lights. Only positive-intensity sources need active slots. Allocated slots
 stay mounted at zero intensity while off or unavailable. Device and dashboard
-light updates change uniforms without changing shader light counts, avoiding
-synchronous scene shader compilation during interaction. Device emitters, including
+updates within the existing peak capacity change uniforms without changing shader
+light counts. First growth to a larger bounded peak can compile shaders. Device emitters, including
 fallbacks from resolved bindings, are scoped to their owning floor so stair
 transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
 opaque wall retain their unshadowed point source at the bulb. The beauty pass
