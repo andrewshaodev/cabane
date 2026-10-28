@@ -100,7 +100,7 @@ export function ConstructionSelectionProperties({
   const deletionCount = Object.values(deletionCounts).reduce((sum, count) => sum + count, 0);
   const kind = editor.selection?.kind;
   const names = {
-    wall: "Wall",
+    wall: selectedWall?.virtual ? "Invisible wall" : "Wall",
     room: selectedRoom?.name || "Unnamed room",
     hedge: "Boundary",
     pool: "Pool",
@@ -198,39 +198,52 @@ export function ConstructionSelectionProperties({
               </div>
               <div>
                 <dt>Type</dt>
-                <dd>{resolvedWall?.classification ?? "Pending"}</dd>
+                <dd>
+                  {selectedWall.virtual ? "Invisible" : (resolvedWall?.classification ?? "Pending")}
+                </dd>
               </div>
             </dl>
-            <fieldset>
-              <legend>Dimensions</legend>
-              <label>
-                Thickness
-                <LengthInput
-                  label="Wall thickness"
-                  min={0.04}
-                  step={0.01}
-                  value={wallThickness}
-                  onCommit={(value) =>
-                    editor.updateSelectedWallMetadata({ thicknessMeters: value })
-                  }
+            {selectedWall.virtual && (
+              <p className="construction-inspector__tool-hint">
+                This boundary separates rooms without blocking the view or walking.
+              </p>
+            )}
+            {!selectedWall.virtual && (
+              <>
+                <fieldset>
+                  <legend>Dimensions</legend>
+                  <label>
+                    Thickness
+                    <LengthInput
+                      label="Wall thickness"
+                      min={0.04}
+                      step={0.01}
+                      value={wallThickness}
+                      onCommit={(value) =>
+                        editor.updateSelectedWallMetadata({ thicknessMeters: value })
+                      }
+                    />
+                  </label>
+                  <label>
+                    Height
+                    <LengthInput
+                      label="Wall height"
+                      min={0.3}
+                      step={0.05}
+                      value={wallHeight}
+                      onCommit={(value) =>
+                        editor.updateSelectedWallMetadata({ heightMeters: value })
+                      }
+                    />
+                  </label>
+                </fieldset>
+                <WallFinishFields
+                  editor={editor}
+                  wall={selectedWall}
+                  isExterior={!!selectedWallIsExterior}
                 />
-              </label>
-              <label>
-                Height
-                <LengthInput
-                  label="Wall height"
-                  min={0.3}
-                  step={0.05}
-                  value={wallHeight}
-                  onCommit={(value) => editor.updateSelectedWallMetadata({ heightMeters: value })}
-                />
-              </label>
-            </fieldset>
-            <WallFinishFields
-              editor={editor}
-              wall={selectedWall}
-              isExterior={!!selectedWallIsExterior}
-            />
+              </>
+            )}
             <EditorButton variant="text" type="button" onClick={editor.deleteSelected}>
               Delete wall
             </EditorButton>

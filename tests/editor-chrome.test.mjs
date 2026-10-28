@@ -118,22 +118,38 @@ await withModules(async (load) => {
       const buttons = [...document.querySelectorAll("button")];
       assert.deepEqual(
         buttons.map((button) => button.getAttribute("aria-label")),
-        ["Select", "Wall", "Door", "Window", "Passage", "Floor", "Measure", "Decorations"],
+        ["Select", "Wall", "Openings", "Floor", "Measure", "Decorations"],
       );
-      assert.equal(
-        document.querySelector('[aria-label="Wall"]').getAttribute("aria-pressed"),
-        "true",
+      const wallGroup = document.querySelector('[aria-label="Wall"]');
+      assert.equal(wallGroup.getAttribute("aria-pressed"), "true");
+      await act(async () => wallGroup.click());
+      const walls = document.querySelector('[aria-label="Wall tools"]');
+      assert.equal(walls.parentElement, document.body);
+      assert.deepEqual(
+        [...walls.querySelectorAll("button")].map((b) => b.textContent),
+        ["Wall", "Invisible wall", "Outdoor space"],
       );
-      await act(async () => buttons.slice(0, 7).forEach((button) => button.click()));
-      assert.deepEqual(selected, [
-        "select",
-        "wall",
-        "door",
-        "window",
-        "passage",
-        "floor",
-        "measure",
-      ]);
+      await act(async () => walls.querySelector('[aria-label="Invisible wall"]').click());
+      assert.equal(selected.at(-1), "virtual-wall");
+      assert.equal(document.querySelector('[aria-label="Wall tools"]'), null);
+      await act(async () => wallGroup.click());
+      await act(async () => document.querySelector('[aria-label="Outdoor space"]').click());
+      assert.equal(selected.at(-1), "platform");
+      const openings = document.querySelector('[aria-label="Openings"]');
+      for (const [label, tool] of [
+        ["Door", "door"],
+        ["Passage", "passage"],
+        ["Window", "window"],
+      ]) {
+        await act(async () => openings.click());
+        const panel = document.querySelector('[aria-label="Opening tools"]');
+        assert.deepEqual(
+          [...panel.querySelectorAll("button")].map((b) => b.textContent),
+          ["Door", "Passage", "Window"],
+        );
+        await act(async () => panel.querySelector(`[aria-label="${label}"]`).click());
+        assert.equal(selected.at(-1), tool);
+      }
       const decorations = document.querySelector('[aria-label="Decorations"]');
       await act(async () => decorations.click());
       assert.equal(decorations.getAttribute("aria-expanded"), "true");
@@ -165,7 +181,55 @@ await withModules(async (load) => {
       });
       assert.equal(decorations.getAttribute("aria-expanded"), "false");
       assert.equal(document.activeElement, decorations);
-      assert.equal(buttons[5].getAttribute("aria-keyshortcuts"), "F");
+      assert.equal(
+        document.querySelector('[aria-label="Floor"]').getAttribute("aria-keyshortcuts"),
+        "F",
+      );
+    });
+  });
+
+  test("grouped tools reflect tutorial selections and keep Stairs after Floor", async () => {
+    await withDom(async ({ root, document, window }) => {
+      for (const tool of ["wall", "virtual-wall", "platform", "door", "window"]) {
+        await act(async () =>
+          root.render(React.createElement(EditorActionBar, props({ tool, onStairs() {} }))),
+        );
+        const buttons = [
+          ...document
+            .querySelector('[aria-label="Construction actions"]')
+            .querySelectorAll("button"),
+        ];
+        assert.deepEqual(
+          buttons.map((b) => b.getAttribute("aria-label")),
+          ["Select", "Wall", "Openings", "Floor", "Stairs", "Measure", "Decorations"],
+        );
+        const group = ["door", "window"].includes(tool) ? "Openings" : "Wall";
+        assert.equal(
+          document.querySelector(`[aria-label="${group}"]`).getAttribute("aria-pressed"),
+          "true",
+        );
+        assert.equal(
+          document.querySelector('[aria-label="Floor"]').getAttribute("aria-pressed"),
+          "false",
+        );
+      }
+      const wall = document.querySelector('[aria-label="Wall"]');
+      await act(async () =>
+        wall.dispatchEvent(
+          Object.assign(new window.Event("pointerover", { bubbles: true }), {
+            pointerType: "mouse",
+          }),
+        ),
+      );
+      assert.ok(document.querySelector('[aria-label="Wall tools"]'), "hover reveals tools");
+      await act(async () =>
+        root.render(React.createElement(EditorActionBar, props({ inert: true, onStairs() {} }))),
+      );
+      assert.equal(
+        document.querySelector('[aria-label="Wall tools"]'),
+        null,
+        "locked editor dismisses the portal",
+      );
     });
   });
 

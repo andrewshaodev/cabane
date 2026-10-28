@@ -143,6 +143,18 @@ export const sceneItemPlacementIssues = (
       `Wall “${placement.wallId}” does not exist.`,
     );
   }
+  if (
+    placement.kind === "wall" &&
+    floor.walls.some((wall) => wall.id === placement.wallId && wall.virtual === true)
+  ) {
+    supportExists = false;
+    addProjectIssue(
+      issues,
+      "project.wall-support-virtual",
+      `${path}.wallId`,
+      "Invisible walls divide rooms and cannot support items. Choose a physical wall or floor placement.",
+    );
+  }
   if (placement.kind === "ceiling" && !floor.rooms.some((room) => room.id === placement.roomId)) {
     addProjectIssue(
       issues,

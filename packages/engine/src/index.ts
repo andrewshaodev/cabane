@@ -12,6 +12,7 @@ export * from "./pools/pool-footprint";
 export * from "./floor-finishes";
 export * from "./opening-orientation";
 export * from "./architecture-geometry";
+export { physicalFloor } from "./architecture-geometry/physical-floor";
 export * from "./architecture-models";
 export * from "./lighting";
 export * from "./SceneLighting";

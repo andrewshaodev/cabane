@@ -291,7 +291,10 @@ collision, shadows or fade ownership.
 An optional `WallSpec.virtual` wall divides rooms without being built: it adds no
 geometry, collision, shadow, lighting plane, roof seam, or opening host, and junctions
 keep only their physical walls (dropped below two). Rooms and ceilings are unchanged.
-Validation requires a boolean flag and rejects openings on a virtual wall.
+Validation requires a boolean flag and rejects openings and supported scene items on a
+virtual wall. Arrange uses the public `physicalFloor()` projection for wall support and
+corner snapping. Shared opening-clearance intervals ignore virtual incident walls.
+Construct alone draws these boundaries as dashed plan strokes, without filled joints.
 
 Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
 

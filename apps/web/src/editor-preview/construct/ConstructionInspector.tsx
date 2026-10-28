@@ -33,31 +33,41 @@ export function ConstructionInspector({
         {(editor.tool === "floor" || editor.tool === "platform") && floorPainting && (
           <FloorToolProperties editor={editor} painting={floorPainting} />
         )}
-        {editor.tool === "wall" && (
+        {(editor.tool === "wall" || editor.tool === "virtual-wall") && (
           <div className="construction-inspector__selection">
             <header>
               <div>
-                <strong>Draw walls</strong>
+                <strong>
+                  {editor.tool === "virtual-wall" ? "Draw invisible walls" : "Draw walls"}
+                </strong>
               </div>
             </header>
             <p className="construction-inspector__tool-hint">
               Click and drag a wall segment. Continue from its endpoint to draw a connected wall.
             </p>
-            <fieldset>
-              <legend>Finish</legend>
-              <label>
-                Exterior
-                <DebouncedColorInput
-                  label="New wall exterior color"
-                  value={editor.exteriorWallColor}
-                  onCommit={(exteriorColor) => {
-                    editor.setExteriorWallColor(exteriorColor);
-                    if (editor.selection?.kind === "wall")
-                      editor.updateSelectedWallMetadata({ exteriorColor });
-                  }}
-                />
-              </label>
-            </fieldset>
+            {editor.tool === "virtual-wall" && (
+              <p className="construction-inspector__tool-hint">
+                Divide an open space into rooms without building a wall. Dashed lines appear only in
+                Construct; people can walk through them.
+              </p>
+            )}
+            {editor.tool === "wall" && (
+              <fieldset>
+                <legend>Finish</legend>
+                <label>
+                  Exterior
+                  <DebouncedColorInput
+                    label="New wall exterior color"
+                    value={editor.exteriorWallColor}
+                    onCommit={(exteriorColor) => {
+                      editor.setExteriorWallColor(exteriorColor);
+                      if (editor.selection?.kind === "wall")
+                        editor.updateSelectedWallMetadata({ exteriorColor });
+                    }}
+                  />
+                </label>
+              </fieldset>
+            )}
           </div>
         )}
         {editor.tool === "door" && (

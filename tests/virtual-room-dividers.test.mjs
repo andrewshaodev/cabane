@@ -12,6 +12,10 @@ await withModules(async (load) => {
     isWalkPointClear,
     neutralDemoManifest,
     validateHomeManifest,
+    availableOpeningOffsetRanges,
+    nearestAvailableOpeningOffset,
+    resolveItemTransform,
+    sceneItemPlacementIssues,
   } = await load("/packages/engine/src/index.ts");
   const { physicalFloor } = await load(
     "/packages/engine/src/architecture-geometry/physical-floor.ts",
@@ -22,6 +26,12 @@ await withModules(async (load) => {
   );
   const { parseHomeProjectSchema } = await load("/packages/engine/src/home-project/validation.ts");
   const { makeLegacyProject } = await load("/tests/fixtures/multiple-floors.ts");
+  const { placementCandidate } = await load(
+    "/apps/web/src/editor-preview/furnish/placement/placement-candidate.ts",
+  );
+  const { placementNearWallsForWorldDrag } = await load(
+    "/apps/web/src/editor-preview/furnish/placement/wall-drag-placement.ts",
+  );
 
   const wall = (id, from, to, extra = {}) => ({ id, from, to, thicknessMeters: 0.2, ...extra });
   const topologyInput = (partitionExtra) => ({
@@ -117,6 +127,104 @@ await withModules(async (load) => {
 
   const manifestWith = (floor) => defineHomeManifest({ ...neutralDemoManifest, floors: [floor] });
   const codes = (floor) => validateHomeManifest(manifestWith(floor)).issues.map((i) => i.code);
+
+  const definition = {
+    defaultSize: [0.3, 0.6, 0.3],
+    preferredPlacement: "absolute",
+    bounds: { min: [-0.15, 0, -0.15], max: [0.15, 0.6, 0.15] },
+  };
+  const floorItem = {
+    id: "lamp",
+    kind: "furnishing",
+    modelId: "lamp",
+    floorId: virtualFloor.id,
+    size: definition.defaultSize,
+    placement: {
+      kind: "absolute",
+      at: [2, 2],
+      elevationMeters: 0.001,
+      rotationYRadians: 0,
+    },
+  };
+
+  test("Arrange placement and world dragging ignore invisible wall supports", () => {
+    const candidate = placementCandidate({ definition }, virtualFloor, { at: [3.1, 2] });
+    assert.equal(candidate.error, null);
+    assert.equal(candidate.placement.kind, "absolute");
+    assert.doesNotThrow(() =>
+      resolveItemTransform(candidate.placement, physicalFloor(virtualFloor)),
+    );
+    assert.equal(
+      placementNearWallsForWorldDrag({
+        rawAt: [3.1, 2],
+        item: floorItem,
+        definition,
+        floor: virtualFloor,
+      }),
+      null,
+    );
+    assert.equal(
+      placementCandidate({ definition }, virtualFloor, {
+        at: [3.1, 2],
+        kind: "wall",
+        wallId: "divider",
+      }).placement,
+      null,
+    );
+    const physical = placementCandidate({ definition }, solidFloor, { at: [3.1, 2] });
+    assert.equal(physical.placement.kind, "wall", "physical dividers remain valid supports");
+  });
+
+  test("saved-project validation rejects attachments to invisible walls", () => {
+    const item = {
+      ...floorItem,
+      placement: {
+        kind: "wall",
+        wallId: "divider",
+        face: "right",
+        offsetFromWallStartPlanUnits: 2,
+        elevationMeters: 0,
+        depthOffsetMeters: 0.2,
+        rotationOffsetRadians: 0,
+      },
+    };
+    const issues = sceneItemPlacementIssues(item, { floors: [virtualFloor] }, definition);
+    assert.ok(
+      issues.some(
+        (issue) => issue.code === "project.wall-support-virtual" && issue.severity === "error",
+      ),
+    );
+    assert.deepEqual(sceneItemPlacementIssues(item, { floors: [solidFloor] }, definition), []);
+  });
+
+  test("invisible junctions do not block validation or placement of facade windows", () => {
+    const floor = {
+      ...virtualFloor,
+      openings: [
+        {
+          id: "facade-window",
+          kind: "window",
+          wallId: "north",
+          offsetFromWallStartPlanUnits: 2.5,
+          widthPlanUnits: 1,
+          openingHeightMeters: 1.2,
+          sillHeightMeters: 0.8,
+          operation: "fixed",
+          variant: "plain",
+          panelCount: 1,
+          glazing: "clear",
+        },
+      ],
+    };
+    assert.equal(codes(floor).includes("wall-junction.opening-overlap"), false);
+    const draft = createFloorEditorDraft(virtualFloor);
+    const request = { draft, wallId: "north", widthPlanUnits: 1, sillHeightMeters: 0.8 };
+    assert.equal(nearestAvailableOpeningOffset(2.5, availableOpeningOffsetRanges(request)), 2.5);
+    assert.deepEqual(availableOpeningOffsetRanges({ ...request, wallId: "divider" }), []);
+    assert.ok(
+      codes({ ...solidFloor, openings: floor.openings }).includes("wall-junction.opening-overlap"),
+    );
+  });
 
   test("validation accepts the flag, rejects non-boolean values, and bars openings on it", () => {
     assert.equal(codes(virtualFloor).includes("wall.virtual"), false);
