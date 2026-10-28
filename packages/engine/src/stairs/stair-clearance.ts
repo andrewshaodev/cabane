@@ -46,6 +46,14 @@ export function stairVolumesIntersect(a: StairVolume, b: StairVolume) {
   );
 }
 
+/** Rendered tread slabs at their actual building elevations. */
+export function stairStructureVolumes(flight: StairFlight) {
+  const base = flight.baseElevationMeters;
+  return flight.treads.map((tread) =>
+    stairVolume(stairPolygon(tread.polygon), base + tread.elevation - 0.12, base + tread.elevation),
+  );
+}
+
 /** Actual tread footprints, including turning treads, with the existing 1.8 m walking clearance. */
 export function stairClearanceVolumes(flight: StairFlight, coordinates: FloorCoordinates) {
   const base = flight.baseElevationMeters;

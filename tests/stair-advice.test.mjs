@@ -69,6 +69,19 @@ await withModules(async (load) => {
     p.stairs[0].upperFloorId = "second";
     assert.equal(validateHomeProject(p, emptyRegistries).valid, false);
   });
+  test("stacked flights in one stairwell do not overlap across adjacent storeys", () => {
+    const p = makeStairProject();
+    p.stairs.push({
+      ...p.stairs[0],
+      id: "first-stairs",
+      lowerFloorId: "first",
+      upperFloorId: "second",
+    });
+    assert.equal(
+      validateStairs(p).some((issue) => issue.code === "stair.overlap"),
+      false,
+    );
+  });
   test("long rotated wardrobe uses its physical narrow side, not its diagonal radius", () => {
     const p = makeStairProject();
     p.stairs[0].widthMeters = 1;
