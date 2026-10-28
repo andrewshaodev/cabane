@@ -115,8 +115,9 @@ permit asset loading in native models or generated home extensions. See
 [personal models](personal-models.md).
 Physical lights render only on the active floor. Room, dashboard and device
 emissions share the [bounded model-lighting execution policy](model-lighting.md#rendering),
-which preserves authored declarations and total brightness within 128 physical
-point lights. Only positive-intensity sources need active slots. Allocated slots
+which preserves authored declarations and total brightness within 64 physical
+point lights. Only positive-intensity sources need active slots; native and
+dashboard declarations prewarm spare bounded slots for first-activation reuse. Allocated slots
 stay mounted at zero intensity while off or unavailable. Device and dashboard
 updates within the existing peak capacity change uniforms without changing shader
 light counts. First growth to a larger bounded peak can compile shaders. Device emitters, including

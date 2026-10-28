@@ -78,7 +78,7 @@ test(
           error: gl.getContext().getError(),
         };
       });
-      assert.equal(before.ids.length, 128);
+      assert.equal(before.ids.length, 64);
       assert.equal(before.runnable, true);
       assert.equal(before.error, 0);
       await page.evaluate(() => window.lightPool.configure(64, 4294967296));

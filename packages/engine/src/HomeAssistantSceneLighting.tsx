@@ -118,6 +118,7 @@ export function HomeAssistantSceneLighting({
         color: lightColorForSnapshot(entity.state, configured?.color ?? fallback.color),
         intensity: (configured?.maxIntensity ?? fallback.maxIntensity) * brightness,
         distance: configured?.distance ?? fallback.distance,
+        prewarm: true,
       });
     }
   }
@@ -194,6 +195,7 @@ export function HomeAssistantSceneLighting({
           : {}),
         color: lightColorForSnapshot(state, source.color),
         intensity: source.intensity * brightness,
+        prewarm: !definition.lightingCustomized && !modelId.startsWith("custom:"),
         distance: source.distance * (typeof scale === "number" ? scale : Math.max(...scale)),
       };
       pooledSources.push(properties);

@@ -6,7 +6,7 @@ import type {
 } from "../imported-models/contracts";
 
 /** Measured shader/resource budget, shared by previews and each mounted floor. */
-export const SCENE_LIGHT_BUDGET = 128;
+export const SCENE_LIGHT_BUDGET = 64;
 
 /** Compact emission: intensity belongs to the whole strip, not each requested sample. */
 export interface SceneLightEmission {
@@ -16,9 +16,14 @@ export interface SceneLightEmission {
   color: string;
   intensity: number;
   distance: number;
+  /** Engine-owned native/dashboard sources prewarm spare slots before first activation. */
+  prewarm?: boolean;
 }
 
-export type ExecutedSceneLight = Omit<SceneLightEmission, "strip">;
+export type ExecutedSceneLight = Pick<
+  SceneLightEmission,
+  "name" | "position" | "color" | "intensity" | "distance"
+>;
 
 /** Read old declarations without rewriting portable source intent. */
 export function modelLightSources(light: CustomModelLight): readonly CustomModelLightSource[] {
@@ -76,9 +81,12 @@ function spatialGroup(sources: readonly SceneLightEmission[]) {
 }
 
 /** Median spatial partitions keep every logical source's contribution, including distant copies. */
-function mergeEmissions(sources: readonly SceneLightEmission[]): ExecutedSceneLight[] {
+function mergeEmissions(
+  sources: readonly SceneLightEmission[],
+  budget: number,
+): ExecutedSceneLight[] {
   const groups = [spatialGroup(sources)];
-  while (groups.length < SCENE_LIGHT_BUDGET) {
+  while (groups.length < budget) {
     let split = -1;
     for (let i = 0; i < groups.length; i++)
       if (groups[i].sources.length > 1 && (split < 0 || groups[i].span > groups[split].span))
@@ -118,8 +126,44 @@ function mergeEmissions(sources: readonly SceneLightEmission[]): ExecutedSceneLi
   });
 }
 
+function expandEmissions(
+  sources: readonly SceneLightEmission[],
+  budget: number,
+): ExecutedSceneLight[] {
+  if (budget === 0 || sources.length === 0) return [];
+  if (sources.length > budget) return mergeEmissions(sources, budget);
+  // Give every logical source a slot, then fairly share spare strip samples.
+  const counts = sources.map(() => 1);
+  let remaining = budget - sources.length;
+  while (remaining > 0) {
+    let added = false;
+    for (let i = 0; i < sources.length && remaining > 0; i++) {
+      if (counts[i] >= requestedSamples(sources[i])) continue;
+      counts[i]++;
+      remaining--;
+      added = true;
+    }
+    if (!added) break;
+  }
+  return sources.flatMap((source, sourceIndex) => {
+    const count = counts[sourceIndex];
+    return Array.from({ length: count }, (_, index) => ({
+      name: source.name + (index ? `-sample-${index}` : ""),
+      position: source.strip
+        ? (source.position.map((n, axis) => {
+            const t = count === 1 ? 0.5 : index / (count - 1);
+            return n * (1 - t) + source.strip!.end[axis] * t;
+          }) as [number, number, number])
+        : source.position,
+      color: source.color,
+      intensity: source.intensity / count,
+      distance: source.distance,
+    }));
+  });
+}
+
 /**
- * The sole expansion policy. Work follows authored declarations plus at most 128
+ * The sole expansion policy. Work follows authored declarations plus at most 64
  * physical emitters, never a requested sample count. No saved source is truncated.
  */
 export function planSceneLights(input: readonly SceneLightEmission[]) {
@@ -130,39 +174,22 @@ export function planSceneLights(input: readonly SceneLightEmission[]) {
     (sum, source) => Math.min(Number.MAX_SAFE_INTEGER, sum + requestedSamples(source)),
     0,
   );
-  let lights: ExecutedSceneLight[];
-  if (sources.length > SCENE_LIGHT_BUDGET) lights = mergeEmissions(sources);
-  else {
-    // Give every logical source a slot, then fairly share spare strip samples.
-    const counts = sources.map(() => 1);
-    let remaining = SCENE_LIGHT_BUDGET - sources.length;
-    while (remaining > 0) {
-      let added = false;
-      for (let i = 0; i < sources.length && remaining > 0; i++) {
-        if (counts[i] >= requestedSamples(sources[i])) continue;
-        counts[i]++;
-        remaining--;
-        added = true;
-      }
-      if (!added) break;
-    }
-    lights = sources.flatMap((source, sourceIndex) => {
-      const count = counts[sourceIndex];
-      return Array.from({ length: count }, (_, index) => ({
-        name: source.name + (index ? `-sample-${index}` : ""),
-        position: source.strip
-          ? (source.position.map((n, axis) => {
-              const t = count === 1 ? 0.5 : index / (count - 1);
-              return n * (1 - t) + source.strip!.end[axis] * t;
-            }) as [number, number, number])
-          : source.position,
-        color: source.color,
-        intensity: source.intensity / count,
-        distance: source.distance,
-      }));
-    });
+  const lights = expandEmissions(sources, SCENE_LIGHT_BUDGET);
+  const approximated = requested > lights.length;
+  // Native first-use interaction already promises uniform-only state changes.
+  // Off declarations borrow only spare capacity; they never crowd out active sources.
+  if (lights.length < SCENE_LIGHT_BUDGET) {
+    const prewarm = input
+      .filter((source) => source.prewarm && source.intensity === 0)
+      .map((source) => ({ ...source, intensity: 1 }));
+    lights.push(
+      ...expandEmissions(prewarm, SCENE_LIGHT_BUDGET - lights.length).map((source) => ({
+        ...source,
+        intensity: 0,
+      })),
+    );
   }
-  return { lights, requested, approximated: requested > lights.length };
+  return { lights, requested, approximated };
 }
 
 export const modelLightingExecution = (light: CustomModelLight) =>

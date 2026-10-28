@@ -100,7 +100,7 @@ including both endpoints. Sample counts are explicit and survive endpoint edits.
 
 There is no eight-point logical model limit or source-discarding floor cutoff.
 The shared [execution policy](model-lighting.md#rendering) approximates all active
-sources within 128 physical lights per preview or floor. It reduces strip samples
+sources within 64 physical lights per preview or floor. It reduces strip samples
 and, when necessary, merges nearby logical sources while conserving total
 brightness. Saved declarations and requested counts remain intact. The pool
 reuses bounded zero-intensity slots when lights turn off, avoiding

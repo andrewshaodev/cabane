@@ -105,7 +105,6 @@ function assignLightSlots(
   const used = new Set<number>();
   const waiting: ExecutedSceneLight[] = [];
   for (const source of sources) {
-    if (!(source.intensity > 0)) continue;
     const slot = byName.get(source.name);
     if (slot === undefined) waiting.push(source);
     else {

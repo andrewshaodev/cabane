@@ -141,7 +141,7 @@ await withModules(async (load) => {
       ]) {
         const original = structuredClone(settings);
         const emitters = api.importedLightSources(settings);
-        assert.ok(emitters.length > 1 && emitters.length <= 128);
+        assert.ok(emitters.length > 1 && emitters.length <= api.SCENE_LIGHT_BUDGET);
         assert.deepEqual(emitters[0].position, light.position);
         assert.deepEqual(emitters.at(-1).position, [2, 0.2, 0]);
         assert.ok(Math.abs(emitters.reduce((sum, s) => sum + s.maxIntensity, 0) - 6) < 1e-8);
@@ -160,7 +160,7 @@ await withModules(async (load) => {
       ],
     };
     const execution = api.modelLightingExecution(settings);
-    assert.equal(api.SCENE_LIGHT_BUDGET, 128);
+    assert.equal(api.SCENE_LIGHT_BUDGET, 64);
     assert.equal(execution.lights.length, api.SCENE_LIGHT_BUDGET);
     assert.equal(execution.approximated, true);
     for (const y of [0, 1, 2])
@@ -180,7 +180,7 @@ await withModules(async (load) => {
       sources: Array.from({ length: 257 }, (_, i) => ({ kind: "point", position: [i, 1, 0] })),
     };
     const merged = api.modelLightingExecution(many);
-    assert.equal(merged.lights.length, 128);
+    assert.equal(merged.lights.length, api.SCENE_LIGHT_BUDGET);
     assert.equal(merged.requested, 257);
     assert.ok(Math.abs(merged.lights.reduce((sum, s) => sum + s.intensity, 0) - 257) < 1e-8);
     assert.ok(
@@ -294,10 +294,14 @@ await withModules(async (load) => {
         "120 earlier off sources cannot crowd out the on light",
       );
       await renderer.update(render({ ...item, lightState: "always-on" }, state(), true, 25));
-      assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 125);
+      assert.equal(
+        renderer.scene.findAll((node) => node.instance.isPointLight).length,
+        api.SCENE_LIGHT_BUDGET,
+      );
       const pool = renderer.scene
         .findAll((node) => node.instance.isPointLight)
         .map((node) => node.instance);
+      assert.ok(Math.abs(pool.reduce((sum, source) => sum + source.intensity, 0) - 150) < 1e-8);
       await renderer.update(render(item, state({ state: "off" }), true, 25));
       assert.deepEqual(
         renderer.scene.findAll((node) => node.instance.isPointLight).map((node) => node.instance),
@@ -310,7 +314,7 @@ await withModules(async (load) => {
         .map((node) => node.instance);
       assert.equal(
         crowded.length,
-        128,
+        api.SCENE_LIGHT_BUDGET,
         "copies share a floor budget before expanding strip samples",
       );
       assert.ok(Math.abs(crowded.reduce((sum, source) => sum + source.intensity, 0) - 600) < 1e-8);
@@ -339,7 +343,11 @@ await withModules(async (load) => {
       const shared = renderer.scene
         .findAll((node) => node.instance.isPointLight)
         .map((node) => node.instance);
-      assert.equal(shared.length, 128, "room lights and copies share the same physical budget");
+      assert.equal(
+        shared.length,
+        api.SCENE_LIGHT_BUDGET,
+        "room lights and copies share the same physical budget",
+      );
       assert.ok(Math.abs(shared.reduce((sum, source) => sum + source.intensity, 0) - 605) < 1e-8);
       await renderer.update(render(item, state(), false));
       assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 0);
@@ -517,8 +525,8 @@ await withModules(async (load) => {
       assert.equal(current.sources.at(-1).samples, 4294967296);
       assert.match(
         dom.document.querySelector('[role="status"]').textContent,
-        /Preview approximates.*128 physical lights/,
+        /Preview approximates.*64 physical lights/,
       );
-      assert.equal(api.importedLightSources(current).length, 128);
+      assert.equal(api.importedLightSources(current).length, api.SCENE_LIGHT_BUDGET);
     }));
 });

@@ -453,7 +453,7 @@ await withModules(async (load) => {
       distance: i % 2 ? 0 : 5,
     }));
     const execution = planSceneLights(sources);
-    assert.equal(execution.lights.length, 128);
+    assert.equal(execution.lights.length, api.SCENE_LIGHT_BUDGET);
     assert.ok(
       execution.lights.every((source) => source.color === "#8900e1" && source.distance === 0),
     );
@@ -466,7 +466,7 @@ await withModules(async (load) => {
     const lights = () => scene.scene.findAllByType("PointLight").map((node) => node.instance);
     try {
       const peak = lights();
-      assert.equal(peak.length, 128);
+      assert.equal(peak.length, api.SCENE_LIGHT_BUDGET);
       await scene.update(render(sources.map((source) => ({ ...source, intensity: 0 }))));
       assert.deepEqual(lights(), peak);
       assert.ok(lights().every((source) => source.intensity === 0));
@@ -476,6 +476,34 @@ await withModules(async (load) => {
         lights().reduce((sum, source) => sum + source.intensity, 0),
         1,
       );
+    } finally {
+      await scene.unmount();
+    }
+  });
+  test("native off sources prewarm only spare budget and retain slots on their first activation", async () => {
+    const floor = { ...fixture().project.floors[0], rooms: [], walls: [], openings: [] };
+    const off = Array.from({ length: 256 }, (_, i) => ({
+      name: `native-${i}`,
+      position: [i, 1, 0],
+      color: "#ffffff",
+      intensity: 0,
+      distance: 5,
+      prewarm: true,
+    }));
+    assert.equal(planSceneLights(off).lights.length, api.SCENE_LIGHT_BUDGET);
+    assert.equal(planSceneLights(off).requested, 0);
+    const active = { ...off[0], name: "custom-on", intensity: 3, prewarm: false };
+    const prioritized = planSceneLights([...off, active]);
+    assert.equal(prioritized.lights.length, api.SCENE_LIGHT_BUDGET);
+    assert.equal(prioritized.lights.find((source) => source.name === active.name).intensity, 3);
+    const render = (sources) => React.createElement(ActiveSceneLightPool, { floor, sources });
+    const scene = await create(render([off[0]]));
+    try {
+      const initial = scene.scene.findByProps({ name: off[0].name }).instance;
+      assert.equal(initial.intensity, 0);
+      await scene.update(render([{ ...off[0], intensity: 2 }]));
+      assert.equal(scene.scene.findByProps({ name: off[0].name }).instance, initial);
+      assert.equal(initial.intensity, 2);
     } finally {
       await scene.unmount();
     }
