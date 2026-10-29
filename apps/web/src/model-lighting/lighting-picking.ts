@@ -8,7 +8,10 @@ export function lightingModelHit(
   return hits.find((hit) => {
     if (!(hit.object instanceof Mesh) || hit.object.userData.sceneOutline) return false;
     let parent: Object3D | null = hit.object;
-    while (parent && parent !== root) parent = parent.parent;
+    while (parent && parent !== root) {
+      if (parent.userData.modelGlowIgnore || !parent.visible) return false;
+      parent = parent.parent;
+    }
     if (!parent) return false;
     const mesh = hit.object as Mesh;
     const materials = mesh.material as Material | Material[];

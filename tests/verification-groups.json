@@ -60,6 +60,7 @@
       "weather.test.mjs",
       "workspace-startup-routing.test.mjs",
       "model-lighting.test.mjs",
+      "model-lighting-surfaces.test.mjs",
       "model-lighting-ui.test.mjs"
     ]
   },

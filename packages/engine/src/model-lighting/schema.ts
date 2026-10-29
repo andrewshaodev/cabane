@@ -107,7 +107,10 @@ export function validateModelLighting(value: unknown, path: string, issues: Home
       }
     if (
       Array.isArray(light.emissiveSurfaces) &&
-      light.emissiveSurfaces.some((id) => typeof id !== "string" || !/^surface:\d+:\d+$/.test(id))
+      light.emissiveSurfaces.some(
+        (id) =>
+          typeof id !== "string" || !/^surface:(\d+:\d+|key:[A-Za-z0-9_.!~*'()%-]+)$/.test(id),
+      )
     )
       error("emissiveSurfaces", "Choose surfaces from the model preview.");
     if (

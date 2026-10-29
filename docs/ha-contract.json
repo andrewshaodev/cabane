@@ -1,9 +1,9 @@
 {
-  "revision": 18,
-  "fingerprint": "200393e0197c3a96f2dc26cf3e3f957ecc6831bd302b57573c1f605a156ddeeb",
-  "summary": "Add virtual room boundaries without physical geometry or collision",
+  "revision": 19,
+  "fingerprint": "fda4b9e66e9bcdf703a6ee463202d37ecdeeb8899f94c2e418cfc1360f6f8cc3",
+  "summary": "Keep native glow selections stable across model variants",
   "breakingChanges": [
-    "Existing homes remain supported. Homes using WallSpec.virtual require the matching updated frontend and Home Assistant panel; older clients keep unsupported fields blocked. Mixed lighting, placement repairs and independent entity readings from revisions 15 through 17 remain supported."
+    "Existing homes and immutable GLB selections remain supported. Native keyed emissiveSurfaces require the updated frontend and matching HA panel. Old native ordinals remain saved but inactive until explicitly reselected. No asset, binding or schema-version migration is required."
   ],
   "history": [
     {
@@ -123,6 +123,13 @@
       "summary": "Support independent furniture and device sensor readings with scene visibility and TV switch controls",
       "breakingChanges": [
         "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Mixed model lighting and placement repairs from revisions 15 and 16 remain supported. Older clients retain unsupported-field protection."
+      ]
+    },
+    {
+      "revision": 18,
+      "summary": "Add virtual room boundaries without physical geometry or collision",
+      "breakingChanges": [
+        "Existing homes remain supported. Homes using WallSpec.virtual require the matching updated frontend and Home Assistant panel; older clients keep unsupported fields blocked. Mixed lighting, placement repairs and independent entity readings from revisions 15 through 17 remain supported."
       ]
     }
   ],

@@ -12,7 +12,7 @@ export interface ModelLightingSurfaceOption {
   supported: boolean;
 }
 
-/** Mesh order belongs to the immutable model, independent of scene transforms and wrapper groups. */
+/** Native parts use unique authored keys/names. Immutable GLBs retain their existing ordinals. */
 function visitSurfaces(
   root: Object3D,
   visit: (
@@ -22,20 +22,46 @@ function visitSurfaces(
     option: ModelLightingSurfaceOption,
   ) => void,
 ) {
-  let ordinal = 0;
+  const meshes: Mesh[] = [];
   root.traverse((object) => {
-    if (!(object instanceof Mesh) || !object.visible || object.userData.sceneOutline) return;
-    const mesh = object as Mesh<BufferGeometry, Material | Material[]>;
+    if (
+      !(object instanceof Mesh) ||
+      object.userData.sceneOutline ||
+      object.userData.modelGlowIgnore
+    )
+      return;
+    for (let parent = object.parent; parent; parent = parent.parent) {
+      if (parent.userData.sceneOutline || parent.userData.modelGlowIgnore) return;
+      if (parent === root) break;
+    }
+    meshes.push(object as Mesh);
+  });
+  const keyFor = (mesh: Mesh): string =>
+    typeof mesh.userData.modelGlowKey === "string" ? mesh.userData.modelGlowKey : mesh.name;
+  const counts = new Map<string, number>();
+  for (const mesh of meshes)
+    if (!mesh.userData.importedModel) counts.set(keyFor(mesh), (counts.get(keyFor(mesh)) ?? 0) + 1);
+  let ordinal = 0;
+  meshes.forEach((object) => {
+    if (!object.visible) return;
     const order = ordinal++;
+    const mesh = object as Mesh<BufferGeometry, Material | Material[]>;
     const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const key = encodeURIComponent(keyFor(mesh));
+    const native =
+      !!key && key.length <= 100 && counts.get(keyFor(mesh)) === 1 && materials.length === 1;
     materials.forEach((material, index) =>
       visit(mesh, material, index, {
-        id: `surface:${order}:${index}`,
+        id: mesh.userData.importedModel
+          ? `surface:${order}:${index}`
+          : native
+            ? `surface:key:${key}`
+            : `unavailable:${order}:${index}`,
         label:
           object.name ||
           material.name ||
           `Surface ${order + 1}${materials.length > 1 ? ` · ${index + 1}` : ""}`,
-        supported: emissive(material),
+        supported: emissive(material) && (!!mesh.userData.importedModel || native),
       }),
     );
   });
@@ -69,10 +95,12 @@ export function controlModelLightMaterials(
   const clones = new Map<Material, EmissiveMaterial>();
   const highlightedClones = new Set<EmissiveMaterial>();
   visitSurfaces(root, (mesh, original, index, option) => {
-    const highlight = option.id === highlighted;
+    const highlight = option.supported && option.id === highlighted;
     if (
       !emissive(original) ||
-      (!selectedNames.has(original.name) && !selectedSurfaces.has(option.id) && !highlight)
+      (!selectedNames.has(original.name) &&
+        !(option.supported && selectedSurfaces.has(option.id)) &&
+        !highlight)
     )
       return;
     if (!originals.has(mesh)) originals.set(mesh, mesh.material);

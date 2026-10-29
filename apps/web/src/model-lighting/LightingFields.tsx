@@ -174,6 +174,23 @@ export function LightingFields({
         </p>
         <details className="lighting-surfaces">
           <summary>Surface list</summary>
+          {light.emissiveSurfaces
+            ?.filter((id) => !surfaces.some((surface) => surface.id === id && surface.supported))
+            .map((id) => (
+              <label key={id} className="lighting-check">
+                <input
+                  type="checkbox"
+                  checked
+                  onChange={() =>
+                    onChange({
+                      ...light,
+                      emissiveSurfaces: light.emissiveSurfaces!.filter((saved) => saved !== id),
+                    })
+                  }
+                />
+                {id} · Unavailable. Remove and choose the surface again.
+              </label>
+            ))}
           {surfaces.map((surface) => {
             const checked = !!light.emissiveSurfaces?.includes(surface.id);
             return (
@@ -214,6 +231,9 @@ export function LightingFields({
           ))}
           {!surfaces.some((surface) => surface.supported) && (
             <p className="lighting-note">No surfaces available for glow.</p>
+          )}
+          {surfaces.some((surface) => surface.id.startsWith("unavailable:")) && (
+            <p className="lighting-note">Some model parts are unavailable for surface selection.</p>
           )}
         </details>
       </fieldset>

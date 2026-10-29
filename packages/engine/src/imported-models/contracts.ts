@@ -83,7 +83,7 @@ export interface CustomModelLight {
   sources?: readonly CustomModelLightSource[];
   /** Exact names of Standard/Physical GLB materials to control. */
   emissiveMaterials?: readonly string[];
-  /** Stable surface references within the immutable model geometry. */
+  /** Native part keys or legacy ordinals within an immutable GLB. */
   emissiveSurfaces?: readonly string[];
 }
 

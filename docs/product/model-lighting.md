@@ -70,6 +70,16 @@ stripping them.
 Selected surfaces use instance-owned materials; geometry and texture resources
 stay shared. Original built-in model glow implementations remain catalog-owned.
 
+Native selections use `surface:key:<key>` in the existing `emissiveSurfaces` list.
+A unique mesh name identifies a part; repeated names use an explicit
+`userData.modelGlowKey` (`glowKey` on RoundedFurniturePanel). Keep these keys when
+changing variants, state geometry or internal wrappers, and never reuse a key for
+a different part. Unnamed, duplicate or multi-material native parts cannot be
+selected. Absent targets and old native ordinals stay saved but inactive, with
+removal/reselection in Surface list. Immutable personal GLBs retain their existing
+ordinal and named-material behavior. The sixteen-total rule is unchanged. Older
+panels must update before reading keyed native selections.
+
 The engine's `model-lighting/execution.ts` owns physical expansion for imports,
 the lighting editor and runtime. Each preview and active floor has a budget of
 64 unshadowed point lights. Room/dashboard lights, native defaults and personal
