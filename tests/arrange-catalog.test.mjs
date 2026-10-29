@@ -37,6 +37,29 @@ await withModules(async (load) => {
   const { createSceneItemId } = await load(
     "/apps/web/src/editor-preview/furnish/scene-item-identity.ts",
   );
+  test("standalone and corner worktops are searchable furnishings with matching finishes", () => {
+    const ids = ["countertop", "corner-countertop"];
+    assert.deepEqual(
+      filterCatalog(entries, "kitchen", "worktop")
+        .map((entry) => entry.modelId)
+        .sort(),
+      [...ids].sort(),
+    );
+    assert.deepEqual(get(ids[0]).definition.variants, get(ids[1]).definition.variants);
+    for (const modelId of ids) {
+      assert.ok(filterCatalog(entries, "all", "countertop marble").includes(get(modelId)));
+      const placement = {
+        kind: "absolute",
+        at: [2, 2],
+        elevationMeters: 0.87,
+        rotationYRadians: 0,
+      };
+      const item = createCatalogItem(get(modelId), placement, []);
+      assert.equal(item.kind, "furnishing");
+      assert.equal(item.entitySlots, undefined);
+      assert.equal(item.placement.elevationMeters, 0.87);
+    }
+  });
   test("rattan pendants are offered only as bindable light devices", () => {
     const matches = entries.filter((entry) => entry.modelId === "rattan-bell-pendant");
     assert.equal(matches.length, 1);
