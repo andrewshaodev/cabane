@@ -8,8 +8,9 @@ import { testGlb } from "./fixtures/personal-glb.mjs";
 
 await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
-  const { editCustomModel } = await load("/apps/web/src/custom-models/edit-custom-model.ts");
+  const { editCustomModel } = api;
   const { ModelImportDialog } = await load("/apps/web/src/custom-models/ModelImportDialog.tsx");
+  const { CustomModelLibrary } = await load("/apps/web/src/custom-models/CustomModelLibrary.tsx");
   const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
   const bytes = testGlb();
   const asset = { bytes, byteLength: bytes.length, sha256: await api.modelAssetHash(bytes) };
@@ -235,10 +236,8 @@ await withModules(async (load) => {
         editCustomModel(source, { ...model, asset: { ...model.asset, sha256: "a".repeat(64) } }),
       /cannot replace/,
     );
-    assert.throws(
-      () => editCustomModel(source, { ...model, id: "custom:missing" }),
-      /no longer exists/,
-    );
+    const added = { ...model, id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" };
+    assert.equal(editCustomModel(source, added).project.customModels.length, 2);
   });
 
   test("edited definitions and copies reload from real IndexedDB without duplicating GLB assets", () =>
@@ -296,6 +295,84 @@ await withModules(async (load) => {
       assert.equal(
         (await api.createModelAssetRepository(dom.indexedDB).verify([model.asset])).length,
         1,
+      );
+    }));
+
+  test("definition updates add and remove lighting on existing furniture copies", () => {
+    const { light, ...base } = model;
+    const furniture = { ...base, profile: "furniture" };
+    const unlit = editCustomModel(fixture(), furniture);
+    const lit = editCustomModel(unlit, { ...furniture, light });
+    assert.ok(lit.project.sceneItems.every((item) => item.lightSlotId));
+    const removed = editCustomModel(lit, furniture);
+    assert.ok(removed.project.sceneItems.every((item) => !item.lightSlotId));
+    for (const snapshot of [lit, removed])
+      assert.deepEqual(api.validateHomeProject(snapshot.project, native).issues, []);
+  });
+
+  test("restoring or replacing missing definitions preserves compatible slots and saved sizes", () => {
+    const before = fixture();
+    before.project.customModels = [];
+    const restored = editCustomModel(before, model);
+    assert.deepEqual(restored.project.sceneItems, before.project.sceneItems);
+    assert.deepEqual(restored.bindings, before.bindings);
+    const replacement = { ...model, id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" };
+    const replaced = editCustomModel(before, replacement, { modelId: model.id, kind: "device" });
+    assert.deepEqual(
+      replaced.project.sceneItems,
+      before.project.sceneItems.map((item) => ({ ...item, modelId: replacement.id })),
+    );
+    assert.deepEqual(replaced.bindings, before.bindings);
+    assert.deepEqual(api.validateHomeProject(replaced.project, native).issues, []);
+  });
+
+  test("same-asset model-pack profile updates reconcile placed copies through the library", () =>
+    withStorageDom(async (dom) => {
+      const before = fixture();
+      const { light: _light, ...base } = model;
+      const changed = { ...base, profile: "sensor" };
+      const bytes = api.createCabaneModelPack([changed], [asset]);
+      let committed,
+        commits = 0;
+      await dom.mount(async () => {
+        const container = dom.document.createElement("div");
+        dom.document.body.append(container);
+        const root = createRoot(container);
+        root.render(
+          React.createElement(CustomModelLibrary, {
+            workspace: {
+              snapshot: before,
+              modelAssetReferences: [model.asset],
+              commit: (next) => {
+                committed = next;
+                commits++;
+              },
+              flush: async () => ({ status: "saved" }),
+            },
+            disabled: false,
+            onBrowse: () => {},
+            editingModel: null,
+            onCloseEditor: () => {},
+            onEditSnapshot: () => {},
+          }),
+        );
+        return { unmount: () => root.unmount() };
+      });
+      const input = dom.document.querySelector('input[accept^=".zip"]');
+      Object.defineProperty(input, "files", {
+        value: [{ name: "fixture.zip", size: bytes.length, arrayBuffer: async () => bytes.buffer }],
+      });
+      await React.act(async () =>
+        input.dispatchEvent(new dom.window.Event("change", { bubbles: true })),
+      );
+      await dom.click("Import pack");
+      await dom.until(() => committed);
+      assert.equal(commits, 1);
+      assert.deepEqual(api.validateHomeProject(committed.project, native).issues, []);
+      assert.deepEqual(committed.bindings, editCustomModel(before, changed).bindings);
+      assert.deepEqual(
+        await api.createModelAssetRepository(dom.indexedDB).read(asset.sha256),
+        asset.bytes,
       );
     }));
 

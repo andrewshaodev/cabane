@@ -109,7 +109,9 @@ diagnostics are warnings; they do not prevent opening or saving the home.
 Schema, identity and structural-reference errors retain their blocking behavior.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
-can remain visible while editing. The shared validation panel stays available in
+can remain visible while editing. Item removal clears its primary, reading and
+independent lighting draft connections even when another floor is unfinished,
+preserving published mappings and Undo. The shared validation panel stays available in
 Construct, Arrange, Connect, and Shortcuts whenever the draft has visible issues.
 Locate selects and focuses the affected editable object, switching floor and mode
 when needed; attachment errors select the attachment rather than its supporting

@@ -75,7 +75,8 @@
       "apps/web/src/editor-chrome/SelectionDetailsPanel.tsx",
       "apps/web/src/editor-preview/PreviewCamera.tsx",
       "apps/web/src/editor-workspace/useEditorIssueRepairs.ts",
-      "apps/web/src/editor-workspace/EditorDraftStatus.tsx"
+      "apps/web/src/editor-workspace/EditorDraftStatus.tsx",
+      "packages/engine/src/home-project/item-binding-identities.ts"
     ],
     "interfaces": [
       {
@@ -83,7 +84,7 @@
         "symbols": ["ConnectWorkspaceProps", "HomeEditorExitReason"]
       }
     ],
-    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel changes wait for active gestures. Full-height Properties overlays preserve canvas bounds and camera projection. Undo/Redo share project actions with Reset/Save. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time with an underlined active tab; panel state stays outside project persistence. Scene-item Issues rows identify the model and expose Select in Arrange, Reset placement and Remove. Repairs share workspace history, with device draft mapping cleanup on removal. Failed exits retain the in-memory draft, show storage/conflict recovery and reset pending navigation for explicit retries.",
+    "invariant": "Keep mode coordination separate from domain edits, history, persistence and presentation; Apply is the publication boundary. Save proceeds directly for warnings or no issues; errors and failed saves open the review dialog. Shared draft diagnostics remain available in every editor mode; Locate selects and focuses the affected object on its floor, including wall attachments. Construct and Arrange share ordered 3D/2D/Explore controls and Shift+1/2/3 shortcuts; Construct disables 3D. View shortcuts respect typing, dialogs and unfinished edits, and reuse Explore pointer lock. Keep tools and catalog on the left, automatically selected Properties on the right and collapsible Issues below the canvas. Property collapse preserves selection; panel changes wait for active gestures. Full-height Properties overlays preserve canvas bounds and camera projection. Undo/Redo share project actions with Reset/Save. Shared flat form styling retains semantic groups and focus. Mobile presents one panel surface at a time with an underlined active tab; panel state stays outside project persistence. Scene-item Issues rows identify the model and expose Select in Arrange, Reset placement and Remove. Item removal uses itemBindingSlotIds to clean draft controls, readings and lighting even during unfinished geometry, preserving published mappings and Undo. Failed exits retain the in-memory draft, show storage/conflict recovery and reset pending navigation for explicit retries.",
     "checks": ["test:unit", "test:browser"]
   },
   {
@@ -227,11 +228,12 @@
           "createCabaneArchive",
           "readCabaneFile",
           "createCabaneModelPack",
-          "readCabaneModelPack"
+          "readCabaneModelPack",
+          "editCustomModel"
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded.",
+    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {

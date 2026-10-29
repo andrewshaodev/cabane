@@ -130,6 +130,10 @@ scene items that currently point at a selected missing model ID. Pack imports
 reject unknown files, unreferenced assets, hash/size mismatches, and conflicting
 IDs; a same-ID model is accepted only when it points to the same asset.
 
+Imports and Edit use the engine's `editCustomModel` to update the definition,
+placed copies, lighting and draft connections in one history step. Restoring a
+missing definition keeps saved copy sizes because its prior normalization is unknown.
+
 JSON projects and workspace imports preserve unknown furnishing and device model
 IDs as warnings. The scene shows an editable generic cube with the saved size
 and placement until the model is imported or replaced. Structural errors still
