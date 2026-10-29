@@ -6,6 +6,7 @@ import { act, createElement, StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
+import { waitForAsyncCondition } from "./async-condition.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -606,7 +607,12 @@ await withModules(async (load) => {
         ),
         false,
       );
-      await act(async () => alert.querySelector("button").click());
+      await act(async () => {
+        alert.querySelector("button").click();
+        await waitForAsyncCondition(() => blob && filename, {
+          message: "The recovery archive download did not complete",
+        });
+      });
       const archive = await engine.readCabaneFile(blob);
       assert.equal(archive.assets.length, 1);
       assert.equal(filename, `${record.homeId}-draft-recovery.cabane`);

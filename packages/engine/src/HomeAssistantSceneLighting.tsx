@@ -1,6 +1,7 @@
 import { lightingSlotForItem, lightingModelId } from "./model-lighting/settings";
 import { useContext } from "react";
-import { ActiveSceneLightPool, PhysicalSceneLight, type SceneLightSource } from "./SceneLightPool";
+import { ActiveSceneLightPool, type SceneLightSource } from "./SceneLightPool";
+import { modelLightEmissions } from "./model-lighting/execution";
 import { resolveModelVariant } from "./model-variants";
 import { SceneNightContext, sceneLightState } from "./scene-light-state";
 import {
@@ -92,120 +93,116 @@ export function HomeAssistantSceneLighting({
       })),
   ];
   const pooledSources: SceneLightSource[] = [];
+  for (const room of floor.rooms) {
+    const resolvedRoom = resolvedBindings.rooms[room.id];
+    if (!resolvedRoom) continue;
+    for (const entity of Object.values(resolvedRoom.sections).flat()) {
+      const slot = room.dashboardSlots.find((candidate) => candidate.id === entity.slotId);
+      if (
+        entity.domain !== "light" &&
+        !(entity.domain === "switch" && slot?.compatibleDomains.includes("light"))
+      )
+        continue;
+      const brightness = lightBrightnessRatio(entity.state);
+      const configured = slot?.sceneLight;
+      const fallback = defaultRoomLight(room, floor);
+      const configuredPosition = configured
+        ? planPointToWorld(configured.at, floor.coordinates)
+        : null;
+      const resolvedPosition = configured
+        ? ([configuredPosition![0], configured.elevationMeters, configuredPosition![1]] as const)
+        : fallback.position;
+      pooledSources.push({
+        name: `ha-room-light-${entity.slotId}`,
+        position: resolvedPosition,
+        color: lightColorForSnapshot(entity.state, configured?.color ?? fallback.color),
+        intensity: (configured?.maxIntensity ?? fallback.maxIntensity) * brightness,
+        distance: configured?.distance ?? fallback.distance,
+        prewarm: true,
+      });
+    }
+  }
+  for (const { id, modelId, item: sceneItem, resolved } of lightDevices) {
+    const definition = resolveDeviceModelDefinition(
+      sceneItem?.lightSlotId ? lightingModelId(modelId) : modelId,
+      deviceModels,
+      extensionDeviceModels,
+    );
+    if (
+      !definition?.sceneLight ||
+      resolveModelVariant(definition, sceneItem?.variant).sceneLight === false
+    )
+      continue;
+    const primaryLightSlot = sceneItem
+      ? lightingSlotForItem(sceneItem)
+      : resolved?.slot.entitySlots.find(
+          (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
+        );
+    const entity =
+      resolved && (resolved.slot.model === modelId || !!sceneItem?.lightSlotId)
+        ? resolved.entities.find(
+            (candidate) =>
+              (candidate.domain === "light" ||
+                (candidate.domain === "switch" && Boolean(primaryLightSlot))) &&
+              (!primaryLightSlot || candidate.slotId === primaryLightSlot.id),
+          )
+        : undefined;
+    const transform = sceneItem
+      ? resolveItemTransform(sceneItem.placement, floor)
+      : deviceWorldTransform(resolved.slot, floor.coordinates);
+    const state = sceneLightState(sceneItem?.lightState, entity?.state, nightLighting);
+    const brightness = lightBrightnessRatio(state);
+    const sceneItemScale = sceneItem ? uniformDeviceScaleForSize(sceneItem.size, definition) : null;
+    if (sceneItem && sceneItemScale === null && !definition.lighting) continue;
+    const scale = sceneItem
+      ? definition.lighting
+        ? (sceneItem.size.map((n, axis) => n / definition.defaultSize[axis]) as [
+            number,
+            number,
+            number,
+          ])
+        : sceneItemScale!
+      : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
+    // Keep strips compact until all active copies can share the execution budget.
+    const sources = definition.lighting
+      ? modelLightEmissions(definition.lighting, "ha-device-light-" + id)
+      : (definition.sceneLights ?? [definition.sceneLight]).map((source, index) => ({
+          ...source,
+          name: "ha-device-light-" + id + (index ? "-" + index : ""),
+          intensity: source.maxIntensity,
+        }));
+    for (const source of sources) {
+      const properties: SceneLightSource = {
+        name: source.name,
+        position: deviceLightPosition(
+          transform.position,
+          transform.rotationYRadians,
+          scale,
+          source.position,
+        ),
+        ...("strip" in source && source.strip
+          ? {
+              strip: {
+                end: deviceLightPosition(
+                  transform.position,
+                  transform.rotationYRadians,
+                  scale,
+                  source.strip.end,
+                ),
+                samples: source.strip.samples,
+              },
+            }
+          : {}),
+        color: lightColorForSnapshot(state, source.color),
+        intensity: source.intensity * brightness,
+        prewarm: !definition.lightingCustomized && !modelId.startsWith("custom:"),
+        distance: source.distance * (typeof scale === "number" ? scale : Math.max(...scale)),
+      };
+      pooledSources.push(properties);
+    }
+  }
   return (
     <group name="home-assistant-scene-lighting">
-      {floor.rooms.flatMap((room) => {
-        const resolvedRoom = resolvedBindings.rooms[room.id];
-        if (!resolvedRoom) return [];
-        const roomLights = Object.values(resolvedRoom.sections)
-          .flat()
-          .flatMap((entity) => {
-            const slot = room.dashboardSlots.find((candidate) => candidate.id === entity.slotId);
-            if (
-              entity.domain !== "light" &&
-              !(entity.domain === "switch" && slot?.compatibleDomains.includes("light"))
-            )
-              return [];
-            const brightness = lightBrightnessRatio(entity.state);
-            // Keep light counts stable: toggles update uniforms instead of recompiling shaders.
-            const configured = slot?.sceneLight;
-            const fallback = defaultRoomLight(room, floor);
-            const configuredPosition = configured
-              ? planPointToWorld(configured.at, floor.coordinates)
-              : null;
-            const resolvedPosition = configured
-              ? ([
-                  configuredPosition![0],
-                  configured.elevationMeters,
-                  configuredPosition![1],
-                ] as const)
-              : fallback.position;
-            return [
-              <PhysicalSceneLight
-                floor={floor}
-                key={`room-light-${entity.slotId}`}
-                name={`ha-room-light-${entity.slotId}`}
-                position={resolvedPosition}
-                color={lightColorForSnapshot(entity.state, configured?.color ?? fallback.color)}
-                intensity={(configured?.maxIntensity ?? fallback.maxIntensity) * brightness}
-                distance={configured?.distance ?? fallback.distance}
-              />,
-            ];
-          });
-        return roomLights;
-      })}
-      {lightDevices.flatMap(({ id, modelId, item: sceneItem, resolved }) => {
-        const definition = resolveDeviceModelDefinition(
-          sceneItem?.lightSlotId ? lightingModelId(modelId) : modelId,
-          deviceModels,
-          extensionDeviceModels,
-        );
-        if (
-          !definition?.sceneLight ||
-          resolveModelVariant(definition, sceneItem?.variant).sceneLight === false
-        )
-          return [];
-        const primaryLightSlot = sceneItem
-          ? lightingSlotForItem(sceneItem)
-          : resolved?.slot.entitySlots.find(
-              (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),
-            );
-        const entity =
-          resolved && (resolved.slot.model === modelId || !!sceneItem?.lightSlotId)
-            ? resolved.entities.find(
-                (candidate) =>
-                  (candidate.domain === "light" ||
-                    (candidate.domain === "switch" && Boolean(primaryLightSlot))) &&
-                  (!primaryLightSlot || candidate.slotId === primaryLightSlot.id),
-              )
-            : undefined;
-        const transform = sceneItem
-          ? resolveItemTransform(sceneItem.placement, floor)
-          : deviceWorldTransform(resolved.slot, floor.coordinates);
-        const state = sceneLightState(sceneItem?.lightState, entity?.state, nightLighting);
-        const brightness = lightBrightnessRatio(state);
-        // Zero-intensity emitters retain the shader layout while devices are off.
-        const sceneItemScale = sceneItem
-          ? uniformDeviceScaleForSize(sceneItem.size, definition)
-          : null;
-        if (sceneItem && sceneItemScale === null && !definition.lighting) return [];
-        const scale = sceneItem
-          ? definition.lighting
-            ? (sceneItem.size.map((n, axis) => n / definition.defaultSize[axis]) as [
-                number,
-                number,
-                number,
-              ])
-            : sceneItemScale!
-          : deviceWorldTransform(resolved.slot, floor.coordinates).scale;
-        const sources = definition.sceneLights ?? [definition.sceneLight];
-        const pooled = definition.lightingCustomized || modelId.startsWith("custom:");
-        return sources.flatMap((source, index) => {
-          const properties: SceneLightSource = {
-            name: "ha-device-light-" + id + (index ? "-" + index : ""),
-            position: deviceLightPosition(
-              transform.position,
-              transform.rotationYRadians,
-              scale,
-              source.position,
-            ),
-            color: lightColorForSnapshot(state, source.color),
-            intensity: source.maxIntensity * brightness,
-            distance: source.distance * (typeof scale === "number" ? scale : Math.max(...scale)),
-          };
-          if (pooled) {
-            pooledSources.push(properties);
-            return [];
-          }
-          return [
-            <PhysicalSceneLight
-              key={"device-light-" + id + "-" + index}
-              floor={floor}
-              {...properties}
-            />,
-          ];
-        });
-      })}
       <ActiveSceneLightPool key={floor.id} floor={floor} sources={pooledSources} />
     </group>
   );

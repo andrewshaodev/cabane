@@ -14,8 +14,9 @@ entity IDs enter these declarations.
 
 ## Authoring
 
-Add points and LED strips to the same source list. There is no per-model point
-limit or per-floor cutoff. Duplicate source makes an offset copy, useful for
+Add points and LED strips to the same source list. Authored logical sources have
+no per-model point limit or per-floor cutoff. Physical illumination uses the
+bounded approximation described below. Duplicate source makes an offset copy, useful for
 repeated shelves. Each strip has its own start, end and sample count. Fit along
 model spans the longest model axis without replacing the chosen count. Suggest
 sample count estimates a count from its length; moving endpoints preserves it.
@@ -69,12 +70,81 @@ stripping them.
 Selected surfaces use instance-owned materials; geometry and texture resources
 stay shared. Original built-in model glow implementations remain catalog-owned.
 
-Customized and imported sources use a pool of unshadowed point lights. Only
-positive-intensity sources take active slots. The pool grows to the largest
-simultaneously active source count seen on the floor, with no 32-light cutoff.
-Turning sources off retains zero-intensity slots for reuse, so subsequent toggles
-within that capacity do not recompile shaders. More simultaneously active sources
-increase GPU work; this is not an unlimited performance guarantee.
+The engine's `model-lighting/execution.ts` owns physical expansion for imports,
+the lighting editor and runtime. Each preview and active floor has a budget of
+64 unshadowed point lights. Room/dashboard lights, native defaults and personal
+or customized copies share the floor budget. Sample counts are requests for
+spatial resolution, not array sizes or guaranteed physical light counts. Saved
+logical sources, counts, connections and total brightness are never truncated or
+rewritten. Legacy point, points and strip forms use the same policy. Validation,
+portable types and migrations are unchanged; this is a rendering policy, not a
+new saved format or HA contract revision.
+
+Within the budget, every requested sample renders as before. Above it, each
+positive-intensity logical source first receives one slot, and strips fairly
+share the remaining slots up to their requested count. Two or more retained
+samples include both endpoints; a strip receiving one slot uses its midpoint.
+Each strip retains its share of the model's total brightness. If logical sources
+alone exceed 64, median partitions along the widest spatial axis group nearby
+source midpoints. Every source contributes its whole intensity to its group's
+weighted position and linear color. Range uses the widest member range (including
+unbounded range). Nothing is discarded by source order or copy order. This
+approximation can soften or move coverage, including near walls; it does not
+guarantee the same illumination at every receiver. Glow and logical editing
+handles remain independent. The editor explains the shared budget and reports
+when its model preview is approximated. Other active copies may need a coarser
+approximation than a model viewed alone.
+
+Expansion allocates at most 64 physical emitters, even for safe-integer requests
+such as 4,294,967,296 or 9,007,199,254,740,991. Processing still scales with the
+number of authored declarations/copies, never with their expanded sample request.
+Glow-only, zero-brightness and off sources request no active physical slots.
+Native defaults and dashboard sources may prewarm spare zero-intensity slots,
+preserving their first-activation shader reuse. Active sources always take
+priority, and prewarming shares the same 64-slot bound.
+The pool grows only to its bounded peak. Turning sources off retains those
+zero-intensity slots for reuse; subsequent state changes within that capacity do
+not recompile shaders. Reducing demand after a peak does not release those slots
+until the floor or preview unmounts.
+
+The budget is a practical resource bound, not a universal FPS guarantee. A
+640×360 Chromium probe with twenty mixed toon/PBR box receivers on Apple M5 Pro
+(ANGLE Metal, 1,024 fragment uniform vectors) compiled successfully at 16, 32, 64
+and 128 points. At 256 points both shaders failed with
+`FRAGMENT shader uniforms count exceeds MAX_FRAGMENT_UNIFORM_VECTORS(1024)`;
+the failed layout persisted after switching off or returning to sixteen sources.
+The bounded implementation keeps that same workload at 64 slots, including after
+peak use. The existing browser smoke now covers twenty receivers, eight copies
+with two points and two seven-sample strips each, then sixty-four copies with
+4,294,967,296 requested samples per strip, off, and one ordinary copy. It verifies
+valid shaders, conserved brightness and reused light/program identities within
+the ten-second test budget on that host.
+
+The same host's furnished demo was also sampled with the existing
+`scripts/scene-performance/browser-probe.mjs` motion probe, ten measured frames
+after eight warmup frames per state. A local browser route override added compact
+lighting declarations (two points and two strips per copy) to the real floor
+pool, without adding geometry. The 1440×960 viewport produced a 1800×1200 canvas
+at DPR 1.25. Each run retained the same 1,435 visible meshes and 289 draw calls;
+submitted triangles ranged from 173,594 to 261,587 during camera motion.
+
+| Physical budget | Peak CPU p95 | Added copies off after peak | Ordinary copies again |
+| --------------- | ------------ | --------------------------- | --------------------- |
+| 64              | 16.1 ms      | 12.5 ms                     | 16.2 ms               |
+| 96              | 32.3 ms      | 36.1 ms                     | 33.0 ms               |
+| 128             | 75.6 ms      | 62.2 ms                     | 62.4 ms               |
+
+Ordinary demand was four added lighting copies with seven samples per strip;
+peak demand was sixty-four with 4,294,967,296 requested samples per strip. The
+floor also contained twenty-two active native emitters. The 64-light run retained
+64 slots and the same 22 shader programs through all states; all shaders were
+valid, with no GL errors or new batch buffers. This measured retained cost is why
+the execution budget is 64 rather than the larger shader compilation ceiling.
+More aggressive approximation trades spatial detail for bounded recurring work.
+These are instrumented single-host observations, not GPU frame times, a stable
+FPS target, or mobile acceptance. This furnished scene exceeds the separate
+opt-in draw/triangle budgets at every tested light count; this change does not
+claim to address that geometry cost.
 
 Strips approximate line illumination with samples and light both native toon and
 imported PBR materials. Surface glow changes appearance and does not illuminate
@@ -84,5 +154,6 @@ not implemented. Three.js RectAreaLight does not support native toon materials.
 Implementation: [shared editor](../../apps/web/src/model-lighting/ModelLightingEditor.tsx),
 [dialog](../../apps/web/src/model-lighting/ModelLightingDialog.tsx),
 [lighting owner](../../packages/engine/src/model-lighting),
+[execution policy](../../packages/engine/src/model-lighting/execution.ts),
 [scene illumination](../../packages/engine/src/HomeAssistantSceneLighting.tsx),
 [active light pool](../../packages/engine/src/SceneLightPool.tsx).

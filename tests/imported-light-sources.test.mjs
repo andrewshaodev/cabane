@@ -43,6 +43,7 @@ await withModules(async (load) => {
           emissiveMaterials: ["Diffuser"],
         },
         { ...light, strip: { end: [2, 0.2, 0], samples: 20 }, emissiveMaterials: ["Diffuser"] },
+        { ...light, strip: { end: [2, 0.2, 0], samples: 4294967296 } },
         { ...light, points: Array.from({ length: 20 }, (_, i) => [i / 10, 0.2, 0]) },
         {
           ...light,
@@ -127,6 +128,74 @@ await withModules(async (load) => {
     assert.ok(Math.abs(mixed.reduce((sum, source) => sum + source.maxIntensity, 0) - 6) < 1e-8);
     assert.deepEqual(api.importedLightSources({ ...light, sources: [] }), []);
     assert.deepEqual(api.importedLightSources(light), [light]);
+  });
+
+  test("schema-valid excessive sample requests use bounded execution without rewriting intent", () => {
+    for (const samples of [4294967296, Number.MAX_SAFE_INTEGER]) {
+      for (const settings of [
+        { ...light, strip: { end: [2, 0.2, 0], samples } },
+        {
+          ...light,
+          sources: [{ kind: "strip", start: light.position, end: [2, 0.2, 0], samples }],
+        },
+      ]) {
+        const original = structuredClone(settings);
+        const emitters = api.importedLightSources(settings);
+        assert.ok(emitters.length > 1 && emitters.length <= api.SCENE_LIGHT_BUDGET);
+        assert.deepEqual(emitters[0].position, light.position);
+        assert.deepEqual(emitters.at(-1).position, [2, 0.2, 0]);
+        assert.ok(Math.abs(emitters.reduce((sum, s) => sum + s.maxIntensity, 0) - 6) < 1e-8);
+        assert.deepEqual(settings, original);
+      }
+    }
+  });
+
+  test("the execution budget fairly samples strips, merges all logical contributions and skips glow-only work", () => {
+    const settings = {
+      ...light,
+      sources: [
+        { kind: "point", position: [0, 0, 0] },
+        { kind: "strip", start: [-2, 1, 0], end: [2, 1, 0], samples: 4294967296 },
+        { kind: "strip", start: [-2, 2, 0], end: [2, 2, 0], samples: Number.MAX_SAFE_INTEGER },
+      ],
+    };
+    const execution = api.modelLightingExecution(settings);
+    assert.equal(api.SCENE_LIGHT_BUDGET, 64);
+    assert.equal(execution.lights.length, api.SCENE_LIGHT_BUDGET);
+    assert.equal(execution.approximated, true);
+    for (const y of [0, 1, 2])
+      assert.ok(
+        Math.abs(
+          execution.lights
+            .filter((s) => s.position[1] === y)
+            .reduce((sum, s) => sum + s.intensity, 0) - 2,
+        ) < 1e-8,
+      );
+    for (const y of [1, 2])
+      for (const x of [-2, 2])
+        assert.ok(execution.lights.some((s) => s.position[0] === x && s.position[1] === y));
+    const many = {
+      ...light,
+      maxIntensity: 257,
+      sources: Array.from({ length: 257 }, (_, i) => ({ kind: "point", position: [i, 1, 0] })),
+    };
+    const merged = api.modelLightingExecution(many);
+    assert.equal(merged.lights.length, api.SCENE_LIGHT_BUDGET);
+    assert.equal(merged.requested, 257);
+    assert.ok(Math.abs(merged.lights.reduce((sum, s) => sum + s.intensity, 0) - 257) < 1e-8);
+    assert.ok(
+      Math.abs(
+        merged.lights.reduce((sum, s) => sum + s.position[0] * s.intensity, 0) - (256 * 257) / 2,
+      ) < 1e-8,
+      "even sources beyond the budget contribute their energy and position",
+    );
+    assert.deepEqual(api.importedLightSources({ ...settings, illuminate: false }), []);
+    assert.deepEqual(api.importedLightSources({ ...settings, maxIntensity: 0 }), []);
+    assert.deepEqual(api.importedLightSources({ ...settings, sources: [] }), []);
+    for (const samples of [0, -1, NaN, Infinity, 2.5]) {
+      const emitters = api.importedLightSources({ ...light, strip: { end: [2, 0.2, 0], samples } });
+      assert.equal(emitters.length, 2, "in-progress typed input cannot drive array sizes");
+    }
   });
 
   test("runtime sources follow normalized placement, instance resize, shared HA state and local light modes", async () => {
@@ -225,16 +294,61 @@ await withModules(async (load) => {
         "120 earlier off sources cannot crowd out the on light",
       );
       await renderer.update(render({ ...item, lightState: "always-on" }, state(), true, 25));
-      assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 125);
+      assert.equal(
+        renderer.scene.findAll((node) => node.instance.isPointLight).length,
+        api.SCENE_LIGHT_BUDGET,
+      );
       const pool = renderer.scene
         .findAll((node) => node.instance.isPointLight)
         .map((node) => node.instance);
+      assert.ok(Math.abs(pool.reduce((sum, source) => sum + source.intensity, 0) - 150) < 1e-8);
       await renderer.update(render(item, state({ state: "off" }), true, 25));
       assert.deepEqual(
         renderer.scene.findAll((node) => node.instance.isPointLight).map((node) => node.instance),
         pool,
       );
       assert.ok(pool.every((source) => source.intensity === 0));
+      await renderer.update(render({ ...item, lightState: "always-on" }, state(), true, 100));
+      const crowded = renderer.scene
+        .findAll((node) => node.instance.isPointLight)
+        .map((node) => node.instance);
+      assert.equal(
+        crowded.length,
+        api.SCENE_LIGHT_BUDGET,
+        "copies share a floor budget before expanding strip samples",
+      );
+      assert.ok(Math.abs(crowded.reduce((sum, source) => sum + source.intensity, 0) - 600) < 1e-8);
+      const withRoom = render({ ...item, lightState: "always-on" }, state(), true, 100);
+      const roomBindings = withRoom.props.resolvedBindings.rooms[roomId];
+      await renderer.update(
+        React.cloneElement(withRoom, {
+          resolvedBindings: {
+            rooms: {
+              [roomId]: {
+                ...roomBindings,
+                sections: {
+                  lighting: [
+                    {
+                      slotId: "synthetic-room-budget",
+                      domain: "light",
+                      state: state({ attributes: {} }),
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        }),
+      );
+      const shared = renderer.scene
+        .findAll((node) => node.instance.isPointLight)
+        .map((node) => node.instance);
+      assert.equal(
+        shared.length,
+        api.SCENE_LIGHT_BUDGET,
+        "room lights and copies share the same physical budget",
+      );
+      assert.ok(Math.abs(shared.reduce((sum, source) => sum + source.intensity, 0) - 605) < 1e-8);
       await renderer.update(render(item, state(), false));
       assert.equal(renderer.scene.findAll((node) => node.instance.isPointLight).length, 0);
     } finally {
@@ -400,5 +514,19 @@ await withModules(async (load) => {
         12,
         "fitting does not overwrite the chosen count",
       );
+      await act(async () => {
+        const input = dom.document.querySelector('[aria-label="Strip sample count"]');
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          input,
+          "4294967296",
+        );
+        input.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+      });
+      assert.equal(current.sources.at(-1).samples, 4294967296);
+      assert.match(
+        dom.document.querySelector('[role="status"]').textContent,
+        /Preview approximates.*64 physical lights/,
+      );
+      assert.equal(api.importedLightSources(current).length, api.SCENE_LIGHT_BUDGET);
     }));
 });

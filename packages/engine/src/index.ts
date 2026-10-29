@@ -145,6 +145,7 @@ export {
   modelLightingPointCount,
 } from "./model-lighting/settings";
 export { editModelLighting } from "./model-lighting/edit";
+export { SCENE_LIGHT_BUDGET, modelLightingExecution } from "./model-lighting/execution";
 
 export {
   modelLightingSurfaces,

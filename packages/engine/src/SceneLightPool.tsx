@@ -3,6 +3,11 @@ import { useMemo, useState } from "react";
 import { findContainingRoom, planPointToWorld, worldPointToPlan } from "./geometry";
 import type { FloorSpec } from "./types";
 import type { SceneLightWallPlane } from "./scene-light-wall-mask";
+import {
+  planSceneLights,
+  type SceneLightEmission,
+  type ExecutedSceneLight,
+} from "./model-lighting/execution";
 
 // Restrict receivers behind the wall, never the hemisphere behind the bulb.
 const lightWallPlane = (
@@ -86,27 +91,20 @@ export function PhysicalSceneLight({
   );
 }
 
-export type SceneLightSource = {
-  name: string;
-  position: readonly [number, number, number];
-  color: string;
-  intensity: number;
-  distance: number;
-};
+export type SceneLightSource = SceneLightEmission;
 
 /** Keep active sources in their existing slots before borrowing slots from off lights. */
 function assignLightSlots(
-  previous: readonly SceneLightSource[],
-  sources: readonly SceneLightSource[],
+  previous: readonly ExecutedSceneLight[],
+  sources: readonly ExecutedSceneLight[],
 ) {
   const byName = new Map(previous.map((source, index) => [source.name, index]));
   const next = previous.map((source) =>
     source.intensity === 0 ? source : { ...source, intensity: 0 },
   );
   const used = new Set<number>();
-  const waiting: SceneLightSource[] = [];
+  const waiting: ExecutedSceneLight[] = [];
   for (const source of sources) {
-    if (!(source.intensity > 0)) continue;
     const slot = byName.get(source.name);
     if (slot === undefined) waiting.push(source);
     else {
@@ -126,7 +124,7 @@ function assignLightSlots(
     : next;
 }
 
-/** Grow to the maximum on count; retain identities and shader slots through toggles. */
+/** Retain shader slots through toggles, within the shared execution budget. */
 export function ActiveSceneLightPool({
   floor,
   sources,
@@ -134,8 +132,9 @@ export function ActiveSceneLightPool({
   floor: FloorSpec;
   sources: readonly SceneLightSource[];
 }) {
-  const [slots, setSlots] = useState<readonly SceneLightSource[]>([]);
-  const current = assignLightSlots(slots, sources);
+  const [slots, setSlots] = useState<readonly ExecutedSceneLight[]>([]);
+  const execution = useMemo(() => planSceneLights(sources), [sources]);
+  const current = assignLightSlots(slots, execution.lights);
   if (current !== slots) setSlots(current);
   return current.map((source, index) => (
     <PhysicalSceneLight key={index} floor={floor} {...source} />
