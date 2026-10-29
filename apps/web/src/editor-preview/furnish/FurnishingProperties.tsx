@@ -91,14 +91,6 @@ export function FurnishingProperties({
           />
         </fieldset>
       )}
-      {onEntitySlotsChange && (
-        <ItemEntitySlots
-          key={selected.id}
-          item={selected}
-          label={definition.label}
-          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
-        />
-      )}
       <fieldset>
         <legend>Dimensions</legend>
         {definition.resizePolicy.kind === "uniform" ? (
@@ -137,6 +129,14 @@ export function FurnishingProperties({
           })
         )}
       </fieldset>
+      {onEntitySlotsChange && (
+        <ItemEntitySlots
+          key={selected.id}
+          item={selected}
+          label={definition.label}
+          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
+        />
+      )}
       {onEditLighting && (
         <fieldset>
           <legend>Lighting</legend>

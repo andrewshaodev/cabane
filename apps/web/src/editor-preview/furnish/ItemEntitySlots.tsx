@@ -6,6 +6,7 @@ import {
   type SceneItemSpec,
 } from "@cabane/engine";
 import { EditorButton } from "../../editor-chrome/EditorButton";
+import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import "./item-entity-slots.css";
 
 const READING_TYPES = {
@@ -25,6 +26,7 @@ export function ItemEntitySlots({
   label: string;
   onChange: (slots: readonly EntityBindingSlotSpec[]) => void;
 }) {
+  const [adding, setAdding] = useState(false);
   const [kind, setKind] = useState<keyof typeof READING_TYPES>("temperature");
   const [name, setName] = useState("");
   const slots = item.entitySlots ?? [];
@@ -47,7 +49,19 @@ export function ItemEntitySlots({
       },
     ]);
     setName("");
+    setAdding(false);
   };
+  if (slots.length === 0 && !adding) {
+    return (
+      <fieldset className="item-entity-slots">
+        <legend>Linked entities</legend>
+        <EditorButton onClick={() => setAdding(true)} aria-expanded={false}>
+          <EditorIcon name="plus" />
+          Add reading
+        </EditorButton>
+      </fieldset>
+    );
+  }
   return (
     <fieldset className="item-entity-slots">
       <legend>Linked entities</legend>
@@ -114,6 +128,11 @@ export function ItemEntitySlots({
         />
       </label>
       <EditorButton onClick={add}>Add reading</EditorButton>
+      {slots.length === 0 && (
+        <EditorButton variant="text" onClick={() => setAdding(false)}>
+          Cancel
+        </EditorButton>
+      )}
     </fieldset>
   );
 }
