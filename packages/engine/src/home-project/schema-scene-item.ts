@@ -81,6 +81,7 @@ export const sceneItem = (
           "lightState",
           "color",
           "lightSlotId",
+          "group",
         ]
       : [
           "id",
@@ -94,10 +95,27 @@ export const sceneItem = (
           "entitySlots",
           "lightSlotId",
           "lightState",
+          "group",
         ],
     path,
     issues,
   );
+  if (candidate.group !== undefined) {
+    const group = record(candidate.group, `${path}.group`, issues);
+    if (group) {
+      keys(group, ["id", "name"], `${path}.group`, issues);
+      for (const key of ["id", "name"]) {
+        string(group[key], `${path}.group.${key}`, issues);
+        if (typeof group[key] === "string" && !group[key].trim())
+          addProjectIssue(
+            issues,
+            "project.item-group",
+            `${path}.group.${key}`,
+            "Groups need an ID and a name.",
+          );
+      }
+    }
+  }
   if (candidate.lightSlotId !== undefined)
     string(candidate.lightSlotId, `${path}.lightSlotId`, issues);
   string(candidate.id, `${path}.id`, issues);

@@ -2,6 +2,7 @@
   "workspace": {
     "description": "Workspace library, persistence, import/export, publication and recovery. Includes runtime and editor integration tests.",
     "tests": [
+      "arrange-groups.test.mjs",
       "camera-stream.test.mjs",
       "command-scheduler.test.mjs",
       "connect-action-bar.test.mjs",

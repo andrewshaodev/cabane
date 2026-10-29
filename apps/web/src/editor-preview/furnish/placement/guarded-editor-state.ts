@@ -13,6 +13,8 @@ const placementActions = new Set<FurnishingEditorAction["type"]>([
   "add-item",
   "add-preset",
   "duplicate",
+  "duplicate-items",
+  "transform-group",
   "rotate",
   "update-placement",
   "update-placements",
@@ -21,6 +23,7 @@ const placementActions = new Set<FurnishingEditorAction["type"]>([
 ]);
 const clearErrorActions = new Set<FurnishingEditorAction["type"]>([
   "select",
+  "select-many",
   "replace-items",
   "undo",
   "redo",

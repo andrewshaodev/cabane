@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useReducer } from "react";
+import { collectProjectIds } from "@cabane/engine";
 import type {
   EntityBindingSlotSpec,
   FloorSpec,
@@ -17,6 +18,7 @@ import {
   type FurnishingEditorAction,
 } from "./editor-state";
 import { guardedFurnishingEditorReducer } from "./placement/guarded-editor-state";
+import { expandItemSelection, selectedItemGroup } from "./item-groups";
 
 export const useFurnishingEditor = (
   initialItems: readonly SceneItemSpec[],
@@ -47,28 +49,47 @@ export const useFurnishingEditor = (
     initialItems,
     createFurnishingEditorState,
   );
-  const [multipleIds, setMultipleIds] = useState<string[]>([]);
-  const selectedIds = state.selectedId
-    ? [state.selectedId]
-    : multipleIds.filter((id) => state.items.some((item) => item.id === id));
-  const selectedItem = useMemo(
-    () => state.items.find((item) => item.id === state.selectedId) ?? null,
-    [state.items, state.selectedId],
+  const selectedIds = useMemo(
+    () =>
+      expandItemSelection(state.items, state.selectedId ? [state.selectedId] : state.multipleIds),
+    [state.items, state.selectedId, state.multipleIds],
   );
+  const selectedGroup = selectedItemGroup(state.items, selectedIds);
+  const selectedItem =
+    !selectedGroup && selectedIds.length === 1
+      ? (state.items.find((item) => item.id === selectedIds[0]) ?? null)
+      : null;
 
   return {
     ...state,
+    selectedId: selectedGroup ? selectedIds[0] : state.selectedId,
+    selectedGroup,
     selectedIds,
     selectMany: useCallback((ids: string[]) => {
-      setMultipleIds(ids);
-      dispatch({ type: "select", id: ids.length === 1 ? ids[0] : null });
+      dispatch({ type: "select-many", ids });
     }, []),
+    groupSelection: () =>
+      dispatch({
+        type: "group-items",
+        ids: selectedIds,
+        reservedIds: context ? collectProjectIds(context.project) : [],
+      }),
+    ungroupSelection: () => dispatch({ type: "ungroup-items", ids: selectedIds }),
+    renameGroup: (id: string, name: string) => dispatch({ type: "rename-group", id, name }),
+    transformGroup: (
+      id: string,
+      placement: Extract<ItemPlacement, { kind: "absolute" }>,
+      floor: FloorSpec,
+    ) => dispatch({ type: "transform-group", id, placement, floor }),
+    duplicateSelection: (
+      floor: FloorSpec,
+      reservedIds: readonly string[] = context ? collectProjectIds(context.project) : [],
+    ) => dispatch({ type: "duplicate-items", ids: selectedIds, floor, reservedIds }),
     addItem: useCallback((item: SceneItemSpec) => dispatch({ type: "add-item", item }), []),
     selectedItem,
     canUndo: state.past.length > 0,
     canRedo: state.future.length > 0,
     select: useCallback((id: string | null) => {
-      setMultipleIds([]);
       dispatch({ type: "select", id });
     }, []),
     beginTransaction: useCallback(() => dispatch({ type: "begin-transaction" }), []),
@@ -158,7 +179,6 @@ export const useFurnishingEditor = (
     undo: useCallback(() => dispatch({ type: "undo" }), []),
     redo: useCallback(() => dispatch({ type: "redo" }), []),
     replaceItems: useCallback((items: readonly SceneItemSpec[], selectedId?: string | null) => {
-      setMultipleIds([]);
       dispatch({
         type: "replace-items",
         items,
