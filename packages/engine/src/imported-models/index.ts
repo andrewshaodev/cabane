@@ -9,4 +9,4 @@ export { importedLightSources, modelLightSources } from "./light-sources";
 export { importedEmissiveMaterialNames } from "./light-materials";
 export { resolveProjectModels } from "./resolve-models";
 export * from "./archive";
-export { editCustomModel, importCustomModels, type MissingModelReplacement } from "./model-updates";
+export { editCustomModel } from "./model-updates";

@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import {
   CUSTOM_MODEL_LIMITS,
   editCustomModel,
-  importCustomModels,
   createCabaneModelPack,
   createModelAssetRepository,
   downloadCabaneBytes,
@@ -81,9 +80,9 @@ export function CustomModelLibrary({
       ? missingModelOptions.find((option) => option.key === replacementKey)
       : undefined;
     workspace.commit(
-      importCustomModels(
+      editCustomModel(
         workspace.snapshot,
-        [model],
+        model,
         replacement ? { modelId: replacement.id, kind: replacement.kind } : undefined,
       ),
     );
@@ -99,7 +98,10 @@ export function CustomModelLibrary({
     setError(null);
     try {
       const pack = await readCabaneModelPack(new Uint8Array(await packFile.arrayBuffer()));
-      const next = importCustomModels(workspace.snapshot, pack.models);
+      const next = pack.models.reduce(
+        (snapshot, model) => editCustomModel(snapshot, model),
+        workspace.snapshot,
+      );
       const references = new Map(
         workspace.modelAssetReferences.map((asset) => [asset.sha256, asset.byteLength]),
       );

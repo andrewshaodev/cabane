@@ -109,16 +109,9 @@ diagnostics are warnings; they do not prevent opening or saving the home.
 Schema, identity and structural-reference errors retain their blocking behavior.
 
 Autosave preserves schema-valid intermediate drafts. Geometry or semantic issues
-can remain visible while editing.
-Explicit item removal, including Issues repairs and floor deletion, clears all
-known removed primary, auxiliary reading and independent lighting draft bindings
-without depending on unrelated geometry being complete. The shared engine
-`itemBindingSlotIds` enumerator reads authored identities even when a model or
-placement is unresolved. Cleanup preserves surviving unresolved declarations and
-published mappings, and Undo restores the removed item and its draft mappings
-together. Broad reconciliation still requires a valid completed edit.
-
-The shared validation panel stays available in
+can remain visible while editing. Item removal clears its primary, reading and
+independent lighting draft connections even when another floor is unfinished,
+preserving published mappings and Undo. The shared validation panel stays available in
 Construct, Arrange, Connect, and Shortcuts whenever the draft has visible issues.
 Locate selects and focuses the affected editable object, switching floor and mode
 when needed; attachment errors select the attachment rather than its supporting

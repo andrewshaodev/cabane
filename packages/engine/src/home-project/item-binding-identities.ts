@@ -1,6 +1,5 @@
 import type { SceneItemSpec } from "./types";
-
-export const lightingEntitySlotId = (id: string) => `${id}-entity`;
+import { lightingEntitySlotId } from "../model-lighting/settings";
 
 /** All declared item-owned binding IDs, even when geometry/model resolution is unfinished. */
 export const itemBindingSlotIds = (item: SceneItemSpec): string[] => [

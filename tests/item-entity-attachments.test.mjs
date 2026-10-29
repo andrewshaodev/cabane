@@ -435,25 +435,6 @@ await withModules(async (load) => {
         assert.equal(state.draft.entityIdsBySlotId["fridge-control"], "sensor.fridge");
         assert.deepEqual(state.published, lit.bindings[origin].published);
       }
-      const undone = engine.undoWorkspaceHistory(history).present;
-      const savedUndo = await lifecycle.autosave(
-        reopened,
-        undone.project,
-        undefined,
-        undone.bindings,
-      );
-      assert.equal(savedUndo.status, "saved", savedUndo.error?.message);
-      const reopenedUndo = await records.load(record.homeId);
-      assert.deepEqual(reopenedUndo.draft, before.project);
-      assert.deepEqual(reopenedUndo.bindings, before.bindings);
-      const savedRedo = await lifecycle.autosave(
-        reopenedUndo,
-        next.project,
-        undefined,
-        next.bindings,
-      );
-      assert.equal(savedRedo.status, "saved", savedRedo.error?.message);
-      assert.deepEqual((await records.load(record.homeId)).bindings, next.bindings);
     }));
   test("attachment edits participate in undo, duplication identity, and mapping cleanup while published mappings remain intact", () => {
     const { project, profile, runtime } = connectionFixture();

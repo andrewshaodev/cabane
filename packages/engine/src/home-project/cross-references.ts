@@ -1,5 +1,4 @@
 import { outdoorPlatformRoomId } from "../outdoor-platforms/platform-rooms";
-import { lightingEntitySlotId } from "./item-binding-identities";
 import type { HomeProject } from "./types";
 import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
@@ -74,11 +73,7 @@ const visitProjectIds = (
   project.sceneItems.forEach((item, itemIndex) => {
     if (item.lightSlotId) {
       register(item.lightSlotId, `sceneItems[${itemIndex}].lightSlotId`, "slot");
-      register(
-        lightingEntitySlotId(item.lightSlotId),
-        `sceneItems[${itemIndex}].lightSlotId.entity`,
-        "slot",
-      );
+      register(`${item.lightSlotId}-entity`, `sceneItems[${itemIndex}].lightSlotId.entity`, "slot");
     }
     (item.entitySlots ?? []).forEach((slot, slotIndex) =>
       register(slot.id, `sceneItems[${itemIndex}].entitySlots[${slotIndex}].id`, "slot"),

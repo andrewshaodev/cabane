@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  createModelAssetRepository,
-  downloadCabaneBytes,
-  editCustomModel,
-  type CustomModel,
-} from "@cabane/engine";
+import { createModelAssetRepository, downloadCabaneBytes, type CustomModel } from "@cabane/engine";
 import { EditorButton } from "../editor-chrome/EditorButton";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import type { CatalogEntry } from "../editor-preview/furnish/catalog/catalog";
@@ -101,8 +96,10 @@ export function CustomModelCard({
           onSubmit={(event) => {
             event.preventDefault();
             if (!disabled && name.trim()) {
-              workspace.commit(
-                editCustomModel(workspace.snapshot, { ...model, name: name.trim() }),
+              setModels(
+                models.map((item) =>
+                  item.id === model.id ? { ...item, name: name.trim() } : item,
+                ),
               );
               setName(null);
             }

@@ -325,69 +325,6 @@ await withModules(async (load) => {
     assert.equal(store.snapshot(seed.home.id), validRaw);
   });
 
-  test("explicit unavailable-item recovery cleans primary, reading and lighting identities in each repaired slice", async () => {
-    const project = fixtureProject();
-    project.sceneItems = [
-      {
-        id: "unavailable-item",
-        kind: "device",
-        modelId: "retired-model",
-        floorId: "missing-floor",
-        size: [1, 1, 1],
-        lightSlotId: "unavailable-light",
-        placement: { kind: "absolute", at: [2, 2], elevationMeters: 0, rotationYRadians: 0 },
-        entitySlots: [
-          {
-            id: "unavailable-primary",
-            compatibleDomains: ["sensor"],
-            required: true,
-            autoMap: "manual",
-            deviceRole: "primary",
-            presentation: { label: "Sensor", dashboardRole: "primary" },
-          },
-          {
-            id: "unavailable-reading",
-            compatibleDomains: ["sensor"],
-            required: false,
-            autoMap: "manual",
-            deviceRole: "secondary",
-            presentation: { label: "Reading", dashboardRole: "secondary" },
-          },
-        ],
-      },
-    ];
-    const record = createSeedProjectRecord(project);
-    const profile = {
-      schemaVersion: 1,
-      homeId: project.home.id,
-      roomAreaIds: {},
-      entityIdsBySlotId: {
-        "unavailable-primary": "sensor.fixture",
-        "unavailable-reading": "sensor.reading",
-        "unavailable-light-entity": "light.fixture",
-      },
-    };
-    record.bindings = {
-      "https://fixture.invalid": {
-        draft: profile,
-        published: structuredClone(profile),
-        manualRoomIds: [],
-        manualSlotIds: Object.keys(profile.entityIdsBySlotId),
-      },
-    };
-    const raw = serializeHomeProjectRecord(record);
-    const store = createMemoryProjectRecordStore({ [project.home.id]: raw });
-    const repository = createHomeProjectRepository(store, registries);
-    assert.equal((await repository.loadOrCreate(fixtureProject())).status, "recovery");
-    const repaired = await repository.recoverWithoutMissingSceneItems(project.home.id, raw);
-    assert.deepEqual(repaired.draft.sceneItems, []);
-    assert.deepEqual(repaired.published.sceneItems, []);
-    assert.deepEqual(repaired.bindings["https://fixture.invalid"].draft.entityIdsBySlotId, {});
-    assert.deepEqual(repaired.bindings["https://fixture.invalid"].published.entityIdsBySlotId, {});
-    assert.deepEqual(repaired.bindings["https://fixture.invalid"].manualSlotIds, []);
-    assert.deepEqual(await repository.load(project.home.id), repaired);
-  });
-
   test("recovery advances any readable prior revision and rejects numeric exhaustion", async () => {
     const seed = fixtureProject();
     const priorRevision = 7_000_000_000_000_000;

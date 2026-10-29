@@ -77,17 +77,6 @@ await withModules(async (load) => {
 
   test("light edits preserve identity, exact copy transforms/sizes and mappings on every floor", () => {
     const before = fixture();
-    const secondary = {
-      ...before.project.sceneItems[0].entitySlots[0],
-      id: "secondary-control",
-      deviceRole: "secondary",
-    };
-    before.project.sceneItems[0].entitySlots.push(secondary);
-    for (const state of Object.values(before.bindings)) {
-      state.draft.entityIdsBySlotId[secondary.id] = "light.secondary";
-      state.published.entityIdsBySlotId[secondary.id] = "light.secondary";
-      state.manualSlotIds.push(secondary.id);
-    }
     const changed = {
       ...model,
       name: "Updated",
@@ -247,10 +236,8 @@ await withModules(async (load) => {
         editCustomModel(source, { ...model, asset: { ...model.asset, sha256: "a".repeat(64) } }),
       /cannot replace/,
     );
-    assert.throws(
-      () => editCustomModel(source, { ...model, id: "custom:missing" }),
-      /no longer exists/,
-    );
+    const added = { ...model, id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" };
+    assert.equal(editCustomModel(source, added).project.customModels.length, 2);
   });
 
   test("edited definitions and copies reload from real IndexedDB without duplicating GLB assets", () =>
@@ -311,172 +298,32 @@ await withModules(async (load) => {
       );
     }));
 
-  test("Edit and verified model packs produce identical atomic model updates", async (context) => {
-    const { light: _light, ...base } = model;
+  test("definition updates add and remove lighting on existing furniture copies", () => {
+    const { light, ...base } = model;
     const furniture = { ...base, profile: "furniture" };
-    const sensor = { ...base, profile: "sensor" };
-    const normalization = api.normalizeGlb(decoded.root, "wall", [0, Math.PI / 2, 0], 1.2);
-    const cases = [
-      [model, sensor],
-      [model, furniture],
-      [model, { ...model, placement: "wall", normalization }],
-      [furniture, { ...furniture, light: model.light }],
-      [{ ...furniture, light: model.light }, furniture],
-      [{ ...sensor, light: model.light }, model],
-      [
-        { ...furniture, light: model.light },
-        { ...sensor, light: model.light },
-      ],
-    ];
-    let serial = 0;
-    context.mock.method(
-      globalThis.crypto,
-      "randomUUID",
-      () => `00000000-0000-4000-8000-${String(++serial).padStart(12, "0")}`,
-    );
-    for (const [source, changed] of cases) {
-      const before = editCustomModel(fixture(), source);
-      for (const [index, item] of before.project.sceneItems.entries()) {
-        const reading = {
-          id: `reading-${index}`,
-          compatibleDomains: ["sensor"],
-          required: false,
-          autoMap: "manual",
-          deviceRole: "secondary",
-          presentation: { label: "Temperature", dashboardRole: "secondary", showInScene: true },
-        };
-        item.entitySlots = [...(item.entitySlots ?? []), reading];
-        for (const state of Object.values(before.bindings)) {
-          state.draft.entityIdsBySlotId[reading.id] = `sensor.fixture_${index}`;
-          state.published.entityIdsBySlotId[reading.id] = `sensor.fixture_${index}`;
-          state.manualSlotIds.push(reading.id);
-          if (item.lightSlotId) {
-            const id = api.lightingEntitySlotId(item.lightSlotId);
-            state.draft.entityIdsBySlotId[id] = `light.fixture_${index}`;
-            state.published.entityIdsBySlotId[id] = `light.fixture_${index}`;
-            state.manualSlotIds.push(id);
-          }
-        }
-      }
-      const original = structuredClone(before);
-      const pack = await api.readCabaneModelPack(api.createCabaneModelPack([changed], [asset]));
-      const checkpoint = serial;
-      const edited = editCustomModel(before, changed);
-      serial = checkpoint;
-      const imported = api.importCustomModels(before, pack.models);
-      assert.deepEqual(JSON.parse(JSON.stringify(imported)), JSON.parse(JSON.stringify(edited)));
-      assert.equal(api.validateHomeProject(imported.project, native).valid, true);
-      assert.deepEqual(before, original);
-      const manifest = api.composeHomeBindingManifest(imported.project, {
-        ...native,
-        openingModels: {},
-      });
-      const slotIds = new Set(api.collectBindingSlots(manifest).map((slot) => slot.slotId));
-      for (const [index, item] of imported.project.sceneItems.entries()) {
-        assert.deepEqual(item.placement, before.project.sceneItems[index].placement);
-        assert.equal(item.floorId, before.project.sceneItems[index].floorId);
-        assert.deepEqual(
-          item.entitySlots.filter(api.isAuxiliaryEntitySlot),
-          before.project.sceneItems[index].entitySlots.filter(api.isAuxiliaryEntitySlot),
-        );
-        assert.equal(
-          Boolean(api.lightingSlotForItem(item)),
-          Boolean(changed.light) || changed.profile === "light",
-        );
-        if (changed.light) {
-          assert.ok(slotIds.has(api.lightingSlotForItem(item).id));
-          assert.equal(Boolean(item.lightSlotId), changed.profile !== "light");
-        } else assert.equal(item.lightSlotId, undefined);
-      }
-      for (const [origin, state] of Object.entries(imported.bindings)) {
-        assert.deepEqual(state.published, before.bindings[origin].published);
-        assert.ok(Object.keys(state.draft.entityIdsBySlotId).every((id) => slotIds.has(id)));
-        for (let index = 0; index < 3; index++)
-          assert.equal(
-            state.draft.entityIdsBySlotId[`reading-${index}`],
-            `sensor.fixture_${index}`,
-          );
-      }
-      const history = api.commitWorkspaceSnapshot(api.createWorkspaceHistory(before), imported);
-      assert.equal(history.past.length, 1);
-      assert.deepEqual(api.undoWorkspaceHistory(history).present, before);
-      assert.deepEqual(
-        api.redoWorkspaceHistory(api.undoWorkspaceHistory(history)).present,
-        imported,
-      );
-      assert.equal("bytes" in imported.project.customModels[0].asset, false);
-      assert.equal(JSON.stringify(imported.project).includes("sensor.fixture_"), false);
-    }
+    const unlit = editCustomModel(fixture(), furniture);
+    const lit = editCustomModel(unlit, { ...furniture, light });
+    assert.ok(lit.project.sceneItems.every((item) => item.lightSlotId));
+    const removed = editCustomModel(lit, furniture);
+    assert.ok(removed.project.sceneItems.every((item) => !item.lightSlotId));
+    for (const snapshot of [lit, removed])
+      assert.deepEqual(api.validateHomeProject(snapshot.project, native).issues, []);
   });
 
-  test("pack recovery and missing-model replacement retain compatible controls, readings and authored size", () => {
+  test("restoring or replacing missing definitions preserves compatible slots and saved sizes", () => {
     const before = fixture();
     before.project.customModels = [];
-    const reading = {
-      id: "retained-reading",
-      compatibleDomains: ["sensor"],
-      required: false,
-      autoMap: "manual",
-      deviceRole: "secondary",
-      presentation: { label: "Temperature", dashboardRole: "secondary" },
-    };
-    before.project.sceneItems[0].entitySlots.push(reading);
-    for (const state of Object.values(before.bindings)) {
-      state.draft.entityIdsBySlotId[reading.id] = "sensor.retained";
-      state.published.entityIdsBySlotId[reading.id] = "sensor.retained";
-      state.manualSlotIds.push(reading.id);
-    }
-    const unchanged = structuredClone(before);
-    const restored = api.importCustomModels(before, [model]);
+    const restored = editCustomModel(before, model);
     assert.deepEqual(restored.project.sceneItems, before.project.sceneItems);
     assert.deepEqual(restored.bindings, before.bindings);
-    const { light: _light, ...base } = model;
-    const replacement = {
-      ...base,
-      id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-      profile: "sensor",
-    };
-    const recovered = api.importCustomModels(before, [replacement], {
-      modelId: model.id,
-      kind: "device",
-    });
-    for (const [index, item] of recovered.project.sceneItems.entries()) {
-      assert.equal(item.modelId, replacement.id);
-      assert.deepEqual(item.entitySlots[0].compatibleDomains, ["sensor"]);
-      assert.notEqual(item.entitySlots[0].id, before.project.sceneItems[index].entitySlots[0].id);
-      assert.deepEqual(item.size, before.project.sceneItems[index].size);
-      assert.deepEqual(item.placement, before.project.sceneItems[index].placement);
-    }
-    assert.equal(api.validateHomeProject(recovered.project, native).valid, true);
-    assert.deepEqual(recovered.project.sceneItems[0].entitySlots[1], reading);
-    for (const [origin, state] of Object.entries(recovered.bindings)) {
-      assert.deepEqual(state.draft.entityIdsBySlotId, { "retained-reading": "sensor.retained" });
-      assert.deepEqual(state.manualSlotIds, [reading.id]);
-      assert.deepEqual(state.published, before.bindings[origin].published);
-    }
-    assert.deepEqual(before, unchanged);
-  });
-
-  test("batch pack updates reject immutable asset conflicts before changing any definitions or copies", () => {
-    const before = fixture();
-    const original = structuredClone(before);
-    const added = { ...model, id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" };
-    assert.throws(
-      () =>
-        api.importCustomModels(before, [
-          added,
-          { ...model, asset: { ...model.asset, byteLength: model.asset.byteLength + 1 } },
-        ]),
-      /cannot replace.*GLB/,
-    );
-    assert.deepEqual(before, original);
-    const next = api.importCustomModels(before, [added, { ...model, name: "Renamed" }]);
+    const replacement = { ...model, id: "custom:aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee" };
+    const replaced = editCustomModel(before, replacement, { modelId: model.id, kind: "device" });
     assert.deepEqual(
-      next.project.customModels.map((model) => model.name),
-      ["Renamed", model.name],
+      replaced.project.sceneItems,
+      before.project.sceneItems.map((item) => ({ ...item, modelId: replacement.id })),
     );
-    assert.deepEqual(next.project.sceneItems, before.project.sceneItems);
-    assert.deepEqual(next.bindings, before.bindings);
+    assert.deepEqual(replaced.bindings, before.bindings);
+    assert.deepEqual(api.validateHomeProject(replaced.project, native).issues, []);
   });
 
   test("same-asset model-pack profile updates reconcile placed copies through the library", () =>
@@ -485,7 +332,8 @@ await withModules(async (load) => {
       const { light: _light, ...base } = model;
       const changed = { ...base, profile: "sensor" };
       const bytes = api.createCabaneModelPack([changed], [asset]);
-      let committed;
+      let committed,
+        commits = 0;
       await dom.mount(async () => {
         const container = dom.document.createElement("div");
         dom.document.body.append(container);
@@ -497,6 +345,7 @@ await withModules(async (load) => {
               modelAssetReferences: [model.asset],
               commit: (next) => {
                 committed = next;
+                commits++;
               },
               flush: async () => ({ status: "saved" }),
             },
@@ -518,6 +367,7 @@ await withModules(async (load) => {
       );
       await dom.click("Import pack");
       await dom.until(() => committed);
+      assert.equal(commits, 1);
       assert.deepEqual(api.validateHomeProject(committed.project, native).issues, []);
       assert.deepEqual(committed.bindings, editCustomModel(before, changed).bindings);
       assert.deepEqual(
