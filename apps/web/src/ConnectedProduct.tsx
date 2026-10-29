@@ -20,7 +20,6 @@ import { composeOwnerProjectManifest, ownerProjectRegistries } from "./project-r
 import type { EditorOpenRequest } from "./editor-connect/useConnectEditor";
 import { downloadConnectData } from "./editor-connect/profile-transfer";
 import { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-navigation";
-export { CONNECT_RETURN_KEY, readEditorReturn } from "./editor-connect/connect-navigation";
 import { editorPath, editorRoutes, mobileEditorPath, workspaceHomePath } from "./editor-routes";
 import { exportWorkspaceBackup } from "./workspaces/workspace-transfer";
 import { RoutedHomeEditor } from "./RoutedHomeEditor";

@@ -1,10 +1,8 @@
 {
   "personal-models-browser.test.mjs": 16119,
   "gun-portals-browser.test.mjs": 4202,
-  "basement-browser.test.mjs": 10013,
-  "workspace-ha-storage-ui.test.mjs": 15278,
   "laser-device-performance.test.mjs": 10467,
   "native-first-launch.test.mjs": 6339,
-  "workspace-open-ui.test.mjs": 3743,
-  "workspace-backup-browser.test.mjs": 1702
+  "workspace-backup-browser.test.mjs": 1702,
+  "floor-menu-browser.test.mjs": 2916
 }
