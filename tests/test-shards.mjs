@@ -1,8 +1,8 @@
-// Keep software WebGL serial, while Node/DOM work uses the other shared workers.
-// A unit-only selection still uses every worker. File order breaks cost ties.
-export function assignTestShards(files, shardCount) {
+// CI keeps software WebGL serial while Node/DOM uses the other shared workers.
+// Local hardware graphics can overlap. Unit-only selections use every worker.
+export function assignTestShards(files, shardCount, { serialBrowser = false } = {}) {
   const shards = Array.from({ length: shardCount }, () => ({ cost: 0, files: [] }));
-  const hasBrowser = files.some((file) => file.browser);
+  const hasBrowser = serialBrowser && files.some((file) => file.browser);
   for (const file of [...files].sort(
     (left, right) => right.cost - left.cost || left.name.localeCompare(right.name),
   )) {

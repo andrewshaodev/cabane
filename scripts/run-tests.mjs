@@ -113,6 +113,7 @@ if (reportDirectory) {
           platform: process.platform,
           arch: process.arch,
           concurrency,
+          ci: process.env.CI === "true",
           suite: process.env.CABANE_TEST_SUITE ?? "all",
           group: process.env.CABANE_VERIFY_GROUP ?? null,
           elapsedMs: performance.now() - startedAt,

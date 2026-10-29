@@ -449,7 +449,8 @@
       "scripts/layered-surface-contract.mjs",
       "scripts/eslint-panel-dom.mjs",
       "scripts/agent-test-reporter.mjs",
-      "scripts/run-tests.mjs"
+      "scripts/run-tests.mjs",
+      "tests/test-shards.mjs"
     ],
     "interfaces": [],
     "invariant": "AGENTS.md owns task sizing and local verification policy; the linked delivery contract documents command execution, CI, and HA release provenance. Test review follows docs/test-guidelines.md.",

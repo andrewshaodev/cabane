@@ -12,12 +12,20 @@ const files = [
 ];
 
 test("shards serialize every browser file and retain every Node file exactly once", () => {
-  const shards = assignTestShards(files, 4);
+  const shards = assignTestShards(files, 4, { serialBrowser: true });
   assert.deepEqual(shards[0], ["picker.test.mjs", "scene.test.mjs"]);
   assert.deepEqual(shards.flat().sort(), files.map((file) => file.name).sort());
   assert.ok(shards.slice(1).every((shard) => shard.length > 0));
-  assert.deepEqual(assignTestShards([...files].reverse(), 4), shards);
+  assert.deepEqual(assignTestShards([...files].reverse(), 4, { serialBrowser: true }), shards);
   assert.deepEqual(assignTestShards(files, 1), [files.map((file) => file.name).sort()]);
+  const local = assignTestShards(files, 4);
+  assert.deepEqual(local.flat().sort(), shards.flat().sort());
+  assert.equal(
+    local.filter((shard) =>
+      shard.some((name) => name === "scene.test.mjs" || name === "picker.test.mjs"),
+    ).length,
+    2,
+  );
 });
 
 test("unit-only shards use all four workers and balance measured costs", () => {
@@ -41,6 +49,7 @@ test("browser-only and empty selections never duplicate or lose files", () => {
     assignTestShards(
       files.filter((file) => file.browser),
       4,
+      { serialBrowser: true },
     ),
     [["picker.test.mjs", "scene.test.mjs"], [], [], []],
   );
