@@ -173,8 +173,11 @@ viewport. Gun input waits for pointer lock and the Walk toolbar before equipping
 shader checks wait for rendered pulse/impact completion rather than 45 frames.
 Gun fixtures keep a 240-by-180 scene canvas inside the desktop UI so software
 graphics exercise the same shaders and normal input without a full-window pixel
-workload. The complete HA storage journey seeds a one-room demo through the real
-repository; bundled-villa furnishing is outside that test's storage risk.
+workload. HA settings boundaries and receiving-link routing run in Node/DOM with
+the real components and isolated IndexedDB. The browser keeps backup file/download
+wiring and native first-launch persistence. The floor-menu browser smoke checks
+the actual component's CSS overflow and native focus in a narrow viewport; floor
+editing, deletion constraints, persistence and undo remain in Node/DOM.
 
 The optional portal gun has exactly one Chromium smoke: enter Walk, equip the
 installed gun and create a visible portal. Placement, targeting, traversal at
@@ -299,7 +302,10 @@ basement viewing/walking. GLB import no longer includes publication, reload, ges
 or archive transfer. Existing Node/DOM suites retain schema, repository, model-pack,
 archive, reference-plan, weather and startup behavior; they do not establish equivalent
 end-to-end UI coverage. No replacement browser journeys or duplicate unit matrices
-are added. Basement editing and the representative-scale GLB scene remain.
+are added. The floor-menu smoke and representative-scale GLB scene remain.
+The [29 October coverage ledger](../test-suite-simplification-2026-10-29.md)
+records further source-snapshot removals, browser-to-DOM conversions and the
+intentional loss of combined basement editing/reload/responsive journeys.
 
 Wall face editing uses Node/DOM tests for labels, preview targeting, color edits,
 reset and history, renderer tests for face colors, and isolated IndexedDB tests for
