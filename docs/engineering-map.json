@@ -211,7 +211,8 @@
     "owners": [
       "packages/engine/src/imported-models",
       "apps/web/src/custom-models",
-      "apps/web/src/workspaces/ha-model-assets.ts"
+      "apps/web/src/workspaces/ha-model-assets.ts",
+      ".agents/skills/create-cabane-model"
     ],
     "interfaces": [
       {
@@ -233,7 +234,7 @@
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
+    "invariant": "Maintain the standalone authoring skill in .agents/skills/create-cabane-model alongside the product, retaining its MIT license and standalone installation. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {

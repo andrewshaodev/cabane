@@ -74,8 +74,8 @@ furnishing without a new user instruction.
   Personal user-uploaded GLBs still use the validated public import APIs owned
   by `packages/engine/src/imported-models/`. Their self-contained validation and
   prohibition on executable user code remain unchanged.
-  The standalone `create-cabane-model` skill remains in the public
-  [cabane-app/agent-skills](https://github.com/cabane-app/agent-skills) repository.
+  The standalone [create-cabane-model skill](../.agents/skills/create-cabane-model/SKILL.md)
+  is maintained in this repository and can be installed without a Cabane checkout.
 - Use the engine's public toon materials and restrained outlines for authored
   home geometry. Hosted models may retain their original materials; engine-owned
   atmospheric effects may use suitable particle materials.

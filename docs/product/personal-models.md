@@ -154,19 +154,22 @@ native homes and ask for an update for homes containing GLB references.
 Unreferenced remote files and abandoned transfers expire after 24 hours; cleanup
 preserves assets referenced by any stored draft or published home.
 
-The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) contains `SKILL.md`, export guidance,
+The public [`create-cabane-model` skill](../../.agents/skills/create-cabane-model/SKILL.md) contains `SKILL.md`, export guidance,
 standalone Blender and Three.js examples, and a local Python validator. It emits
 a standard GLB without Cabane source or an additional manifest. Simplified
 proportions, a restrained palette, and Cabane-like finishes are defaults; explicit
 style preferences take precedence. Final validation also uses the Cabane import
 preview. Reference photos and household HA data are not deliverables. Install with
-`npx skills add cabane-app/agent-skills --skill create-cabane-model`. This public
-repository is the single source of the skill; Cabane does not keep a second copy.
+`npx skills add cabane-app/cabane --skill create-cabane-model`. The skill and its
+bundled resources retain their [MIT license](../../.agents/skills/create-cabane-model/LICENSE).
+This repository is the maintained source. The former `cabane-app/agent-skills`
+repository is archived; existing users must reinstall from `cabane-app/cabane`
+to receive future updates.
 
 Implementation: [import owner](../../packages/engine/src/imported-models/index.ts),
 [Arrange library](../../apps/web/src/custom-models/CustomModelLibrary.tsx),
 [HA asset client](../../apps/web/src/workspaces/ha-model-assets.ts),
-[portable skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model).
+[portable skill](../../.agents/skills/create-cabane-model/SKILL.md).
 
 [Back to product overview](../../PRODUCT_SPEC.md).
 
