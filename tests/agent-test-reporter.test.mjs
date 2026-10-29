@@ -225,3 +225,58 @@ test("successful output stays compact while skip, todo and hook failures remain 
   assert.match(output, /1 passed, 1 failed, 1 skipped, 1 todo/);
   assert.doesNotMatch(output, /FAIL todo/);
 });
+
+test("shared rerun preserves earlier files when an isolated rerun passes", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "cabane-shared-reporter-"));
+  const shard = join(directory, "shared's.test.mjs");
+  const environment = {
+    ...process.env,
+    CABANE_TEST_SHARED_MODULES: "1",
+    CABANE_TEST_SHARD: shard,
+    CABANE_TEST_SUITE: "unit",
+    CABANE_VERIFY_GROUP: "workspace",
+  };
+  delete environment.NODE_TEST_CONTEXT;
+  delete environment.CABANE_TEST_REPORT_DIRECTORY;
+  const run = (command) =>
+    new Promise((resolve, reject) => {
+      const child = spawn(command, { shell: true, env: environment });
+      let output = "";
+      child.stdout.on("data", (chunk) => (output += chunk));
+      child.stderr.on("data", (chunk) => (output += chunk));
+      child.on("error", reject);
+      child.on("close", (code) => resolve({ code, output }));
+    });
+  try {
+    await writeFile(
+      join(directory, "first.mjs"),
+      "import test from 'node:test'; test('setup', () => { globalThis.leaked = true; });",
+    );
+    await writeFile(
+      join(directory, "second.mjs"),
+      "import test from 'node:test'; import assert from 'node:assert/strict'; test('clean state', () => { assert.equal(globalThis.leaked, undefined); });",
+    );
+    await writeFile(
+      shard,
+      "import {describe} from 'node:test'; await describe('shared', async () => { await import('./first.mjs'); await import('./second.mjs'); });",
+    );
+    const result = await run(
+      `node --test --test-reporter=./scripts/agent-test-reporter.mjs '${shard.replaceAll("'", "'\"'\"'")}'`,
+    );
+    assert.equal(result.code, 1);
+    const lines = result.output.split("\n");
+    const isolated = lines.find((line) => line.startsWith("Rerun:")).slice("Rerun: ".length);
+    assert.equal((await run(isolated)).code, 0);
+    const shared = lines
+      .find((line) => line.startsWith("Shared-shard rerun:"))
+      .slice("Shared-shard rerun: ".length);
+    assert.match(shared, /CABANE_TEST_SUITE='unit'/);
+    assert.match(shared, /CABANE_VERIFY_GROUP='workspace'/);
+    assert.doesNotMatch(shared, /test-name-pattern/);
+    const rerun = await run(shared);
+    assert.equal(rerun.code, 1);
+    assert.match(rerun.output, /FAIL clean state/);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
