@@ -42,8 +42,17 @@ private workspace on the connected Home Assistant instance. Manual Save to HA
 and Restore from HA work with sync disabled. Enable sync uploads and enables per-workspace synchronization in one explicit action; local IndexedDB saves remain immediate and
 offline edits remain local until HA reconnects. Remote version checks stop
 concurrent browsers from silently overwriting each other. All signed-in HA
-users share the instance's Cabane library. Browser deletion leaves the HA copy;
-remote deletion is a separate confirmed action. Installation and the integration source are maintained in
+users share the instance's Cabane library. The library Delete dialog offers direct Remove locally and Delete permanently
+actions when an HA copy exists. Remove locally keeps the saved HA copy. Delete permanently removes the current browser copy and the saved
+copy on the selected HA server, with no undo; other devices may retain browser
+copies. Local-only homes use a simple permanent-delete confirmation. Download
+backup is a secondary action that keeps the dialog open. HA-only library cards
+and the HA import list allow backup and confirmed deletion without restoring the
+home, including mismatched origins and damaged documents. Deletion uses the
+observed remote version and never requires parsing the home or loading its GLBs;
+concurrent changes preserve the local copy and require review. An unavailable HA
+server leaves local removal available. Removing a local workspace clears its sync
+cursor. Installation and the integration source are maintained in
 [the dedicated repository](https://github.com/cabane-app/cabane-home-assistant).
 Storage controls live on the workspace-specific Home Assistant page. The library
 shows saved/sync indicators on ordinary workspace cards; Open from Home Assistant is a direct library action (the legacy Import → From Home Assistant route remains supported). Opening a saved home restores its exact identity and enables sync, while divergent local copies require explicit review. In the native HACS panel, healthy saved homes that are absent from this browser

@@ -11,7 +11,6 @@ import {
   type WorkspaceLibraryEntry,
 } from "./WorkspaceCard";
 import { WorkspaceNameDialog } from "./WorkspaceNameDialog";
-import { WorkspaceDeleteDialog } from "./WorkspaceDeleteDialog";
 import { WorkspaceTransferDialog } from "./WorkspaceTransferDialog";
 import "./workspaces.css";
 export type { WorkspaceLibraryEntry } from "./WorkspaceCard";
@@ -26,7 +25,11 @@ export interface WorkspaceLibraryProps {
   onCreate: (name: string) => Promise<void>;
   onRename: (id: string, name: string) => Promise<void>;
   onDuplicate: (id: string, name: string) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  renderDelete: (
+    entry: WorkspaceLibraryEntry,
+    onCancel: () => void,
+    onBusyChange: (busy: boolean) => void,
+  ) => ReactNode;
   onImport: (json: string) => Promise<void>;
   onExport: (id: string, privateBackup: boolean) => Promise<void>;
   onRecover: (id: string) => Promise<void>;
@@ -203,15 +206,7 @@ export function WorkspaceLibrary(props: WorkspaceLibraryProps) {
             }
           />
         )}
-      {dialog?.action === "delete" && (
-        <WorkspaceDeleteDialog
-          name={dialog.entry!.metadata.name}
-          busy={busy}
-          error={error}
-          onCancel={cancel}
-          onDelete={() => void run(() => props.onDelete(dialog.entry!.metadata.id))}
-        />
-      )}
+      {dialog?.action === "delete" && props.renderDelete(dialog.entry!, cancel, setBusy)}
       {(dialog?.action === "import" || dialog?.action === "export") && (
         <WorkspaceTransferDialog
           mode={dialog.action}
