@@ -80,6 +80,10 @@ its minor/patch version independently of the local pins. Install with `npm ci`, 
 use modern headless Chromium rather than an independently updated system browser.
 Linux environments without browser libraries can use
 `npm run browser:install -- --with-deps`. Reinstall the browser after Playwright upgrades.
+The Verification job pins GitHub's Ubuntu 24.04 image, which already includes
+Chrome's system libraries, and installs only the matching Playwright browser.
+It avoids per-job apt/font downloads. Missing libraries still fail the browser
+preflight before any shard starts.
 
 Dependency changes also require a clean `npm ci` with the managed host's npm version.
 Keep required peer dependencies of optional platform packages in the portable
@@ -107,13 +111,17 @@ Keep those entry points explicit when adding runtime-loaded modules. The engine'
 Roboto font dependency is retained because CSS imports are outside this analysis.
 
 The test command runs four cost-balanced shards with shared harness modules and a
-compact agent reporter per worker. The launcher keeps four independent worker
+compact agent reporter per worker. Under `CI=true`, one shard owns all Chromium
+cases and Node/DOM files use the other three. Unit-only selections use all four.
+Local runs keep parallel browser shards for hardware-accelerated graphics.
+The launcher keeps four independent worker
 processes so Node cannot buffer a later shard's failures behind an earlier shard.
 Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
 workers on constrained local machines. All four
 shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
-Hosted CI runs one shard at a time to prevent software-rendered scenes from
-starving each other's input and shader warmup. It retains the test report and
+Hosted CI runs one shard at a time. Browser files still share one worker and its
+Vite/Chromium processes; concurrent cold Node/DOM setup can starve browser startup
+on software graphics. It retains the test report and
 any browser failure screenshots, traces and errors as `verification-diagnostics`
 artifacts for seven days.
 Set `CABANE_TEST_PROGRESS=1` to print each starting test when diagnosing slow work.
@@ -125,7 +133,8 @@ runner does. Set `TEST_PROFILE=1` to report slow tests. For repeatable measureme
 `npm run test:profile -- --runs 3 --output test-results/baseline.json`, then repeat
 with a different output path and `--baseline test-results/baseline.json`. Reports
 include median wall time, per-file mean cost, every original test name/status,
-worker durations, concurrency and Node/platform metadata. Comparison refuses
+worker durations, concurrency and Node/platform metadata. Set `CI=true` to profile
+the hosted browser-isolation schedule locally. Comparison refuses
 failed runs or changed test inventories/statuses; intentional test migrations need
 an explicit coverage review rather than a like-for-like speed claim. Run benchmarks
 without other verification or development work competing for CPU. The profiler
