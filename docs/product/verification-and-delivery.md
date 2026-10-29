@@ -303,9 +303,6 @@ or archive transfer. Existing Node/DOM suites retain schema, repository, model-p
 archive, reference-plan, weather and startup behavior; they do not establish equivalent
 end-to-end UI coverage. No replacement browser journeys or duplicate unit matrices
 are added. The floor-menu smoke and representative-scale GLB scene remain.
-The [29 October coverage ledger](../test-suite-simplification-2026-10-29.md)
-records further source-snapshot removals, browser-to-DOM conversions and the
-intentional loss of combined basement editing/reload/responsive journeys.
 
 Wall face editing uses Node/DOM tests for labels, preview targeting, color edits,
 reset and history, renderer tests for face colors, and isolated IndexedDB tests for
