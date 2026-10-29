@@ -139,3 +139,10 @@ apartment-specific fitted platforms are excluded. Square cube storage shares one
 frame with two- and four-compartment variants. Wall-mounted awnings and cleaning
 racks use ordinary wall support; folding balcony furniture uses outdoor ground
 support. Existing catalog IDs and default variants remain unchanged.
+
+The integrated roller shutter is a separate Arrange cover device with exterior-recessed
+window fitting and indoor room controls. Its concealed roll requires no architectural
+cut. Full-size slats slide upward behind the exit strip, smoothly retarget from the
+current pose, freeze when readings become unusable, and settle immediately for reduced
+motion. The catalog owns the closed opening clearance metadata; the engine derives
+room membership from the opposite physical wall face. No project fields are added.

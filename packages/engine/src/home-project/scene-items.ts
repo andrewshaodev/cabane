@@ -1,3 +1,4 @@
+import { roomIdForItem } from "./item-rooms";
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
@@ -29,7 +30,12 @@ const roomIdsForItem = (
 export const resolvedRoomIdForItem = (
   item: SceneItemSpec,
   project: { floors: readonly FloorSpec[] },
+  definition?: SceneModelEditorDescriptor,
 ): string | null => {
+  if (definition?.windowFit?.mounting === "exterior-recessed") {
+    const floor = project.floors.find((candidate) => candidate.id === item.floorId);
+    return floor ? roomIdForItem(item, floor, definition) : null;
+  }
   const roomIds = roomIdsForItem(item, project);
   if (roomIds.length !== 1) return null;
   if (item.placement.kind === "ceiling" && roomIds[0] !== item.placement.roomId) return null;

@@ -2,7 +2,7 @@ import { lightingModelId, lightingSlotForItem } from "../model-lighting/settings
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { resolveProjectModels } from "../imported-models/resolve-models";
 import { deriveFloorLevels } from "../building/floor-levels";
-import { pointInsidePolygon, worldPointToPlan } from "../geometry";
+import { worldPointToPlan } from "../geometry";
 import type {
   DeviceSlotSpec,
   RenderableFloorSpec,
@@ -10,9 +10,13 @@ import type {
   HomeManifest,
   HomeBindingManifest,
   OpeningSpec,
+  SceneModelEditorDescriptor,
 } from "../types";
 import { resolveItemTransform } from "./placements";
 import type { DeviceItemSpec, HomeProject, SceneItemSpec } from "./types";
+
+export { roomIdForItem, indoorRoomIdsOnWallFace } from "./item-rooms";
+import { roomIdForItem } from "./item-rooms";
 
 const resolvedPlanPoint = (item: SceneItemSpec, floor: HomeBindingManifest["floors"][number]) => {
   const transform = resolveItemTransform(item.placement, floor);
@@ -22,27 +26,14 @@ const resolvedPlanPoint = (item: SceneItemSpec, floor: HomeBindingManifest["floo
   };
 };
 
-export const roomIdForItem = (
-  item: SceneItemSpec,
-  floor: HomeBindingManifest["floors"][number],
-): string | null => {
-  const { at } = resolvedPlanPoint(item, floor);
-  const rooms = roomsForFloor(floor).filter(
-    (room) => !room.isSolid && pointInsidePolygon(at, room.polygon),
-  );
-  if (rooms.length !== 1) return null;
-  return item.placement.kind !== "ceiling" || rooms[0].id === item.placement.roomId
-    ? rooms[0].id
-    : null;
-};
-
 const itemBelongsToRoom = (
   item: SceneItemSpec,
   floor: HomeBindingManifest["floors"][number],
   roomId: string,
+  definition?: SceneModelEditorDescriptor,
 ) => {
   try {
-    return roomIdForItem(item, floor) === roomId;
+    return roomIdForItem(item, floor, definition) === roomId;
   } catch {
     return false;
   }
@@ -154,12 +145,21 @@ export const composeHomeBindingManifest = (
                 item.kind === "furnishing" &&
                 item.floorId === floor.id &&
                 Boolean(item.entitySlots?.length) &&
-                itemBelongsToRoom(item, floor, room.id),
+                itemBelongsToRoom(item, floor, room.id, extensions.furnishingModels[item.modelId]),
             )
             .flatMap((item) => item.entitySlots ?? []),
         ],
         devices: items
-          .filter((item) => itemBelongsToRoom(item, floor, room.id))
+          .filter((item) =>
+            itemBelongsToRoom(
+              item,
+              floor,
+              room.id,
+              (item.kind === "device" ? extensions.deviceModels : extensions.furnishingModels)[
+                item.modelId
+              ],
+            ),
+          )
           .flatMap((item) =>
             bindingDevicesForItem(
               item,

@@ -73,8 +73,9 @@ export const validateHomeProject = (
   );
   validateProfileReferencesAndSlots(project, issues);
   validateGlobalProjectIds(project, issues);
-  validateActionBarTargets(project, issues);
-  validateSceneItemsAndSupports(project, resolveProjectModels(project, registries), issues);
+  const models = resolveProjectModels(project, registries);
+  validateActionBarTargets(project, issues, models.deviceModels);
+  validateSceneItemsAndSupports(project, models, issues);
   const ordered = sortProjectIssues(issues);
   return !ordered.some((issue) => issue.severity === "error")
     ? { valid: true, project, issues: ordered }

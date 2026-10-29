@@ -199,7 +199,10 @@ export function ShortcutPicker({
           rooms.map((room) => {
             const roomName = roomNames[room.id] ?? room.name;
             const choices = devices
-              .filter((device) => resolvedRoomIdForItem(device, project) === room.id)
+              .filter(
+                (device) =>
+                  resolvedRoomIdForItem(device, project, deviceModels[device.modelId]) === room.id,
+              )
               .filter(
                 (device) =>
                   matching(roomName) ||
