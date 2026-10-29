@@ -93,13 +93,13 @@ zero-range output. Four strips with four samples remain sixteen physical lights
 when the shared budget permits.
 
 Malformed optional lighting in a runtime model extension disables illumination
-for that model, with a named, dismissible repair notice. Geometry and unrelated
-lights remain available, and Edit lighting opens Arrange. Recovery changes only
-the runtime projection, never the stored definitions or connections. Structural
-manifest errors and unsupported saved fields still use their existing validation.
-Models requesting more than 64 samples also receive a warning in the editor's
-Issues panel naming the model and shared budget; Select opens the affected copy
-in Arrange. Saving remains available with warnings.
+for that model. Geometry and unrelated lights remain available. Lighting warnings
+name the affected model in the editor's existing Issues panel; Select opens the
+copy in Arrange for repair. Recovery changes only the runtime projection, never
+the stored definitions or connections. Structural manifest errors and unsupported
+saved fields still use their existing validation.
+Models requesting more than 64 samples receive an approximation warning there
+naming the model and shared budget. Saving remains available with warnings.
 
 Within the budget, every requested sample renders as before. Above it, each
 positive-intensity logical source first receives one slot, and strips fairly

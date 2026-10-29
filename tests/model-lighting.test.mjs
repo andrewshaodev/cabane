@@ -17,7 +17,9 @@ await withModules(async (load) => {
   const { collectConstructContextualIssues } = await load(
     "/apps/web/src/editor-preview/construct/contextual-validation.ts",
   );
-  const { ModelLightingNotice } = await load("/packages/engine/src/ModelLightingNotice.tsx");
+  const { EditorValidationPanel } = await load(
+    "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
+  );
   const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
   const { createCatalogItem } = await load(
     "/apps/web/src/editor-preview/furnish/placement/item-creation.ts",
@@ -309,7 +311,7 @@ await withModules(async (load) => {
     assert.equal(api.validateHomeProject(updated.project, native).valid, true);
     assert.deepEqual(before.project.modelLights, undefined);
   });
-  test("broken optional lighting keeps geometry, healthy illumination and a repair notice", async () => {
+  test("broken optional lighting keeps geometry and healthy illumination, with warnings in editor Issues", async () => {
     const configured = api.editModelLighting(fixture(), "cabinet", cabinetLighting(), native);
     const project = {
       ...configured.project,
@@ -355,25 +357,62 @@ await withModules(async (load) => {
       await renderer.unmount();
     }
     await withStorageDom(async (dom) => {
+      const brokenNative = {
+        ...native,
+        furnishingModels: {
+          ...native.furnishingModels,
+          cabinet: {
+            ...native.furnishingModels.cabinet,
+            lighting: { ...cabinetLighting(), distance: -1 },
+          },
+        },
+      };
+      const draft = fixture().project;
+      const checked = api.validateHomeProject(draft, brokenNative);
+      assert.equal(checked.valid, true, JSON.stringify(checked.issues));
+      const issues = collectConstructContextualIssues({
+        project: draft,
+        floor: draft.floors[0],
+        projectIssues: checked.issues,
+      });
+      const warnings = issues.filter((issue) => issue.code === "project.model-lighting-disabled");
+      assert.deepEqual(
+        warnings.map(({ severity, floorId, target }) => ({ severity, floorId, target })),
+        [
+          {
+            severity: "warning",
+            floorId: "ground",
+            target: { kind: "scene-item", id: "cabinet-a" },
+          },
+          {
+            severity: "warning",
+            floorId: "first",
+            target: { kind: "scene-item", id: "cabinet-b" },
+          },
+        ],
+      );
       const container = dom.document.createElement("div");
       dom.document.body.append(container);
       const root = createRoot(container);
-      let edited = 0;
+      const selected = [];
       try {
         await React.act(async () =>
           root.render(
-            React.createElement(ModelLightingNotice, {
-              issues: validation.issues,
-              onEdit: () => edited++,
+            React.createElement(EditorValidationPanel, {
+              issues,
+              expanded: true,
+              onSelect: (issue) => selected.push(issue.target.id),
             }),
           ),
         );
-        assert.match(container.querySelector('[role="status"]').textContent, /Cabinet.*disabled/);
-        const buttons = container.querySelectorAll("button");
-        await React.act(async () => buttons[0].click());
-        assert.equal(edited, 1);
-        await React.act(async () => buttons[1].click());
-        assert.equal(container.querySelector('[role="status"]'), null);
+        assert.ok(container.querySelector('[aria-label="Editor validation"]'));
+        const row = [...container.querySelectorAll('li[data-severity="warning"]')].find((row) =>
+          /Cabinet.*disabled/.test(row.textContent),
+        );
+        assert.ok(row);
+        assert.match(row.textContent, /save with this warning.*Lighting/);
+        await React.act(async () => row.querySelector('button[aria-label^="Select"]').click());
+        assert.deepEqual(selected, ["cabinet-a"]);
       } finally {
         await React.act(async () => root.unmount());
       }

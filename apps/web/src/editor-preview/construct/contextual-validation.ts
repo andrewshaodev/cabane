@@ -83,6 +83,8 @@ const collectionTargetKinds = {
 type TargetCollectionName = keyof typeof collectionTargetKinds;
 
 const defaultCorrections: Readonly<Record<string, string>> = {
+  "project.model-lighting-disabled":
+    "You can save with this warning. Select the item in Arrange and open Lighting to repair its settings.",
   "project.model-lighting-approximation":
     "You can save with this warning. Select the item in Arrange and open Lighting to adjust its sources or sample counts.",
   "floor-zone.polygon": "Move a corner until the floor area is simple and has visible area.",

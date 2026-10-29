@@ -2,6 +2,8 @@ import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
 import { modelLightingExecution, SCENE_LIGHT_BUDGET } from "../model-lighting/execution";
+import { lightingModelId } from "../model-lighting/settings";
+import { recoverModelLighting } from "../validation/recover-model-lighting";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import { pointStrictlyOutsideFloorFootprint } from "../floor-finishes/finish-geometry";
@@ -228,6 +230,9 @@ export const validateSceneItemsAndSupports = (
   registries: ProjectModelRegistries,
   issues: HomeProjectIssue[],
 ) => {
+  const lightingWarnings = new Map(
+    recoverModelLighting({ extensions: registries }).issues.map((issue) => [issue.path, issue]),
+  );
   project.sceneItems.forEach((item, index) => {
     const itemPath = `sceneItems[${index}]`;
     const floor = project.floors.find((candidate) => candidate.id === item.floorId);
@@ -250,7 +255,18 @@ export const validateSceneItemsAndSupports = (
         `Model “${item.modelId}” is not registered; a generic placeholder will be shown until it is imported.`,
       );
     } else {
-      if (definition.lighting) {
+      const lightingWarning =
+        lightingWarnings.get(
+          `extensions.${item.kind === "device" ? "deviceModels" : "furnishingModels"}.${item.modelId}`,
+        ) ?? lightingWarnings.get(`extensions.deviceModels.${lightingModelId(item.modelId)}`);
+      if (lightingWarning)
+        addProjectWarning(
+          issues,
+          "project.model-lighting-disabled",
+          `${itemPath}.modelId`,
+          lightingWarning.message,
+        );
+      else if (definition.lighting) {
         const execution = modelLightingExecution(definition.lighting);
         if (execution.approximated)
           addProjectWarning(
