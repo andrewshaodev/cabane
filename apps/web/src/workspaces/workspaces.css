@@ -265,6 +265,21 @@
   color: #963f32;
   margin-bottom: 12px;
 }
+.workspace-delete-server {
+  overflow-wrap: anywhere;
+}
+.workspace-delete-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.workspace-delete-actions .workspace-danger {
+  margin-bottom: 0;
+}
+.workspace-delete-actions + button {
+  margin-inline-end: 8px;
+}
 .workspace-export-options button {
   text-align: left;
 }
