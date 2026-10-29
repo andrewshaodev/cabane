@@ -20,9 +20,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      # The runner reserves one shard for Chromium; the other three run Node/DOM.
-      # Software-rendered scenes never compete with another browser shard.
-      CABANE_TEST_CONCURRENCY: 4
+      # Browser files share one shard, but cold Vite/SSR setup in competing Node
+      # workers can still starve software graphics on the hosted runner.
+      CABANE_TEST_CONCURRENCY: 1
       CABANE_TEST_REPORT: test-results/ci-report.json
     steps:
       - uses: actions/checkout@v4

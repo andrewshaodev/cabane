@@ -119,9 +119,9 @@ processes so Node cannot buffer a later shard's failures behind an earlier shard
 Set `CABANE_TEST_CONCURRENCY` to an integer from 1 to 4 to limit simultaneous
 workers on constrained local machines. All four
 shards still run, with identical tests and assertions. `npm test` always includes both Node and Chromium coverage.
-Hosted CI overlaps the four shards while Chromium cases run sequentially in
-their shared worker, preventing scenes from starving each other's input and
-shader warmup. It retains the test report and
+Hosted CI runs one shard at a time. Browser files still share one worker and its
+Vite/Chromium processes; concurrent cold Node/DOM setup can starve browser startup
+on software graphics. It retains the test report and
 any browser failure screenshots, traces and errors as `verification-diagnostics`
 artifacts for seven days.
 Set `CABANE_TEST_PROGRESS=1` to print each starting test when diagnosing slow work.
