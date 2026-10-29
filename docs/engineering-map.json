@@ -171,6 +171,7 @@
       "apps/web/src/editor-preview/furnish/group-transforms.ts",
       "apps/web/src/editor-preview/furnish/selection-target.ts",
       "apps/web/src/editor-preview/furnish/FurnishingSelectionControls.tsx",
+      "apps/web/src/editor-preview/furnish/SelectionBounds.tsx",
       "apps/web/src/editor-preview/furnish/SelectedItemsProperties.tsx",
       "apps/web/src/editor-preview/furnish/placement",
       "packages/engine/src/home-project/placements.ts",

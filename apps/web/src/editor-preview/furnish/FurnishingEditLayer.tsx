@@ -2,7 +2,6 @@ import { useCabaneDom } from "@cabane/engine";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
   resolveItemTransform,
-  ToonMaterial,
   type DeviceModelRegistry,
   type FloorSpec,
   type FurnishingModelRegistry,
@@ -14,7 +13,9 @@ import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
 import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
 import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
 import { missingModelEditorDescriptor } from "./missing-model";
-import { expandItemSelection, toggleItemSelection } from "./item-groups";
+import { expandItemSelection, itemSelectionUnits, toggleItemSelection } from "./item-groups";
+import { furnishingSelectionTarget } from "./selection-target";
+import { SelectionBounds } from "./SelectionBounds";
 
 interface DragSession {
   items: readonly SceneItemSpec[];
@@ -383,14 +384,28 @@ export function FurnishingEditLayer({
               onLostPointerCapture={() => endDrag(true)}
               renderOrder={20}
             >
-              <ToonMaterial
+              <PlanOverlayMaterial
                 color={selected ? "#6b896c" : "#ffffff"}
                 transparent
-                visible={selected && !item.group}
-                opacity={selected ? 0.18 : 0.001}
+                visible={selected}
+                opacity={0.12}
+                depthTest={false}
                 depthWrite={false}
               />
             </mesh>
+          </group>
+        );
+      })}
+      {itemSelectionUnits(items.filter((item) => selectedIds.includes(item.id))).map((unit) => {
+        const target = furnishingSelectionTarget(
+          unit.items,
+          floor,
+          { furnishingModels, deviceModels },
+          unit.name ?? "Selected item",
+        );
+        return (
+          <group key={unit.id} position={target.position} rotation={[0, target.rotation, 0]}>
+            <SelectionBounds {...target.box} />
           </group>
         );
       })}

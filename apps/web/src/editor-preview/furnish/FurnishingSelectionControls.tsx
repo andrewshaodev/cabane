@@ -1,15 +1,13 @@
-import {
-  ToonMaterial,
-  type FloorSpec,
-  type ProjectModelRegistries,
-  type SceneItemSpec,
-  type SceneModelEditorDescriptor,
+import type {
+  FloorSpec,
+  ProjectModelRegistries,
+  SceneItemSpec,
+  SceneModelEditorDescriptor,
 } from "@cabane/engine";
 import { SelectedItemControls } from "./SelectedItemControls";
 import type { FurnishingEditorController } from "./useFurnishingEditor";
 import { furnishingSelectionTarget } from "./selection-target";
 import { itemSelectionUnits } from "./item-groups";
-import { noPlanRaycast } from "../construct/PlanDrawing";
 
 export function FurnishingSelectionControls({
   editor,
@@ -56,64 +54,46 @@ export function FurnishingSelectionControls({
   const group = editor.selectedGroup;
   const groupCount = itemSelectionUnits(members).filter((unit) => unit.name).length;
   return (
-    <>
-      {group && target && (
-        <group position={target.position} rotation={[0, target.rotation, 0]}>
-          <mesh position={target.box.center} raycast={noPlanRaycast} renderOrder={30}>
-            <boxGeometry args={target.box.size} />
-            <ToonMaterial
-              color="#6b896c"
-              wireframe
-              transparent
-              opacity={0.65}
-              depthWrite={false}
-              depthTest={false}
-            />
-          </mesh>
-        </group>
-      )}
-      <SelectedItemControls
-        key={group?.id ?? (multiple ? "multiple" : item.id)}
-        item={item}
-        definition={definition}
-        floor={floor}
-        busy={busy || !!editor.transaction}
-        actionsOnly={multiple && !group}
-        freePlacement={!!group}
-        onSelect={editor.select}
-        onRotate={(id, rotationYRadians) =>
-          group && item.placement.kind === "absolute"
-            ? editor.transformGroup(group.id, { ...item.placement, rotationYRadians }, floor)
-            : editor.rotate(id, rotationYRadians)
-        }
-        onResize={editor.updateSize}
-        onMovePlacement={(id, placement) =>
-          group && placement.kind === "absolute"
-            ? editor.transformGroup(group.id, placement, floor)
-            : editor.updatePlacement(id, placement)
-        }
-        onBegin={() => {
-          editor.beginTransaction();
-          setDragging(true);
-        }}
-        onCommit={() => {
-          editor.commitTransaction();
-          setDragging(false);
-        }}
-        onCancel={() => {
-          editor.cancelTransaction();
-          setDragging(false);
-        }}
-        actions={{
-          onDuplicate: () => (multiple ? editor.duplicateSelection(floor) : onDuplicate(item.id)),
-          onDelete: () => (multiple ? editor.deleteItems(editor.selectedIds) : onDelete(item.id)),
-          onMap: multiple ? undefined : onConnect,
-          onGroup: multiple && !group ? editor.groupSelection : undefined,
-          onUngroup: group ? editor.ungroupSelection : undefined,
-          groupLabel:
-            groupCount === 1 ? "Add to group" : groupCount > 1 ? "Combine groups" : "Group",
-        }}
-      />
-    </>
+    <SelectedItemControls
+      key={group?.id ?? (multiple ? "multiple" : item.id)}
+      item={item}
+      definition={definition}
+      floor={floor}
+      busy={busy || !!editor.transaction}
+      actionsOnly={multiple && !group}
+      freePlacement={!!group}
+      onSelect={editor.select}
+      onRotate={(id, rotationYRadians) =>
+        group && item.placement.kind === "absolute"
+          ? editor.transformGroup(group.id, { ...item.placement, rotationYRadians }, floor)
+          : editor.rotate(id, rotationYRadians)
+      }
+      onResize={editor.updateSize}
+      onMovePlacement={(id, placement) =>
+        group && placement.kind === "absolute"
+          ? editor.transformGroup(group.id, placement, floor)
+          : editor.updatePlacement(id, placement)
+      }
+      onBegin={() => {
+        editor.beginTransaction();
+        setDragging(true);
+      }}
+      onCommit={() => {
+        editor.commitTransaction();
+        setDragging(false);
+      }}
+      onCancel={() => {
+        editor.cancelTransaction();
+        setDragging(false);
+      }}
+      actions={{
+        onDuplicate: () => (multiple ? editor.duplicateSelection(floor) : onDuplicate(item.id)),
+        onDelete: () => (multiple ? editor.deleteItems(editor.selectedIds) : onDelete(item.id)),
+        onMap: multiple ? undefined : onConnect,
+        onGroup: multiple && !group ? editor.groupSelection : undefined,
+        onUngroup: group ? editor.ungroupSelection : undefined,
+        groupLabel: groupCount === 1 ? "Add to group" : groupCount > 1 ? "Combine groups" : "Group",
+      }}
+    />
   );
 }

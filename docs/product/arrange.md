@@ -49,6 +49,12 @@ count and expandable, descriptive member names. Search also matches group and
 member names. Groups are listed by their shared placement center. The list
 includes items outside rooms.
 
+Selected items have crisp forest-green bounds with an ivory contrast stroke and
+emphasized corners. Stroke widths stay constant on screen as the camera zooms.
+Multi-selection frames each selected item or saved group, with a light tint on
+its members; saved groups share one frame. The overlay remains visible through
+scene geometry and never intercepts picking or dragging.
+
 Multi-selection exposes **Group**, **Duplicate**, and **Delete** in the same
 floating action bar used for single items, with matching Properties actions.
 Group immediately creates a named, flat assembly on the active floor. Selecting
