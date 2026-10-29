@@ -1,5 +1,7 @@
 import {
   modelLightSources,
+  modelLightingExecution,
+  SCENE_LIGHT_BUDGET,
   type CustomModelLight,
   type DeviceModelBounds,
   type ModelLightingSurfaceOption,
@@ -52,8 +54,17 @@ export function LightingFields({
       ),
     );
   const glowing = (light.emissiveSurfaces?.length ?? 0) + (light.emissiveMaterials?.length ?? 0);
+  const execution = modelLightingExecution(light);
   return (
     <div className="lighting-fields">
+      <p className="lighting-note" role="status">
+        {execution.approximated
+          ? `Preview approximates ${execution.requested.toLocaleString("en")} requested samples with ${execution.lights.length} physical lights. `
+          : ""}
+        Scenes share up to {SCENE_LIGHT_BUDGET} physical lights across active copies. Dense setups
+        use fewer strip samples or merge nearby sources. Saved sources and total brightness stay
+        unchanged; coverage may soften.
+      </p>
       <LightingSources
         light={light}
         bounds={bounds}
@@ -114,7 +125,8 @@ export function LightingFields({
                 />
               </label>
               <p className="lighting-note">
-                More samples give smoother coverage. The strip keeps the same total brightness.
+                Requests finer coverage within the scene's shared budget. The strip keeps the same
+                total brightness.
               </p>
               <EditorButton
                 variant="text"
