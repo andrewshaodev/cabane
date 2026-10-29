@@ -134,8 +134,14 @@ export function useHomeEditorShortcuts({
           if (mode === "construct" && selectedOpening) {
             copiedEditorElement.current = { mode, id: selectedOpening.id };
             event.preventDefault();
-          } else if (mode === "furnish" && furnishingEditor.selectedItem) {
-            copiedEditorElement.current = { mode, id: furnishingEditor.selectedItem.id };
+          } else if (
+            mode === "furnish" &&
+            (furnishingEditor.selectedItem || furnishingEditor.selectedGroup)
+          ) {
+            copiedEditorElement.current = {
+              mode,
+              id: furnishingEditor.selectedItem?.id ?? furnishingEditor.selectedIds[0],
+            };
             event.preventDefault();
           }
           return;

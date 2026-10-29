@@ -1,6 +1,19 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  group: (
+    <>
+      <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" />
+      <rect x="7" y="7" width="10" height="10" rx="1" />
+    </>
+  ),
+  ungroup: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+      <path d="m14 4 6 6m-6 0 6-6M4 14l6 6m-6 0 6-6" />
+    </>
+  ),
   "virtual-wall": <path d="M3 4h18v16H3Z M3 12h18 M9 4v8 M15 12v8" strokeDasharray="3 3" />,
   "outdoor-space": (
     <>

@@ -239,8 +239,20 @@ export const validateSceneItemsAndSupports = (
   const lightingWarnings = new Map(
     recoverModelLighting({ extensions: registries }).issues.map((issue) => [issue.path, issue]),
   );
+  const groups = new Map<string, SceneItemSpec>();
   project.sceneItems.forEach((item, index) => {
     const itemPath = `sceneItems[${index}]`;
+    if (item.group) {
+      const member = groups.get(item.group.id);
+      if (member && (member.floorId !== item.floorId || member.group?.name !== item.group.name))
+        addProjectIssue(
+          issues,
+          "project.item-group",
+          `${itemPath}.group`,
+          "Group members must share one floor and group name. Ungroup them in Arrange to edit separately.",
+        );
+      else groups.set(item.group.id, item);
+    }
     const floor = project.floors.find((candidate) => candidate.id === item.floorId);
     if (!floor) {
       addProjectIssue(

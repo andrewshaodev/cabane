@@ -358,6 +358,7 @@ export function EditorSidebar({
               selectedIds={furnishingEditor.selectedIds}
               disabled={editingLocked || unsettled}
               onSelect={onSelectPlacedItem}
+              onSelectMany={furnishingEditor.selectMany}
             />
             <ArrangeCatalog
               enabled={!shortcutsMode && mode === "furnish"}

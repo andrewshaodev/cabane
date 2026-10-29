@@ -27,7 +27,7 @@ import {
 import { Suspense, useMemo } from "react";
 import { RetainedArrangeScene } from "./RetainedArrangeScene";
 
-import { SelectedItemControls } from "../editor-preview/furnish/SelectedItemControls";
+import { FurnishingSelectionControls } from "../editor-preview/furnish/FurnishingSelectionControls";
 
 import {
   ConstructionEditLayer,
@@ -627,49 +627,37 @@ export function HomeEditorScene({
                   onDraggingChange={setDragging}
                 />
               )}
-              {mode === "furnish" && selectedItem && selectedDefinition && (
-                <SelectedItemControls
-                  key={selectedItem.id}
-                  item={selectedItem}
-                  definition={selectedDefinition}
+              {mode === "furnish" && (
+                <FurnishingSelectionControls
+                  editor={furnishingEditor}
+                  items={visualSceneItems}
+                  selectedItem={selectedItem}
+                  selectedDefinition={selectedDefinition}
+                  furnishingModels={furnishingModels}
+                  deviceModels={deviceModels}
                   floor={placementFloor}
                   busy={dragging || Boolean(furnishingEditor.transaction)}
-                  onRotate={furnishingEditor.rotate}
-                  onResize={furnishingEditor.updateSize}
-                  onMovePlacement={furnishingEditor.updatePlacement}
-                  onSelect={furnishingEditor.select}
-                  onBegin={() => {
-                    furnishingEditor.beginTransaction();
-                    setDragging(true);
-                  }}
-                  onCommit={() => {
-                    furnishingEditor.commitTransaction();
-                    setDragging(false);
-                  }}
-                  onCancel={() => {
-                    furnishingEditor.cancelTransaction();
-                    setDragging(false);
-                  }}
-                  actions={{
-                    onMap:
-                      ((selectedItem.entitySlots?.length ?? 0) > 0 || !!selectedItem.lightSlotId) &&
-                      !unsettled
-                        ? () => {
-                            if (
-                              connect.selectDevice(
-                                selectedItem.kind === "device"
-                                  ? selectedItem.id
-                                  : (selectedItem.lightSlotId ??
-                                      selectedItem.entitySlots?.[0]?.id ??
-                                      selectedItem.id),
-                              )
+                  setDragging={setDragging}
+                  onConnect={
+                    selectedItem &&
+                    ((selectedItem.entitySlots?.length ?? 0) > 0 || !!selectedItem.lightSlotId) &&
+                    !unsettled
+                      ? () => {
+                          if (
+                            connect.selectDevice(
+                              selectedItem.kind === "device"
+                                ? selectedItem.id
+                                : (selectedItem.lightSlotId ??
+                                    selectedItem.entitySlots?.[0]?.id ??
+                                    selectedItem.id),
                             )
-                              selectMode("connect", true);
-                          }
-                        : undefined,
-                    onDuplicate: () => duplicateArrangeItem(selectedItem.id),
-                    onDelete: () => deleteSceneItem(selectedItem.id),
-                  }}
+                          )
+                            selectMode("connect", true);
+                        }
+                      : undefined
+                  }
+                  onDuplicate={duplicateArrangeItem}
+                  onDelete={deleteSceneItem}
                 />
               )}
             </StylizedScene>

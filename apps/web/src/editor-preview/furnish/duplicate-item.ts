@@ -47,6 +47,7 @@ export const duplicateSceneItem = (
 ): SceneItemSpec => {
   const occupied = new Set([
     ...items.map((item) => item.id),
+    ...items.flatMap((item) => (item.group ? [item.group.id] : [])),
     ...reservedSlotIds,
     ...items.flatMap((item) =>
       item.lightSlotId ? [item.lightSlotId, `${item.lightSlotId}-entity`] : [],
@@ -70,8 +71,9 @@ export const duplicateSceneItem = (
     occupied.add(lightSlotId);
     occupied.add(`${lightSlotId}-entity`);
   }
+  const { group: _group, ...ungrouped } = source;
   const common = {
-    ...source,
+    ...ungrouped,
     ...(lightSlotId ? { lightSlotId } : {}),
     id,
     size: [...source.size] as [number, number, number],
