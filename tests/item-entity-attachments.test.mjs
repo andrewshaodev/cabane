@@ -533,12 +533,19 @@ await withModules(async (load) => {
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
+      assert.equal(document.querySelector("select"), null);
+      assert.equal(document.querySelectorAll("button").length, 1);
+      await act(async () => document.querySelector("button").click());
+      assert.equal(current.entitySlots.length, 0);
+      assert.ok(document.querySelector("select"));
+      assert.ok(document.querySelector('input[maxlength="80"]'));
       await act(async () =>
         [...document.querySelectorAll("button")]
           .find((button) => button.textContent === "Add reading")
           .click(),
       );
       assert.equal(current.entitySlots.length, 1);
+      assert.ok(document.querySelector("select"));
       assert.equal(current.entitySlots[0].presentation.label, "Cabinet temperature");
       assert.equal(engine.isAuxiliaryEntitySlot(current.entitySlots[0]), true);
       await act(async () => document.querySelector('input[type="checkbox"]').click());
@@ -548,6 +555,8 @@ await withModules(async (load) => {
         document.querySelector('button[aria-label="Remove Cabinet temperature"]').click(),
       );
       assert.equal(current.entitySlots.length, 0);
+      assert.equal(document.querySelector("select"), null);
+      assert.equal(document.querySelectorAll("button").length, 1);
     });
   });
   test("Connect offers separate auxiliary entities across HA devices and retains the inspector after mapping", async () => {

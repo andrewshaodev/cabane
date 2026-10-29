@@ -18,6 +18,7 @@ import {
   type WorkspaceRepository,
 } from "@cabane/engine";
 import { WorkspaceLibrary } from "./WorkspaceLibrary";
+import { WorkspaceDeletion } from "./WorkspaceDeletion";
 import { WorkspaceHost } from "./WorkspaceHost";
 import { BuildWorkspaceEntry } from "./BuildWorkspaceEntry";
 import { WorkspaceHaLibrary, WorkspaceHaSuggestions } from "./WorkspaceHaLibrary";
@@ -247,6 +248,24 @@ export function WorkspaceApplication() {
   const open = async (id: string) => {
     await navigate(workspaceHomePath(id));
   };
+  const deleteLocal = async (id: string) => {
+    const entry = selected(id);
+    const raw = await repository.readRaw(id);
+    if (entry.record) {
+      const fresh = await repository.read(id);
+      if (fresh?.record?.revision !== entry.record.revision)
+        throw new Error("This workspace changed. Refresh before deleting it.");
+    }
+    await repository.delete(id, raw);
+    await deleteReferenceHome(id);
+    forgetWorkspacePresentation(id);
+    forgetBuildTutorial(id);
+    try {
+      window.localStorage.removeItem(setupStorageKey(id));
+    } catch {
+      /* Non-authoritative onboarding only. */
+    }
+  };
   return (
     <>
       {migrationError && (
@@ -278,25 +297,19 @@ export function WorkspaceApplication() {
           await repository.duplicate(id, record(id).revision, name);
           await refresh();
         }}
-        onDelete={async (id) => {
-          const entry = selected(id);
-          const raw = await repository.readRaw(id);
-          if (entry.record) {
-            const fresh = await repository.read(id);
-            if (fresh?.record?.revision !== entry.record.revision)
-              throw new Error("This workspace changed. Refresh before deleting it.");
-          }
-          await repository.delete(id, raw);
-          await deleteReferenceHome(id);
-          forgetWorkspacePresentation(id);
-          forgetBuildTutorial(id);
-          try {
-            window.localStorage.removeItem(setupStorageKey(id));
-          } catch {
-            /* Non-authoritative onboarding only. */
-          }
-          await refresh();
-        }}
+        renderDelete={(entry, onCancel, onBusyChange) => (
+          <WorkspaceDeletion
+            repository={repository}
+            target={{ entry }}
+            onDeleteLocal={() => deleteLocal(entry.metadata.id)}
+            onDeleted={async () => {
+              await refresh();
+              onCancel();
+            }}
+            onCancel={onCancel}
+            onBusyChange={onBusyChange}
+          />
+        )}
         onImport={async (json) => {
           const imported = parseWorkspaceImport(json, ownerProjectRegistries);
           const entry = await repository.create(imported.record, imported);

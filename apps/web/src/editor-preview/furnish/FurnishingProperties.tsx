@@ -91,14 +91,6 @@ export function FurnishingProperties({
           />
         </fieldset>
       )}
-      {onEntitySlotsChange && (
-        <ItemEntitySlots
-          key={selected.id}
-          item={selected}
-          label={definition.label}
-          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
-        />
-      )}
       <fieldset>
         <legend>Dimensions</legend>
         {definition.resizePolicy.kind === "uniform" ? (
@@ -137,15 +129,25 @@ export function FurnishingProperties({
           })
         )}
       </fieldset>
+      {onEntitySlotsChange && (
+        <ItemEntitySlots
+          key={selected.id}
+          item={selected}
+          label={definition.label}
+          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
+        />
+      )}
       {onEditLighting && (
         <fieldset>
           <legend>Lighting</legend>
           <div className="furnishing-lighting-action">
-            <p className="editor-properties-note">
-              {definition.lighting
-                ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
-                : "No lighting"}
-            </p>
+            {definition.lighting && (
+              <p className="editor-properties-note">
+                {definition.lighting.strip
+                  ? "LED strip"
+                  : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}
+              </p>
+            )}
             <EditorButton onClick={onEditLighting}>
               <EditorIcon name="lighting" />
               Edit lighting

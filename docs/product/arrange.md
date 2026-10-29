@@ -51,7 +51,14 @@ may be placed outside the house or in areas without a room; neither condition
 creates a validation issue. Absolute, wall, window-aware, and ceiling placement
 have dedicated resolution paths. Window-aware models may opt into full-glass
 sliding doors as well as windows; the architecture keeps those glazed doors
-classified as doors. Dragging previews a
+classified as doors. The integrated roller shutter declares exterior-recessed window fitting: it fits
+on the outside of glazing while its controls belong to the indoor room across
+the supporting wall. The same derived assignment groups placed items, Connect,
+dashboard state and device shortcuts, including beside outdoor room platforms.
+Only a unique indoor wall side is used; roomless or ambiguous openings cannot be
+automatically fitted. There is no saved room override. Free placement uses actual
+position. Closed opening clearance can move the assembly forward on shallow
+walls; window edits use the ordinary refit workflow. Dragging previews a
 transaction; release commits it, cancel restores it, and history records the
 finished operation. Cmd-drag (Mac) or Ctrl-drag (Windows/Linux) draws a selection rectangle in either view and selects
 items whose placement anchors lie inside it. Shift-drag remains available for

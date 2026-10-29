@@ -34,7 +34,11 @@ export function ArrangePlacedItems({
     .map((item) => {
       let roomId: string | null = null;
       try {
-        roomId = roomIdForItem(item, floor);
+        roomId = roomIdForItem(
+          item,
+          floor,
+          (item.kind === "device" ? deviceModels : furnishingModels)[item.modelId],
+        );
       } catch {
         // Invalid supports must not prevent selecting an item to repair it.
       }
