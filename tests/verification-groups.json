@@ -238,6 +238,7 @@
       "portal-persistence.test.mjs",
       "reference-storage.test.mjs",
       "test-profile.test.mjs",
+      "test-shards.test.mjs",
       "thumbnail-cache.test.mjs",
       "verification-groups.test.mjs",
       "workspace-availability.test.mjs",
