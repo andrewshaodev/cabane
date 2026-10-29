@@ -141,11 +141,13 @@ export function FurnishingProperties({
         <fieldset>
           <legend>Lighting</legend>
           <div className="furnishing-lighting-action">
-            <p className="editor-properties-note">
-              {definition.lighting
-                ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
-                : "No lighting"}
-            </p>
+            {definition.lighting && (
+              <p className="editor-properties-note">
+                {definition.lighting.strip
+                  ? "LED strip"
+                  : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}
+              </p>
+            )}
             <EditorButton onClick={onEditLighting}>
               <EditorIcon name="lighting" />
               Edit lighting
