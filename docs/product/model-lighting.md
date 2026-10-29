@@ -86,9 +86,20 @@ the lighting editor and runtime. Each preview and active floor has a budget of
 or customized copies share the floor budget. Sample counts are requests for
 spatial resolution, not array sizes or guaranteed physical light counts. Saved
 logical sources, counts, connections and total brightness are never truncated or
-rewritten. Legacy point, points and strip forms use the same policy. Validation,
-portable types and migrations are unchanged; this is a rendering policy, not a
-new saved format or HA contract revision.
+rewritten. Legacy point, points and strip forms use the same policy. Portable
+types and migrations are unchanged. Manifest validation imposes no separate
+per-model emitter count limit and accepts empty, glow-only, zero-brightness and
+zero-range output. Four strips with four samples remain sixteen physical lights
+when the shared budget permits.
+
+Malformed optional lighting in a runtime model extension disables illumination
+for that model. Geometry and unrelated lights remain available. Lighting warnings
+name the affected model in the editor's existing Issues panel; Select opens the
+copy in Arrange for repair. Recovery changes only the runtime projection, never
+the stored definitions or connections. Structural manifest errors and unsupported
+saved fields still use their existing validation.
+Models requesting more than 64 samples receive an approximation warning there
+naming the model and shared budget. Saving remains available with warnings.
 
 Within the budget, every requested sample renders as before. Above it, each
 positive-intensity logical source first receives one slot, and strips fairly
