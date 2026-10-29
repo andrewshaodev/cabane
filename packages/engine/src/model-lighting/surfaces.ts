@@ -1,11 +1,12 @@
-import { Color, Mesh, type Material, type Object3D, type BufferGeometry } from "three";
+import type { Color, Mesh, Material, Object3D, BufferGeometry } from "three";
 import { lightBrightnessRatio, lightColorForSnapshot } from "../home-assistant-controls";
 import type { CustomModelLight } from "../imported-models/contracts";
 import type { EntityStateSnapshot } from "../types";
 
 type EmissiveMaterial = Material & { emissive: Color; emissiveIntensity: number };
 const emissive = (material: Material): material is EmissiveMaterial =>
-  "emissive" in material && material.emissive instanceof Color && "emissiveIntensity" in material;
+  (material as Partial<EmissiveMaterial>).emissive?.isColor === true &&
+  "emissiveIntensity" in material;
 export interface ModelLightingSurfaceOption {
   id: string;
   label: string;
@@ -24,11 +25,7 @@ function visitSurfaces(
 ) {
   const meshes: Mesh[] = [];
   root.traverse((object) => {
-    if (
-      !(object instanceof Mesh) ||
-      object.userData.sceneOutline ||
-      object.userData.modelGlowIgnore
-    )
+    if (!(object as Mesh).isMesh || object.userData.sceneOutline || object.userData.modelGlowIgnore)
       return;
     for (let parent = object.parent; parent; parent = parent.parent) {
       if (parent.userData.sceneOutline || parent.userData.modelGlowIgnore) return;

@@ -49,6 +49,7 @@ try {
           const environment = {
             ...process.env,
             CABANE_TEST_SHARED_MODULES: files.length ? "0" : "1",
+            CABANE_TEST_SHARD: files.length ? "" : file,
           };
           delete environment.NODE_TEST_CONTEXT;
           delete environment.CABANE_TEST_REPORT;
