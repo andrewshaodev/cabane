@@ -46,7 +46,6 @@ import type { useHomeEditorController } from "./useHomeEditorController";
 
 const NO_INTERACTION = () => undefined;
 type Props = {
-  rightPanelOpen: boolean;
   onStairIssuesChange?: (issues: readonly ManifestIssue[] | null) => void;
   reference: ReferencePlanController;
   onNameFocusHandled?: () => void;
@@ -115,7 +114,6 @@ type Props = {
   | "deleteSceneItem"
 >;
 export function HomeEditorScene({
-  rightPanelOpen,
   reference,
   northOrientation,
   onStairIssuesChange,
@@ -279,7 +277,6 @@ export function HomeEditorScene({
               )}
               {mode === "construct" && !referenceCanvas.visible && <ConstructionGrid />}
               <PreviewCamera
-                rightPanelOpen={rightPanelOpen}
                 northOrientation={northOrientation.active}
                 planWheelNavigation={mode === "construct" || mode === "furnish"}
                 view={mode === "construct" ? "top" : cameraView}
@@ -460,7 +457,7 @@ export function HomeEditorScene({
                       : constructEditor.drawPreview
                   }
                   drawAngleReferenceRadians={
-                    constructEditor.tool === "wall"
+                    constructEditor.tool === "wall" || constructEditor.tool === "virtual-wall"
                       ? constructEditor.drawAngleReferenceRadians
                       : null
                   }
@@ -655,11 +652,19 @@ export function HomeEditorScene({
                   }}
                   actions={{
                     onMap:
-                      selectedItem.kind === "device" &&
-                      selectedItem.entitySlots.length > 0 &&
+                      ((selectedItem.entitySlots?.length ?? 0) > 0 || !!selectedItem.lightSlotId) &&
                       !unsettled
                         ? () => {
-                            if (connect.selectDevice(selectedItem.id)) selectMode("connect", true);
+                            if (
+                              connect.selectDevice(
+                                selectedItem.kind === "device"
+                                  ? selectedItem.id
+                                  : (selectedItem.lightSlotId ??
+                                      selectedItem.entitySlots?.[0]?.id ??
+                                      selectedItem.id),
+                              )
+                            )
+                              selectMode("connect", true);
                           }
                         : undefined,
                     onDuplicate: () => duplicateArrangeItem(selectedItem.id),

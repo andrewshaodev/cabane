@@ -1,3 +1,4 @@
+import { lightingModelId, lightingSlotForItem } from "../model-lighting/settings";
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { resolveProjectModels } from "../imported-models/resolve-models";
 import { deriveFloorLevels } from "../building/floor-levels";
@@ -35,6 +36,18 @@ export const roomIdForItem = (
     : null;
 };
 
+const itemBelongsToRoom = (
+  item: SceneItemSpec,
+  floor: HomeBindingManifest["floors"][number],
+  roomId: string,
+) => {
+  try {
+    return roomIdForItem(item, floor) === roomId;
+  } catch {
+    return false;
+  }
+};
+
 export const deviceSlotForItem = (
   item: DeviceItemSpec,
   floor: HomeBindingManifest["floors"][number],
@@ -59,6 +72,40 @@ export const deviceSlotForItem = (
             support: { kind: "surface" },
           },
   };
+};
+
+/** Optional independent light remains a separate normal Connect relationship. */
+export const lightingDeviceForItem = (
+  item: SceneItemSpec,
+  floor: HomeBindingManifest["floors"][number],
+  label = item.modelId,
+): DeviceSlotSpec | null => {
+  if (!item.lightSlotId) return null;
+  const { at, transform } = resolvedPlanPoint(item, floor);
+  const slot = lightingSlotForItem(item);
+  if (!slot) return null;
+  return {
+    id: item.lightSlotId,
+    model: lightingModelId(item.modelId),
+    entitySlots: [{ ...slot, presentation: { ...slot.presentation, label: `${label} lighting` } }],
+    placement: {
+      at,
+      elevationMeters: transform.position[1],
+      rotationYRadians: transform.rotationYRadians,
+      support: { kind: "surface" },
+    },
+  };
+};
+export const bindingDevicesForItem = (
+  item: SceneItemSpec,
+  floor: HomeBindingManifest["floors"][number],
+  label = item.modelId,
+): readonly DeviceSlotSpec[] => {
+  const lighting = lightingDeviceForItem(item, floor, label);
+  return [
+    ...(item.kind === "device" ? [deviceSlotForItem(item, floor)] : []),
+    ...(lighting ? [lighting] : []),
+  ];
 };
 
 /** Full-home composition. Empty draft floors use composeHomeProjectPreview instead. */
@@ -93,22 +140,36 @@ export const composeHomeBindingManifest = (
       return { ...opening, contactSlot };
     });
     const items = project.sceneItems.filter(
-      (item): item is DeviceItemSpec => item.kind === "device" && item.floorId === floor.id,
+      (item) => (item.kind === "device" || !!item.lightSlotId) && item.floorId === floor.id,
     );
     const rooms = roomsForFloor(floor)
       .filter((room) => !room.isSolid)
       .map((room) => ({
         ...room,
-        dashboardSlots: project.roomProfiles[room.id]?.dashboardSlots ?? [],
+        dashboardSlots: [
+          ...(project.roomProfiles[room.id]?.dashboardSlots ?? []),
+          ...project.sceneItems
+            .filter(
+              (item) =>
+                item.kind === "furnishing" &&
+                item.floorId === floor.id &&
+                Boolean(item.entitySlots?.length) &&
+                itemBelongsToRoom(item, floor, room.id),
+            )
+            .flatMap((item) => item.entitySlots ?? []),
+        ],
         devices: items
-          .filter((item) => {
-            try {
-              return roomIdForItem(item, floor) === room.id;
-            } catch {
-              return false;
-            }
-          })
-          .map((item) => deviceSlotForItem(item, floor)),
+          .filter((item) => itemBelongsToRoom(item, floor, room.id))
+          .flatMap((item) =>
+            bindingDevicesForItem(
+              item,
+              floor,
+              project.customModels?.find((model) => model.id === item.modelId)?.name ??
+                extensions.deviceModels[item.modelId]?.label ??
+                extensions.furnishingModels[item.modelId]?.label ??
+                item.modelId,
+            ),
+          ),
       }));
     const solidRooms = floor.rooms.filter((room) => room.isSolid);
     const roomIds = new Set(rooms.map((room) => room.id));

@@ -1,6 +1,17 @@
 import { EditorModeIcon, type EditorMode } from "@cabane/engine";
 
 const paths = {
+  "virtual-wall": <path d="M3 4h18v16H3Z M3 12h18 M9 4v8 M15 12v8" strokeDasharray="3 3" />,
+  "outdoor-space": (
+    <>
+      <path d="m3 14 9-5 9 5-9 6Z M3 14v3l9 6 9-6v-3 M6 11V5m6 4V2m6 9V5M6 6l6-4 6 4" />
+    </>
+  ),
+  lighting: (
+    <>
+      <path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4Z" />
+    </>
+  ),
   floorAbove: <path d="M3 14h12v7H3zM3 17.5h12M19 13V3m-3 3 3-3 3 3" />,
   floorBelow: <path d="M3 3h12v7H3zM3 6.5h12M19 11v10m-3-3 3 3 3-3" />,
   apartmentFloor: (
@@ -180,6 +191,7 @@ const paths = {
   devices: <path d="M9 3v6m6-6v6M6 9h12v3a6 6 0 0 1-12 0Zm6 9v3" />,
   refresh: <path d="M20 4v6h-6M4 20v-6h6M19 8a7 7 0 0 0-12-3L4 8m1 8a7 7 0 0 0 12 3l3-3" />,
   warning: <path d="M12 3 2 21h20ZM12 9v5m0 3v.1" />,
+  minus: <path d="M5 12h14" />,
   plus: <path d="M12 5v14M5 12h14" />,
   chevronLeft: <path d="m15 5-7 7 7 7" />,
   chevron: <path d="m9 5 7 7-7 7" />,

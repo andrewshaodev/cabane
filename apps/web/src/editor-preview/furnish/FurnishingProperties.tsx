@@ -1,7 +1,13 @@
+import { ItemEntitySlots } from "./ItemEntitySlots";
+import { EditorButton } from "../../editor-chrome/EditorButton";
+import { EditorIcon } from "../../editor-chrome/EditorIcon";
+import { FurnishingVariantGrid } from "./FurnishingVariantGrid";
+import type { CatalogEntry } from "./catalog/catalog";
 import { NumericField } from "./NumericField";
 import { modelVariants, resolveModelVariant } from "@cabane/engine";
 import { SelectionDetailsPanel } from "../../editor-chrome/SelectionDetailsPanel";
 import type {
+  EntityBindingSlotSpec,
   FloorSpec,
   ItemPlacement,
   SceneItemSpec,
@@ -16,12 +22,16 @@ const rotationFor = (placement: ItemPlacement) =>
 export function FurnishingProperties({
   selected,
   definition,
+  previewEntry,
   onPlacementChange,
   onSizeChange,
   onLightStateChange,
+  onEntitySlotsChange,
   onVariantChange,
   onColorChange,
   onClose,
+  onEditLighting,
+  onConnectLighting,
   floor,
   onWindowFit,
 }: {
@@ -36,6 +46,7 @@ export function FurnishingProperties({
     | undefined;
   selected: SceneItemSpec;
   definition: SceneModelEditorDescriptor;
+  previewEntry?: CatalogEntry | undefined;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
   onSizeChange: (id: string, size: SceneItemSize, definition: SceneModelEditorDescriptor) => void;
   onColorChange?:
@@ -43,9 +54,12 @@ export function FurnishingProperties({
     | undefined;
   onVariantChange?:
     ((id: string, variant: string, definition: SceneModelEditorDescriptor) => void) | undefined;
+  onEntitySlotsChange?: ((id: string, slots: readonly EntityBindingSlotSpec[]) => void) | undefined;
   onLightStateChange?:
     | ((id: string, lightState: "always-off" | "always-on" | "night-only" | "connected") => void)
     | undefined;
+  onConnectLighting?: (() => void) | undefined;
+  onEditLighting?: (() => void) | undefined;
   onClose: () => void;
 }) {
   const updatePlacement = (patch: Partial<ItemPlacement>) =>
@@ -67,6 +81,24 @@ export function FurnishingProperties({
       subtitle={`${definition.category}${floor ? ` · ${floor.name}` : ""}`}
       onClose={onClose}
     >
+      {previewEntry && modelVariants(definition).length > 1 && onVariantChange && (
+        <fieldset>
+          <legend>Variant</legend>
+          <FurnishingVariantGrid
+            entry={previewEntry}
+            value={selected.variant}
+            onChange={(variant) => onVariantChange(selected.id, variant, definition)}
+          />
+        </fieldset>
+      )}
+      {onEntitySlotsChange && (
+        <ItemEntitySlots
+          key={selected.id}
+          item={selected}
+          label={definition.label}
+          onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
+        />
+      )}
       <fieldset>
         <legend>Dimensions</legend>
         {definition.resizePolicy.kind === "uniform" ? (
@@ -105,6 +137,46 @@ export function FurnishingProperties({
           })
         )}
       </fieldset>
+      {onEditLighting && (
+        <fieldset>
+          <legend>Lighting</legend>
+          <div className="furnishing-lighting-action">
+            <p className="editor-properties-note">
+              {definition.lighting
+                ? `${definition.lighting.strip ? "LED strip" : `${1 + (definition.lighting.points?.length ?? 0)} light point${definition.lighting.points?.length ? "s" : ""}`}`
+                : "No lighting"}
+            </p>
+            <EditorButton onClick={onEditLighting}>
+              <EditorIcon name="lighting" />
+              Edit lighting
+            </EditorButton>
+          </div>
+          {definition.lighting && onConnectLighting && (
+            <EditorButton variant="text" onClick={onConnectLighting}>
+              Connect lighting
+            </EditorButton>
+          )}
+          {definition.lighting && onLightStateChange && (
+            <label>
+              <span>Scene state</span>
+              <select
+                value={selected.lightState ?? "connected"}
+                onChange={(event) =>
+                  onLightStateChange(
+                    selected.id,
+                    event.target.value as "connected" | "always-on" | "always-off" | "night-only",
+                  )
+                }
+              >
+                <option value="connected">Connected</option>
+                <option value="always-on">Always on</option>
+                <option value="always-off">Always off</option>
+                <option value="night-only">Night only</option>
+              </select>
+            </label>
+          )}
+        </fieldset>
+      )}
       {definition.windowFit && onWindowFit && (
         <fieldset>
           <legend>Window</legend>
@@ -264,9 +336,9 @@ export function FurnishingProperties({
         </fieldset>
       )}
 
-      {((modelVariants(definition).length > 1 && !!onVariantChange) ||
-        (!!definition.defaultColor && !!onColorChange) ||
+      {((!!definition.defaultColor && !!onColorChange) ||
         (selected.kind === "device" &&
+          !onEditLighting &&
           !!onLightStateChange &&
           resolveModelVariant(definition, selected.variant).sceneLight !== false &&
           selected.entitySlots.some(
@@ -274,25 +346,6 @@ export function FurnishingProperties({
           ))) && (
         <fieldset>
           <legend>Appearance</legend>
-          {modelVariants(definition).length > 1 && onVariantChange && (
-            <>
-              <label>
-                <span>Variant</span>
-                <select
-                  value={resolveModelVariant(definition, selected.variant).id}
-                  onChange={(event) =>
-                    onVariantChange(selected.id, event.currentTarget.value, definition)
-                  }
-                >
-                  {modelVariants(definition).map((variant) => (
-                    <option key={variant.id} value={variant.id}>
-                      {variant.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </>
-          )}
           {definition.defaultColor && onColorChange && (
             <>
               <label>
@@ -314,7 +367,8 @@ export function FurnishingProperties({
               </button>
             </>
           )}
-          {selected.kind === "device" &&
+          {!onEditLighting &&
+            selected.kind === "device" &&
             resolveModelVariant(definition, selected.variant).sceneLight !== false &&
             selected.entitySlots.some(
               (slot) => slot.deviceRole === "primary" && slot.compatibleDomains.includes("light"),

@@ -1,11 +1,14 @@
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import type { EditorWorkspaceSnapshot } from "../home-editor/workspace-history";
+import { copyFloorContents, type FloorCopyOptions } from "./floor-duplication";
 import type { DraftLayoutFloorSpec } from "./types";
 import { removeWorkspaceSlotReferences } from "./workspace-bindings";
+import { itemBindingSlotIds } from "./item-binding-identities";
 
 export const addTopFloor = (
   snapshot: EditorWorkspaceSnapshot,
   id: string,
+  copy?: FloorCopyOptions,
 ): EditorWorkspaceSnapshot => {
   const { project } = snapshot;
   if (!id.trim() || project.floors.some((floor) => floor.id === id))
@@ -26,13 +29,15 @@ export const addTopFloor = (
     openings: [],
     ceilings: [],
   };
-  return { ...snapshot, project: { ...project, floors: [...project.floors, floor] } };
+  const next = { ...snapshot, project: { ...project, floors: [...project.floors, floor] } };
+  return copy ? copyFloorContents(next, floor, copy) : next;
 };
 
-/** Add an empty basement beneath the current lowest level. */
+/** Add a basement beneath the current lowest level, optionally copying an existing floor. */
 export const addBottomFloor = (
   snapshot: EditorWorkspaceSnapshot,
   id: string,
+  copy?: FloorCopyOptions,
 ): EditorWorkspaceSnapshot => {
   const added = addTopFloor(snapshot, id);
   const lowest = snapshot.project.floors[0];
@@ -44,10 +49,11 @@ export const addBottomFloor = (
     defaultWallHeightMeters: lowest.defaultWallHeightMeters,
     defaultCeilingHeightMeters: lowest.defaultCeilingHeightMeters,
   };
-  return {
+  const next = {
     ...snapshot,
     project: { ...snapshot.project, floors: [floor, ...snapshot.project.floors] },
   };
+  return copy ? copyFloorContents(next, floor, copy) : next;
 };
 
 export const floorRemovalDisabledReason = (
@@ -120,6 +126,9 @@ export const removeFloor = (
   const roomIds = new Set(roomsForFloor(removedFloor).map((room) => room.id));
   const openingIds = new Set(removedFloor.openings.map((opening) => opening.id));
   const slotIds = [
+    ...project.sceneItems
+      .filter((item) => item.floorId === removedFloor.id)
+      .flatMap(itemBindingSlotIds),
     ...roomsForFloor(removedFloor).flatMap(
       (room) => project.roomProfiles[room.id]?.dashboardSlots.map((slot) => slot.id) ?? [],
     ),
@@ -128,11 +137,6 @@ export const removeFloor = (
         project.openingProfiles[opening.id]?.contactSlot?.id,
         project.openingProfiles[opening.id]?.coverSlot?.id,
       ].filter((id): id is string => Boolean(id)),
-    ),
-    ...project.sceneItems.flatMap((item) =>
-      item.floorId === removedFloor.id && item.kind === "device"
-        ? item.entitySlots.map((slot) => slot.id)
-        : [],
     ),
   ];
   const bindings = removeWorkspaceSlotReferences(snapshot.bindings, slotIds);

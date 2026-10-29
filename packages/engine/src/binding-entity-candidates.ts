@@ -49,7 +49,7 @@ export const bindingEntityCandidates = ({
   runtime: HomeAssistantRuntimeSnapshot;
   scope?: BindingEntityCandidateScope;
 }): readonly BindingEntityCandidate[] => {
-  const outsideRooms = descriptor.kind === "device" && descriptor.roomIds.length === 0;
+  const outsideRooms = descriptor.roomIds.length === 0;
   const roomAreaId = profile.roomAreaIds[roomId];
   if (
     !outsideRooms &&
@@ -94,7 +94,11 @@ export const bindingEntityCandidates = ({
                 : "Unavailable"
               : "Available";
       return {
-        matchRank: bindingDomainMatchRank(descriptor.spec, entry.entity_id.split(".")[0]),
+        matchRank: bindingDomainMatchRank(
+          descriptor.spec,
+          entry.entity_id.split(".")[0],
+          descriptor.deviceModel,
+        ),
         entityId: entry.entity_id,
         label: registryLabel(entry, runtime),
         areaId,

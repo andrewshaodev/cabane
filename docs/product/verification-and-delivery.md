@@ -285,6 +285,13 @@ reference checks, and delayed cleanup. These checks use synthetic data and do no
 contact household devices. Cabane and the integration must be delivered together;
 publishing and deployment remain separate actions.
 
+The wall-normalized GLB regression checks the reported negative surface gap
+through composition and legacy manifest validation. Placement bounds, refused
+edits, and Issues repair/removal run in Node/DOM tests with real project
+validation and workspace history. Removal checks draft mapping cleanup and
+preservation of published mappings. These fixtures do not establish acceptance
+of the reporter's original GLB or live HA workspace.
+
 Browser coverage omits journeys for model-pack
 replacement, reference-plan tracing, six weather previews, standalone navigation and
 OAuth, north/solar preview, rug dimensions, room-control reordering, and imported

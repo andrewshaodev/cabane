@@ -2,8 +2,11 @@
 
 Construct is an implemented 2D plan editor. Two-finger trackpad scrolling pans
 the plan without clicking or changing tools, including during construction.
-Pinch (or Ctrl/Command-scroll) zooms around the cursor. Its tool set is Select, Wall, Door,
-Window, Passage, Floor, Measure, Pan, and Decorations (Niche, Boundary, Pool). Users can edit wall endpoints and
+Pinch (or Ctrl/Command-scroll) zooms around the cursor. After Select, the toolbar orders
+Wall, Openings, Floor and Stairs, followed by Measure and Decorations. Wall groups
+Wall, Invisible wall and Outdoor space; Openings groups Door, Passage and Window.
+Hover, click/tap or keyboard activation reveals each group in a floating disclosure.
+Existing tool shortcuts and tutorial actions still select the individual tools directly. Users can edit wall endpoints and
 positions, choose wall finishes and thicknesses, identify rooms, place and resize
 openings, and change supported opening models/orientations. The floor inspector
 also controls default wall/ceiling settings. Select a door, window, or passage and
@@ -12,6 +15,15 @@ controls rectangular/arched shape and arch rise. Valid width and height edits up
 the scene immediately. Sizes that do not fit report an error; leaving the field
 restores the accepted value. These edits use the ordinary
 preview, undo/redo, autosave, and Apply flow.
+
+Add floor above/below opens a dialog with an empty-plan default and a
+“Duplicate this floor” option for the selected floor. Copies are appended above
+the top floor or below the lowest basement, and retain the source floor's height,
+architecture and finishes. Every copied identity and internal architectural
+reference is remapped. Furniture, devices, Connect profiles and private Home
+Assistant mappings are never copied. Connecting stairs and building-wide settings
+remain unchanged. Cancel leaves the workspace untouched;
+adding a floor is one undoable workspace edit using existing persistence formats.
 
 Niche uses the same wall placement preview, single-shot selection, dragging,
 width handles, marquee, duplication and deletion system as doors/windows.
@@ -71,6 +83,14 @@ loop ends the drawing chain. Topology derives
 rooms, interior/exterior wall runs, junctions, footprint regions, and ceilings
 from the editable wall graph while retaining room identities where possible.
 Incomplete shells and ambiguous room merges produce actionable diagnostics.
+Rooms exist only inside wall-enclosed areas, so an open plan with several named
+areas separates them with `virtual` walls. Topology treats a virtual wall like any
+other boundary and preserves the flag through draft creation and re-derivation.
+Choose Wall → Invisible wall to use the same endpoint, click/drag, snapping, measurement,
+loop-closing and history flow as physical walls. Invisible boundaries appear as dashed
+lines in Construct and remain selectable and editable, but have no physical finish,
+opening or item support. Arrange ignores them when snapping items; project validation
+rejects attachments to them. Physical opening clearance ignores their junction arms.
 
 Selection includes individual targets and Shift-drag marquee selection. Drag
 activation distinguishes a click from an actual move. Opening placement avoids
@@ -291,7 +311,8 @@ the L-shaped stair controls: lower/upper flight lengths, width, and left/right t
 Place the bottom, lower-flight landing center, then the returning upper endpoint.
 The landing depth equals the flight width; curved half-turn stairs remain unsupported.
 
-Floor also offers Outdoor platform for same-level terraces and balconies. Close an
+Wall → Outdoor space draws the existing outdoor platforms for same-level terraces and
+balconies. The Floor tool keeps whole-room and custom-area finish painting. Close an
 independent polygon using the ordinary snapping, measurements, local drawing
 undo/redo and cancel gestures. Choose Railing (1 m), Low wall (0.3 m), or Open
 from procedural thumbnail cards before drawing; exposed edges inherit that

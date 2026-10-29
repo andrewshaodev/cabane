@@ -80,11 +80,26 @@ export const sceneItem = (
           "entitySlots",
           "lightState",
           "color",
+          "lightSlotId",
         ]
-      : ["id", "floorId", "kind", "modelId", "variant", "placement", "size", "color"],
+      : [
+          "id",
+          "floorId",
+          "kind",
+          "modelId",
+          "variant",
+          "placement",
+          "size",
+          "color",
+          "entitySlots",
+          "lightSlotId",
+          "lightState",
+        ],
     path,
     issues,
   );
+  if (candidate.lightSlotId !== undefined)
+    string(candidate.lightSlotId, `${path}.lightSlotId`, issues);
   string(candidate.id, `${path}.id`, issues);
   string(candidate.modelId, `${path}.modelId`, issues);
   if (candidate.variant !== undefined) string(candidate.variant, `${path}.variant`, issues);
@@ -112,7 +127,6 @@ export const sceneItem = (
     );
   size?.forEach((entry, index) => finite(entry, `${path}.size[${index}]`, issues));
   if (
-    device &&
     candidate.lightState !== undefined &&
     (typeof candidate.lightState !== "string" ||
       !["always-off", "always-on", "night-only", "connected"].includes(candidate.lightState))
@@ -124,7 +138,7 @@ export const sceneItem = (
       "Choose always-off, always-on, night-only, or connected.",
     );
   }
-  if (device)
+  if (device || candidate.entitySlots !== undefined)
     array(candidate.entitySlots, `${path}.entitySlots`, issues)?.forEach((entry, index) =>
       entitySlot(entry, `${path}.entitySlots[${index}]`, issues),
     );

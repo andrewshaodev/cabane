@@ -1,9 +1,9 @@
 {
-  "revision": 13,
-  "fingerprint": "05c0de4e8a5a1cacdd3bb4ba191aab9414a886cc3dbbcbc13e80c42c8c543b28",
-  "summary": "Add outdoor room membership with shared room controls",
+  "revision": 19,
+  "fingerprint": "fda4b9e66e9bcdf703a6ee463202d37ecdeeb8899f94c2e418cfc1360f6f8cc3",
+  "summary": "Keep native glow selections stable across model variants",
   "breakingChanges": [
-    "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+    "Existing homes and immutable GLB selections remain supported. Native keyed emissiveSurfaces require the updated frontend and matching HA panel. Old native ordinals remain saved but inactive until explicitly reselected. No asset, binding or schema-version migration is required."
   ],
   "history": [
     {
@@ -88,6 +88,48 @@
       "summary": "Add decorative apartment floors through Construct floor management",
       "breakingChanges": [
         "Existing homes retain their appearance. Homes saved with apartmentFloor require a matching updated Home Assistant panel; older panels reject the new field. Solid structural spaces from revision 11 remain supported."
+      ]
+    },
+    {
+      "revision": 13,
+      "summary": "Add outdoor room membership with shared room controls",
+      "breakingChanges": [
+        "Existing homes, apartment floors and solid structural spaces remain supported. Homes saving platform useAsRoom or roomName fields require an updated panel. Older clients keep unsupported fields blocked until updated through HACS. No data migration is required."
+      ]
+    },
+    {
+      "revision": 14,
+      "summary": "Unify model lighting authoring for personal and built-in models",
+      "breakingChanges": [
+        "Existing homes and single-point imports remain supported. Model lighting overrides, independent light relationships, surface selections and glow-only settings require an updated frontend and matching native panel. No asset or backend migration is required; older clients retain unsupported-field protection."
+      ]
+    },
+    {
+      "revision": 15,
+      "summary": "Support mixed light sources and remove fixed lighting cutoffs",
+      "breakingChanges": [
+        "Existing point and strip declarations remain readable without migration. Mixed explicit source layouts and expanded sample counts require this updated frontend and matching native panel. Older clients retain unsupported-data protection. No asset, HA binding or backend migration is required."
+      ]
+    },
+    {
+      "revision": 16,
+      "summary": "Keep misplaced items editable and add explicit placement repairs",
+      "breakingChanges": [
+        "Existing homes remain compatible. The updated panel treats geometric placement diagnostics as warnings, checks scaled bounds before Arrange edits, and offers per-copy repairs in Issues. Older panels can still block a home on legacy device contact errors. No data or asset migration is required."
+      ]
+    },
+    {
+      "revision": 17,
+      "summary": "Support independent furniture and device sensor readings with scene visibility and TV switch controls",
+      "breakingChanges": [
+        "Existing homes remain supported. Furniture entitySlots and slot presentation.showInScene require the matching updated frontend and Home Assistant panel. Mixed model lighting and placement repairs from revisions 15 and 16 remain supported. Older clients retain unsupported-field protection."
+      ]
+    },
+    {
+      "revision": 18,
+      "summary": "Add virtual room boundaries without physical geometry or collision",
+      "breakingChanges": [
+        "Existing homes remain supported. Homes using WallSpec.virtual require the matching updated frontend and Home Assistant panel; older clients keep unsupported fields blocked. Mixed lighting, placement repairs and independent entity readings from revisions 15 through 17 remain supported."
       ]
     }
   ],

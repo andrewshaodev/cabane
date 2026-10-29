@@ -2,6 +2,7 @@ import { EditorButton } from "../editor-chrome/EditorButton";
 import { requestWalkPointerLock } from "@cabane/engine";
 import { useMemo, useState } from "react";
 import { EditorActionBar } from "../editor-chrome/EditorActionBar";
+import { EditorActionButton } from "../editor-chrome/EditorActionButton";
 
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 
@@ -94,6 +95,21 @@ export function HomeEditorHeader({
       ),
     [snapshot.project, snapshot.bindings, workspace.record.published],
   );
+  const historyEnabled = !editingLocked && !dragging && !referenceAdjusting;
+  const canUndo =
+    historyEnabled &&
+    (floorZoneDrawing.active
+      ? floorZoneDrawing.points.length > 0
+      : poolDrawing.active
+        ? poolDrawing.points.length > 0
+        : workspace.canUndo && !unsettled);
+  const canRedo =
+    historyEnabled &&
+    (floorZoneDrawing.active
+      ? floorZoneDrawing.future.length > 0
+      : poolDrawing.active
+        ? poolDrawing.future.length > 0
+        : workspace.canRedo && !unsettled);
   return (
     <header className="editor-header" inert={editingLocked || publishOpen || previewOpen}>
       <div className="editor-navigation">
@@ -177,6 +193,23 @@ export function HomeEditorHeader({
       {walkError && <p role="alert">{walkError}</p>}
       <EditorModeNav mode={shortcutsMode ? "shortcuts" : mode} onModeChange={onModeTabChange} />
       <div className="direction-project-actions" role="group" aria-label="Project actions">
+        <EditorActionButton
+          icon="undo"
+          label="Undo"
+          disabled={!canUndo}
+          onClick={undoProject}
+          shortcut="⌘/Ctrl Z"
+          keyShortcuts="Control+Z Meta+Z"
+        />
+        <EditorActionButton
+          icon="redo"
+          label="Redo"
+          disabled={!canRedo}
+          onClick={redoProject}
+          shortcut="⌘/Ctrl Shift Z · Ctrl Y"
+          keyShortcuts="Control+Shift+Z Meta+Shift+Z Control+Y"
+        />
+        <span className="editor-action-bar__separator" aria-hidden="true" />
         <button
           type="button"
           className="editor-reset-changes"
@@ -221,10 +254,9 @@ export function HomeEditorHeader({
           disconnected={connect.disconnected}
           onRefresh={() => void connect.refresh()}
         />
-      ) : (
+      ) : mode === "construct" ? (
         <EditorActionBar
           inert={referenceAdjusting}
-          mode={mode}
           tool={constructEditor.tool}
           onToolChange={(tool) => {
             setStairPlacement(null);
@@ -239,28 +271,8 @@ export function HomeEditorHeader({
                 ? "Finish the current edit first."
                 : undefined
           }
-          canUndo={
-            !editingLocked &&
-            !dragging &&
-            (floorZoneDrawing.active
-              ? floorZoneDrawing.points.length > 0
-              : poolDrawing.active
-                ? poolDrawing.points.length > 0
-                : workspace.canUndo && !unsettled)
-          }
-          canRedo={
-            !editingLocked &&
-            !dragging &&
-            (floorZoneDrawing.active
-              ? floorZoneDrawing.future.length > 0
-              : poolDrawing.active
-                ? poolDrawing.future.length > 0
-                : workspace.canRedo && !unsettled)
-          }
-          onUndo={undoProject}
-          onRedo={redoProject}
         />
-      )}
+      ) : null}
     </header>
   );
 }

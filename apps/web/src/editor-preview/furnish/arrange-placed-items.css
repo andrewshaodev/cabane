@@ -1,0 +1,64 @@
+.arrange-placed-items {
+  flex: none;
+  min-width: 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--editor-line);
+  padding-bottom: 12px;
+  color: #354738;
+  font:
+    var(--editor-text-control, 0.875rem)/1.4 "Roboto",
+    sans-serif;
+}
+.arrange-placed-items summary {
+  padding: 6px 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.arrange-placed-items p {
+  margin: 8px 0 12px;
+}
+.arrange-placed-items__groups {
+  max-height: min(240px, 26dvh);
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.arrange-placed-items ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.arrange-placed-items button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.arrange-placed-items button:hover,
+.arrange-placed-items button[aria-pressed="true"] {
+  background: #dfe6d8;
+}
+.arrange-placed-items button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.arrange-placed-items button span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.arrange-placed-items h3 {
+  margin: 14px 8px 4px;
+  color: #58654e;
+  font: inherit;
+  font-weight: 600;
+}
+.arrange-placed-items section:first-child h3 {
+  margin-top: 0;
+}

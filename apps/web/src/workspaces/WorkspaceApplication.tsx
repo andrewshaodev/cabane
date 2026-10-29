@@ -1,9 +1,4 @@
-import {
-  createModelAssetRepository,
-  createCabaneArchive,
-  documentModelReferences,
-  downloadCabaneBytes,
-} from "@cabane/engine";
+import { downloadWorkspaceArchive } from "./download-workspace-archive";
 import { NativeWorkspaceWelcome } from "./NativeWorkspaceWelcome";
 import { WorkspaceOpenPage } from "./WorkspaceOpenPage";
 import { deleteReferenceHome } from "../editor-reference-plan/reference-storage";
@@ -317,13 +312,9 @@ export function WorkspaceApplication() {
           const json = privateBackup
             ? exportWorkspaceBackup(entry.metadata, saved)
             : serializeCanonicalJson(saved.draft);
-          const assets = await createModelAssetRepository(window.indexedDB).verify(
-            documentModelReferences(json),
-          );
-          downloadCabaneBytes(
-            createCabaneArchive(json, assets),
+          await downloadWorkspaceArchive(
+            json,
             `${id}-${privateBackup ? "backup" : "project"}.cabane`,
-            "application/zip",
           );
         }}
         onExportRaw={async (id) => {

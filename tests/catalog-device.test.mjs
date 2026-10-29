@@ -963,7 +963,7 @@ await withModules(async (load) => {
 
   test("television displays camera media while preserving its media-player fallback", async () => {
     const definition = catalog.stableDeviceRegistry.television;
-    assert.deepEqual(definition.supportedDomains, ["camera", "media_player"]);
+    assert.deepEqual(definition.supportedDomains, ["camera", "media_player", "switch"]);
     assert.equal(definition.liveMedia.kind, "camera-stream");
     assert.equal(definition.interaction.target, "camera-viewer");
     const props = { ...blindProps, visualState: "connected-active" };
@@ -1279,21 +1279,37 @@ await withModules(async (load) => {
         },
       },
     };
-    const resolvedBindings = engine.resolveHomeAssistantBindings(
-      fixtures.equippedFixtureManifest,
-      fixtures.equippedFixtureProfile,
-      runtime,
-      catalog.stableDeviceRegistry,
-    );
-    const renderer = await create(
+    const resolveLighting = (snapshot) =>
+      engine.resolveHomeAssistantBindings(
+        fixtures.equippedFixtureManifest,
+        fixtures.equippedFixtureProfile,
+        snapshot,
+        catalog.stableDeviceRegistry,
+      );
+    const render = (snapshot) =>
       createElement(engine.HomeAssistantSceneLighting, {
         floor: fixtures.equippedFixtureManifest.floors[0],
-        resolvedBindings,
+        resolvedBindings: resolveLighting(snapshot),
         deviceModels: catalog.stableDeviceRegistry,
         extensionDeviceModels: {},
         sceneItems: [],
+      });
+    const renderer = await create(
+      render({
+        ...runtime,
+        entityStates: {
+          ...runtime.entityStates,
+          "light.fixture_terracotta_pendant": {
+            ...runtime.entityStates["light.fixture_terracotta_pendant"],
+            state: "on",
+          },
+        },
       }),
     );
+    const pendant = renderer.scene.findByProps({
+      name: "ha-device-light-fixture-terracotta-pendant",
+    }).instance;
+    await renderer.update(render(runtime));
     const floorLamp = renderer.scene.findByProps({
       name: "ha-device-light-fixture-floor-lamp",
     });
@@ -1305,6 +1321,10 @@ await withModules(async (load) => {
         name: "ha-device-light-fixture-terracotta-pendant",
       }).instance.intensity,
       0,
+    );
+    assert.equal(
+      renderer.scene.findByProps({ name: "ha-device-light-fixture-terracotta-pendant" }).instance,
+      pendant,
     );
     await renderer.unmount();
   });

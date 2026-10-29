@@ -37,6 +37,14 @@ persisted scene override controls bulb appearance and illumination without
 sending HA commands; Connected follows the
 bound entity. Changes participate in draft history and take effect in Home on Apply.
 
+The **Placed items** disclosure above the catalog lists every stored item on the active
+floor, including occluded items and unavailable models. Items are grouped by room,
+including outdoor areas, with an Outside rooms group for unassigned items. Search
+matches item and room names; instance IDs are not displayed. Choosing an entry selects that existing item and opens the normal
+Properties inspector, including when it was collapsed. Focus stays on the list.
+Selection alone changes no item data or undo history; canvas group selection and
+group movement keep their existing behavior. The list includes items outside rooms.
+
 Placement resolves a feasible start near the camera target (or floor center),
 using model support and outdoor-only model constraints. Furnishings and devices
 may be placed outside the house or in areas without a room; neither condition
@@ -60,6 +68,28 @@ identity namespace across every floor, including architecture and implicit openi
 slots. Catalog models and room display names may repeat; instance IDs must remain
 unique. Identity-conflict errors distinguish rooms, items, and device slots and
 identify their floors with recovery guidance. Failed placement reports a catalog error.
+
+Arrange checks placement changes, duplication, group movement, and resizing against the same
+support diagnostics as saved projects. An invalid change is refused with a
+visible message and creates no undo step. Bounds account for the model's origin
+and the placed copy's scale: a wall-normalized model may move freely when its
+bottom stays above the floor. Preferred placement does not restrict an existing
+copy to one support kind.
+Checks run against each queued edit's result. Window fitting changes size and
+placement together in one validated undo step. Native ceiling devices retain
+their existing recessed mounting convention; personal GLBs use their explicit
+normalized bounds for ceiling clearance.
+
+Existing geometric placement problems are warnings, so the home remains visible
+and editable. Issues names the affected model and offers **Select**,
+**Reset placement**, and **Remove item**. Reset places that copy on a supported floor,
+preserving its dimensions, identity, horizontal anchor and rotation where
+possible. If the anchor has no floor support, it searches for a valid starting
+position. A failed repair leaves the item unchanged and explains how to continue.
+Repairs share workspace Undo/Redo; removing a device clears its draft mappings
+in the same step. Model definitions, normalization and other copies are unchanged.
+Malformed data, identity conflicts, and missing floor/wall/room references remain
+blocking structural errors. The new repair actions run only when explicitly chosen.
 
 Wall and ceiling dependencies are evaluated against the edited architecture.
 Shortening a collinear wall preserves attached items at their original anchors
@@ -113,3 +143,9 @@ tracks, wood, motor housings, and decorative throw cushions retain their finishe
 Only descriptors declaring `defaultColor` offer this control.
 
 Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.
+
+Properties → Linked entities adds optional temperature, power, humidity, sensor or binary sensor readings to furniture and devices. Each reading declares a local slot and name. Choose its HA entity in Connect. “Show readings” is independent for every slot and does not change dashboard visibility or the primary control. Reading edits use ordinary undo/redo, duplication and Apply; duplicates get fresh slot identities and no household mappings.
+
+Properties exposes **Lighting** for personal and built-in models. Shared settings
+apply to every copy in this home while each copy retains its own connection.
+The visual editor and persistence rules are defined by [model lighting](model-lighting.md).

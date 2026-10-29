@@ -113,10 +113,14 @@ owned, shared, and disposed by the dedicated import module and use ordinary
 draws. Floor imports add a simple envelope collider. The exception does not
 permit asset loading in native models or generated home extensions. See
 [personal models](personal-models.md).
-Physical lights render only on the active floor. On that floor, supported emitters
+Physical lights render only on the active floor. Room, dashboard and device
+emissions share the [bounded model-lighting execution policy](model-lighting.md#rendering),
+which preserves authored declarations and total brightness within 64 physical
+point lights. Only positive-intensity sources need active slots; native and
+dashboard declarations prewarm spare bounded slots for first-activation reuse. Allocated slots
 stay mounted at zero intensity while off or unavailable. Device and dashboard
-light updates change uniforms without changing shader light counts, avoiding
-synchronous scene shader compilation during interaction. Device emitters, including
+updates within the existing peak capacity change uniforms without changing shader
+light counts. First growth to a larger bounded peak can compile shaders. Device emitters, including
 fallbacks from resolved bindings, are scoped to their owning floor so stair
 transitions never recreate another storey’s light at the active floor’s elevation. Indoor sources close to an
 opaque wall retain their unshadowed point source at the bulb. The beauty pass
@@ -235,7 +239,9 @@ bounds. Walls share their height slices and opening cuts with the renderer; clos
 door state does not fill these structural apertures. Bounds retain model-origin
 offsets and vertical clearance, including the spiral bridge. Unknown model bounds
 are not guessed; missing-model validation remains authoritative. Whole landing
-polygons are checked against floor regions. Width and slope are unrestricted. Full-turn
+polygons are checked against floor regions. Stair-to-stair advice compares rendered
+tread slabs and rendered spiral upper bridges at their building elevations, so
+vertically separated flights may share a stairwell without an overlap warning. Width and slope are unrestricted. Full-turn
 spirals retain the current route elevation at their coincident entrance and exit.
 Shaped plan strokes and guard rails are instanced; each model family has its own
 renderer. Legacy straight-stair geometry and stored records remain supported.
@@ -285,6 +291,14 @@ otherwise an authored exterior color is used, falling back to the general interi
 rendering share this rule. Shared horizontal junction surfaces use the general
 finish when their participating walls disagree, without changing geometry,
 collision, shadows or fade ownership.
+
+An optional `WallSpec.virtual` wall divides rooms without being built: it adds no
+geometry, collision, shadow, lighting plane, roof seam, or opening host, and junctions
+keep only their physical walls (dropped below two). Rooms and ceilings are unchanged.
+Validation requires a boolean flag and rejects openings and supported scene items on a
+virtual wall. Arrange uses the public `physicalFloor()` projection for wall support and
+corner snapping. Shared opening-clearance intervals ignore virtual incident walls.
+Construct alone draws these boundaries as dashed plan strokes, without filled joints.
 
 Interior right-angle endpoint junctions use filled corner footprints. Architectural planes retain exact geometry during LOD changes and shadows during camera cutaways.
 

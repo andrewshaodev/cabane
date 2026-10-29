@@ -1144,8 +1144,11 @@ await withModules(async (load) => {
       hanging.placement.elevationMeters = elevation;
       hanging.size = [0.6, height, 0.6];
       const result = validateHomeProject(project, extensions);
-      assert.equal(result.valid, false);
-      assert.ok(result.issues.some((issue) => issue.code === "project.wall-support-height"));
+      assert.equal(result.valid, true);
+      assert.equal(
+        result.issues.find((issue) => issue.code === "project.wall-support-height")?.severity,
+        "warning",
+      );
     }
   });
 });

@@ -1,3 +1,5 @@
+import { EditorDraftStatus } from "./EditorDraftStatus";
+import { roomsForFloor } from "@cabane/engine";
 import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinishPreview";
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
@@ -37,9 +39,12 @@ import { HomeEditorHeader } from "./HomeEditorHeader";
 import { HomeEditorScene } from "./HomeEditorScene";
 import { useHomeEditorController } from "./useHomeEditorController";
 import { AgentPilotPanel } from "../agent-pilot/AgentPilotPanel";
+import { useEditorIssueRepairs } from "./useEditorIssueRepairs";
 
 export function EditorWorkspace(props: Parameters<typeof useHomeEditorController>[0]) {
   const controller = useHomeEditorController(props);
+  const { repairIssue, repairMessage, repairError, itemLabel } = useEditorIssueRepairs(controller);
+  const placementError = controller.furnishingEditor.placementError ?? repairError;
   const {
     editorProject,
     northOrientation,
@@ -72,7 +77,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     snapshot,
     commit,
     replaceEditorsFromProject,
-    autosaveStatus,
     editedManifest,
   } = controller;
   const [stairLiveIssues, setStairLiveIssues] = useState<readonly ManifestIssue[] | null>(null);
@@ -144,7 +148,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     : undefined;
   const roomPictures = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, resolveHomeAssistantPictureUrl(area?.picture, runtime.origin)] as const;
       }),
@@ -152,7 +156,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   );
   const roomNames = Object.fromEntries(
     editorProject.floors.flatMap((floor) =>
-      floor.rooms.map((room) => {
+      roomsForFloor(floor).map((room) => {
         const area = runtime.areas.find((area) => area.area_id === roomAreaIds?.[room.id]);
         return [room.id, area?.name?.trim() || room.name] as const;
       }),
@@ -263,18 +267,16 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     (unsettled && !reference.adjusting) ||
     Boolean(floorDialog);
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
-  const addFloorBelow = () => {
-    const next = addBottomFloor(snapshot, `floor-${createBrowserUuid()}`);
+  const addFloor = (below: boolean, duplicate: boolean) => {
+    const id = `floor-${createBrowserUuid()}`;
+    const next = (below ? addBottomFloor : addTopFloor)(
+      snapshot,
+      id,
+      duplicate ? { sourceFloorId: activeFloorId } : undefined,
+    );
     commit(next);
-    floorNavigation.selectFloor(next.project.floors[0].id);
-    constructEditor.replaceFloor(next.project.floors[0]);
-    furnishingEditor.replaceItems([]);
-  };
-  const addFloorAbove = () => {
-    const next = addTopFloor(snapshot, `floor-${createBrowserUuid()}`);
-    commit(next);
-    floorNavigation.selectFloor(next.project.floors.at(-1)!.id);
-    constructEditor.replaceFloor(next.project.floors.at(-1)!);
+    floorNavigation.selectFloor(id);
+    constructEditor.replaceFloor(next.project.floors.find((floor) => floor.id === id)!);
     furnishingEditor.replaceItems([]);
   };
   return (
@@ -291,7 +293,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
       >
         {!shortcutsMode && (
           <HomeEditorScene
-            rightPanelOpen={panels.propertiesOpen}
             onStairIssuesChange={setStairLiveIssues}
             onNameFocusHandled={() => setNameFocusRequest(null)}
             nameFocusRequest={nameFocusRequest}
@@ -310,8 +311,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             selectedId={activeFloorId}
             disabled={floorControlsDisabled}
             onSelect={(id) => floorNavigation.selectFloor(id)}
-            onAdd={mode === "construct" ? addFloorAbove : undefined}
-            onAddBelow={mode === "construct" ? addFloorBelow : undefined}
+            onAdd={mode === "construct" ? () => setFloorDialog("add-above") : undefined}
+            onAddBelow={mode === "construct" ? () => setFloorDialog("add-below") : undefined}
             onRename={mode === "construct" ? () => setFloorDialog("rename") : undefined}
             onRemove={
               mode === "construct" && !removeDisabledReason
@@ -351,7 +352,12 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
               ).length
             }
             onCancel={() => setFloorDialog(null)}
-            onSave={(name, height) => {
+            onSave={(name, height, duplicate = false) => {
+              if (floorDialog === "add-above" || floorDialog === "add-below") {
+                addFloor(floorDialog === "add-below", duplicate);
+                setFloorDialog(null);
+                return;
+              }
               const next =
                 floorDialog === "remove"
                   ? removeFloor(snapshot, activeFloorId)
@@ -397,12 +403,16 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
 
         <EditorSidebar
           {...controller}
+          onSelectPlacedItem={(id) => {
+            controller.furnishingEditor.select(id);
+            panels.openProperties();
+          }}
           sidebar={sidebar}
           iconUrl={iconUrl}
           shortcutsMode={shortcutsMode}
           floorControlsDisabled={floorControlsDisabled}
-          addFloorAbove={addFloorAbove}
-          addFloorBelow={addFloorBelow}
+          addFloorAbove={() => setFloorDialog("add-above")}
+          addFloorBelow={() => setFloorDialog("add-below")}
           tutorial={tutorial}
           tutorialBusy={tutorialBusy}
           activateTutorial={activateTutorial}
@@ -431,6 +441,8 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             expanded={panels.issuesExpanded}
             onToggle={panels.toggleIssues}
             disabled={panelBusy}
+            onRepair={repairIssue}
+            itemLabel={itemLabel}
             onSelect={(issue) => {
               setActionBarPanelOpen(false);
               panels.openProperties();
@@ -443,13 +455,16 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
             disabled={panelsDisabled}
           />
         </div>
-        {autosaveStatus !== "saved" && (
-          <div className={`direction-status is-${autosaveStatus}`}>
+        {placementError && (
+          <div className="direction-status is-error" role="status">
             <span />
-            {autosaveStatus === "saving" && "Saving draft…"}
-            {autosaveStatus === "error" && "Could not save · Changes kept in memory"}
+            {placementError}
           </div>
         )}
+        <EditorDraftStatus workspace={workspace} homeAssistantUrl={homeAssistantUrl} />
+        <div className="arrange-announcement" role="status">
+          {repairMessage}
+        </div>
 
         <EditorCompletionDialogs {...controller} />
       </main>

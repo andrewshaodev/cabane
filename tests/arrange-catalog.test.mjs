@@ -613,7 +613,8 @@ await withModules(async (load) => {
     assert.equal(filterCatalog(entries, "all", "  FLOOR light  ")[0].modelId, "floor-lamp");
     assert.equal(
       filterCatalog(entries, "devices", "").length,
-      Object.keys(ownerProjectRegistries.deviceModels).length,
+      Object.values(ownerProjectRegistries.deviceModels).filter((model) => !model.lightingOnly)
+        .length,
     );
     assert.ok(filterCatalog(entries, "devices", "").every((entry) => entry.kind === "device"));
     assert.deepEqual(filterCatalog(entries, "devices", "sectional furniture"), []);

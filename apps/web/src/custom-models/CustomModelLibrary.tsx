@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import {
   CUSTOM_MODEL_LIMITS,
+  editCustomModel,
   createCabaneModelPack,
   createModelAssetRepository,
   downloadCabaneBytes,
@@ -9,6 +10,7 @@ import {
   resolveProjectModels,
   stageModelAssets,
   type CustomModel,
+  type EditorWorkspaceSnapshot,
   type ModelAsset,
 } from "@cabane/engine";
 import { ownerProjectRegistries } from "../project-runtime";
@@ -23,10 +25,16 @@ export function CustomModelLibrary({
   workspace,
   disabled,
   onBrowse,
+  editingModel,
+  onCloseEditor,
+  onEditSnapshot,
 }: {
   workspace: ReturnType<typeof useEditorWorkspace>;
   disabled: boolean;
   onBrowse: () => void;
+  editingModel: CustomModel | null;
+  onCloseEditor: () => void;
+  onEditSnapshot: (snapshot: EditorWorkspaceSnapshot) => void;
 }) {
   const picker = useRef<HTMLInputElement>(null);
   const packPicker = useRef<HTMLInputElement>(null);
@@ -71,21 +79,13 @@ export function CustomModelLibrary({
     const replacement = replacementKey
       ? missingModelOptions.find((option) => option.key === replacementKey)
       : undefined;
-    const sceneItems = replacement
-      ? workspace.snapshot.project.sceneItems.map((item) =>
-          item.kind === replacement.kind && item.modelId === replacement.id
-            ? { ...item, modelId: model.id }
-            : item,
-        )
-      : workspace.snapshot.project.sceneItems;
-    workspace.commit({
-      ...workspace.snapshot,
-      project: {
-        ...workspace.snapshot.project,
-        customModels: [...models.filter((entry) => entry.id !== model.id), model],
-        sceneItems,
-      },
-    });
+    workspace.commit(
+      editCustomModel(
+        workspace.snapshot,
+        model,
+        replacement ? { modelId: replacement.id, kind: replacement.kind } : undefined,
+      ),
+    );
     const saved = await workspace.flush();
     if (saved.status !== "saved")
       throw new Error("Could not save the model. Your draft is kept in memory. Try again.");
@@ -98,22 +98,14 @@ export function CustomModelLibrary({
     setError(null);
     try {
       const pack = await readCabaneModelPack(new Uint8Array(await packFile.arrayBuffer()));
-      const current = new Map(models.map((model) => [model.id, model]));
-      for (const model of pack.models) {
-        const existing = current.get(model.id);
-        if (
-          existing &&
-          (existing.asset.sha256 !== model.asset.sha256 ||
-            existing.asset.byteLength !== model.asset.byteLength)
-        )
-          throw new Error(`Model “${model.id}” already exists with different GLB data.`);
-        current.set(model.id, model);
-      }
-      const nextModels = [...current.values()];
+      const next = pack.models.reduce(
+        (snapshot, model) => editCustomModel(snapshot, model),
+        workspace.snapshot,
+      );
       const references = new Map(
         workspace.modelAssetReferences.map((asset) => [asset.sha256, asset.byteLength]),
       );
-      for (const reference of modelAssetReferences([{ customModels: nextModels }]))
+      for (const reference of modelAssetReferences([next.project]))
         references.set(reference.sha256, reference.byteLength);
       if (
         [...references.values()].reduce((sum, size) => sum + size, 0) >
@@ -121,10 +113,7 @@ export function CustomModelLibrary({
       )
         throw new Error("This house and its active history exceed 100 MiB of distinct assets.");
       await stageModelAssets(pack.assets);
-      workspace.commit({
-        ...workspace.snapshot,
-        project: { ...workspace.snapshot.project, customModels: nextModels },
-      });
+      workspace.commit(next);
       const saved = await workspace.flush();
       if (saved.status !== "saved")
         throw new Error("Could not save the model pack. Your draft is kept in memory. Try again.");
@@ -201,6 +190,25 @@ export function CustomModelLibrary({
         <p role="alert" className="catalog-add-error">
           {error}
         </p>
+      )}
+      {editingModel && (
+        <ModelImportDialog
+          key={editingModel.id}
+          existingModel={editingModel}
+          missingModelOptions={[]}
+          onCancel={onCloseEditor}
+          onImport={async (model) => {
+            if (disabled) throw new Error("The editor is busy. Try again when it is ready.");
+            const next = editCustomModel(workspace.snapshot, model);
+            onEditSnapshot(next);
+            const saved = await workspace.flush();
+            if (saved.status !== "saved")
+              throw new Error(
+                "Could not save the model. Your draft is kept in memory. Retry Save changes, or close and use Undo to revert.",
+              );
+            onCloseEditor();
+          }}
+        />
       )}
       {file && (
         <ModelImportDialog

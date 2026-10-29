@@ -78,6 +78,8 @@ export interface EntityBindingSlotSpec {
   deviceRole?: "primary" | "secondary";
   presentation: {
     label: string;
+    /** Opt-in reading badge above the item; does not change dashboard visibility. */
+    showInScene?: boolean;
     dashboardRole: "primary" | "secondary" | "diagnostic" | "hidden";
   };
   sceneLight?: {
@@ -167,6 +169,11 @@ export interface WallSpec {
   to: PlanPoint;
   classification: "interior" | "exterior";
   thicknessMeters: number;
+  /**
+   * A virtual wall only divides rooms: it has no geometry, collision, shadow or
+   * openings, and renders and collides as open floor.
+   */
+  virtual?: boolean;
   niches?: readonly WallNicheSpec[];
   heightMeters?: number;
   exteriorColor?: string;
@@ -540,6 +547,8 @@ export interface ResolvedDeviceBinding {
 }
 
 export interface ResolvedRoomBindings {
+  /** Resolved opted-in map readings, including slots hidden from the dashboard. */
+  sceneEntities?: readonly ResolvedEntityBinding[];
   room: RoomSpec;
   displayName: string;
   pictureUrl: string | null;
@@ -691,6 +700,10 @@ export interface SceneModelVariant {
 }
 
 export interface SceneModelEditorDescriptor {
+  /** Effective model-local lighting, shared by every copy in this home. */
+  lighting?: import("./imported-models/contracts").CustomModelLight;
+  lightingCustomized?: boolean;
+  lightingDisabled?: boolean;
   /** Enables the fabric color picker; omission keeps a model's original palette. */
   defaultColor?: string;
   /** Ordered choices sharing size, placement, and bindings. First is the default. */
@@ -726,6 +739,8 @@ export interface FurnishingModelDefinition extends SceneModelEditorDescriptor {
 export type FurnishingModelRegistry = Readonly<Record<string, FurnishingModelDefinition>>;
 
 export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
+  /** Binding-only adapter for an item’s independent lighting relationship. */
+  lightingOnly?: boolean;
   component: HomeDeviceModelComponent;
   supportedDomains: readonly DeviceDomain[];
   supportedDeviceClasses?: Readonly<Partial<Record<DeviceDomain, readonly string[]>>>;
@@ -741,6 +756,12 @@ export interface DeviceModelDefinition extends SceneModelEditorDescriptor {
     maxIntensity: number;
     distance: number;
   };
+  sceneLights?: readonly {
+    position: readonly [x: number, y: number, z: number];
+    color: string;
+    maxIntensity: number;
+    distance: number;
+  }[];
   interaction: {
     target?: DeviceInteractionIntent;
     tapTolerancePixels: number;

@@ -1,0 +1,29 @@
+.item-entity-slots {
+  min-width: 0;
+}
+.direction-preview .item-entity-slots .item-entity-slots__new-reading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.item-entity-slots p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.item-entity-slots__entry {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--editor-border, #ddd8cc);
+  overflow-wrap: anywhere;
+}
+.direction-preview .item-entity-slots .item-entity-slots__visibility {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.direction-preview .item-entity-slots input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}

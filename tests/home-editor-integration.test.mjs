@@ -241,6 +241,22 @@ await withModules(async (load) => {
       await expand("Ground floor");
       await click("Manage floors");
       await click("Add floor above");
+      await click("Cancel");
+      assert.equal(button("Floor 2"), undefined);
+      await expand("Ground floor");
+      await click("Manage floors");
+      await click("Add floor above");
+      await act(async () =>
+        dom.window.document
+          .querySelector('.floor-management-dialog input[type="checkbox"]')
+          .click(),
+      );
+      assert.equal(
+        dom.window.document.querySelectorAll('.floor-management-dialog input[type="checkbox"]')
+          .length,
+        1,
+      );
+      await click("Add floor");
       assert.equal(button("Floor 2").getAttribute("aria-pressed"), "true");
       await expand("Floor 2");
       await click("Manage floors");
@@ -880,6 +896,7 @@ test("selected walls expose friendly facts before exact expert controls", async 
         "apps/web/src/editor-preview/construct/RoomMembershipFields.tsx",
         "apps/web/src/editor-preview/construct/DebouncedColorInput.tsx",
         "apps/web/src/editor-preview/construct/WallFinishFields.tsx",
+        "apps/web/src/editor-preview/construct/RoomMembershipFields.tsx",
       ].map((path) => readFile(path, "utf8")),
     )
   ).join("\n");

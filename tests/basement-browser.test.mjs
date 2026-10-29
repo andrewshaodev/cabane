@@ -1,3 +1,4 @@
+import { selectConstructionTool } from "./editor-browser-tools.mjs";
 import { withBrowserDiagnostics } from "./browser-test-diagnostics.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -22,6 +23,7 @@ test(
       );
       await current.click();
       await page.getByRole("menuitem", { name: "Add floor below", exact: true }).click();
+      await page.getByRole("button", { name: "Add floor", exact: true }).click();
       await page.waitForFunction(
         () =>
           document.querySelector(".construct-floor-controls__trigger")?.textContent === "Floor −1",
@@ -46,6 +48,7 @@ test(
         "Add floor below",
       );
       await page.keyboard.press("Enter");
+      await page.getByRole("button", { name: "Add floor", exact: true }).click();
       await page.waitForFunction(
         () =>
           document.querySelector(".construct-floor-controls__trigger")?.textContent === "Floor −2",
@@ -63,7 +66,7 @@ test(
       await page.keyboard.press("Escape");
       assert.equal(await current.getAttribute("aria-expanded"), "false");
       // A real drawing round-trip must retain the basement flag.
-      await page.getByRole("button", { name: "Wall", exact: true }).click();
+      await selectConstructionTool(page, "Wall");
       for (const [x, y] of [
         [600, 380],
         [1000, 380],
