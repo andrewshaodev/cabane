@@ -720,6 +720,8 @@ export interface SceneModelEditorDescriptor {
   placementEnvironment?: "outdoor" | "indoor-outdoor";
   /** Window/opening alignment uses the closed covering's width/height within the full envelope. */
   windowFit?: {
+    /** Exterior geometry keeps controls in the indoor room across its supporting wall. */
+    mounting?: "exterior-recessed";
     openingWidthRatio: number;
     openingHeightRatio: number;
     depthOffsetMeters: number;

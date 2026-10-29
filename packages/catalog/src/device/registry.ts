@@ -1,3 +1,4 @@
+import { IntegratedRollerShutterModel, INTEGRATED_ROLLER_SHUTTER_SIZE } from "./presets/covers";
 import { heatedTowelRailDefinition } from "./definitions/heated-towel-rail";
 import { underCabinetLedStripDefinition } from "./definitions/under-cabinet-led-strip";
 import { builtInMicrowaveDefinition, microwaveDefinition } from "./definitions/microwaves";
@@ -497,6 +498,28 @@ export const stableDeviceRegistry = defineDeviceModelRegistry({
     outlineContact: true,
     interaction,
     complexity: { visibleMeshes: 9, triangles: 360 },
+  }),
+  "integrated-roller-shutter": defineDeviceModel({
+    defaultRoomType: "living-room",
+    component: IntegratedRollerShutterModel,
+    label: "Integrated roller shutter",
+    category: "Covers",
+    defaultSize: INTEGRATED_ROLLER_SHUTTER_SIZE,
+    resizePolicy: { kind: "axes", axes: ["width", "height"] },
+    preferredPlacement: "wall",
+    windowFit: {
+      mounting: "exterior-recessed",
+      openingWidthRatio: 1,
+      openingHeightRatio: 1,
+      depthOffsetMeters: 0.003,
+      openingTypes: ["window", "sliding-glass-door"],
+    },
+    supportedDomains: ["cover"],
+    mountKind: "wall",
+    bounds: { min: [-0.6, 0, 0], max: [0.6, 1.6, 0.04] },
+    outlineContact: true,
+    interaction,
+    complexity: { visibleMeshes: 35, triangles: 1_000 },
   }),
   "leak-sensor": defineDeviceModel({
     defaultRoomType: "bathroom",

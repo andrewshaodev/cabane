@@ -134,6 +134,7 @@ export const STABLE_MODELS = new Set([
   "thermometer",
   "motion-sensor",
   "motorized-blind",
+  "integrated-roller-shutter",
   "leak-sensor",
   "ceiling-fan",
   "table-fan",
@@ -240,7 +241,8 @@ const isSceneModelDefinition = (value: unknown): value is RawObject => {
         (ratio) => isFiniteNumber(ratio) && ratio > 0 && ratio <= 1,
       ) ||
       !isFiniteNumber(fit.depthOffsetMeters) ||
-      fit.depthOffsetMeters < 0
+      fit.depthOffsetMeters < 0 ||
+      (fit.mounting !== undefined && fit.mounting !== "exterior-recessed")
     )
       return false;
   }
