@@ -3,7 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 
 const HOST = "127.0.0.1";
 const DEFAULT_PORT = 4317;
-const PROTOCOL_VERSION = "1";
+const PROTOCOL_VERSION = "2";
 const MAX_BODY_BYTES = 128 * 1024;
 const REQUEST_TTL_MS = 30_000;
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -338,7 +338,7 @@ async function startBridge() {
   console.log("  npm run agent:request -- --method list_catalog --pretty");
   console.log("  npm run agent:request -- --method validate_draft --pretty");
   console.log(
-    '  npm run agent:request -- --method dispatch_arrange --params \'{"action":{"type":"add-item","modelId":"<modelId>"}}\' --pretty',
+    '  npm run agent:request -- --method execute_action --params \'{"action":{"type":"add-item","modelId":"<modelId>"}}\' --pretty',
   );
   let closing = false;
   const close = () => {
@@ -423,7 +423,7 @@ async function main() {
     return;
   }
   if (command === "undo" || command === "redo") {
-    printResult(await requestAgent(args, command, {}), args);
+    printResult(await requestAgent(args, "execute_action", { action: { type: command } }), args);
     return;
   }
   if (command === "rename-room") {
@@ -435,7 +435,14 @@ async function main() {
         ? { expectedRevision: Number(option(args, "--expected-revision")) }
         : {}),
     };
-    printResult(await requestAgent(args, "rename_room", params), args);
+    const { floorId, expectedRevision, ...action } = params;
+    printResult(
+      await requestAgent(args, "execute_action", {
+        action: { type: "rename-room", ...action, ...(floorId ? { floorId } : {}) },
+        ...(expectedRevision === undefined ? {} : { expectedRevision }),
+      }),
+      args,
+    );
     return;
   }
   if (command === "request") {
@@ -460,9 +467,8 @@ async function main() {
   cabane-agent request --method METHOD --params '{"key":"value"}'
 
 Methods include get_capabilities, inspect_workspace, get_draft_diff, validate_draft,
-select_floor, dispatch_construct, floor_operation, list_catalog, dispatch_arrange,
-list_binding_slots, apply_binding, apply_room_mapping, discard_draft, publish_draft,
-rename_room, undo and redo.`);
+list_catalog, list_binding_slots and execute_action. Use get_capabilities to discover
+the public action types and their parameters.`);
 }
 
 main().catch((error) => {

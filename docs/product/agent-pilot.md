@@ -37,32 +37,39 @@ written to the repository, generated home source or bridge logs.
 
 ## Command boundary
 
-The bridge exposes a small generic registry rather than one bespoke CLI command
-per engine feature:
+Protocol version 2 has one mutating entry point: `execute_action`. `get_capabilities`
+returns the public action manifest with each action's domain, description and
+parameter types. The manifest is the agent-facing description; the action is
+then routed to the existing editor reducers, engine operations and binding
+helpers.
 
-- `get_capabilities`, `inspect_workspace`, `get_draft_diff` and `validate_draft`
-  inspect the selected workspace without changing it.
-- `select_floor` changes the editor's active floor. `dispatch_construct` accepts
-  the whitelisted durable `FloorEditorAction` types, including walls, openings,
-  rooms, finishes, pools, hedges, platforms and zones. Selection, camera and
-  tool-only actions stay browser-local.
-- `floor_operation` adds, renames, resizes or removes floors through the engine's
-  existing floor operations.
-- `list_catalog` exposes both stable models and project-local `custom:*` models.
-  `dispatch_arrange` adds, updates, duplicates or deletes items using the normal
-  Arrange editor. Adding an item goes through the existing catalog placement and
-  typed device-slot creation path.
-- `list_binding_slots` exposes typed slots and, when Cabane is connected to Home
-  Assistant, compatible registry candidates. `apply_binding` maps or clears one
-  slot. `apply_room_mapping` maps or clears a room's HA area. These commands do
-  not show a manual confirmation dialog; the browser still checks the active
-  origin, registry presence, disabled/hidden status and slot compatibility.
-- `discard_draft` restores the published project and bindings. `publish_draft`
-  is the explicit publication command; it saves the current draft, runs the
-  normal project and binding validation, and publishes only when no error
-  remains. Warnings are acknowledged by the explicit command itself.
-- `rename_room`, `undo` and `redo` remain compatibility shortcuts over the same
-  controller and history paths.
+The read-only methods are `inspect_workspace`, `get_draft_diff`,
+`validate_draft`, `list_catalog` and `list_binding_slots`.
+
+`execute_action` accepts an action object such as:
+
+```json
+{
+  "action": {
+    "type": "add-wall",
+    "floorId": "floor-ground",
+    "from": [0, 0],
+    "to": [4, 0]
+  },
+  "expectedRevision": 12
+}
+```
+
+The public action types cover durable construction edits, floor operations,
+catalog placement and editing, Home Assistant slot and room mappings, draft
+discard/publication, room renaming and history. Selection, camera and tool-only
+actions stay browser-local. `list_catalog` exposes both stable models and
+project-local `custom:*` models; `list_binding_slots` exposes typed slots and,
+when Cabane is connected to Home Assistant, compatible registry candidates.
+
+The browser still checks the active origin, registry presence, disabled/hidden
+status, slot compatibility, editor busy state and draft revision. Publish and
+discard remain explicit actions and use the normal project and binding paths.
 
 Mutating commands accept an optional `expectedRevision`. When supplied, a stale
 agent request is rejected and the agent must inspect again. The browser also
@@ -83,7 +90,7 @@ documented command through the generic request entry point:
 ```sh
 npm run agent:request -- --method get_capabilities --pretty
 npm run agent:request -- --method inspect_workspace --pretty
-npm run agent:request -- --method dispatch_arrange \\
+npm run agent:request -- --method execute_action \\
   --params '{"action":{"type":"add-item","modelId":"some-model"}}' --pretty
 ```
 

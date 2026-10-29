@@ -67,7 +67,7 @@ export async function executeFloorOperation(
   ensureEditable(controller);
   expectedRevision(params, controller);
   const operation = requiredString(params, "operation");
-  if (!AGENT_FLOOR_OPERATIONS.has(operation))
+  if (!(Object.values(AGENT_FLOOR_OPERATIONS) as readonly string[]).includes(operation))
     throw new Error(`Unsupported floor operation: ${operation}.`);
   const beforeRevision = controller.workspace.getRecord().revision;
   const floorId = optionalString(params, "floorId") ?? controller.activeFloorId;

@@ -198,6 +198,7 @@
     "tests": [
       "action-bar-editor.test.mjs",
       "action-bar-navigation.test.mjs",
+      "agent-action-contract.test.mjs",
       "agent-test-reporter.test.mjs",
       "agent-workflow.test.mjs",
       "async-condition.test.mjs",
