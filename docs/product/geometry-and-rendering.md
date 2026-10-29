@@ -360,7 +360,9 @@ using parent groups. Disjoint patches can reuse a layer; overlapping patches
 must use different layers. The component owns depth testing, depth writing,
 opaque toon material, and bounded polygon bias. A small local Z separation matches
 the paint order; callers do not supply material depth overrides. Colours and
-emissive colour/intensity remain configurable. This is not a transparent-glass or
+emissive colour/intensity remain configurable. Physical surfaces can opt into
+`castShadow` and `receiveShadow`; both default to false for flat artwork.
+This is not a transparent-glass or
 volumetric-overlay primitive, and depth bias does not replace physical clearance
 between separate objects.
 

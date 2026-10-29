@@ -56,6 +56,32 @@ offers Open/Stop/Close and a position slider according to advertised features,
 and disables commands when offline. It uses the existing command scheduler and
 exact runtime binding. No household bindings are included in the preset.
 
+## Standalone kitchen countertops
+
+**Arrange → Kitchen → Worktops** offers **Countertop** (`countertop`) and
+**Corner countertop** (`corner-countertop`). Search for countertop or worktop.
+Both are independent slabs, with no cabinet, legs, plinth, or appliance baked in.
+They share six Details → Variant finishes: **Light oak**, **Dark oak**,
+**White marble**, **Black granite**, **White quartz**, and **Concrete**.
+Beveled edges, fine directional oak grain, marble veins, and mineral flecks
+are procedural, with no external textures.
+
+Width, depth, and height resize independently; height is the slab's thickness.
+The inferred default straight slab is **180 × 63 × 4 cm (width × depth × thickness)**.
+The continuous L-shaped slab is **126 × 126 × 4 cm**, with two **63 cm** deep arms
+and a clear inner corner. Resizing the corner scales each arm with its corresponding
+overall dimension: its arm depths stay half the overall width and depth.
+Rotate it to suit any kitchen corner, and use the same finish on adjacent straight runs.
+These are generic dimensions, not manufacturer measurements.
+
+The origin is centered on X/Z at the slab's underside (Y=0). Set **Elevation**
+to the desired underside height in Arrange Details. For a 91 cm finished worktop
+with a 4 cm slab, use **87 cm elevation**, leaving clear space above an 86.5 cm
+washing machine. Elevation and thickness are independent, so changing thickness
+does not move the underside. The L's opening is toward +X/−Z before rotation.
+Both components and size constants are exported from `@cabane/catalog/furnishing`:
+`Countertop` / `COUNTERTOP_SIZE`, `CornerCountertop` / `CORNER_COUNTERTOP_SIZE`.
+
 ## Integrated roller shutter
 
 `integrated-roller-shutter` exports `IntegratedRollerShutterModel` and
