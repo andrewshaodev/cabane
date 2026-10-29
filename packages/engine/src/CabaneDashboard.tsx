@@ -9,6 +9,7 @@ import { useHomeAssistantRuntime } from "./HomeAssistantRuntime";
 import { useRuntimeBindingProfile } from "./RuntimeBindingSetup";
 
 import { validateHomeManifest } from "./validation";
+import { ModelLightingNotice } from "./ModelLightingNotice";
 
 import { ConfigurationScreen } from "./ConfigurationScreen";
 
@@ -51,51 +52,58 @@ export function CabaneDashboard({
   if (!validation.canRender || !validation.manifest) {
     return <ConfigurationScreen issues={validation.issues} />;
   }
-  if (bindingManager)
-    return (
-      <ValidatedDashboard
-        manifest={validation.manifest}
-        architectureModels={architectureModels}
-        deviceModels={deviceModels}
-        renderActionBarDeviceIcon={renderActionBarDeviceIcon}
-        walkTools={walkTools}
-        bindingManager={bindingManager}
-        fallbackDemo={manifest === null}
-        sessionPresentation={sessionPresentation}
-        setupAction={setupAction}
-        setupOpen={setupOpen}
-        mappingRequest={mappingRequest}
-        focusRoomId={focusRoomId}
-        onEditHome={onEditHome}
-        onCustomizeActionBar={onCustomizeActionBar}
-        onExportBrowserData={onExportBrowserData}
-        onWorkspaces={onWorkspaces}
-        onHomeAssistantSettings={onHomeAssistantSettings}
-        onOpenConnect={onOpenConnect}
-        walkthrough={walkthrough}
-      />
-    );
   return (
-    <ManagedValidatedDashboard
-      manifest={validation.manifest}
-      architectureModels={architectureModels}
-      deviceModels={deviceModels}
-      renderActionBarDeviceIcon={renderActionBarDeviceIcon}
-      walkTools={walkTools}
-      fallbackDemo={manifest === null}
-      sessionPresentation={sessionPresentation}
-      setupAction={setupAction}
-      setupOpen={setupOpen}
-      mappingRequest={mappingRequest}
-      focusRoomId={focusRoomId}
-      onEditHome={onEditHome}
-      onCustomizeActionBar={onCustomizeActionBar}
-      onExportBrowserData={onExportBrowserData}
-      onWorkspaces={onWorkspaces}
-      onHomeAssistantSettings={onHomeAssistantSettings}
-      onOpenConnect={onOpenConnect}
-      walkthrough={walkthrough}
-    />
+    <>
+      <ModelLightingNotice
+        key={validation.issues.map((issue) => issue.path).join("|")}
+        issues={validation.issues}
+        onEdit={onEditHome ? () => onEditHome("furnish") : undefined}
+      />
+      {bindingManager ? (
+        <ValidatedDashboard
+          manifest={validation.manifest}
+          architectureModels={architectureModels}
+          deviceModels={deviceModels}
+          renderActionBarDeviceIcon={renderActionBarDeviceIcon}
+          walkTools={walkTools}
+          bindingManager={bindingManager}
+          fallbackDemo={manifest === null}
+          sessionPresentation={sessionPresentation}
+          setupAction={setupAction}
+          setupOpen={setupOpen}
+          mappingRequest={mappingRequest}
+          focusRoomId={focusRoomId}
+          onEditHome={onEditHome}
+          onCustomizeActionBar={onCustomizeActionBar}
+          onExportBrowserData={onExportBrowserData}
+          onWorkspaces={onWorkspaces}
+          onHomeAssistantSettings={onHomeAssistantSettings}
+          onOpenConnect={onOpenConnect}
+          walkthrough={walkthrough}
+        />
+      ) : (
+        <ManagedValidatedDashboard
+          manifest={validation.manifest}
+          architectureModels={architectureModels}
+          deviceModels={deviceModels}
+          renderActionBarDeviceIcon={renderActionBarDeviceIcon}
+          walkTools={walkTools}
+          fallbackDemo={manifest === null}
+          sessionPresentation={sessionPresentation}
+          setupAction={setupAction}
+          setupOpen={setupOpen}
+          mappingRequest={mappingRequest}
+          focusRoomId={focusRoomId}
+          onEditHome={onEditHome}
+          onCustomizeActionBar={onCustomizeActionBar}
+          onExportBrowserData={onExportBrowserData}
+          onWorkspaces={onWorkspaces}
+          onHomeAssistantSettings={onHomeAssistantSettings}
+          onOpenConnect={onOpenConnect}
+          walkthrough={walkthrough}
+        />
+      )}
+    </>
   );
 }
 

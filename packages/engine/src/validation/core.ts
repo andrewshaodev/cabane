@@ -289,14 +289,14 @@ export const isDeviceModelDefinition = (value: unknown): value is DeviceModelDef
         value.sceneLight.position.every(isFiniteNumber) &&
         isNonEmptyString(value.sceneLight.color) &&
         isFiniteNumber(value.sceneLight.maxIntensity) &&
-        value.sceneLight.maxIntensity > 0 &&
+        value.sceneLight.maxIntensity >= 0 &&
         isFiniteNumber(value.sceneLight.distance) &&
-        value.sceneLight.distance > 0 &&
+        value.sceneLight.distance >= 0 &&
         (value.supportedDomains as unknown[]).includes("light"))) &&
     (value.sceneLights === undefined ||
       (Array.isArray(value.sceneLights) &&
-        value.sceneLights.length > 0 &&
-        value.sceneLights.length <= 8 &&
+        // Physical capacity belongs to the shared light planner. Glow-only and
+        // zero-brightness settings legitimately produce no physical emitters.
         (value.supportedDomains as unknown[]).includes("light") &&
         value.sceneLights.every(
           (source) =>

@@ -234,7 +234,7 @@
         ]
       }
     ],
-    "invariant": "Maintain the standalone authoring skill in .agents/skills/create-cabane-model alongside the product, retaining its MIT license and standalone installation. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
+    "invariant": "Maintain the standalone authoring skill in .agents/skills/create-cabane-model alongside the product, retaining its MIT license and standalone installation. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and physical emitter counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {
@@ -518,7 +518,10 @@
       "packages/engine/src/model-lighting",
       "packages/engine/src/model-lighting/execution.ts",
       "packages/engine/src/HomeAssistantSceneLighting.tsx",
-      "packages/engine/src/SceneLightPool.tsx"
+      "packages/engine/src/SceneLightPool.tsx",
+      "packages/engine/src/validation/recover-model-lighting.ts",
+      "packages/engine/src/home-project/scene-items.ts",
+      "packages/engine/src/ModelLightingNotice.tsx"
     ],
     "interfaces": [
       {
@@ -537,7 +540,7 @@
         ]
       }
     ],
-    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. execution.ts alone bounds physical expansion for import, editor and floor runtime. Keep strips compact across copies; all logical sources contribute within the 64-light budget through fair strip sampling or spatial merging, without rewriting saved intent. Active sources take priority over native/dashboard prewarming; retain at most the bounded peak slots across state changes.",
+    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. execution.ts alone bounds physical expansion for import, editor and floor runtime. Keep strips compact across copies; all logical sources contribute within the 64-light budget through fair strip sampling or spatial merging, without rewriting saved intent. Active sources take priority over native/dashboard prewarming; retain at most the bounded peak slots across state changes. Manifest validation accepts bounded compatibility emitters, including empty and zero-output settings. Broken optional runtime lighting is suppressed per model with a repair notice while geometry and saved definitions remain intact; dense authored models report selectable, warning-only approximation diagnostics.",
     "checks": ["verify:workspace", "verify:runtime", "build:panel"]
   }
 ]

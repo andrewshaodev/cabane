@@ -6,6 +6,7 @@ import { loadStoredHomeAssistantUrl, saveStoredHomeAssistantUrl } from "./home-a
 import { HomeAssistantRuntimeProvider } from "./HomeAssistantRuntime";
 import type { ArchitectureModelRegistry, DeviceModelRegistry, HomeManifest } from "./types";
 import { validateHomeManifest } from "./validation";
+import { ModelLightingNotice } from "./ModelLightingNotice";
 import { exportCabaneBrowserData, importCabaneBrowserData } from "./browser-data-transfer";
 
 const ONBOARDING_STORAGE_PREFIX = "cabane:onboarding:v1";
@@ -85,6 +86,11 @@ export function CabaneApp({
   };
   return (
     <HomeAssistantRuntimeProvider homeAssistantUrl={homeAssistantUrl}>
+      <ModelLightingNotice
+        key={validation.issues.map((issue) => issue.path).join("|")}
+        issues={validation.issues}
+        onEdit={onEditHome ? () => onEditHome("furnish") : undefined}
+      />
       <CabaneAppExperience
         manifest={validation.manifest}
         architectureModels={architectureModels}

@@ -1,9 +1,9 @@
 {
-  "revision": 19,
-  "fingerprint": "fda4b9e66e9bcdf703a6ee463202d37ecdeeb8899f94c2e418cfc1360f6f8cc3",
-  "summary": "Keep native glow selections stable across model variants",
+  "revision": 20,
+  "fingerprint": "cd6bc7e5e7a5d774fd1ffe18cee7720ddc868e95e1d28a478b256519b24c7609",
+  "summary": "Keep dense model lighting renderable and isolate broken optional illumination",
   "breakingChanges": [
-    "Existing homes and immutable GLB selections remain supported. Native keyed emissiveSurfaces require the updated frontend and matching HA panel. Old native ordinals remain saved but inactive until explicitly reselected. No asset, binding or schema-version migration is required."
+    "Existing authored sources, sample counts, model identities and connections remain unchanged. Older panels can reject valid lighting above eight samples or with no physical output; update HACS, restart Home Assistant and reload the frontend. Runtime recovery disables only malformed optional lighting without rewriting saved data."
   ],
   "history": [
     {
@@ -130,6 +130,13 @@
       "summary": "Add virtual room boundaries without physical geometry or collision",
       "breakingChanges": [
         "Existing homes remain supported. Homes using WallSpec.virtual require the matching updated frontend and Home Assistant panel; older clients keep unsupported fields blocked. Mixed lighting, placement repairs and independent entity readings from revisions 15 through 17 remain supported."
+      ]
+    },
+    {
+      "revision": 19,
+      "summary": "Keep native glow selections stable across model variants",
+      "breakingChanges": [
+        "Existing homes and immutable GLB selections remain supported. Native keyed emissiveSurfaces require the updated frontend and matching HA panel. Old native ordinals remain saved but inactive until explicitly reselected. No asset, binding or schema-version migration is required."
       ]
     }
   ],

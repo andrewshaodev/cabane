@@ -41,6 +41,11 @@
   font-size: 0.58rem;
   font-weight: 730;
 }
+.runtime-lighting-notice {
+  max-block-size: min(40dvh, 20rem);
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
 .configuration-screen {
   display: grid;
   place-items: center;

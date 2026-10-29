@@ -1,6 +1,7 @@
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
+import { modelLightingExecution, SCENE_LIGHT_BUDGET } from "../model-lighting/execution";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import { pointStrictlyOutsideFloorFootprint } from "../floor-finishes/finish-geometry";
@@ -249,6 +250,16 @@ export const validateSceneItemsAndSupports = (
         `Model “${item.modelId}” is not registered; a generic placeholder will be shown until it is imported.`,
       );
     } else {
+      if (definition.lighting) {
+        const execution = modelLightingExecution(definition.lighting);
+        if (execution.approximated)
+          addProjectWarning(
+            issues,
+            "project.model-lighting-approximation",
+            `${itemPath}.modelId`,
+            `“${definition.label}” requests ${execution.requested.toLocaleString("en")} light samples. The scene shares ${SCENE_LIGHT_BUDGET} physical lights; coverage is approximated while saved sources and total brightness are preserved.`,
+          );
+      }
       if (
         item.lightSlotId &&
         (!definition.lighting ||
