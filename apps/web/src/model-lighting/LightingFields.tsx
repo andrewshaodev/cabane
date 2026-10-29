@@ -1,9 +1,5 @@
 import {
   modelLightSources,
-  modelGlowTargetCount,
-  MODEL_GLOW_TARGET_LIMIT,
-  resolveModelGlowTargets,
-  toggleModelGlowTarget,
   type CustomModelLight,
   type DeviceModelBounds,
   type ModelLightingSurfaceOption,
@@ -55,8 +51,7 @@ export function LightingFields({
         sources.map((source, i) => (i === selected.index ? next : source)),
       ),
     );
-  const glowing = modelGlowTargetCount(light);
-  const resolution = resolveModelGlowTargets(surfaces, light);
+  const glowing = (light.emissiveSurfaces?.length ?? 0) + (light.emissiveMaterials?.length ?? 0);
   return (
     <div className="lighting-fields">
       <LightingSources
@@ -167,62 +162,66 @@ export function LightingFields({
         </p>
         <details className="lighting-surfaces">
           <summary>Surface list</summary>
-          {surfaces.map((surface) => {
-            const checked = resolution.selected.includes(surface.id);
-            return (
-              <label key={surface.id} className="lighting-check" title={surface.unavailableReason}>
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  disabled={!surface.supported || (!checked && glowing >= MODEL_GLOW_TARGET_LIMIT)}
-                  onChange={() => onChange(toggleModelGlowTarget(light, surfaces, surface.id))}
-                />
-                {surface.label}
-                {!surface.supported && ` · ${surface.unavailableReason ?? "Unavailable"}`}
-              </label>
-            );
-          })}
-          {light.emissiveMaterials
-            ?.filter(
-              (name) =>
-                !resolution.unresolved.some(
-                  (target) => target.field === "emissiveMaterials" && target.id === name,
-                ),
-            )
-            .map((name) => (
-              <label key={name} className="lighting-check">
+          {light.emissiveSurfaces
+            ?.filter((id) => !surfaces.some((surface) => surface.id === id && surface.supported))
+            .map((id) => (
+              <label key={id} className="lighting-check">
                 <input
                   type="checkbox"
                   checked
                   onChange={() =>
                     onChange({
                       ...light,
-                      emissiveMaterials: light.emissiveMaterials!.filter(
-                        (material) => material !== name,
-                      ),
+                      emissiveSurfaces: light.emissiveSurfaces!.filter((saved) => saved !== id),
                     })
                   }
                 />
-                {name} (material)
+                {id} · Unavailable. Remove and choose the surface again.
               </label>
             ))}
-          {resolution.unresolved.map((target) => (
-            <label key={`${target.field}:${target.id}`} className="lighting-check">
+          {surfaces.map((surface) => {
+            const checked = !!light.emissiveSurfaces?.includes(surface.id);
+            return (
+              <label key={surface.id} className="lighting-check">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  disabled={!surface.supported || (!checked && glowing >= 16)}
+                  onChange={() =>
+                    onChange({
+                      ...light,
+                      emissiveSurfaces: checked
+                        ? light.emissiveSurfaces!.filter((id) => id !== surface.id)
+                        : [...(light.emissiveSurfaces ?? []), surface.id],
+                    })
+                  }
+                />
+                {surface.label}
+              </label>
+            );
+          })}
+          {light.emissiveMaterials?.map((name) => (
+            <label key={name} className="lighting-check">
               <input
                 type="checkbox"
                 checked
                 onChange={() =>
                   onChange({
                     ...light,
-                    [target.field]: light[target.field]!.filter((id) => id !== target.id),
+                    emissiveMaterials: light.emissiveMaterials!.filter(
+                      (material) => material !== name,
+                    ),
                   })
                 }
               />
-              {target.id} · {target.reason}
+              {name} (material)
             </label>
           ))}
           {!surfaces.some((surface) => surface.supported) && (
             <p className="lighting-note">No surfaces available for glow.</p>
+          )}
+          {surfaces.some((surface) => surface.id.startsWith("unavailable:")) && (
+            <p className="lighting-note">Some model parts are unavailable for surface selection.</p>
           )}
         </details>
       </fieldset>

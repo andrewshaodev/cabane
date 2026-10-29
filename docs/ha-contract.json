@@ -1,9 +1,9 @@
 {
   "revision": 19,
-  "fingerprint": "589969343d0d15d8fd387e60f11d522426bc2da90ae03dd6a89265956d33cf77",
-  "summary": "Give model glow targets authored and immutable asset identities",
+  "fingerprint": "fda4b9e66e9bcdf703a6ee463202d37ecdeeb8899f94c2e418cfc1360f6f8cc3",
+  "summary": "Keep native glow selections stable across model variants",
   "breakingChanges": [
-    "Existing homes stay readable. New glowTargets require the matching updated frontend and Home Assistant panel; older clients keep unknown fields blocked. Historical emissiveSurfaces ordinals stay saved but inactive until reviewed and reselected. Legacy named-material groups remain supported only for immutable GLBs. No asset or private binding migration is required."
+    "Existing homes and immutable GLB selections remain supported. Native keyed emissiveSurfaces require the updated frontend and matching HA panel. Old native ordinals remain saved but inactive until explicitly reselected. No asset, binding or schema-version migration is required."
   ],
   "history": [
     {

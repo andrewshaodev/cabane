@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import React, { act, useState } from "react";
+import React, { useState } from "react";
 import {
   BoxGeometry,
   Group,
@@ -24,63 +24,6 @@ await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
   const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
   const { lightingModelHit } = await load("/apps/web/src/model-lighting/lighting-picking.ts");
-  const { LightingFields } = await load("/apps/web/src/model-lighting/LightingFields.tsx");
-  test("surface lists retain absent targets, expose legacy review, and toggle the same targets as picking", () =>
-    withStorageDom(async (dom) => {
-      const leg = { id: "native:1:bench.leg.back-left", label: "Bench leg", supported: true };
-      const cushion = { id: "native:1:bench.seat-pad", label: "Bench cushion", supported: true };
-      let current, setSurfaces;
-      function Harness() {
-        const [light, onChange] = useState({
-          position: [0, 0.5, 0],
-          color: "#ffe3b4",
-          maxIntensity: 2,
-          distance: 5,
-          sources: [],
-          glowTargets: [leg.id, cushion.id],
-          emissiveSurfaces: ["surface:0:0"],
-        });
-        const [surfaces, receiveSurfaces] = useState([leg]);
-        current = light;
-        setSurfaces = receiveSurfaces;
-        return React.createElement(LightingFields, {
-          light,
-          onChange,
-          surfaces,
-          bounds: { min: [-1, 0, -1], max: [1, 1, 1] },
-          selected: { index: 0 },
-          onSelect: () => {},
-          picking: null,
-          onPicking: () => {},
-          step: 0.01,
-          onStep: () => {},
-        });
-      }
-      await dom.mount(async () => {
-        const root = createRoot(dom.document.body);
-        root.render(React.createElement(Harness));
-        return { unmount: () => root.unmount() };
-      });
-      const checkbox = (text) =>
-        [...dom.document.querySelectorAll("label")]
-          .find((label) => label.textContent.includes(text))
-          .querySelector("input");
-      assert.equal(checkbox("Bench leg").checked, true);
-      assert.match(dom.document.body.textContent, /older surface selection needs review/i);
-      assert.match(dom.document.body.textContent, /absent from this variant or state/i);
-      await act(async () => setSurfaces([leg, cushion]));
-      assert.equal(checkbox("Bench cushion").checked, true);
-      assert.deepEqual(current.glowTargets, [leg.id, cushion.id]);
-      const expected = api.toggleModelGlowTarget(current, [leg, cushion], leg.id);
-      await act(async () => checkbox("Bench leg").click());
-      assert.deepEqual(current, expected);
-      await act(async () => checkbox("surface:0:0").click());
-      assert.deepEqual(current.emissiveSurfaces, []);
-      await act(async () => setSurfaces([leg]));
-      assert.deepEqual(current.glowTargets, [cushion.id]);
-      await act(async () => checkbox(cushion.id).click());
-      assert.deepEqual(current.glowTargets, []);
-    }));
   test("placement skips transparent or transmitting faces without mutating glass or picking another model", () => {
     const geometry = new BoxGeometry(2, 2, 0.02);
     const glass = new MeshPhysicalMaterial({ transmission: 1 });
@@ -100,16 +43,6 @@ await withModules(async (load) => {
     const hits = ray.intersectObject(root, true);
     assert.equal(lightingModelHit(root, hits, false).object, door);
     assert.equal(lightingModelHit(root, hits, true).object, back);
-    const overlay = new Group();
-    overlay.userData.modelGlowIgnore = true;
-    const decoration = new Mesh(geometry, opaque);
-    decoration.position.z = 2;
-    overlay.add(decoration);
-    root.add(overlay);
-    root.updateMatrixWorld(true);
-    const decoratedHits = ray.intersectObject(root, true);
-    assert.equal(decoratedHits[0].object, decoration);
-    assert.equal(lightingModelHit(root, decoratedHits, true).object, back);
     const local = root.worldToLocal(lightingModelHit(root, hits, true).point.clone());
     assert.ok(Math.abs(local.z - 0.01) < 1e-6);
     glass.transmission = 0;

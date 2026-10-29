@@ -25,12 +25,6 @@ catalog registries.
 A new native model should use the public engine material/geometry vocabulary, expose
 only its supported entry points through a local barrel, and preserve catalog
 placement and slot semantics. Do not put household HA IDs into registry entries.
-Native glow selection requires authored mesh-local `userData.modelGlowKey`
-identities, with one logical key per material role. `RoundedFurniturePanel`
-forwards an explicit `glowKey`. Keep a part's key across variants, device states,
-wrapper changes and cosmetic refactors, and never reuse it for another part.
-Unkeyed or duplicate targets are explicitly unavailable. Display names and
-traversal order cannot supply identity. See [glow identities](model-lighting.md#glow-identities-and-compatibility).
 The exact available models and presets are the current registry contents, not a
 frozen product-spec enumeration.
 

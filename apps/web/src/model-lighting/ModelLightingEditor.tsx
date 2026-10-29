@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type ReactNode } from "react";
-import { modelLightSources, resolveModelGlowTargets, toggleModelGlowTarget } from "@cabane/engine";
+import { modelLightSources } from "@cabane/engine";
 import type {
   CustomModelLight,
   DeviceModelBounds,
@@ -107,8 +107,23 @@ export function ModelLightingEditor({
               setSelected(index);
               setPicking(null);
             }}
-            onSurface={(id) => {
-              if (value) change(toggleModelGlowTarget(value, surfaces, id));
+            onSurface={(id, materialName) => {
+              if (!value) return;
+              const ids = value.emissiveSurfaces ?? [];
+              const materials = value.emissiveMaterials ?? [];
+              const savedMaterial = materials.includes(materialName);
+              if (!savedMaterial && !ids.includes(id) && ids.length + materials.length >= 16)
+                return;
+              change({
+                ...value,
+                ...(savedMaterial
+                  ? { emissiveMaterials: materials.filter((name) => name !== materialName) }
+                  : {}),
+                emissiveSurfaces:
+                  savedMaterial || ids.includes(id)
+                    ? ids.filter((value) => value !== id)
+                    : [...ids, id],
+              });
             }}
             onSurfaces={receiveSurfaces}
           >
@@ -146,10 +161,11 @@ export function ModelLightingEditor({
           <p className="lighting-empty">Enable lighting to add sources and glow.</p>
         )}
       </div>
-      {value && resolveModelGlowTargets(surfaces, value).unresolved.length > 0 && (
+      {value?.emissiveSurfaces?.some(
+        (id) => !surfaces.some((surface) => surface.id === id && surface.supported),
+      ) && (
         <p role="status" className="lighting-warning">
-          Some saved glow targets are inactive in this preview. Review Surface list to remove older
-          selections, choose a surface again, or preview the matching variant and state.
+          Some saved surfaces are unavailable. Choose another surface or restore the original model.
         </p>
       )}
     </fieldset>

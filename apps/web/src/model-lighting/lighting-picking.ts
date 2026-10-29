@@ -6,12 +6,10 @@ export function lightingModelHit(
   throughGlass: boolean,
 ) {
   return hits.find((hit) => {
-    if (!(hit.object instanceof Mesh)) return false;
+    if (!(hit.object instanceof Mesh) || hit.object.userData.sceneOutline) return false;
     let parent: Object3D | null = hit.object;
-    while (parent) {
-      if (!parent.visible || parent.userData.sceneOutline || parent.userData.modelGlowIgnore)
-        return false;
-      if (parent === root) break;
+    while (parent && parent !== root) {
+      if (parent.userData.modelGlowIgnore || !parent.visible) return false;
       parent = parent.parent;
     }
     if (!parent) return false;

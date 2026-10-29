@@ -28,12 +28,8 @@ Original GLB materials, colours, and embedded textures are preserved. Personal
 models receive scene lighting without compulsory toon conversion or contours.
 Native procedural models retain their materials, batching, LOD, and outlines.
 Animations remain in their initial pose; embedded cameras and lights are ignored
-with preview notices. Glow targets identify an immutable asset's source node,
-primitive and material slot. Normalization and copied instances preserve their
-meaning. Legacy named Standard/Physical material groups retain their exact-name
-semantics. Historical ordinal targets require explicit reselection, as described
-in [glow compatibility](model-lighting.md#glow-identities-and-compatibility).
-Selected materials' emissive colour and intensity follow the connected light. Other
+with preview notices. Light profiles may explicitly select named Standard/Physical
+materials whose emissive colour and intensity follow the connected light. Other
 visual variants driven by HA state are outside this version.
 Only the import owner may load personal GLB resources; catalog/home generation
 follows the [visual asset contract](geometry-and-rendering.md#visual-assets).

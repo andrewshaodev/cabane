@@ -526,13 +526,11 @@
           "lightingSlotForItem",
           "modelLightingSurfaces",
           "modelLightingSurfaceAt",
-          "resolveModelGlowTargets",
-          "toggleModelGlowTarget",
           "controlModelLightMaterials"
         ]
       }
     ],
-    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Authored native keys and verified immutable GLB source identities share one resolver for picking, lists and runtime. Retain historical ordinals as inactive reviewable selections; legacy named groups resolve only inside GLBs. Never retarget absent, duplicate or unsupported parts. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. Only on sources occupy the reusable pool; grow capacity without an arbitrary floor cutoff and retain slots across state changes.",
+    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. Only on sources occupy the reusable pool; grow capacity without an arbitrary floor cutoff and retain slots across state changes.",
     "checks": ["verify:workspace", "verify:runtime", "build:panel"]
   }
 ]

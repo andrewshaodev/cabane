@@ -152,12 +152,6 @@ export {
   controlModelLightMaterials,
   type ModelLightingSurfaceOption,
 } from "./model-lighting/surfaces";
-export {
-  resolveModelGlowTargets,
-  toggleModelGlowTarget,
-  modelGlowTargetCount,
-  MODEL_GLOW_TARGET_LIMIT,
-} from "./model-lighting/surface-targets";
 
 export {
   ModelLightingStateContext,

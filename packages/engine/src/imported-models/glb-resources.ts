@@ -91,23 +91,12 @@ export async function loadGlb(bytes: Uint8Array) {
   const discarded: Object3D[] = [];
   let meshes = 0,
     triangles = 0;
-  const sha256 = await modelAssetHash(bytes);
   gltf.scene.traverse((object) => {
     // User-supplied extras cannot install collision or interaction metadata.
     object.userData = {};
     if ("isCamera" in object || "isLight" in object) discarded.push(object);
     if (!(object instanceof Mesh)) return;
     object.userData.importedModel = true;
-    // Parser associations preserve source indices through loader wrappers and shared meshes.
-    const association = gltf.parser.associations.get(object) as { primitives?: number } | undefined;
-    const primitive = association?.primitives;
-    let node: number | undefined;
-    for (let ancestor: Object3D | null = object; ancestor; ancestor = ancestor.parent) {
-      node = gltf.parser.associations.get(ancestor)?.nodes;
-      if (node !== undefined) break;
-    }
-    if (node !== undefined && primitive !== undefined)
-      object.userData.modelGlowAsset = { sha256, node, primitive };
     object.layers.enable(IMPORTED_MODEL_LAYER);
     object.castShadow = object.receiveShadow = true;
     const mesh = object as Mesh<BufferGeometry, Material | Material[]>;

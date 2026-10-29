@@ -38,12 +38,10 @@ Visible X/Y/Z fields and step buttons support 1 mm, 1 cm and 10 cm movements.
 Focus the preview and use arrow keys for X/Z, Page Up/Down for Y, and Shift for
 ten times the selected step. Length fields use the ordinary measurement inputs.
 
-Choose in preview selects supported glowing surfaces directly and highlights the
-surface under the cursor. Click again to remove glow; existing named GLB material
-groups can also be removed this way or in Surface list. Up to sixteen saved
-targets, including historical selections, may be retained in total. Preview
-variant changes only the displayed model. Targets absent from that variant or
-device state remain saved and are reported in Surface list. Show handles hides editor markers and gizmos without
+Choose in preview selects glowing surfaces directly and highlights the surface
+under the cursor. Click again to remove glow; existing named GLB material
+selections can also be removed this way or in Surface list. Up to sixteen
+surfaces/materials may glow. Show handles hides editor markers and gizmos without
 changing saved lighting. Disabling Illuminate surroundings retains surface glow
 and source settings. Default color, total brightness and range configure the
 scene. Connected light entities supply their actual brightness and color;
@@ -71,43 +69,15 @@ stripping them.
 Selected surfaces use instance-owned materials; geometry and texture resources
 stay shared. Original built-in model glow implementations remain catalog-owned.
 
-### Glow identities and compatibility
-
-New selections use `light.glowTargets`. Native targets are
-`native:1:<authored-key>` within the model definition. Meshes opt in through
-`userData.modelGlowKey`: one string for a single material, or an array of explicit
-material-role keys for a material array. Keys identify logical parts across
-variants and device states. They must never be reused for a different part.
-Display names, mesh order, transforms and wrapper groups are not identities.
-Duplicate keys, geometry without keys, and non-emissive materials are unavailable
-for selection, with an explanation in Surface list. Invisible parts retain their
-keys but cannot be picked. Outline and `modelGlowIgnore` subtrees are excluded.
-The bench, tabletop TV and countertop microwave supply authored keys; other
-native geometry opts in as its model author declares stable parts.
-
-The verified GLB loader stamps targets as
-`glb:1:<asset-sha256>:<source-node>:<primitive>:<material-slot>`, using loader
-associations with immutable source indices. Names and wrapper groups do not
-participate. Normalization, copied instances and model-pack transfer retain these
-targets. A different asset cannot resolve them.
-
-Historical `emissiveSurfaces` ordinals remain readable and round-trip unchanged,
-but are inactive for both native and imported models. The original model revision
-and logical part were not saved, so automatic remapping cannot prove the intended
-surface. Surface list explains that the selection needs review and allows its
-removal and explicit reselection. Legacy `emissiveMaterials` retain their original
-exact-name group meaning only inside immutable GLBs, including multiple surfaces
-with the same material name. Native named selections and missing or unsupported
-GLB groups are inactive and reviewable. No historical reference is silently
-converted or assigned to a new part.
-
-`modelLightingSurfaces`, `modelLightingSurfaceAt`, `resolveModelGlowTargets` and
-`toggleModelGlowTarget` are the shared engine seam for a model editor. Runtime
-materials consume the same resolution and return unresolved targets. Editors
-should preserve unresolved declarations until the user removes or replaces them.
-Older clients reject the new field through the unsupported-format recovery path;
-the matching frontend and HA panel are required. Assets, private bindings and the
-HomeProject version do not migrate.
+Native selections use `surface:key:<key>` in the existing `emissiveSurfaces` list.
+A unique mesh name identifies a part; repeated names use an explicit
+`userData.modelGlowKey` (`glowKey` on RoundedFurniturePanel). Keep these keys when
+changing variants, state geometry or internal wrappers, and never reuse a key for
+a different part. Unnamed, duplicate or multi-material native parts cannot be
+selected. Absent targets and old native ordinals stay saved but inactive, with
+removal/reselection in Surface list. Immutable personal GLBs retain their existing
+ordinal and named-material behavior. The sixteen-total rule is unchanged. Older
+panels must update before reading keyed native selections.
 
 Customized and imported sources use a pool of unshadowed point lights. Only
 positive-intensity sources take active slots. The pool grows to the largest

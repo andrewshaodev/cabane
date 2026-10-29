@@ -335,14 +335,6 @@
                           }
                         }
                       },
-                      "glowTargets": {
-                        "optional": true,
-                        "schema": {
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
                       "illuminate": {
                         "optional": true,
                         "schema": {
@@ -3080,14 +3072,6 @@
                       }
                     },
                     "emissiveSurfaces": {
-                      "optional": true,
-                      "schema": {
-                        "items": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "glowTargets": {
                       "optional": true,
                       "schema": {
                         "items": {
