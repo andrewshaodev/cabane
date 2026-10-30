@@ -22,11 +22,11 @@ Draw your floor plan, furnish it, and connect it to Home Assistant. Explore your
 home in 3D, see live device states, and control supported devices from the scene.
 Use Cabane in your browser or directly in the Home Assistant sidebar.
 
-|                                                   3D dashboard                                                   |                                            Arrange editor                                            |                                                          Walk mode                                                           |
+|                                                   3D dashboard                                                   |                                         Built-in Home Editor                                         |                                                      First person mode                                                       |
 | :--------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------: |
 | [![Cabane demo home with simulated room states](docs/images/demo-dashboard.jpg)](docs/images/demo-dashboard.jpg) | [![Furnishing the demo home in Arrange](docs/images/demo-arrange.jpg)](docs/images/demo-arrange.jpg) | [![First-person view of the kitchen and dining room in Casa Solstice](docs/images/walk-view.jpg)](docs/images/walk-view.jpg) |
 
-Dashboard and Arrange show the bundled demo with simulated devices. Walk mode
+The dashboard and Built-in Home Editor show the bundled demo with simulated devices. First person mode
 shows Casa Solstice from inside. Click any screenshot to enlarge.
 
 ## What you can do
@@ -256,7 +256,7 @@ homes use the same portable project schema. See the [bundled home guide](home/RE
 
 ## Easter egg: shoot the lights
 
-The optional laser gun lets you toggle supported devices in Walk mode.
+The optional laser gun lets you toggle supported devices in first person mode.
 
 <a href="docs/images/walk-laser.jpg">
   <img src="docs/images/walk-laser.jpg" alt="Laser gun toggling a light in Casa Solstice" width="480" />
