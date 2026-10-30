@@ -15,7 +15,8 @@ no rerun. Report the result, checks, and material uncertainty briefly.
 - Keep the UI in English and preserve Construct, Arrange, and Connect modes.
 - Keep credentials, household HA IDs, private mappings, and source media out of
   Git. Screenshots belong in ignored directories or outside the repository.
-- Home generation edits only `home/`, declares local slots, and never accesses HA.
+- Home generation uses the paired Cabane editor or edits only `home/` for source
+  output. Declare local slots; keep HA device administration outside generation.
   Shared product changes require a product-development request.
 - Implementation requests authorize focused commits and pushes after appropriate
   checks. Preserve Git history and remotes; deployments require an explicit request.

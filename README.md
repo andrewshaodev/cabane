@@ -103,6 +103,34 @@ See [workspace setup and backups](docs/ha-workspace-storage-setup.md).
 
 ### Build with AI
 
+Give your coding agent a floor plan or a description and let it build the home
+in the open editor. You can watch the changes, adjust them yourself and use Undo.
+The agent uses the same editing actions as Construct and Arrange.
+
+1. Open Cabane **inside Home Assistant**, then create or choose a workspace.
+2. In **Workspaces**, open that home's **••• → Connect LLM agent → Generate
+   pairing code**.
+3. Give your agent a checkout of this repository with Node.js and npm available
+   (see [Run locally](#run-locally)). Run the pairing command shown by the panel
+   from that checkout, then keep the editor open.
+4. Give the agent your plan and dimensions, for example:
+   “Use build-floor-layout to draw this unfurnished floor in my paired Cabane
+   workspace. Check the layout and stop for my review.”
+
+The agent can discover the available commands and inspect the draft with:
+
+```sh
+npm run agent:request -- --method get_capabilities --pretty
+npm run agent:inspect -- --pretty
+```
+
+Pairing requires a matching agent-enabled frontend and HA integration (protocol
+3). The browser and agent can run on different devices that can reach the same
+HA instance. The one-use code grants temporary access to that workspace, without
+giving the agent your HA access token. Edits autosave to the browser draft;
+**Save** publishes them. See [agent pairing and commands](docs/product/agent-pilot.md)
+for session lifetime and command details.
+
 Cabane's agent skills live in this repository so they can evolve with the product.
 Install a skill with the [Skills CLI](https://github.com/vercel-labs/skills), then
 select your agent in the installer:
@@ -114,7 +142,7 @@ npx skills add cabane-app/cabane --skill create-cabane-model
 | Skill                                                                  | Purpose                                                                                                                             |
 | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | [create-cabane-model](.agents/skills/create-cabane-model/SKILL.md)     | Create a standalone GLB from a description or reference photo for import through Arrange → My models. No Cabane checkout is needed. |
-| [build-floor-layout](.agents/skills/build-floor-layout/SKILL.md)       | Build an unfurnished floor from a plan or layout description in a Cabane checkout.                                                  |
+| [build-floor-layout](.agents/skills/build-floor-layout/SKILL.md)       | Build an unfurnished floor in a paired HA workspace, or author floor JSON in a Cabane checkout.                                     |
 | [equip-room](.agents/skills/equip-room/SKILL.md)                       | Furnish one accepted room from photos and descriptions in a Cabane checkout.                                                        |
 | [build-catalog-presets](.agents/skills/build-catalog-presets/SKILL.md) | Author reusable built-in catalog presets in a Cabane checkout.                                                                      |
 | [bootstrap-cabane](.agents/skills/bootstrap-cabane/SKILL.md)           | Install dependencies and start a local Cabane checkout.                                                                             |

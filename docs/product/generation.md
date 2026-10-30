@@ -1,8 +1,9 @@
 # Agent-generated home workflow
 
 Repository instructions separate home generation from product development.
-Ordinary generation edits `home/`; changes to the stable web/engine/catalog
-packages require a product-development request. The accepted owner's home is
+Source generation edits `home/`; the paired HA workflow edits only the selected
+browser workspace through the [agent relay](agent-pilot.md). Changes to stable
+web/engine/catalog packages require a product-development request. The accepted owner's home is
 already furnished, so generation should not reset it to a neutral fixture.
 
 The supported workflow skills cover bootstrapping, architectural floor layout,
@@ -27,8 +28,9 @@ requires no Cabane checkout or household HA information. Its self-contained uplo
 assets; see
 [personal models](personal-models.md).
 
-Generation does not authenticate to or inspect HA. Household mapping is a later,
-explicit authenticated browser activity. Source plans/photos, credentials,
+The paired workflow uses a workspace-scoped Cabane session; source generation
+runs offline. Generation leaves HA device administration and household mapping
+to separate user instructions in the authenticated browser. Source plans/photos, credentials,
 registry exports, HA histories, camera images, and private household IDs must
 not enter generated source. Attachments may be processed by the chosen agent
 provider. These are workflow requirements, not claims about new runtime screens.
