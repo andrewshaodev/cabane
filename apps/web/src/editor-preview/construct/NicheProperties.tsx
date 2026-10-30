@@ -77,12 +77,7 @@ export function NicheProperties({
             onCommit={(sillHeightMeters) => editor.updateSelectedOpening({ sillHeightMeters })}
           />
         </label>
-        <EditorButton
-          variant="text"
-          onClick={() =>
-            editor.dispatch({ type: "reorient-opening", openingId: niche.id, change: "side" })
-          }
-        >
+        <EditorButton variant="text" onClick={() => editor.reorientOpening(niche.id, "side")}>
           Switch wall face
         </EditorButton>
       </fieldset>

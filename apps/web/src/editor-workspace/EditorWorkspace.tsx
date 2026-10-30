@@ -4,20 +4,15 @@ import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinis
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
   FloorPicker,
-  addBottomFloor,
-  addTopFloor,
   createBrowserUuid,
   floorRemovalDisabledReason,
   normalizeWorkspaceBindingOrigin,
-  removeFloor,
-  renameFloor,
   resolveHomeAssistantBindings,
   resolveHomeAssistantPictureUrl,
-  setFloorHeight,
   useCabaneAssetUrl,
   useCabaneDom,
 } from "@cabane/engine";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FloorManagementDialog } from "../editor-floors";
 import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { installedWalkTools } from "../walk-tools";
@@ -39,13 +34,14 @@ import type { EditorMode } from "../editor-chrome/EditorModeNav";
 import { HomeEditorHeader } from "./HomeEditorHeader";
 import { HomeEditorScene } from "./HomeEditorScene";
 import { useHomeEditorController } from "./useHomeEditorController";
-import { useEditorIssueRepairs } from "./useEditorIssueRepairs";
+import { AgentPilotPanel } from "../agent-pilot/AgentPilotPanel";
 
 export function EditorWorkspace(props: Parameters<typeof useHomeEditorController>[0]) {
   const controller = useHomeEditorController(props);
-  const { repairIssue, repairMessage, repairError, itemLabel } = useEditorIssueRepairs(controller);
+  const { repairIssue, repairMessage, repairError, itemLabel } = controller.repairs;
   const placementError = controller.furnishingEditor.placementError ?? repairError;
   const {
+    executeProjectAction,
     editorProject,
     northOrientation,
     setActionBarItems,
@@ -65,7 +61,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     constructEditor,
     displayedContextualIssues,
     deviceModels,
-    furnishingEditor,
     unsettled,
     selectMode,
     runtime,
@@ -80,9 +75,18 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     editedManifest,
   } = controller;
   const [stairLiveIssues, setStairLiveIssues] = useState<readonly ManifestIssue[] | null>(null);
+  const [agentPilotOpen, setAgentPilotOpen] = useState(() => Boolean(props.agentPilotOpen));
   useEffect(() => {
     setStairLiveIssues(null);
   }, [mode, activeFloorId, stairDialog?.id, stairPlacement?.shape]);
+  useEffect(() => {
+    setAgentPilotOpen(Boolean(props.agentPilotOpen));
+  }, [props.agentPilotOpen]);
+  const onAgentPilotClose = props.onAgentPilotClose;
+  const closeAgentPilot = useCallback(() => {
+    setAgentPilotOpen(false);
+    onAgentPilotClose?.();
+  }, [onAgentPilotClose]);
   const tutorial = useBuildTutorial(
     editorProject,
     mode,
@@ -260,15 +264,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
   const addFloor = (below: boolean, duplicate: boolean) => {
     const id = `floor-${createBrowserUuid()}`;
-    const next = (below ? addBottomFloor : addTopFloor)(
-      snapshot,
+    executeProjectAction({
+      type: below ? "add-floor-below" : "add-floor-above",
       id,
-      duplicate ? { sourceFloorId: activeFloorId } : undefined,
-    );
-    commit(next);
-    floorNavigation.selectFloor(id);
-    constructEditor.replaceFloor(next.project.floors.find((floor) => floor.id === id)!);
-    furnishingEditor.replaceItems([]);
+      ...(duplicate ? { sourceFloorId: activeFloorId } : {}),
+    });
   };
   return (
     <WallFinishPreviewProvider palette={editorProject.home.palette}>
@@ -362,16 +362,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
                 setFloorDialog(null);
                 return;
               }
-              const next =
+              executeProjectAction(
                 floorDialog === "remove"
-                  ? removeFloor(snapshot, activeFloorId)
-                  : setFloorHeight(
-                      renameFloor(snapshot, activeFloorId, name),
-                      activeFloorId,
-                      height,
-                    );
-              commit(next);
-              replaceEditorsFromProject(next.project);
+                  ? { type: "remove-floor", floorId: activeFloorId }
+                  : { type: "rename-floor", floorId: activeFloorId, name, heightMeters: height },
+              );
               setFloorDialog(null);
             }}
           />
@@ -425,6 +420,12 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           placingWalkStart={placingWalkStart}
           setWalkStartFloor={setWalkStartFloor}
           onHomeAssistantSettings={props.onHomeAssistantSettings}
+        />
+        <AgentPilotPanel
+          workspaceId={props.initialRecord.homeId}
+          controller={controller}
+          open={agentPilotOpen}
+          onClose={closeAgentPilot}
         />
         <EditorSelectionDetails
           {...controller}

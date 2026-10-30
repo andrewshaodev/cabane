@@ -68,6 +68,15 @@ Contract: [Measurement preferences](../docs/product/workspace.md).
 - Review invariant: Convert physical measurements at the UI boundary. Browser-local unit preferences never rescale authored geometry; plan-coordinate inputs account for metersPerPlanUnit. Temperatures, angles and dimensionless values keep their own units.
 - Checks: `verify:construct`.
 
+### Home Assistant agent relay
+
+Contract: [Home Assistant agent relay](../docs/product/agent-pilot.md).
+
+- Owners: [`apps/agent-cli/src/cli.mjs`](../apps/agent-cli/src/cli.mjs), [`apps/agent-cli/src/ha-client.mjs`](../apps/agent-cli/src/ha-client.mjs), [`apps/web/src/agent-pilot/AgentPilotPanel.tsx`](../apps/web/src/agent-pilot/AgentPilotPanel.tsx), [`apps/web/src/agent-pilot/agent-command-contract.ts`](../apps/web/src/agent-pilot/agent-command-contract.ts), [`apps/web/src/agent-pilot/agent-command-executor.ts`](../apps/web/src/agent-pilot/agent-command-executor.ts), [`apps/web/src/agent-pilot/agent-action-executor.ts`](../apps/web/src/agent-pilot/agent-action-executor.ts), [`apps/web/src/agent-pilot/agent-command-operations.ts`](../apps/web/src/agent-pilot/agent-command-operations.ts), [`apps/web/src/agent-pilot/agent-construct-actions.ts`](../apps/web/src/agent-pilot/agent-construct-actions.ts), [`apps/web/src/agent-pilot/agent-construct-inputs.ts`](../apps/web/src/agent-pilot/agent-construct-inputs.ts), [`apps/web/src/agent-pilot/agent-arrange-actions.ts`](../apps/web/src/agent-pilot/agent-arrange-actions.ts), [`apps/web/src/editor-workspace/editor-project-actions.ts`](../apps/web/src/editor-workspace/editor-project-actions.ts), [`apps/web/src/editor-preview/construct/opening-edits.ts`](../apps/web/src/editor-preview/construct/opening-edits.ts), [`apps/web/src/editor-preview/furnish/item-edits.ts`](../apps/web/src/editor-preview/furnish/item-edits.ts), [`apps/web/src/agent-pilot/agent-model-actions.ts`](../apps/web/src/agent-pilot/agent-model-actions.ts), [`apps/web/src/custom-models/custom-model-edits.ts`](../apps/web/src/custom-models/custom-model-edits.ts), [`apps/web/src/editor-workspace/useEditorProjectActions.ts`](../apps/web/src/editor-workspace/useEditorProjectActions.ts), [`apps/web/src/agent-pilot/ha-agent-client.ts`](../apps/web/src/agent-pilot/ha-agent-client.ts), [`apps/web/src/agent-pilot/useAgentRelay.ts`](../apps/web/src/agent-pilot/useAgentRelay.ts).
+- Interface: repository commands below.
+- Review invariant: Commands decode inputs and call the same editing owners as the UI. Pairing is HA-panel-only: the native authenticated WebSocket owns the editor subscription, while the CLI uses a short-lived Cabane relay token scoped to that workspace. No browser-to-localhost transport or HA credentials are given to the agent. Sessions and pending requests are ephemeral and invalidated on disconnect; history, validation and autosave remain editor-owned.
+- Checks: `verify:fast`, `build`.
+
 ### Construct and floor topology
 
 Contract: [Construct and floor topology](../docs/product/construct.md).

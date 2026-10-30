@@ -7,6 +7,9 @@ import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
+  const { HomeAssistantHostSessionProvider } = await load(
+    "/packages/engine/src/HomeAssistantHostSession.tsx",
+  );
   const { WorkspaceLibrary } = await load("/apps/web/src/workspaces/WorkspaceLibrary.tsx");
   const { WorkspaceDeleteDialog } = await load(
     "/apps/web/src/workspaces/WorkspaceDeleteDialog.tsx",
@@ -20,7 +23,7 @@ await withModules(async (load) => {
       createdAt: 1,
     },
   };
-  async function mount(overrides = {}) {
+  async function mount(overrides = {}, hosted = false) {
     const dom = new JSDOM('<!doctype html><div id="root"></div>', {
       url: "http://synthetic.invalid",
     });
@@ -46,6 +49,7 @@ await withModules(async (load) => {
           "Export",
           "Recover",
           "ExportRaw",
+          "AgentPilot",
         ].map((name) => [
           `on${name}`,
           async (...args) => {
@@ -66,7 +70,13 @@ await withModules(async (load) => {
       });
     const root = createRoot(dom.window.document.getElementById("root"));
     await act(async () =>
-      root.render(createElement(MemoryRouter, null, createElement(WorkspaceLibrary, props))),
+      root.render(
+        createElement(
+          HomeAssistantHostSessionProvider,
+          { session: hosted ? { connection: {}, origin: "https://ha.test" } : null },
+          createElement(MemoryRouter, null, createElement(WorkspaceLibrary, props)),
+        ),
+      ),
     );
     return {
       dom,
@@ -116,6 +126,19 @@ await withModules(async (load) => {
       await h.click("Cancel");
       await act(async () => target.click());
       assert.deepEqual(h.calls, [["Open", "a"]]);
+    } finally {
+      await h.close();
+    }
+  });
+  test("the workspace menu opens the selected home for agent pairing in HA only", async () => {
+    const standalone = await mount();
+    assert.ok(!standalone.dom.window.document.body.textContent.includes("Connect LLM agent"));
+    await standalone.close();
+    const h = await mount({}, true);
+    try {
+      await act(async () => h.dom.window.document.querySelector("summary").click());
+      await h.click("Connect LLM agent");
+      assert.deepEqual(h.calls, [["AgentPilot", "a"]]);
     } finally {
       await h.close();
     }

@@ -263,6 +263,127 @@ await withModules(async (load) => {
     }
   });
 
+  test("shared room assignment requires explicit dependent-slot confirmation without selecting a room", async () => {
+    const harness = await mount();
+    try {
+      const roomId = Object.keys(initialProfile.roomAreaIds).find((id) =>
+        engine
+          .collectBindingSlots(manifest)
+          .some(
+            (slot) => slot.roomIds.includes(id) && initialProfile.entityIdsBySlotId[slot.slotId],
+          ),
+      );
+      const before = structuredClone(harness.bindings);
+      let result;
+      await act(async () => {
+        result = harness.editor.assignRoomArea(roomId, null);
+      });
+      assert.equal(result.status, "confirmation-required");
+      assert.ok(result.clearedSlotIds.length);
+      const clearedSlotIds = result.clearedSlotIds;
+      assert.deepEqual(harness.bindings, before);
+      await act(async () => {
+        result = harness.editor.assignRoomArea(roomId, null, true);
+      });
+      assert.equal(result.status, "applied");
+      assert.equal(harness.editor.profile.roomAreaIds[roomId], undefined);
+      for (const slotId of clearedSlotIds)
+        assert.equal(harness.editor.profile.entityIdsBySlotId[slotId], undefined);
+      assert.equal(harness.editor.pendingAreaChange, null);
+      assert.deepEqual(harness.bindings[origin].published, before[origin].published);
+    } finally {
+      await harness.close();
+    }
+  });
+
+  test("shared entity assignment clears only its slot and rejects incompatible maps atomically", async () => {
+    const harness = await mount();
+    try {
+      const [slotId, entityId] = Object.entries(initialProfile.entityIdsBySlotId)[0];
+      const before = structuredClone(harness.bindings);
+      let result;
+      await act(async () => {
+        result = harness.editor.assignEntity(slotId, null);
+      });
+      assert.equal(result.status, "applied");
+      assert.equal(harness.editor.profile.entityIdsBySlotId[slotId], undefined);
+      const retained = { ...before[origin].draft.entityIdsBySlotId };
+      delete retained[slotId];
+      assert.deepEqual(harness.editor.profile.entityIdsBySlotId, retained);
+      assert.ok(harness.bindings[origin].manualSlotIds.includes(slotId));
+      assert.deepEqual(harness.bindings[origin].published, before[origin].published);
+      const cleared = structuredClone(harness.bindings);
+      await act(async () => {
+        result = harness.editor.assignEntities({
+          ...retained,
+          [slotId]: entityId,
+          "unknown-slot": entityId,
+        });
+      });
+      assert.equal(result.status, "rejected");
+      assert.deepEqual(harness.bindings, cleared);
+      const descriptor = engine
+        .collectBindingSlots(manifest)
+        .find((slot) => slot.slotId === slotId);
+      const incompatible = runtime.entityRegistry.find(
+        (entry) => !engine.entityMatchesBindingSlot(descriptor, entry.entity_id, runtime),
+      );
+      assert.ok(incompatible);
+      await act(async () => {
+        result = harness.editor.assignEntity(slotId, incompatible.entity_id);
+      });
+      assert.equal(result.status, "rejected");
+      assert.deepEqual(harness.bindings, cleared);
+    } finally {
+      await harness.close();
+    }
+  });
+
+  test("shared entity assignment permits offline clearing and blocks offline additions", async () => {
+    const harness = await mount();
+    try {
+      const [slotId, entityId] = Object.entries(initialProfile.entityIdsBySlotId)[0];
+      await harness.render({
+        actualRuntime: { ...runtime, status: "disconnected", entityRegistry: [] },
+      });
+      let result;
+      await act(async () => {
+        result = harness.editor.assignEntity(slotId, null);
+      });
+      assert.equal(result.status, "applied");
+      assert.equal(harness.editor.profile.entityIdsBySlotId[slotId], undefined);
+      const cleared = structuredClone(harness.bindings);
+      await act(async () => {
+        result = harness.editor.assignEntity(slotId, entityId);
+      });
+      assert.equal(result.status, "rejected");
+      assert.deepEqual(harness.bindings, cleared);
+    } finally {
+      await harness.close();
+    }
+  });
+
+  test("pending room clearing cannot overwrite a changed draft or another connection origin", async () => {
+    const harness = await mount();
+    try {
+      const roomId = Object.keys(initialProfile.roomAreaIds)[0];
+      await act(async () => harness.editor.assignRoomArea(roomId, null));
+      assert.ok(harness.editor.pendingAreaChange);
+      const changed = structuredClone(harness.bindings);
+      changed[origin].draft = { ...changed[origin].draft, weatherSource: "off" };
+      await harness.setBindings(changed);
+      await act(async () => harness.editor.confirmAreaChange());
+      assert.deepEqual(harness.bindings, changed);
+      await act(async () => harness.editor.assignRoomArea(roomId, null));
+      await harness.render({ actualOrigin: "https://other.invalid" });
+      await act(async () => harness.editor.confirmAreaChange());
+      assert.deepEqual(harness.bindings, changed);
+      assert.equal(harness.bindings["https://other.invalid"], undefined);
+    } finally {
+      await harness.close();
+    }
+  });
+
   test("exact-device entry resolves its current room and retains selection through connection loss", async () => {
     const room = manifest.floors[0].rooms.find((room) => room.devices.length);
     const device = room.devices[0];

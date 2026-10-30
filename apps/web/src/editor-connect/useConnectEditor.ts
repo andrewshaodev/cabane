@@ -2,10 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   deviceMappingRooms,
   automaticallyMapRuntimeBindings,
+  collectBindingSlots,
   createEmptyRuntimeBindingProfile,
+  entityMatchesBindingSlot,
   groupRoomMappingRelationships,
   normalizeWorkspaceBindingOrigin,
   replaceRoomAreaMapping,
+  replaceEntitySlotMapping,
   saveRoomAreaDraft,
   validateRuntimeBindingProfile,
   type HomeAssistantRuntimeValue,
@@ -19,6 +22,11 @@ import {
 import { stageImportedProfile } from "./profile-transfer";
 import { deviceRoom, type EditorOpenRequest } from "./connect-navigation";
 export type { EditorOpenRequest } from "./connect-navigation";
+
+type AssignmentResult =
+  | { status: "applied" | "unchanged" }
+  | { status: "confirmation-required"; clearedSlotIds: readonly string[] }
+  | { status: "rejected"; message: string };
 
 export function useConnectEditor({
   manifest,
@@ -80,9 +88,13 @@ export function useConnectEditor({
     initialRequest?.relationshipId ?? null,
   );
   const [slotId, setSlotId] = useState<string | null>(null);
-  const [pendingAreaChange, setPendingAreaChange] = useState<ReturnType<
-    typeof saveRoomAreaDraft
-  > | null>(null);
+  const [pendingAreaChange, setPendingAreaChange] = useState<
+    | (ReturnType<typeof saveRoomAreaDraft> & {
+        origin: string;
+        sourceProfile: RuntimeBindingProfile;
+      })
+    | null
+  >(null);
   const [message, setMessage] = useState<string | null>(null);
   const disconnected = runtime.status !== "connected" || runtime.origin !== key;
   const cache = useRef<{ origin: string; runtime: HomeAssistantRuntimeValue } | null>(null);
@@ -199,6 +211,93 @@ export function useConnectEditor({
     },
     [empty],
   );
+  const assignRoomArea = (
+    targetRoomId: string,
+    areaId: string | null,
+    confirmClearedSlots = false,
+  ): AssignmentResult => {
+    const latest = current.current;
+    if (!latest.key) return { status: "rejected", message: "Set a Home Assistant address first." };
+    if (
+      !latest.manifest.floors.some((floor) => floor.rooms.some((room) => room.id === targetRoomId))
+    )
+      return { status: "rejected", message: `Room ${targetRoomId} was not found.` };
+    if (areaId && latest.disconnected)
+      return { status: "rejected", message: "Home Assistant is not connected for this workspace." };
+    if (
+      areaId &&
+      (!latest.runtime.areas.some((area) => area.area_id === areaId) ||
+        Object.entries(latest.profile.roomAreaIds).some(
+          ([id, assigned]) => id !== targetRoomId && assigned === areaId,
+        ))
+    )
+      return {
+        status: "rejected",
+        message: `Home Assistant area ${areaId} is unavailable or already mapped.`,
+      };
+    const next = replaceRoomAreaMapping(latest.profile, targetRoomId, areaId);
+    const proposed = saveRoomAreaDraft({
+      manifest: latest.manifest,
+      savedProfile: latest.profile,
+      roomAreaIds: next.roomAreaIds,
+    });
+    if (proposed.clearedSlotIds.length && !confirmClearedSlots) {
+      setPendingAreaChange({ ...proposed, origin: latest.key, sourceProfile: latest.profile });
+      return { status: "confirmation-required", clearedSlotIds: proposed.clearedSlotIds };
+    }
+    if (!proposed.changedRoomIds.length && latest.state?.manualRoomIds.includes(targetRoomId))
+      return { status: "unchanged" };
+    commitProfile(proposed.profile, [targetRoomId], proposed.clearedSlotIds);
+    setPendingAreaChange(null);
+    return { status: "applied" };
+  };
+  const assignEntities = (
+    entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"],
+    manualSlotIds: readonly string[] = relationship?.slotIds ?? [],
+  ): AssignmentResult => {
+    const latest = current.current;
+    if (!latest.key) return { status: "rejected", message: "Set a Home Assistant address first." };
+    const changed = [
+      ...new Set([
+        ...Object.keys(latest.profile.entityIdsBySlotId),
+        ...Object.keys(entityIdsBySlotId),
+      ]),
+    ].filter((id) => latest.profile.entityIdsBySlotId[id] !== entityIdsBySlotId[id]);
+    const slots = collectBindingSlots(latest.manifest);
+    for (const slotId of changed) {
+      const slot = slots.find((candidate) => candidate.slotId === slotId);
+      if (!slot) return { status: "rejected", message: `Binding slot ${slotId} was not found.` };
+      const entityId = entityIdsBySlotId[slotId];
+      if (!entityId) continue;
+      const entry = latest.runtime.entityRegistry.find(
+        (candidate) => candidate.entity_id === entityId,
+      );
+      if (
+        latest.disconnected ||
+        !entry ||
+        entry.disabled_by ||
+        entry.hidden_by ||
+        !entityMatchesBindingSlot(slot, entityId, latest.runtime)
+      )
+        return {
+          status: "rejected",
+          message: `Home Assistant entity ${entityId} is unavailable or incompatible with slot ${slotId}.`,
+        };
+    }
+    if (!changed.length && manualSlotIds.every((id) => latest.state?.manualSlotIds.includes(id)))
+      return { status: "unchanged" };
+    commitProfile({ ...latest.profile, entityIdsBySlotId }, [], [...changed, ...manualSlotIds]);
+    return { status: "applied" };
+  };
+  const assignEntity = (slotId: string, entityId: EntityId | null): AssignmentResult => {
+    const latest = current.current;
+    if (!collectBindingSlots(latest.manifest).some((slot) => slot.slotId === slotId))
+      return { status: "rejected", message: `Binding slot ${slotId} was not found.` };
+    return assignEntities(
+      replaceEntitySlotMapping(latest.profile, slotId, entityId).entityIdsBySlotId,
+      [slotId],
+    );
+  };
   // History edits are deliberately absent from this trigger. Undo must stay undone.
   const entryKey = JSON.stringify([
     key,
@@ -336,32 +435,17 @@ export function useConnectEditor({
     issues,
     message,
     pendingAreaChange,
-    assignArea: (areaId: string) => {
-      if (!room || !key || (disconnected && areaId)) return;
-      if (
-        areaId &&
-        (!runtime.areas.some((area) => area.area_id === areaId) ||
-          Object.entries(profile.roomAreaIds).some(
-            ([id, assigned]) => id !== room.id && assigned === areaId,
-          ))
-      )
-        return;
-      const next = replaceRoomAreaMapping(profile, room.id, areaId || null);
-      const proposed = saveRoomAreaDraft({
-        manifest,
-        savedProfile: profile,
-        roomAreaIds: next.roomAreaIds,
-      });
-      if (proposed.clearedSlotIds.length) setPendingAreaChange(proposed);
-      else commitProfile(proposed.profile, [room.id]);
-    },
+    assignRoomArea,
+    assignEntity,
+    assignArea: (areaId: string) => room && assignRoomArea(room.id, areaId || null),
     confirmAreaChange: () => {
       if (!pendingAreaChange) return;
-      commitProfile(
-        pendingAreaChange.profile,
-        pendingAreaChange.changedRoomIds,
-        pendingAreaChange.clearedSlotIds,
-      );
+      if (pendingAreaChange.origin === key && pendingAreaChange.sourceProfile === profile)
+        commitProfile(
+          pendingAreaChange.profile,
+          pendingAreaChange.changedRoomIds,
+          pendingAreaChange.clearedSlotIds,
+        );
       setPendingAreaChange(null);
     },
     cancelAreaChange: () => setPendingAreaChange(null),
@@ -373,17 +457,7 @@ export function useConnectEditor({
             if (!disconnected) onAddReading(relationship.id, entityId, presentation);
           }
         : undefined,
-    assignEntities: (entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"]) => {
-      const changed = [
-        ...new Set([...Object.keys(profile.entityIdsBySlotId), ...Object.keys(entityIdsBySlotId)]),
-      ].filter((id) => profile.entityIdsBySlotId[id] !== entityIdsBySlotId[id]);
-      if (disconnected && changed.some((id) => entityIdsBySlotId[id])) return;
-      commitProfile(
-        { ...profile, entityIdsBySlotId },
-        [],
-        [...changed, ...(relationship?.slotIds ?? [])],
-      );
-    },
+    assignEntities,
     refresh: async () => {
       if (disconnected) return;
       try {

@@ -44,22 +44,27 @@ export function useEditorSession(
   }, [flush, onClose]);
 
   const publishProject = useCallback(
-    async (bindingIssues: readonly HomeProjectIssue[]) => {
+    async (
+      bindingIssues: readonly HomeProjectIssue[],
+      closeAfter = true,
+      isActive?: () => boolean,
+    ) => {
       setPublishMessage(null);
-      const result = await publish({ confirmWarnings: true, bindingIssues });
+      const result = await publish({ confirmWarnings: true, bindingIssues }, isActive);
       if (result.status === "published") {
         setPublishOpen(false);
-        onClose(result.record, "applied");
-        return;
+        if (closeAfter) onClose(result.record, "applied");
+        return result;
       }
       setPublishOpen(true);
       if (result.status === "storage-error") {
         setPublishMessage(
           "Could not save changes in browser storage. The previous home is unchanged.",
         );
-        return;
+        return result;
       }
       setPublishMessage("The draft changed while saving. Review the issues and try again.");
+      return result;
     },
     [onClose, publish],
   );

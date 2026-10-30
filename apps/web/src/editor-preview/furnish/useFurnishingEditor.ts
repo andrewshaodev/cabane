@@ -1,3 +1,4 @@
+import type { SceneItemPatch } from "./item-edits";
 import { useCallback, useMemo, useReducer } from "react";
 import { collectProjectIds } from "@cabane/engine";
 import type {
@@ -68,6 +69,20 @@ export const useFurnishingEditor = (
     selectMany: useCallback((ids: string[]) => {
       dispatch({ type: "select-many", ids });
     }, []),
+    groupItems: (ids: readonly string[]) =>
+      dispatch({
+        type: "group-items",
+        ids,
+        reservedIds: context ? collectProjectIds(context.project) : [],
+      }),
+    ungroupItems: (ids: readonly string[]) => dispatch({ type: "ungroup-items", ids }),
+    duplicateItems: (ids: readonly string[], floor: FloorSpec) =>
+      dispatch({
+        type: "duplicate-items",
+        ids,
+        floor,
+        reservedIds: context ? collectProjectIds(context.project) : [],
+      }),
     groupSelection: () =>
       dispatch({
         type: "group-items",
@@ -95,6 +110,8 @@ export const useFurnishingEditor = (
     beginTransaction: useCallback(() => dispatch({ type: "begin-transaction" }), []),
     commitTransaction: useCallback(() => dispatch({ type: "commit-transaction" }), []),
     cancelTransaction: useCallback(() => dispatch({ type: "cancel-transaction" }), []),
+    updateItem: (id: string, patch: SceneItemPatch, definition: SceneModelEditorDescriptor) =>
+      dispatch({ type: "update-item", id, patch, definition }),
     updateColor: useCallback(
       (id: string, color: string | null, definition: SceneModelEditorDescriptor) =>
         dispatch({ type: "update-color", id, color, definition }),

@@ -873,7 +873,11 @@ await withModules(async (load) => {
         root.render(
           React.createElement(OpeningDetails, {
             opening,
-            editor: { ...controller, dispatch: (action) => changes.push(action) },
+            editor: {
+              ...controller,
+              reorientOpening: (openingId, change) =>
+                changes.push({ type: "reorient-opening", openingId, change }),
+            },
             disabled: false,
             onClose: () => closed++,
           }),

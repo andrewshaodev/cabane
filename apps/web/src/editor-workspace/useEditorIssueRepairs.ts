@@ -3,18 +3,15 @@ import type { ConstructContextualIssue } from "../editor-preview/construct";
 import { workspaceSnapshotFromEditorState } from "../editor-preview/project-sync";
 import { missingModelEditorDescriptor } from "../editor-preview/furnish/missing-model";
 import { resetSceneItemPlacement } from "../editor-preview/furnish/placement/repair-placement";
-import type { useHomeEditorController } from "./useHomeEditorController";
+import type { EditorWorkspaceSnapshot, HomeProject, ProjectModelRegistries } from "@cabane/engine";
 
 export function useEditorIssueRepairs(
-  controller: Pick<
-    ReturnType<typeof useHomeEditorController>,
-    | "editorProject"
-    | "snapshot"
-    | "commit"
-    | "replaceEditorsFromProject"
-    | "furnishingModels"
-    | "deviceModels"
-  >,
+  controller: ProjectModelRegistries & {
+    editorProject: HomeProject;
+    snapshot: EditorWorkspaceSnapshot;
+    commit: (snapshot: EditorWorkspaceSnapshot) => unknown;
+    replaceEditorsFromProject: (project: HomeProject) => void;
+  },
 ) {
   const [repairMessage, setRepairMessage] = useState<string | null>(null);
   const [repairError, setRepairError] = useState<string | null>(null);
@@ -28,12 +25,11 @@ export function useEditorIssueRepairs(
         ]?.label
       : undefined;
   };
-  const repairIssue = (issue: ConstructContextualIssue, action: "reset-placement" | "remove") => {
-    if (issue.target?.kind !== "scene-item") return;
+  const repairItem = (itemId: string, action: "reset-placement" | "remove") => {
     const project = controller.editorProject;
-    const item = project.sceneItems.find((item) => item.id === issue.target?.id);
+    const item = project.sceneItems.find((item) => item.id === itemId);
     const floor = project.floors.find((floor) => floor.id === item?.floorId);
-    if (!item || !floor) return;
+    if (!item || !floor) return { error: "Item or floor was not found." };
     const definition =
       (item.kind === "device" ? controller.deviceModels : controller.furnishingModels)[
         item.modelId
@@ -43,7 +39,7 @@ export function useEditorIssueRepairs(
     if (candidate && !candidate.placement) {
       setRepairError(candidate.error);
       setRepairMessage(null);
-      return;
+      return { error: candidate.error };
     }
     const items = project.sceneItems
       .filter((other) => other.floorId === floor.id)
@@ -68,6 +64,10 @@ export function useEditorIssueRepairs(
         ? "Item removed. Undo restores it."
         : "Placement reset to the floor. Undo restores the previous placement.",
     );
+    return { error: null };
   };
-  return { repairIssue, repairMessage, repairError, itemLabel };
+  const repairIssue = (issue: ConstructContextualIssue, action: "reset-placement" | "remove") => {
+    if (issue.target?.kind === "scene-item") repairItem(issue.target.id, action);
+  };
+  return { repairItem, repairIssue, repairMessage, repairError, itemLabel };
 }
