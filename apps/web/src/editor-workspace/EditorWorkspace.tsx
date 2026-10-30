@@ -4,16 +4,11 @@ import { WallFinishPreviewProvider } from "../editor-preview/construct/WallFinis
 import type { BuildTutorialStep, ManifestIssue } from "@cabane/engine";
 import {
   FloorPicker,
-  addBottomFloor,
-  addTopFloor,
   createBrowserUuid,
   floorRemovalDisabledReason,
   normalizeWorkspaceBindingOrigin,
-  removeFloor,
-  renameFloor,
   resolveHomeAssistantBindings,
   resolveHomeAssistantPictureUrl,
-  setFloorHeight,
   useCabaneAssetUrl,
   useCabaneDom,
 } from "@cabane/engine";
@@ -39,13 +34,13 @@ import { HomeEditorHeader } from "./HomeEditorHeader";
 import { HomeEditorScene } from "./HomeEditorScene";
 import { useHomeEditorController } from "./useHomeEditorController";
 import { AgentPilotPanel } from "../agent-pilot/AgentPilotPanel";
-import { useEditorIssueRepairs } from "./useEditorIssueRepairs";
 
 export function EditorWorkspace(props: Parameters<typeof useHomeEditorController>[0]) {
   const controller = useHomeEditorController(props);
-  const { repairIssue, repairMessage, repairError, itemLabel } = useEditorIssueRepairs(controller);
+  const { repairIssue, repairMessage, repairError, itemLabel } = controller.repairs;
   const placementError = controller.furnishingEditor.placementError ?? repairError;
   const {
+    executeProjectAction,
     editorProject,
     northOrientation,
     setActionBarItems,
@@ -65,7 +60,6 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     constructEditor,
     displayedContextualIssues,
     deviceModels,
-    furnishingEditor,
     unsettled,
     selectMode,
     runtime,
@@ -269,15 +263,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
   const removeDisabledReason = floorRemovalDisabledReason(snapshot.project.floors, activeFloorId);
   const addFloor = (below: boolean, duplicate: boolean) => {
     const id = `floor-${createBrowserUuid()}`;
-    const next = (below ? addBottomFloor : addTopFloor)(
-      snapshot,
+    executeProjectAction({
+      type: below ? "add-floor-below" : "add-floor-above",
       id,
-      duplicate ? { sourceFloorId: activeFloorId } : undefined,
-    );
-    commit(next);
-    floorNavigation.selectFloor(id);
-    constructEditor.replaceFloor(next.project.floors.find((floor) => floor.id === id)!);
-    furnishingEditor.replaceItems([]);
+      ...(duplicate ? { sourceFloorId: activeFloorId } : {}),
+    });
   };
   return (
     <WallFinishPreviewProvider palette={editorProject.home.palette}>
@@ -358,16 +348,11 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
                 setFloorDialog(null);
                 return;
               }
-              const next =
+              executeProjectAction(
                 floorDialog === "remove"
-                  ? removeFloor(snapshot, activeFloorId)
-                  : setFloorHeight(
-                      renameFloor(snapshot, activeFloorId, name),
-                      activeFloorId,
-                      height,
-                    );
-              commit(next);
-              replaceEditorsFromProject(next.project);
+                  ? { type: "remove-floor", floorId: activeFloorId }
+                  : { type: "rename-floor", floorId: activeFloorId, name, heightMeters: height },
+              );
               setFloorDialog(null);
             }}
           />

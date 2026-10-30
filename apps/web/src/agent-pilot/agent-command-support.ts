@@ -1,15 +1,12 @@
 import {
-  availableOpeningOffsetRanges,
   createEmptyRuntimeBindingProfile,
-  normalizeWorkspaceBindingOrigin,
-  roomAnchorForPolygon,
-  type FloorEditorAction,
+  serializeCanonicalJson,
   type HomeProject,
   type ItemPlacement,
   type PlanPoint,
 } from "@cabane/engine";
 import type { useHomeEditorController } from "../editor-workspace/useHomeEditorController";
-import { AGENT_CAPABILITIES, AGENT_CONSTRUCT_ACTIONS } from "./agent-command-contract";
+import { AGENT_CAPABILITIES } from "./agent-command-contract";
 
 export const PROTOCOL_VERSION = "2";
 
@@ -23,7 +20,7 @@ export type AgentRequest = {
 
 export type AgentControllerRef = React.MutableRefObject<EditorController>;
 
-export const wait = (milliseconds: number) =>
+const wait = (milliseconds: number) =>
   new Promise<void>((resolve) => globalThis.setTimeout(resolve, milliseconds));
 
 export const waitUntil = async (predicate: () => boolean, timeoutMs = 2_500) => {
@@ -45,12 +42,10 @@ type AgentWorkspaceInspection = {
   autosaveStatus: EditorController["autosaveStatus"];
   mode: EditorController["mode"];
   activeFloorId: string;
-  floors: readonly {
-    id: string;
-    name: string;
-    rooms: readonly { id: string; name: string; accent: string }[];
-  }[];
-  sceneItems: readonly { id: string; kind: string; floorId: string; modelId: string }[];
+  project: HomeProject;
+  floors: HomeProject["floors"];
+  stairs: HomeProject["stairs"];
+  sceneItems: HomeProject["sceneItems"];
   validation: readonly {
     code: string;
     path: string;
@@ -80,29 +75,22 @@ export function inspectionFor(
     protocolVersion: PROTOCOL_VERSION,
     workspaceId,
     workspaceName: project.home.name,
-    draftRevision: record.revision,
+    draftRevision: controller.workspace.getEditRevision(),
     draftUpdatedAt: record.draftUpdatedAt,
     publishedAt: record.publishedAt,
     autosaveStatus: controller.autosaveStatus,
     mode: controller.mode,
     activeFloorId: controller.activeFloorId,
-    floors: project.floors.map((floor) => ({
-      id: floor.id,
-      name: floor.name,
-      rooms: floor.rooms.map((room) => ({ id: room.id, name: room.name, accent: room.accent })),
-    })),
-    sceneItems: project.sceneItems.map((item) => ({
-      id: item.id,
-      kind: item.kind,
-      floorId: item.floorId,
-      modelId: item.modelId,
-    })),
-    validation: controller.displayedContextualIssues.map((issue) => ({
+    project,
+    floors: project.floors,
+    stairs: project.stairs,
+    sceneItems: project.sceneItems,
+    validation: controller.publishIssues.map((issue) => ({
       code: issue.code,
       path: issue.path,
       severity: issue.severity,
       message: issue.message,
-      suggestion: issue.suggestion,
+      suggestion: "",
     })),
     canUndo: controller.workspace.canUndo,
     canRedo: controller.workspace.canRedo,
@@ -152,13 +140,20 @@ export function expectedRevision(params: Record<string, unknown>, controller: Ed
   if (
     typeof value !== "number" ||
     !Number.isInteger(value) ||
-    value !== controller.workspace.getRecord().revision
+    value !== controller.workspace.getEditRevision()
   )
     throw new Error("The workspace revision changed; inspect it again before editing.");
 }
 
 export function ensureEditable(controller: EditorController) {
-  if (controller.editingLocked || controller.unsettled)
+  if (
+    controller.editingLocked ||
+    controller.unsettled ||
+    controller.publishOpen ||
+    controller.previewOpen ||
+    controller.constructEditor.drawStart ||
+    controller.marqueeSelecting
+  )
     throw new Error("The editor is busy; retry after the current edit settles.");
 }
 
@@ -178,15 +173,6 @@ export function currentBindingState(controller: EditorController, origin: string
   return { draft: empty, published: empty, manualRoomIds: [], manualSlotIds: [] };
 }
 
-export function connectedBindingContext(controller: EditorController) {
-  if (!controller.homeAssistantUrl)
-    throw new Error("Set a Home Assistant connection for this workspace first.");
-  const origin = normalizeWorkspaceBindingOrigin(controller.homeAssistantUrl);
-  if (controller.runtime.status !== "connected" || controller.runtime.origin !== origin)
-    throw new Error("Home Assistant is not connected for this workspace.");
-  return { origin, state: currentBindingState(controller, origin) };
-}
-
 export async function settleMutation(
   workspaceId: string,
   controllerRef: AgentControllerRef,
@@ -194,8 +180,8 @@ export async function settleMutation(
   operation: string,
 ) {
   const changed = await waitUntil(
-    () => controllerRef.current.workspace.getRecord().revision > beforeRevision,
-    5_000,
+    () => controllerRef.current.workspace.getEditRevision() > beforeRevision,
+    2_500,
   );
   if (!changed) {
     return {
@@ -235,81 +221,9 @@ export function changedProjectSections(draft: HomeProject, published: HomeProjec
     "assumptions",
   ].filter(
     (key) =>
-      JSON.stringify(draft[key as keyof HomeProject]) !==
-      JSON.stringify(published[key as keyof HomeProject]),
+      serializeCanonicalJson(draft[key as keyof HomeProject]) !==
+      serializeCanonicalJson(published[key as keyof HomeProject]),
   );
-}
-
-export function actionObject(params: Record<string, unknown>) {
-  const action = objectParams(params.action);
-  const type = action.type;
-  if (typeof type !== "string" || !AGENT_CONSTRUCT_ACTIONS.has(type))
-    throw new Error(`Unsupported Construct action: ${String(type)}.`);
-  return action;
-}
-
-export function normalizeConstructAction(
-  action: Record<string, unknown>,
-  floor: ReturnType<typeof activeFloor>,
-  draft: EditorController["constructEditor"]["draft"],
-):
-  | FloorEditorAction
-  | { type: "move-wall-endpoint"; wallId: string; endpoint: "from" | "to"; point: PlanPoint } {
-  const type = action.type;
-  if (type === "move-wall-endpoint") {
-    const wallId = requiredString(action, "wallId");
-    const endpoint = action.endpoint;
-    if (endpoint !== "from" && endpoint !== "to") throw new Error("endpoint must be from or to.");
-    return { type, wallId, endpoint, point: planPoint(action.point, "point") };
-  }
-  if (type === "update-room-metadata") {
-    const roomId = requiredString(action, "roomId");
-    const room = floor.rooms.find((candidate) => candidate.id === roomId);
-    if (!room) throw new Error(`Room ${roomId} was not found on floor ${floor.id}.`);
-    return {
-      ...action,
-      type,
-      roomId,
-      anchor:
-        action.anchor === undefined
-          ? roomAnchorForPolygon(room.polygon)
-          : planPoint(action.anchor, "anchor"),
-    } as FloorEditorAction;
-  }
-  if (type === "add-floor-zone" && action.roomId !== undefined && action.room === undefined) {
-    const roomId = requiredString(action, "roomId");
-    const room = floor.rooms.find((candidate) => candidate.id === roomId);
-    if (!room) throw new Error(`Room ${roomId} was not found on floor ${floor.id}.`);
-    return {
-      ...action,
-      type,
-      room: {
-        id: room.id,
-        name: room.name,
-        accent: room.accent,
-        anchor: roomAnchorForPolygon(room.polygon),
-      },
-    } as FloorEditorAction;
-  }
-  if (type === "add-opening") {
-    const wallId = requiredString(action, "wallId");
-    const kind = action.kind;
-    if (!["door", "window", "passage", "niche"].includes(String(kind)))
-      throw new Error("add-opening kind must be door, window, passage, or niche.");
-    const width = kind === "window" ? 1.2 : 0.9;
-    const widthPlanUnits = width / draft.coordinates.metersPerPlanUnit;
-    const ranges = availableOpeningOffsetRanges({
-      draft,
-      wallId,
-      widthPlanUnits,
-      sillHeightMeters: kind === "window" ? 0.9 : 0,
-      kind: kind as "door" | "window" | "passage" | "niche",
-    });
-    const offsetPlanUnits = finiteNumber(action.offsetPlanUnits, "offsetPlanUnits");
-    if (!ranges.some(({ min, max }) => offsetPlanUnits >= min && offsetPlanUnits <= max))
-      throw new Error("The opening does not fit at that position on the wall.");
-  }
-  return action as unknown as FloorEditorAction;
 }
 
 export function itemPlacement(value: unknown, key: string): ItemPlacement {

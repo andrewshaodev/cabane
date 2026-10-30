@@ -1,9 +1,7 @@
-import type { HomeProject } from "@cabane/engine";
 import {
   AGENT_ARRANGE_ACTIONS,
   AGENT_CONSTRUCT_ACTIONS,
   AGENT_FLOOR_ACTIONS,
-  AGENT_FLOOR_OPERATIONS,
 } from "./agent-command-contract";
 import {
   applyBinding,
@@ -15,6 +13,7 @@ import {
   publishDraft,
 } from "./agent-command-operations";
 import {
+  activeFloor,
   ensureEditable,
   expectedRevision,
   inspectionFor,
@@ -22,7 +21,6 @@ import {
   optionalString,
   requiredString,
   settleMutation,
-  wait,
   waitUntil,
   type AgentControllerRef,
 } from "./agent-command-support";
@@ -33,6 +31,8 @@ async function selectFloor(
   params: Record<string, unknown>,
 ) {
   const controller = controllerRef.current;
+  ensureEditable(controller);
+  expectedRevision(params, controller);
   const floorId = requiredString(params, "floorId");
   if (!controller.snapshot.project.floors.some((floor) => floor.id === floorId))
     throw new Error(`Floor ${floorId} was not found in this workspace.`);
@@ -55,37 +55,12 @@ async function renameRoom(
   ensureEditable(controller);
   const roomId = requiredString(params, "roomId");
   const name = requiredString(params, "name");
-  const requestedFloorId = optionalString(params, "floorId");
+  const floor = activeFloor(controller, optionalString(params, "floorId"));
+  const room = floor.rooms.find((room) => room.id === roomId);
+  if (!room) throw new Error(`Room ${roomId} was not found on the active floor.`);
   expectedRevision(params, controller);
-  const match = controller.snapshot.project.floors.flatMap((floor) =>
-    floor.rooms
-      .filter((room) => room.id === roomId && (!requestedFloorId || floor.id === requestedFloorId))
-      .map((room) => ({ floor, room })),
-  );
-  if (match.length === 0) throw new Error(`Room ${roomId} was not found in this workspace.`);
-  if (match.length > 1) throw new Error(`Room ${roomId} is ambiguous; provide floorId.`);
-  const { floor, room } = match[0];
-  const beforeRevision = controller.workspace.getRecord().revision;
-  if (floor.id === controller.activeFloorId) {
-    controller.constructEditor.updateRoom(roomId, { name });
-  } else {
-    const nextProject: HomeProject = {
-      ...controller.snapshot.project,
-      floors: controller.snapshot.project.floors.map((candidate) =>
-        candidate.id !== floor.id
-          ? candidate
-          : {
-              ...candidate,
-              rooms: candidate.rooms.map((candidateRoom) =>
-                candidateRoom.id === roomId ? { ...candidateRoom, name } : candidateRoom,
-              ),
-            },
-      ),
-    };
-    if (!controller.commit({ ...controller.snapshot, project: nextProject })) {
-      throw new Error("The draft could not accept the room edit.");
-    }
-  }
+  const beforeRevision = controller.workspace.getEditRevision();
+  controller.constructEditor.updateRoom(roomId, { name });
   const updated = await waitUntil(
     () =>
       controllerRef.current.snapshot.project.floors
@@ -116,13 +91,12 @@ async function historyAction(
   ensureEditable(controller);
   expectedRevision(params, controller);
   const canChange = action === "undo" ? controller.workspace.canUndo : controller.workspace.canRedo;
-  const beforeRevision = controller.workspace.getRecord().revision;
+  const beforeRevision = controller.workspace.getEditRevision();
   const next = action === "undo" ? controller.undoProject() : controller.redoProject();
   if (canChange && next) {
     const settled = await settleMutation(workspaceId, controllerRef, beforeRevision, action);
     return { ...settled, operation: action, workspaceId };
   }
-  await wait(50);
   return {
     operation: action,
     workspaceId,
@@ -153,15 +127,7 @@ export async function executeAction(
   }
 
   if (AGENT_FLOOR_ACTIONS.has(type)) {
-    const operation = AGENT_FLOOR_OPERATIONS[type as keyof typeof AGENT_FLOOR_OPERATIONS];
-    return executeFloorOperation(workspaceId, controllerRef, {
-      ...params,
-      operation,
-      ...(action.id === undefined ? {} : { id: action.id }),
-      ...(action.floorId === undefined ? {} : { floorId: action.floorId }),
-      ...(action.name === undefined ? {} : { name: action.name }),
-      ...(action.heightMeters === undefined ? {} : { heightMeters: action.heightMeters }),
-    });
+    return executeFloorOperation(workspaceId, controllerRef, { ...params, action });
   }
 
   if (AGENT_ARRANGE_ACTIONS.has(type)) {
@@ -173,7 +139,11 @@ export async function executeAction(
     });
   }
 
-  if (type === "select-floor") return selectFloor(workspaceId, controllerRef, action);
+  if (type === "select-floor")
+    return selectFloor(workspaceId, controllerRef, {
+      ...action,
+      expectedRevision: params.expectedRevision,
+    });
   if (type === "apply-binding")
     return applyBinding(workspaceId, controllerRef, { ...params, ...action });
   if (type === "apply-room-mapping")

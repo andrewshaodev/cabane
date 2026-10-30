@@ -1,3 +1,4 @@
+import { serializeCanonicalJson } from "@cabane/engine";
 import { AGENT_ACTIONS, AGENT_CAPABILITIES, AGENT_READ_METHODS } from "./agent-command-contract";
 import {
   changedProjectSections,
@@ -46,9 +47,10 @@ export async function executeAgentRequest(
       workspaceId,
       draftChanged: sections.length > 0,
       changedProjectSections: sections,
-      bindingsChanged:
-        JSON.stringify(controller.snapshot.bindings) !== JSON.stringify(record.bindings),
-      draftRevision: record.revision,
+      bindingsChanged: Object.values(controller.snapshot.bindings).some(
+        (state) => serializeCanonicalJson(state.draft) !== serializeCanonicalJson(state.published),
+      ),
+      draftRevision: controller.workspace.getEditRevision(),
       publishedAt: record.publishedAt,
     };
   }

@@ -1,5 +1,6 @@
 import { DEFAULT_WALL_COLORS } from "@cabane/engine";
 import { useWallOpeningPlacement } from "./useWallOpeningPlacement";
+import { openingEdits } from "./opening-edits";
 import { incompleteFloorPreview } from "./incomplete-floor-preview";
 import {
   editorWallAttachments,
@@ -283,11 +284,11 @@ export const useConstructEditor = (
     [topologyPreview.previewFloor.rooms],
   );
   const resolveRoomMerge = useCallback(
-    (survivorId: string) => {
+    (survivorId: string, roomId?: string) => {
       const selection = history.present.selection;
-      if (selection?.kind !== "room") return;
+      const targetId = roomId ?? (selection?.kind === "room" ? selection.id : undefined);
       const room = topologyPreview.previewFloor.rooms.find(
-        (candidate) => candidate.id === selection.id,
+        (candidate) => candidate.id === targetId,
       );
       if (!room) return;
       const mergedRoomIds = history.present.rooms
@@ -317,6 +318,19 @@ export const useConstructEditor = (
       }),
     [draft, topologyPreview.previewFloor, topologyPreview.wallRuns],
   );
+  const deleteElements: ConstructEditorController["deleteElements"] = (targets) =>
+    dispatch({
+      type: "delete-elements",
+      targets: resolveConstructionDeletionTargets({
+        selection: createFloorEditorSelection(targets),
+        draft,
+        previewFloor: topologyPreview.previewFloor,
+        wallRuns: topologyPreview.wallRuns,
+      }),
+    });
+  const updateWallMetadata: ConstructEditorController["updateWallMetadata"] = (wallId, changes) =>
+    dispatch({ type: "update-wall-metadata", wallId, changes });
+  const edits = openingEdits(draft, dispatch, setOpeningError);
   return {
     history,
     doorConfiguration,
@@ -336,10 +350,15 @@ export const useConstructEditor = (
       select({ kind: "outdoor-platform", id });
     },
     updatePlatform: (id, changes) => dispatch({ type: "update-outdoor-platform", id, changes }),
+    addPlatform: (polygon, finish, defaultEdge) =>
+      dispatch({ type: "add-outdoor-platform", polygon, finish, defaultEdge }),
     poolDrawing,
     selectPool: (id) => select({ kind: "pool", id }),
     selectFloorZone: (id) => select({ kind: "floor-zone", id }),
     updatePool: (poolId, polygon) => dispatch({ type: "update-pool", poolId, polygon }),
+    addPool: (polygon) => dispatch({ type: "add-pool", polygon }),
+    addHedge: (hedge) => dispatch({ type: "add-hedge", hedge }),
+    updateHedge: (id, changes) => dispatch({ type: "update-hedge", id, changes }),
     paintRoomFloor,
     addFloorZone,
     addGroundZone: (polygon, finish) =>
@@ -388,9 +407,13 @@ export const useConstructEditor = (
     updateSelectedWallMetadata: (changes) => {
       const selection = history.present.selection;
       if (selection?.kind !== "wall") return;
-      dispatch({ type: "update-wall-metadata", wallId: selection.id, changes });
+      updateWallMetadata(selection.id, changes);
     },
+    updateWallMetadata,
+    addWallSegment: (from, to, options = {}) =>
+      dispatch({ type: "add-wall", from, to, ...options }),
     updateFloorSettings: (settings) => dispatch({ type: "update-floor-settings", settings }),
+    setFloorName: (name) => dispatch({ type: "set-floor-name", name }),
     updateRoom,
     updateSelectedRoom: (changes) => {
       if (history.present.selection?.kind === "room")
@@ -404,66 +427,9 @@ export const useConstructEditor = (
     cancelWall,
     addOpening,
     placeOpening,
-    updateSelectedOpening: (patch) => {
-      const selection = draft.selection;
-      const opening =
-        selection?.kind === "opening"
-          ? editorWallAttachments(draft).find((candidate) => candidate.id === selection.id)
-          : undefined;
-      if (!opening) return;
-      const updated = { ...opening, ...patch };
-      const wall = draft.walls.find((candidate) => candidate.id === updated.wallId);
-      const fits =
-        availableOpeningOffsetRanges({
-          draft,
-          wallId: updated.wallId,
-          widthPlanUnits: updated.widthPlanUnits,
-          sillHeightMeters: updated.sillHeightMeters,
-          excludeOpeningId: updated.id,
-        }).length > 0;
-      if (
-        !fits ||
-        !wall ||
-        updated.openingHeightMeters + updated.sillHeightMeters >
-          (wall.heightMeters ?? draft.defaultWallHeightMeters) -
-            (updated.kind === "niche" ? 0.002 : 0)
-      ) {
-        setOpeningError(
-          "This opening does not fit here. Choose a smaller size or another wall position.",
-        );
-        return;
-      }
-      setOpeningError(null);
-      dispatch({ type: "update-selected-opening", patch });
-    },
-    replaceSelectedOpening: (opening) => {
-      const wall = draft.walls.find((wall) => wall.id === opening.wallId);
-      const fits = availableOpeningOffsetRanges({
-        draft,
-        wallId: opening.wallId,
-        widthPlanUnits: opening.widthPlanUnits,
-        sillHeightMeters: opening.sillHeightMeters,
-        excludeOpeningId: opening.id,
-      }).some(({ min, max }) => opening.offsetPlanUnits >= min && opening.offsetPlanUnits <= max);
-      if (
-        !fits ||
-        !wall ||
-        opening.openingHeightMeters + opening.sillHeightMeters >
-          (wall.heightMeters ?? draft.defaultWallHeightMeters) -
-            (opening.kind === "niche" ? 0.002 : 0)
-      ) {
-        setOpeningError(
-          "This opening does not fit here. Choose a smaller size or another wall position.",
-        );
-        return;
-      }
-      setOpeningError(null);
-      dispatch({ type: "replace-selected-opening", opening });
-    },
-    resizeSelectedOpening: (offsetPlanUnits, widthPlanUnits) => {
-      setOpeningError(null);
-      dispatch({ type: "update-selected-opening", patch: { offsetPlanUnits, widthPlanUnits } });
-    },
+    reorientOpening: (openingId, change) =>
+      dispatch({ type: "reorient-opening", openingId, change }),
+    ...edits,
     moveOpening: (openingId, wallId, offsetPlanUnits) => {
       const opening = editorWallAttachments(history.present).find(
         (candidate) => candidate.id === openingId,
@@ -494,7 +460,8 @@ export const useConstructEditor = (
       dispatch({ type: "duplicate-opening", openingId });
       return true;
     },
-    deleteSelected: () => dispatch({ type: "delete-elements", targets: deletionTargets }),
+    deleteSelected: () => deleteElements(selectionTargets),
+    deleteElements,
     undo: () => dispatch({ type: "undo" }),
     redo: () => dispatch({ type: "redo" }),
     replaceFloor: (floor) => {

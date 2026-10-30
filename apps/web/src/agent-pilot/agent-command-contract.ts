@@ -49,7 +49,7 @@ export const AGENT_ACTIONS = [
   constructAction(
     "add-wall",
     "Add a wall to a floor plan.",
-    "from: PlanPoint; to: PlanPoint; exteriorColor?: string",
+    "from: PlanPoint; to: PlanPoint; exteriorColor?: string; virtual?: boolean",
   ),
   constructAction(
     "move-wall-endpoint",
@@ -84,7 +84,7 @@ export const AGENT_ACTIONS = [
   constructAction(
     "resize-opening",
     "Resize an existing opening.",
-    "openingId: string; widthPlanUnits: number",
+    "openingId: string; widthPlanUnits: number; offsetPlanUnits?: number",
   ),
   constructAction(
     "update-opening",
@@ -92,15 +92,35 @@ export const AGENT_ACTIONS = [
     "opening: EditorWallAttachment",
   ),
   constructAction(
+    "duplicate-opening",
+    "Duplicate a door, window, passage or niche where it fits.",
+    "openingId: string",
+  ),
+  constructAction(
+    "reorient-opening",
+    "Switch a supported opening hinge, wall face or slide direction.",
+    'openingId: string; change: "hinge" | "side" | "slide"',
+  ),
+  constructAction(
     "update-room-metadata",
     "Update metadata for a room.",
-    "roomId: string; changes: RoomMetadataPatch; anchor?: PlanPoint",
+    "roomId: string; changes: RoomMetadataPatch",
+  ),
+  constructAction(
+    "resolve-room-merge",
+    "Choose the saved room identity to retain after joining rooms.",
+    "roomId: string; survivorId: string",
+  ),
+  constructAction(
+    "paint-room-floor",
+    "Paint a whole room, explicitly keeping or clearing existing finish zones.",
+    "roomId: string; finish: FloorFinishSpec; clearZones: boolean",
   ),
   constructAction("add-hedge", "Add a hedge to the floor plan.", 'hedge: Omit<HedgeSpec, "id">'),
   constructAction(
     "update-hedge",
     "Update an existing hedge.",
-    "id: string; changes: Partial<HedgeSpec>",
+    'id: string; changes: Partial<Omit<HedgeSpec, "id">>',
   ),
   constructAction("add-pool", "Add a pool polygon.", "polygon: Polygon"),
   constructAction(
@@ -116,7 +136,7 @@ export const AGENT_ACTIONS = [
   constructAction(
     "update-outdoor-platform",
     "Update an existing outdoor platform.",
-    "id: string; changes: Partial<OutdoorPlatformSpec>",
+    'id: string; changes: Partial<Omit<OutdoorPlatformSpec, "id">>',
   ),
   constructAction(
     "add-floor-zone",
@@ -143,8 +163,16 @@ export const AGENT_ACTIONS = [
     "Rename the active floor in the construction editor.",
     "name: string",
   ),
-  floorAction("add-floor-above", "Add a floor above the active stack.", "id: string"),
-  floorAction("add-floor-below", "Add a floor below the active stack.", "id: string"),
+  floorAction(
+    "add-floor-above",
+    "Add a floor above the active stack.",
+    "id: string; sourceFloorId?: string",
+  ),
+  floorAction(
+    "add-floor-below",
+    "Add a floor below the active stack.",
+    "id: string; sourceFloorId?: string",
+  ),
   floorAction("rename-floor", "Rename a floor.", "name: string; floorId?: string"),
   floorAction(
     "set-floor-height",
@@ -152,6 +180,39 @@ export const AGENT_ACTIONS = [
     "heightMeters: number; floorId?: string",
   ),
   floorAction("remove-floor", "Remove a floor when the engine allows it.", "floorId?: string"),
+  floorAction(
+    "update-home-settings",
+    "Update roof, north or apartment floor settings.",
+    "changes: {roof?: RoofSpec; northAngleDegrees?: number; apartmentFloor?: number}",
+  ),
+  floorAction(
+    "set-walk-start",
+    "Set or clear the walking start point.",
+    "walkStart: {floorId: string; at: PlanPoint} | null",
+  ),
+  floorAction("add-stair", "Add stairs between floors.", "stair: StairSpec"),
+  floorAction("update-stair", "Edit existing stairs.", "stair: StairSpec"),
+  floorAction("delete-stair", "Delete stairs.", "stairId: string"),
+  arrangeAction(
+    "update-item-placements",
+    "Move, rotate or elevate multiple items together.",
+    "placements: Record<string, ItemPlacement>",
+  ),
+  arrangeAction("group-items", "Group items on the active floor.", "itemIds: string[]"),
+  arrangeAction("ungroup-items", "Ungroup items on the active floor.", "itemIds: string[]"),
+  arrangeAction("rename-group", "Rename a saved item group.", "groupId: string; name: string"),
+  arrangeAction(
+    "transform-group",
+    "Move, rotate or elevate a saved group.",
+    'groupId: string; placement: Extract<ItemPlacement, {kind: "absolute"}>',
+  ),
+  arrangeAction("duplicate-items", "Duplicate multiple items or groups.", "itemIds: string[]"),
+  arrangeAction("delete-items", "Delete multiple items or groups.", "itemIds: string[]"),
+  arrangeAction(
+    "repair-item-placement",
+    "Reset an invalid placement using the Issues repair action.",
+    "itemId: string",
+  ),
   arrangeAction(
     "add-item",
     "Add a catalog item, including custom project-local models.",
@@ -160,10 +221,26 @@ export const AGENT_ACTIONS = [
   arrangeAction(
     "update-item",
     "Update a placed furnishing or device.",
-    "itemId: string; patch: ItemPatch",
+    'itemId: string; patch: {placement?: ItemPlacement; size?: [number, number, number]; variant?: string; color?: string | null; lightState?: "always-off" | "always-on" | "night-only" | "connected"; entitySlots?: EntityBindingSlotSpec[]}',
   ),
   arrangeAction("duplicate-item", "Duplicate a placed furnishing or device.", "itemId: string"),
   arrangeAction("delete-item", "Delete a placed furnishing or device.", "itemId: string"),
+  arrangeAction(
+    "update-model-lighting",
+    "Edit shared lighting for every copy of a model, disable it with null, or reset native defaults.",
+    "modelId: string; light?: CustomModelLight | null; reset?: boolean",
+  ),
+  arrangeAction(
+    "update-custom-model",
+    "Edit an existing personal model and update all its copies using the model editor's normal save flow.",
+    "modelId: string; changes: { name?: string; placement?: CustomModelPlacement; profile?: CustomModelProfile; normalization?: CustomModelNormalization; light?: CustomModelLight | null }",
+  ),
+  arrangeAction(
+    "rename-custom-model",
+    "Rename an existing personal model.",
+    "modelId: string; name: string",
+  ),
+  arrangeAction("remove-custom-model", "Remove an unused personal model.", "modelId: string"),
   {
     type: "select-floor",
     domain: "lifecycle",
@@ -180,7 +257,8 @@ export const AGENT_ACTIONS = [
     type: "apply-room-mapping",
     domain: "connection",
     description: "Map or clear a Cabane room to a Home Assistant area.",
-    input: "roomId: string; areaId: string | null",
+    input:
+      "roomId: string; areaId: string | null; confirmClearedSlots?: boolean (required to confirm clearing dependent entity slots)",
   },
   {
     type: "discard-draft",
@@ -197,7 +275,7 @@ export const AGENT_ACTIONS = [
   {
     type: "rename-room",
     domain: "lifecycle",
-    description: "Rename a room on any floor.",
+    description: "Rename a room on the selected floor.",
     input: "roomId: string; name: string; floorId?: string",
   },
   { type: "undo", domain: "history", description: "Undo the latest project edit.", input: "{}" },
@@ -209,18 +287,12 @@ export const AGENT_ACTIONS = [
   },
 ] as const satisfies readonly AgentActionDescriptor[];
 
-export const AGENT_FLOOR_OPERATIONS = {
-  "add-floor-above": "add-top",
-  "add-floor-below": "add-bottom",
-  "rename-floor": "rename",
-  "set-floor-height": "set-height",
-  "remove-floor": "remove",
-} as const;
-
 export const AGENT_CONSTRUCT_ACTIONS = new Set(
   AGENT_ACTIONS.filter((action) => action.domain === "construct").map((action) => action.type),
 );
-export const AGENT_FLOOR_ACTIONS = new Set(Object.keys(AGENT_FLOOR_OPERATIONS));
+export const AGENT_FLOOR_ACTIONS = new Set(
+  AGENT_ACTIONS.filter((action) => action.domain === "floor").map((action) => action.type),
+);
 export const AGENT_ARRANGE_ACTIONS = new Set(
   AGENT_ACTIONS.filter((action) => action.domain === "arrange").map((action) => action.type),
 );

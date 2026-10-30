@@ -65,7 +65,7 @@ type Props = {
   | "setStairPlacement"
   | "setStairDialog"
   | "floorReferences"
-  | "commit"
+  | "executeProjectAction"
   | "snapshot"
   | "connectFloor"
   | "mode"
@@ -131,7 +131,7 @@ export function HomeEditorScene({
   setStairPlacement,
   setStairDialog,
   floorReferences,
-  commit,
+  executeProjectAction,
   snapshot,
   connectFloor,
   mode,
@@ -261,15 +261,9 @@ export function HomeEditorScene({
                   start={snapshot.project.home.walkStart}
                   placing={placingWalkStart}
                   onPlace={(at) => {
-                    commit({
-                      ...snapshot,
-                      project: {
-                        ...snapshot.project,
-                        home: {
-                          ...snapshot.project.home,
-                          walkStart: { floorId: activeFloorId, at },
-                        },
-                      },
+                    executeProjectAction({
+                      type: "set-walk-start",
+                      walkStart: { floorId: activeFloorId, at },
                     });
                     onWalkStartPlaced();
                   }}
@@ -349,26 +343,10 @@ export function HomeEditorScene({
                         setStairDialog(stair);
                       }}
                       onDraggingChange={setDragging}
-                      onCommit={(next) =>
-                        commit({
-                          ...snapshot,
-                          project: {
-                            ...snapshot.project,
-                            stairs: snapshot.project.stairs.map((existing) =>
-                              existing.id === next.id ? next : existing,
-                            ),
-                          },
-                        })
-                      }
+                      onCommit={(stair) => executeProjectAction({ type: "update-stair", stair })}
                       onGoToFloor={() => floorNavigation.selectFloor(destination)}
                       onDelete={() => {
-                        commit({
-                          ...snapshot,
-                          project: {
-                            ...snapshot.project,
-                            stairs: snapshot.project.stairs.filter((s) => s.id !== stair.id),
-                          },
-                        });
+                        executeProjectAction({ type: "delete-stair", stairId: stair.id });
                         setStairDialog(null);
                       }}
                     />
@@ -672,11 +650,7 @@ export function HomeEditorScene({
                 onDraggingChange={setDragging}
                 onCancel={() => setStairPlacement(null)}
                 onComplete={(stair) => {
-                  const project = {
-                    ...snapshot.project,
-                    stairs: [...snapshot.project.stairs, stair],
-                  };
-                  commit({ ...snapshot, project });
+                  executeProjectAction({ type: "add-stair", stair });
                   setStairPlacement(null);
                   setStairDialog(stair);
                 }}

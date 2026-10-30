@@ -62,19 +62,42 @@ The read-only methods are `inspect_workspace`, `get_draft_diff`,
 
 The public action types cover durable construction edits, floor operations,
 catalog placement and editing, Home Assistant slot and room mappings, draft
-discard/publication, room renaming and history. Selection, camera and tool-only
+discard/publication, room renaming and history. Construct includes invisible
+walls, opening duplication and orientation, room merge resolution, room painting
+with explicit zone clearing, floor duplication, stairs, roof/north/apartment
+settings and walking start points. Arrange includes atomic item patches, linked
+entity slots, multiple-item operations, saved groups, placement repair, model lighting and personal-model metadata,
+renaming and removal. File pickers, asset import/export and camera/tool gestures
+remain UI operations. Selection, camera and tool-only
 actions stay browser-local. `list_catalog` exposes both stable models and
 project-local `custom:*` models; `list_binding_slots` exposes typed slots and,
 when Cabane is connected to Home Assistant, compatible registry candidates.
+
+Commands only decode JSON and route to the same editor actions used by the UI.
+Opening dimensions and fit, catalog placement and size, item edits and groups,
+project operations and mapping rules belong to those shared owners. The command
+adapter never edits a parallel project or binding profile. Invalid compound item
+patches are rejected before any field changes or history entry is added.
+
+`inspect_workspace` returns the editable project, complete floor geometry, stairs
+and placed items, together with all publication issues. Validation is independent
+of the selected editor tool and includes binding diagnostics.
 
 The browser still checks the active origin, registry presence, disabled/hidden
 status, slot compatibility, editor busy state and draft revision. Publish and
 discard remain explicit actions and use the normal project and binding paths.
 
-Mutating commands accept an optional `expectedRevision`. When supplied, a stale
-agent request is rejected and the agent must inspect again. The browser also
+Mutating commands accept an optional `expectedRevision`. It is an editor-session
+revision that advances for unsaved edits as well as saved changes. When supplied,
+a stale agent request is rejected and the agent must inspect again. Commands run
+serially. Disconnecting, replacing the pairing or changing workspace cancels
+queued work and prevents late pairing/poll responses from restoring a session. The browser also
 rejects commands while an edit is unsettled or the workspace is busy, then
 flushes accepted draft changes through the existing workspace autosave path.
+Changing a room's Home Assistant area reports `confirmation-required` and the
+slots it would clear. Repeat the action with `confirmClearedSlots: true` after
+reviewing those slots. Publishing uses the same save/validation path as the UI
+and leaves the paired editor open.
 
 ## CLI usage
 
@@ -90,7 +113,7 @@ documented command through the generic request entry point:
 ```sh
 npm run agent:request -- --method get_capabilities --pretty
 npm run agent:request -- --method inspect_workspace --pretty
-npm run agent:request -- --method execute_action \\
+npm run agent:request -- --method execute_action \
   --params '{"action":{"type":"add-item","modelId":"some-model"}}' --pretty
 ```
 
@@ -102,8 +125,10 @@ workspace ID, browser-storage access or a second Home Assistant connection.
 The CLI is a new executable workspace at `apps/agent-cli/`. The browser bridge,
 command contract and on-demand pairing dialog are new web-local modules under
 `apps/web/src/agent-pilot/`. The existing workspace repository, editor
-controller, engine packages and `home/` seed remain in their current paths and
-are reused through their public interfaces. No existing code is moved.
+controller, engine packages and `home/` seed retain their responsibilities.
+Shared project edits live in `editor-workspace/editor-project-actions.ts`;
+Construct and Arrange controllers own their domain rules. CLI argument handling,
+HTTP transport and browser session lifecycle have separate focused modules.
 
 The transport is plain HTTP polling so it can be tested without a new runtime
 dependency. A future MCP or other agent adapter can call the same command

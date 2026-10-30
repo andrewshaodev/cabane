@@ -59,7 +59,7 @@ type Props = Pick<
   | "setFloorPaintTarget"
   | "homeAssistantUrl"
   | "snapshot"
-  | "commit"
+  | "executeProjectAction"
   | "catalogBrowsing"
   | "setCatalogBrowsing"
   | "catalogError"
@@ -113,7 +113,7 @@ export function EditorSidebar({
   setFloorPaintTarget,
   homeAssistantUrl,
   snapshot,
-  commit,
+  executeProjectAction,
   catalogBrowsing,
   setCatalogBrowsing,
   catalogError,
@@ -175,13 +175,7 @@ export function EditorSidebar({
               onSettings={() => setFloorDialog("rename")}
               apartmentFloor={snapshot.project.home.apartmentFloor ?? 0}
               onApartmentFloor={(apartmentFloor) =>
-                commit({
-                  ...snapshot,
-                  project: {
-                    ...snapshot.project,
-                    home: { ...snapshot.project.home, apartmentFloor },
-                  },
-                })
+                executeProjectAction({ type: "update-home-settings", changes: { apartmentFloor } })
               }
             />
           )}
@@ -298,8 +292,7 @@ export function EditorSidebar({
                       <EditorButton
                         variant="text"
                         onClick={() => {
-                          const { walkStart, ...home } = snapshot.project.home;
-                          commit({ ...snapshot, project: { ...snapshot.project, home } });
+                          executeProjectAction({ type: "set-walk-start", walkStart: null });
                           setWalkStartFloor(null);
                         }}
                       >
@@ -318,10 +311,7 @@ export function EditorSidebar({
               }
               roof={snapshot.project.home.roof}
               onRoofChange={(roof) =>
-                commit({
-                  ...snapshot,
-                  project: { ...snapshot.project, home: { ...snapshot.project.home, roof } },
-                })
+                executeProjectAction({ type: "update-home-settings", changes: { roof } })
               }
               editor={constructEditor}
               floorPainting={{
