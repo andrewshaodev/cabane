@@ -5,7 +5,7 @@ const PAGE_SIZE = 8;
 const domId = (value: string) => value.replaceAll(/[^a-zA-Z0-9_-]/g, "-");
 
 export const mappingOptionMatches = (option: MappingOption, query: string) =>
-  `${option.label} ${option.value}`
+  `${option.label} ${option.value} ${option.searchText ?? ""}`
     .toLocaleLowerCase("en")
     .includes(query.trim().toLocaleLowerCase("en"));
 

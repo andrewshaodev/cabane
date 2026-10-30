@@ -182,6 +182,7 @@ export function ConnectInspector({
                   }
                   state="open"
                   onEntityIdsBySlotIdChange={editor.assignEntities}
+                  onAddReading={editor.addReading}
                   onSelectionMade={back}
                   onCollapse={back}
                   onReopen={() => undefined}

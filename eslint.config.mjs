@@ -17,7 +17,7 @@ const existingFileLineLimits = {
   "packages/engine/src/HomeAssistantRuntime.tsx": 552,
   "packages/engine/src/SceneActionBar.tsx": 618,
   "packages/engine/src/ValidatedDashboardView.tsx": 700,
-  "packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx": 600,
+  "packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx": 560,
   "packages/engine/src/home-editor/construct/draft-reducer.ts": 598,
   "packages/engine/src/home-project/schema.ts": 707,
   "packages/engine/src/types.ts": 739,

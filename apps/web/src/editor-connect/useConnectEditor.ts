@@ -9,6 +9,7 @@ import {
   saveRoomAreaDraft,
   validateRuntimeBindingProfile,
   type HomeAssistantRuntimeValue,
+  type EntityId,
   type HomeBindingManifest,
   type HomeProjectIssue,
   type RuntimeBindingProfile,
@@ -25,6 +26,7 @@ export function useConnectEditor({
   origin,
   active,
   onChange,
+  onAddReading,
   initialRequest,
   routeView,
   onViewChange,
@@ -37,6 +39,7 @@ export function useConnectEditor({
   origin: string | null;
   active: boolean;
   onChange: (bindings: WorkspaceBindings) => void;
+  onAddReading?: (itemId: string, entityId: EntityId) => void;
   initialRequest?: EditorOpenRequest;
   routeView?: "rooms" | "devices";
   onViewChange?: ((view: "rooms" | "devices") => void) | undefined;
@@ -312,6 +315,14 @@ export function useConnectEditor({
       setPendingAreaChange(null);
     },
     cancelAreaChange: () => setPendingAreaChange(null),
+    addReading:
+      onAddReading &&
+      relationship?.kind === "modeled-device" &&
+      manifest.sceneItems.some((item) => item.kind === "device" && item.id === relationship.id)
+        ? (entityId: EntityId) => {
+            if (!disconnected) onAddReading(relationship.id, entityId);
+          }
+        : undefined,
     assignEntities: (entityIdsBySlotId: RuntimeBindingProfile["entityIdsBySlotId"]) => {
       const changed = [
         ...new Set([...Object.keys(profile.entityIdsBySlotId), ...Object.keys(entityIdsBySlotId)]),

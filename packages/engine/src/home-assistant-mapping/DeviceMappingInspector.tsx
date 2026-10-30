@@ -8,7 +8,7 @@ import {
 } from "./auxiliary-mapping-choices";
 import { isAuxiliaryEntitySlot } from "../entity-slot-roles";
 import { useState, type ReactNode } from "react";
-import { MappingChoicePicker, mappingOptionMatches } from "./MappingChoicePicker";
+import { DeviceMappingChoices } from "./DeviceMappingChoices";
 import {
   bindingEntityCandidates,
   isShareableCameraDescriptor,
@@ -43,6 +43,7 @@ export function DeviceMappingInspector({
   onCollapse,
   onReopen,
   onChoiceElement,
+  onAddReading,
   inline = false,
   preview,
 }: {
@@ -60,10 +61,10 @@ export function DeviceMappingInspector({
   onCollapse: () => void;
   onReopen: () => void;
   onChoiceElement?: (element: HTMLElement | null) => void;
+  onAddReading?: ((entityId: EntityId) => void) | undefined;
   inline?: boolean;
   preview?: ReactNode;
 }) {
-  const [query, setQuery] = useState("");
   const [optimisticTarget, setOptimisticTarget] = useState<{ id: string; label: string } | null>(
     null,
   );
@@ -475,6 +476,7 @@ export function DeviceMappingInspector({
       onEntityIdsBySlotIdChange,
     ),
   ];
+  const canAddReading = Boolean(onAddReading && relationship.kind === "modeled-device");
   const selectedTargetLabel =
     optimisticTarget?.id === relationship.id ? optimisticTarget.label : relationshipLabel;
   const choose = (choice: MappingChoice, value: string, primary: boolean) => {
@@ -488,23 +490,9 @@ export function DeviceMappingInspector({
     const targetLabel = primary ? chosenLabel : relationshipLabel;
     const selectionComplete = choice.onChange(value);
     setOptimisticTarget({ id: relationship.id, label: targetLabel });
-    if (selectionComplete && auxiliaryDescriptors.length === 0) onSelectionMade(targetLabel);
+    if (selectionComplete && auxiliaryDescriptors.length === 0 && !canAddReading)
+      onSelectionMade(targetLabel);
   };
-  const renderChoice = (choice: MappingChoice, primary = false) => (
-    <MappingChoicePicker
-      key={`${choice.id}:${query}`}
-      choice={choice}
-      primary={primary}
-      query={query}
-      disabled={disabled}
-      open={state === "open"}
-      onChoose={(value) => choose(choice, value, primary)}
-      onChoiceElement={onChoiceElement}
-    />
-  );
-  const choices = [primaryChoice, ...functionChoices];
-  const requiredFunctionChoices = functionChoices.filter((choice) => choice.required);
-  const optionalFunctionChoices = functionChoices.filter((choice) => !choice.required);
 
   return (
     <aside
@@ -539,46 +527,18 @@ export function DeviceMappingInspector({
         <div className="device-mapping-inspector__content">
           <h2>{relationship.label}</h2>
           <p className="device-mapping-inspector__room">{room.name}</p>
-          <div className="device-mapping-inspector__choices">
-            {choices.some((choice) => choice.options.length > 0) && (
-              <input
-                type="search"
-                className="device-mapping-inspector__search"
-                aria-label="Search Home Assistant matches"
-                placeholder="Search by name or entity ID…"
-                value={query}
-                disabled={state !== "open"}
-                onChange={(event) => setQuery(event.target.value)}
-              />
-            )}
-            {query.trim() &&
-              !choices.some((choice) =>
-                choice.options.some((option) => mappingOptionMatches(option, query)),
-              ) && (
-                <p className="device-mapping-inspector__empty" role="status">
-                  No compatible matches. Try another name or entity ID.
-                </p>
-              )}
-            {renderChoice(
-              auxiliaryDescriptors.length
-                ? { ...primaryChoice, label: "Primary control" }
-                : primaryChoice,
-              true,
-            )}
-            {requiredFunctionChoices.map((choice) => renderChoice(choice))}
-            {optionalFunctionChoices.length > 0 && (
-              <details
-                className="device-mapping-inspector__functions"
-                open={auxiliaryDescriptors.length > 0 || Boolean(query.trim())}
-              >
-                <summary>
-                  {auxiliaryDescriptors.length ? "Readings" : "Optional device functions"}{" "}
-                  <span>{optionalFunctionChoices.length}</span>
-                </summary>
-                <div>{optionalFunctionChoices.map((choice) => renderChoice(choice))}</div>
-              </details>
-            )}
-          </div>
+          <DeviceMappingChoices
+            primaryChoice={primaryChoice}
+            functionChoices={functionChoices}
+            readingSlotIds={auxiliaryDescriptors.map((descriptor) => descriptor.slotId)}
+            profile={profile}
+            runtime={runtime}
+            disabled={disabled}
+            open={state === "open"}
+            onChoose={choose}
+            onChoiceElement={onChoiceElement}
+            onAddReading={canAddReading ? onAddReading : undefined}
+          />
           {connectionDetails && (
             <details className="device-mapping-inspector__details">
               <summary>Connection details</summary>

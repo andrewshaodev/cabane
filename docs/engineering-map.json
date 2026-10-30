@@ -201,6 +201,7 @@
     "spec": "docs/product/connect.md",
     "owners": [
       "apps/web/src/editor-connect/useConnectEditor.ts",
+      "apps/web/src/editor-connect/add-reading.ts",
       "packages/engine/src/home-assistant-mapping",
       "packages/engine/src/runtime-binding-profile.ts",
       "apps/web/src/editor-workspace/EditorConnectionMap.tsx",
@@ -212,7 +213,7 @@
         "symbols": ["RuntimeBindingProfile", "HomeAssistantMappingScreen"]
       }
     ],
-    "invariant": "Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only. HA light helpers need no physical device; manual shared-light mappings retain every modeled slot. Auxiliary sensor slots map independently across HA devices and areas, without changing or clearing the primary control. Manual TV switch alternatives are model-scoped and preserve existing slot identities.",
+    "invariant": "Keep local slot declarations separate from browser household mappings; matching and rescan remain read-only. HA light helpers need no physical device; manual shared-light mappings retain every modeled slot. Connect search includes HA device names and can add sensor readings directly to scene devices, committing the local slot and private draft mapping in one history step. Auxiliary sensor slots map independently across HA devices and areas, without changing or clearing the primary control. Manual TV switch alternatives are model-scoped and preserve existing slot identities.",
     "checks": ["verify:runtime", "fixture:verify:scale"]
   },
   {

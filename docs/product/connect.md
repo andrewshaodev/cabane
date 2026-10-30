@@ -105,13 +105,21 @@ profile and browser mapping through ordinary draft reconciliation and history.
 
 Auxiliary readings declared in Arrange Properties are optional, manual secondary sensor slots. They can map to separate HA devices or entities in any area, including entities without a device. Existing shared-entity mappings and usage indications remain. Furniture readings appear separately by their reading names in the room’s Devices list, or under Outside rooms when placed outside room polygons. Devices retain one primary control and list attached readings under Readings. Changing the primary HA device preserves its independently mapped readings.
 
-The entity inspector has one search above all choices, matching names and entity
-IDs across the primary control, device functions and readings. Each choice shows
+The entity inspector has one search above all choices, matching HA device names,
+entity names and IDs across the primary control, device functions and readings. Each choice shows
 its current selection in a compact disclosure. Unmapped primary choices open
 initially; search opens choices with matching results. Lists start with eight
 results and offer more on demand, while search always considers every candidate.
 The current selection remains visible, including when it does not match the
 search. Entity IDs accompany result names to distinguish similarly named
 sensors. Domain and device-class compatibility rules still apply to each choice.
+
+For scene devices, Connect also offers **Add reading** directly in the inspector.
+Search includes all sensor and binary-sensor candidates, even when no reading is
+declared yet. Results identify their HA device and area. Adding a result creates
+an optional manual secondary slot and its private draft mapping in one workspace
+history step, preserving the primary control and published state. Undo removes
+both together; Save publishes them through the normal workspace flow. Existing
+attachments are marked Added, and disconnected sessions cannot add readings.
 
 TV models offer a manual smart-plug switch alternative for on/off control, including TVs created before this feature. This is a model-specific compatibility rule, not an unrestricted entity-filter override. Commands follow the actual mapped switch domain; camera or media controls remain available for their corresponding entities.

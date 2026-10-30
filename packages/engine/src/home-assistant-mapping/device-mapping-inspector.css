@@ -150,6 +150,61 @@
   font-weight: 400;
   overflow-wrap: anywhere;
 }
+.device-mapping-inspector__add-reading {
+  padding-top: 8px;
+  border-top: 1px solid #d9dfd8;
+  color: #20352d;
+  font-size: 0.875rem;
+}
+.device-mapping-inspector__add-reading > summary {
+  min-height: 44px;
+  padding-block: 12px;
+  color: #285143;
+  font-weight: 600;
+  cursor: pointer;
+}
+.device-mapping-inspector__add-reading > p {
+  margin: 0 0 12px;
+  color: #53685e;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.device-mapping-inspector__reading-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 4px;
+  border: 0;
+  border-top: 1px solid #d9dfd8;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.device-mapping-inspector__reading-option strong {
+  font-weight: 500;
+}
+.device-mapping-inspector__reading-option > span:last-child {
+  color: #285143;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.device-mapping-inspector__reading-option:hover:not(:disabled) {
+  background: #edf0e9;
+}
+.device-mapping-inspector__reading-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.device-mapping-inspector__add-reading > summary:focus-visible,
+.device-mapping-inspector__reading-option:focus-visible {
+  outline: 2px solid #285143;
+  outline-offset: 2px;
+}
 .device-mapping-inspector__choice fieldset {
   min-width: 0;
   padding: 0;

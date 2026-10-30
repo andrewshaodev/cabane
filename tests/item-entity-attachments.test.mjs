@@ -25,6 +25,7 @@ await withModules(async (load) => {
   const { DeviceMappingInspector } = await load(
     "/packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx",
   );
+  const { addReadingToSnapshot } = await load("/apps/web/src/editor-connect/add-reading.ts");
   const { furnishingEditorReducer, createFurnishingEditorState } = await load(
     "/apps/web/src/editor-preview/furnish/editor-state.ts",
   );
@@ -557,6 +558,148 @@ await withModules(async (load) => {
       assert.equal(current.entitySlots.length, 0);
       assert.equal(document.querySelector("select"), null);
       assert.equal(document.querySelectorAll("button").length, 1);
+    });
+  });
+  test("Connect finds an HA device's sensors before any readings are declared", async () => {
+    const project = projectFixture();
+    const item = {
+      ...project.sceneItems[0],
+      id: "sprinkler",
+      modelId: "pop-up-sprinkler",
+      size: devices["pop-up-sprinkler"].defaultSize,
+      placement: { kind: "absolute", at: [-2, -2], elevationMeters: 0, rotationYRadians: 0 },
+      entitySlots: [
+        {
+          id: "sprinkler-control",
+          compatibleDomains: ["valve", "switch"],
+          required: true,
+          autoMap: "manual",
+          deviceRole: "primary",
+          presentation: { label: "Pop-up sprinkler", dashboardRole: "primary" },
+        },
+      ],
+    };
+    project.sceneItems = [item];
+    const manifest = engine.composeHomeManifest(project, registries);
+    const room = engine
+      .deviceMappingRooms(manifest)
+      .find((entry) => entry.id.startsWith("outside-rooms:"));
+    const relationship = engine
+      .groupRoomMappingRelationships(manifest, room.id)
+      .flatMap((group) => group.relationships)[0];
+    const runtime = connectedRuntimeFixture();
+    runtime.devices = [
+      { id: "synthetic-hydro", area_id: "outside", name: "Hydro", name_by_user: null },
+    ];
+    runtime.entityRegistry = [
+      ["switch.synthetic_control", "Hydro switch"],
+      ["sensor.synthetic_water_total", "Water consumption"],
+      ["sensor.synthetic_watering_volume", "Watering volume"],
+    ].map(([entity_id, name]) => ({
+      entity_id,
+      name,
+      device_id: "synthetic-hydro",
+      area_id: null,
+      disabled_by: null,
+      hidden_by: null,
+    }));
+    runtime.entityStates = toSnapshots(
+      Object.fromEntries(
+        [
+          rawEntity("switch.synthetic_control", "on"),
+          rawEntity("sensor.synthetic_water_total", "0.00", {
+            device_class: "water",
+            unit_of_measurement: "L",
+          }),
+          rawEntity("sensor.synthetic_watering_volume", "0.00", {
+            device_class: "water",
+            unit_of_measurement: "L",
+          }),
+        ].map((entity) => [entity.entity_id, entity]),
+      ),
+    );
+    const profile = engine.createEmptyRuntimeBindingProfile(project.home.id);
+    profile.entityIdsBySlotId["sprinkler-control"] = "switch.synthetic_control";
+    const initialSnapshot = {
+      project,
+      bindings: {
+        [runtime.origin]: {
+          draft: profile,
+          published: profile,
+          manualRoomIds: [],
+          manualSlotIds: ["sprinkler-control"],
+        },
+      },
+    };
+    let history = engine.createWorkspaceHistory(initialSnapshot);
+    let added;
+    await withDom(async ({ root, document, dom }) => {
+      await act(async () =>
+        root.render(
+          React.createElement(DeviceMappingInspector, {
+            manifest,
+            room,
+            relationship,
+            profile,
+            runtime,
+            disabled: false,
+            state: "open",
+            inline: true,
+            onAddReading: (entityId) => {
+              added = entityId;
+              history = engine.commitWorkspaceSnapshot(
+                history,
+                addReadingToSnapshot(history.present, item.id, entityId, runtime),
+              );
+            },
+            onEntityIdsBySlotIdChange() {},
+            onSelectionMade() {},
+            onCollapse() {},
+            onReopen() {},
+          }),
+        ),
+      );
+      const search = document.querySelector('input[type="search"]');
+      dom.window.HTMLElement.prototype.attachEvent = () => {};
+      dom.window.HTMLElement.prototype.detachEvent = () => {};
+      await act(async () => search.focus());
+      await act(async () => {
+        Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+          search,
+          "hydro",
+        );
+        search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+        search.dispatchEvent(new dom.window.KeyboardEvent("keyup", { bubbles: true }));
+      });
+      const add = document.querySelector('button[aria-label="Add Water consumption as reading"]');
+      assert.ok(add, "searching the HA device name must offer its sensors as new readings");
+      assert.ok(document.querySelector('button[aria-label="Add Watering volume as reading"]'));
+      await act(async () => add.click());
+      assert.equal(added, "sensor.synthetic_water_total");
+      assert.equal(profile.entityIdsBySlotId["sprinkler-control"], "switch.synthetic_control");
+      const next = history.present;
+      const reading = next.project.sceneItems[0].entitySlots[1];
+      assert.equal(engine.isAuxiliaryEntitySlot(reading), true);
+      assert.equal(next.bindings[runtime.origin].draft.entityIdsBySlotId[reading.id], added);
+      assert.deepEqual(next.bindings[runtime.origin].published, profile);
+      assert.equal(
+        addReadingToSnapshot(next, item.id, added, runtime),
+        null,
+        "duplicate clicks do not add duplicate readings",
+      );
+      const record = engine.createSeedProjectRecord(project);
+      record.draft = next.project;
+      record.bindings = next.bindings;
+      const parsed = engine.parseHomeProjectRecord(
+        engine.serializeHomeProjectRecord(record),
+        registries,
+      );
+      assert.equal(parsed.valid, true, JSON.stringify(parsed.issues));
+      assert.equal(
+        parsed.record.bindings[runtime.origin].draft.entityIdsBySlotId[reading.id],
+        added,
+      );
+      assert.deepEqual(engine.undoWorkspaceHistory(history).present, initialSnapshot);
     });
   });
   test("Connect search filters an outside sprinkler's readings by name and entity ID", async () => {

@@ -13,7 +13,22 @@ export interface MappingOption {
   label: string;
   summaryLabel?: string;
   disabled?: boolean;
+  searchText?: string;
 }
+
+export const entityDeviceNames = (
+  runtime: HomeAssistantRuntimeSnapshot,
+): ReadonlyMap<string, string> => {
+  const devices = new Map(
+    runtime.devices.map((device) => [device.id, device.name_by_user ?? device.name ?? ""]),
+  );
+  return new Map(
+    runtime.entityRegistry.map((entry) => [
+      entry.entity_id,
+      entry.device_id ? (devices.get(entry.device_id) ?? "") : "",
+    ]),
+  );
+};
 
 export interface MappingOptionGroup {
   id?: string;
