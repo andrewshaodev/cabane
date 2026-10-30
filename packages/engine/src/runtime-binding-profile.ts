@@ -116,7 +116,7 @@ export const validateRuntimeBindingProfile = (
       if (
         mappedRoomIds.length === 0 &&
         descriptor.roomIds.length > 0 &&
-        descriptor.kind !== "opening-contact"
+        !allowsCrossAreaEntityBinding(manifest, descriptor)
       ) {
         add(
           "profile.room-unmapped",

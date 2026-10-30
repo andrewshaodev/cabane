@@ -1,4 +1,5 @@
 import { ItemEntitySlots } from "./ItemEntitySlots";
+import type { ItemConnectionContext } from "./ItemEntitySlots";
 import { EditorButton } from "../../editor-chrome/EditorButton";
 import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import { FurnishingVariantGrid } from "./FurnishingVariantGrid";
@@ -27,6 +28,7 @@ export function FurnishingProperties({
   onSizeChange,
   onLightStateChange,
   onEntitySlotsChange,
+  connections,
   onVariantChange,
   onColorChange,
   onClose,
@@ -45,6 +47,7 @@ export function FurnishingProperties({
       ) => void)
     | undefined;
   selected: SceneItemSpec;
+  connections?: ItemConnectionContext | undefined;
   definition: SceneModelEditorDescriptor;
   previewEntry?: CatalogEntry | undefined;
   onPlacementChange: (id: string, placement: ItemPlacement) => void;
@@ -134,6 +137,7 @@ export function FurnishingProperties({
           key={selected.id}
           item={selected}
           label={definition.label}
+          connections={connections}
           onChange={(slots) => onEntitySlotsChange(selected.id, slots)}
         />
       )}

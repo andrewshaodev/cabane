@@ -1,6 +1,3 @@
-.direction-preview.is-connect {
-  --editor-rail-width: 330px;
-}
 .connect-inspector {
   display: flex;
   flex: 1;

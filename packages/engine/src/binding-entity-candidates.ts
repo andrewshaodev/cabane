@@ -51,15 +51,7 @@ export const bindingEntityCandidates = ({
 }): readonly BindingEntityCandidate[] => {
   const outsideRooms = descriptor.roomIds.length === 0;
   const roomAreaId = profile.roomAreaIds[roomId];
-  if (
-    !outsideRooms &&
-    !roomAreaId &&
-    !(
-      (descriptor.kind === "opening-contact" || descriptor.kind === "opening-cover") &&
-      scope === "all-areas"
-    )
-  )
-    return [];
+  if (!outsideRooms && !roomAreaId && scope !== "all-areas") return [];
   const homeWideCamera = isShareableCameraDescriptor(descriptor);
   const claimed =
     homeWideCamera || descriptor.kind === "opening-contact"

@@ -339,6 +339,7 @@ export function useHomeEditorController({
   );
   const { connect, connectManifest, connectFloor, signIn, bindingIssues } = useEditorConnection({
     workspace,
+    replaceEditorsFromProject,
     activeFloorId,
     runtime,
     mode,

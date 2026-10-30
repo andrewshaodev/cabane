@@ -7,6 +7,7 @@ import {
   type EntityBindingSlotSpec,
   type EntityId,
   type HomeAssistantRuntimeSnapshot,
+  type ReadingPresentation,
 } from "@cabane/engine";
 
 /** Add the local slot and private draft mapping in one undoable workspace edit. */
@@ -15,13 +16,13 @@ export function addReadingToSnapshot(
   itemId: string,
   entityId: EntityId,
   runtime: HomeAssistantRuntimeSnapshot,
+  presentation?: ReadingPresentation,
 ): EditorWorkspaceSnapshot | null {
   const domain = entityId.split(".")[0];
   const item = snapshot.project.sceneItems.find((candidate) => candidate.id === itemId);
   const entry = runtime.entityRegistry.find((candidate) => candidate.entity_id === entityId);
   if (
     !item ||
-    item.kind !== "device" ||
     !entry ||
     !runtime.origin ||
     runtime.status !== "connected" ||
@@ -37,7 +38,7 @@ export function addReadingToSnapshot(
     manualSlotIds: [],
   };
   if (
-    item.entitySlots.some(
+    item.entitySlots?.some(
       (slot) =>
         isAuxiliaryEntitySlot(slot) && previous.draft.entityIdsBySlotId[slot.id] === entityId,
     )
@@ -55,14 +56,20 @@ export function addReadingToSnapshot(
     required: false,
     autoMap: "manual",
     deviceRole: "secondary",
-    presentation: { label, dashboardRole: "secondary", showInScene: true },
+    presentation: {
+      label: presentation?.label.trim() || label,
+      dashboardRole: "secondary",
+      showInScene: presentation?.showInScene ?? true,
+    },
   };
   return {
     ...snapshot,
     project: {
       ...snapshot.project,
       sceneItems: snapshot.project.sceneItems.map((candidate) =>
-        candidate.id === itemId ? { ...item, entitySlots: [...item.entitySlots, slot] } : candidate,
+        candidate.id === itemId
+          ? { ...item, entitySlots: [...(item.entitySlots ?? []), slot] }
+          : candidate,
       ),
     },
     bindings: {

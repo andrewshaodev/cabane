@@ -54,6 +54,15 @@ export {
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
 export { DeviceMappingInspector } from "./home-assistant-mapping/DeviceMappingInspector";
+export { DeviceConnectionWorkbench } from "./home-assistant-mapping/DeviceConnectionWorkbench";
+export { ConnectionSourcePicker } from "./home-assistant-mapping/ConnectionSourcePicker";
+export { ReadingConnectionForm } from "./home-assistant-mapping/ReadingConnectionForm";
+export { ConnectionIcon } from "./home-assistant-mapping/ConnectionIcon";
+export {
+  connectionSlotLabel,
+  entityConnectionSummary,
+  type ReadingPresentation,
+} from "./home-assistant-mapping/connection-presentation";
 export { DeviceMappingGroup } from "./home-assistant-mapping/DeviceMappingGroup";
 export { ModeledDeviceMappingRow } from "./home-assistant-mapping/ModeledDeviceMappingRow";
 export { EntitySlotMappingRow } from "./home-assistant-mapping/EntitySlotMappingRow";

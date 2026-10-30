@@ -1,138 +1,214 @@
 import { useState } from "react";
 import {
+  ConnectionIcon,
+  DeviceCategoryIcon,
+  connectionSlotLabel,
+  entityConnectionSummary,
   isAuxiliaryEntitySlot,
-  createBrowserUuid,
   type EntityBindingSlotSpec,
+  type HomeAssistantRuntimeSnapshot,
+  type RuntimeBindingProfile,
   type SceneItemSpec,
 } from "@cabane/engine";
 import { EditorButton } from "../../editor-chrome/EditorButton";
-import { EditorIcon } from "../../editor-chrome/EditorIcon";
 import "./item-entity-slots.css";
 
-const READING_TYPES = {
-  temperature: { label: "Temperature", domain: "sensor", deviceClass: "temperature" },
-  power: { label: "Power", domain: "sensor", deviceClass: "power" },
-  humidity: { label: "Humidity", domain: "sensor", deviceClass: "humidity" },
-  sensor: { label: "Other sensor", domain: "sensor" },
-  binary_sensor: { label: "Binary sensor", domain: "binary_sensor" },
-} as const;
+export interface ItemConnectionContext {
+  profile: RuntimeBindingProfile;
+  runtime: HomeAssistantRuntimeSnapshot;
+  onConnect: (slotId: string) => void;
+  onDisconnect: (slotId: string) => void;
+  onAddReading: () => void;
+}
+
+function ItemConnectionRow({
+  slot,
+  item,
+  connections,
+  onChange,
+  onRemove,
+}: {
+  slot: EntityBindingSlotSpec;
+  item: SceneItemSpec;
+  connections?: ItemConnectionContext | undefined;
+  onChange: (slot: EntityBindingSlotSpec) => void;
+  onRemove?: (() => void) | undefined;
+}) {
+  const [menu, setMenu] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [name, setName] = useState(slot.presentation.label);
+  const current = connections?.profile.entityIdsBySlotId[slot.id];
+  const summary = connections && entityConnectionSummary(current, connections.runtime);
+  const label = connectionSlotLabel(slot, item.modelId);
+  const visible = slot.presentation.showInScene === true;
+  return (
+    <div className="item-entity-slots__entry">
+      <>
+        {current &&
+        connections?.runtime.entityStates[current]?.attributes.device_class === "water" ? (
+          <ConnectionIcon name="water" />
+        ) : (
+          <DeviceCategoryIcon domain={slot.compatibleDomains[0] ?? "sensor"} />
+        )}
+      </>
+      <div className="item-connection-content">
+        <div className="item-connection-title">
+          <strong>{label}</strong>
+          <button
+            type="button"
+            className="item-connection-link"
+            onClick={() => connections?.onConnect(slot.id)}
+            disabled={!connections}
+          >
+            {current ? "Change" : "Connect"}
+            <ConnectionIcon name="chevron" />
+          </button>
+          {onRemove && (
+            <button
+              type="button"
+              className="item-connection-more"
+              aria-label={`Options for ${label}`}
+              aria-expanded={menu}
+              onClick={() => setMenu(!menu)}
+            >
+              <ConnectionIcon name="more" />
+            </button>
+          )}
+        </div>
+        <p className="item-connection-source">
+          {current && summary
+            ? [summary.deviceName, summary.label].filter(Boolean).join(" · ")
+            : slot.deviceRole === "primary"
+              ? "Primary connection"
+              : "Choose a Home Assistant sensor"}
+        </p>
+        <p
+          className={`item-connection-status${!current ? " is-pending" : summary && !summary.available ? " is-unavailable" : ""}`}
+        >
+          <ConnectionIcon name={current ? "check" : "link"} />
+          {summary?.status ?? "Not connected"}
+        </p>
+        <div className="connection-visibility">
+          <span>{isAuxiliaryEntitySlot(slot) ? "Show on model" : "Show state on model"}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-label={`Show ${label} on model`}
+            aria-checked={visible}
+            onClick={() =>
+              onChange({ ...slot, presentation: { ...slot.presentation, showInScene: !visible } })
+            }
+          >
+            <ConnectionIcon name={visible ? "eye" : "hidden"} />
+            {visible ? "On" : "Off"}
+          </button>
+        </div>
+        {menu && (
+          <div className="item-connection-menu" role="group" aria-label={`${label} actions`}>
+            <button
+              type="button"
+              onClick={() => {
+                setRenaming(true);
+                setMenu(false);
+                setName(slot.presentation.label);
+              }}
+            >
+              Rename
+            </button>
+            {current && (
+              <button
+                type="button"
+                onClick={() => {
+                  connections?.onDisconnect(slot.id);
+                  setMenu(false);
+                }}
+              >
+                Disconnect
+              </button>
+            )}
+            <button type="button" className="item-connection-remove" onClick={onRemove}>
+              Remove reading
+            </button>
+          </div>
+        )}
+        {renaming && (
+          <form
+            className="item-connection-rename"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (name.trim()) {
+                onChange({ ...slot, presentation: { ...slot.presentation, label: name.trim() } });
+                setRenaming(false);
+              }
+            }}
+          >
+            <label>
+              Reading name
+              <input
+                type="text"
+                value={name}
+                maxLength={80}
+                required
+                onChange={(event) => setName(event.target.value)}
+              />
+            </label>
+            <button type="submit">Save name</button>
+            <button type="button" onClick={() => setRenaming(false)}>
+              Cancel
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function ItemEntitySlots({
   item,
-  label,
+  label: _label,
   onChange,
+  connections,
 }: {
   item: SceneItemSpec;
   label: string;
   onChange: (slots: readonly EntityBindingSlotSpec[]) => void;
+  connections?: ItemConnectionContext | undefined;
 }) {
-  const [adding, setAdding] = useState(false);
-  const [kind, setKind] = useState<keyof typeof READING_TYPES>("temperature");
-  const [name, setName] = useState("");
   const slots = item.entitySlots ?? [];
-  const reading = READING_TYPES[kind];
-  const add = () => {
-    onChange([
-      ...slots,
-      {
-        id: `reading-${createBrowserUuid()}`,
-        compatibleDomains: [reading.domain],
-        ...("deviceClass" in reading ? { compatibleDeviceClasses: [reading.deviceClass] } : {}),
-        deviceRole: "secondary",
-        required: false,
-        autoMap: "manual",
-        presentation: {
-          label: name.trim() || `${label} ${reading.label.toLowerCase()}`,
-          dashboardRole: "secondary",
-          showInScene: true,
-        },
-      },
-    ]);
-    setName("");
-    setAdding(false);
-  };
-  if (slots.length === 0 && !adding) {
-    return (
+  const controls = slots.filter((slot) => !isAuxiliaryEntitySlot(slot));
+  const readings = slots.filter(isAuxiliaryEntitySlot);
+  const row = (slot: EntityBindingSlotSpec) => (
+    <ItemConnectionRow
+      key={slot.id}
+      slot={slot}
+      item={item}
+      connections={connections}
+      onChange={(next) =>
+        onChange(slots.map((candidate) => (candidate.id === next.id ? next : candidate)))
+      }
+      onRemove={
+        isAuxiliaryEntitySlot(slot)
+          ? () => onChange(slots.filter((candidate) => candidate.id !== slot.id))
+          : undefined
+      }
+    />
+  );
+  return (
+    <>
+      {controls.length > 0 && (
+        <fieldset className="item-entity-slots">
+          <legend>Connections</legend>
+          {controls.map(row)}
+        </fieldset>
+      )}
       <fieldset className="item-entity-slots">
-        <legend>Linked entities</legend>
-        <EditorButton onClick={() => setAdding(true)} aria-expanded={false}>
-          <EditorIcon name="plus" />
+        <legend>Readings</legend>
+        {readings.map(row)}
+        <EditorButton onClick={() => connections?.onAddReading()} disabled={!connections}>
+          <ConnectionIcon name="plus" />
           Add reading
         </EditorButton>
       </fieldset>
-    );
-  }
-  return (
-    <fieldset className="item-entity-slots">
-      <legend>Linked entities</legend>
-      <p>
-        Add readings here, then choose their Home Assistant entities in Connect.
-        {item.kind === "device" ? " The primary entity controls the device." : ""}
-      </p>
-      {slots.map((slot) => (
-        <div className="item-entity-slots__entry" key={slot.id}>
-          <strong>{slot.presentation.label}</strong>
-          <label className="item-entity-slots__visibility">
-            <input
-              type="checkbox"
-              checked={slot.presentation.showInScene === true}
-              onChange={(event) =>
-                onChange(
-                  slots.map((candidate) =>
-                    candidate.id === slot.id
-                      ? {
-                          ...candidate,
-                          presentation: {
-                            ...candidate.presentation,
-                            showInScene: event.target.checked,
-                          },
-                        }
-                      : candidate,
-                  ),
-                )
-              }
-            />
-            Show readings
-          </label>
-          {isAuxiliaryEntitySlot(slot) && (
-            <EditorButton
-              variant="text"
-              onClick={() => onChange(slots.filter((candidate) => candidate.id !== slot.id))}
-              aria-label={`Remove ${slot.presentation.label}`}
-            >
-              Remove reading
-            </EditorButton>
-          )}
-        </div>
-      ))}
-      <label className="item-entity-slots__new-reading">
-        Reading type
-        <select
-          value={kind}
-          onChange={(event) => setKind(event.target.value as keyof typeof READING_TYPES)}
-        >
-          {Object.entries(READING_TYPES).map(([value, type]) => (
-            <option key={value} value={value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="item-entity-slots__new-reading">
-        Reading name
-        <input
-          value={name}
-          maxLength={80}
-          placeholder={`${label} ${reading.label.toLowerCase()}`}
-          onChange={(event) => setName(event.target.value)}
-        />
-      </label>
-      <EditorButton onClick={add}>Add reading</EditorButton>
-      {slots.length === 0 && (
-        <EditorButton variant="text" onClick={() => setAdding(false)}>
-          Cancel
-        </EditorButton>
-      )}
-    </fieldset>
+    </>
   );
 }

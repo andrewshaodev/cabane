@@ -8,8 +8,6 @@ import { EditorIcon } from "../editor-chrome/EditorIcon";
 
 import { EditorModeNav, type EditorMode } from "../editor-chrome/EditorModeNav";
 
-import { ConnectActionBar } from "../editor-connect/ConnectActionBar";
-
 import type { useHomeEditorController } from "./useHomeEditorController";
 
 type Props = Pick<
@@ -35,8 +33,6 @@ type Props = Pick<
   | "setPublishOpen"
   | "publishErrors"
   | "publishProject"
-  | "connect"
-  | "runtime"
   | "constructEditor"
   | "dragging"
   | "floorZoneDrawing"
@@ -72,8 +68,6 @@ export function HomeEditorHeader({
   setPublishOpen,
   publishErrors,
   publishProject,
-  connect,
-  runtime,
   constructEditor,
   dragging,
   floorZoneDrawing,
@@ -245,16 +239,7 @@ export function HomeEditorHeader({
           Save
         </EditorButton>
       </div>
-      {mode === "connect" ? (
-        <ConnectActionBar
-          view={connect.view}
-          onViewChange={connect.setView}
-          hasUnmappedRooms={connect.hasUnmappedRooms}
-          refreshing={runtime.refreshing}
-          disconnected={connect.disconnected}
-          onRefresh={() => void connect.refresh()}
-        />
-      ) : mode === "construct" ? (
+      {mode === "connect" ? null : mode === "construct" ? (
         <EditorActionBar
           inert={referenceAdjusting}
           tool={constructEditor.tool}
