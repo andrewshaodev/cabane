@@ -73,6 +73,7 @@ export function EditorActionButton({
       <button
         type="button"
         className="editor-action-button"
+        data-show-label={showLabel || undefined}
         aria-label={label}
         title={disabled ? disabledReason : undefined}
         aria-description={disabled ? disabledReason : warning}

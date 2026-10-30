@@ -2,6 +2,7 @@
   "workspace": {
     "description": "Workspace library, persistence, import/export, publication and recovery. Includes runtime and editor integration tests.",
     "tests": [
+      "arrange-groups.test.mjs",
       "camera-stream.test.mjs",
       "command-scheduler.test.mjs",
       "connect-action-bar.test.mjs",
@@ -279,6 +280,7 @@
       "gun-portals.test.mjs",
       "laser-device-performance.test.mjs",
       "laser-visuals.test.mjs",
+      "integrated-roller-shutter.test.mjs",
       "layered-surfaces.test.mjs",
       "package-lock.test.mjs",
       "portal-transition.test.mjs",

@@ -8,6 +8,9 @@ import { withModules } from "./test-server.mjs";
 await withModules(async (load) => {
   const { CabaneDomProvider, useCabaneDom } = await load("/packages/engine/src/CabaneDom.tsx");
   const { useDesktopWalkInput } = await load("/packages/engine/src/desktop-walk-input.ts");
+  const { requestWalkPointerLock } = await load(
+    "/packages/engine/src/request-walk-pointer-lock.ts",
+  );
   const { FloorPicker } = await load("/packages/engine/src/building/FloorPicker.tsx");
   const { ConstructFloorControls } = await load(
     "/apps/web/src/editor-floors/ConstructFloorControls.tsx",
@@ -228,6 +231,75 @@ await withModules(async (load) => {
         ),
       );
       assert.deepEqual(movement.current, { x: 0, y: 0 });
+    }));
+  test("active walk input keeps movement and other keys out of host shortcuts", async () =>
+    fixture(async ({ browser, shadow, render }) => {
+      const movement = { current: { x: 0, y: 0 } },
+        sprint = { current: false };
+      function WalkInput({ active }) {
+        useDesktopWalkInput(active, movement, sprint);
+        return h("button", null, "Walk");
+      }
+      const hostKeys = [];
+      for (const type of ["keydown", "keyup"])
+        window.addEventListener(type, (event) => hostKeys.push(`${type}:${event.code}`));
+      const key = (code, target = shadow.querySelector("button"), type = "keydown") => {
+        const event = new browser.window.KeyboardEvent(type, {
+          code,
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+        });
+        target.dispatchEvent(event);
+        return event;
+      };
+      await render(h(WalkInput, { active: true }));
+      const localKeys = [];
+      shadow.addEventListener("keydown", (event) => localKeys.push(event.code));
+      assert.equal(key("KeyW").defaultPrevented, true);
+      assert.equal(movement.current.y, -1);
+      key("KeyW", shadow.querySelector("button"), "keyup");
+      assert.deepEqual(movement.current, { x: 0, y: 0 });
+      key("KeyE");
+      assert.deepEqual(hostKeys, [], "HA must not open its entity search while walking");
+      assert.deepEqual(localKeys, ["KeyW", "KeyE"], "other Cabane key handlers still run");
+      key("KeyE", document.querySelector("#host"));
+      assert.deepEqual(hostKeys, ["keydown:KeyE"], "host input outside Cabane remains available");
+      await render(h(WalkInput, { active: false }));
+      key("KeyE");
+      assert.deepEqual(
+        hostKeys,
+        ["keydown:KeyE", "keydown:KeyE"],
+        "leaving walk restores host shortcuts",
+      );
+    }));
+  test("walk pointer lock focuses its persistent scene instead of the host or entry button", async () =>
+    fixture(async ({ browser, shadow, render }) => {
+      await render(h("main", null, h("button", null, "Explore")));
+      const scene = shadow.querySelector("main");
+      const button = shadow.querySelector("button");
+      let locked = null;
+      let focusCalls = 0;
+      const focus = scene.focus.bind(scene);
+      scene.focus = (options) => {
+        focusCalls++;
+        focus(options);
+      };
+      Object.defineProperty(shadow, "pointerLockElement", { get: () => locked });
+      scene.requestPointerLock = () => {
+        locked = scene;
+        document.dispatchEvent(new browser.window.Event("pointerlockchange"));
+        return Promise.resolve();
+      };
+      document.querySelector("#host").focus();
+      await requestWalkPointerLock(scene);
+      assert.ok(shadow.activeElement === scene, "keyboard input must enter the panel");
+      assert.equal(focusCalls, 1, "the event and Promise must not focus the scene twice");
+      button.remove();
+      assert.ok(shadow.activeElement === scene, "removing the entry UI must not lose focus");
+      document.querySelector("#host").focus();
+      await requestWalkPointerLock(scene);
+      assert.ok(shadow.activeElement === scene, "resuming existing pointer lock restores focus");
     }));
   test("editor tooltip stays inside the shadow portal and accounts for panel offsets", async () =>
     fixture(async ({ shadow, portals, render }) => {

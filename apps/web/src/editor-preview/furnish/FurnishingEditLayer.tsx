@@ -2,7 +2,6 @@ import { useCabaneDom } from "@cabane/engine";
 import type { ThreeEvent } from "@react-three/fiber";
 import {
   resolveItemTransform,
-  ToonMaterial,
   type DeviceModelRegistry,
   type FloorSpec,
   type FurnishingModelRegistry,
@@ -14,6 +13,9 @@ import { BoxGeometry, DoubleSide, Plane, Vector3 } from "three";
 import { noPlanRaycast, PlanOverlayMaterial } from "../construct/PlanDrawing";
 import { placementForWorldDrag, selectionBoxGeometry } from "./editor-state";
 import { missingModelEditorDescriptor } from "./missing-model";
+import { expandItemSelection, itemSelectionUnits, toggleItemSelection } from "./item-groups";
+import { furnishingSelectionTarget } from "./selection-target";
+import { SelectionBounds } from "./SelectionBounds";
 
 interface DragSession {
   items: readonly SceneItemSpec[];
@@ -90,6 +92,9 @@ export function FurnishingEditLayer({
   const marquee = useRef<{
     from: Vector3;
     to: Vector3;
+    active: boolean;
+    startClientX: number;
+    startClientY: number;
     pointerId: number;
     target: PointerCaptureTarget | null;
   } | null>(null);
@@ -114,7 +119,7 @@ export function FurnishingEditLayer({
       const current = marquee.current;
       marquee.current = null;
       setRectangle(null);
-      if (!cancel)
+      if (!cancel && current.active)
         onSelectMany?.(
           items
             .filter((item) => {
@@ -188,10 +193,12 @@ export function FurnishingEditLayer({
             marquee.current = {
               from: hit.clone(),
               to: hit.clone(),
+              active: false,
+              startClientX: event.nativeEvent.clientX,
+              startClientY: event.nativeEvent.clientY,
               pointerId: event.pointerId,
               target: pointerCaptureTarget(event),
             };
-            setRectangle(marquee.current);
             pointerCaptureTarget(event)?.setPointerCapture?.(event.pointerId);
             onDraggingChange?.(true);
           }}
@@ -202,7 +209,12 @@ export function FurnishingEditLayer({
             const hit = pointOnElevationPlane(event, 0);
             if (hit) {
               current.to = hit.clone();
-              setRectangle({ ...current });
+              current.active ||=
+                Math.hypot(
+                  event.nativeEvent.clientX - current.startClientX,
+                  event.nativeEvent.clientY - current.startClientY,
+                ) >= DRAG_ACTIVATION_DISTANCE_PX;
+              if (current.active) setRectangle({ ...current });
             }
           }}
           onPointerUp={(event) => {
@@ -272,6 +284,10 @@ export function FurnishingEditLayer({
               geometry={unitBox}
               onClick={(event) => {
                 event.stopPropagation();
+                if (boxSelectionModifier(event) && onSelectMany) {
+                  onSelectMany(toggleItemSelection(items, selectedIds, item.id));
+                  return;
+                }
                 if (!cameraModifier(event) && !boxSelectionModifier(event) && !selected)
                   onSelect(item.id);
               }}
@@ -290,10 +306,11 @@ export function FurnishingEditLayer({
                 // opens Properties and can move the item out from under the pointer.
                 const hit = pointOnElevationPlane(event, transform.position[1]);
                 if (!hit) return;
+                const dragIds = new Set(
+                  selected ? selectedIds : expandItemSelection(items, [item.id]),
+                );
                 drag.current = {
-                  items: selected
-                    ? items.filter((candidate) => selectedIds.includes(candidate.id))
-                    : [item],
+                  items: items.filter((candidate) => dragIds.has(candidate.id)),
                   origin: new Vector3(...transform.position),
                   active: false,
                   id: item.id,
@@ -325,7 +342,7 @@ export function FurnishingEditLayer({
                 }
                 const hit = pointOnElevationPlane(event, session.elevation);
                 if (!hit) return;
-                if (session.items.length > 1) {
+                if (session.items.length > 1 || session.items[0]?.group) {
                   const dx = hit.x + session.offsetX - session.origin.x;
                   const dz = hit.z + session.offsetZ - session.origin.z;
                   const x = modifierIsPressed(event) ? dx : Math.round(dx * 10) / 10;
@@ -367,14 +384,28 @@ export function FurnishingEditLayer({
               onLostPointerCapture={() => endDrag(true)}
               renderOrder={20}
             >
-              <ToonMaterial
+              <PlanOverlayMaterial
                 color={selected ? "#6b896c" : "#ffffff"}
                 transparent
                 visible={selected}
-                opacity={selected ? 0.18 : 0.001}
+                opacity={0.12}
+                depthTest={false}
                 depthWrite={false}
               />
             </mesh>
+          </group>
+        );
+      })}
+      {itemSelectionUnits(items.filter((item) => selectedIds.includes(item.id))).map((unit) => {
+        const target = furnishingSelectionTarget(
+          unit.items,
+          floor,
+          { furnishingModels, deviceModels },
+          unit.name ?? "Selected item",
+        );
+        return (
+          <group key={unit.id} position={target.position} rotation={[0, target.rotation, 0]}>
+            <SelectionBounds {...target.box} />
           </group>
         );
       })}

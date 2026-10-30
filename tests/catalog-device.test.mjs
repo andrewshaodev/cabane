@@ -456,6 +456,7 @@ await withModules(async (load) => {
       "thermometer",
       "motion-sensor",
       "motorized-blind",
+      "integrated-roller-shutter",
       "leak-sensor",
       "ceiling-fan",
       "table-fan",
@@ -511,9 +512,11 @@ await withModules(async (load) => {
         definition.complexity.visibleMeshes <=
           (["pop-up-sprinkler", "rotating-sprinkler"].includes(id)
             ? 72
-            : id === "pergola-string-lights"
-              ? 17
-              : 16),
+            : id === "integrated-roller-shutter"
+              ? 35
+              : id === "pergola-string-lights"
+                ? 17
+                : 16),
       );
       assert.ok(
         definition.complexity.triangles <=

@@ -47,7 +47,10 @@ export function useEditorSceneProjection({
   );
   const previewSceneItems = ceilingDependencies.items;
   const visualSceneItems = furnishingEditorTransaction ? furnishingEditorItems : previewSceneItems;
-  const selectedItem = visualSceneItems.find((item) => item.id === furnishingEditorSelectedId);
+  const selectedItem =
+    !furnishingEditor.selectedGroup && furnishingEditor.selectedIds.length <= 1
+      ? visualSceneItems.find((item) => item.id === furnishingEditorSelectedId)
+      : undefined;
   const selectedDefinition =
     selectedItem &&
     ((selectedItem.kind === "device" ? deviceModels : furnishingModels)[selectedItem.modelId] ??

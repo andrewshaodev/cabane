@@ -4,7 +4,7 @@ import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
 
 interface RegisteredId {
   path: string;
-  kind: "architecture" | "slot" | "shortcut" | "item";
+  kind: "architecture" | "slot" | "shortcut" | "item" | "group";
 }
 
 const visitProjectIds = (
@@ -110,7 +110,14 @@ const visitProjectIds = (
     register(shortcut.id, `shortcuts[${index}].id`, "shortcut"),
   );
 
-  project.sceneItems.forEach((item, index) => register(item.id, `sceneItems[${index}].id`, "item"));
+  const groups = new Set<string>();
+  project.sceneItems.forEach((item, index) => {
+    register(item.id, `sceneItems[${index}].id`, "item");
+    if (item.group && !groups.has(item.group.id)) {
+      register(item.group.id, `sceneItems[${index}].group.id`, "group");
+      groups.add(item.group.id);
+    }
+  });
 };
 
 /** The same identity namespace used by validation, including implicit opening slots. */

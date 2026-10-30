@@ -3823,6 +3823,25 @@
                         "type": "string"
                       }
                     },
+                    "group": {
+                      "optional": true,
+                      "schema": {
+                        "properties": {
+                          "id": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
+                          "name": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
                     "id": {
                       "optional": false,
                       "schema": {
@@ -4262,6 +4281,25 @@
                       "optional": false,
                       "schema": {
                         "type": "string"
+                      }
+                    },
+                    "group": {
+                      "optional": true,
+                      "schema": {
+                        "properties": {
+                          "id": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
+                          "name": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        }
                       }
                     },
                     "id": {
@@ -7459,6 +7497,25 @@
                         "type": "string"
                       }
                     },
+                    "group": {
+                      "optional": true,
+                      "schema": {
+                        "properties": {
+                          "id": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
+                          "name": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    },
                     "id": {
                       "optional": false,
                       "schema": {
@@ -7898,6 +7955,25 @@
                       "optional": true,
                       "schema": {
                         "type": "string"
+                      }
+                    },
+                    "group": {
+                      "optional": true,
+                      "schema": {
+                        "properties": {
+                          "id": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
+                          "name": {
+                            "optional": false,
+                            "schema": {
+                              "type": "string"
+                            }
+                          }
+                        }
                       }
                     },
                     "id": {
