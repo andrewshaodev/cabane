@@ -559,6 +559,129 @@ await withModules(async (load) => {
       assert.equal(document.querySelectorAll("button").length, 1);
     });
   });
+  test("Connect search filters an outside sprinkler's readings by name and entity ID", async () => {
+    const project = projectFixture();
+    const runtime = connectedRuntimeFixture();
+    const waterId = "sensor.synthetic_water_consumption";
+    for (let index = 0; index < 250; index++) {
+      const entityId = `sensor.synthetic_${index}`;
+      runtime.entityRegistry.push({
+        entity_id: entityId,
+        device_id: null,
+        area_id: null,
+        name: `Auxiliary sensor ${index}`,
+        disabled_by: null,
+        hidden_by: null,
+      });
+      Object.assign(runtime.entityStates, toSnapshots({ [entityId]: rawEntity(entityId, "10") }));
+    }
+    runtime.entityRegistry.push({
+      entity_id: waterId,
+      device_id: null,
+      area_id: null,
+      name: "Water consumption",
+      disabled_by: null,
+      hidden_by: null,
+    });
+    Object.assign(
+      runtime.entityStates,
+      toSnapshots({
+        [waterId]: rawEntity(waterId, "325", {
+          device_class: "water",
+          state_class: "total_increasing",
+          unit_of_measurement: "L",
+        }),
+      }),
+    );
+    const reading = slot("sprinkler-water");
+    delete reading.compatibleDeviceClasses;
+    project.sceneItems = [
+      {
+        ...project.sceneItems[0],
+        id: "sprinkler",
+        modelId: "rotating-sprinkler",
+        size: devices["rotating-sprinkler"].defaultSize,
+        placement: { kind: "absolute", at: [-2, -2], elevationMeters: 0, rotationYRadians: 0 },
+        entitySlots: [
+          {
+            id: "sprinkler-control",
+            compatibleDomains: ["valve", "switch"],
+            required: false,
+            autoMap: "manual",
+            deviceRole: "primary",
+            presentation: { label: "Sprinkler", dashboardRole: "primary" },
+          },
+          reading,
+        ],
+      },
+    ];
+    const manifest = engine.composeHomeManifest(project, registries);
+    const room = engine
+      .deviceMappingRooms(manifest)
+      .find((entry) => entry.id.startsWith("outside-rooms:"));
+    const relationship = engine
+      .groupRoomMappingRelationships(manifest, room.id)
+      .flatMap((group) => group.relationships)
+      .find((entry) => entry.id === "sprinkler");
+    const profile = engine.createEmptyRuntimeBindingProfile(manifest.home.id);
+    profile.entityIdsBySlotId["sprinkler-control"] = "valve.demo_water";
+    await withDom(async ({ root, document, dom }) => {
+      await act(async () =>
+        root.render(
+          React.createElement(DeviceMappingInspector, {
+            manifest,
+            room,
+            relationship,
+            profile,
+            runtime,
+            disabled: false,
+            state: "open",
+            inline: true,
+            onEntityIdsBySlotIdChange() {},
+            onSelectionMade() {},
+            onCollapse() {},
+            onReopen() {},
+          }),
+        ),
+      );
+      const readingGroup = () =>
+        document.querySelector('[aria-label="Home Assistant entity for sprinkler-water"]');
+      assert.equal(readingGroup().querySelector("details").open, false);
+      const values = () =>
+        [...readingGroup().querySelectorAll('input[type="radio"]')].map((input) => input.value);
+      assert.equal(values().length, 9, "long candidate lists render one page at a time");
+      assert.equal(values().includes(waterId), false, "search must reach beyond the first page");
+      assert.equal(values().includes("valve.demo_water"), false);
+      await act(async () => readingGroup().querySelector("summary").click());
+      assert.equal(readingGroup().querySelector("details").open, true);
+      await act(async () => readingGroup().querySelector("button").click());
+      assert.equal(values().length, 17);
+      const search = document.querySelector('input[type="search"]');
+      dom.window.HTMLElement.prototype.attachEvent = () => {};
+      dom.window.HTMLElement.prototype.detachEvent = () => {};
+      await act(async () => search.focus());
+      const setSearch = async (value) =>
+        act(async () => {
+          Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+            search,
+            value,
+          );
+          search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+          search.dispatchEvent(new dom.window.KeyboardEvent("keyup", { bubbles: true }));
+        });
+      await setSearch("  SYNTHETIC_WATER  ");
+      assert.deepEqual(values(), ["", waterId]);
+      assert.equal(readingGroup().querySelector("details").open, true);
+      assert.ok(document.querySelector('input[value="valve.demo_water"]')?.checked);
+      await setSearch("Water consumption");
+      assert.deepEqual(values(), ["", waterId]);
+      await setSearch("no such entity");
+      assert.deepEqual(values(), [""]);
+      assert.match(readingGroup().textContent, /Clear search/);
+      await setSearch("");
+      assert.equal(values().length, 9);
+    });
+  });
   test("Connect offers separate auxiliary entities across HA devices and retains the inspector after mapping", async () => {
     const { manifest, profile, runtime } = connectionFixture();
     const room = manifest.floors[0].rooms[0];
