@@ -18,6 +18,7 @@ import { useBuildTutorial } from "../editor-onboarding/useBuildTutorial";
 import { installedWalkTools } from "../walk-tools";
 import { EditorCompletionDialogs } from "./EditorCompletionDialogs";
 import { EditorSelectionDetails } from "./EditorSelectionDetails";
+import { ConnectInspector } from "../editor-connect/ConnectInspector";
 import { EditorSidebar } from "./EditorSidebar";
 import { EditorValidationPanel } from "./EditorValidationPanel";
 import { EditorPanelControls } from "./EditorPanelControls";
@@ -273,6 +274,7 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
     <WallFinishPreviewProvider palette={editorProject.home.palette}>
       <main
         className={`direction-preview${northOrientation.active ? " is-orienting-north" : ""}${shortcutsMode ? " is-shortcuts" : mode === "connect" ? " is-connect" : mode === "construct" ? " is-plan" : ""}`}
+        data-connect-room={mode === "connect" && Boolean(connect.room)}
         data-editor-mode={shortcutsMode ? "shortcuts" : mode}
         data-properties-open={panels.propertiesOpen}
         data-has-issues={panelIssues.length > 0}
@@ -292,6 +294,18 @@ export function EditorWorkspace(props: Parameters<typeof useHomeEditorController
           />
         )}
 
+        {!shortcutsMode && mode === "connect" && connect.room && homeAssistantUrl && (
+          <div
+            className="connect-workspace-host"
+            inert={editingLocked || publishOpen || previewOpen}
+          >
+            <ConnectInspector
+              editor={connect}
+              manifest={controller.connectManifest}
+              deviceModels={deviceModels}
+            />
+          </div>
+        )}
         <div
           className="editor-floor-controls"
           inert={publishOpen || previewOpen || northOrientation.active}

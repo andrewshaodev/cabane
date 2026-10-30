@@ -1,4 +1,3 @@
-import { isAuxiliaryEntitySlot } from "./entity-slot-roles";
 import { entityDomain } from "./binding-profile-contract";
 import type {
   BindingSlotDescriptor,
@@ -86,31 +85,8 @@ export const isShareableCameraDescriptor = (descriptor: BindingSlotDescriptor | 
     isShareableCameraSlot(descriptor.deviceModel, descriptor.spec),
   );
 
+/** Explicit compatible choices may cross areas; automatic candidates remain area-scoped. */
 export const allowsCrossAreaEntityBinding = (
-  manifest: HomeBindingManifest,
+  _manifest: HomeBindingManifest,
   descriptor: BindingSlotDescriptor | undefined,
-) => {
-  if (descriptor?.kind === "opening-contact" || descriptor?.kind === "opening-cover") return true;
-  if (
-    descriptor &&
-    isAuxiliaryEntitySlot(descriptor.spec) &&
-    (descriptor.kind === "device" ||
-      manifest.sceneItems.some((item) =>
-        item.entitySlots?.some((slot) => slot.id === descriptor.slotId),
-      ))
-  )
-    return true;
-  if (!descriptor || descriptor.kind !== "device") return false;
-  if (isShareableCameraDescriptor(descriptor)) return true;
-  return (
-    manifest.floors
-      .flatMap((floor) => floor.rooms)
-      .some((room) =>
-        room.devices.some(
-          (device) =>
-            device.id === descriptor.deviceSlotId &&
-            device.entitySlots.filter((slot) => !isAuxiliaryEntitySlot(slot)).length === 1,
-        ),
-      ) ?? false
-  );
-};
+) => Boolean(descriptor);

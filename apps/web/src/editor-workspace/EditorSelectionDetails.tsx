@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AddItemReadingDialog } from "../editor-preview/furnish/AddItemReadingDialog";
 import { saveModelLighting } from "../model-lighting/save-model-lighting";
 import { ownerProjectRegistries } from "../project-runtime";
 import { ModelLightingDialog } from "../model-lighting/ModelLightingDialog";
@@ -74,6 +75,21 @@ export function EditorSelectionDetails({
   liveStairIssues,
   disabled,
 }: Props) {
+  const [addingReading, setAddingReading] = useState(false);
+  const itemConnections = {
+    profile: connect.profile,
+    runtime: connect.displayRuntime,
+    onConnect: (slotId: string) => {
+      if (connect.selectSlot(slotId)) selectMode("connect", true);
+    },
+    onDisconnect: (slotId: string) =>
+      connect.assignEntities(
+        Object.fromEntries(
+          Object.entries(connect.profile.entityIdsBySlotId).filter(([id]) => id !== slotId),
+        ),
+      ),
+    onAddReading: () => setAddingReading(true),
+  };
   const [lightingModel, setLightingModel] = useState<string | null>(null);
   const selectedStair =
     stairDialog && snapshot.project.stairs.find((stair) => stair.id === stairDialog.id);
@@ -145,6 +161,7 @@ export function EditorSelectionDetails({
                 onSizeChange={furnishingEditor.updateSize}
                 onLightStateChange={furnishingEditor.updateLightState}
                 onEntitySlotsChange={furnishingEditor.updateEntitySlots}
+                connections={itemConnections}
                 onVariantChange={furnishingEditor.updateVariant}
                 onColorChange={furnishingEditor.updateColor}
                 onEditLighting={() => setLightingModel(selectedItem.modelId)}
@@ -156,6 +173,23 @@ export function EditorSelectionDetails({
               />
             ) : null)}
         </div>
+      )}
+      {addingReading && selectedItem && (
+        <AddItemReadingDialog
+          item={selectedItem}
+          label={
+            deviceModels[selectedItem.modelId]?.label ??
+            furnishingModels[selectedItem.modelId]?.label ??
+            selectedItem.modelId
+          }
+          connections={itemConnections}
+          disabled={disabled || connect.disconnected}
+          onClose={() => setAddingReading(false)}
+          onAdd={(id, presentation) => {
+            connect.addItemReading(selectedItem.id, id, presentation);
+            setAddingReading(false);
+          }}
+        />
       )}
       {lightingModel && (
         <ModelLightingDialog

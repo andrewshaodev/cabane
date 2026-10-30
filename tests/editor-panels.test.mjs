@@ -4,6 +4,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
+import { connectedRuntimeFixture } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
   const { useEditorPanels, editorPanelSelection } = await load(
@@ -28,9 +29,8 @@ await withModules(async (load) => {
     "/apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
   );
   const { interactionFloor: floor } = await load("/tests/fixtures/interaction-floor.ts");
-  const { createEmptyHomeProject, editorWallAttachments } = await load(
-    "/packages/engine/src/index.ts",
-  );
+  const { createEmptyHomeProject, createEmptyRuntimeBindingProfile, editorWallAttachments } =
+    await load("/packages/engine/src/index.ts");
   const definition = {
     label: "A chair with a deliberately long descriptive model name",
     category: "Seating",
@@ -119,6 +119,13 @@ await withModules(async (load) => {
           },
         },
         snapshot: { project },
+        connect: {
+          profile: createEmptyRuntimeBindingProfile(project.home.id),
+          displayRuntime: connectedRuntimeFixture({ status: "disconnected", canMutate: false }),
+          selectSlot: () => false,
+          assignEntities() {},
+        },
+        selectMode() {},
         stairDialog: null,
         commit() {},
         floorZoneDrawing: { active: false, cancel() {} },

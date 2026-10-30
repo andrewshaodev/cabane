@@ -17,6 +17,7 @@ import {
   type HomeProjectIssue,
   type RuntimeBindingProfile,
   type WorkspaceBindings,
+  type ReadingPresentation,
 } from "@cabane/engine";
 import { stageImportedProfile } from "./profile-transfer";
 import { deviceRoom, type EditorOpenRequest } from "./connect-navigation";
@@ -47,7 +48,7 @@ export function useConnectEditor({
   origin: string | null;
   active: boolean;
   onChange: (bindings: WorkspaceBindings) => void;
-  onAddReading?: (itemId: string, entityId: EntityId) => void;
+  onAddReading?: (itemId: string, entityId: EntityId, presentation?: ReadingPresentation) => void;
   initialRequest?: EditorOpenRequest;
   routeView?: "rooms" | "devices";
   onViewChange?: ((view: "rooms" | "devices") => void) | undefined;
@@ -86,6 +87,7 @@ export function useConnectEditor({
   const [relationshipId, setRelationshipId] = useState<string | null>(
     initialRequest?.relationshipId ?? null,
   );
+  const [slotId, setSlotId] = useState<string | null>(null);
   const [pendingAreaChange, setPendingAreaChange] = useState<
     | (ReturnType<typeof saveRoomAreaDraft> & {
         origin: string;
@@ -118,7 +120,7 @@ export function useConnectEditor({
   const roomDeviceSummaries = useMemo(
     () =>
       Object.fromEntries(
-        rooms.map((candidate) => {
+        deviceRooms.map((candidate) => {
           // Optional opening contacts should not make the room look unfinished.
           const categories = groupsByRoom[candidate.id]
             .map((group) => ({
@@ -137,16 +139,30 @@ export function useConnectEditor({
             candidate.id,
             {
               // Count each device/control once, even when it has several mapped functions.
-              mapped: relationships.filter((relationship) =>
-                relationship.slotIds.some((id) => Boolean(profile.entityIdsBySlotId[id])),
-              ).length,
+              mapped: relationships.filter((relationship) => {
+                const descriptors =
+                  relationship.kind === "modeled-device"
+                    ? relationship.descriptors
+                    : [relationship.descriptor];
+                const required = descriptors.filter((descriptor) => descriptor.spec.required);
+                const checked = required.length
+                  ? required
+                  : [
+                      descriptors.find((descriptor) => descriptor.spec.deviceRole === "primary") ??
+                        descriptors[0],
+                    ];
+                return checked.every(
+                  (descriptor) =>
+                    descriptor && Boolean(profile.entityIdsBySlotId[descriptor.slotId]),
+                );
+              }).length,
               total: relationships.length,
               categories,
             },
           ];
         }),
       ),
-    [groupsByRoom, profile.entityIdsBySlotId, rooms],
+    [groupsByRoom, profile.entityIdsBySlotId, deviceRooms],
   );
   const relationship =
     groups
@@ -341,6 +357,10 @@ export function useConnectEditor({
       severity: "warning",
     });
   }
+  const selectRelationship = useCallback((id: string | null) => {
+    setRelationshipId(id);
+    setSlotId(null);
+  }, []);
   return {
     view,
     defaultView,
@@ -354,17 +374,47 @@ export function useConnectEditor({
     deviceRooms,
     roomId: room?.id ?? null,
     room,
+    slotId,
+    selectSlot: (id: string) => {
+      const destination = deviceRooms.find((room) =>
+        groupsByRoom[room.id].some((group) =>
+          group.relationships.some((relationship) => relationship.slotIds.includes(id)),
+        ),
+      );
+      const target =
+        destination &&
+        groupsByRoom[destination.id]
+          .flatMap((group) => group.relationships)
+          .find((relationship) => relationship.slotIds.includes(id));
+      if (!destination || !target) return false;
+      setView("devices");
+      setRoomId(destination.id);
+      setRelationshipId(target.id);
+      setSlotId(id);
+      return true;
+    },
+    selectSlotId: setSlotId,
+    showPlan: () => {
+      setRoomId(null);
+      setRelationshipId(null);
+      setSlotId(null);
+      setPendingAreaChange(null);
+    },
     selectRoom: (id: string) => {
       setRoomId(id);
       setRelationshipId(null);
       setPendingAreaChange(null);
+      setSlotId(null);
     },
     relationshipId,
     relationship,
-    selectRelationship: setRelationshipId,
+    selectRelationship,
     groups,
     roomDeviceSummaries,
     profile,
+    addItemReading: (itemId: string, entityId: EntityId, presentation?: ReadingPresentation) => {
+      if (!disconnected) onAddReading?.(itemId, entityId, presentation);
+    },
     selectDevice: (id: string) => {
       const destination = deviceRoom(manifest, id);
       setView("devices");
@@ -403,8 +453,8 @@ export function useConnectEditor({
       onAddReading &&
       relationship?.kind === "modeled-device" &&
       manifest.sceneItems.some((item) => item.kind === "device" && item.id === relationship.id)
-        ? (entityId: EntityId) => {
-            if (!disconnected) onAddReading(relationship.id, entityId);
+        ? (entityId: EntityId, presentation?: ReadingPresentation) => {
+            if (!disconnected) onAddReading(relationship.id, entityId, presentation);
           }
         : undefined,
     assignEntities,

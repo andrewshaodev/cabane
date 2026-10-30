@@ -19,7 +19,7 @@ import { NorthSettingsEditor } from "../editor-preview/construct/NorthSettingsEd
 
 import { ConstructionInspector } from "../editor-preview/construct";
 
-import { ConnectInspector } from "../editor-connect/ConnectInspector";
+import { ConnectSidebar } from "../editor-connect/ConnectSidebar";
 
 import { ArrangePlacedItems } from "../editor-preview/furnish/ArrangePlacedItems";
 import { ArrangeCatalog } from "../editor-preview/furnish/catalog/ArrangeCatalog";
@@ -40,7 +40,6 @@ type Props = Pick<
   | "editingLocked"
   | "publishOpen"
   | "previewOpen"
-  | "connectManifest"
   | "connect"
   | "clearConstructionSelection"
   | "constructEditor"
@@ -94,7 +93,6 @@ export function EditorSidebar({
   editingLocked,
   publishOpen,
   previewOpen,
-  connectManifest,
   connect,
   clearConstructionSelection,
   constructEditor,
@@ -329,11 +327,9 @@ export function EditorSidebar({
             />
           )}
           {!shortcutsMode && mode === "connect" && (
-            <ConnectInspector
+            <ConnectSidebar
               editor={connect}
-              manifest={connectManifest}
               runtime={runtime}
-              deviceModels={deviceModels}
               homeAssistantUrl={homeAssistantUrl}
               onSettings={onHomeAssistantSettings}
             />
