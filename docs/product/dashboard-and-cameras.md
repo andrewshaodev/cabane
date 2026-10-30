@@ -191,6 +191,8 @@ Implementation: [dashboard](../../packages/engine/src/CabaneDashboard.tsx),
 Desktop Walk requires pointer lock. Explore requests it directly from the entry
 click; if the browser refuses it, the editor shows a permission error. Mouse
 motion turns the view and keyboard input moves only while the pointer is locked.
+Acquiring or resuming pointer lock focuses the scene so keyboard input reaches the
+native HA panel. Active walk keys stay inside Cabane instead of triggering HA shortcuts.
 Space triggers a jump on desktop while pointer lock is active and device controls
 are closed. Walking and sprinting continue during a jump; holding Space or
 pressing it while airborne does not trigger another jump. The jump follows floor
