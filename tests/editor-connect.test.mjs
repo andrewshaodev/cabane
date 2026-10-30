@@ -74,6 +74,7 @@ await withModules(async (load) => {
       actualRuntime = runtime,
       actualOrigin = origin,
       active = true,
+      onAddReading,
     }) {
       [bindings, setBindings] = useState(initialBindings);
       current = useConnectEditor({
@@ -82,6 +83,7 @@ await withModules(async (load) => {
         origin: actualOrigin,
         bindings,
         onChange: setBindings,
+        onAddReading,
         active,
         initialRequest,
       });
@@ -146,14 +148,31 @@ await withModules(async (load) => {
       ],
     };
     const harness = await mount(protectedBindings(), true);
+    const added = [];
+    const onAddReading = (itemId, entityId) => added.push({ itemId, entityId });
     try {
-      await harness.render({ actualManifest });
+      await harness.render({ actualManifest, onAddReading });
       await act(async () => harness.editor.setView("devices"));
       assert.match(harness.dom.window.document.body.textContent, /Outside rooms/);
       await act(async () => assert.equal(harness.editor.selectDevice("garden-device"), true));
       assert.equal(harness.editor.relationship.id, "garden-device");
       assert.equal(harness.editor.room.name, "Outside rooms");
       assert.equal(harness.editor.rooms.length, manifest.floors[0].rooms.length);
+      assert.ok(
+        harness.dom.window.document.querySelector(".device-mapping-inspector__add-reading"),
+      );
+      const entityId = runtime.entityRegistry.find((entry) =>
+        entry.entity_id.startsWith("sensor."),
+      ).entity_id;
+      await act(async () => harness.editor.addReading(entityId));
+      assert.deepEqual(added, [{ itemId: "garden-device", entityId }]);
+      await harness.render({
+        actualManifest,
+        onAddReading,
+        actualRuntime: { ...runtime, status: "disconnected" },
+      });
+      await act(async () => harness.editor.addReading(entityId));
+      assert.equal(added.length, 1, "disconnected sessions cannot add readings");
       await act(async () => harness.editor.setView("rooms"));
       assert.equal(harness.editor.room, null);
     } finally {

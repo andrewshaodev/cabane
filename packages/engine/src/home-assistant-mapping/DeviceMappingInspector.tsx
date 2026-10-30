@@ -8,6 +8,7 @@ import {
 } from "./auxiliary-mapping-choices";
 import { isAuxiliaryEntitySlot } from "../entity-slot-roles";
 import { useState, type ReactNode } from "react";
+import { DeviceMappingChoices } from "./DeviceMappingChoices";
 import {
   bindingEntityCandidates,
   isShareableCameraDescriptor,
@@ -29,8 +30,6 @@ import type { DeviceMappingRelationship } from "./device-mapping-groups";
 
 export type DeviceMappingInspectorState = "open" | "summary";
 
-const domId = (value: string) => value.replaceAll(/[^a-zA-Z0-9_-]/g, "-");
-
 export function DeviceMappingInspector({
   manifest,
   room,
@@ -44,6 +43,7 @@ export function DeviceMappingInspector({
   onCollapse,
   onReopen,
   onChoiceElement,
+  onAddReading,
   inline = false,
   preview,
 }: {
@@ -60,11 +60,11 @@ export function DeviceMappingInspector({
   onSelectionMade: (targetLabel: string) => void;
   onCollapse: () => void;
   onReopen: () => void;
-  onChoiceElement?: (element: HTMLInputElement | null) => void;
+  onChoiceElement?: (element: HTMLElement | null) => void;
+  onAddReading?: ((entityId: EntityId) => void) | undefined;
   inline?: boolean;
   preview?: ReactNode;
 }) {
-  const [query, setQuery] = useState("");
   const [optimisticTarget, setOptimisticTarget] = useState<{ id: string; label: string } | null>(
     null,
   );
@@ -476,6 +476,7 @@ export function DeviceMappingInspector({
       onEntityIdsBySlotIdChange,
     ),
   ];
+  const canAddReading = Boolean(onAddReading && relationship.kind === "modeled-device");
   const selectedTargetLabel =
     optimisticTarget?.id === relationship.id ? optimisticTarget.label : relationshipLabel;
   const choose = (choice: MappingChoice, value: string, primary: boolean) => {
@@ -489,134 +490,9 @@ export function DeviceMappingInspector({
     const targetLabel = primary ? chosenLabel : relationshipLabel;
     const selectionComplete = choice.onChange(value);
     setOptimisticTarget({ id: relationship.id, label: targetLabel });
-    if (selectionComplete && auxiliaryDescriptors.length === 0) onSelectionMade(targetLabel);
+    if (selectionComplete && auxiliaryDescriptors.length === 0 && !canAddReading)
+      onSelectionMade(targetLabel);
   };
-  const renderChoice = (choice: MappingChoice, primary = false) => {
-    const groupId = `device-map-${domId(choice.id)}`;
-    const matches = (option: MappingOption) =>
-      !inline ||
-      !primary ||
-      option.value === choice.value ||
-      !query.trim() ||
-      `${option.label} ${option.value}`
-        .toLocaleLowerCase("en")
-        .includes(query.trim().toLocaleLowerCase("en"));
-    const visibleOptions = choice.options.filter(matches);
-    const renderOption = (option: MappingOption) => {
-      const optionId = `${groupId}-${domId(option.value || "empty")}`;
-      const selected = choice.value === option.value;
-      return (
-        <label
-          key={option.value}
-          className="device-mapping-inspector__option"
-          data-selected={selected ? "true" : "false"}
-          data-disabled={option.disabled ? "true" : "false"}
-          htmlFor={optionId}
-        >
-          <input
-            ref={primary && (disabled ? !option.value : selected) ? onChoiceElement : undefined}
-            id={optionId}
-            type="radio"
-            name={groupId}
-            value={option.value}
-            checked={selected}
-            disabled={option.disabled || (disabled && Boolean(option.value))}
-            tabIndex={state === "open" ? undefined : -1}
-            onChange={() => choose(choice, option.value, primary)}
-          />
-          <span className="device-mapping-inspector__option-marker" aria-hidden="true" />
-          <span>{option.label}</span>
-        </label>
-      );
-    };
-    const groupOptions = (group: MappingOptionGroup): readonly MappingOption[] => [
-      ...group.options,
-      ...(group.groups ?? []).flatMap(groupOptions),
-    ];
-    const renderGroup = (group: MappingOptionGroup): ReactNode => {
-      const visible = groupOptions(group).filter(matches);
-      if (!visible.length) return null;
-      const content = (
-        <>
-          {group.options.filter(matches).map(renderOption)}
-          {group.groups?.map(renderGroup)}
-        </>
-      );
-      return group.collapsed ? (
-        <details
-          key={group.id ?? group.label}
-          className="device-mapping-inspector__option-group"
-          open={Boolean(query.trim()) || visible.some((option) => option.value === choice.value)}
-        >
-          <summary>
-            <span className="device-mapping-inspector__group-label">{group.label}</span>
-            <span className="device-mapping-inspector__group-count">{visible.length}</span>
-            <svg
-              className="device-mapping-inspector__group-chevron"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m9 5 7 7-7 7" />
-            </svg>
-          </summary>
-          {content}
-        </details>
-      ) : (
-        <div
-          key={group.id ?? group.label}
-          className="device-mapping-inspector__option-group"
-          role="group"
-          aria-label={group.label}
-        >
-          <p>{group.label}</p>
-          {content}
-        </div>
-      );
-    };
-    return (
-      <div key={choice.id} className="device-mapping-inspector__choice">
-        <fieldset aria-label={choice.ariaLabel} disabled={state !== "open"}>
-          <legend>{choice.label}</legend>
-          {inline && primary && choice.options.length > 0 && (
-            <input
-              type="search"
-              className="device-mapping-inspector__search"
-              aria-label="Search compatible matches"
-              placeholder="Search compatible matches…"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          )}
-          {inline && primary && choice.options.length === 0 && (
-            <p className="device-mapping-inspector__empty" role="status">
-              {disabled ? "Reconnect to load compatible matches." : choice.emptyLabel}
-            </p>
-          )}
-          <div className="device-mapping-inspector__options">
-            {renderOption({ value: "", label: inline ? "Not connected" : choice.emptyLabel })}
-            {choice.optionGroups
-              ? choice.optionGroups.map(renderGroup)
-              : visibleOptions.map(renderOption)}
-            {inline &&
-              primary &&
-              query.trim() &&
-              !visibleOptions.some((option) => option.value !== choice.value) && (
-                <p className="device-mapping-inspector__empty" role="status">
-                  No other matching targets. Clear search to see all compatible matches.
-                </p>
-              )}
-          </div>
-        </fieldset>
-      </div>
-    );
-  };
-  const requiredFunctionChoices = functionChoices.filter((choice) => choice.required);
-  const optionalFunctionChoices = functionChoices.filter((choice) => !choice.required);
 
   return (
     <aside
@@ -651,24 +527,18 @@ export function DeviceMappingInspector({
         <div className="device-mapping-inspector__content">
           <h2>{relationship.label}</h2>
           <p className="device-mapping-inspector__room">{room.name}</p>
-          <div className="device-mapping-inspector__choices">
-            {renderChoice(primaryChoice, true)}
-            {requiredFunctionChoices.map((choice) => renderChoice(choice))}
-            {optionalFunctionChoices.length > 0 && (
-              <details
-                className="device-mapping-inspector__functions"
-                open={auxiliaryDescriptors.length > 0}
-              >
-                <summary>
-                  {auxiliaryDescriptors.length
-                    ? "Additional entities"
-                    : "Optional device functions"}{" "}
-                  <span>{optionalFunctionChoices.length}</span>
-                </summary>
-                <div>{optionalFunctionChoices.map((choice) => renderChoice(choice))}</div>
-              </details>
-            )}
-          </div>
+          <DeviceMappingChoices
+            primaryChoice={primaryChoice}
+            functionChoices={functionChoices}
+            readingSlotIds={auxiliaryDescriptors.map((descriptor) => descriptor.slotId)}
+            profile={profile}
+            runtime={runtime}
+            disabled={disabled}
+            open={state === "open"}
+            onChoose={choose}
+            onChoiceElement={onChoiceElement}
+            onAddReading={canAddReading ? onAddReading : undefined}
+          />
           {connectionDetails && (
             <details className="device-mapping-inspector__details">
               <summary>Connection details</summary>

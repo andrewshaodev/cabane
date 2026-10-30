@@ -21,6 +21,7 @@ import { useConnectEditor, type EditorOpenRequest } from "../editor-connect/useC
 import { CONNECT_RETURN_KEY, type EditorCameraState } from "../editor-connect/connect-navigation";
 
 import { useConnectSignIn } from "../editor-connect/useConnectSignIn";
+import { addReadingToSnapshot } from "../editor-connect/add-reading";
 
 type Options = {
   workspace: ReturnType<typeof useEditorWorkspace>;
@@ -77,6 +78,11 @@ export function useEditorConnection({
     origin: homeAssistantUrl,
     active: mode === "connect" && !editingLocked && !unsettled && !publishOpen,
     onChange: (bindings) => commit({ ...snapshot, bindings }),
+    onAddReading: (itemId, entityId) => {
+      if (editingLocked || unsettled || publishOpen) return;
+      const next = addReadingToSnapshot(snapshot, itemId, entityId, runtime);
+      if (next) commit(next);
+    },
     ...(initialRequest === undefined ? {} : { initialRequest: initialRequest }),
     ...(navigation?.request.view === undefined ? {} : { routeView: navigation?.request.view }),
     onViewChange: navigation ? (view) => navigation.go({ mode: "connect", view }) : undefined,
