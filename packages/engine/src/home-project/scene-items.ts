@@ -1,6 +1,10 @@
+import { roomIdForItem } from "./item-rooms";
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
 import { pointOnFloorSupport } from "../outdoor-platforms/platform-geometry";
 import { modelVariants } from "../model-variants";
+import { modelLightingExecution, SCENE_LIGHT_BUDGET } from "../model-lighting/execution";
+import { lightingModelId } from "../model-lighting/settings";
+import { recoverModelLighting } from "../validation/recover-model-lighting";
 import { GROUND_ELEVATION_METERS } from "../ground-elevation";
 import { pointInsidePolygon, worldPointToPlan } from "../geometry";
 import { pointStrictlyOutsideFloorFootprint } from "../floor-finishes/finish-geometry";
@@ -29,7 +33,12 @@ const roomIdsForItem = (
 export const resolvedRoomIdForItem = (
   item: SceneItemSpec,
   project: { floors: readonly FloorSpec[] },
+  definition?: SceneModelEditorDescriptor,
 ): string | null => {
+  if (definition?.windowFit?.mounting === "exterior-recessed") {
+    const floor = project.floors.find((candidate) => candidate.id === item.floorId);
+    return floor ? roomIdForItem(item, floor, definition) : null;
+  }
   const roomIds = roomIdsForItem(item, project);
   if (roomIds.length !== 1) return null;
   if (item.placement.kind === "ceiling" && roomIds[0] !== item.placement.roomId) return null;
@@ -227,8 +236,23 @@ export const validateSceneItemsAndSupports = (
   registries: ProjectModelRegistries,
   issues: HomeProjectIssue[],
 ) => {
+  const lightingWarnings = new Map(
+    recoverModelLighting({ extensions: registries }).issues.map((issue) => [issue.path, issue]),
+  );
+  const groups = new Map<string, SceneItemSpec>();
   project.sceneItems.forEach((item, index) => {
     const itemPath = `sceneItems[${index}]`;
+    if (item.group) {
+      const member = groups.get(item.group.id);
+      if (member && (member.floorId !== item.floorId || member.group?.name !== item.group.name))
+        addProjectIssue(
+          issues,
+          "project.item-group",
+          `${itemPath}.group`,
+          "Group members must share one floor and group name. Ungroup them in Arrange to edit separately.",
+        );
+      else groups.set(item.group.id, item);
+    }
     const floor = project.floors.find((candidate) => candidate.id === item.floorId);
     if (!floor) {
       addProjectIssue(
@@ -249,6 +273,27 @@ export const validateSceneItemsAndSupports = (
         `Model “${item.modelId}” is not registered; a generic placeholder will be shown until it is imported.`,
       );
     } else {
+      const lightingWarning =
+        lightingWarnings.get(
+          `extensions.${item.kind === "device" ? "deviceModels" : "furnishingModels"}.${item.modelId}`,
+        ) ?? lightingWarnings.get(`extensions.deviceModels.${lightingModelId(item.modelId)}`);
+      if (lightingWarning)
+        addProjectWarning(
+          issues,
+          "project.model-lighting-disabled",
+          `${itemPath}.modelId`,
+          lightingWarning.message,
+        );
+      else if (definition.lighting) {
+        const execution = modelLightingExecution(definition.lighting);
+        if (execution.approximated)
+          addProjectWarning(
+            issues,
+            "project.model-lighting-approximation",
+            `${itemPath}.modelId`,
+            `“${definition.label}” requests ${execution.requested.toLocaleString("en")} light samples. The scene shares ${SCENE_LIGHT_BUDGET} physical lights; coverage is approximated while saved sources and total brightness are preserved.`,
+          );
+      }
       if (
         item.lightSlotId &&
         (!definition.lighting ||

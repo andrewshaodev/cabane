@@ -17,6 +17,8 @@ import { placementNearWallsForWorldDrag } from "./placement/wall-drag-placement"
 
 import { duplicateSceneItem } from "./duplicate-item";
 import { createSceneItemId } from "./scene-item-identity";
+import { expandItemSelection } from "./item-groups";
+import { editFurnishingSelection, type FurnishingSelectionAction } from "./selection-operations";
 
 const MINIMUM_SIZE_METERS = 0.01;
 
@@ -145,6 +147,7 @@ export const selectionBoxGeometry = (
 interface EditorSnapshot {
   items: readonly SceneItemSpec[];
   selectedId: string | null;
+  multipleIds: readonly string[];
 }
 
 export interface FurnishingEditorState extends EditorSnapshot {
@@ -155,6 +158,8 @@ export interface FurnishingEditorState extends EditorSnapshot {
 }
 
 export type FurnishingEditorAction =
+  | FurnishingSelectionAction
+  | { type: "select-many"; ids: readonly string[] }
   | {
       type: "update-color";
       id: string;
@@ -204,6 +209,7 @@ export const createFurnishingEditorState = (
 ): FurnishingEditorState => ({
   items: [...items],
   selectedId: null,
+  multipleIds: [],
   placementError: null,
   past: [],
   future: [],
@@ -213,13 +219,16 @@ export const createFurnishingEditorState = (
 const snapshot = (state: FurnishingEditorState): EditorSnapshot => ({
   items: state.items,
   selectedId: state.selectedId,
+  multipleIds: state.multipleIds,
 });
 
 const withChange = (
   state: FurnishingEditorState,
-  change: Pick<FurnishingEditorState, "items" | "selectedId">,
+  change: Pick<FurnishingEditorState, "items" | "selectedId"> &
+    Partial<Pick<FurnishingEditorState, "multipleIds">>,
 ): FurnishingEditorState => ({
   ...state,
+  multipleIds: [],
   ...change,
   past: state.transaction ? state.past : [...state.past, snapshot(state)],
   future: state.transaction ? state.future : [],
@@ -232,7 +241,7 @@ const updateItem = (
 ) => {
   let found = false;
   const items = state.items.map((item) => {
-    if (item.id !== id) return item;
+    if (item.id !== id || item.group) return item;
     const next = update(item);
     if (JSON.stringify(next) === JSON.stringify(item)) return item;
     found = true;
@@ -277,14 +286,31 @@ export const furnishingEditorReducer = (
         selectedId: action.selectedId ?? null,
       };
     case "select":
-      return state.selectedId === action.id ? state : { ...state, selectedId: action.id };
+      return state.selectedId === action.id && !state.multipleIds.length
+        ? state
+        : { ...state, selectedId: action.id, multipleIds: [] };
+    case "select-many":
+      return {
+        ...state,
+        selectedId: action.ids.length === 1 ? action.ids[0] : null,
+        multipleIds: action.ids,
+      };
+    case "group-items":
+    case "ungroup-items":
+    case "rename-group":
+    case "transform-group":
+    case "duplicate-items": {
+      const change = editFurnishingSelection(state.items, action);
+      return change ? withChange(state, change) : state;
+    }
     case "begin-transaction":
       return state.transaction ? state : { ...state, transaction: snapshot(state) };
     case "commit-transaction":
       if (!state.transaction) return state;
       if (
         state.transaction.items === state.items &&
-        state.transaction.selectedId === state.selectedId
+        state.transaction.selectedId === state.selectedId &&
+        state.transaction.multipleIds === state.multipleIds
       ) {
         return { ...state, transaction: null };
       }
@@ -321,6 +347,8 @@ export const furnishingEditorReducer = (
           : item,
       );
     case "update-placements": {
+      const ids = new Set(Object.keys(action.placements));
+      if (expandItemSelection(state.items, [...ids]).some((id) => !ids.has(id))) return state;
       const items = state.items.map((item) => {
         const placement = action.placements[item.id];
         return placement && JSON.stringify(placement) !== JSON.stringify(item.placement)
@@ -328,7 +356,7 @@ export const furnishingEditorReducer = (
           : item;
       });
       return items.some((item, index) => item !== state.items[index])
-        ? withChange(state, { items, selectedId: state.selectedId })
+        ? withChange(state, { items, selectedId: state.selectedId, multipleIds: state.multipleIds })
         : state;
     }
     case "update-placement":
@@ -352,19 +380,31 @@ export const furnishingEditorReducer = (
     case "duplicate": {
       const source = state.items.find((item) => item.id === action.id);
       if (!source) return state;
+      if (source.group)
+        return action.floor
+          ? furnishingEditorReducer(state, {
+              type: "duplicate-items",
+              ids: [source.id],
+              floor: action.floor,
+              reservedIds: action.reservedSlotIds ?? [],
+            })
+          : state;
       const item = duplicateSceneItem(source, state.items, action.floor, action.reservedSlotIds);
       return withChange(state, { items: [...state.items, item], selectedId: item.id });
     }
     case "delete-items": {
-      const ids = new Set(action.ids);
+      const ids = new Set(expandItemSelection(state.items, action.ids));
       const items = state.items.filter((item) => !ids.has(item.id));
       if (items.length === state.items.length) return state;
       return withChange(state, {
         items,
         selectedId: state.selectedId && ids.has(state.selectedId) ? null : state.selectedId,
+        multipleIds: state.multipleIds.filter((id) => !ids.has(id)),
       });
     }
     case "delete": {
+      if (state.items.find((item) => item.id === action.id)?.group)
+        return furnishingEditorReducer(state, { type: "delete-items", ids: [action.id] });
       const index = state.items.findIndex((item) => item.id === action.id);
       if (index < 0) return state;
       const items = state.items.filter((item) => item.id !== action.id);

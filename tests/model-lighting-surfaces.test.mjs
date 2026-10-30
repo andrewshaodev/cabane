@@ -2,13 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import React from "react";
 import { create } from "@react-three/test-renderer";
-import { extend } from "@react-three/fiber";
 import * as THREE from "three";
 import { withModules } from "./test-server.mjs";
 import { testGlb } from "./fixtures/personal-glb.mjs";
 
-// Match the engine's ESM Three constructors in the renderer.
-extend(THREE);
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 await withModules(async (load) => {
@@ -41,6 +38,9 @@ await withModules(async (load) => {
         scenes.push(await create(React.createElement(GardenBench, { variant })));
       const roots = scenes.map((scene) => scene.scene.children[0].instance);
       const legs = roots.map((root) => part(root, "bench.leg.back-left"));
+      // Keep Fiber's own Three constructors: replacing its global catalogue
+      // breaks color prop conversion in every later test in a shared shard.
+      assert.equal(legs[0].material.color.getHexString(), "414e49");
       const id = api.modelLightingSurfaceAt(roots[0], legs[0]);
       assert.equal(id, "surface:key:bench.leg.back-left");
       const wrapper = new THREE.Group();

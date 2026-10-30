@@ -101,6 +101,35 @@ other device. The website and native panel have separate browser storage; use
 Home Assistant sync or a workspace export to move between them.
 See [workspace setup and backups](docs/ha-workspace-storage-setup.md).
 
+### Build with AI
+
+Cabane's agent skills live in this repository so they can evolve with the product.
+Install a skill with the [Skills CLI](https://github.com/vercel-labs/skills), then
+select your agent in the installer:
+
+```sh
+npx skills add cabane-app/cabane --skill create-cabane-model
+```
+
+| Skill                                                                  | Purpose                                                                                                                             |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [create-cabane-model](.agents/skills/create-cabane-model/SKILL.md)     | Create a standalone GLB from a description or reference photo for import through Arrange → My models. No Cabane checkout is needed. |
+| [build-floor-layout](.agents/skills/build-floor-layout/SKILL.md)       | Build an unfurnished floor from a plan or layout description in a Cabane checkout.                                                  |
+| [equip-room](.agents/skills/equip-room/SKILL.md)                       | Furnish one accepted room from photos and descriptions in a Cabane checkout.                                                        |
+| [build-catalog-presets](.agents/skills/build-catalog-presets/SKILL.md) | Author reusable built-in catalog presets in a Cabane checkout.                                                                      |
+| [bootstrap-cabane](.agents/skills/bootstrap-cabane/SKILL.md)           | Install dependencies and start a local Cabane checkout.                                                                             |
+
+Replace `create-cabane-model` in the command with the skill you want. Node.js and
+npm are required for installation. Add `--global` to make the skill available
+across projects. See the [home-generation workflow](docs/agent-home-generation.md)
+for layout and room authoring.
+
+The model skill includes [export guidance](.agents/skills/create-cabane-model/references/export.md),
+Blender and Three.js examples, a [sample desk GLB](.agents/skills/create-cabane-model/examples/desk.glb),
+and a Python validator. It and its bundled resources retain their
+[MIT license](.agents/skills/create-cabane-model/LICENSE). Reference photos remain
+inputs and may be processed by your chosen AI provider.
+
 ## Data and privacy
 
 Homes and drafts are stored in your browser. Optional sync stores workspaces and
@@ -195,7 +224,7 @@ homes use the same portable project schema. See the [bundled home guide](home/RE
 - [Architecture](docs/product/architecture.md) — package boundaries and ownership.
 - [Catalog](packages/catalog/README.md) and [personal models](docs/product/personal-models.md) — built-in models and GLB imports.
 - [Home generation workflow](docs/agent-home-generation.md) — authoring layouts and rooms with an agent.
-- [Agent skills](https://github.com/cabane-app/agent-skills) — standalone custom-model authoring tools.
+- [Agent skills](#build-with-ai) — floor layouts, room furnishing and standalone custom models.
 
 ## Easter egg: shoot the lights
 

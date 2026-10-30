@@ -42,8 +42,41 @@ floor, including occluded items and unavailable models. Items are grouped by roo
 including outdoor areas, with an Outside rooms group for unassigned items. Search
 matches item and room names; instance IDs are not displayed. Choosing an entry selects that existing item and opens the normal
 Properties inspector, including when it was collapsed. Focus stays on the list.
-Selection alone changes no item data or undo history; canvas group selection and
-group movement keep their existing behavior. The list includes items outside rooms.
+Selection alone changes no item data or undo history. **Select items** reveals
+checkboxes for touch and keyboard multi-selection. Cmd/Ctrl-click also toggles
+items in the list or canvas. Saved groups appear as one selectable row, with a
+count and expandable, descriptive member names. Search also matches group and
+member names. Groups are listed by their shared placement center. The list
+includes items outside rooms.
+
+Selected items have crisp forest-green bounds with an ivory contrast stroke and
+emphasized corners. Stroke widths stay constant on screen as the camera zooms.
+Multi-selection frames each selected item or saved group, with a light tint on
+its members; saved groups share one frame. The overlay remains visible through
+scene geometry and never intercepts picking or dragging.
+
+Multi-selection exposes **Group**, **Duplicate**, and **Delete** in the same
+floating action bar used for single items, with matching Properties actions.
+Group immediately creates a named, flat assembly on the active floor. Selecting
+or starting a drag on any member selects or moves the whole group, including
+after reopening the workspace. A single boundary and the existing rotation,
+movement and elevation controls operate on the assembly. Properties edits its
+name, shared horizontal position, elevation and rotation. Rotation uses a stable
+member-anchor centroid, preserving relative spacing, yaw and heights. There is
+no group resizing or individual member editing: **Ungroup** removes membership
+without changing placement, dimensions, lighting, identities or connections,
+and leaves the items selected for further edits or regrouping. Double-clicking a
+group or member does not enter a separate editing mode.
+
+Selecting one saved group with loose items offers **Add to group**. Selecting
+multiple saved groups offers **Combine groups**, retaining the first group's
+name and flattening membership. Groups never nest or span floors. Each member
+stores the same optional `group` ID and name; no runtime transform hierarchy or
+shared HA entity is introduced. Group creation, renaming, movement, rotation,
+duplication, deletion and ungrouping share ordinary Undo/Redo, Save, publication
+and project import/export. Duplicate groups receive a new group ID and fresh
+member/slot IDs, with no copied household mappings. Multi-item duplicates use
+one common offset. Invalid group transforms or duplicates are refused in full.
 
 Placement resolves a feasible start near the camera target (or floor center),
 using model support and outdoor-only model constraints. Furnishings and devices
@@ -51,7 +84,14 @@ may be placed outside the house or in areas without a room; neither condition
 creates a validation issue. Absolute, wall, window-aware, and ceiling placement
 have dedicated resolution paths. Window-aware models may opt into full-glass
 sliding doors as well as windows; the architecture keeps those glazed doors
-classified as doors. Dragging previews a
+classified as doors. The integrated roller shutter declares exterior-recessed window fitting: it fits
+on the outside of glazing while its controls belong to the indoor room across
+the supporting wall. The same derived assignment groups placed items, Connect,
+dashboard state and device shortcuts, including beside outdoor room platforms.
+Only a unique indoor wall side is used; roomless or ambiguous openings cannot be
+automatically fitted. There is no saved room override. Free placement uses actual
+position. Closed opening clearance can move the assembly forward on shallow
+walls; window edits use the ordinary refit workflow. Dragging previews a
 transaction; release commits it, cancel restores it, and history records the
 finished operation. Cmd-drag (Mac) or Ctrl-drag (Windows/Linux) draws a selection rectangle in either view and selects
 items whose placement anchors lie inside it. Shift-drag remains available for

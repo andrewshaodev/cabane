@@ -246,36 +246,36 @@ export const FloorScene = memo(function FloorScene({
       {manifest.sceneItems.length > 0 ? (
         manifest.sceneItems
           .filter((item) => item.floorId === floor.id)
-          .map((item) => (
-            <Fragment key={item.id}>
-              <SceneItemRenderer
-                item={item}
-                floor={floor}
-                furnishingModels={manifest.extensions.furnishingModels}
-                deviceModels={declarativeDeviceModels}
-                resolvedDevice={resolvedDeviceById[item.id]}
-                entityStatesBySlotId={
-                  roomStates[roomIdForItem(item, floor) ?? `outside-rooms:${floor.id}`] ??
-                  EMPTY_STATES
-                }
-                reducedMotion={reducedMotion}
-                walkMode={walkMode}
-                onInteract={onInteract}
-                liveMediaByEntityId={liveMediaByEntityId}
-                outlineColor={manifest.home.palette.accent}
-              />
-              {!walkMode && interactionMode !== "editor" && (
-                <ItemEntityReadings
+          .map((item) => {
+            const definition = (
+              item.kind === "device"
+                ? declarativeDeviceModels
+                : manifest.extensions.furnishingModels
+            )[item.modelId];
+            const states =
+              roomStates[roomIdForItem(item, floor, definition) ?? `outside-rooms:${floor.id}`] ??
+              EMPTY_STATES;
+            return (
+              <Fragment key={item.id}>
+                <SceneItemRenderer
                   item={item}
                   floor={floor}
-                  states={
-                    roomStates[roomIdForItem(item, floor) ?? `outside-rooms:${floor.id}`] ??
-                    EMPTY_STATES
-                  }
+                  furnishingModels={manifest.extensions.furnishingModels}
+                  deviceModels={declarativeDeviceModels}
+                  resolvedDevice={resolvedDeviceById[item.id]}
+                  entityStatesBySlotId={states}
+                  reducedMotion={reducedMotion}
+                  walkMode={walkMode}
+                  onInteract={onInteract}
+                  liveMediaByEntityId={liveMediaByEntityId}
+                  outlineColor={manifest.home.palette.accent}
                 />
-              )}
-            </Fragment>
-          ))
+                {!walkMode && interactionMode !== "editor" && (
+                  <ItemEntityReadings item={item} floor={floor} states={states} />
+                )}
+              </Fragment>
+            );
+          })
       ) : (
         <>
           {sourceFloor.rooms.map((room) => (

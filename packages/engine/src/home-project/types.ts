@@ -70,6 +70,8 @@ export type ItemPlacement =
     };
 
 interface SceneItemBase {
+  /** Flat Arrange group. Members share this metadata and retain independent bindings. */
+  group?: { id: string; name: string };
   /** Independent lighting relationship; the entity slot is derived as <id>-entity. */
   lightSlotId?: string;
   /** Local scene appearance only; this never sends Home Assistant commands. */

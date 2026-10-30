@@ -70,7 +70,7 @@ export function ActionBarEditor({
   const items = resolveActionBarItems(project.actionBar, walkTools);
   const rooms = project.floors.flatMap(roomsForFloor);
   const devices = project.sceneItems.filter(
-    (item) => item.kind === "device" && isActionBarDeviceNavigable(project, item.id),
+    (item) => item.kind === "device" && isActionBarDeviceNavigable(project, item.id, deviceModels),
   );
   const selected = items.find((item) => item.id === selectedId);
   const actionWarnings =

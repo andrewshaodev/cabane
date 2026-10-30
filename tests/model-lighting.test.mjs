@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import React from "react";
 import { create } from "@react-three/test-renderer";
+import { createRoot } from "react-dom/client";
 import { BoxGeometry, Group, Mesh, MeshToonMaterial } from "three";
 import { withModules } from "./test-server.mjs";
 import { withStorageDom } from "./dom-test-environment.mjs";
+import { testGlb } from "./fixtures/personal-glb.mjs";
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -12,6 +14,12 @@ await withModules(async (load) => {
   const api = await load("/packages/engine/src/index.ts");
   const { ActiveSceneLightPool } = await load("/packages/engine/src/SceneLightPool.tsx");
   const { planSceneLights } = await load("/packages/engine/src/model-lighting/execution.ts");
+  const { collectConstructContextualIssues } = await load(
+    "/apps/web/src/editor-preview/construct/contextual-validation.ts",
+  );
+  const { EditorValidationPanel } = await load(
+    "/apps/web/src/editor-workspace/EditorValidationPanel.tsx",
+  );
   const { makeThreeFloorProject } = await load("/tests/fixtures/multiple-floors.ts");
   const { createCatalogItem } = await load(
     "/apps/web/src/editor-preview/furnish/placement/item-creation.ts",
@@ -115,6 +123,160 @@ await withModules(async (load) => {
       ),
     };
   };
+  const personalCabinet = (profile = "furniture") => {
+    const modelId = "custom:00000000-0000-4000-8000-000000000001";
+    return {
+      ...fixture().project,
+      customModels: [
+        {
+          id: modelId,
+          name: "Display cabinet",
+          profile,
+          placement: "floor",
+          asset: { sha256: "0".repeat(64), byteLength: 1 },
+          complexity: descriptor.complexity,
+          normalization: {
+            rotation: [0, 0, 0],
+            scale: 1,
+            offset: [0, 0, 0],
+            size: descriptor.defaultSize,
+            bounds: descriptor.bounds,
+          },
+        },
+      ],
+      sceneItems: [item("display-cabinet", modelId, profile === "light" ? "device" : "furnishing")],
+    };
+  };
+  const cabinetLighting = (samples = 4) => ({
+    position: [0, 0, 0],
+    color: light.color,
+    maxIntensity: light.maxIntensity,
+    distance: light.distance,
+    sources: Array.from({ length: 4 }, (_, index) => ({
+      kind: "strip",
+      start: [-0.4, index / 4, 0],
+      end: [0.4, index / 4, 0],
+      samples,
+    })),
+  });
+  test("a saved four-strip cabinet remains renderable after manifest composition", () => {
+    for (const profile of ["furniture", "light"]) {
+      const project = personalCabinet(profile);
+      const modelId = project.customModels[0].id;
+      for (const lighting of [
+        cabinetLighting(),
+        cabinetLighting(4294967296),
+        { ...cabinetLighting(), illuminate: false },
+        { ...cabinetLighting(), maxIntensity: 0 },
+        { ...cabinetLighting(), distance: 0 },
+        { ...cabinetLighting(), sources: [] },
+        { ...light, strip: { end: [0.4, 0.7, 0], samples: 20 }, points: undefined },
+      ]) {
+        const edited = api.editModelLighting({ project, bindings: {} }, modelId, lighting, native);
+        const parsed = api.parseHomeProjectSchema(JSON.parse(JSON.stringify(edited.project)));
+        assert.equal(parsed.valid, true, JSON.stringify(parsed.issues));
+        const manifest = api.composeHomeManifest(parsed.project, { ...native, openingModels: {} });
+        const execution = api.modelLightingExecution(lighting);
+        assert.equal(
+          manifest.extensions.deviceModels[`lighting:${modelId}`].sceneLights.length,
+          execution.lights.length,
+        );
+        if (
+          lighting.sources?.[0]?.samples === 4 &&
+          lighting.illuminate !== false &&
+          lighting.maxIntensity > 0
+        )
+          assert.equal(execution.lights.length, 16);
+        const validation = api.validateHomeManifest(manifest);
+        assert.equal(validation.canRender, true, JSON.stringify(validation.issues));
+        assert.equal(api.assertValidHomeManifest(manifest), manifest);
+        assert.deepEqual(
+          parsed.project.customModels[0].light,
+          JSON.parse(JSON.stringify(lighting)),
+        );
+        const checked = api.validateHomeProject(parsed.project, native);
+        assert.equal(checked.valid, true, JSON.stringify(checked.issues));
+        const warnings = checked.issues.filter(
+          (issue) => issue.code === "project.model-lighting-approximation",
+        );
+        assert.equal(warnings.length, execution.approximated ? 1 : 0);
+        if (execution.approximated) {
+          assert.equal(warnings[0].path, "sceneItems[0].modelId");
+          assert.equal(warnings[0].severity, "warning");
+          assert.match(warnings[0].message, /Display cabinet.*64 physical lights/);
+        }
+      }
+    }
+  });
+  test("an existing dense cabinet reopens, publishes and can be repaired without rewriting saved samples", () =>
+    withStorageDom(async (dom) => {
+      const project = personalCabinet();
+      const bytes = testGlb();
+      const asset = {
+        bytes,
+        byteLength: bytes.byteLength,
+        sha256: await api.modelAssetHash(bytes),
+      };
+      await api.stageModelAssets([asset]);
+      project.customModels[0].asset = { sha256: asset.sha256, byteLength: asset.byteLength };
+      const modelId = project.customModels[0].id;
+      const configured = api.editModelLighting(
+        { project, bindings: {} },
+        modelId,
+        cabinetLighting(4294967296),
+        native,
+      );
+      const repository = api.createHomeProjectRepository(
+        api.createIndexedDbProjectRecordStore(dom.indexedDB),
+        native,
+      );
+      const lifecycle = api.createHomeProjectLifecycle(repository, configured.project);
+      const opened = await lifecycle.load();
+      assert.equal(opened.status, "ready");
+      const published = await lifecycle.publish(opened.record, { confirmWarnings: true });
+      assert.equal(published.status, "published");
+      const reopened = await lifecycle.load();
+      assert.equal(reopened.status, "ready");
+      assert.deepEqual(
+        reopened.record.published.customModels[0].light,
+        cabinetLighting(4294967296),
+      );
+      const diagnostics = collectConstructContextualIssues({
+        project: reopened.record.draft,
+        floor: reopened.record.draft.floors[0],
+        projectIssues: api.validateHomeProject(reopened.record.draft, native).issues,
+      });
+      const warning = diagnostics.find(
+        (issue) => issue.code === "project.model-lighting-approximation",
+      );
+      assert.deepEqual(warning.target, { kind: "scene-item", id: "display-cabinet" });
+      assert.match(warning.suggestion, /save.*Arrange.*Lighting/);
+      assert.equal(
+        api.validateHomeManifest(
+          api.composeHomeManifest(reopened.record.published, { ...native, openingModels: {} }),
+        ).canRender,
+        true,
+      );
+      const repaired = api.editModelLighting(
+        { project: reopened.record.draft, bindings: reopened.record.bindings },
+        modelId,
+        cabinetLighting(),
+        native,
+      );
+      const saved = await lifecycle.autosave(reopened.record, repaired.project);
+      assert.equal(saved.status, "saved");
+      assert.equal(
+        saved.record.draft.sceneItems[0].lightSlotId,
+        configured.project.sceneItems[0].lightSlotId,
+      );
+      assert.deepEqual(saved.record.published, reopened.record.published);
+      assert.equal(
+        api
+          .validateHomeProject(saved.record.draft, native)
+          .issues.some((issue) => issue.code === "project.model-lighting-approximation"),
+        false,
+      );
+    }));
   test("shared lighting settings retain all copies, device controls and per-copy connections", () => {
     const before = fixture();
     const next = api.editModelLighting(before, "cabinet", light, native);
@@ -148,6 +310,113 @@ await withModules(async (load) => {
     assert.equal(parsed.valid, true, JSON.stringify(parsed.issues));
     assert.equal(api.validateHomeProject(updated.project, native).valid, true);
     assert.deepEqual(before.project.modelLights, undefined);
+  });
+  test("broken optional lighting keeps geometry and healthy illumination, with warnings in editor Issues", async () => {
+    const configured = api.editModelLighting(fixture(), "cabinet", cabinetLighting(), native);
+    const project = {
+      ...configured.project,
+      sceneItems: configured.project.sceneItems
+        .filter((item) => item.floorId === "ground" && item.modelId !== "tv")
+        .map((item) => ({ ...item, lightState: "always-on" })),
+    };
+    const original = api.composeHomeManifest(project, { ...native, openingModels: {} });
+    const bad = original.extensions.deviceModels["lighting:cabinet"];
+    bad.sceneLights = [{ ...bad.sceneLights[0], maxIntensity: NaN }];
+    original.extensions.furnishingModels.cabinet.lighting = {
+      ...cabinetLighting(),
+      sources: [{ kind: "unknown" }],
+    };
+    const validation = api.validateHomeManifest(original);
+    assert.equal(validation.canRender, true, JSON.stringify(validation.issues));
+    assert.equal(validation.issues.length, 2);
+    const recovered = validation.manifest;
+    assert.equal(recovered.extensions.furnishingModels.cabinet.lighting, undefined);
+    assert.equal(
+      recovered.extensions.furnishingModels.cabinet.component,
+      original.extensions.furnishingModels.cabinet.component,
+    );
+    assert.equal(original.extensions.deviceModels["lighting:cabinet"], bad);
+    assert.ok(
+      Number.isNaN(bad.sceneLights[0].maxIntensity),
+      "runtime recovery never overwrites the source definition",
+    );
+    const renderer = await create(
+      React.createElement(api.HomeAssistantSceneLighting, {
+        floor: recovered.floors[0],
+        resolvedBindings: { rooms: {} },
+        deviceModels: native.deviceModels,
+        extensionDeviceModels: recovered.extensions.deviceModels,
+        sceneItems: project.sceneItems,
+      }),
+    );
+    try {
+      const lights = renderer.scene.findAllByType("PointLight");
+      assert.equal(lights.length, 1, "the healthy lamp still illuminates the scene");
+      assert.equal(lights[0].instance.intensity, 2);
+    } finally {
+      await renderer.unmount();
+    }
+    await withStorageDom(async (dom) => {
+      const brokenNative = {
+        ...native,
+        furnishingModels: {
+          ...native.furnishingModels,
+          cabinet: {
+            ...native.furnishingModels.cabinet,
+            lighting: { ...cabinetLighting(), distance: -1 },
+          },
+        },
+      };
+      const draft = fixture().project;
+      const checked = api.validateHomeProject(draft, brokenNative);
+      assert.equal(checked.valid, true, JSON.stringify(checked.issues));
+      const issues = collectConstructContextualIssues({
+        project: draft,
+        floor: draft.floors[0],
+        projectIssues: checked.issues,
+      });
+      const warnings = issues.filter((issue) => issue.code === "project.model-lighting-disabled");
+      assert.deepEqual(
+        warnings.map(({ severity, floorId, target }) => ({ severity, floorId, target })),
+        [
+          {
+            severity: "warning",
+            floorId: "ground",
+            target: { kind: "scene-item", id: "cabinet-a" },
+          },
+          {
+            severity: "warning",
+            floorId: "first",
+            target: { kind: "scene-item", id: "cabinet-b" },
+          },
+        ],
+      );
+      const container = dom.document.createElement("div");
+      dom.document.body.append(container);
+      const root = createRoot(container);
+      const selected = [];
+      try {
+        await React.act(async () =>
+          root.render(
+            React.createElement(EditorValidationPanel, {
+              issues,
+              expanded: true,
+              onSelect: (issue) => selected.push(issue.target.id),
+            }),
+          ),
+        );
+        assert.ok(container.querySelector('[aria-label="Editor validation"]'));
+        const row = [...container.querySelectorAll('li[data-severity="warning"]')].find((row) =>
+          /Cabinet.*disabled/.test(row.textContent),
+        );
+        assert.ok(row);
+        assert.match(row.textContent, /save with this warning.*Lighting/);
+        await React.act(async () => row.querySelector('button[aria-label^="Select"]').click());
+        assert.deepEqual(selected, ["cabinet-a"]);
+      } finally {
+        await React.act(async () => root.unmount());
+      }
+    });
   });
   test("removing lighting clears only its draft mappings and undo restores settings and stable identities", () => {
     const enabled = api.editModelLighting(fixture(), "cabinet", light, native);
@@ -264,6 +533,12 @@ await withModules(async (load) => {
       );
       const saved = await lifecycle.autosave(entry.record, next.project, undefined, next.bindings);
       assert.equal(saved.status, "saved", saved.error?.message);
+      assert.equal(
+        api.validateHomeManifest(
+          api.composeHomeManifest(saved.record.draft, { ...native, openingModels: {} }),
+        ).canRender,
+        true,
+      );
       assert.deepEqual(
         (await repository.read(entry.record.homeId)).record.draft.modelLights,
         next.project.modelLights,

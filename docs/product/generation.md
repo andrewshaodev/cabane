@@ -20,10 +20,10 @@ which permits procedural geometry and hosted/bundled textures and models.
 Stable catalog models are preferred where they fit; bespoke reusable geometry
 belongs to domain-specific home extensions.
 
-The public [`create-cabane-model` skill](https://github.com/cabane-app/agent-skills/tree/main/skills/create-cabane-model) is a distinct standalone authoring
+The public [`create-cabane-model` skill](../../.agents/skills/create-cabane-model/SKILL.md) is a distinct standalone authoring
 route for users of hosted Cabane. It produces a standard GLB, recommends the
 Cabane aesthetic, and respects an explicitly requested alternative style. It
-requires no repository access or household HA information. Its self-contained upload validation remains separate from authored hosted
+requires no Cabane checkout or household HA information. Its self-contained upload validation remains separate from authored hosted
 assets; see
 [personal models](personal-models.md).
 

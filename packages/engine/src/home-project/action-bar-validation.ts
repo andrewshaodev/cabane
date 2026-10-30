@@ -1,4 +1,5 @@
 import { roomsForFloor } from "../outdoor-platforms/platform-rooms";
+import type { DeviceModelRegistry } from "../types";
 import type { ActionBarItem } from "../action-bar/action-bar-config";
 import type { HomeProject } from "./types";
 import { resolvedRoomIdForItem } from "./scene-items";
@@ -17,12 +18,23 @@ const targetKey = (item: ActionBarItem): string => {
           : `ha-action:${item.id}`;
 };
 
-export function isActionBarDeviceNavigable(project: HomeProject, deviceId: string): boolean {
+export function isActionBarDeviceNavigable(
+  project: HomeProject,
+  deviceId: string,
+  deviceModels?: DeviceModelRegistry,
+): boolean {
   const device = project.sceneItems.find((item) => item.id === deviceId);
-  return device?.kind === "device" && resolvedRoomIdForItem(device, project) !== null;
+  return (
+    device?.kind === "device" &&
+    resolvedRoomIdForItem(device, project, deviceModels?.[device.modelId]) !== null
+  );
 }
 
-export function validateActionBarTargets(project: HomeProject, issues: HomeProjectIssue[]): void {
+export function validateActionBarTargets(
+  project: HomeProject,
+  issues: HomeProjectIssue[],
+  deviceModels?: DeviceModelRegistry,
+): void {
   if (!project.actionBar) return;
   const ids = new Set<string>();
   const targets = new Set<string>();
@@ -58,7 +70,7 @@ export function validateActionBarTargets(project: HomeProject, issues: HomeProje
     }
     if (
       item.target.kind === "device" &&
-      !isActionBarDeviceNavigable(project, item.target.deviceId)
+      !isActionBarDeviceNavigable(project, item.target.deviceId, deviceModels)
     ) {
       addProjectIssue(
         issues,

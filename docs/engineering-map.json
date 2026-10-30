@@ -39,6 +39,8 @@
       "apps/web/src/workspaces/workspace-weather-source.ts",
       "apps/web/src/workspaces/WorkspaceLibrary.tsx",
       "apps/web/src/workspaces/WorkspaceHaLibrary.tsx",
+      "apps/web/src/workspaces/WorkspaceDeletion.tsx",
+      "apps/web/src/workspaces/WorkspaceDeleteDialog.tsx",
       "apps/web/src/workspaces/workspace-transfer.ts",
       "apps/web/src/workspaces/download-workspace-archive.ts"
     ],
@@ -48,7 +50,7 @@
         "symbols": ["HomeProject", "parseHomeProject", "createWorkspaceRepository", "sha256Hex"]
       }
     ],
-    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Opt-in outdoor platform rooms derive stable identities through platform-rooms; physical slabs, ceilings and roofs keep structural rooms separate. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path. Weather source preferences are private and origin-scoped; their revision-checked save updates only that field in draft and published profiles. Rejected records surface blocking errors before warnings. Missing catalog models and variants stay warning-only and retain their IDs; rendering uses placeholders or default variants. Native HA library suggestions append only healthy remote homes missing locally and reuse identity-preserving, conflict-checked restore; discovery stays read-only. Library, settings and draft-recovery downloads share the complete archive owner, including verified staged GLBs; recovery exports the live draft and private mappings without overwriting a newer record.",
+    "invariant": "Trace draft, published state and revision checks before changing persistence; preserve portable IDs and migrations. Opt-in outdoor platform rooms derive stable identities through platform-rooms; physical slabs, ceilings and roofs keep structural rooms separate. Personal GLBs are immutable SHA assets outside snapshots; references and record publication share a transaction. Unsupported fields and newer schema versions stay blocked and explain the HACS update, restart and reload recovery path. Weather source preferences are private and origin-scoped; their revision-checked save updates only that field in draft and published profiles. Rejected records surface blocking errors before warnings. Missing catalog models and variants stay warning-only and retain their IDs; rendering uses placeholders or default variants. Native HA library suggestions append only healthy remote homes missing locally and reuse identity-preserving, conflict-checked restore; discovery stays read-only. WorkspaceDeletion owns local/permanent deletion actions, backup and version-checked HA deletion without restore, including remote-only cards; local removal clears sync cursors. Library, settings and draft-recovery downloads share the complete archive owner, including verified staged GLBs; recovery exports the live draft and private mappings without overwriting a newer record.",
     "checks": ["verify:workspace"]
   },
   {
@@ -179,8 +181,16 @@
     "owners": [
       "apps/web/src/editor-preview/furnish/ArrangePlacedItems.tsx",
       "apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
+      "apps/web/src/editor-preview/furnish/item-groups.ts",
+      "apps/web/src/editor-preview/furnish/selection-operations.ts",
+      "apps/web/src/editor-preview/furnish/group-transforms.ts",
+      "apps/web/src/editor-preview/furnish/selection-target.ts",
+      "apps/web/src/editor-preview/furnish/FurnishingSelectionControls.tsx",
+      "apps/web/src/editor-preview/furnish/SelectionBounds.tsx",
+      "apps/web/src/editor-preview/furnish/SelectedItemsProperties.tsx",
       "apps/web/src/editor-preview/furnish/placement",
       "packages/engine/src/home-project/placements.ts",
+      "packages/engine/src/home-project/item-rooms.ts",
       "apps/web/src/editor-preview/furnish/FurnishingProperties.tsx",
       "apps/web/src/editor-preview/furnish/NumericField.tsx",
       "apps/web/src/editor-preview/furnish/SelectedItemControls.tsx",
@@ -195,10 +205,10 @@
       },
       {
         "module": "packages/engine/src/index.ts",
-        "symbols": ["sceneItemPlacementIssues"]
+        "symbols": ["sceneItemPlacementIssues", "roomIdForItem", "indoorRoomIdsOnWallFace"]
       }
     ],
-    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Window-aware models use their declared opening types, including opt-in full-glass sliding doors without reclassifying architectural doors. Optional fabric colors follow item history and persistence; model defaultColor enables the picker. 3D elevation dragging preserves support and horizontal placement, commits one history step on release, and restores the initial placement on cancellation. Proportional resize dragging preserves placement, respects model resize policies, and shares the single-transaction commit/cancel behavior. Arrange edits and saved projects share scaled placement bounds; rejected moves/resizes retain the last accepted draft without a history step. Existing geometric placement problems warn while malformed data and structural references stay blocked. Explicit per-copy floor repairs preserve shared model normalization. The guarded reducer checks each queued result, including duplication; window fitting commits size and placement together. Furniture and devices author optional read-only attachments in Properties, sharing ordinary item history and publication.",
+    "invariant": "Resolve catalog definitions and supported placement before changing item records; preserve floor and item identity through history. Window-aware models use their declared opening types, including opt-in full-glass sliding doors without reclassifying architectural doors. Exterior-recessed window covers use catalog-owned closed opening clearance and derive controls from the opposite indoor wall face, consistently across Arrange, Connect, dashboard state and shortcuts without saved room overrides. Optional fabric colors follow item history and persistence; model defaultColor enables the picker. 3D elevation dragging preserves support and horizontal placement, commits one history step on release, and restores the initial placement on cancellation. Proportional resize dragging preserves placement, respects model resize policies, and shares the single-transaction commit/cancel behavior. Arrange edits and saved projects share scaled placement bounds; rejected moves/resizes retain the last accepted draft without a history step. Existing geometric placement problems warn while malformed data and structural references stay blocked. Explicit per-copy floor repairs preserve shared model normalization. The guarded reducer checks each queued result, including duplication; window fitting commits size and placement together. Furniture and devices author optional read-only attachments in Properties, sharing ordinary item history and publication.",
     "checks": ["test:unit", "test:browser", "verify:furnishing-surfaces", "fixture:verify:room"]
   },
   {
@@ -226,7 +236,8 @@
     "owners": [
       "packages/engine/src/imported-models",
       "apps/web/src/custom-models",
-      "apps/web/src/workspaces/ha-model-assets.ts"
+      "apps/web/src/workspaces/ha-model-assets.ts",
+      ".agents/skills/create-cabane-model"
     ],
     "interfaces": [
       {
@@ -248,7 +259,7 @@
         ]
       }
     ],
-    "invariant": "Distribute the standalone authoring skill from the public cabane-app/agent-skills repository. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and source counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
+    "invariant": "Maintain the standalone authoring skill in .agents/skills/create-cabane-model alongside the product, retaining its MIT license and standalone installation. Keep personal import and illustrated AI-generation guidance inside Arrange's My models section. Manage models directly in its single preview grid, with hover, keyboard and touch access. Reuse the import preview for edits; preserve model/asset identity, copy scale and placement, and undo draft mapping cleanup with profile changes. Resolve personal definitions per project; validate self-contained GLBs and resource budgets before storage. Preserve materials, share and dispose resources, and publish verified assets before documents. Keep private bindings and authenticated transfers isolated by HA origin; interrupted transfers preserve the prior revision. Imported Light sources share the primary entity; selected emissive materials are instance-owned and physical emitter counts are bounded. Import and Edit use editCustomModel for one atomic definition, copy, lighting and draft binding update.",
     "checks": ["verify:workspace", "verify:runtime", "fixture:verify:scale", "build:panel"]
   },
   {
@@ -463,7 +474,8 @@
       "scripts/layered-surface-contract.mjs",
       "scripts/eslint-panel-dom.mjs",
       "scripts/agent-test-reporter.mjs",
-      "scripts/run-tests.mjs"
+      "scripts/run-tests.mjs",
+      "tests/test-shards.mjs"
     ],
     "interfaces": [],
     "invariant": "AGENTS.md owns task sizing and local verification policy; the linked delivery contract documents command execution, CI, and HA release provenance. Test review follows docs/test-guidelines.md.",
@@ -531,7 +543,9 @@
       "packages/engine/src/model-lighting",
       "packages/engine/src/model-lighting/execution.ts",
       "packages/engine/src/HomeAssistantSceneLighting.tsx",
-      "packages/engine/src/SceneLightPool.tsx"
+      "packages/engine/src/SceneLightPool.tsx",
+      "packages/engine/src/validation/recover-model-lighting.ts",
+      "packages/engine/src/home-project/scene-items.ts"
     ],
     "interfaces": [
       {
@@ -550,7 +564,7 @@
         ]
       }
     ],
-    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. execution.ts alone bounds physical expansion for import, editor and floor runtime. Keep strips compact across copies; all logical sources contribute within the 64-light budget through fair strip sampling or spatial merging, without rewriting saved intent. Active sources take priority over native/dashboard prewarming; retain at most the bounded peak slots across state changes.",
+    "invariant": "Keep one model lighting setup per home and one connection per placed copy. Preserve original furniture/device identity and controls. Native overrides never mutate the shared catalog. Source transforms and instance-owned glow use the same preview/runtime contract. Save and Undo include independent lighting identities and draft-only mapping cleanup; never operate HA during authoring. Preserve legacy declarations and mixed point/strip transforms. execution.ts alone bounds physical expansion for import, editor and floor runtime. Keep strips compact across copies; all logical sources contribute within the 64-light budget through fair strip sampling or spatial merging, without rewriting saved intent. Active sources take priority over native/dashboard prewarming; retain at most the bounded peak slots across state changes. Manifest validation accepts bounded compatibility emitters, including empty and zero-output settings. Broken optional runtime lighting is suppressed per model while geometry and saved definitions remain intact. Lighting recovery and approximation warnings use the existing editor Issues panel with per-item selection.",
     "checks": ["verify:workspace", "verify:runtime", "build:panel"]
   }
 ]

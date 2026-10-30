@@ -7,8 +7,7 @@ import { OpeningDetails } from "../editor-preview/construct/OpeningDetails";
 import { ConstructionSelectionProperties } from "../editor-preview/construct/ConstructionSelectionProperties";
 import { FloorPaintConfirmation } from "../editor-preview/construct";
 import { FurnishingInspector } from "../editor-preview/furnish";
-import { SelectionDetailsPanel } from "../editor-chrome/SelectionDetailsPanel";
-import { EditorButton } from "../editor-chrome/EditorButton";
+import { SelectedItemsProperties } from "../editor-preview/furnish/SelectedItemsProperties";
 import { StairDetails } from "../editor-floors/StairDetails";
 import type { useHomeEditorController } from "./useHomeEditorController";
 
@@ -126,21 +125,14 @@ export function EditorSelectionDetails({
               />
             ) : null)}
           {mode === "furnish" &&
-            (furnishingEditor.selectedIds.length > 1 ? (
-              <SelectionDetailsPanel
-                title={`${furnishingEditor.selectedIds.length} items`}
-                subtitle={placementFloor.name}
-                label="Selected items"
+            (furnishingEditor.selectedGroup || furnishingEditor.selectedIds.length > 1 ? (
+              <SelectedItemsProperties
+                editor={furnishingEditor}
+                floor={placementFloor}
+                furnishingModels={furnishingModels}
+                deviceModels={deviceModels}
                 onClose={onCollapse}
-              >
-                <p className="editor-properties-note">Drag any selected item to move the group.</p>
-                <EditorButton
-                  variant="text"
-                  onClick={() => furnishingEditor.deleteItems(furnishingEditor.selectedIds)}
-                >
-                  Delete selection
-                </EditorButton>
-              </SelectionDetailsPanel>
+              />
             ) : selectedItem ? (
               <FurnishingInspector
                 items={visualSceneItems}

@@ -1593,6 +1593,15 @@
 .selected-item-actions .editor-action-button[aria-label="Delete"] {
   color: #9f6659;
 }
+.selected-item-actions .editor-action-button[data-show-label="true"] {
+  width: auto;
+  gap: 8px;
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+.selected-item-controls[data-actions-only="true"] > :not(.selected-item-actions) {
+  display: none;
+}
 .selected-item-actions__separator {
   height: 24px;
   margin-inline: 3px;
