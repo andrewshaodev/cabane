@@ -2028,3 +2028,13 @@
   touch-action: none;
   cursor: ns-resize;
 }
+
+.agent-pilot-command {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border-radius: 8px;
+  background: #35433a0a;
+  font-size: 12px;
+  user-select: all;
+}

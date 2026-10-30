@@ -23,7 +23,7 @@ When implementation changes, update the relevant focused spec with it.
 | Models       | Stable registries and code-defined owner extensions                                                | [Catalog contracts](docs/product/catalog-and-extensions.md)          |
 | My models    | Per-home GLB catalog, preserved materials, portable assets and HA synchronization                  | [Personal models](docs/product/personal-models.md)                   |
 | Generation   | Accepted layout followed by room equipment; local typed slots, explicit review gates               | [Agent workflow](docs/product/generation.md)                         |
-| Agent pilot  | Loopback pairing for external agents to inspect and make guarded draft edits in the open workspace | [Local agent pilot](docs/product/agent-pilot.md)                     |
+| Agent pilot  | HA-panel pairing for external agents to inspect and make guarded draft edits in the open workspace | [Home Assistant agent relay](docs/product/agent-pilot.md)            |
 | Delivery     | Automated checks and static build; incomplete deployment/household acceptance called out           | [Verification and limits](docs/product/verification-and-delivery.md) |
 
 The important boundaries are English UI, procedural and externally sourced visual

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent, type MouseEvent } from "react";
+import { useEffect, useRef, type MouseEvent } from "react";
 import { useCabaneDom } from "@cabane/engine";
 import type { useHomeEditorController } from "../editor-workspace/useHomeEditorController";
-import { useAgentPilotBridge } from "./browser-bridge";
+import { useAgentRelay } from "./useAgentRelay";
 
 type Props = {
   workspaceId: string;
@@ -9,38 +9,32 @@ type Props = {
   open: boolean;
   onClose: () => void;
 };
-
 export function AgentPilotPanel({ workspaceId, controller, open, onClose }: Props) {
-  const [code, setCode] = useState("");
   const dialogRef = useRef<HTMLElement>(null);
   const dom = useCabaneDom();
-  const { connection, pair, disconnect } = useAgentPilotBridge(workspaceId, controller);
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    void pair(code);
-  };
+  const { connection, start, disconnect, host } = useAgentRelay(workspaceId, controller);
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) return;
+    const previous = dom.root.activeElement as HTMLElement | null;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     dom.events.addEventListener("keydown", onKeyDown);
-    dialogRef.current?.querySelector<HTMLElement>("#agent-pilot-code")?.focus({
-      preventScroll: true,
-    });
-    return () => dom.events.removeEventListener("keydown", onKeyDown);
-  }, [dom.events, onClose, open]);
-
+    dialogRef.current?.focus({ preventScroll: true });
+    return () => {
+      dom.events.removeEventListener("keydown", onKeyDown);
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [dom, onClose, open]);
   if (!open) return null;
-
   const closeFromBackdrop = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) onClose();
   };
-
   return (
     <div className="agent-pilot-dialog-backdrop" onMouseDown={closeFromBackdrop}>
       <section
         ref={dialogRef}
+        tabIndex={-1}
         className="agent-pilot-dialog"
         role="dialog"
         aria-modal="true"
@@ -50,7 +44,7 @@ export function AgentPilotPanel({ workspaceId, controller, open, onClose }: Prop
       >
         <header className="agent-pilot-dialog__header">
           <div>
-            <p className="agent-pilot-dialog__eyebrow">Local agent connection</p>
+            <p className="agent-pilot-dialog__eyebrow">Home Assistant agent connection</p>
             <h2 id="agent-pilot-title">Connect LLM agent</h2>
           </div>
           <button
@@ -63,75 +57,58 @@ export function AgentPilotPanel({ workspaceId, controller, open, onClose }: Prop
           </button>
         </header>
         <p id="agent-pilot-description" className="agent-pilot-dialog__description">
-          Connect an LLM agent running on this computer to this workspace. It can inspect and edit
-          the draft, manage catalog items, and use this workspace’s existing Home Assistant
-          connection.
+          Connect an agent to this workspace through Home Assistant. It can inspect and edit the
+          draft using the same actions as the editor.
         </p>
-        <div className="agent-pilot-dialog__status">
-          <span>Status</span>
-          <strong className={`is-${connection.status}`}>{connection.status}</strong>
-        </div>
-        <p className="agent-pilot-dialog__message" role="status">
-          {connection.message}
-        </p>
-        {connection.status !== "connected" ? (
-          <>
-            <ol className="agent-pilot-dialog__steps">
-              <li>
-                <strong>Start the local bridge</strong>
-                <span>
-                  Open a terminal in the Cabane repository on this computer and run:
-                  <code>npm run agent:bridge</code>
-                </span>
-              </li>
-              <li>
-                <strong>Copy the pairing code</strong>
-                <span>Copy the code printed by the command. It starts with MCBN-.</span>
-              </li>
-              <li>
-                <strong>Connect this workspace</strong>
-                <span>Paste the code below, then select Connect.</span>
-              </li>
-            </ol>
-            <p className="agent-pilot-dialog__notice">
-              Keep the terminal running. The browser and the terminal must be on the same computer.
-            </p>
-            <form onSubmit={submit}>
-              <label htmlFor="agent-pilot-code">Pairing code from your terminal</label>
-              <div className="agent-pilot-dialog__form-row">
-                <input
-                  id="agent-pilot-code"
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder="MCBN-XXXXXX"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <button
-                  type="submit"
-                  className="agent-pilot-dialog__primary"
-                  disabled={!code.trim() || connection.status === "connecting"}
-                >
-                  Connect
-                </button>
-              </div>
-            </form>
-          </>
+        {!host ? (
+          <p className="agent-pilot-dialog__notice">
+            Open Cabane from your Home Assistant sidebar to connect an agent.
+          </p>
         ) : (
           <>
-            <p className="agent-pilot-dialog__notice">
-              The LLM agent can now use the Cabane CLI with this workspace. Keep the bridge terminal
-              running.
+            <div className="agent-pilot-dialog__status">
+              <span>Status</span>
+              <strong className={`is-${connection.status}`}>{connection.status}</strong>
+            </div>
+            <p className="agent-pilot-dialog__message" role="status">
+              {connection.message}
             </p>
-            <button type="button" onClick={disconnect}>
-              Disconnect
-            </button>
+            {connection.status === "waiting" && connection.code ? (
+              <>
+                <p>Run this in the agent terminal:</p>
+                <pre className="agent-pilot-command">
+                  <code>{`npm run agent:pair -- --url ${host.origin} --code ${connection.code}`}</code>
+                </pre>
+                <p className="agent-pilot-dialog__notice">
+                  The code can be used once and expires in five minutes. The agent can run on
+                  another device that can reach this Home Assistant.
+                </p>
+              </>
+            ) : null}
+            {connection.status === "waiting" || connection.status === "connected" ? (
+              <button type="button" onClick={disconnect}>
+                Disconnect
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="agent-pilot-dialog__primary"
+                disabled={connection.status === "connecting"}
+                onClick={() => void start()}
+              >
+                {connection.status === "connecting" ? "Creating code…" : "Generate pairing code"}
+              </button>
+            )}
+            {connection.status === "connected" ? (
+              <p className="agent-pilot-dialog__notice">
+                Keep this editor open. The agent can now use npm run agent:request.
+              </p>
+            ) : null}
           </>
         )}
         <small>
-          The agent can use only Cabane’s exposed commands. It cannot read browser storage or
-          credentials, run arbitrary code, or start a second Home Assistant connection. Publishing
-          remains an explicit command.
+          The session grants access to Cabane commands for this workspace. Home Assistant
+          credentials stay in Home Assistant. Save remains an explicit action.
         </small>
       </section>
     </div>

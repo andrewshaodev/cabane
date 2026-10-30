@@ -7,7 +7,7 @@
     "cabane-agent": "src/cli.mjs"
   },
   "scripts": {
-    "bridge": "node src/cli.mjs bridge"
+    "pair": "node src/cli.mjs pair"
   },
   "license": "PolyForm-Noncommercial-1.0.0"
 }

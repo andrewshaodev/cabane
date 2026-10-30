@@ -1,5 +1,4 @@
-import { startBridge } from "./bridge-server.mjs";
-import { baseUrl, fetchJson, option, requiredOption, requestAgent } from "./bridge-client.mjs";
+import { pairAgent, sessionOperation, option, requiredOption, requestAgent } from "./ha-client.mjs";
 
 function printResult(result, args) {
   console.log(JSON.stringify(result, null, args.includes("--pretty") ? 2 : 0));
@@ -7,12 +6,12 @@ function printResult(result, args) {
 
 async function main() {
   const [command, ...args] = process.argv.slice(2);
-  if (command === "bridge") {
-    await startBridge();
+  if (command === "pair") {
+    printResult(await pairAgent(args), args);
     return;
   }
-  if (command === "status") {
-    printResult(await fetchJson(`${baseUrl(args)}/status`), args);
+  if (command === "status" || command === "disconnect") {
+    printResult(await sessionOperation(args, command), args);
     return;
   }
   if (command === "inspect") {
@@ -64,8 +63,8 @@ async function main() {
     return;
   }
   console.log(`Usage:
-  cabane-agent bridge
-  cabane-agent status [--url http://127.0.0.1:4317]
+  cabane-agent pair --url https://your-home-assistant --code MCBN-CODE
+  cabane-agent status | disconnect
   cabane-agent inspect [--pretty]
   cabane-agent validate [--pretty]
   cabane-agent rename-room --room-id ROOM_ID --name "New name"
@@ -74,7 +73,10 @@ async function main() {
 
 Methods include get_capabilities, inspect_workspace, get_draft_diff, validate_draft,
 list_catalog, list_binding_slots and execute_action. Use get_capabilities to discover
-the public action types and their parameters.`);
+the public action types and their parameters.
+
+Keep the paired Cabane panel open. Use --session-file PATH (or CABANE_AGENT_SESSION)
+to keep separate Home Assistant/editor sessions. No Home Assistant API token is needed.`);
 }
 
 main().catch((error) => {

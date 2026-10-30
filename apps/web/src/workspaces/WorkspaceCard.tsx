@@ -1,3 +1,4 @@
+import { useHomeAssistantHostSession } from "@cabane/engine";
 import { HomeAssistantIcon } from "./HomeAssistantIcon";
 import { workspaceStorageStatus } from "./workspace-availability";
 import { useEffect, useState } from "react";
@@ -32,6 +33,7 @@ export function WorkspaceCard({
   onExportRaw: () => void;
 }) {
   const { metadata, record, error } = entry;
+  const hostSession = useHomeAssistantHostSession();
   const [sync, setSync] = useState<SyncCursor | null>(null);
   const [changed, setChanged] = useState(false);
   const [storageError, setStorageError] = useState(false);
@@ -111,7 +113,11 @@ export function WorkspaceCard({
               "delete",
             ] as const
           )
-            .filter((action) => action !== "sync" || !sync?.enabled)
+            .filter(
+              (action) =>
+                (action !== "sync" || !sync?.enabled) &&
+                (action !== "agent-pilot" || Boolean(hostSession)),
+            )
             .map((action) => (
               <button
                 key={action}

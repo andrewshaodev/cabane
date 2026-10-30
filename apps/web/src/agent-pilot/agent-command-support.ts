@@ -8,7 +8,7 @@ import {
 import type { useHomeEditorController } from "../editor-workspace/useHomeEditorController";
 import { AGENT_CAPABILITIES } from "./agent-command-contract";
 
-export const PROTOCOL_VERSION = "2";
+export const PROTOCOL_VERSION = "3";
 
 export type EditorController = ReturnType<typeof useHomeEditorController>;
 

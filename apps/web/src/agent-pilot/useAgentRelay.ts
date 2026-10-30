@@ -1,30 +1,31 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useHomeAssistantHostSession } from "@cabane/engine";
 import type { useHomeEditorController } from "../editor-workspace/useHomeEditorController";
 import { executeAgentRequest } from "./agent-command-executor";
-import { createBrowserBridgeClient, type AgentPilotConnection } from "./browser-bridge-client";
+import { createHaAgentClient, type AgentPilotConnection } from "./ha-agent-client";
 
-export type { AgentPilotConnection } from "./browser-bridge-client";
 type EditorController = ReturnType<typeof useHomeEditorController>;
-
-export function useAgentPilotBridge(workspaceId: string, controller: EditorController) {
+export function useAgentRelay(workspaceId: string, controller: EditorController) {
+  const host = useHomeAssistantHostSession();
   const editorRef = useRef({ workspaceId, controller });
   editorRef.current = { workspaceId, controller };
-  const bridgeRef = useRef<ReturnType<typeof createBrowserBridgeClient> | null>(null);
+  const clientRef = useRef<ReturnType<typeof createHaAgentClient> | null>(null);
   const [connection, setConnection] = useState<AgentPilotConnection>({
     status: "disconnected",
-    message: "Waiting for the pairing code from the local bridge.",
+    message: "Generate a pairing code to connect an agent.",
   });
+  const hostConnection = host?.connection;
   useEffect(() => {
-    const bridge = createBrowserBridgeClient({
+    if (!hostConnection) return;
+    const client = createHaAgentClient({
+      connection: hostConnection,
       workspaceId,
-      origin: window.location.origin,
       onConnection: setConnection,
       execute: (request, isActive) =>
         executeAgentRequest(
           workspaceId,
           {
             get current() {
-              // Every access after an await must still belong to the paired editor.
               if (!isActive() || editorRef.current.workspaceId !== workspaceId)
                 throw new Error("The agent session is no longer paired with this workspace.");
               return editorRef.current.controller;
@@ -33,20 +34,20 @@ export function useAgentPilotBridge(workspaceId: string, controller: EditorContr
           request,
         ),
     });
-    bridgeRef.current = bridge;
+    clientRef.current = client;
     setConnection({
       status: "disconnected",
-      message: "Pair this workspace with the local bridge.",
+      message: "Generate a pairing code to connect an agent.",
     });
-    const onPageHide = () => bridge.pageHide();
+    const onPageHide = () => client.disconnect();
     window.addEventListener("pagehide", onPageHide);
     return () => {
       window.removeEventListener("pagehide", onPageHide);
-      bridge.close();
-      bridgeRef.current = null;
+      client.close();
+      clientRef.current = null;
     };
-  }, [workspaceId]);
-  const pair = useCallback(async (code: string) => bridgeRef.current?.pair(code), []);
-  const disconnect = useCallback(() => bridgeRef.current?.disconnect(), []);
-  return { connection, pair, disconnect };
+  }, [hostConnection, workspaceId]);
+  const start = useCallback(async () => clientRef.current?.start(), []);
+  const disconnect = useCallback(() => clientRef.current?.disconnect(), []);
+  return { connection, start, disconnect, host };
 }

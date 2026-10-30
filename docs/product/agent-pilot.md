@@ -1,52 +1,66 @@
 # Connect LLM agent
 
-Connect LLM agent lets an external agent running on the same computer operate the
-currently open Cabane workspace through a small, loopback-only command bridge. It
-does not give the agent direct access to IndexedDB, localStorage, React state or
-Home Assistant credentials. Cabane's browser runtime remains the owner of those
-things.
+An agent can inspect and edit the workspace open in Cabane's Home Assistant
+panel. The Cabane integration relays commands to that editor over HA's existing
+authenticated WebSocket connection. The editor remains the owner of the draft,
+validation, history, browser storage and authenticated device connections.
 
-## Pairing and routing
+Agent pairing is available only in the HA panel. There is no localhost server,
+browser-to-loopback request, CORS configuration or separate HA login for the agent.
+The browser and agent may run on different devices that can reach the same HA.
+Both the frontend and integration must include relay protocol version 3. An older
+integration produces an update/reload message rather than falling back to localhost.
 
-`npm run agent:bridge` starts one local HTTP process on
-`http://127.0.0.1:4317` and prints a process-local pairing code. The Connect LLM
-agent entry in a workspace card's three-dot menu opens the selected workspace's
-editor with an on-demand pairing dialog. The dialog sends the code, the current
-workspace ID and the browser origin. The bridge stores one in-memory session for
-that exact workspace.
+## Pairing and lifetime
 
-The bridge allows the local development origin and
-`https://smart-cabane.vercel.app` by default. For another Cabane deployment,
-start it with a comma-separated `CABANE_AGENT_ORIGINS` value. The CLI includes
-the paired session when it queues a request, so a request cannot be submitted to
-an unpaired or replaced workspace session.
+From the panel's workspace menu, choose **Connect LLM agent**, then **Generate
+pairing code**. The integration creates one in-memory session for that editor
+connection and workspace. A code is valid for five minutes and can be used once:
 
-The CLI therefore never guesses a workspace from a filesystem path or from
-browser storage. The open browser tab is the router: it polls the bridge, runs
-the command through the existing editor controller, and posts the JSON result
-back. Pairing another workspace replaces the previous session. Closing the
-connection or leaving the workspace explicitly unpairs the session; changing
-editor modes within the same workspace does not. Restarting the bridge makes
-the browser show a disconnected state and requires pairing again.
+```sh
+npm run agent:pair -- --url https://your-home-assistant --code MCBN-CODE
+```
 
-There is no separate Home Assistant bridge. Home Assistant commands use this
-same Cabane bridge and the connection already authenticated in Cabane's browser
-runtime. The local agent may receive the current compatible entity candidates
-from `list_binding_slots`; those IDs are transient command results and are not
-written to the repository, generated home source or bridge logs.
+Pairing returns a random Cabane token limited to this relay session. It is not a
+Home Assistant access token and cannot call other HA endpoints or read the HA
+workspace store. The CLI writes it to `~/.config/cabane/agent-session.json` with
+owner-only permissions, and never prints it. Use `--session-file PATH` or
+`CABANE_AGENT_SESSION` for separate sessions. Keep session files out of Git.
 
-## Command boundary
+The panel displays when an agent pairs. Keep the editor open. Disconnecting from
+the panel or CLI, closing/leaving the editor, losing its HA connection, or
+replacing its session revokes the token and rejects pending requests. Reconnection
+requires a new code. Sessions expire after eight hours; HA restarts discard all
+sessions, codes and requests. Closing the pairing dialog alone keeps the session.
 
-Protocol version 2 has one mutating entry point: `execute_action`. `get_capabilities`
-returns the public action manifest with each action's domain, description and
-parameter types. The manifest is the agent-facing description; the action is
-then routed to the existing editor reducers, engine operations and binding
-helpers.
+The HA-authenticated subscription is `cabane/agent/open`. Results return through
+`cabane/agent/respond`, restricted to the owning WebSocket connection. The CLI
+uses `/api/cabane/agent/{pair,request,status,disconnect}`. These HTTP endpoints
+accept a one-use code for pairing and an `X-Cabane-Agent-Token` for subsequent
+calls. Browser Origin headers are rejected. Requests have bounded sizes, queues
+and lifetimes, and are never persisted or logged by the relay. Expired requests
+are not retried automatically; an edit already accepted by the editor may still
+finish, so inspect before repeating a timed-out mutation.
 
-The read-only methods are `inspect_workspace`, `get_draft_diff`,
-`validate_draft`, `list_catalog` and `list_binding_slots`.
+## Commands
 
-`execute_action` accepts an action object such as:
+```sh
+npm run agent:request -- --method get_capabilities --pretty
+npm run agent:request -- --method inspect_workspace --pretty
+npm run agent:request -- --method execute_action \
+  --params '{"action":{"type":"add-item","modelId":"kitchen-island"}}' --pretty
+node apps/agent-cli/src/cli.mjs status
+node apps/agent-cli/src/cli.mjs disconnect
+```
+
+`get_capabilities` describes each public action's domain and inputs. The other
+read methods are `inspect_workspace`, `get_draft_diff`, `validate_draft`,
+`list_catalog` and `list_binding_slots`. Inspection returns complete editable
+geometry, scene items and publication diagnostics independent of the selected
+tool. Connected entity candidates may appear in private results, never in
+repository source or relay logs.
+
+`execute_action` accepts an action and optional `expectedRevision`:
 
 ```json
 {
@@ -60,76 +74,30 @@ The read-only methods are `inspect_workspace`, `get_draft_diff`,
 }
 ```
 
-The public action types cover durable construction edits, floor operations,
-catalog placement and editing, Home Assistant slot and room mappings, draft
-discard/publication, room renaming and history. Construct includes invisible
-walls, opening duplication and orientation, room merge resolution, room painting
-with explicit zone clearing, floor duplication, stairs, roof/north/apartment
-settings and walking start points. Arrange includes atomic item patches, linked
-entity slots, multiple-item operations, saved groups, placement repair, model lighting and personal-model metadata,
-renaming and removal. File pickers, asset import/export and camera/tool gestures
-remain UI operations. Selection, camera and tool-only
-actions stay browser-local. `list_catalog` exposes both stable models and
-project-local `custom:*` models; `list_binding_slots` exposes typed slots and,
-when Cabane is connected to Home Assistant, compatible registry candidates.
+The revision includes unsaved edits. Stale requests and edits while the editor is
+busy or unsettled are rejected. Commands run serially, use shared UI actions and
+flush accepted edits through ordinary workspace autosave. They decode wire input
+without implementing parallel geometry, placement, model or mapping rules.
 
-Commands only decode JSON and route to the same editor actions used by the UI.
-Opening dimensions and fit, catalog placement and size, item edits and groups,
-project operations and mapping rules belong to those shared owners. The command
-adapter never edits a parallel project or binding profile. Invalid compound item
-patches are rejected before any field changes or history entry is added.
+Construct includes walls and invisible walls, openings and orientation, room
+metadata/merges/finishes, floor zones, pools and platforms, floor duplication,
+stairs, building settings and walk start points. Arrange includes atomic item and
+multiple-item edits, groups, duplication/removal, placement repair, linked slots,
+model metadata and lighting. File import/export and camera/tool gestures remain
+UI operations. Mapping changes use the normal Connect helpers; room-area changes
+that clear dependent slots require explicit `confirmClearedSlots: true` after
+review. Save/publication and discard remain explicit commands.
 
-`inspect_workspace` returns the editable project, complete floor geometry, stairs
-and placed items, together with all publication issues. Validation is independent
-of the selected editor tool and includes binding diagnostics.
+## Ownership and verification
 
-The browser still checks the active origin, registry presence, disabled/hidden
-status, slot compatibility, editor busy state and draft revision. Publish and
-discard remain explicit actions and use the normal project and binding paths.
+`apps/agent-cli/` handles pairing, a private session file and HTTP requests to HA.
+`apps/web/src/agent-pilot/ha-agent-client.ts` owns subscription lifetime and serial
+execution; `useAgentRelay.ts` binds it to the native host session. The existing
+command executor and shared editor actions own all workspace behavior.
 
-Mutating commands accept an optional `expectedRevision`. It is an editor-session
-revision that advances for unsaved edits as well as saved changes. When supplied,
-a stale agent request is rejected and the agent must inspect again. Commands run
-serially. Disconnecting, replacing the pairing or changing workspace cancels
-queued work and prevents late pairing/poll responses from restoring a session. The browser also
-rejects commands while an edit is unsettled or the workspace is busy, then
-flushes accepted draft changes through the existing workspace autosave path.
-Changing a room's Home Assistant area reports `confirmation-required` and the
-slots it would clear. Repeat the action with `confirmClearedSlots: true` after
-reviewing those slots. Publishing uses the same save/validation path as the UI
-and leaves the paired editor open.
-
-## CLI usage
-
-The bridge is started from the repository root:
-
-```sh
-npm run agent:bridge
-```
-
-After pairing the workspace in Cabane, an agent or terminal can send any
-documented command through the generic request entry point:
-
-```sh
-npm run agent:request -- --method get_capabilities --pretty
-npm run agent:request -- --method inspect_workspace --pretty
-npm run agent:request -- --method execute_action \
-  --params '{"action":{"type":"add-item","modelId":"some-model"}}' --pretty
-```
-
-The CLI only talks to the loopback bridge. It does not need a workspace URL,
-workspace ID, browser-storage access or a second Home Assistant connection.
-
-## Repository ownership
-
-The CLI is a new executable workspace at `apps/agent-cli/`. The browser bridge,
-command contract and on-demand pairing dialog are new web-local modules under
-`apps/web/src/agent-pilot/`. The existing workspace repository, editor
-controller, engine packages and `home/` seed retain their responsibilities.
-Shared project edits live in `editor-workspace/editor-project-actions.ts`;
-Construct and Arrange controllers own their domain rules. CLI argument handling,
-HTTP transport and browser session lifecycle have separate focused modules.
-
-The transport is plain HTTP polling so it can be tested without a new runtime
-dependency. A future MCP or other agent adapter can call the same command
-boundary; it must not bypass the browser-side capability and validation checks.
+The integration's `agent_relay.py` owns ephemeral sessions and request futures;
+`agent_transport.py` adapts authenticated HA subscriptions and scoped HTTP calls.
+Tests cover pairing, scope, expiry, disconnect races, bounded requests, command
+parity, history and persistence. The local HA stack accepts
+`npm run ha:refresh -- --integration-source /path/to/integration-checkout` to test
+matching frontend/backend changes without changing a household installation.
