@@ -159,6 +159,18 @@ await withModules(async (load) => {
     assert.equal(f.answers[0].response.error.message, "Busy");
     assert.equal(f.answers[1].response.ok, true);
   });
+  test("oversized results report an error without dropping the HA connection", async (t) => {
+    const f = fixture(t, async () => ({ data: "x".repeat(4 * 1024 * 1024) }));
+    await f.client.start();
+    f.event({ type: "paired" });
+    f.event(request());
+    await until(() => f.answers.length === 1);
+    assert.equal(f.answers[0].response.ok, false);
+    assert.match(f.answers[0].response.error.message, /may have completed/);
+    assert.ok(JSON.stringify(f.answers[0]).length < 1000);
+    assert.equal(f.states.at(-1).status, "connected");
+    assert.equal(f.subscriptions[0].closed, false);
+  });
   test("expired responses leave the relay usable while other transport errors disconnect it", async (t) => {
     const f = fixture(t, undefined, { respondError: { code: "request_expired" } });
     await f.client.start();

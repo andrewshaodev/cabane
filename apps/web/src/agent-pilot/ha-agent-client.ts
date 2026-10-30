@@ -1,6 +1,9 @@
 import type { Connection } from "home-assistant-js-websocket";
 import type { AgentRequest } from "./agent-command-executor";
 
+// Leave room for HA's command envelope below its 4 MiB WebSocket message limit.
+const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
+
 export type AgentPilotConnection = {
   status: "disconnected" | "connecting" | "waiting" | "connected" | "error";
   message: string;
@@ -127,6 +130,13 @@ export function createHaAgentClient({
                     ok: true,
                     result: await execute(request, () => active() && sessionId === id),
                   };
+                  if (
+                    new TextEncoder().encode(JSON.stringify(response)).byteLength >
+                    MAX_RESPONSE_BYTES
+                  )
+                    throw new Error(
+                      "The command response is too large for the HA relay. The command may have completed; review the draft in the editor before retrying.",
+                    );
                 } catch (error) {
                   response = {
                     ok: false,

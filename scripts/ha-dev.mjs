@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const target = join(root, "test-results/ha-dev/custom_components/cabane");
-const integrationCommit = "a0226956340c44d3222bb304912e7de06d92a09e";
+const integrationCommit = "1a050ae19260f4f82995544c56029ffb419decf9";
 const action = process.argv[2];
 const sourceIndex = process.argv.indexOf("--integration-source");
 const localSource = sourceIndex === -1 ? null : process.argv[sourceIndex + 1];
