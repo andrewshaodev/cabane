@@ -44,7 +44,7 @@ export const wallExteriorNormal = (wall: WallSpec, floor: WallPlanFloor): Horizo
   if (plusInside !== minusInside)
     return plusInside ? [-frame.normal[0], -frame.normal[1]] : frame.normal;
   if (plusInside) return null;
-  // Outside the building on both sides, a free-standing wall (a terrace's parapet) faces away from the outdoor platform it stands on.
+  // Outside the building, use the platform perimeter to orient parapets and side walls.
   const onPlatform = (point: PlanPoint) =>
     (floor.outdoorPlatforms ?? []).some((platform) => pointInsidePolygon(point, platform.polygon));
   const plusOnPlatform = onPlatform(plus);

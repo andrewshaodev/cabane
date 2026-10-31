@@ -57,8 +57,9 @@ does not obstruct it. Actual intersecting wall spans remain protected, with a
 wall rises above the opening sill; windows above low partitions remain valid.
 Exterior walls fade away from the building: a wall fades toward the side outside the
 floor's footprint. An exterior wall wholly outside the footprint (a terrace's parapet or
-side wall, drawn as an ordinary wall) fades away from the outdoor platform it stands on,
-and a wall touching neither is not faded.
+side wall, drawn as an ordinary wall) fades away from an outdoor platform when only one
+side borders the platform. Walls with platform on both sides or touching neither a
+footprint nor a platform keep no outward fade direction.
 Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
