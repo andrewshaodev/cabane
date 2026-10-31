@@ -3,6 +3,7 @@ import { useMeasurementUnits, setMeasurementUnits } from "./measurement-units";
 import { WeatherPreferences } from "./weather/WeatherPreferences";
 import type { WeatherController } from "./weather/useWeatherController";
 import { overlayOptions, type OverlayPreferences } from "./room-status/overlay-preferences";
+import type { RoomVisibilityPreferences } from "./room-navigation/room-visibility";
 import { useCabaneDom } from "./CabaneDom";
 import { useEffect, useRef } from "react";
 import type { SolarLightingMode } from "./lighting";
@@ -67,6 +68,8 @@ export function WalkPreferences({
   weather,
   overlayPreferences,
   onOverlayPreferencesChange,
+  roomVisibility,
+  onRoomVisibilityChange,
   inverted,
   onChange,
   lightingMode,
@@ -77,6 +80,8 @@ export function WalkPreferences({
   weather?: WeatherController | undefined;
   overlayPreferences: OverlayPreferences;
   onOverlayPreferencesChange: (value: OverlayPreferences) => void;
+  roomVisibility?: RoomVisibilityPreferences | undefined;
+  onRoomVisibilityChange?: ((value: RoomVisibilityPreferences) => void) | undefined;
   inverted: boolean;
   onChange: (value: boolean) => void;
   lightingMode: SolarLightingMode;
@@ -222,6 +227,27 @@ export function WalkPreferences({
             </label>
           ))}
         </div>
+        {roomVisibility && onRoomVisibilityChange && (
+          <div className="walk-preferences__group">
+            <h3>Rooms</h3>
+            <label className="walk-preferences__row">
+              <span>
+                <strong>Hide rooms without controls</strong>
+                <small>
+                  Leave out rooms with nothing connected. They return when you connect a control.
+                </small>
+              </span>
+              <input
+                type="checkbox"
+                checked={roomVisibility.hideEmptyRooms}
+                onChange={(event) =>
+                  onRoomVisibilityChange({ hideEmptyRooms: event.target.checked })
+                }
+              />
+              <span className="walk-preferences__switch" aria-hidden="true" />
+            </label>
+          </div>
+        )}
         <div className="walk-preferences__group">
           <h3>Look controls</h3>
           <label className="walk-preferences__row">

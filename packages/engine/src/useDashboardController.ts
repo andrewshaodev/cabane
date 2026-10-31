@@ -23,6 +23,8 @@ import { resolveSolarLighting, type SolarLightingMode } from "./lighting";
 import { readSceneSession, writeSceneSession } from "./navigation";
 
 import { deriveRoomStatusMap } from "./room-status/model";
+import { firstVisibleRoomId } from "./room-navigation/room-visibility";
+import { useRoomVisibility } from "./room-navigation/useRoomVisibility";
 
 import { useCoarsePointer, useDocumentVisible, useReducedMotion } from "./SceneControls";
 
@@ -85,6 +87,10 @@ export function useDashboardController({
     [bindingManager.profile, manifest, resolvedBindings, runtime],
   );
   const homePresence = useMemo(() => deriveHomePresence(runtime), [runtime]);
+  const { roomVisibility, chooseRoomVisibility, hiddenRoomIds } = useRoomVisibility(
+    manifest.floors,
+    resolvedBindings,
+  );
   const roomDisplayNames = useMemo(
     () => resolvedRoomDisplayNames(floor.rooms, resolvedBindings.rooms),
     [floor.rooms, resolvedBindings.rooms],
@@ -93,7 +99,7 @@ export function useDashboardController({
     readSceneSession(typeof window === "undefined" ? null : window.sessionStorage),
   );
   const validInitialRoom = floor.rooms.some(
-    (room) => room.id === initialSession.current.selectedRoomId,
+    (room) => room.id === initialSession.current.selectedRoomId && !hiddenRoomIds.has(room.id),
   )
     ? initialSession.current.selectedRoomId
     : null;
@@ -225,6 +231,10 @@ export function useDashboardController({
     walkDevicePanelOpenRef.current = false;
     setMode("overview");
   }, [lookDeltaRef, lookInputRef, movementInputRef, walkDevicePanelOpenRef]);
+  // A room that loses its last control, or is hidden by the preference, cannot stay selected.
+  useEffect(() => {
+    if (selectedRoomId && hiddenRoomIds.has(selectedRoomId)) goHome();
+  }, [goHome, hiddenRoomIds, selectedRoomId]);
 
   const {
     selectedCamera,
@@ -279,10 +289,11 @@ export function useDashboardController({
       case "home-view":
         goHome();
         break;
-      case "room-details":
-        if (walkRoomId) selectRoom(walkRoomId);
-        else if (floor.rooms[0]) selectRoom(floor.rooms[0].id);
+      case "room-details": {
+        const target = firstVisibleRoomId(floor.rooms, hiddenRoomIds, walkRoomId);
+        if (target) selectRoom(target);
         break;
+      }
       case "construct-mode":
         onEditHome?.("construct");
         break;
@@ -377,7 +388,7 @@ export function useDashboardController({
     );
     if (!targetFloor) return;
     floorNavigationSelectFloor(targetFloor.id);
-    selectRoom(focusRoomId);
+    if (!hiddenRoomIds.has(focusRoomId)) selectRoom(focusRoomId);
   });
   useEffect(() => {
     focusRequestedRoom();
@@ -461,6 +472,9 @@ export function useDashboardController({
     setWalkDeviceTarget,
     roomStatuses,
     roomDisplayNames,
+    hiddenRoomIds,
+    roomVisibility,
+    chooseRoomVisibility,
     coarsePointer,
     adjustQuality,
     walkRoomDisplayName,

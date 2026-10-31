@@ -86,28 +86,32 @@ export function RoomStatusOverlays({
   floor,
   summaries,
   roomNames,
+  hiddenRoomIds,
   onSelectRoom,
 }: {
   floor: FloorSpec;
   summaries: RoomStatusMap;
   roomNames: Readonly<Record<string, string>>;
+  hiddenRoomIds?: ReadonlySet<string>;
   onSelectRoom: (roomId: string) => void;
 }) {
   const hoveredRoom = useHoveredRoom();
   const setRoomHover = useRoomHoverTarget();
 
-  return floor.rooms.map((room) => (
-    <RoomStatusOverlay
-      key={room.id}
-      room={room}
-      floor={floor}
-      roomName={roomNames[room.id] ?? room.name}
-      summary={summaries[room.id]}
-      hovered={hoveredRoom === room.id}
-      onHover={(hovered) => setRoomHover(hovered ? room.id : null)}
-      onSelect={() => onSelectRoom(room.id)}
-    />
-  ));
+  return floor.rooms
+    .filter((room) => !hiddenRoomIds?.has(room.id))
+    .map((room) => (
+      <RoomStatusOverlay
+        key={room.id}
+        room={room}
+        floor={floor}
+        roomName={roomNames[room.id] ?? room.name}
+        summary={summaries[room.id]}
+        hovered={hoveredRoom === room.id}
+        onHover={(hovered) => setRoomHover(hovered ? room.id : null)}
+        onSelect={() => onSelectRoom(room.id)}
+      />
+    ));
 }
 
 function RoomStatusOverlay({

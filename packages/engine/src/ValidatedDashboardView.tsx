@@ -130,6 +130,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     setWalkDeviceTarget,
     roomStatuses,
     roomDisplayNames,
+    hiddenRoomIds,
     coarsePointer,
     adjustQuality,
     sessionPresentation,
@@ -182,6 +183,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
     () => filterOverlayStatuses(roomStatuses, overlayPreferences),
     [roomStatuses, overlayPreferences],
   );
+  // A hidden room stays in the scene, but clicking its floor or walls does not open it.
+  const selectVisibleRoom = (id: string) => hiddenRoomIds.has(id) || selectRoom(id);
   const preferencesMenuItem = <WalkPreferencesMenuItem onOpen={() => setPreferencesOpen(true)} />;
   const actionBarTargets = resolveDashboardActionTargets(
     actionBarItems,
@@ -348,7 +351,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                           deviceModels={deviceModels}
                           openingPositions={openingPositions}
                           interactionMode={!walkMode && wholeBuilding ? "editor" : "runtime"}
-                          onSelectRoom={wholeBuilding ? undefined : selectRoom}
+                          onSelectRoom={wholeBuilding ? undefined : selectVisibleRoom}
                           onInteract={handleExtensionInteraction}
                           onWalkDeviceTargetChange={
                             walkthrough || equippedTool ? undefined : setWalkDeviceTarget
@@ -392,6 +395,7 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
                             floor={floor}
                             summaries={overlayStatuses}
                             roomNames={roomDisplayNames}
+                            hiddenRoomIds={hiddenRoomIds}
                             onSelectRoom={selectRoom}
                           />
                         </group>
@@ -537,6 +541,8 @@ export function ValidatedDashboardView(props: Parameters<typeof useDashboardCont
             <WalkPreferences
               weather={weather}
               overlayPreferences={overlayPreferences}
+              roomVisibility={dashboard.roomVisibility}
+              onRoomVisibilityChange={dashboard.chooseRoomVisibility}
               onOverlayPreferencesChange={(value) => {
                 setOverlayPreferences(value);
                 saveOverlayPreferences(value);

@@ -330,6 +330,14 @@ Walk, and draft Explore. Temperature, humidity, heating, cooling, lights, presen
 and open-door indicators each default to enabled. Choices persist in browser-local
 preferences and affect overview labels, accessibility text, and decluttering, while
 room detail sheets retain all available information. The dialog scrolls on short screens.
+Hide rooms without controls, in the Rooms group, defaults to on and is browser-local like the
+overlays. A room with nothing linked, the same state that shows "No controls connected", leaves the
+room pills, the overview labels and the click and wall selection that opens its sheet. Its walls,
+floor, furnishings and Walk collision remain, and Connect, mapping, Construct and Arrange still list
+every room. Hiding follows the current links, so linking a control brings the room back and
+unlinking its last control hides it again; an unavailable or stale entity keeps its room shown. A
+home with nothing linked at all hides nothing. A selected or deep-linked hidden room falls back to
+the floor overview.
 Temperature and humidity prefer a usable sensor explicitly selected on the mapped
 HA area, then fall back to the first usable mapped room sensor of that device class
 in resolved order (primary, secondary, diagnostic, then modeled devices).

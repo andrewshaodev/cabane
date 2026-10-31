@@ -12,6 +12,15 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 await withModules(async (load) => {
   const { OrbitCamera } = await load("/packages/engine/src/OrbitCamera.tsx");
   const { RoomNavigation } = await load("/packages/engine/src/room-navigation/RoomNavigation.tsx");
+  const { DashboardLocation } = await load(
+    "/packages/engine/src/room-navigation/DashboardLocation.tsx",
+  );
+  const {
+    hiddenRoomIds,
+    firstVisibleRoomId,
+    loadRoomVisibilityPreferences,
+    saveRoomVisibilityPreferences,
+  } = await load("/packages/engine/src/room-navigation/room-visibility.ts");
   const { neutralDemoManifest } = await load("/packages/engine/src/demo.ts");
   const { roomCameraFraming } = await load(
     "/packages/engine/src/room-navigation/room-camera-framing.ts",
@@ -313,6 +322,126 @@ await withModules(async (load) => {
           document.querySelector('[aria-label="Ground floor"]'),
           "empty floors remain navigable",
         );
+      } finally {
+        await act(async () => root.unmount());
+        if (originalObserver) globalThis.ResizeObserver = originalObserver;
+        else delete globalThis.ResizeObserver;
+      }
+    });
+  });
+  // Rooms are linked or empty through their resolved device modules, as the room panel decides "No controls connected".
+  const linkedRoom = (id) => ({
+    room: { id, dashboardSlots: [] },
+    devices: [
+      {
+        slot: { id: `${id}-light`, entitySlots: [] },
+        entities: [{ entityId: `light.${id}`, slotId: `${id}-light`, label: "Light", issues: [] }],
+        issues: [],
+      },
+    ],
+    sections: { primary: [], secondary: [], diagnostic: [] },
+    issues: [],
+  });
+  const emptyRoom = (id) => ({
+    room: { id, dashboardSlots: [] },
+    devices: [],
+    sections: { primary: [], secondary: [], diagnostic: [] },
+    issues: [],
+  });
+  const homeFloors = [{ rooms: [{ id: "living" }, { id: "utility" }] }, { rooms: [{ id: "den" }] }];
+
+  test("rooms with nothing linked are hidden, and come back once a control is linked", () => {
+    const resolved = (rooms) => ({ rooms, openings: {}, issues: [] });
+    const before = resolved({
+      living: linkedRoom("living"),
+      utility: emptyRoom("utility"),
+      den: emptyRoom("den"),
+    });
+    assert.deepEqual([...hiddenRoomIds(homeFloors, before, true)].sort(), ["den", "utility"]);
+    const after = resolved({ ...before.rooms, utility: linkedRoom("utility") });
+    assert.deepEqual([...hiddenRoomIds(homeFloors, after, true)], ["den"]);
+    assert.equal(hiddenRoomIds(homeFloors, before, false).size, 0, "the setting turns hiding off");
+    const unlinked = resolved({ living: emptyRoom("living"), utility: emptyRoom("utility") });
+    assert.equal(
+      hiddenRoomIds(homeFloors, unlinked, true).size,
+      0,
+      "a home with nothing linked hides nothing",
+    );
+    assert.equal(firstVisibleRoomId(homeFloors[0].rooms, new Set(["living"])), "utility");
+    assert.equal(firstVisibleRoomId(homeFloors[0].rooms, new Set(["utility"]), "living"), "living");
+    assert.equal(
+      firstVisibleRoomId(homeFloors[0].rooms, new Set(["living", "utility"])),
+      undefined,
+    );
+  });
+
+  test("the hide-rooms preference defaults on, persists, and survives unreadable storage", async () => {
+    await withStorageDom(async ({ window }) => {
+      assert.equal(loadRoomVisibilityPreferences().hideEmptyRooms, true);
+      saveRoomVisibilityPreferences({ hideEmptyRooms: false });
+      assert.equal(loadRoomVisibilityPreferences().hideEmptyRooms, false);
+      window.localStorage.setItem("cabane.room-visibility.preferences.v1", "broken");
+      assert.equal(loadRoomVisibilityPreferences().hideEmptyRooms, true);
+      const setItem = window.Storage.prototype.setItem;
+      window.Storage.prototype.setItem = () => {
+        throw new Error("storage is blocked");
+      };
+      try {
+        saveRoomVisibilityPreferences({ hideEmptyRooms: false });
+      } finally {
+        window.Storage.prototype.setItem = setItem;
+      }
+    });
+  });
+
+  test("the room pills leave out hidden rooms", async () => {
+    await withStorageDom(async ({ document }) => {
+      const originalObserver = globalThis.ResizeObserver;
+      globalThis.ResizeObserver = class {
+        observe() {}
+        disconnect() {}
+      };
+      const root = createRoot(document.body.appendChild(document.createElement("div")));
+      const study = { ...room, id: "study", name: "Study" };
+      const utility = { ...room, id: "utility", name: "Utility" };
+      const pills = (hidden) => ({
+        walkthrough: false,
+        walkMode: false,
+        setupOpen: false,
+        mappingOpen: false,
+        deviceOverlay: false,
+        floorNavigation: { wholeBuilding: false, selectFloor() {} },
+        floor: { ...floor, rooms: [room, study, utility] },
+        manifest: { floors: [floor] },
+        mode: "overview",
+        selectedRoomId: null,
+        roomDisplayNames: {},
+        reducedMotion: true,
+        selectRoom() {},
+        goHome() {},
+        walkRoomDisplayName: "",
+        selectedRoomDisplayName: "",
+        walkRoomId: null,
+        roomStatuses: {},
+        hiddenRoomIds: new Set(hidden),
+        homePresence: null,
+        runtime: { areas: [], status: "unconfigured" },
+        bindingManager: { profile: { roomAreaIds: {} } },
+        sessionPresentation: undefined,
+        demoSession: false,
+      });
+      const names = () =>
+        [...document.querySelectorAll("nav button")].map((button) => button.textContent);
+      try {
+        await act(async () =>
+          root.render(createElement(DashboardLocation, { dashboard: pills([]) })),
+        );
+        assert.ok(names().includes("Utility"));
+        await act(async () =>
+          root.render(createElement(DashboardLocation, { dashboard: pills(["utility"]) })),
+        );
+        assert.equal(names().includes("Utility"), false);
+        assert.ok(names().includes("Study"));
       } finally {
         await act(async () => root.unmount());
         if (originalObserver) globalThis.ResizeObserver = originalObserver;

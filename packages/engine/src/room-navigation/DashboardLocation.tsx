@@ -29,6 +29,7 @@ export function DashboardLocation({
     selectedRoomDisplayName,
     walkRoomId,
     roomStatuses,
+    hiddenRoomIds,
     homePresence,
     runtime,
     bindingManager,
@@ -77,7 +78,9 @@ export function DashboardLocation({
     const areaId = bindingManager.profile.roomAreaIds[roomId];
     return (areaId ? areaOrder.get(areaId) : undefined) ?? runtime.areas.length;
   };
-  const rooms = [...floor.rooms].sort((a, b) => roomOrder(a.id) - roomOrder(b.id));
+  const rooms = floor.rooms
+    .filter((room) => !hiddenRoomIds.has(room.id))
+    .sort((a, b) => roomOrder(a.id) - roomOrder(b.id));
   return (
     <RoomNavigation
       floor={floor}
