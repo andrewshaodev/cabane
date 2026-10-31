@@ -1,12 +1,10 @@
 ---
 version: 1
-slug: "apps-web-src-editor-connect-connect-workspace-css"
-primary_target: "apps/web/src/editor-connect/connect-workspace.css"
-related_targets:
-  [
-    "apps/web/src/editor-connect/ConnectInspector.tsx",
-    "apps/web/src/editor-preview/furnish/ItemEntitySlots.tsx",
-  ]
+slug: "src-editor-connect-connect-workspace-css"
+primary_target: "src/editor-connect/connect-workspace.css"
+# Keep the list on one line for the surface-brief reader.
+# prettier-ignore
+related_targets: ["src/editor-connect/ConnectInspector.tsx","src/editor-preview/furnish/ItemEntitySlots.tsx"]
 ---
 
 # Connect workspace

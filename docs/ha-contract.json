@@ -1,9 +1,9 @@
 {
-  "revision": 24,
-  "fingerprint": "fe2d79851273a95e3c745b292571b0096722c34ea724a3318699f49ba35a14a7",
-  "summary": "Keep homes usable when catalog models are unavailable",
+  "revision": 25,
+  "fingerprint": "80ac61f7c9197304340ea08b2246af7d0bf87897874044cd4fc5f7289a346010",
+  "summary": "Add optional display names for walls, doors, windows and passages; preserve architectural and binding identities.",
   "breakingChanges": [
-    "Unavailable models now render as placeholders while preserving item IDs, placements and connections. Update Cabane in HACS, restart Home Assistant and reload to get this recovery behavior. Structural errors remain blocked; no saved fields or schema versions change."
+    "Older Cabane clients reject projects containing wall or opening name fields. Update the Home Assistant integration and reload all clients before opening a renamed project."
   ],
   "history": [
     {
@@ -165,6 +165,13 @@
       "summary": "Conditional state visibility on models",
       "breakingChanges": [
         "Update older Cabane clients and the Home Assistant integration before opening projects using if-present map visibility. Existing boolean visibility settings remain supported."
+      ]
+    },
+    {
+      "revision": 24,
+      "summary": "Keep homes usable when catalog models are unavailable",
+      "breakingChanges": [
+        "Unavailable models now render as placeholders while preserving item IDs, placements and connections. Update Cabane in HACS, restart Home Assistant and reload to get this recovery behavior. Structural errors remain blocked; no saved fields or schema versions change."
       ]
     }
   ],
