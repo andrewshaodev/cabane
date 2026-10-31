@@ -20,6 +20,7 @@ import { useEditorWorkspace } from "../editor-preview/useEditorWorkspace";
 import { EditorIcon } from "../editor-chrome/EditorIcon";
 import { ModelGenerationGuide } from "./ModelGenerationGuide";
 import "./custom-models.css";
+import { saveCustomModel } from "./custom-model-edits";
 
 export function CustomModelLibrary({
   workspace,
@@ -199,13 +200,7 @@ export function CustomModelLibrary({
           onCancel={onCloseEditor}
           onImport={async (model) => {
             if (disabled) throw new Error("The editor is busy. Try again when it is ready.");
-            const next = editCustomModel(workspace.snapshot, model);
-            onEditSnapshot(next);
-            const saved = await workspace.flush();
-            if (saved.status !== "saved")
-              throw new Error(
-                "Could not save the model. Your draft is kept in memory. Retry Save changes, or close and use Undo to revert.",
-              );
+            await saveCustomModel(workspace, model, onEditSnapshot);
             onCloseEditor();
           }}
         />

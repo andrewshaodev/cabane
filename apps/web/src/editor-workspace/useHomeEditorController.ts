@@ -1,3 +1,4 @@
+import { useEditorProjectActions } from "./useEditorProjectActions";
 import { useNorthOrientation } from "./useNorthOrientation";
 import { isEmptyPublishedHome, resolveProjectModels, useFloorNavigation } from "@cabane/engine";
 import { ownerProjectRegistries } from "../project-runtime";
@@ -245,13 +246,6 @@ export function useHomeEditorController({
     setActiveIssueKey(null);
   }, [constructEditorClearSelection, setActiveIssueKey, setStairDialog]);
 
-  const duplicateConstructionOpening = useCallback(
-    (id: string) => {
-      return constructEditorDuplicateOpening(id);
-    },
-    [constructEditorDuplicateOpening],
-  );
-
   const resetRestoredSelection = useCallback(() => {
     setSelectedRoomId(null);
     setDragging(false);
@@ -281,6 +275,13 @@ export function useHomeEditorController({
     mode,
     onRestore: resetRestoredSelection,
   });
+  const { executeProjectAction, repairs } = useEditorProjectActions({
+    workspace,
+    editorProject,
+    registries,
+    selectFloor: floorNavigationSelectFloor,
+    replaceEditorsFromProject,
+  });
   useEffect(() => {
     if (constructEditorDraft.floorId === activeFloorId) return;
     replaceEditorsFromProject(snapshot.project);
@@ -303,7 +304,7 @@ export function useHomeEditorController({
     constructMeasure,
     dragging,
     duplicateArrangeItem,
-    duplicateConstructionOpening,
+    duplicateConstructionOpening: constructEditorDuplicateOpening,
     editingLocked: editingLocked || reference.adjusting || northOrientation.active,
     floorZoneDrawing,
     furnishingEditor,
@@ -339,6 +340,7 @@ export function useHomeEditorController({
   );
   const { connect, connectManifest, connectFloor, signIn, bindingIssues } = useEditorConnection({
     workspace,
+    replaceEditorsFromProject,
     activeFloorId,
     runtime,
     mode,
@@ -410,11 +412,16 @@ export function useHomeEditorController({
     contextualIssues,
     bindingIssues,
   );
-  const publishProject = useCallback(async () => {
-    if (publishErrors.length || editingLocked || unsettled) return;
-    await applyDraft(bindingIssues);
-  }, [publishErrors.length, editingLocked, unsettled, applyDraft, bindingIssues]);
+  const publishProject = useCallback(
+    async (closeAfter = true, isActive?: () => boolean) => {
+      if (publishErrors.length || editingLocked || unsettled) return;
+      return applyDraft(bindingIssues, closeAfter, isActive);
+    },
+    [publishErrors.length, editingLocked, unsettled, applyDraft, bindingIssues],
+  );
   return {
+    repairs,
+    executeProjectAction,
     northOrientation,
     ...constructionTools,
     editorProject,
@@ -458,7 +465,7 @@ export function useHomeEditorController({
     setDragging,
     setSelectedRoomId,
     setMarqueeSelecting,
-    duplicateConstructionOpening,
+    duplicateConstructionOpening: constructEditorDuplicateOpening,
     visualSceneItems,
     furnishingEditor,
     selectedItem,

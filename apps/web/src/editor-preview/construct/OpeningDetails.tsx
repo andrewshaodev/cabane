@@ -66,9 +66,7 @@ export function OpeningDetails({
         opening={opening}
         showLabel
         disabled={disabled}
-        onChange={(change) =>
-          editor.dispatch({ type: "reorient-opening", openingId: opening.id, change })
-        }
+        onChange={(change) => editor.reorientOpening(opening.id, change)}
       />
     </fieldset>
   ) : null;

@@ -21,16 +21,20 @@ export const editorRoutes = [
   },
 ] satisfies { path: string; handle: EditorOpenRequest }[];
 
-export function mobileEditorPath(workspaceId: string, mode: "construct" | "furnish"): string {
-  return `${workspaceHomePath(workspaceId)}/mobile-editor?mode=${mode === "furnish" ? "arrange" : "construct"}`;
-}
-
 export function editorRequestForPath(pathname: string): EditorOpenRequest | null {
   return matchRoutes(editorRoutes, pathname)?.[0].route.handle ?? null;
 }
 
 export function workspaceHomePath(workspaceId: string): string {
   return `/workspaces/${encodeURIComponent(workspaceId)}`;
+}
+
+export function agentPilotPath(workspaceId: string): string {
+  return `${workspaceHomePath(workspaceId)}/construct?agent-pilot=1`;
+}
+
+export function agentPilotRequested(search: string): boolean {
+  return new URLSearchParams(search).get("agent-pilot") === "1";
 }
 
 export function workspaceIdForPath(pathname: string): string | null {

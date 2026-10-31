@@ -4,13 +4,18 @@ Arrange edits declarative furnishing/device items in 3D or top view. In 2D,
 two-finger trackpad scrolling pans the plan and pinch (Ctrl/Cmd-wheel) zooms
 around the cursor, matching Construct. Its catalog
 supports searching and room-category browsing, visual model previews, and
-creation from supported registry entries. Non-empty searches cover all items,
+creation from supported registry entries. Its initial category view uses room cards
+with item counts on desktop and mobile, plus All items, Devices and My models.
+Choosing a category opens a full-width model grid with a Categories back action.
+Non-empty searches cover all items,
 including devices and personal models, regardless of the selected category.
 Clearing the search restores that category. Clicking furniture or a device on a visible
 lower floor in 3D switches to that floor and selects the item. Selection exposes rotate, duplicate,
-delete and, for devices with slots, Connect actions. Selection automatically opens
+delete and, for devices with slots, Connect actions. On desktop, selection automatically opens
 the shared right Properties inspector while the catalog remains available on the
-left. Properties edit
+left. On phones, selection enables Properties in the compact bottom dock. Add items
+and Properties open the full-screen panel only on request; a successful catalog
+placement closes it so the newly added object is visible on the canvas. Properties edit
 dimensions and placement. In 3D, a matching elevation button beside the rotation
 controls raises or lowers the selected item while dragged vertically. Release
 commits one undo step; Escape, pointer cancellation, or focus loss restores its
@@ -90,8 +95,10 @@ the supporting wall. The same derived assignment groups placed items, Connect,
 dashboard state and device shortcuts, including beside outdoor room platforms.
 Only a unique indoor wall side is used; roomless or ambiguous openings cannot be
 automatically fitted. There is no saved room override. Free placement uses actual
-position. Closed opening clearance can move the assembly forward on shallow
-walls; window edits use the ordinary refit workflow. Dragging previews a
+position. Fitting follows the window frame independently of wall thickness and
+clears closed frames, handles and outlines; window edits use the ordinary refit
+workflow. App composition includes the catalog descriptors in editor previews,
+Connect and the published home so these views share room assignment. Dragging previews a
 transaction; release commits it, cancel restores it, and history records the
 finished operation. Cmd-drag (Mac) or Ctrl-drag (Windows/Linux) draws a selection rectangle in either view and selects
 items whose placement anchors lie inside it. Shift-drag remains available for
@@ -184,7 +191,7 @@ Only descriptors declaring `defaultColor` offer this control.
 
 Numeric object attributes accept decimal commas and points, preserving incomplete text until Enter or blur. Escape restores the saved value. Arrow keys and adjustment buttons step by 0.1 (1 degree for rotation); Shift multiplies steps by ten. Invalid values show an inline error; dimensions require at least 0.01 m. External updates and object selection changes reset drafts.
 
-Properties → Linked entities adds optional temperature, power, humidity, sensor or binary sensor readings to furniture and devices. Each reading declares a local slot and name. Choose its HA entity in Connect. “Show readings” is independent for every slot and does not change dashboard visibility or the primary control. Reading edits use ordinary undo/redo, duplication and Apply; duplicates get fresh slot identities and no household mappings.
+Properties separates **Connections** from optional **Readings**. Each row shows its source and connected/unavailable status with a direct Connect or Change action. These open the corresponding connection in Connect. **Show state on model** and **Show on model** explicitly toggle only the badge above the object, independently of mapping and dashboard visibility. Reading menus contain Rename, Disconnect and Remove. **Add reading** opens a separate sensor picker and asks for its name and display setting only after source selection; no add form remains in Properties. Reading edits use ordinary undo/redo, duplication and Save; duplicates get fresh slot identities and no household mappings.
 
 Properties exposes **Lighting** for personal and built-in models. Shared settings
 apply to every copy in this home while each copy retains its own connection.

@@ -9,11 +9,13 @@ import type {
   SceneModelEditorDescriptor,
 } from "@cabane/engine";
 import { FurnishingProperties } from "./FurnishingProperties";
+import type { ItemConnectionContext } from "./ItemEntitySlots";
 import { missingModelEditorDescriptor } from "./missing-model";
 import { useMemo } from "react";
 import type { CatalogEntry } from "./catalog/catalog";
 
 export interface FurnishingInspectorProps {
+  connections?: ItemConnectionContext | undefined;
   floor?: FloorSpec;
   onWindowFit?: (
     id: string,
@@ -54,6 +56,7 @@ export function FurnishingInspector({
   onSizeChange,
   onLightStateChange,
   onEntitySlotsChange,
+  connections,
   onVariantChange,
   onColorChange,
   onClose,
@@ -84,6 +87,7 @@ export function FurnishingInspector({
       onWindowFit={onWindowFit}
       onLightStateChange={onLightStateChange}
       onEntitySlotsChange={onEntitySlotsChange}
+      connections={connections}
       onVariantChange={onVariantChange}
       onColorChange={onColorChange}
       onPlacementChange={onPlacementChange}

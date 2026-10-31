@@ -25,6 +25,9 @@ await withModules(async (load) => {
   const { DeviceMappingInspector } = await load(
     "/packages/engine/src/home-assistant-mapping/DeviceMappingInspector.tsx",
   );
+  const { DeviceConnectionWorkbench } = await load(
+    "/packages/engine/src/home-assistant-mapping/DeviceConnectionWorkbench.tsx",
+  );
   const { addReadingToSnapshot } = await load("/apps/web/src/editor-connect/add-reading.ts");
   const { furnishingEditorReducer, createFurnishingEditorState } = await load(
     "/apps/web/src/editor-preview/furnish/editor-state.ts",
@@ -299,6 +302,90 @@ await withModules(async (load) => {
       ["Stale", "Unavailable"],
     );
   });
+  test("conditional state badges persist and show only meaningful, usable states", () => {
+    const project = projectFixture();
+    const reading = project.sceneItems[1].entitySlots[0];
+    reading.presentation.showInScene = "if-present";
+    assert.equal(engine.validateHomeProject(project, registries).valid, true);
+    const parsed = engine.parseHomeProject(engine.serializeHomeProject(project));
+    assert.equal(parsed.valid, true, JSON.stringify(parsed.issues));
+    assert.equal(
+      parsed.project.sceneItems[1].entitySlots[0].presentation.showInScene,
+      "if-present",
+    );
+    assert.equal(
+      engine.validateHomeManifest(engine.composeHomeManifest(project, registries), {
+        deviceModels: devices,
+      }).canRender,
+      true,
+    );
+    const state = {
+      entityId: "sensor.fixture",
+      state: "1",
+      attributes: {},
+      available: true,
+      stale: false,
+    };
+    for (const value of ["true", "on", "1", "0.1", "42", "open", "home", "playing"]) {
+      assert.equal(
+        itemEntityReadings([reading], { [reading.id]: { ...state, state: value } }).length,
+        1,
+        value,
+      );
+    }
+    for (const value of [
+      "false",
+      "off",
+      "0",
+      "-2",
+      "0.0",
+      "closed",
+      "not_home",
+      "idle",
+      "unknown",
+      "unavailable",
+      "",
+      "  ",
+      "Infinity",
+    ]) {
+      assert.equal(
+        itemEntityReadings([reading], { [reading.id]: { ...state, state: value } }).length,
+        0,
+        value,
+      );
+    }
+    for (const invalid of [undefined, { ...state, stale: true }, { ...state, available: false }]) {
+      assert.equal(
+        itemEntityReadings([reading], invalid ? { [reading.id]: invalid } : {}).length,
+        0,
+      );
+    }
+    const { project: connectedProject, profile, runtime } = connectionFixture();
+    const control = connectedProject.sceneItems[0].entitySlots[0];
+    control.presentation.showInScene = "if-present";
+    const manifest = engine.composeHomeManifest(connectedProject, registries);
+    for (const value of ["0", "4"]) {
+      const entityId = profile.entityIdsBySlotId[control.id];
+      const resolved = engine.resolveHomeAssistantBindings(
+        manifest,
+        profile,
+        {
+          ...runtime,
+          entityStates: {
+            ...runtime.entityStates,
+            [entityId]: { ...runtime.entityStates[entityId], state: value },
+          },
+        },
+        devices,
+      );
+      assert.equal(
+        resolved.rooms[manifest.floors[0].rooms[0].id].sceneEntities.some(
+          (binding) => binding.slotId === control.id,
+        ),
+        value === "4",
+      );
+    }
+  });
   test("TV switch alternatives preserve existing slots, dispatch switch commands, and do not override unrelated domains", () => {
     for (const modelId of ["television", "wall-television", "compact-wall-television"]) {
       const { project, profile, runtime } = connectionFixture();
@@ -517,48 +604,227 @@ await withModules(async (load) => {
       globalThis.IS_REACT_ACT_ENVIRONMENT = priorAct;
     }
   }
-  test("attachment authoring works on HTTP without randomUUID and toggles only its map visibility", async (context) => {
-    const source = globalThis.crypto;
-    context.mock.getter(globalThis, "crypto", () => ({
-      getRandomValues: source.getRandomValues.bind(source),
-    }));
+  test("Properties separates connection, visibility and contextual reading actions without a permanent add form", async () => {
+    const { project, runtime, profile } = connectionFixture();
     await withDom(async ({ root, document }) => {
-      let current;
+      let current,
+        added = 0,
+        selected = null;
       function Harness() {
-        const [item, setItem] = useState({ ...projectFixture().sceneItems[1], entitySlots: [] });
+        const [item, setItem] = useState(project.sceneItems[0]);
         current = item;
         return React.createElement(ItemEntitySlots, {
           item,
-          label: "Cabinet",
+          label: "Fridge",
           onChange: (entitySlots) => setItem({ ...item, entitySlots }),
+          connections: {
+            profile,
+            runtime,
+            onConnect: (id) => {
+              selected = id;
+            },
+            onDisconnect() {},
+            onAddReading: () => {
+              added++;
+            },
+          },
         });
       }
       await act(async () => root.render(React.createElement(Harness)));
-      assert.equal(document.querySelector("select"), null);
-      assert.equal(document.querySelectorAll("button").length, 1);
-      await act(async () => document.querySelector("button").click());
-      assert.equal(current.entitySlots.length, 0);
-      assert.ok(document.querySelector("select"));
-      assert.ok(document.querySelector('input[maxlength="80"]'));
+      assert.match(document.body.textContent, /Connections/);
+      assert.match(document.body.textContent, /Connected/);
+      assert.equal(document.querySelectorAll("select").length, 4);
       await act(async () =>
         [...document.querySelectorAll("button")]
-          .find((button) => button.textContent === "Add reading")
+          .find((button) => button.textContent.includes("Add reading"))
           .click(),
       );
-      assert.equal(current.entitySlots.length, 1);
-      assert.ok(document.querySelector("select"));
-      assert.equal(current.entitySlots[0].presentation.label, "Cabinet temperature");
-      assert.equal(engine.isAuxiliaryEntitySlot(current.entitySlots[0]), true);
-      await act(async () => document.querySelector('input[type="checkbox"]').click());
-      assert.equal(current.entitySlots[0].presentation.showInScene, false);
-      assert.equal(current.entitySlots[0].presentation.dashboardRole, "secondary");
-      await act(async () =>
-        document.querySelector('button[aria-label="Remove Cabinet temperature"]').click(),
+      assert.equal(added, 1);
+      assert.equal(document.querySelectorAll("select").length, 4);
+      await act(async () => document.querySelector(".item-connection-link").click());
+      assert.equal(selected, "fridge-control");
+      const visibilitySelect = document.querySelector(
+        '[aria-label="Show fridge-temperature on model"]',
       );
-      assert.equal(current.entitySlots.length, 0);
-      assert.equal(document.querySelector("select"), null);
-      assert.equal(document.querySelectorAll("button").length, 1);
+      assert.deepEqual(
+        [...visibilitySelect.options].map((option) => option.textContent),
+        ["Always", "Never", "Only if present"],
+      );
+      await act(async () => {
+        visibilitySelect.value = "if-present";
+        visibilitySelect.dispatchEvent(new document.defaultView.Event("change", { bubbles: true }));
+      });
+      assert.equal(
+        current.entitySlots.find((slot) => slot.id === "fridge-temperature").presentation
+          .showInScene,
+        "if-present",
+      );
+      await act(async () => {
+        visibilitySelect.value = "never";
+        visibilitySelect.dispatchEvent(new document.defaultView.Event("change", { bubbles: true }));
+      });
+      assert.equal(
+        current.entitySlots.find((slot) => slot.id === "fridge-temperature").presentation
+          .showInScene,
+        false,
+      );
+      assert.equal(profile.entityIdsBySlotId["fridge-temperature"], "sensor.fridge");
+      await act(async () =>
+        document.querySelector('[aria-label="Options for fridge-temperature"]').click(),
+      );
+      await act(async () => document.querySelector(".item-connection-remove").click());
+      assert.equal(
+        current.entitySlots.some((slot) => slot.id === "fridge-temperature"),
+        false,
+      );
+      assert.equal(current.entitySlots[0].deviceRole, "primary");
     });
+  });
+
+  test("the workbench searches sensor and parent device names, filters eligible types and adds a named reading", async () => {
+    const { project, manifest, runtime, profile: initialProfile } = connectionFixture();
+    const item = project.sceneItems[0];
+    const room = engine
+      .deviceMappingRooms(manifest)
+      .find((room) =>
+        engine
+          .groupRoomMappingRelationships(manifest, room.id)
+          .some((group) => group.relationships.some((relationship) => relationship.id === item.id)),
+      );
+    const relationship = engine
+      .groupRoomMappingRelationships(manifest, room.id)
+      .flatMap((group) => group.relationships)
+      .find((relationship) => relationship.id === item.id);
+    let profile = initialProfile,
+      added;
+    await withDom(async ({ root, document, dom }) => {
+      function Harness() {
+        const [current, setCurrent] = useState(initialProfile);
+        const [slotId, setSlotId] = useState("fridge-temperature");
+        profile = current;
+        return React.createElement(DeviceConnectionWorkbench, {
+          room,
+          relationship,
+          profile: current,
+          runtime,
+          disabled: false,
+          slotId,
+          onSlotChange: setSlotId,
+          onEntityIdsBySlotIdChange: (ids) => setCurrent({ ...current, entityIdsBySlotId: ids }),
+          onAddReading: (entityId, presentation) => {
+            added = { entityId, presentation };
+          },
+          onBack() {},
+        });
+      }
+      const input = async (value) => {
+        const search = document.querySelector('[aria-label="Search all compatible sources"]');
+        await act(async () => {
+          Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, "value").set.call(
+            search,
+            value,
+          );
+          search.dispatchEvent(new dom.window.Event("input", { bubbles: true }));
+        });
+      };
+      await act(async () => root.render(React.createElement(Harness)));
+      assert.equal(document.querySelector("details"), null);
+      await input("freezer-thermometer");
+      assert.equal(document.querySelectorAll(".connection-source").length, 1);
+      assert.match(document.querySelector(".connection-source").textContent, /sensor.freezer/);
+      await act(async () => document.querySelector(".connection-source").click());
+      assert.equal(profile.entityIdsBySlotId["fridge-temperature"], "sensor.freezer");
+      assert.equal(profile.entityIdsBySlotId["fridge-control"], "sensor.fridge");
+      assert.equal(profile.entityIdsBySlotId["freezer-temperature"], "sensor.freezer");
+      await input("sensor.fridge");
+      assert.equal(document.querySelectorAll(".connection-source").length, 1);
+      assert.doesNotMatch(document.querySelector(".connection-type-filters").textContent, /Power/);
+      await act(async () => document.querySelector(".connection-add").click());
+      const powerFilter = [...document.querySelectorAll(".connection-type-filters button")].find(
+        (button) => button.textContent === "Power",
+      );
+      await act(async () => powerFilter.click());
+      assert.equal(document.querySelectorAll(".connection-source").length, 1);
+      assert.equal(
+        document.querySelector(".connection-source").disabled,
+        true,
+        "already attached sources are marked Added",
+      );
+      await act(async () =>
+        [...document.querySelectorAll(".connection-type-filters button")]
+          .find((button) => button.textContent === "Temperature")
+          .click(),
+      );
+      await act(async () =>
+        document.querySelector('.connection-source[aria-label^="sensor.furniture"]').click(),
+      );
+      assert.ok(document.querySelector(".reading-connection-confirm"));
+      await act(async () => {
+        const select = document.querySelector(".reading-connection-confirm select");
+        select.value = "if-present";
+        select.dispatchEvent(new dom.window.Event("change", { bubbles: true }));
+      });
+      await act(async () =>
+        document
+          .querySelector(".reading-connection-confirm")
+          .dispatchEvent(new dom.window.Event("submit", { bubbles: true, cancelable: true })),
+      );
+      assert.deepEqual(added, {
+        entityId: "sensor.furniture",
+        presentation: { label: "sensor.furniture", showInScene: "if-present" },
+      });
+    });
+    const unmapped = { ...initialProfile, roomAreaIds: {} };
+    assert.ok(
+      engine.bindingEntityCandidates({
+        descriptor: relationship.descriptors.find((entry) => entry.slotId === "fridge-temperature"),
+        roomId: room.id,
+        profile: unmapped,
+        runtime,
+        scope: "all-areas",
+      }).length,
+    );
+    assert.equal(
+      engine
+        .validateRuntimeBindingProfile(unmapped, manifest, runtime)
+        .issues.some((issue) => issue.code === "profile.room-unmapped"),
+      false,
+    );
+    const source = globalThis.crypto;
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: { getRandomValues: source.getRandomValues.bind(source) },
+    });
+    try {
+      const snapshot = addReadingToSnapshot(
+        {
+          project,
+          bindings: {
+            [runtime.origin]: {
+              draft: initialProfile,
+              published: initialProfile,
+              manualRoomIds: [],
+              manualSlotIds: [],
+            },
+          },
+        },
+        "furniture",
+        "sensor.power",
+        runtime,
+        { label: "Power use", showInScene: false },
+      );
+      assert.equal(
+        snapshot.project.sceneItems[1].entitySlots.at(-1).presentation.label,
+        "Power use",
+      );
+      assert.equal(
+        snapshot.project.sceneItems[1].entitySlots.at(-1).presentation.showInScene,
+        false,
+      );
+    } finally {
+      Object.defineProperty(globalThis, "crypto", descriptor);
+    }
   });
   test("Connect finds an HA device's sensors before any readings are declared", async () => {
     const project = projectFixture();

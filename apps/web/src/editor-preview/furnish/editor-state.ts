@@ -1,4 +1,5 @@
-import { modelVariants } from "@cabane/engine";
+import { editSceneItem, type SceneItemPatch } from "./item-edits";
+export { normalizeSizeForPolicy } from "./item-edits";
 import type {
   EntityBindingSlotSpec,
   FloorSpec,
@@ -6,7 +7,6 @@ import type {
   FurnishingModelDefinition,
   ItemPlacement,
   PlanPoint,
-  ResizePolicy,
   SceneItemSpec,
   SceneItemSize,
   SceneModelEditorDescriptor,
@@ -19,8 +19,6 @@ import { duplicateSceneItem } from "./duplicate-item";
 import { createSceneItemId } from "./scene-item-identity";
 import { expandItemSelection } from "./item-groups";
 import { editFurnishingSelection, type FurnishingSelectionAction } from "./selection-operations";
-
-const MINIMUM_SIZE_METERS = 0.01;
 
 export const snapToGrid = (value: number, gridMeters = 0.1) =>
   Math.round(value / gridMeters) * gridMeters;
@@ -89,36 +87,6 @@ export const placementForWorldDrag = ({
   };
 };
 
-const positive = (value: number, fallback: number) =>
-  Number.isFinite(value) && value > 0 ? Math.max(MINIMUM_SIZE_METERS, value) : fallback;
-
-export const normalizeSizeForPolicy = (
-  defaultSize: SceneItemSize,
-  requested: SceneItemSize,
-  policy: ResizePolicy,
-): SceneItemSize => {
-  const safe = requested.map((value, axis) =>
-    positive(value, defaultSize[axis]),
-  ) as unknown as SceneItemSize;
-  if (policy.kind === "fixed") return [...defaultSize];
-  if (policy.kind === "planar") return [safe[0], defaultSize[1], safe[2]];
-  if (policy.kind === "axes") {
-    const allowed = new Set(policy.axes);
-    return [
-      allowed.has("width") ? safe[0] : defaultSize[0],
-      allowed.has("height") ? safe[1] : defaultSize[1],
-      allowed.has("depth") ? safe[2] : defaultSize[2],
-    ];
-  }
-  if (policy.kind === "custom") return policy.normalize(defaultSize, safe);
-
-  const changedAxis = safe.findIndex(
-    (value, axis) => Math.abs(value / defaultSize[axis] - 1) > 1e-9,
-  );
-  const scale = changedAxis < 0 ? 1 : safe[changedAxis] / defaultSize[changedAxis];
-  return defaultSize.map((value) => value * scale) as unknown as SceneItemSize;
-};
-
 export interface SelectionBoxGeometry {
   center: readonly [number, number, number];
   size: SceneItemSize;
@@ -158,6 +126,12 @@ export interface FurnishingEditorState extends EditorSnapshot {
 }
 
 export type FurnishingEditorAction =
+  | {
+      type: "update-item";
+      id: string;
+      patch: SceneItemPatch;
+      definition: SceneModelEditorDescriptor;
+    }
   | FurnishingSelectionAction
   | { type: "select-many"; ids: readonly string[] }
   | {
@@ -322,22 +296,24 @@ export const furnishingEditorReducer = (
       };
     case "cancel-transaction":
       return state.transaction ? { ...state, ...state.transaction, transaction: null } : state;
+    case "update-item":
+      return updateItem(state, action.id, (item) =>
+        editSceneItem(item, action.patch, action.definition),
+      );
     case "update-color":
-      if (
-        !action.definition.defaultColor ||
-        (action.color !== null && !/^#[0-9a-f]{6}$/i.test(action.color))
-      )
-        return state;
-      return updateItem(state, action.id, (item) => {
-        const next = { ...item };
-        if (action.color === null) delete next.color;
-        else next.color = action.color;
-        return next;
+      return furnishingEditorReducer(state, {
+        type: "update-item",
+        id: action.id,
+        patch: { color: action.color },
+        definition: action.definition,
       });
     case "update-variant":
-      if (!modelVariants(action.definition).some((variant) => variant.id === action.variant))
-        return state;
-      return updateItem(state, action.id, (item) => ({ ...item, variant: action.variant }));
+      return furnishingEditorReducer(state, {
+        type: "update-item",
+        id: action.id,
+        patch: { variant: action.variant },
+        definition: action.definition,
+      });
     case "update-entity-slots":
       return updateItem(state, action.id, (item) => ({ ...item, entitySlots: action.entitySlots }));
     case "update-light-state":
@@ -363,15 +339,15 @@ export const furnishingEditorReducer = (
       return updateItem(state, action.id, (item) => ({ ...item, placement: action.placement }));
     case "update-size":
     case "update-placement-and-size":
-      return updateItem(state, action.id, (item) => ({
-        ...item,
-        ...(action.type === "update-placement-and-size" ? { placement: action.placement } : {}),
-        size: normalizeSizeForPolicy(
-          action.definition.defaultSize,
-          action.size,
-          action.definition.resizePolicy,
-        ),
-      }));
+      return furnishingEditorReducer(state, {
+        type: "update-item",
+        id: action.id,
+        definition: action.definition,
+        patch: {
+          size: action.size,
+          ...(action.type === "update-placement-and-size" ? { placement: action.placement } : {}),
+        },
+      });
     case "rotate":
       return updateItem(state, action.id, (item) => ({
         ...item,

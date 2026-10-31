@@ -1,4 +1,4 @@
-import type { PlanPoint } from "@cabane/engine";
+import type { ItemPlacement, PlanPoint } from "@cabane/engine";
 import { collectProjectIds, sceneItemPlacementIssues } from "@cabane/engine";
 import { useEditorSceneProjection } from "./useEditorSceneProjection";
 
@@ -38,20 +38,28 @@ export function useEditorCatalog({ projection, furnishingEditor, disabled }: Opt
   const [catalogBrowsing, setCatalogBrowsing] = useState<CatalogBrowsing>({
     room: "all",
     query: "",
+    view: "categories",
   });
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [arrangeAnnouncement, setArrangeAnnouncement] = useState("");
-  const addCatalogItem = (entry: CatalogEntry) => {
-    if (disabled) return;
-    const candidate = catalogStartPlacement(
-      entry,
-      placementFloor,
-      arrangeTarget.current ?? polygonCentroid(placementFloor.footprint),
-      { items: visualSceneItems, furnishingModels, deviceModels },
-      arrangeVisibility.current,
-    );
+  const addCatalogItem = (
+    entry: CatalogEntry,
+    options?: { at?: PlanPoint; placement?: ItemPlacement },
+  ) => {
+    if (disabled) return { error: "The editor is busy." };
+
+    const candidate = options?.placement
+      ? { placement: options.placement, error: null, size: undefined }
+      : catalogStartPlacement(
+          entry,
+          placementFloor,
+          options?.at ?? arrangeTarget.current ?? polygonCentroid(placementFloor.footprint),
+          { items: visualSceneItems, furnishingModels, deviceModels },
+          arrangeVisibility.current,
+        );
     setCatalogError(candidate.error);
-    if (!candidate.placement) return;
+    if (!candidate.placement)
+      return { error: candidate.error ?? "No suitable placement was found." };
     const item = createCatalogItem(
       entry,
       candidate.placement,
@@ -63,12 +71,13 @@ export function useEditorCatalog({ projection, furnishingEditor, disabled }: Opt
     const issue = sceneItemPlacementIssues(placed, editorProject, entry.definition)[0];
     if (issue) {
       setCatalogError(issue.message);
-      return;
+      return { error: issue.message };
     }
     furnishingEditorAddItem(placed);
     setArrangeAnnouncement(
       `${entry.definition.label} added. Drag to move it; use Undo to remove it.`,
     );
+    return { itemId: placed.id };
   };
 
   return {

@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 6,
+    "validationRevision": 9,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -1199,6 +1199,12 @@
                                 "const": "passage"
                               }
                             },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
                             "offsetFromWallStartPlanUnits": {
                               "optional": false,
                               "schema": {
@@ -1319,6 +1325,12 @@
                                     "const": 2
                                   }
                                 ]
+                              }
+                            },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
                               }
                             },
                             "offsetFromWallStartPlanUnits": {
@@ -1477,6 +1489,12 @@
                                 ]
                               }
                             },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
                             "offsetFromWallStartPlanUnits": {
                               "optional": false,
                               "schema": {
@@ -1633,6 +1651,12 @@
                                 "const": "door"
                               }
                             },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
                             "offsetFromWallStartPlanUnits": {
                               "optional": false,
                               "schema": {
@@ -1761,6 +1785,12 @@
                                 }
                               }
                             },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
+                              }
+                            },
                             "offsetFromWallStartPlanUnits": {
                               "optional": false,
                               "schema": {
@@ -1866,6 +1896,12 @@
                               "optional": false,
                               "schema": {
                                 "const": "passage"
+                              }
+                            },
+                            "name": {
+                              "optional": true,
+                              "schema": {
+                                "type": "string"
                               }
                             },
                             "offsetFromWallStartPlanUnits": {
@@ -2794,6 +2830,12 @@
                             "type": "string"
                           }
                         },
+                        "name": {
+                          "optional": true,
+                          "schema": {
+                            "type": "string"
+                          }
+                        },
                         "niches": {
                           "optional": true,
                           "schema": {
@@ -3008,6 +3050,37 @@
                       "optional": false,
                       "schema": {
                         "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "terrain": {
+                "optional": true,
+                "schema": {
+                  "properties": {
+                    "bottomLeftMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "bottomRightMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "topLeftMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "topRightMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
                       }
                     }
                   }
@@ -3506,6 +3579,9 @@
                                 "schema": {
                                   "anyOf": [
                                     {
+                                      "const": "if-present"
+                                    },
+                                    {
                                       "const": false
                                     },
                                     {
@@ -3743,6 +3819,9 @@
                                     "optional": true,
                                     "schema": {
                                       "anyOf": [
+                                        {
+                                          "const": "if-present"
+                                        },
                                         {
                                           "const": false
                                         },
@@ -4203,6 +4282,9 @@
                                     "optional": true,
                                     "schema": {
                                       "anyOf": [
+                                        {
+                                          "const": "if-present"
+                                        },
                                         {
                                           "const": false
                                         },
@@ -5526,6 +5608,12 @@
                               "const": "passage"
                             }
                           },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
                           "offsetFromWallStartPlanUnits": {
                             "optional": false,
                             "schema": {
@@ -5646,6 +5734,12 @@
                                   "const": 2
                                 }
                               ]
+                            }
+                          },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
                             }
                           },
                           "offsetFromWallStartPlanUnits": {
@@ -5804,6 +5898,12 @@
                               ]
                             }
                           },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
                           "offsetFromWallStartPlanUnits": {
                             "optional": false,
                             "schema": {
@@ -5960,6 +6060,12 @@
                               "const": "door"
                             }
                           },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
                           "offsetFromWallStartPlanUnits": {
                             "optional": false,
                             "schema": {
@@ -6088,6 +6194,12 @@
                               }
                             }
                           },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
+                            }
+                          },
                           "offsetFromWallStartPlanUnits": {
                             "optional": false,
                             "schema": {
@@ -6193,6 +6305,12 @@
                             "optional": false,
                             "schema": {
                               "const": "passage"
+                            }
+                          },
+                          "name": {
+                            "optional": true,
+                            "schema": {
+                              "type": "string"
                             }
                           },
                           "offsetFromWallStartPlanUnits": {
@@ -7121,6 +7239,12 @@
                           "type": "string"
                         }
                       },
+                      "name": {
+                        "optional": true,
+                        "schema": {
+                          "type": "string"
+                        }
+                      },
                       "niches": {
                         "optional": true,
                         "schema": {
@@ -7417,6 +7541,9 @@
                                     "optional": true,
                                     "schema": {
                                       "anyOf": [
+                                        {
+                                          "const": "if-present"
+                                        },
                                         {
                                           "const": false
                                         },
@@ -7877,6 +8004,9 @@
                                     "optional": true,
                                     "schema": {
                                       "anyOf": [
+                                        {
+                                          "const": "if-present"
+                                        },
                                         {
                                           "const": false
                                         },

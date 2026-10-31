@@ -2,6 +2,9 @@
   "workspace": {
     "description": "Workspace library, persistence, import/export, publication and recovery. Includes runtime and editor integration tests.",
     "tests": [
+      "dev-agent.test.mjs",
+      "agent-construct-actions.test.mjs",
+      "agent-model-actions.test.mjs",
       "arrange-groups.test.mjs",
       "camera-stream.test.mjs",
       "command-scheduler.test.mjs",
@@ -67,6 +70,7 @@
   "construct": {
     "description": "Construct editing, topology, openings, floors, stairs and reference plans. Includes workspace publication and persistence tests.",
     "tests": [
+      "agent-construct-actions.test.mjs",
       "adjacent-floor-references.test.mjs",
       "architecture-geometry-resilience.test.mjs",
       "floor-menu-browser.test.mjs",
@@ -136,6 +140,7 @@
       "stair-shape-rendering.test.mjs",
       "stair-shapes.test.mjs",
       "terrain-landing.test.mjs",
+      "sloped-terrain.test.mjs",
       "validate-floor-cli.test.mjs",
       "wall-cap-fade.test.mjs",
       "wall-edge-colors.test.mjs",
@@ -209,6 +214,10 @@
     "tests": [
       "action-bar-editor.test.mjs",
       "action-bar-navigation.test.mjs",
+      "agent-action-contract.test.mjs",
+      "agent-editor-actions.test.mjs",
+      "agent-ha-client.test.mjs",
+      "agent-ha-relay.test.mjs",
       "agent-test-reporter.test.mjs",
       "agent-workflow.test.mjs",
       "async-condition.test.mjs",
@@ -227,6 +236,7 @@
       "home-project-repository.test.mjs",
       "home-project.test.mjs",
       "manifest.test.mjs",
+      "missing-model-recovery.test.mjs",
       "multiple-floor-storage.test.mjs",
       "native-first-launch.test.mjs",
       "native-ha-ui.test.mjs",
@@ -252,6 +262,7 @@
       "workspace-initialization.test.mjs",
       "workspace-library.test.mjs",
       "workspace-deletion.test.mjs",
+      "workspace-dialog-browser.test.mjs",
       "workspace-onboarding-state.test.mjs",
       "workspace-open-content.test.mjs",
       "workspace-open-link.test.mjs",
@@ -261,7 +272,8 @@
       "workspace-repository.test.mjs",
       "workspace-routes.test.mjs",
       "workspace-sync-coordinator.test.mjs",
-      "workspace-transfer.test.mjs"
+      "workspace-transfer.test.mjs",
+      "mobile-editor-panels-browser.test.mjs"
     ]
   },
   "full": {

@@ -15,6 +15,14 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=@cabane/web",
+    "agent:dev": "node scripts/dev-agent.mjs",
+    "agent:status": "node apps/agent-cli/src/cli.mjs status",
+    "agent:inspect": "node apps/agent-cli/src/cli.mjs inspect",
+    "agent:validate": "node apps/agent-cli/src/cli.mjs validate",
+    "agent:request": "node apps/agent-cli/src/cli.mjs request",
+    "agent:rename-room": "node apps/agent-cli/src/cli.mjs rename-room",
+    "agent:undo": "node apps/agent-cli/src/cli.mjs undo",
+    "agent:redo": "node apps/agent-cli/src/cli.mjs redo",
     "build": "npm run build --workspace=@cabane/web",
     "typecheck": "node node_modules/typescript-native/bin/tsc --noEmit -p tsconfig.json",
     "test": "node scripts/run-tests.mjs",
@@ -60,7 +68,8 @@
     "ha:down": "docker compose -f dev/home-assistant/compose.yaml down",
     "ha:logs": "docker compose -f dev/home-assistant/compose.yaml logs --tail=100 -f",
     "ha:check": "docker compose -f dev/home-assistant/compose.yaml exec homeassistant python -m homeassistant --script check_config --config /config",
-    "ha:refresh": "node scripts/ha-dev.mjs refresh"
+    "ha:refresh": "node scripts/ha-dev.mjs refresh",
+    "agent:pair": "node apps/agent-cli/src/cli.mjs pair"
   },
   "devDependencies": {
     "@react-three/test-renderer": "9.1.1",

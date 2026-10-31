@@ -8,8 +8,6 @@ import { EditorIcon } from "../editor-chrome/EditorIcon";
 
 import { EditorModeNav, type EditorMode } from "../editor-chrome/EditorModeNav";
 
-import { ConnectActionBar } from "../editor-connect/ConnectActionBar";
-
 import type { useHomeEditorController } from "./useHomeEditorController";
 
 type Props = Pick<
@@ -35,8 +33,6 @@ type Props = Pick<
   | "setPublishOpen"
   | "publishErrors"
   | "publishProject"
-  | "connect"
-  | "runtime"
   | "constructEditor"
   | "dragging"
   | "floorZoneDrawing"
@@ -72,8 +68,6 @@ export function HomeEditorHeader({
   setPublishOpen,
   publishErrors,
   publishProject,
-  connect,
-  runtime,
   constructEditor,
   dragging,
   floorZoneDrawing,
@@ -118,6 +112,7 @@ export function HomeEditorHeader({
           className="editor-close"
           disabled={editingLocked || unsettled || !hasSaved}
           title={hasSaved ? "Back to Home" : "Save your home before returning to Home"}
+          aria-label={closing ? "Returning to Home" : "Back"}
           onClick={() => void closeEditor()}
         >
           <EditorIcon name="back" />
@@ -190,6 +185,10 @@ export function HomeEditorHeader({
           </div>
         )}
       </div>
+      <div className="editor-mobile-home">
+        <strong>{snapshot.project.home.name}</strong>
+        <span>{snapshot.project.floors.find((floor) => floor.id === activeFloorId)?.name}</span>
+      </div>
       {walkError && <p role="alert">{walkError}</p>}
       <EditorModeNav mode={shortcutsMode ? "shortcuts" : mode} onModeChange={onModeTabChange} />
       <div className="direction-project-actions" role="group" aria-label="Project actions">
@@ -245,16 +244,7 @@ export function HomeEditorHeader({
           Save
         </EditorButton>
       </div>
-      {mode === "connect" ? (
-        <ConnectActionBar
-          view={connect.view}
-          onViewChange={connect.setView}
-          hasUnmappedRooms={connect.hasUnmappedRooms}
-          refreshing={runtime.refreshing}
-          disconnected={connect.disconnected}
-          onRefresh={() => void connect.refresh()}
-        />
-      ) : mode === "construct" ? (
+      {mode === "connect" ? null : mode === "construct" ? (
         <EditorActionBar
           inert={referenceAdjusting}
           tool={constructEditor.tool}

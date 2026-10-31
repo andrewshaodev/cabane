@@ -5,6 +5,8 @@ export interface ConnectWorkspaceProps {
   onHomeAssistantSettings?: () => void;
   onWorkspaces?: () => void;
   onRecoveryWorkspaces?: () => void;
+  agentPilotOpen?: boolean;
+  onAgentPilotClose?: () => void;
   initialRequest?: EditorOpenRequest;
   navigation?: {
     request: EditorOpenRequest;

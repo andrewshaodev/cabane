@@ -1,9 +1,9 @@
 {
-  "revision": 21,
-  "fingerprint": "1971b98a01a78a9fee4fb3541d3115f8410de654f044b01c0be47e2638b345e4",
-  "summary": "Add persistent Arrange item groups",
+  "revision": 27,
+  "fingerprint": "7438347af96fab36b08a7ee845d25d092860385ff5455b5a713377b3bc5795ce",
+  "summary": "Warn about disconnected terrain exits and stabilize terrace clipping",
   "breakingChanges": [
-    "Existing homes remain supported. Homes saved with scene-item group metadata require an updated frontend and matching Home Assistant panel. Groups preserve individual models, lighting and connections without a schema-version or asset migration; older clients retain unsupported-field protection."
+    "No saved fields or migrations change. Terrain exit diagnostics are warning-only and do not block Save. Update the frontend and matching Home Assistant panel for these warnings and the terrace/basement clipping fix."
   ],
   "history": [
     {
@@ -144,6 +144,48 @@
       "summary": "Keep dense model lighting renderable and isolate broken optional illumination",
       "breakingChanges": [
         "Existing authored sources, sample counts, model identities and connections remain unchanged. Older panels can reject valid lighting above eight samples or with no physical output; update HACS, restart Home Assistant and reload the frontend. Runtime recovery disables only malformed optional lighting without rewriting saved data."
+      ]
+    },
+    {
+      "revision": 21,
+      "summary": "Add persistent Arrange item groups",
+      "breakingChanges": [
+        "Existing homes remain supported. Homes saved with scene-item group metadata require an updated frontend and matching Home Assistant panel. Groups preserve individual models, lighting and connections without a schema-version or asset migration; older clients retain unsupported-field protection."
+      ]
+    },
+    {
+      "revision": 22,
+      "summary": "Allow eligible manual connections before room area setup",
+      "breakingChanges": [
+        "No saved fields, slot IDs or schema versions change. Every eligible manual function and reading can now map across Home Assistant areas or before its room has an area association. Older clients may report these mappings as unmapped until their frontend or panel is updated; no migration or device command is involved."
+      ]
+    },
+    {
+      "revision": 23,
+      "summary": "Conditional state visibility on models",
+      "breakingChanges": [
+        "Update older Cabane clients and the Home Assistant integration before opening projects using if-present map visibility. Existing boolean visibility settings remain supported."
+      ]
+    },
+    {
+      "revision": 24,
+      "summary": "Keep homes usable when catalog models are unavailable",
+      "breakingChanges": [
+        "Unavailable models now render as placeholders while preserving item IDs, placements and connections. Update Cabane in HACS, restart Home Assistant and reload to get this recovery behavior. Structural errors remain blocked; no saved fields or schema versions change."
+      ]
+    },
+    {
+      "revision": 25,
+      "summary": "Add optional display names for walls, doors, windows and passages; preserve architectural and binding identities.",
+      "breakingChanges": [
+        "Older Cabane clients reject projects containing wall or opening name fields. Update the Home Assistant integration and reload all clients before opening a renamed project."
+      ]
+    },
+    {
+      "revision": 26,
+      "summary": "Add sloped terrain with home-wide corner heights",
+      "breakingChanges": [
+        "Existing homes retain flat terrain. Homes saved with home.terrain require the updated frontend and matching Home Assistant panel. Older clients retain unsupported-field protection. No floor, asset or binding migration is required."
       ]
     }
   ],

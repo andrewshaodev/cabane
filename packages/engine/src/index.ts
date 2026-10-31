@@ -1,3 +1,4 @@
+export { SceneStateVisibilitySelect } from "./home-assistant-mapping/SceneStateVisibilitySelect";
 export { createBrowserUuid } from "./browser-uuid";
 export * from "./types";
 export { isAuxiliaryEntitySlot } from "./entity-slot-roles";
@@ -5,6 +6,7 @@ export * from "./walk-tools";
 export * from "./action-bar/action-bar-config";
 export * from "./action-bar/ha-action-shortcuts";
 export { DEFAULT_ROOF_SETTINGS, type RoofSettings } from "./roof/roof-settings";
+export { FLAT_TERRAIN, type TerrainSettings } from "./terrain/terrain-settings";
 export * from "./room-types";
 export * from "./devices";
 export * from "./geometry";
@@ -54,6 +56,15 @@ export {
 export { setupStorageKey, setupCollapseSessionKey } from "./setup-progress";
 export { HomePlanMapping } from "./home-assistant-mapping/HomePlanMapping";
 export { DeviceMappingInspector } from "./home-assistant-mapping/DeviceMappingInspector";
+export { DeviceConnectionWorkbench } from "./home-assistant-mapping/DeviceConnectionWorkbench";
+export { ConnectionSourcePicker } from "./home-assistant-mapping/ConnectionSourcePicker";
+export { ReadingConnectionForm } from "./home-assistant-mapping/ReadingConnectionForm";
+export { ConnectionIcon } from "./home-assistant-mapping/ConnectionIcon";
+export {
+  connectionSlotLabel,
+  entityConnectionSummary,
+  type ReadingPresentation,
+} from "./home-assistant-mapping/connection-presentation";
 export { DeviceMappingGroup } from "./home-assistant-mapping/DeviceMappingGroup";
 export { ModeledDeviceMappingRow } from "./home-assistant-mapping/ModeledDeviceMappingRow";
 export { EntitySlotMappingRow } from "./home-assistant-mapping/EntitySlotMappingRow";

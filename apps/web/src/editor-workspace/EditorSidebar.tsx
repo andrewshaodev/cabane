@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { TerrainSettingsEditor } from "../editor-preview/construct/TerrainSettingsEditor";
+import { ConstructionToolCards } from "../editor-chrome/ConstructionToolCards";
 import type { CustomModel } from "@cabane/engine";
 import { CustomModelLibrary } from "../custom-models/CustomModelLibrary";
 import { CustomModelCard } from "../custom-models/CustomModelCard";
@@ -19,7 +21,7 @@ import { NorthSettingsEditor } from "../editor-preview/construct/NorthSettingsEd
 
 import { ConstructionInspector } from "../editor-preview/construct";
 
-import { ConnectInspector } from "../editor-connect/ConnectInspector";
+import { ConnectSidebar } from "../editor-connect/ConnectSidebar";
 
 import { ArrangePlacedItems } from "../editor-preview/furnish/ArrangePlacedItems";
 import { ArrangeCatalog } from "../editor-preview/furnish/catalog/ArrangeCatalog";
@@ -34,13 +36,13 @@ type Props = Pick<
   | "floorNavigation"
   | "activeFloorId"
   | "stairPlacement"
+  | "startStairs"
   | "setStairPlacement"
   | "setFloorDialog"
   | "mode"
   | "editingLocked"
   | "publishOpen"
   | "previewOpen"
-  | "connectManifest"
   | "connect"
   | "clearConstructionSelection"
   | "constructEditor"
@@ -59,7 +61,7 @@ type Props = Pick<
   | "setFloorPaintTarget"
   | "homeAssistantUrl"
   | "snapshot"
-  | "commit"
+  | "executeProjectAction"
   | "catalogBrowsing"
   | "setCatalogBrowsing"
   | "catalogError"
@@ -67,6 +69,7 @@ type Props = Pick<
   | "furnishingEditor"
   | "placementFloor"
 > & {
+  onMobileToolChoose: () => void;
   onSelectPlacedItem: (id: string) => void;
   sidebar: React.RefObject<HTMLElement | null>;
   iconUrl: string;
@@ -88,13 +91,13 @@ export function EditorSidebar({
   floorNavigation,
   activeFloorId,
   stairPlacement,
+  startStairs,
   setStairPlacement,
   setFloorDialog,
   mode,
   editingLocked,
   publishOpen,
   previewOpen,
-  connectManifest,
   connect,
   clearConstructionSelection,
   constructEditor,
@@ -113,7 +116,7 @@ export function EditorSidebar({
   setFloorPaintTarget,
   homeAssistantUrl,
   snapshot,
-  commit,
+  executeProjectAction,
   catalogBrowsing,
   setCatalogBrowsing,
   catalogError,
@@ -135,6 +138,7 @@ export function EditorSidebar({
   placingWalkStart,
   setWalkStartFloor,
   onHomeAssistantSettings,
+  onMobileToolChoose,
 }: Props) {
   const [editingModel, setEditingModel] = useState<CustomModel | null>(null);
   return (
@@ -175,17 +179,32 @@ export function EditorSidebar({
               onSettings={() => setFloorDialog("rename")}
               apartmentFloor={snapshot.project.home.apartmentFloor ?? 0}
               onApartmentFloor={(apartmentFloor) =>
-                commit({
-                  ...snapshot,
-                  project: {
-                    ...snapshot.project,
-                    home: { ...snapshot.project.home, apartmentFloor },
-                  },
-                })
+                executeProjectAction({ type: "update-home-settings", changes: { apartmentFloor } })
               }
             />
           )}
           <EditorModeIntroduction mode={shortcutsMode ? "shortcuts" : mode} />
+          {!shortcutsMode && mode === "construct" && (
+            <ConstructionToolCards
+              inert={editingLocked || unsettled || reference.adjusting}
+              tool={constructEditor.tool}
+              stairsActive={Boolean(stairPlacement)}
+              stairsDisabledReason={
+                snapshot.project.floors.at(-1)?.id === activeFloorId
+                  ? "Add a floor above first."
+                  : undefined
+              }
+              onToolChange={(tool) => {
+                setStairPlacement(null);
+                constructEditor.setTool(tool);
+                onMobileToolChoose();
+              }}
+              onStairs={() => {
+                startStairs();
+                onMobileToolChoose();
+              }}
+            />
+          )}
           {shortcutsMode && (
             <div className="shortcuts-guide">
               <h3>Add a shortcut</h3>
@@ -298,8 +317,7 @@ export function EditorSidebar({
                       <EditorButton
                         variant="text"
                         onClick={() => {
-                          const { walkStart, ...home } = snapshot.project.home;
-                          commit({ ...snapshot, project: { ...snapshot.project, home } });
+                          executeProjectAction({ type: "set-walk-start", walkStart: null });
                           setWalkStartFloor(null);
                         }}
                       >
@@ -317,11 +335,17 @@ export function EditorSidebar({
                 />
               }
               roof={snapshot.project.home.roof}
+              terrainControls={
+                <TerrainSettingsEditor
+                  value={snapshot.project.home.terrain}
+                  disabled={(snapshot.project.home.apartmentFloor ?? 0) > 0}
+                  onChange={(terrain) =>
+                    executeProjectAction({ type: "update-home-settings", changes: { terrain } })
+                  }
+                />
+              }
               onRoofChange={(roof) =>
-                commit({
-                  ...snapshot,
-                  project: { ...snapshot.project, home: { ...snapshot.project.home, roof } },
-                })
+                executeProjectAction({ type: "update-home-settings", changes: { roof } })
               }
               editor={constructEditor}
               floorPainting={{
@@ -339,11 +363,9 @@ export function EditorSidebar({
             />
           )}
           {!shortcutsMode && mode === "connect" && (
-            <ConnectInspector
+            <ConnectSidebar
               editor={connect}
-              manifest={connectManifest}
               runtime={runtime}
-              deviceModels={deviceModels}
               homeAssistantUrl={homeAssistantUrl}
               onSettings={onHomeAssistantSettings}
             />

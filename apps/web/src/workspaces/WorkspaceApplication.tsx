@@ -26,7 +26,7 @@ import { initializeWorkspaces } from "./initialize-workspaces";
 import { exportWorkspaceBackup, parseWorkspaceImport } from "./workspace-transfer";
 import { downloadConnectData } from "../editor-connect/profile-transfer";
 import { readEditorReturn } from "../editor-connect/connect-navigation";
-import { workspaceHomePath, workspaceIdForPath } from "../editor-routes";
+import { agentPilotPath, workspaceHomePath, workspaceIdForPath } from "../editor-routes";
 import { ownerProjectRegistries } from "../project-runtime";
 
 export function WorkspaceApplication() {
@@ -218,17 +218,7 @@ export function WorkspaceApplication() {
           </div>
         )}
         {onboarding.loaded ? (
-          <WorkspaceHost
-            key={id}
-            id={id}
-            repository={repository}
-            onboarding={onboarding}
-            demoWorkspaceId={
-              entries.some((entry) => entry.metadata.id === onboarding.state?.demoWorkspaceId)
-                ? (onboarding.state?.demoWorkspaceId ?? null)
-                : null
-            }
-          />
+          <WorkspaceHost key={id} id={id} repository={repository} onboarding={onboarding} />
         ) : (
           <main className="direction-project-loading">Loading your home…</main>
         )}
@@ -279,6 +269,9 @@ export function WorkspaceApplication() {
           await navigate(
             `${workspaceHomePath(id)}/home-assistant${intent ? `?action=${intent}` : ""}`,
           );
+        }}
+        onAgentPilot={async (id) => {
+          await navigate(agentPilotPath(id));
         }}
         entries={entries}
         onOpen={open}

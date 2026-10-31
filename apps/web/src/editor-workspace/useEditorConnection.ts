@@ -8,7 +8,7 @@ import {
   validateWorkspaceBindings,
 } from "@cabane/engine";
 
-import { homeManifest as ownerProjectManifest } from "@cabane/home";
+import { ownerProjectExtensions } from "../project-runtime";
 
 import { useMemo } from "react";
 
@@ -39,6 +39,7 @@ type Options = {
   furnishingEditorSelectedId: string | null;
   setConnectionBusy: React.Dispatch<React.SetStateAction<boolean>>;
   homeId: string;
+  replaceEditorsFromProject: (project: import("@cabane/engine").HomeProject) => void;
 };
 export function useEditorConnection({
   workspace,
@@ -56,6 +57,7 @@ export function useEditorConnection({
   furnishingEditorSelectedId,
   setConnectionBusy,
   homeId,
+  replaceEditorsFromProject,
 }: Options) {
   const {
     snapshot,
@@ -65,7 +67,7 @@ export function useEditorConnection({
     adoptRecord: workspaceAdoptRecord,
   } = workspace;
   const connectManifest = useMemo(
-    () => composeHomeBindingManifest(snapshot.project, ownerProjectManifest.extensions),
+    () => composeHomeBindingManifest(snapshot.project, ownerProjectExtensions),
     [snapshot.project],
   );
   const connectFloor =
@@ -78,10 +80,13 @@ export function useEditorConnection({
     origin: homeAssistantUrl,
     active: mode === "connect" && !editingLocked && !unsettled && !publishOpen,
     onChange: (bindings) => commit({ ...snapshot, bindings }),
-    onAddReading: (itemId, entityId) => {
+    onAddReading: (itemId, entityId, presentation) => {
       if (editingLocked || unsettled || publishOpen) return;
-      const next = addReadingToSnapshot(snapshot, itemId, entityId, runtime);
-      if (next) commit(next);
+      const next = addReadingToSnapshot(snapshot, itemId, entityId, runtime, presentation);
+      if (next) {
+        replaceEditorsFromProject(next.project);
+        commit(next);
+      }
     },
     ...(initialRequest === undefined ? {} : { initialRequest: initialRequest }),
     ...(navigation?.request.view === undefined ? {} : { routeView: navigation?.request.view }),
@@ -147,7 +152,7 @@ export function useEditorConnection({
       ...validateWorkspaceBindings(
         snapshot.bindings,
         connectManifest,
-        composeHomeBindingManifest(workspaceGetRecord().published, ownerProjectManifest.extensions),
+        composeHomeBindingManifest(workspaceGetRecord().published, ownerProjectExtensions),
       ),
       ...connectIssues,
     ],

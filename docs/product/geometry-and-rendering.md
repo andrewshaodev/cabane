@@ -37,9 +37,18 @@ meters-per-plan-unit scale; positive floor-to-floor heights determine elevations
 Floors marked `belowGround: true` form a bottom-to-top prefix before ground.
 Ground remains at zero; basement elevations accumulate downward. Changing a
 basement height moves that floor and deeper floors without moving ground.
-Basements are hidden in the whole-building view and visible when selected in
+With default flat terrain, basements are hidden in the whole-building view and visible when selected in
 cutaway or entered in Walk. Basement cutaways hide terrain and floors above.
-Ground terrain stays at ground level, with stair apertures through every layer.
+Optional home-wide corner heights slope the terrain between the ground/basement
+building bounds, continuing level beyond each edge. Exterior views then include
+basement facades. Grass, soil and outdoor finish zones follow the grade while
+excavating indoor rooms and retaining pool/stair apertures through every layer.
+Courtyards and outdoor platforms do not excavate indoor volumes. Floors,
+platforms, pools and boundaries retain their authored levels. Walk follows
+rendered terrain and crosses near-level basement entrances with ordinary wall
+and pool collision. Tool relocation retains conservative ground-level support.
+All-zero or omitted heights preserve existing rendering. Apartment shells keep
+their existing decorative ground and suspend custom terrain.
 Footprint/room polygons, straight walls, explicit wall junctions, and wall-owned
 openings define architecture. Junction/opening clearance uses the finite spans of
 adjoining walls: a shallow-angle continuation extending away from an opening
@@ -72,7 +81,11 @@ exterior material groups. Wall face finishes retain each wall’s boundaries,
 including continuous bands above doors and windows and each side of a corner.
 Polygon clipping and numerical normalization prevent
 near-coincident seams from destabilizing geometry. Opening cuts extend 1 mm
-past both wall faces so diagonal walls cannot leave opaque slivers across the aperture. Wall bases extend to outdoor
+past both wall faces so diagonal walls cannot leave opaque slivers across the aperture.
+Platform slab coverage and floor/ceiling apertures share the world-space clipping
+precision grid, preserving holes and ceiling undersides where nearly coincident
+terrace and lower-floor outlines meet. Numerical normalization affects derived
+geometry without rounding saved outlines. Wall bases extend to outdoor
 terrain, 5 cm below the indoor floor datum, without shifting openings or wall tops. Floor-level exterior doors and passages
 have solid thresholds bridging that terrain-to-floor difference. Ceilings support flat and
 sloped runtime surfaces. Project authoring has the narrower flat-ceiling schema.

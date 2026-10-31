@@ -4,6 +4,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { JSDOM } from "jsdom";
 import { withModules } from "./test-server.mjs";
+import { connectedRuntimeFixture } from "./fixtures/home-assistant.mjs";
 
 await withModules(async (load) => {
   const { useEditorPanels, editorPanelSelection } = await load(
@@ -28,9 +29,8 @@ await withModules(async (load) => {
     "/apps/web/src/editor-preview/furnish/useFurnishingEditor.ts",
   );
   const { interactionFloor: floor } = await load("/tests/fixtures/interaction-floor.ts");
-  const { createEmptyHomeProject, editorWallAttachments } = await load(
-    "/packages/engine/src/index.ts",
-  );
+  const { createEmptyHomeProject, createEmptyRuntimeBindingProfile, editorWallAttachments } =
+    await load("/packages/engine/src/index.ts");
   const definition = {
     label: "A chair with a deliberately long descriptive model name",
     category: "Seating",
@@ -88,7 +88,7 @@ await withModules(async (load) => {
       },
       shortcuts,
     );
-    panels = useEditorPanels(selection, busy);
+    panels = useEditorPanels(selection, busy, issues.length > 0, mode);
     return React.createElement(
       "main",
       { "data-open": panels.propertiesOpen, "data-mobile-panel": panels.mobileSurface },
@@ -119,6 +119,13 @@ await withModules(async (load) => {
           },
         },
         snapshot: { project },
+        connect: {
+          profile: createEmptyRuntimeBindingProfile(project.home.id),
+          displayRuntime: connectedRuntimeFixture({ status: "disconnected", canMutate: false }),
+          selectSlot: () => false,
+          assignEntities() {},
+        },
+        selectMode() {},
         stairDialog: null,
         commit() {},
         floorZoneDrawing: { active: false, cancel() {} },
@@ -211,6 +218,32 @@ await withModules(async (load) => {
       await act(async () => editor.clearSelection());
       assert.equal(document.querySelector(".selection-details"), null);
       assert.equal(document.querySelector(".editor-properties-toggle"), null);
+    });
+  });
+  test("mobile panels open only on request, preserve selection on dismissal and close across modes", async () => {
+    await withDom(async (root) => {
+      await act(async () => root.render(React.createElement(Harness)));
+      assert.equal(panels.mobileOpen, false);
+      await act(async () => editor.selectWall(floor.walls[0].id));
+      assert.equal(panels.propertiesOpen, true, "desktop still opens Properties on selection");
+      assert.equal(panels.mobileOpen, false, "canvas selection leaves the mobile panel closed");
+      await act(async () => panels.openProperties());
+      assert.equal(panels.mobileOpen, true);
+      await act(async () => panels.closeMobilePanel());
+      assert.equal(editor.selection.id, floor.walls[0].id);
+      assert.equal(panels.propertiesOpen, true);
+      await act(async () => editor.updateSelectedWallMetadata({ heightMeters: 3 }));
+      assert.equal(panels.mobileOpen, false);
+      await act(async () => panels.showTools());
+      assert.equal(panels.mobileOpen, true);
+      assert.equal(panels.mobileSurface, "tools");
+      await act(async () => root.render(React.createElement(Harness, { mode: "furnish" })));
+      assert.equal(panels.mobileOpen, false);
+      await act(async () => panels.showIssues());
+      await act(async () =>
+        root.render(React.createElement(Harness, { mode: "furnish", issues: [] })),
+      );
+      assert.equal(panels.mobileOpen, false, "resolved issues do not leave an empty dialog open");
     });
   });
   test("panel changes wait for drag, drawing or marquee completion, including deselection", async () => {

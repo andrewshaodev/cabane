@@ -1472,11 +1472,12 @@ await withModules(async (load) => {
       state: "unavailable",
       available: false,
     };
-    runtime.entityRegistry.find((entry) => entry.entity_id === "climate.demo").area_id = "outside";
-    const html = renderDashboard(runtime);
+    const profile = connectedProfileFixture();
+    profile.entityIdsBySlotId["demo-climate-slot"] = "switch.demo_coffee";
+    const html = renderDashboard(runtime, null, profile);
     assert.ok(html.includes("reconnecting"));
     assert.ok(html.includes("currently unavailable"));
-    assert.ok(html.includes("assigned to a different Home Assistant area"));
+    assert.ok(html.includes("connected to an incompatible entity type"));
     assert.ok(html.includes('disabled=""'));
     assert.equal(html.includes("sensor.demo_temperature"), false);
   });

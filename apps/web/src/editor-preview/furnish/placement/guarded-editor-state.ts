@@ -11,6 +11,7 @@ import {
 
 const placementActions = new Set<FurnishingEditorAction["type"]>([
   "add-item",
+  "update-item",
   "add-preset",
   "duplicate",
   "duplicate-items",
