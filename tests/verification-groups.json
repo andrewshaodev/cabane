@@ -144,6 +144,7 @@
       "validate-floor-cli.test.mjs",
       "wall-cap-fade.test.mjs",
       "wall-edge-colors.test.mjs",
+      "wall-fade-platform.test.mjs",
       "wall-niche-properties.test.mjs",
       "wall-niches.test.mjs",
       "workspace-publication.test.mjs",

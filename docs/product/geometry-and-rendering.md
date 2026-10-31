@@ -55,6 +55,11 @@ adjoining walls: a shallow-angle continuation extending away from an opening
 does not obstruct it. Actual intersecting wall spans remain protected, with a
 2 cm finish tolerance. Junction clearance only reserves spans where the adjoining
 wall rises above the opening sill; windows above low partitions remain valid.
+Exterior walls fade away from the building: a wall fades toward the side outside the
+floor's footprint. An exterior wall wholly outside the footprint (a terrace's parapet or
+side wall, drawn as an ordinary wall) fades away from an outdoor platform when only one
+side borders the platform. Walls with platform on both sides or touching neither a
+footprint nor a platform keep no outward fade direction.
 Openings inherit wall thickness, orientation, fade,
 and cutout behavior. Door/window orientation is relative to wall direction.
 Doors support hinged/sliding variants, windows fixed/casement variants, and
