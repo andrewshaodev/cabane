@@ -435,6 +435,17 @@ await withModules(async (load) => {
       }
       await act(async () => root.render(React.createElement(Harness)));
       assert.ok(document.querySelector('[aria-label="Catalog categories"]'));
+      assert.equal(
+        document.querySelector(".catalog-categories h3").textContent,
+        "Browse by category",
+      );
+      assert.ok(document.querySelector('.catalog-category-grid [aria-label="Devices"]'));
+      const lightsCategory = document.querySelector('.catalog-category-grid [aria-label="Lights"]');
+      assert.ok(lightsCategory);
+      await act(async () => lightsCategory.click());
+      assert.ok(document.querySelector('[aria-label="Add Floor lamp"]'));
+      assert.equal(document.querySelector('[aria-label="Add Television"]'), null);
+      await act(async () => document.querySelector(".catalog-navigation button").click());
       assert.equal(document.querySelector(".catalog-grid"), null);
       const chooseRoom = async (name) => {
         await act(async () => document.querySelector(".catalog-navigation button")?.click());

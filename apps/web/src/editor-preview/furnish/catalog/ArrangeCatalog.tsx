@@ -132,7 +132,7 @@ export function ArrangeCatalog({
                           ? "No matching items"
                           : browsing.room === "my-models"
                             ? "Your models will appear here. Import one or create one with your AI."
-                            : "No items for this room type yet"}
+                            : "No items in this category yet"}
                       </p>
                       {(browsing.query.trim() || browsing.room !== "my-models") && (
                         <EditorButton
