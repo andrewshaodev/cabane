@@ -19,7 +19,7 @@
     }
   },
   "semantics": {
-    "validationRevision": 8,
+    "validationRevision": 9,
     "migrationRevision": 1,
     "archiveRevision": 1
   },
@@ -3050,6 +3050,37 @@
                       "optional": false,
                       "schema": {
                         "type": "string"
+                      }
+                    }
+                  }
+                }
+              },
+              "terrain": {
+                "optional": true,
+                "schema": {
+                  "properties": {
+                    "bottomLeftMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "bottomRightMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "topLeftMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
+                    "topRightMeters": {
+                      "optional": false,
+                      "schema": {
+                        "type": "number"
                       }
                     }
                   }

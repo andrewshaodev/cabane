@@ -75,6 +75,25 @@ history, autosave, export/import, and Apply flow. After Apply, Home's Show roof
 action displays the result. Pitch, thickness, and flush overhang are automatic;
 per-section controls and roof drawing are not exposed.
 
+The Terrain disclosure sets four corner heights around the home's ground and
+basement footprint in the unrotated 2D plan. Negative heights lower a side to a
+garage or basement entrance; heights blend across the home and stay level beyond
+its bounds. Fields support the measurement-unit preference, explicit unit suffixes,
+and local validation. The four controls match the 2D plan in a two-by-two layout,
+with up/down arrows to raise or lower each corner. They step by 0.1 m in metric
+or one inch in imperial, with Shift multiplying the step by ten. Reset to flat
+ground restores zero at every corner.
+These home-wide edits use ordinary history, autosave, import/export and Save.
+Inspect the result in 3D Arrange, Explore or Home. Apartment floor must be zero
+to edit terrain. Individual terrain zones and earthwork drawing are not exposed.
+When custom terrain leaves an exterior doorway, passage or open platform edge
+without a crossing within Walk's 30 cm step limit, Issues shows a non-blocking
+warning and Locate selects the affected opening or platform. Supporting platforms
+and connected stair landings count as access. Railed edges, windows and interior
+openings are excluded. A downward slope does not require a basement; adding a
+lower floor alone does not connect an existing ground-floor entrance. Adjust the
+grade or model the intended access. Save remains available with these warnings.
+
 Wall drawing snaps to the grid, endpoints, wall segments, and angle references;
 Alt bypasses snapping. Alignment guides match unfinished opposite sides, including
 rotated rectangles. Editing a corner uses fixed neighboring edges for the same
