@@ -139,6 +139,8 @@
       "stair-railings.test.mjs",
       "stair-shape-editing.test.mjs",
       "stair-shape-rendering.test.mjs",
+      "stair-solid-below.test.mjs",
+      "stair-opening.test.mjs",
       "stair-shapes.test.mjs",
       "terrain-landing.test.mjs",
       "sloped-terrain.test.mjs",

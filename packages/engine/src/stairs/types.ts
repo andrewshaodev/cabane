@@ -26,6 +26,11 @@ export type StraightStairSpec = StairPlacement &
     shape?: "straight";
     widthMeters: number;
     runMeters: number;
+    /**
+     * Fills the space under the first part of the flight, measured along its run, down to the lower floor.
+     * The rest of the flight keeps its open, sloped underside.
+     */
+    solidBelowRunMeters?: number;
   };
 export type LShapedStairSpec = StairPlacement &
   StairConnection & {

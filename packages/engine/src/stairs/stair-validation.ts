@@ -49,6 +49,16 @@ export const validateStairs = (
       add("stair.railings", "Choose Both, Left, Right, or None.", "fatal");
       return;
     }
+    if (
+      "solidBelowRunMeters" in stair &&
+      stair.solidBelowRunMeters !== undefined &&
+      (!Number.isFinite(stair.solidBelowRunMeters) ||
+        stair.solidBelowRunMeters <= 0 ||
+        stair.solidBelowRunMeters > stair.runMeters)
+    ) {
+      add("stair.solid-below", "Fill no more than the stair's run, and more than zero.", "fatal");
+      return;
+    }
     const flight = flights[index];
     if (!flight) {
       add(

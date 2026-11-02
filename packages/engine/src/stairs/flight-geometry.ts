@@ -117,23 +117,41 @@ export const deriveStairFlight = (building: BuildingGeometry, stair: StairSpec) 
   };
 };
 export type StairFlight = NonNullable<ReturnType<typeof deriveStairFlight>>;
+/** Clear height a person needs on the stair, so an opening is only cut where the flight gets this close to the ceiling. */
+export const STAIR_HEADROOM_METERS = 2.1;
+
+/**
+ * An L-shaped flight whose first run stays well below the ceiling (a short entrance run, as on stair 3) needs no opening over that
+ * run: the opening is the landing and the second run only, a plain rectangle. Every other flight keeps its whole footprint.
+ */
+const openingFootprint = (
+  flight: StairFlight,
+  ceilingHeightMeters: number,
+  plan: (p: readonly [number, number]) => Polygon[number],
+): Polygon => {
+  const { spec } = flight;
+  if (spec.shape !== "l-shaped" || flight.footprintWorld.length !== 6) return flight.footprint;
+  if (flight.path[1].elevation >= ceilingHeightMeters - STAIR_HEADROOM_METERS)
+    return flight.footprint;
+  const [p0, , , p3, p4, p5] = flight.footprintWorld;
+  const t = spec.lowerRunMeters / (spec.lowerRunMeters + flight.widthMeters);
+  const q: [number, number] = [p0[0] + (p5[0] - p0[0]) * t, p0[1] + (p5[1] - p0[1]) * t];
+  return [q, p3, p4, p5].map(plan) as unknown as Polygon;
+};
+/** The part of a flight's footprint cut from its upper floor and from its lower floor's ceiling, in plan coordinates. */
+export const stairOpening = (building: BuildingGeometry, flight: StairFlight): Polygon => {
+  const lower = building.floors.find((floor) => floor.id === flight.lowerFloorId);
+  return openingFootprint(flight, lower?.defaultCeilingHeightMeters ?? 0, (p) =>
+    worldPointToPlan({ x: p[0], z: p[1] }, building.coordinates),
+  );
+};
 export const deriveStairApertures = (building: BuildingGeometry) =>
   building.stairs.flatMap((stair) => {
     const flight = deriveStairFlight(building, stair);
-    return flight && !stair.terrain
-      ? [
-          {
-            stairId: stair.id,
-            floorId: stair.lowerFloorId,
-            surface: "ceiling" as const,
-            polygon: flight.footprint,
-          },
-          {
-            stairId: stair.id,
-            floorId: stair.upperFloorId,
-            surface: "floor" as const,
-            polygon: flight.footprint,
-          },
-        ]
-      : [];
+    if (!flight || stair.terrain) return [];
+    const polygon = stairOpening(building, flight);
+    return [
+      { stairId: stair.id, floorId: stair.lowerFloorId, surface: "ceiling" as const, polygon },
+      { stairId: stair.id, floorId: stair.upperFloorId, surface: "floor" as const, polygon },
+    ];
   });

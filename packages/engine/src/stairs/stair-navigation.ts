@@ -20,7 +20,7 @@ import {
 } from "../navigation";
 import { projectStairPath, stairEndCoordinates } from "./path-projection";
 import { pointOnPolygonBoundary } from "../validation/geometry";
-import { deriveStairFlight, type StairFlight } from "./flight-geometry";
+import { deriveStairFlight, stairOpening, type StairFlight } from "./flight-geometry";
 import { stairItemObstacle, type StairModelRegistries } from "./stair-obstacles";
 import type { BuildingGeometry } from "./types";
 import type { PlanPoint } from "../types";
@@ -101,20 +101,26 @@ const landingItemColliders = (
       return [];
     }
   });
+// Only the opening a flight cuts in its upper floor is unsupported: a short first run kept under that floor (stairOpening) leaves it
+// whole.
 const hasUnsupportedStairAperture = (
+  building: BuildingGeometry,
   flights: readonly (StairFlight | null)[],
   floorId: string,
   point: PlanPoint,
   exitingStairId?: string,
 ) =>
-  flights.some(
-    (flight) =>
-      !flight?.terrain &&
-      flight?.upperFloorId === floorId &&
-      flight.id !== exitingStairId &&
-      pointInsidePolygon(point, flight.footprint) &&
-      !pointOnPolygonBoundary(point, flight.footprint),
-  ) &&
+  flights.some((flight) => {
+    if (
+      !flight ||
+      flight.terrain ||
+      flight.upperFloorId !== floorId ||
+      flight.id === exitingStairId
+    )
+      return false;
+    const opening = stairOpening(building, flight);
+    return pointInsidePolygon(point, opening) && !pointOnPolygonBoundary(point, opening);
+  }) &&
   // Only spiral upper landings render a bridge; other landing polygons need floor underneath.
   !flights.some(
     (flight) =>
@@ -125,6 +131,19 @@ const hasUnsupportedStairAperture = (
       (pointInsidePolygon(point, flight.upperLanding) ||
         pointOnPolygonBoundary(point, flight.upperLanding)),
   );
+/**
+ * The floor a flight without railings meets level at its sides: its lower floor within one riser of the bottom, its upper floor
+ * within one riser of the top. A walker may step between the flight and that floor across the open side there, as at a stair whose
+ * first or last steps open onto a room. Stairs with any railings keep their sides closed.
+ */
+const openSideFloor = (flight: StairFlight, localElevation: number) => {
+  if (flight.spec.railings !== "none") return undefined;
+  const riser = flight.riseMeters / flight.stepCount;
+  if (localElevation <= riser + 1e-8) return { floorId: flight.lowerFloorId, relativeElevation: 0 };
+  if (localElevation >= flight.riseMeters - riser - 1e-8)
+    return { floorId: flight.upperFloorId, relativeElevation: flight.riseMeters };
+  return undefined;
+};
 export const moveBuildingWalker = (
   building: BuildingGeometry,
   pose: BuildingWalkPoint,
@@ -220,9 +239,10 @@ export const moveBuildingWalker = (
       localElevation > flight.riseMeters - 0.4 &&
       top.along >= 0 &&
       Math.abs(top.across) <= halfWidth;
-    if (exitingBelow || exitingAbove) {
-      const endpointFloorId = exitingBelow ? flight.lowerFloorId : flight.upperFloorId;
-      const endElevation = flight.baseElevationMeters + (exitingBelow ? 0 : flight.riseMeters);
+    // Steps the walker off the flight onto one of its floors, or onto the terrain at a terrain stair's end, if that holds it and nothing
+    // there is in the way.
+    const land = (endpointFloorId: string | undefined, relativeElevation: number) => {
+      const endElevation = flight.baseElevationMeters + relativeElevation;
       let terrainLanding: BuildingWalkPoint | null = null;
       if (!endpointFloorId) {
         const height = options.terrainHeight?.(next);
@@ -247,7 +267,8 @@ export const moveBuildingWalker = (
         (endpointFloorId && !pointOnFloorSupport(plan, destination))
       )
         return pose;
-      if (hasUnsupportedStairAperture(flights, destinationId, plan, flight.id)) return pose;
+      if (hasUnsupportedStairAperture(building, flights, destinationId, plan, flight.id))
+        return pose;
       const destinationElevation = levels.find(
         (level) => level.floorId === destinationId,
       )!.elevationMeters;
@@ -272,10 +293,21 @@ export const moveBuildingWalker = (
         floorId: destinationId,
         elevation: terrainLanding?.elevation ?? endElevation,
       };
-    }
+    };
+    if (exitingBelow || exitingAbove)
+      return exitingBelow
+        ? land(flight.lowerFloorId, 0)
+        : land(flight.upperFloorId, flight.riseMeters);
     const projected = projectStairPath(flight, next, localElevation);
-    if (!projected || projected.distance > halfWidth + 1e-8) return pose;
-    return { ...candidate, elevation: flight.baseElevationMeters + projected.elevation };
+    if (!projected) return pose;
+    if (projected.distance <= halfWidth + 1e-8)
+      return { ...candidate, elevation: flight.baseElevationMeters + projected.elevation };
+    // Where an open side is within a riser of one of its floors, the walker may cross that edge onto the floor.
+    const side = openSideFloor(flight, localElevation);
+    if (!side) return pose;
+    if (projected.distance <= flight.widthMeters / 2 + 1e-8)
+      return { ...candidate, elevation: flight.baseElevationMeters + projected.elevation };
+    return land(side.floorId, side.relativeElevation);
   }
   let entrance: { stairId: string; elevation: number } | undefined;
   let blockedByFootprint = false;
@@ -321,6 +353,22 @@ export const moveBuildingWalker = (
           };
         }
       }
+      // An open side within a riser of this floor can also be stepped onto from beside the flight.
+      const side = openSideFloor(flight, fromBelow ? 0 : flight.riseMeters);
+      // Measured from the walking line, not the footprint, so an edge shared with another flight cannot decide it by rounding.
+      if (!entering && side?.floorId === pose.floorId) {
+        const projected = projectStairPath(flight, next, side.relativeElevation);
+        if (
+          projected &&
+          projected.distance <= flight.widthMeters / 2 + 1e-6 &&
+          openSideFloor(flight, projected.elevation)?.floorId === pose.floorId &&
+          (!entrance || flight.id < entrance.stairId)
+        )
+          entrance = {
+            stairId: flight.id,
+            elevation: flight.baseElevationMeters + projected.elevation,
+          };
+      }
       if (
         fromBelow &&
         pointInsidePolygon(plan, flight.footprint) &&
@@ -330,7 +378,8 @@ export const moveBuildingWalker = (
     }
   }
   if (entrance) return { ...candidate, ...entrance };
-  if (blockedByFootprint || hasUnsupportedStairAperture(flights, floor.id, plan)) return pose;
+  if (blockedByFootprint || hasUnsupportedStairAperture(building, flights, floor.id, plan))
+    return pose;
   if (options.terrainHeight)
     return resolveTerrainWalking(
       building,
