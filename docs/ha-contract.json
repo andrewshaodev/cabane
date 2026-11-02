@@ -1,9 +1,9 @@
 {
-  "revision": 31,
-  "fingerprint": "67ec1c4859217d78d06197c27b947a51b732ac0ee711bae186c460f0908db70e",
-  "summary": "Support read-only event readings and live device feedback",
+  "revision": 32,
+  "fingerprint": "7e1a791d69e237f67b1871cdb2b14a87d54a2404504441be1d853613c43168ec",
+  "summary": "Add an optional stair fill under the first run",
   "breakingChanges": [
-    "Event slots, Event personal-model profiles and optional event readings require the matching frontend and Home Assistant panel. Existing homes, lighting, terrain and apartment floors remain supported without migration. Runtime activity is transient and changes no saved fields."
+    "A straight stair may set the optional solidBelowRunMeters. Older clients reject a project that sets it; existing projects need no migration."
   ],
   "history": [
     {
@@ -214,6 +214,13 @@
       "summary": "Connect stairs to terrain and add masonry stair styles",
       "breakingChanges": [
         "Existing floor-to-floor stairs and omitted styles remain compatible. Terrain connections and Concrete or Stone styles require the matching frontend and Home Assistant panel. Terrain rise, landing validation and Walk follow the current grade without adding a storey. No migration is required."
+      ]
+    },
+    {
+      "revision": 31,
+      "summary": "Support read-only event readings and live device feedback",
+      "breakingChanges": [
+        "Event slots, Event personal-model profiles and optional event readings require the matching frontend and Home Assistant panel. Existing homes, lighting, terrain and apartment floors remain supported without migration. Runtime activity is transient and changes no saved fields."
       ]
     }
   ],

@@ -43,3 +43,27 @@ export const sortProjectIssues = (issues: HomeProjectIssue[]) =>
       left.code.localeCompare(right.code) ||
       left.message.localeCompare(right.message),
   );
+
+/**
+ * Checks a stair's optional solidBelowRunMeters (the length of solid fill under a straight stair's first steps) and returns the
+ * extra keys that stair may carry: it must be a positive number on a straight stair.
+ */
+export const fillRun = (
+  stair: JsonRecord,
+  shape: unknown,
+  path: string,
+  issues: HomeProjectIssue[],
+): string[] => {
+  const length = stair.solidBelowRunMeters;
+  if (
+    length !== undefined &&
+    (shape !== "straight" || typeof length !== "number" || !Number.isFinite(length) || length <= 0)
+  )
+    addProjectIssue(
+      issues,
+      "stair.solid-below",
+      `${path}.solidBelowRunMeters`,
+      "Fill length must be a positive number on a straight stair.",
+    );
+  return shape === "straight" ? ["solidBelowRunMeters"] : [];
+};

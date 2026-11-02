@@ -310,6 +310,16 @@ facades continue across the real inter-floor slab.
 
 Stair `railings` optionally selects `both`, `left`, `right`, or `none`, relative to ascent; omission preserves both sides. Spiral stairs retain their central support and apply side selection to the outer rail and exit bridge. Upper-opening guards are clipped to actual floor/platform support outside the opening, including partial and disconnected floor regions; exterior flights never acquire floating opening guards. All stair shapes share this guard geometry.
 
+Stairs whose `railings` is `none` have open sides, and Walk may cross them where the flight is within one riser of
+a floor: a walker can step from the lower floor onto the first steps from beside the flight, and from the top steps
+onto the upper floor, and can step back off the same way. Higher along the flight the sides stay closed, and any
+other railings setting keeps them closed, so a stair beside a wall is still bounded by the wall's own collision.
+An L-shaped flight whose first run stays at least 2.1 m below the ceiling cuts its floor and ceiling opening only
+over the landing and the second run, where headroom is needed, as a plain rectangle; every other flight keeps its
+whole footprint. A straight stair may set `solidBelowRunMeters`, the length along its run, from the bottom, that is
+filled solid down to the lower floor (a cupboard or entry beneath the first steps); the rest keeps its sloped
+underside, and the value must be positive and no longer than the run. Without it the treads render as before.
+
 Solar lighting reads Home Assistant's available, fresh `sun.sun` azimuth and elevation.
 Geographic azimuth is clockwise from north; home-wide `northAngleDegrees` rotates
 north clockwise from plan up (−Z), defaulting to zero. Sun shadows and the Walk sky
