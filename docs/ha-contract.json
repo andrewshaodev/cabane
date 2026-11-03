@@ -1,6 +1,6 @@
 {
-  "revision": 32,
-  "fingerprint": "7e1a791d69e237f67b1871cdb2b14a87d54a2404504441be1d853613c43168ec",
+  "revision": 34,
+  "fingerprint": "b99887a65d537940b4ea9419ae29bdae6a09d286b1361b092c725389b9d253af",
   "summary": "Add an optional stair fill under the first run",
   "breakingChanges": [
     "A straight stair may set the optional solidBelowRunMeters. Older clients reject a project that sets it; existing projects need no migration."
@@ -221,6 +221,20 @@
       "summary": "Support read-only event readings and live device feedback",
       "breakingChanges": [
         "Event slots, Event personal-model profiles and optional event readings require the matching frontend and Home Assistant panel. Existing homes, lighting, terrain and apartment floors remain supported without migration. Runtime activity is transient and changes no saved fields."
+      ]
+    },
+    {
+      "revision": 32,
+      "summary": "Adapt linear model lighting to transformed instance length",
+      "breakingChanges": [
+        "Adaptive maxSpacingMeters on strip sources requires the matching frontend and Home Assistant panel. Existing fixed-sample strips remain supported without migration."
+      ]
+    },
+    {
+      "revision": 33,
+      "summary": "Add per-face wall tiles, wallpaper and custom images",
+      "breakingChanges": [
+        "Projects using optional wall faceFinishes require the matching frontend and Home Assistant panel. Existing paint-only projects and adaptive lighting from revision 32 remain supported. Optimized custom images travel inside the existing workspace document without an asset or backend migration; older clients retain unsupported-data protection."
       ]
     }
   ],
