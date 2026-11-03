@@ -1,5 +1,5 @@
 import { keys, record, string, finite, point } from "./schema-json-values";
-import { addProjectIssue, type HomeProjectIssue } from "./validation-types";
+import { addProjectIssue, fillRun, type HomeProjectIssue } from "./validation-types";
 
 export const stairSchema = (entry: unknown, path: string, issues: HomeProjectIssue[]) => {
   const stair = record(entry, path, issues);
@@ -43,6 +43,7 @@ export const stairSchema = (entry: unknown, path: string, issues: HomeProjectIss
       "shape",
       "style",
       "railings",
+      ...fillRun(stair, shape, path, issues),
       ...dimensions,
       ...(shape === "spiral"
         ? ["direction"]

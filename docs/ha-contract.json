@@ -1,9 +1,9 @@
 {
-  "revision": 33,
-  "fingerprint": "380926c2e6b4c889a7f82bc6fc982f88e2d98e541fcef0df391c4c7a752f88cf",
-  "summary": "Add per-face wall tiles, wallpaper and custom images",
+  "revision": 34,
+  "fingerprint": "b99887a65d537940b4ea9419ae29bdae6a09d286b1361b092c725389b9d253af",
+  "summary": "Add an optional stair fill under the first run",
   "breakingChanges": [
-    "Projects using optional wall faceFinishes require the matching frontend and Home Assistant panel. Existing paint-only projects and adaptive lighting from revision 32 remain supported. Optimized custom images travel inside the existing workspace document without an asset or backend migration; older clients retain unsupported-data protection."
+    "A straight stair may set the optional solidBelowRunMeters. Older clients reject a project that sets it; existing projects need no migration."
   ],
   "history": [
     {
@@ -228,6 +228,13 @@
       "summary": "Adapt linear model lighting to transformed instance length",
       "breakingChanges": [
         "Adaptive maxSpacingMeters on strip sources requires the matching frontend and Home Assistant panel. Existing fixed-sample strips remain supported without migration."
+      ]
+    },
+    {
+      "revision": 33,
+      "summary": "Add per-face wall tiles, wallpaper and custom images",
+      "breakingChanges": [
+        "Projects using optional wall faceFinishes require the matching frontend and Home Assistant panel. Existing paint-only projects and adaptive lighting from revision 32 remain supported. Optimized custom images travel inside the existing workspace document without an asset or backend migration; older clients retain unsupported-data protection."
       ]
     }
   ],

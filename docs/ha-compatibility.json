@@ -5438,6 +5438,12 @@
                         "const": "straight"
                       }
                     },
+                    "solidBelowRunMeters": {
+                      "optional": true,
+                      "schema": {
+                        "type": "number"
+                      }
+                    },
                     "style": {
                       "optional": true,
                       "schema": {
@@ -5781,6 +5787,12 @@
                       "optional": true,
                       "schema": {
                         "const": "straight"
+                      }
+                    },
+                    "solidBelowRunMeters": {
+                      "optional": true,
+                      "schema": {
+                        "type": "number"
                       }
                     },
                     "style": {

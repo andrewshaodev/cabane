@@ -40,6 +40,34 @@ await withModules(async (load) => {
     assert.ok(api.safeBuildingSpawn(project, "first"));
     assert.equal(api.safeBuildingSpawn(project, "missing"), null);
   });
+  test("open sides let a walker step on and off level with a floor, but railings and mid-flight sides stay closed", () => {
+    const sideways = (project, pose, dx, steps) => {
+      for (let i = 0; i < steps; i++)
+        pose = api.moveBuildingWalker(project, pose, { x: dx, z: 0 }, new Set());
+      return pose;
+    };
+    const open = makeStairProject();
+    open.stairs = open.stairs.map((stair) => ({ ...stair, railings: "none" }));
+    // Beside the first step (z 1.7 is 0.2 m into the run, below one riser), the open side can be boarded and left.
+    const boarded = sideways(open, { x: 3, z: 1.7, floorId: "ground", elevation: 0 }, 0.1, 8);
+    assert.equal(boarded.stairId, "ground-stairs");
+    assert.ok(boarded.elevation > 0 && boarded.elevation < 0.2);
+    const left = sideways(open, boarded, -0.1, 8);
+    assert.equal(left.stairId, undefined);
+    assert.equal(left.floorId, "ground");
+    assert.equal(left.elevation, 0);
+    // Higher up the flight the side stays closed even without railings.
+    const midway = { x: 4, z: 3, floorId: "ground", elevation: 1.3, stairId: "ground-stairs" };
+    assert.equal(sideways(open, midway, -0.1, 8).stairId, "ground-stairs");
+    // With railings (the default), the side beside the first step is closed.
+    const railed = sideways(
+      makeStairProject(),
+      { x: 3, z: 1.7, floorId: "ground", elevation: 0 },
+      0.1,
+      8,
+    );
+    assert.equal(railed.stairId, undefined);
+  });
   test("retains the active stair through overlapping flights in either array order", () => {
     const project = makeStairProject();
     const original = project.stairs[0];
